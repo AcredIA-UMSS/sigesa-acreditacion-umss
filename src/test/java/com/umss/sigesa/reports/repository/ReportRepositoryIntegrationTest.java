@@ -3,13 +3,15 @@ package com.umss.sigesa.reports.repository;
 import com.umss.sigesa.reports.domain.ReportDefinition;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 public class ReportRepositoryIntegrationTest {
 
     @Autowired
