@@ -2,15 +2,11 @@ package com.umss.sigesa.reports.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.vladmihalcea.hibernate.type.json.JsonType;
-import org.hibernate.annotations.TypeDef;
-
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@TypeDef(name = "json", typeClass = JsonType.class)
 @Entity
 @Table(name = "report_run")
 @Getter
@@ -27,8 +23,8 @@ public class ReportRun {
     @Column(name = "report_definition_id")
     private Long reportDefinitionId;
 
-    @Type(type = "json")
-    @Column(columnDefinition = "jsonb")
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
+    @Column(columnDefinition = "text")
     private Map<String, Object> params;
 
     @Column(name = "status")
@@ -40,12 +36,12 @@ public class ReportRun {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
-    @Type(type = "json")
-    @Column(name = "result_json", columnDefinition = "jsonb")
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
+    @Column(name = "result_json", columnDefinition = "text")
     private Map<String, Object> resultJson;
 
-    @Type(type = "json")
-    @Column(name = "result_metadata", columnDefinition = "jsonb")
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
+    @Column(name = "result_metadata", columnDefinition = "text")
     private Map<String, Object> resultMetadata;
 
     @Column(name = "download_url", length = 1000)
