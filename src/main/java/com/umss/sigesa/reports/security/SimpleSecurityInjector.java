@@ -1,8 +1,9 @@
 package com.umss.sigesa.reports.security;
 
 import com.umss.sigesa.reports.dto.FilterPayload;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public class SimpleSecurityInjector implements SecurityInjector {
                 // ensure requested careers are subset of allowed
                 boolean allAllowed = filter.getCareerIds().stream().allMatch(allowed::contains);
                 if (!allAllowed) {
-                    throw new AccessDeniedException("Actor not authorized for requested career ids");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Actor not authorized for requested career ids");
                 }
                 // nothing to change
             } else {
