@@ -2,10 +2,12 @@ package com.umss.sigesa.reports.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
+import com.umss.sigesa.reports.config.MapToJsonConverter;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+
+import jakarta.persistence.Convert;
 
 @Entity
 @Table(name = "report_definition")
@@ -32,15 +34,15 @@ public class ReportDefinition {
     @Column(name = "owner_role", length = 50)
     private String ownerRole;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = MapToJsonConverter.class)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> audiences;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = MapToJsonConverter.class)
     @Column(name = "filters_allowed", columnDefinition = "jsonb")
     private Map<String, Object> filtersAllowed;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = MapToJsonConverter.class)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> metrics;
 

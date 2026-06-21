@@ -23,7 +23,7 @@ public class ReportRun {
     @Column(name = "report_definition_id")
     private Long reportDefinitionId;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> params;
 
@@ -36,11 +36,11 @@ public class ReportRun {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
     @Column(name = "result_json", columnDefinition = "jsonb")
     private Map<String, Object> resultJson;
 
-    @Type(com.vladmihalcea.hibernate.type.json.JsonType.class)
+    @Convert(converter = com.umss.sigesa.reports.config.MapToJsonConverter.class)
     @Column(name = "result_metadata", columnDefinition = "jsonb")
     private Map<String, Object> resultMetadata;
 
