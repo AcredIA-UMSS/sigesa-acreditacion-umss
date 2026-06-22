@@ -1,0 +1,12 @@
+﻿%% diagramId: D-ACT-001
+%% fsdTrace: docs/LFSD.md Â§2.1 plan de mejora
+%% version: 1.0
+flowchart TD
+    Start([Indicador RECHAZADO]) --> CC1[CC crea plan mejora PROPUESTO]
+    CC1 --> TD1[TD revisa plan]
+    TD1 -->|requiere ajuste| CC1
+    TD1 -->|acepta| EJ[CC ejecuta acciones en carrera]
+    EJ --> EVID[CC adjunta evidencia cumplimiento]
+    EVID --> TD2[TD marca EVIDENCIADO]
+    TD2 --> CERR[TD cierra plan CERRADO]
+    CERR --> End([Fin trazabilidad en auditoria])

@@ -1,0 +1,36 @@
+﻿%% diagramId: AYL-SEQ-004
+%% fsdTrace: FSD-UC-004 PC-004
+sequenceDiagram
+    autonumber
+    title FSD-UC-004 â€” Dashboard gerencial semaforos
+
+    actor JD as Jefatura_DUEA
+    participant FE as Frontend_React
+    participant API as API_Dashboard
+    participant CACHE as Cache_60s
+    participant DB as PostgreSQL
+
+    JD->>FE: Accede /dashboard/jefatura
+    FE->>API: GET /dashboard/estado filtros
+
+    API->>CACHE: lookup facultad tipo gestion
+    alt cache hit
+        CACHE-->>API: agregados semaforo
+    else cache miss
+        API->>DB: agregar avance por carrera RB-09
+        DB-->>API: porcentajes estados
+        API->>CACHE: store TTL 60s
+    end
+
+    alt DB-003 timeout mayor 3s
+        API-->>FE: 200 stale true
+    else DB-001 sin procesos
+        API-->>FE: 200 mensaje vacio
+    else respuesta OK
+        API-->>FE: 200 tabla semaforo VERDE AMARILLO ROJO
+    end
+
+    loop polling 30s
+        FE->>API: GET /dashboard/estado
+        API-->>FE: actualizacion tiempo real
+    end

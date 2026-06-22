@@ -1,0 +1,24 @@
+﻿%% diagramId: MAR-SEQ-007
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-007 BR-008 NFR-ED-02
+sequenceDiagram
+    autonumber
+    actor TD as Tecnico_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Busqueda
+    participant DB as PostgreSQL_FTS
+
+    TD->>SPA: query texto y facetas
+    SPA->>API: GET /search q filtros cursor
+    API->>API: sanitizar longitud query
+    alt SEARCH_BAD_QUERY
+        API-->>SPA: 400
+    else busqueda valida
+        API->>DB: tsvector rank facetas carrera fase
+        DB-->>API: pagina metadatos sin blob
+        API-->>SPA: 200 resultados cursor next
+    end
+    opt export CSV fase 2
+        TD->>SPA: exportar resultados
+        SPA->>API: POST /search/export
+        API-->>SPA: 202 job CSV
+    end

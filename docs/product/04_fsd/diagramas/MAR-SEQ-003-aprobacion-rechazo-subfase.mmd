@@ -1,0 +1,40 @@
+﻿%% diagramId: MAR-SEQ-003
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-003 RB-03 BR-014
+sequenceDiagram
+    autonumber
+    actor TD as Tecnico_DUEA
+    actor CC as Coordinador_Carrera
+    participant SPA as SPA_SIGESA
+    participant API as API_Workflow
+    participant DB as PostgreSQL
+    participant OUT as notification_outbox
+
+    TD->>SPA: abrir cola EN_REVISION
+    SPA->>API: GET indicador detalle
+    API->>DB: SELECT documento vigente
+    DB-->>API: metadata y URL firmada
+    API-->>SPA: detalle descarga
+    TD->>SPA: dictamen APROBAR o RECHAZAR
+    alt RECHAZAR sin justificacion 20 chars
+        API-->>SPA: 400 WF_JUSTIFICATION_REQUIRED
+    else RECHAZAR valido
+        SPA->>API: POST rechazo texto
+        API->>DB: UPDATE indicador RECHAZADO optimistic lock
+        API->>OUT: notificar CC
+        API-->>SPA: 200 RECHAZADO
+    else APROBAR
+        SPA->>API: POST aprobacion
+        API->>DB: UPDATE indicador APROBADO
+        API->>OUT: notificar CC
+        API-->>SPA: 200 APROBADO
+    end
+    TD->>SPA: cerrar subfase si completa
+    SPA->>API: POST avanzar subfase
+    alt indicadores pendientes
+        API-->>SPA: 409 WF_INCOMPLETE
+    else concurrencia
+        API-->>SPA: 409 WF_CONFLICT
+    else avance OK
+        API->>DB: transicion subfase siguiente
+        API-->>SPA: 200 subfase avanzada
+    end

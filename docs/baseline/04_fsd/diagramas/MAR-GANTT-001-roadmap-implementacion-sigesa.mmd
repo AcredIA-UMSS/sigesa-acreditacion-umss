@@ -1,0 +1,30 @@
+﻿%% diagramId: MAR-GANTT-001
+%% fsdTrace: team/Marlene/04_fsd/FSD.md roadmap F0-F4
+gantt
+    title SIGESA â€” Roadmap implementacion F0 a F4
+    dateFormat YYYY-MM-DD
+    axisFormat %b %Y
+
+    section F0 Fundamentos
+    Gobernanza y plantillas CEUB     :f0a, 2026-05-01, 30d
+    Esquema append-only y auth JWT   :f0b, after f0a, 25d
+
+    section F1 Nucleo operativo
+    UC-001 Auth y RBAC               :f1a, 2026-06-15, 20d
+    UC-002 Carga evidencia           :f1b, after f1a, 25d
+    UC-003 Workflow aprobacion       :f1c, after f1b, 30d
+
+    section F2 Busqueda y portal
+    UC-007 FTS multifiltro           :f2a, 2026-08-01, 35d
+    UC-008 Portal publico              :f2b, after f2a, 20d
+    UC-006 Notificaciones SMTP         :f2c, 2026-08-15, 25d
+
+    section F3 Gestion JD
+    UC-004 Dashboard                   :f3a, 2026-09-15, 30d
+    UC-005 Reportes PDF                :f3b, after f3a, 25d
+    UC-009 Auditoria export            :f3c, after f3b, 20d
+
+    section F4 Piloto UMSS
+    UC-010 Config proceso piloto       :f4a, 2026-11-01, 20d
+    UC-011 Supervision backups         :f4b, after f4a, 15d
+    UAT y cierre FSD-UC-012            :f4c, after f4b, 25d

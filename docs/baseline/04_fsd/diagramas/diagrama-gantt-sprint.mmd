@@ -1,0 +1,41 @@
+﻿gantt
+    title Sprint S2 â€” Repositorio Documental (SIGESA)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %d %b
+
+    section Backend â€” MOD-02 Evidencias
+    DiseÃ±o endpoint POST /evidencias/{id}           :done,    be01, 2026-06-01, 1d
+    ValidaciÃ³n MIME type + tamaÃ±o â‰¤ 50 MB          :done,    be02, 2026-06-01, 1d
+    Escritura en volumen /data/evidencias/          :active,  be03, 2026-06-02, 2d
+    CÃ¡lculo SHA-256 post-escritura                  :         be04, 2026-06-03, 1d
+    Versionado automÃ¡tico (MAX version + 1)         :         be05, 2026-06-04, 1d
+    INSERT EVIDENCIA + UPDATE INDICADOR             :         be06, 2026-06-04, 1d
+    Barra de progreso multipart (NFR-007)           :         be07, 2026-06-05, 1d
+
+    section Backend â€” MOD-03 AprobaciÃ³n
+    PATCH /indicadores/{id}/aprobar                 :         be08, 2026-06-05, 2d
+    PATCH /indicadores/{id}/rechazar + validaciÃ³n   :         be09, 2026-06-06, 2d
+    LÃ³gica cierre condicional de subfase            :         be10, 2026-06-07, 2d
+    Transiciones de estado (RBN-02, RBN-03, RBN-04) :        be11, 2026-06-08, 2d
+
+    section Backend â€” MOD-07 Notificaciones
+    Cola de eventos NOTIFICACION en BD              :         nt01, 2026-06-08, 1d
+    Consumer SYS-NOTIF (polling 60s)                :         nt02, 2026-06-09, 2d
+    Plantilla HTML institucional para correos       :         nt03, 2026-06-09, 1d
+    EnvÃ­o SMTP + retry x3 con backoff               :         nt04, 2026-06-10, 2d
+    Scheduler alertas por vencimiento (7/15/30d)    :         nt05, 2026-06-11, 2d
+
+    section LOG_AUDITORIA â€” Eventos S2
+    Evento CARGA en LOG_AUDITORIA                   :         la01, 2026-06-04, 1d
+    Evento APROBACION en LOG_AUDITORIA              :         la02, 2026-06-07, 1d
+    Evento RECHAZO + detalle justificaciÃ³n          :         la03, 2026-06-08, 1d
+    Evento NOTIFICATION_SENT                        :         la04, 2026-06-10, 1d
+
+    section Testing S2
+    Tests unitarios MOD-02 (â‰¥80% cobertura)        :         tu02, 2026-06-12, 2d
+    Tests integraciÃ³n flujo carga â†’ aprobaciÃ³n      :         ti01, 2026-06-12, 2d
+    Tests integraciÃ³n rechazo â†’ resubida            :         ti02, 2026-06-13, 1d
+    Escenario Gherkin: rechazo sin justificaciÃ³n    :         gh01, 2026-06-13, 1d
+    Test LOG_AUDITORIA inmutable (TC-006)           :         tc06, 2026-06-14, 1d
+    Test archivo 60 MB rechazado (TC-004)           :         tc04, 2026-06-14, 1d
+    Review S2 + demo interna DUEA                   :milestone, rev2, 2026-06-15, 0d

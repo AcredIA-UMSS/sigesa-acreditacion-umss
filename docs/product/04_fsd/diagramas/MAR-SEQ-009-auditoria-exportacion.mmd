@@ -1,0 +1,25 @@
+﻿%% diagramId: MAR-SEQ-009
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-009 BR-009 RB-04
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Auditoria
+    participant DB as audit_log_append_only
+    participant WRK as Worker_Export
+
+    JD->>SPA: filtros fecha usuario accion
+    SPA->>API: GET /auditoria paginado
+    API->>DB: SELECT append-only ORDER BY ts
+    DB-->>API: pagina eventos
+    API->>DB: INSERT meta-auditoria ACCESO_LOG
+    API-->>SPA: 200 lista
+    JD->>SPA: exportar rango amplio
+    SPA->>API: POST /auditoria/export
+    alt rango mayor 1 anio
+        API->>WRK: job async CSV firmado
+        API-->>SPA: 202 jobId
+    else rango corto
+        API->>DB: stream CSV
+        API-->>SPA: 200 archivo descarga
+    end

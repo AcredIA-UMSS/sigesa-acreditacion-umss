@@ -1,0 +1,18 @@
+﻿%% diagramId: D-C4-001
+%% dtiTrace: docs/05_dti/DTI.md Â§2.1
+%% version: Dorada v1.0 â€” fuente Ãºnica C4 nivel 1
+C4Context
+  title SIGESA â€” Diagrama de contexto v1.0
+  Person(cc, "[CC] Coordinador de Carrera", "Carga y subsana Evidencia")
+  Person(td, "[TD] Tecnico DUEA", "Valida Indicadores y cierra Fases")
+  Person(jd, "[JD] Jefatura DUEA", "Plantillas, usuarios, reportes")
+  Person(pub, "[P] Publico", "Consulta publicacion sin login")
+  System(sigesa, "SIGESA / AcredIA", "Automatizacion acreditacion UMSS")
+  System_Ext(smtp, "SMTP institucional UMSS", "Notificaciones")
+  System_Ext(ceub, "CEUB / ARCU-SUR", "Marco normativo")
+  Rel(cc, sigesa, "HTTPS")
+  Rel(td, sigesa, "HTTPS")
+  Rel(jd, sigesa, "HTTPS")
+  Rel(pub, sigesa, "HTTPS lectura")
+  Rel(sigesa, smtp, "Envia alertas")
+  Rel(sigesa, ceub, "Cumple taxonomias y trazabilidad")

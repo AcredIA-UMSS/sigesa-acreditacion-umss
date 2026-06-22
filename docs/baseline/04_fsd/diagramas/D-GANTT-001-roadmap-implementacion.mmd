@@ -1,0 +1,16 @@
+﻿%% diagramId: D-GANTT-001
+%% fsdTrace: docs/LFSD.md Â§3 tareas roadmap despliegue
+%% version: 1.0
+gantt
+    title SIGESA Roadmap implementacion y pruebas UMSS
+    dateFormat YYYY-MM-DD
+    section Fase0
+    Descubrimiento datos maestros     :a1, 2026-06-01, 35d
+    section MVP
+    Auth roles y catalogo             :a2, after a1, 45d
+    Carga evidencia y workflow TD     :a3, after a2, 50d
+    section Piloto
+    Piloto 1-2 facultades             :a4, after a3, 40d
+    UAT firmado DUEA                    :milestone, m1, after a4, 0d
+    section Institucional
+    Despliegue multi facultad         :a5, after m1, 60d

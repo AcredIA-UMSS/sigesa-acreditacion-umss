@@ -1,0 +1,24 @@
+﻿%% diagramId: MAR-SEQ-006
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-006 BR-005
+sequenceDiagram
+    autonumber
+    participant DOM as Evento_Dominio
+    participant OUT as notification_outbox
+    participant WRK as Worker_Notificaciones
+    participant SMTP as SMTP_UMSS
+    participant DB as PostgreSQL
+
+    DOM->>OUT: INSERT evento CARGA RECHAZO APROBACION
+    WRK->>OUT: SELECT pendientes FOR UPDATE SKIP LOCKED
+    OUT-->>WRK: fila plantilla destinatarios
+    WRK->>WRK: resolver plantilla rol CC TD
+    WRK->>SMTP: send correo institucional
+    alt SMTP exito
+        WRK->>DB: UPDATE outbox ENVIADO timestamp
+    else SMTP caido
+        WRK->>DB: UPDATE outbox REINTENTO backoff
+        Note over WRK: alerta ops tras N reintentos
+    end
+    opt horario no laboral
+        WRK->>DB: diferir hasta ventana configurada
+    end

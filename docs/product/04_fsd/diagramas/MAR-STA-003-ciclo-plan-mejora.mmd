@@ -1,0 +1,20 @@
+﻿%% diagramId: MAR-STA-003
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-012
+stateDiagram-v2
+    direction LR
+
+    [*] --> ABIERTO: CC crea item tras RECHAZADO
+
+    ABIERTO --> EN_VALIDACION: CC adjunta accion propuesta
+    EN_VALIDACION --> EN_EJECUCION: TD valida plan
+    EN_VALIDACION --> ABIERTO: TD devuelve observaciones
+
+    EN_EJECUCION --> PENDIENTE_CIERRE: CC marca acciones completadas
+    PENDIENTE_CIERRE --> CERRADO: TD verifica evidencia opcional
+    PENDIENTE_CIERRE --> EN_EJECUCION: TD solicita mas trabajo
+
+    CERRADO --> [*]
+
+    note right of CERRADO
+        Registro append-only en PLAN_MEJORA
+    end note

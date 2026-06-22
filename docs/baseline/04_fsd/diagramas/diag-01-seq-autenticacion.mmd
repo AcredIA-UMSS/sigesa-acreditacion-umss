@@ -1,0 +1,42 @@
+﻿---
+title: "SEQ-01 Â· AutenticaciÃ³n y autorizaciÃ³n por roles (FSD-UC-001)"
+---
+sequenceDiagram
+    actor U as Usuario
+    participant F as Frontend
+    participant A as Auth Service
+    participant DB as Base de datos
+    participant AUD as AuditorÃ­a
+
+    U->>F: Ingresa credenciales
+    F->>A: POST /auth/login {email, password}
+
+    alt Credenciales vÃ¡lidas
+        A->>DB: Consulta usuario + roles
+        DB-->>A: Usuario {id, roles, permisos}
+        A->>AUD: INSERT evento LOGIN {user_id, ip, timestamp}
+        A-->>F: 200 OK {token, roles}
+        F-->>U: Redirige al panel segÃºn rol
+
+    else Credenciales invÃ¡lidas
+        A->>AUD: INSERT evento LOGIN_FAILED {ip, timestamp}
+        A-->>F: 401 Unauthorized
+        F-->>U: "Credenciales invÃ¡lidas" (sin revelar si usuario existe)
+
+    else Usuario sin rol asignado
+        A->>DB: Consulta usuario + roles
+        DB-->>A: Usuario {id, roles: []}
+        A-->>F: 403 Forbidden {code: AUTH_NO_ROLE}
+        F-->>U: "Contacte al administrador para obtener acceso"
+    end
+
+    Note over U,AUD: OperaciÃ³n sensible con sesiÃ³n activa
+    U->>F: Solicita recurso protegido /procesos
+    F->>A: Verifica token + permiso requerido
+    alt SesiÃ³n vÃ¡lida y permiso OK
+        A-->>F: 200 Authorized
+        F-->>U: Muestra recurso segÃºn rol
+    else Sin sesiÃ³n o sesiÃ³n expirada
+        A-->>F: 401 Unauthorized {code: AUTH_NO_SESSION}
+        F-->>U: Redirige al login (sin alterar datos)
+    end

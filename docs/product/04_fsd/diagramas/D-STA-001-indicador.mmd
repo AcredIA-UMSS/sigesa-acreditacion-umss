@@ -1,0 +1,11 @@
+﻿%% diagramId: D-STA-001
+%% fsdTrace: docs/LFSD.md FSD-UC-002 FSD-UC-003 RB-02 RB-03 RB-04
+%% version: 1.0
+stateDiagram-v2
+    [*] --> PENDIENTE
+    PENDIENTE --> EN_REVISION: CC carga documento
+    EN_REVISION --> APROBADO: TD aprueba
+    EN_REVISION --> RECHAZADO: TD rechaza con causa
+    RECHAZADO --> EN_REVISION: CC nueva version
+    APROBADO --> EN_REVISION: nueva version permitida RB04
+    APROBADO --> [*]: subfase cerrada si todos aprobados

@@ -1,0 +1,18 @@
+﻿%% diagramId: D-SEQ-005
+%% fsdTrace: docs/LFSD.md Â§2.2 SIIS v2 fuera alcance v1
+%% version: 1.0
+sequenceDiagram
+    autonumber
+    participant API as SIGESA_API
+    participant ESB as Bus_Institucional_Futuro
+    participant SIIS as SIIS_UMSS
+
+    Note over API,SIIS: v2 solo lectura enriquecimiento catalogo
+    API->>ESB: GET carrera oferta resumida
+    alt ESB disponible
+        ESB->>SIIS: consulta interna
+        SIIS-->>ESB: JSON malla resumen
+        ESB-->>API: 200 datos no sensibles
+    else indisponible
+        ESB-->>API: 503 degradacion sin bloquear carga evidencias
+    end

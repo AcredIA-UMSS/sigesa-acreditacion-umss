@@ -52,7 +52,7 @@ action:
       changed_files: $CHANGED_FILES
       repo_root: $REPO_ROOT
       # enforce repository rules from AGENTS.md and DTI
-      must_read: ["docs/05_dti/DTI.md", "docs/04_fsd/FSD.md"]
+      must_read: ["docs/product/DTP.md", "docs/product/FSD.md"]
       # repository metadata for the reviewer
       repo: $REPO_NAME
       branch: $BRANCH_NAME

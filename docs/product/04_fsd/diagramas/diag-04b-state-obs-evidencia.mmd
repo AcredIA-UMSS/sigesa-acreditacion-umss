@@ -1,0 +1,43 @@
+﻿---
+title: "STATE-04b Â· Estados de ObservaciÃ³n DUEA-Carrera y Evidencia"
+---
+stateDiagram-v2
+    direction LR
+
+    state "ObservaciÃ³n DUEA â†” Carrera" as OBS {
+        [*] --> Abierta : DUEA registra\nobservaciÃ³n formal
+
+        Abierta --> Respondida : Coordinador\nenvÃ­a respuesta
+        Respondida --> Cerrada : DUEA acepta\nla respuesta
+        Respondida --> Abierta : DUEA rechaza\ncon comentario
+
+        Cerrada --> [*] : Auditada\ne inmutable
+
+        note right of Abierta
+            Genera alerta automÃ¡tica
+            si coordinador no responde
+            antes del plazo (FSD-UC-006)
+        end note
+    }
+
+    state "Evidencia / VersiÃ³n" as EVID {
+        [*] --> Borrador : Coordinador sube\narchivo + criterio
+
+        Borrador --> Vigente : Sistema valida\nclasificaciÃ³n obligatoria\ny crea versiÃ³n v1
+
+        Vigente --> Vigente : Nueva versiÃ³n cargada\n(v2, v3â€¦); versiÃ³n anterior\npasa a Historial
+
+        Vigente --> EliminadaAuditada : Admin confirma\nborrado + modal
+
+        note right of Vigente
+            Historial inalterable:
+            autor + fecha + hash
+            por cada versiÃ³n (BR-007)
+        end note
+
+        note right of EliminadaAuditada
+            Evento ELIMINACION
+            registrado en bitÃ¡cora.
+            No se borra silenciosamente.
+        end note
+    }

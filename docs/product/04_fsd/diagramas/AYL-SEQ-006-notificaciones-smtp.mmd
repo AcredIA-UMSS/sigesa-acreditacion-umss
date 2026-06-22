@@ -1,0 +1,27 @@
+﻿%% diagramId: AYL-SEQ-006
+%% fsdTrace: FSD-UC-006 PC-006
+sequenceDiagram
+    autonumber
+    title FSD-UC-006 â€” Notificaciones automaticas SMTP
+
+    participant MOD as Modulo_Dominio
+    participant Q as Cola_NOTIFICACION
+    participant WRK as Worker_Notif
+    participant SMTP as SMTP_UMSS
+    participant DB as PostgreSQL
+    participant JD as Jefatura_DUEA
+
+    MOD->>Q: INSERT evento CARGA RECHAZO VENCIMIENTO
+    WRK->>Q: consume cada 60s
+    WRK->>WRK: plantilla HTML institucional
+    WRK->>SMTP: send correo destinatario
+
+    alt envio exito RBN-08
+        WRK->>DB: UPDATE ENVIADO timestamp
+    else SMTP caido
+        WRK->>DB: UPDATE REINTENTO backoff 1 5 15 min
+        alt 3 reintentos fallidos
+            WRK->>DB: FALLIDO_DEFINITIVO
+            WRK->>JD: alerta canal respaldo
+        end
+    end

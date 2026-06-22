@@ -1,0 +1,27 @@
+﻿%% diagramId: D-COMP-001
+%% fsdTrace: docs/LFSD.md modulos logicos Â§2.1
+%% version: 1.0
+flowchart TB
+    subgraph M1["M1 IAM"]
+        A1[Auth JWT]
+    end
+    subgraph M4["M4 Documentos"]
+        A2[Upload versionado]
+    end
+    subgraph M5["M5 Workflow"]
+        A3[Dictamen avance]
+    end
+    subgraph M7["M7 Reportes"]
+        A4[PDF Jobs]
+    end
+    subgraph M9["M9 Auditoria"]
+        A5[Log append only]
+    end
+    subgraph M10["M10 Publico"]
+        A6[Consulta estado]
+    end
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+    A3 --> A5
+    A4 --> A5

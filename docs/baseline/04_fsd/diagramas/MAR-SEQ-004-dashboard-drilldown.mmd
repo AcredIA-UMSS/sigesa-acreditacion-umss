@@ -1,0 +1,32 @@
+﻿%% diagramId: MAR-SEQ-004
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-004 RB-09 RB-10
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Dashboard
+    participant CACHE as Redis_opcional
+    participant DB as PostgreSQL
+
+    JD->>SPA: abrir panel gerencial
+    SPA->>API: GET /dashboard/resumen filtros
+    API->>CACHE: buscar snapshot 5min
+    alt cache hit
+        CACHE-->>API: agregados semaforo
+    else cache miss
+        API->>DB: agregar por carrera RB-09
+        DB-->>API: porcentajes y estados
+        API->>CACHE: guardar TTL 300s
+    end
+    alt timeout calculo
+        API-->>SPA: 200 stale true datos cacheados
+    else respuesta OK
+        API-->>SPA: 200 tabla semaforo facultad
+    end
+    JD->>SPA: drill-down carrera
+    SPA->>API: GET /dashboard/carrera id
+    API->>DB: detalle indicadores subfases
+    API-->>SPA: vista detalle
+    opt log acceso
+        API->>DB: INSERT ACCESO_DASHBOARD audit
+    end

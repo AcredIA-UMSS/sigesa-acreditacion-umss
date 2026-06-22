@@ -1,0 +1,27 @@
+﻿%% diagramId: D-ER-001
+%% fsdTrace: docs/LFSD.md modelo datos Â§2.1 Â§4
+%% version: 1.0
+erDiagram
+    FACULTAD ||--o{ CARRERA : contiene
+    CARRERA ||--o{ PROCESO_ACREDITACION : tiene
+    PROCESO_ACREDITACION ||--o{ FASE : compone
+    FASE ||--o{ SUBFASE : compone
+    SUBFASE ||--o{ INDICADOR : define
+    INDICADOR ||--o{ DOCUMENTO : evidencia
+    USUARIO ||--o{ DOCUMENTO : carga
+    USUARIO ||--o{ LOG_AUDITORIA : genera
+    CARRERA {
+        uuid id PK
+        string nombre
+        uuid facultad_id FK
+    }
+    INDICADOR {
+        uuid id PK
+        string codigo
+        string estado
+    }
+    DOCUMENTO {
+        uuid id PK
+        int version
+        string hash
+    }

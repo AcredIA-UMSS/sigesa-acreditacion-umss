@@ -1,0 +1,24 @@
+﻿%% diagramId: MAR-STA-001
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-002 RB-02 RB-04
+stateDiagram-v2
+    direction LR
+
+    [*] --> PENDIENTE: indicador creado sin documento
+
+    PENDIENTE --> EN_REVISION: CC carga documento v1
+    RECHAZADO --> EN_REVISION: CC nueva version documento
+
+  state EN_REVISION {
+        [*] --> vigente
+        vigente --> superseded: nueva version cargada
+        superseded --> [*]
+    }
+
+    EN_REVISION --> APROBADO: TD dictamen APROBAR
+    EN_REVISION --> RECHAZADO: TD dictamen RECHAZAR con justificacion
+
+    APROBADO --> EN_REVISION: politica reapertura nueva version
+
+    note right of RECHAZADO
+        Dispara plan mejora FSD-UC-012
+    end note

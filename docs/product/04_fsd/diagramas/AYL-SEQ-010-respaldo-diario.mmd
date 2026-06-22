@@ -1,0 +1,25 @@
+﻿%% diagramId: AYL-SEQ-010
+%% fsdTrace: FSD-UC-010 PC-010
+sequenceDiagram
+    autonumber
+    title FSD-UC-010 â€” Respaldo automatico diario
+
+    participant SCH as Scheduler_0200_BOT
+    participant JOB as Job_Backup
+    participant DB as PostgreSQL
+    participant VOL as Volumen_Evidencias
+    participant STORE as Almacen_Secundario
+    participant LOG as LOG_AUDITORIA
+    participant JD as Jefatura_DUEA
+
+    SCH->>JOB: trigger diario 02:00
+    JOB->>DB: pg_dump
+    JOB->>VOL: snapshot blobs de Evidence
+    alt BKP-001 fallo dump
+        JOB->>LOG: BACKUP_FAILED
+        JOB->>JD: alerta 15 min
+    else OK
+        JOB->>JOB: SHA-256 paquete
+        JOB->>STORE: PUT sin sobrescribir valido
+        JOB->>LOG: BACKUP_COMPLETED hash
+    end

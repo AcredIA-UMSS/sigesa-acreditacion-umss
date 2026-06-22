@@ -1,0 +1,22 @@
+﻿%% diagramId: D-ARCH-001
+%% fsdTrace: docs/LFSD.md NFR-004 NFR-013 Â§2.1 respaldos
+%% version: 1.0
+flowchart LR
+    subgraph Cliente
+        SPA[SPA React UMSS]
+    end
+    subgraph Borde
+        LB[Load Balancer TLS]
+    end
+    subgraph Aplicacion
+        API[API REST SIGESA]
+        W[Workers PDF SMTP]
+    end
+    subgraph Datos
+        DB[(PostgreSQL)]
+        OBJ[(S3 compatible)]
+    end
+    SPA --> LB --> API
+    API --> DB
+    API --> OBJ
+    API --> W

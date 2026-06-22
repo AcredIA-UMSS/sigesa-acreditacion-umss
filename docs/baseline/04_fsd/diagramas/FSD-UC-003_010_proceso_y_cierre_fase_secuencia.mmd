@@ -1,0 +1,27 @@
+﻿%% FSD-UC-003 Plantilla y Proceso + FSD-UC-010 Avanzar Fase
+%% Trazabilidad: PRD-US-024, PRD-US-023 | FSD-BR-07, FSD-BR-08
+
+sequenceDiagram
+    autonumber
+    participant JD as Jefatura_DUEA_JD
+    participant SYS as SIGESA_API
+    participant TD as Tecnico_DUEA_TD
+
+    JD->>SYS: POST /templates/{id}/activate
+    SYS-->>JD: plantilla CEUB o ARCU-SUR activa
+
+    JD->>SYS: POST /processes programId templateId
+    SYS->>SYS: materializa Fases e Indicadores
+    SYS-->>JD: processId estado EN_PROCESO
+
+    Note over SYS,TD: Tras auditoria â€” todos APROBADO
+
+    TD->>SYS: POST /phases/{id}/close-request
+    SYS->>SYS: COUNT indicadores != APROBADO
+    alt hay pendientes u observados
+        SYS-->>TD: 409 FASE_CIERRE_BLOQUEADO
+    else todos aprobados
+        SYS->>SYS: INSERT phase_state_history COMPLETADA
+        SYS->>SYS: abre Fase N+1
+        SYS-->>TD: 200 fase cerrada
+    end

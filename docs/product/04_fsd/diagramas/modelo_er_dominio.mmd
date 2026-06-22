@@ -1,0 +1,44 @@
+﻿%% Modelo ER funcional SIGESA â€” append-only
+%% Fuente: team/alexAlvarez/docs/04_fsd/modelo_datos.md
+
+erDiagram
+    FACULTY ||--o{ ACADEMIC_PROGRAM : tiene
+    ACADEMIC_PROGRAM ||--o{ ACCREDITATION_PROCESS : ejecuta
+    ACCREDITATION_TEMPLATE ||--o{ ACCREDITATION_PROCESS : define
+    ACCREDITATION_TEMPLATE ||--o{ TEMPLATE_PHASE : contiene
+    ACCREDITATION_PROCESS ||--o{ PHASE : instancia
+    TEMPLATE_PHASE ||--o{ PHASE : referencia
+    PHASE ||--o{ INDICATOR : agrupa
+    INDICATOR_CATALOG ||--o{ INDICATOR : instancia_de
+    EVALUATION_CRITERION ||--o{ INDICATOR_CATALOG : clasifica
+    EVALUATION_DIMENSION ||--o{ EVALUATION_CRITERION : agrupa
+    INDICATOR ||--o{ EVIDENCE : ancla
+    EVIDENCE ||--o{ EVIDENCE_VERSION : versiona
+    OBSERVATION ||--o{ EVIDENCE_VERSION : motiva_subsanacion
+    INDICATOR ||--o{ OBSERVATION : recibe
+    APP_USER ||--o{ EVIDENCE_VERSION : created_by
+    INDICATOR ||--o{ STATE_TRANSITION : historial
+
+    EVIDENCE_VERSION {
+        uuid id PK
+        uuid evidence_id FK
+        int version_no
+        uuid supersedes_id FK
+        uuid observation_id FK
+        varchar storage_key
+        varchar content_hash_sha256
+        varchar created_by_role
+    }
+
+    INDICATOR {
+        uuid id PK
+        uuid phase_id FK
+        varchar estado
+    }
+
+    OBSERVATION {
+        uuid id PK
+        uuid indicator_id FK
+        text justification
+        varchar estado
+    }

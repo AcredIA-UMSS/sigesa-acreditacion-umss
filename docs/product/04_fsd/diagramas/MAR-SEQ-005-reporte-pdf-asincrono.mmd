@@ -1,0 +1,30 @@
+﻿%% diagramId: MAR-SEQ-005
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-005 RB-07 BR-004
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Reportes
+    participant DB as PostgreSQL
+    participant WRK as Worker_PDF
+    participant OBJ as ObjectStore_temporal
+    participant MAIL as SMTP_UMSS
+
+    JD->>SPA: solicitar reporte ejecutivo alcance
+    SPA->>API: POST /reportes job alcance filtros
+    API->>DB: INSERT job estado PENDIENTE
+    API-->>SPA: 202 jobId accepted
+    SPA-->>JD: UI seguimiento progreso
+    WRK->>DB: poll job PENDIENTE
+    WRK->>DB: SELECT datos agregados procesos
+    alt plantilla invalida
+        WRK->>DB: job ERROR REPORT_TEMPLATE
+    else generacion OK
+        WRK->>WRK: render PDF plantilla UMSS
+        WRK->>OBJ: PUT pdf TTL 24h URL firmada
+        WRK->>DB: job COMPLETADO historico
+        WRK->>MAIL: enlace descarga si supera 5min P95
+    end
+    JD->>SPA: polling o notificacion
+    SPA->>API: GET /reportes/jobId
+    API-->>SPA: url descarga o estado

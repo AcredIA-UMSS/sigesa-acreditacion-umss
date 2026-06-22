@@ -1,0 +1,21 @@
+﻿%% diagramId: D-SEQ-004
+%% fsdTrace: docs/LFSD.md FSD-UC-005 RB-07 PRD-REQ-007
+%% version: 1.0
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_JD
+    participant API as API_Reportes
+    participant DB as PostgreSQL
+    participant JOB as Cola_Jobs
+    participant WRK as Worker_PDF
+    participant OBJ as Object_Storage
+
+    JD->>API: POST /reportes/pdf alcance gestion
+    API->>DB: crear job REPORTE ENCOLADO
+    API-->>JD: 202 jobId
+    JOB->>WRK: consumir job
+    WRK->>DB: leer agregados dashboard
+    WRK->>WRK: render plantilla RB07 USO_INTERNO
+    WRK->>OBJ: guardar PDF temporal TTL
+    WRK->>DB: append AUDITORIA REPORTE
+    WRK-->>JD: notificacion enlace descarga opcional

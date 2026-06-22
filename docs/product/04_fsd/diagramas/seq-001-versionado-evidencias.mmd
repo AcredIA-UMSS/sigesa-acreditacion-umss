@@ -1,0 +1,41 @@
+﻿%% diagramId: seq-001
+%% fsdTrace: team/aylenGonzales/04_fsd/FSD_v2.md FSD-UC-002 PC-002
+sequenceDiagram
+    autonumber
+    title FSD-UC-002 â€” Carga y versionado de evidencia
+
+    actor CC as Coordinador_Carrera
+    participant FE as Frontend_React
+    participant API as API_Evidencias
+    participant VOL as Volumen_Docker
+    participant DB as PostgreSQL
+    participant Q as Cola_Notificaciones
+    participant LOG as LOG_AUDITORIA
+
+    CC->>FE: Selecciona indicador y adjunta archivo
+    FE->>API: POST /evidencias/{indicador_id} multipart
+
+    API->>API: Validar JWT carrera_id del indicador
+    API->>API: Validar MIME y tamano max 50MB
+
+    alt EV-001 tamano o EV-002 MIME
+        API-->>FE: 413 o 415
+        FE-->>CC: Mensaje formato o tamano
+    else EV-003 indicador APROBADO
+        API-->>FE: 409 EV-003
+    else flujo nominal
+        API->>DB: SELECT MAX version indicador
+        API->>VOL: PUT version_nombre_original
+        API->>API: SHA-256 post-escritura
+        alt EV-004 falla volumen
+            API->>DB: ROLLBACK
+            API-->>FE: 502 EV-004
+        else persistencia OK
+            API->>DB: INSERT EVIDENCIA EN_REVISION
+            API->>DB: UPDATE INDICADOR EN_REVISION
+            API->>LOG: INSERT accion CARGA
+            API->>Q: Encolar notificacion TD
+            API-->>FE: 201 evidencia_id version hash
+            FE-->>CC: Confirmacion con barra progreso
+        end
+    end

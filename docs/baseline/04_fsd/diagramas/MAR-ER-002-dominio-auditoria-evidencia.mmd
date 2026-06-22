@@ -1,0 +1,50 @@
+﻿%% diagramId: MAR-ER-002
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-009 RB-04 append-only
+erDiagram
+    AUDIT_LOG ||--o{ AUDIT_LOG : correlacion
+    DOCUMENTO ||--o{ AUDIT_LOG : referencia
+    USUARIO ||--o{ AUDIT_LOG : actor
+    NOTIFICATION_OUTBOX ||--o{ AUDIT_LOG : traza_envio
+    PLAN_MEJORA ||--|| INDICADOR : deriva
+    REPORTE_HISTORICO }o--|| USUARIO : solicitante
+
+    AUDIT_LOG {
+        bigint id PK
+        timestamptz ts
+        uuid actor_id FK
+        string accion
+        string entidad
+        uuid entidad_id
+        jsonb payload
+        string ip_hash
+    }
+
+    NOTIFICATION_OUTBOX {
+        uuid id PK
+        string evento
+        string estado
+        int reintentos
+        timestamptz programado_en
+    }
+
+    PLAN_MEJORA {
+        uuid id PK
+        uuid indicador_id FK
+        string estado
+        text accion_correctiva
+        timestamptz cerrado_en
+    }
+
+    REPORTE_HISTORICO {
+        uuid id PK
+        uuid solicitante_id FK
+        string alcance
+        string storage_key
+        timestamptz generado_en
+    }
+
+    DOCUMENTO {
+        uuid id PK
+        int version
+        string hash_sha256
+    }

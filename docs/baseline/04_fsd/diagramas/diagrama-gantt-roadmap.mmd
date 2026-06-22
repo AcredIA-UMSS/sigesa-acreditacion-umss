@@ -1,0 +1,49 @@
+﻿gantt
+    title Roadmap SIGESA / AcredIA â€” v1.0 (2026)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %d
+
+    section Fase 0 â€” Fundamentos
+    Spike stack tecnolÃ³gico (Node vs FastAPI)       :done,    spike,    2026-05-14, 2d
+    Setup monorepo Docker Compose (T-01)            :done,    t01,      2026-05-14, 3d
+    Esquema BD PostgreSQL + migraciones (T-03)      :done,    t03,      2026-05-16, 4d
+
+    section Sprint S1 â€” AutenticaciÃ³n y Roles
+    MÃ³dulo JWT + RBAC + dominio @umss.edu.bo (T-02) :active,  t02,      2026-05-20, 7d
+    Log de auditorÃ­a append-only + REVOKE (T-11)    :         t11,      2026-05-22, 5d
+    Tests unitarios MOD-01 (â‰¥80% cobertura)         :         test_s1,  2026-05-25, 3d
+    Review S1 + ajustes                             :         rev_s1,   2026-05-28, 2d
+
+    section Sprint S2 â€” Repositorio Documental
+    API carga evidencias + SHA-256 + versionado (T-04) :      t04,      2026-06-01, 7d
+    Flujo aprobaciÃ³n/rechazo + cierre fase (T-05, T-06) :     t05,      2026-06-05, 7d
+    Sistema notificaciones SMTP + cola (T-09)        :        t09,      2026-06-08, 5d
+    Tests integraciÃ³n MOD-02/03/07                  :         test_s2,  2026-06-12, 3d
+    Review S2 + demo interna                        :         rev_s2,   2026-06-15, 2d
+
+    section Sprint S3 â€” Dashboard y Reportes
+    Dashboard gerencial + semÃ¡foros (T-07)          :         t07,      2026-06-17, 6d
+    Motor reportes PDF con plantilla SIGESA (T-08)  :         t08,      2026-06-20, 7d
+    Buscador full-text PostgreSQL GIN (T-10)        :         t10,      2026-06-24, 5d
+    Tests carga k6 (p95 â‰¤ 3s, 50 VUs)              :         test_s3,  2026-06-27, 3d
+    Review S3 y demo con JD real                    :         rev_s3,   2026-06-30, 2d
+
+    section Sprint S4 â€” Portal PÃºblico y Certificados
+    Portal pÃºblico + endpoints sin auth (T-12a)     :         t12a,     2026-07-01, 5d
+    MÃ³dulo de certificados + QR + firma digital(T-12b) :      t12b,     2026-07-05, 7d
+    Respaldo automÃ¡tico + verificaciÃ³n SHA-256      :         t_bck,    2026-07-10, 4d
+    Tests E2E Playwright (flujos crÃ­ticos)          :         test_s4,  2026-07-13, 4d
+    Review S4                                       :         rev_s4,   2026-07-17, 2d
+
+    section QA y ValidaciÃ³n Final
+    Tests de seguridad OWASP ZAP + mutaciÃ³n BD      :         sec_test, 2026-07-20, 5d
+    Test de usabilidad con 3 coordinadores DUEA     :         usab,     2026-07-22, 3d
+    CorrecciÃ³n de defectos crÃ­ticos                 :         fix,      2026-07-25, 5d
+    ValidaciÃ³n accesibilidad WCAG 2.2 AA            :         a11y,     2026-07-28, 3d
+
+    section Despliegue y Piloto
+    Despliegue en servidor institucional UMSS       :         deploy,   2026-07-31, 3d
+    Carga de datos iniciales (carreras, fases DUEA) :         data,     2026-08-01, 2d
+    CapacitaciÃ³n presencial equipo DUEA             :         train,    2026-08-04, 3d
+    Piloto controlado con 3 carreras                :         pilot,    2026-08-07, 14d
+    Go-live v1.0                                    :milestone, golive,  2026-08-21, 0d

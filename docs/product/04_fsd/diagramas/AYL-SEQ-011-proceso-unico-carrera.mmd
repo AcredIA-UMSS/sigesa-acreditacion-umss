@@ -1,0 +1,22 @@
+﻿%% diagramId: AYL-SEQ-011
+%% fsdTrace: FSD-UC-011 RBN-05
+sequenceDiagram
+    autonumber
+    title FSD-UC-011 â€” Proceso unico activo por carrera
+
+    actor JD as Jefatura_DUEA
+    participant FE as Frontend_React
+    participant API as API_Procesos
+    participant DB as PostgreSQL
+
+    JD->>FE: Crear proceso CEUB carrera periodo
+    FE->>API: POST /procesos
+    API->>DB: SELECT activo mismo tipo carrera periodo
+
+    alt proceso activo existe PROC-001
+        API-->>FE: 409 mensaje duplicado
+        FE-->>JD: No puede haber dos procesos activos
+    else proceso anterior cerrado
+        API->>DB: INSERT proceso ACTIVO
+        API-->>FE: 201 procesoId
+    end

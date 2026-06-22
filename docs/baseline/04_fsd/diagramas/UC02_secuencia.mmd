@@ -1,0 +1,23 @@
+﻿%% FSD-UC-004 Cargar Evidencia + FSD-UC-008 Observar
+%% Trazabilidad: PRD-US-002, PRD-US-009 | FSD-BR-01, FSD-BR-05
+
+sequenceDiagram
+    autonumber
+    participant CC as Coordinador_Carrera_CC
+    participant SYS as SIGESA_API
+    participant STORE as Object_Storage
+    participant TD as Tecnico_DUEA_TD
+
+    CC->>SYS: POST /indicators/{id}/evidences evidenceBlob metadata
+    SYS->>SYS: RBAC programa CC
+    SYS->>STORE: PUT blob con hash SHA-256
+    STORE-->>SYS: storage_key
+    SYS->>SYS: INSERT evidence_version v1
+    SYS->>SYS: INSERT indicator_state_history SUBIDO
+    SYS-->>TD: alerta bandeja auditoria
+
+    TD->>SYS: GET /audit-queue?phaseId=
+    TD->>SYS: POST /indicators/{id}/observe
+    Note over SYS: justification obligatoria min 20 chars
+    SYS->>SYS: INSERT observation + indicator_state_history OBSERVADO
+    SYS-->>CC: notificacion en 15 min

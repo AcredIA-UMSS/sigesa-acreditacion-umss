@@ -1,0 +1,13 @@
+---
+description: Sincronización de arquitectura viva. Se activa al modificar controladores, entidades JPA, DTOs o pom.xml.
+globs: ["**/*.java", "**/pom.xml"]
+---
+# ⚙️ Sincronización de DTP y Cero Divergencia
+
+Estás modificando el código fuente del backend (Java/Spring Boot). Debemos mantener la trazabilidad arquitectónica.
+
+## Reglas de Ejecución:
+1. **Cambios Menores:** Si cambias lógica interna de un Service, no necesitas actualizar la documentación.
+2. **Cambios Estructurales:** Si modificas un DTO, añades un Endpoint en un Controller, creas una nueva Entidad JPA o añades una dependencia al `pom.xml`, debes avisar al usuario.
+3. **Acción Requerida:** Propón actualizar el archivo `docs/product/DTP.md` para reflejar este nuevo contrato.
+4. **ADR First:** Si estás a punto de realizar un cambio arquitectónico grande (ej. cambiar H2 por PostgreSQL, cambiar la forma de autenticación), DETENTE. Informa al usuario que primero deben crear un documento en `docs/adr/`.

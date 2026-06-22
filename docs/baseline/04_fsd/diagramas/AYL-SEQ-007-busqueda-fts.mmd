@@ -1,0 +1,32 @@
+﻿%% diagramId: AYL-SEQ-007
+%% fsdTrace: FSD-UC-007 PC-007
+sequenceDiagram
+    autonumber
+    title FSD-UC-007 â€” Buscador documentos FTS
+
+    actor U as TD_o_JD
+    participant FE as Frontend_React
+    participant API as API_Busqueda
+    participant DB as PostgreSQL_FTS
+
+    U->>FE: Query texto y facetas
+    FE->>API: GET /buscar q filtros
+
+    API->>API: Sanitizar query longitud
+    API->>API: Extraer carrera_id JWT si rol CC
+
+    alt CC intenta otra carrera
+        API->>DB: WHERE carrera_id token only
+    else TD JD global
+        API->>DB: tsvector rank facetas
+    end
+
+    alt sin resultados
+        API-->>FE: 200 lista vacia mensaje ajuste filtros
+    else resultados
+        DB-->>API: pagina 50 max p95 3s
+        API-->>FE: 200 metadatos sin blob
+    end
+
+    U->>FE: Abrir documento
+    FE-->>U: Vista detalle

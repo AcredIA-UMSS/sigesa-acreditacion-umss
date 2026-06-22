@@ -1,0 +1,12 @@
+﻿%% diagramId: D-STA-002
+%% fsdTrace: docs/LFSD.md T-012 taxonomias RB-01 RB-08
+%% version: 1.0
+stateDiagram-v2
+    [*] --> BORRADOR
+    BORRADOR --> EN_PROCESO: JD activa proceso
+    EN_PROCESO --> EN_EVALUACION_EXTERNA: convocatoria CEUB fase externa
+    EN_EVALUACION_EXTERNA --> ACREDITADO: dictamen favorable
+    EN_PROCESO --> NO_ACREDITADO: cierre sin acreditacion
+    ACREDITADO --> VENCIDO: fin vigencia resolucion
+    EN_PROCESO --> SUSPENDIDO: causa administrativa
+    SUSPENDIDO --> EN_PROCESO: reanudacion JD

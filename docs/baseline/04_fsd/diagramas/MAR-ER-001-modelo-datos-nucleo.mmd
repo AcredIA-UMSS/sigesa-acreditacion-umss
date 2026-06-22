@@ -1,0 +1,52 @@
+﻿%% diagramId: MAR-ER-001
+%% fsdTrace: team/Marlene/04_fsd/FSD.md seccion 6 modelo datos
+erDiagram
+    CARRERA ||--o{ PROCESO_ACREDITACION : instancia
+    PROCESO_ACREDITACION ||--|{ FASE : contiene
+    FASE ||--|{ SUBFASE : contiene
+    SUBFASE ||--|{ INDICADOR : evalua
+    INDICADOR ||--o{ DOCUMENTO : versiona
+    USUARIO ||--o{ ASIGNACION_ROL : tiene
+    ASIGNACION_ROL }o--|| CARRERA : alcance
+    PLANTILLA_NORMATIVA ||--o{ PROCESO_ACREDITACION : origen
+
+    CARRERA {
+        uuid id PK
+        string nombre
+        string facultad
+        string tipo_grado
+        boolean publicado_portal
+    }
+
+    PROCESO_ACREDITACION {
+        uuid id PK
+        uuid carrera_id FK
+        uuid plantilla_id FK
+        string gestion
+        string estado
+        date inicio
+    }
+
+    INDICADOR {
+        uuid id PK
+        uuid subfase_id FK
+        string codigo_ceub
+        string estado
+        int peso
+    }
+
+    DOCUMENTO {
+        uuid id PK
+        uuid indicador_id FK
+        int version
+        string hash_sha256
+        string storage_key
+        timestamptz cargado_en
+    }
+
+    USUARIO {
+        uuid id PK
+        string email_umss
+        string rol
+        boolean activo
+    }

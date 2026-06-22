@@ -1,0 +1,57 @@
+﻿%% SEQ-03 Flujo observaciones DUEA-Carrera â€” Fuente: FSD-UC-004 / PC-006
+---
+title: "SEQ-03 Â· Flujo de observaciones DUEA â†” Carrera (FSD-UC-004)"
+---
+sequenceDiagram
+    actor D as Admin DUEA
+    participant F as Frontend
+    participant OBS as Obs. API
+    participant NOTIF as Notificador
+    actor CO as Coordinador
+    participant AUD as AuditorÃ­a
+
+    Note over D,AUD: DUEA emite observaciÃ³n formal
+    D->>F: Abre fase "DocumentaciÃ³n" de carrera "Arquitectura"
+    D->>F: Selecciona "Nueva observaciÃ³n"
+    D->>F: Escribe detalle + guarda
+    F->>OBS: POST /observaciones {fase_id, detalle, autor_id}
+    OBS->>OBS: Crea observaciÃ³n estado="Abierta"
+    OBS->>AUD: INSERT OBSERVACION_CREADA {user_id, obs_id, fase_id, timestamp}
+    OBS->>NOTIF: Notificar a coordinador de carrera
+    NOTIF-->>CO: Email/notif: "Nueva observaciÃ³n en fase DocumentaciÃ³n"
+    OBS-->>F: 201 Created {obs_id, estado: "Abierta"}
+    F-->>D: ConfirmaciÃ³n de observaciÃ³n registrada
+
+    Note over D,AUD: Coordinador responde
+    CO->>F: Abre bandeja de observaciones
+    F->>OBS: GET /observaciones?carrera_id={id}&estado=Abierta
+    OBS-->>F: Lista de observaciones pendientes
+    F-->>CO: Muestra observaciÃ³n de DUEA
+
+    CO->>F: Redacta respuesta + adjunta evidencia (opcional)
+    F->>OBS: PATCH /observaciones/{id} {respuesta, adjunto_id}
+
+    alt ObservaciÃ³n ya cerrada
+        OBS-->>F: 409 Conflict {estado: "Cerrada", fecha_cierre}
+        F-->>CO: "Esta observaciÃ³n ya fue cerrada el [fecha]"
+    else Respuesta registrada
+        OBS->>OBS: Actualiza estado="Respondida"
+        OBS->>AUD: INSERT OBSERVACION_RESPONDIDA {user_id, obs_id, timestamp}
+        OBS->>NOTIF: Notificar a DUEA
+        NOTIF-->>D: Notif: "Coordinador respondiÃ³ observaciÃ³n"
+        OBS-->>F: 200 OK {estado: "Respondida"}
+        F-->>CO: ConfirmaciÃ³n de respuesta enviada
+    end
+
+    Note over D,AUD: DUEA revisa respuesta
+    D->>F: Revisa respuesta del coordinador
+    alt DUEA acepta
+        D->>F: Cierra observaciÃ³n
+        F->>OBS: PATCH /observaciones/{id} {estado: "Cerrada"}
+        OBS->>AUD: INSERT OBSERVACION_CERRADA {user_id, obs_id, timestamp}
+    else DUEA rechaza
+        D->>F: Rechaza con comentario
+        F->>OBS: PATCH /observaciones/{id} {estado: "Abierta", comentario_rechazo}
+        OBS->>NOTIF: Notificar rechazo al coordinador
+        NOTIF-->>CO: Notif: "ObservaciÃ³n reabierta con comentarios"
+    end

@@ -1,0 +1,28 @@
+﻿%% diagramId: MAR-STA-002
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-003 FSD-UC-010 RB-01
+stateDiagram-v2
+    direction TB
+
+    [*] --> BORRADOR_CONFIG: JD define plantilla
+
+    BORRADOR_CONFIG --> EN_PROCESO: alta proceso valida BR-013
+    EN_PROCESO --> EN_PROCESO: avance subfase si indicadores APROBADO
+
+    state EN_PROCESO {
+        [*] --> Subfase_Activa
+        Subfase_Activa --> Subfase_Cerrada: cerrar subfase WF completo
+        Subfase_Cerrada --> Subfase_Activa: siguiente subfase
+        Subfase_Cerrada --> [*]: ultima subfase
+    }
+
+    EN_PROCESO --> OBSERVADO: observacion externa CEUB
+    OBSERVADO --> EN_PROCESO: subsanacion evidencias
+
+    EN_PROCESO --> CERRADO: cierre formal JD
+    CERRADO --> ARCHIVADO: post-gestion read-only
+
+    ARCHIVADO --> [*]
+
+    note right of EN_PROCESO
+        Un solo proceso activo por carrera RB-01
+    end note
