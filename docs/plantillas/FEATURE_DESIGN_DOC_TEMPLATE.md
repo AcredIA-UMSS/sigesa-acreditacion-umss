@@ -61,7 +61,7 @@ flowchart LR
 | Artefacto vivo | Cambio | ¿Delta vs DTI vFinal? |
 |----------------|--------|-----------------------|
 | `docs/product/FSD.md` (`FSD-UC-001`) | `<ajuste de criterio/flujo>` | no |
-| `docs/product/PRD.md` (`PRD-REQ-01`) | `<…>` | no |
+| `docs/product/03_prd/PRD.md` (`PRD-REQ-01`) | `<…>` | no |
 | `docs/product/DTP.md` | `<changelog + estado UC>` | sí → `ADR-NNNN` |
 
 > **Recordatorio (regla de oro)**: el baseline congelado de M4 (`docs/baseline/`) **no se toca**. Los cambios viven en `docs/product/`.
