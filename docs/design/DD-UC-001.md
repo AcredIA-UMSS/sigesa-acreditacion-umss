@@ -167,7 +167,7 @@ flowchart LR
 |---|---|---|
 | `PR-IMPL-004` | Implementación MOD-AUTH (hexagonal, JWT, user_program_assignment) | `src/.../auth/**`, tests, DDL |
 
-> Ver [`PR-IMPL-004`](../prompts/impl/PR-IMPL-004.md). Tras ejecutar: `@save-prompt-mapping PR-IMPL-004` → `@dtp-sync`.
+> **Paso 3 (README):** `PR-IMPL-004` generado vía [`@sigesa-prompt-contract-architect`](../../.cursor/skills/sigesa-prompt-contract-architect/SKILL.md), **no** dentro del flujo `@feature-design-doc`. Ver [`PR-IMPL-004`](../prompts/impl/PR-IMPL-004.md). Tras ejecutar (Paso 4): `@save-prompt-mapping PR-IMPL-004` → `@dtp-sync` (Paso 6).
 
 ## 6. Plan de pruebas y evals
 
