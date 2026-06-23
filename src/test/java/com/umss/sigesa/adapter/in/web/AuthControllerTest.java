@@ -84,4 +84,15 @@ class AuthControllerTest {
 
         assertEquals(missingUser.getResponse().getContentAsString(), badPassword.getResponse().getContentAsString());
     }
+
+    @Test
+    void login_blankEmailReturns400() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"","password":"secret"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("VALIDATION_ERROR"));
+    }
 }

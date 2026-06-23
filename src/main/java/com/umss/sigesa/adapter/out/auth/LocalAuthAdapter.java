@@ -41,7 +41,7 @@ public class LocalAuthAdapter implements AuthPort {
             return Optional.empty();
         }
 
-        if (!passwordEncoder.matches(new String(rawPassword), entity.getPasswordHash())) {
+        if (!PasswordUtils.matches(passwordEncoder, rawPassword, entity.getPasswordHash())) {
             return Optional.empty();
         }
 

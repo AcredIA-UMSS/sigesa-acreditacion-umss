@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.out.persistance;
 
 import com.umss.sigesa.adapter.out.persistance.entity.UserProgramAssignmentEntity;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateActiveAssignmentException;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,11 @@ public class UserProgramAssignmentJpaAdapter implements UserProgramAssignmentRep
 
     @Override
     public UserProgramAssignment save(UserProgramAssignment assignment) {
+        if (assignment.getRevokedAt() == null
+                && jpaRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(
+                        assignment.getUserId(), assignment.getProgramId())) {
+            throw new DuplicateActiveAssignmentException(assignment.getUserId(), assignment.getProgramId());
+        }
         UserProgramAssignmentEntity entity = toEntity(assignment);
         UserProgramAssignmentEntity saved = jpaRepository.save(entity);
         return toDomain(saved);

@@ -4,6 +4,7 @@
 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Implementación MOD-AUTH hexagonal + JWT (Paso 4) | PM-002 |
 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Completar MOD-AUTH §6 DD + JaCoCo ≥90% (Paso 4 cierre) | PM-004 |
 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Tests Gherkin Authenticate/RegisterUser + DD-UC-001 §6 | PM-005 |
+| — | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Hardening post code-review MOD-AUTH (PM-006) | PM-006 |
 
 ---
 
@@ -102,7 +103,7 @@ Contexto de diseño a respetar en las secciones 1-7:
 |---|---|
 | **ID** | PM-002 |
 | **Fecha** | 2026-06-22 |
-| **Hora** | 23:45 |
+| **Hora** | 23:02 |
 | **Solicitante** | Aylen |
 | **Agente/Entorno** | Cursor IDE — Agent |
 | **Modelo** | Composer |
@@ -265,7 +266,7 @@ Implementación MOD-AUTH v1.0 en código fuente. Cadena: `PM-001 → PM-003 → 
 |---|---|
 | **ID** | PM-004 |
 | **Fecha** | 2026-06-22 |
-| **Hora** | 00:30 |
+| **Hora** | 23:09 |
 | **Solicitante** | Aylen |
 | **Agente/Entorno** | Cursor IDE — Agent |
 | **Modelo** | Composer |
@@ -360,13 +361,13 @@ MOD-AUTH alineado a PR-IMPL-004 y DD-UC-001 §6; suite de tests auth completa; J
 
 ---
 
-## PM-005
+## PM-004
 
 | Campo | Valor |
 |---|---|
 | **ID** | PM-005 |
 | **Fecha** | 2026-06-22 |
-| **Hora** | 01:15 |
+| **Hora** | 23:27 |
 | **Solicitante** | Aylen |
 | **Agente/Entorno** | Cursor IDE — Agent |
 | **Modelo** | Composer |
@@ -444,3 +445,79 @@ Suite Gherkin FSD-UC-001/002 cubierta en servicios auth; §6 DD actualizado con 
 - [ ] `mvn verify` y registrar % JaCoCo real en DD §6 si difiere
 - [ ] `@dtp-sync` (Paso 6)
 - [ ] Commit sugerido: `test: Gherkin auth tests and DD-UC-001 §6 (PM-005)`
+
+---
+
+## PM-005
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-006 |
+| **Fecha** | 2026-06-21 |
+| **Hora** | 23:37 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Hardening MOD-AUTH post `@code-review-sigesa` |
+| **Objetivo** | Implementar todas las mejoras del code review: A1 login, 409 duplicados, índice parcial, seguridad, validación, tests smoke, DTP sync |
+| **Contexto** | DD-UC-001; reporte code-review PM-005; AGENTS.md |
+| **PR-IMPL vinculado** | PR-IMPL-004 (cierre hardening) |
+| **DD-UC vinculado** | DD-UC-001 |
+| **FSD-UC vinculado** | FSD-UC-001, FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```
+IMPLEMENTA LAS MEJORAS SEGUN SON PREVISTAS DE RESOLVER DE @code-review-sigesa
+```
+
+### Entradas auxiliares
+
+- Reporte `@code-review-sigesa` (violaciones A1, 409, índice parcial, JWT perímetro, @Valid, DTP)
+- `docs/design/DD-UC-001.md`
+- `.cursor/skills/dtp-sync/SKILL.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `src/main/java/com/umss/sigesa/domain/exception/DuplicateEmailException.java` |
+| generado | `src/main/java/com/umss/sigesa/domain/exception/DuplicateActiveAssignmentException.java` |
+| generado | `src/main/java/com/umss/sigesa/adapter/out/auth/PasswordUtils.java` |
+| generado | `src/main/java/com/umss/sigesa/config/AuthSchemaInitializer.java` |
+| generado | `src/main/resources/application-dev.yaml` |
+| generado | `src/test/java/com/umss/sigesa/adapter/in/web/AuthenticatedApiSmokeTest.java` |
+| modificado | `Email.java`, `AuthenticateService.java`, `RegisterUserService.java` |
+| modificado | `AuthExceptionHandler.java`, `SecurityConfig.java`, controllers, DTOs |
+| modificado | `UserJpaAdapter.java`, `UserProgramAssignmentJpaAdapter.java`, `LocalAuthAdapter.java` |
+| modificado | `application.yaml`, tests auth + support in-memory |
+| modificado | `docs/design/DD-UC-001.md`, `docs/product/DTP.md`, `docs/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- **A1 login:** `Email.forLogin()` → `401 AUTH_INVALID_CREDENTIALS` para dominio inválido/vacío.
+- **409:** `DuplicateEmailException` + check en `RegisterUserService`/`UserJpaAdapter`; handler HTTP.
+- **Asignaciones:** validación activa duplicada + `AuthSchemaInitializer` índice `uk_upa_active`.
+- **Seguridad:** JWT secret `${SIGESA_JWT_SECRET}`; H2 console solo perfil `dev`; cadena JWT documentada.
+- **Calidad:** `@Valid` DTOs; `PasswordUtils` zeroize; smoke test JWT `/fases`.
+- **Docs:** DTP §A.1–A.3 + deltas; DD-UC-001 reglas §2 y §6 actualizados.
+
+### Validación ejecutada
+
+- [ ] `mvn verify` — no ejecutado (`JAVA_HOME` ausente en entorno Windows del agente)
+- [x] `git status` / `git diff --name-status` — archivos verificados
+
+### Resultado obtenido
+
+Todas las mejoras del code review implementadas en código y documentación viva. JaCoCo pendiente verificación local.
+
+### Riesgos / observaciones
+
+- Perímetro JWT en `/api/v1/**` es breaking change documentado en DTP §A.2.
+- Password temporal sigue fuera del response API (canal offline v1.0).
+
+### Próximos pasos
+
+- [ ] `mvn verify` local y registrar % JaCoCo en DD §6
+- [ ] Commit sugerido: `fix: MOD-AUTH hardening from code review (PM-006)`

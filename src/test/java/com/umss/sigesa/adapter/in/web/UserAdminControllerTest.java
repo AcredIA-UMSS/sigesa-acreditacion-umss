@@ -93,4 +93,19 @@ class UserAdminControllerTest {
         mockMvc.perform(patch("/api/v1/admin/users/{id}/deactivate", userId))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    @WithMockUser(roles = "JD")
+    void register_duplicateEmailReturns409() throws Exception {
+        when(registerUserUseCase.register(anyString(), anyString(), any(), any(char[].class)))
+                .thenThrow(new com.umss.sigesa.domain.exception.DuplicateEmailException("cc@umss.edu.bo"));
+
+        mockMvc.perform(post("/api/v1/admin/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"cc@umss.edu.bo","role":"CC","programId":"550e8400-e29b-41d4-a716-446655440000"}
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("EMAIL_ALREADY_REGISTERED"));
+    }
 }

@@ -43,6 +43,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 |-------|--------|--------------------------|-----|-------------|-------|
+| 22/06/2026 | Implementación MOD-AUTH (JWT, login, admin users, user_program_assignment, hardening code-review). | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | `5cd14df`…`PM-006` | Cursor Agent |
 | 22/06/2026 | Implementación core de MOD-PROCESS (Dominio, Casos de Uso, Controladores y Stubs JPA para plantillas). | FSD-UC-003 / DD-UC-003 | N/A | Pendiente | Boris Angulo |
 | 22/06/2026 | Inicialización de la arquitectura base Spring Boot y DTP vivo. | N/A | N/A | `init` | Boris Angulo |
 
@@ -52,13 +53,15 @@ artefactos_vivos:
 
 | # | Sección del DTI afectada | Qué decía el DTI vFinal | Qué dice ahora el DTP | Motivo | ADR |
 |---|--------------------------|-------------------------|-----------------------|--------|-----|
-| * | *Ninguna por ahora* | *El código refleja el DTI al 100%* | *N/A* | *Inicio de codificación* | *N/A* |
+| 1 | Perímetro API | Endpoints legacy sin auth explícita en DTI piloto | Todo `/api/v1/**` excepto `POST /auth/login` exige JWT Bearer | MOD-AUTH v1.0 unifica seguridad antes de MOD-EVIDENCE | N/A (DD-UC-001) |
+| 2 | Entrega password temporal | No especificado en API baseline | Alta genera password en servidor; entrega **offline** v1.0 (no en JSON response) | Evitar exposición en tránsito; capacitación [JD] | N/A |
 
 ### A.3 Estado de implementación por FSD-UC
 
 | FSD-UC | Design Doc | Estado | Release | Tests/Evals | Notas |
 |--------|------------|--------|---------|-------------|-------|
-| `FSD-UC-001` | `DD-UC-001` | pendiente | `release/3.0.0` | TBD | Preparando esqueleto hexagonal |
+| `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001 | JWT + LocalAuthAdapter; A1 dominio→401 |
+| `FSD-UC-002` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001 | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | hecho (core) | `release/3.0.0` | Pendiente | Faltan queries SQL nativas en JPA Adapters |
 
 ### A.4 Trazabilidad código ↔ DTP
@@ -78,6 +81,7 @@ artefactos_vivos:
 | §3 Arquitectura de alto nivel (C4 N2/N3) | no | DTI vFinal §3 |
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | no | DTI vFinal §5 |
+| **MOD-AUTH (identidad)** | **sí** | `DD-UC-001`; tablas `app_user`, `user_program_assignment`; endpoints `/api/v1/auth/login`, `/api/v1/admin/users*`; secret JWT vía `SIGESA_JWT_SECRET` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/PROMPT_MAPPING.md` |
 | §21 ADRs | **sí (crece)** | `docs/adr/` |

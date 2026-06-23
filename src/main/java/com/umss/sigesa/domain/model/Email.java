@@ -1,5 +1,6 @@
 package com.umss.sigesa.domain.model;
 
+import com.umss.sigesa.domain.exception.InvalidCredentialsException;
 import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
 
 import java.util.Objects;
@@ -21,6 +22,21 @@ public final class Email {
         String normalized = raw.trim().toLowerCase();
         if (!normalized.endsWith(UMSS_SUFFIX)) {
             throw new InvalidEmailDomainException("Solo se permiten correos institucionales @umss.edu.bo.");
+        }
+        return new Email(normalized);
+    }
+
+    /**
+     * Validación de email en login: cualquier formato o dominio inválido se trata como
+     * credenciales inválidas (FSD-UC-001 A1), sin revelar la causa.
+     */
+    public static Email forLogin(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw new InvalidCredentialsException();
+        }
+        String normalized = raw.trim().toLowerCase();
+        if (!normalized.endsWith(UMSS_SUFFIX)) {
+            throw new InvalidCredentialsException();
         }
         return new Email(normalized);
     }

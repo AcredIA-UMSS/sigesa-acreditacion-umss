@@ -20,6 +20,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+/**
+ * Entidad de persistencia de usuarios. {@code failedAttempts} y {@code lockedUntil}
+ * están reservados para bloqueo por intentos fallidos (v1.1).
+ */
 public class AppUserEntity {
 
     @Id

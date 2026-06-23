@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.InvalidScopeException;
 import com.umss.sigesa.domain.model.AppUser;
@@ -34,6 +35,10 @@ public class RegisterUserService implements RegisterUserUseCase {
         Email emailVo = Email.of(email);
         Role role = parseRole(roleName);
         validateScope(role, programId);
+
+        if (userRepository.findByEmail(emailVo).isPresent()) {
+            throw new DuplicateEmailException(emailVo.value());
+        }
 
         LocalDateTime now = LocalDateTime.now();
         AppUser user = new AppUser(

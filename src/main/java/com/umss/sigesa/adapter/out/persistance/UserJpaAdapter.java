@@ -1,10 +1,12 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.auth.PasswordUtils;
 import com.umss.sigesa.adapter.out.persistance.entity.AppUserEntity;
-import com.umss.sigesa.adapter.out.persistance.entity.UserProgramAssignmentEntity;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
@@ -25,9 +27,13 @@ public class UserJpaAdapter implements UserRepositoryPort {
     @Override
     public AppUser save(AppUser user, char[] rawPassword) {
         AppUserEntity entity = toEntity(user);
-        entity.setPasswordHash(passwordEncoder.encode(new String(rawPassword)));
-        AppUserEntity saved = jpaRepository.save(entity);
-        return toDomain(saved);
+        entity.setPasswordHash(PasswordUtils.encode(passwordEncoder, rawPassword));
+        try {
+            AppUserEntity saved = jpaRepository.save(entity);
+            return toDomain(saved);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateEmailException(user.getEmail().value());
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.service.auth.support;
 
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateActiveAssignmentException;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 
 import java.util.ArrayList;
@@ -13,6 +14,15 @@ public class InMemoryUserProgramAssignmentRepository implements UserProgramAssig
 
     @Override
     public UserProgramAssignment save(UserProgramAssignment assignment) {
+        if (assignment.isActive()) {
+            boolean duplicate = assignments.stream()
+                    .anyMatch(a -> a.isActive()
+                            && a.getUserId().equals(assignment.getUserId())
+                            && a.getProgramId().equals(assignment.getProgramId()));
+            if (duplicate) {
+                throw new DuplicateActiveAssignmentException(assignment.getUserId(), assignment.getProgramId());
+            }
+        }
         assignments.add(assignment);
         return assignment;
     }

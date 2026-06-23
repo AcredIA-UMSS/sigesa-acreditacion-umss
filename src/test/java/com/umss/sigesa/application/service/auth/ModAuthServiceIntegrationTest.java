@@ -7,6 +7,7 @@ import com.umss.sigesa.application.service.auth.support.InMemoryAuthPort;
 import com.umss.sigesa.application.service.auth.support.InMemoryUserProgramAssignmentRepository;
 import com.umss.sigesa.application.service.auth.support.InMemoryUserRepository;
 import com.umss.sigesa.application.service.auth.support.RecordingAuditLogPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.exception.InvalidCredentialsException;
 import com.umss.sigesa.domain.model.Role;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
@@ -83,6 +84,14 @@ class ModAuthServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("FSD-UC-001 A1: Email no @umss.edu.bo — mismo mensaje genérico")
+    void fsdUc001_emailNoUmss_mismo401() {
+        InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
+                () -> authenticateService.authenticate("user@gmail.com", "secret"));
+        assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+    }
+
+    @Test
     @DisplayName("FSD-UC-002: Alta de usuario con rol — cuenta INACTIVE + assignment")
     void fsdUc002_altaUsuarioCc_inactivoConAssignment() {
         UUID programId = UUID.randomUUID();
@@ -96,6 +105,15 @@ class ModAuthServiceIntegrationTest {
         assertEquals(programId, assignments.get(0).getProgramId());
         assertEquals(result.userId(), assignments.get(0).getUserId());
         assertTrue(auditLogPort.events().contains("REGISTER:" + result.userId()));
+    }
+
+    @Test
+    @DisplayName("FSD-UC-002: Email duplicado rechazado")
+    void fsdUc002_emailDuplicado_rechazado() {
+        registerUserService.register("nuevo.cc@umss.edu.bo", "CC", UUID.randomUUID(), "TempPass123!".toCharArray());
+
+        assertThrows(DuplicateEmailException.class,
+                () -> registerUserService.register("nuevo.cc@umss.edu.bo", "CC", UUID.randomUUID(), "TempPass123!".toCharArray()));
     }
 
     @Test

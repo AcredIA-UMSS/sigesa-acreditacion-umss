@@ -67,9 +67,11 @@ autores:
   1. Un usuario = un rol (`CC`, `TD`, `JD`).
   2. **`User` sin `programId` plano**; alcance en **`UserProgramAssignment`**.
   3. `UserStatus`: `INACTIVE` → `ACTIVE` (primer login) → `DEACTIVATED` (revocación).
-  4. Login A1: usuario inexistente, password incorrecto o `DEACTIVATED` → mismo `401 AUTH_INVALID_CREDENTIALS`.
-  5. Login A2: sin rol → `403`.
-  6. Revocación A1 UC-002: soft deactivate + `revoked_at` en asignaciones; **sin DELETE** de usuario ni auditoría.
+  4. Login A1: usuario inexistente, password incorrecto, `DEACTIVATED`, email vacío o dominio distinto de `@umss.edu.bo` → mismo `401 AUTH_INVALID_CREDENTIALS` (`Email.forLogin`).
+  5. Registro/admin: dominio email inválido → `422 INVALID_EMAIL_DOMAIN`; email duplicado → `409 EMAIL_ALREADY_REGISTERED`.
+  6. Login A2: sin rol → `403`.
+  7. Revocación A1 UC-002: soft deactivate + `revoked_at` en asignaciones; **sin DELETE** de usuario ni auditoría.
+  8. **Perímetro JWT v1.0:** todo `/api/v1/**` excepto `POST /auth/login` exige `Authorization: Bearer`. Contraseña temporal en alta se entrega por **canal offline** (no en response API v1.0).
 
 - **Contratos y tipos**:
 
@@ -185,6 +187,7 @@ Derivado de Gherkin FSD-UC-001 y FSD-UC-002.
 | **Integración HTTP** | `AuthControllerTest` | UC-001 200 JWT; A1 body idéntico | implementado |
 | **Integración HTTP** | `UserAdminControllerTest` | UC-002 POST [JD] 201; 401/403 roles | implementado |
 | **Integración HTTP** | `JwtAuthenticationFilterTest` | UC-001 E3 / US-003 → 401 | implementado |
+| **Integración HTTP** | `AuthenticatedApiSmokeTest` | Perímetro JWT; A1 dominio en login; `/fases` con token | implementado |
 | **Integración JPA** | `UserProgramAssignmentRepositoryTest` | FK; revoke soft; historial preservado | implementado |
 
 > **Nota de nombres:** `AuthenticateService` ≡ AuthenticationService del dominio; `RegisterUserService` ≡ CreateUserService (caso de uso `RegisterUserUseCase`).
@@ -194,9 +197,9 @@ Derivado de Gherkin FSD-UC-001 y FSD-UC-002.
 | Escenario FSD | Test(s) |
 |---|---|
 | UC-001: Inicio de sesión exitoso con rol | `AuthenticateServiceTest.loginExitoso*`; `ModAuthServiceIntegrationTest.fsdUc001_loginExitoso*`; `AuthControllerTest.login_returnsJwtOnSuccess` |
-| UC-001: Credenciales inválidas (A1) | `AuthenticateServiceTest.credencialesInvalidas*`; `ModAuthServiceIntegrationTest.fsdUc001_credencialesInvalidas*`; `AuthControllerTest.login_invalidCredentials*` |
+| UC-001: Credenciales inválidas (A1) | `AuthenticateServiceTest.credencialesInvalidas*`; `AuthenticateServiceTest.credencialesInvalidas_emailNoUmss`; `ModAuthServiceIntegrationTest.fsdUc001_*`; `AuthControllerTest.login_invalidCredentials*`; `AuthenticatedApiSmokeTest.loginInvalidEmailDomainReturns401` |
 | UC-001 E3 / US-003: Sin autenticación | `JwtAuthenticationFilterTest.sensitiveActionWithoutTokenReturns401` |
-| UC-002: Alta con rol | `RegisterUserServiceTest.alta*`; `ModAuthServiceIntegrationTest.fsdUc002_alta*`; `UserAdminControllerTest.register_withJdRole*` |
+| UC-002: Alta con rol | `RegisterUserServiceTest.alta*`; `RegisterUserServiceTest.emailDuplicado*`; `ModAuthServiceIntegrationTest.fsdUc002_alta*`; `UserAdminControllerTest.register_withJdRole*` |
 | UC-002 A1: Revocación | `DeactivateUserServiceTest`; `ModAuthServiceIntegrationTest.fsdUc002_revocacion*` |
 
 ### JaCoCo (agents.md)
@@ -237,6 +240,6 @@ Reporte esperado: `target/site/jacoco/index.html` tras `mvn verify`.
 - [ ] ADR-0003 referenciado; no ADR adicional requerido.
 - [ ] §4 Impacto en specs vivas registrado.
 - [x] Prompt(s) en `docs/prompts/impl/` (`PR-IMPL-004`) y `PROMPT_MAPPING.md` (PM-001 registrado).
-- [x] Tests/evals (§6) implementados; JaCoCo pendiente `mvn verify` local.
-- [ ] DTP actualizado vía `@dtp-sync`.
+- [x] Tests/evals (§6) implementados; JaCoCo pendiente `mvn verify` local (sin Java en CI agente).
+- [x] DTP actualizado vía `@dtp-sync` (PM-006).
 - [ ] PR declara prompts y archivos generados vs editados.

@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.adapter.in.web.dto.RegisterUserRequest;
 import com.umss.sigesa.adapter.in.web.dto.RegisterUserResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.SecureRandom;
 import java.util.UUID;
 
+/**
+ * Alta de usuarios por [JD]. La contraseña temporal se genera en servidor y debe
+ * entregarse al usuario por canal offline acordado con DUEA (v1.0: no via API).
+ */
 @RestController
 @RequestMapping("/api/v1/admin/users")
 public class UserAdminController {
@@ -34,18 +39,21 @@ public class UserAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<RegisterUserResponse> register(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
         char[] tempPassword = generateTemporaryPassword();
+        try {
+            RegisterUserUseCase.RegisterResult result = registerUserUseCase.register(
+                    request.email(),
+                    request.role(),
+                    request.programId(),
+                    tempPassword
+            );
 
-        RegisterUserUseCase.RegisterResult result = registerUserUseCase.register(
-                request.email(),
-                request.role(),
-                request.programId(),
-                tempPassword
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new RegisterUserResponse(result.userId(), result.status().name()));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new RegisterUserResponse(result.userId(), result.status().name()));
+        } finally {
+            java.util.Arrays.fill(tempPassword, '\0');
+        }
     }
 
     @PatchMapping("/{id}/deactivate")

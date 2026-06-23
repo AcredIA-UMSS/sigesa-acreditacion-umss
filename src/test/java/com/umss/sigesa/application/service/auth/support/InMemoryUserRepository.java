@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.service.auth.support;
 
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
 
@@ -15,6 +16,9 @@ public class InMemoryUserRepository implements UserRepositoryPort {
 
     @Override
     public AppUser save(AppUser user, char[] rawPassword) {
+        if (findByEmail(user.getEmail()).isPresent()) {
+            throw new DuplicateEmailException(user.getEmail().value());
+        }
         usersById.put(user.getId(), new StoredUser(user, new String(rawPassword)));
         return user;
     }

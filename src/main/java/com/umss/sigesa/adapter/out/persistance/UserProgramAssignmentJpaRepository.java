@@ -15,6 +15,8 @@ public interface UserProgramAssignmentJpaRepository extends JpaRepository<UserPr
 
     List<UserProgramAssignmentEntity> findByUserIdAndRevokedAtIsNull(UUID userId);
 
+    boolean existsByUserIdAndProgramIdAndRevokedAtIsNull(UUID userId, UUID programId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("UPDATE UserProgramAssignmentEntity a SET a.revokedAt = :revokedAt WHERE a.userId = :userId AND a.revokedAt IS NULL")

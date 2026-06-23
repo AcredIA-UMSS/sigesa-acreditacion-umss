@@ -13,6 +13,8 @@ import com.umss.sigesa.domain.model.AuthenticatedIdentity;
 import com.umss.sigesa.domain.model.Email;
 import com.umss.sigesa.domain.model.UserStatus;
 
+import java.util.Arrays;
+
 public class AuthenticateService implements AuthenticateUseCase {
 
     private final AuthPort authPort;
@@ -32,27 +34,31 @@ public class AuthenticateService implements AuthenticateUseCase {
 
     @Override
     public LoginResult authenticate(String email, String password) {
-        Email emailVo = Email.of(email);
         char[] passwordChars = password != null ? password.toCharArray() : new char[0];
+        try {
+            Email emailVo = Email.forLogin(email);
 
-        AuthenticatedIdentity identity = authPort.authenticate(emailVo, passwordChars)
-                .orElseThrow(InvalidCredentialsException::new);
+            AuthenticatedIdentity identity = authPort.authenticate(emailVo, passwordChars)
+                    .orElseThrow(InvalidCredentialsException::new);
 
-        if (identity.role() == null) {
-            throw new RoleNotAssignedException();
+            if (identity.role() == null) {
+                throw new RoleNotAssignedException();
+            }
+
+            AppUser user = userRepository.findById(identity.userId())
+                    .orElseThrow(InvalidCredentialsException::new);
+
+            if (user.getStatus() == UserStatus.INACTIVE) {
+                user.activate();
+                userRepository.update(user);
+            }
+
+            IssuedToken issuedToken = tokenPort.issue(identity);
+            auditLogPort.logLogin(identity.userId(), identity.email());
+
+            return new LoginResult(issuedToken, identity.role(), identity.programScope());
+        } finally {
+            Arrays.fill(passwordChars, '\0');
         }
-
-        AppUser user = userRepository.findById(identity.userId())
-                .orElseThrow(InvalidCredentialsException::new);
-
-        if (user.getStatus() == UserStatus.INACTIVE) {
-            user.activate();
-            userRepository.update(user);
-        }
-
-        IssuedToken issuedToken = tokenPort.issue(identity);
-        auditLogPort.logLogin(identity.userId(), identity.email());
-
-        return new LoginResult(issuedToken, identity.role(), identity.programScope());
     }
 }

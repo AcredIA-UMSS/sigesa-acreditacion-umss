@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.auth;
 
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.InvalidScopeException;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,6 +112,18 @@ class RegisterUserServiceTest {
     void rolInvalido_rechazado() {
         assertThrows(InvalidRoleException.class,
                 () -> registerUserService.register("cc@umss.edu.bo", "SUPERADMIN", null, "temp".toCharArray()));
+    }
+
+    @Test
+    @DisplayName("Email duplicado rechazado con DuplicateEmailException")
+    void emailDuplicado_rechazado() {
+        when(userRepository.findByEmail(Email.of("cc@umss.edu.bo"))).thenReturn(Optional.of(
+                new AppUser(UUID.randomUUID(), Email.of("cc@umss.edu.bo"), Role.CC, UserStatus.ACTIVE,
+                        LocalDateTime.now(), LocalDateTime.now())));
+
+        assertThrows(DuplicateEmailException.class,
+                () -> registerUserService.register("cc@umss.edu.bo", "CC", UUID.randomUUID(), "temp".toCharArray()));
+        verify(userRepository, never()).save(any(), any(char[].class));
     }
 
     @Test

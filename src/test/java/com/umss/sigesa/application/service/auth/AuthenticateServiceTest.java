@@ -133,6 +133,15 @@ class AuthenticateServiceTest {
     }
 
     @Test
+    @DisplayName("A1: Email no @umss.edu.bo — 401 genérico sin consultar AuthPort")
+    void credencialesInvalidas_emailNoUmss() {
+        InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
+                () -> authenticateService.authenticate("user@gmail.com", "secret"));
+        assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+        verify(authPort, never()).authenticate(any(Email.class), any(char[].class));
+    }
+
+    @Test
     @DisplayName("Password nulo se trata como credenciales inválidas")
     void passwordNulo_lanza401() {
         when(authPort.authenticate(any(Email.class), any(char[].class))).thenReturn(Optional.empty());
