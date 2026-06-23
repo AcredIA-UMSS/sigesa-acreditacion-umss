@@ -32,6 +32,9 @@ public class ReportServiceImpl implements ReportService {
     private final ReportRunRepository runRepo;
     private final File exportDir;
 
+    // ObjectMapper used to convert FilterPayload to a Map<String,Object> for persistence
+    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
     public ReportServiceImpl(ReportDefinitionRepository defRepo, ReportRunRepository runRepo, @Value("${app.reports.export-dir:/tmp/sigesa-exports}") String exportDirPath) {
         this.defRepo = defRepo;
         this.runRepo = runRepo;
@@ -52,9 +55,20 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportRun submitExport(Long definitionId, FilterPayload filter, String actor) {
+        // persist the sanitized filter payload for audit in ReportRun.params
+        java.util.Map<String, Object> paramsMap = new java.util.HashMap<>();
+        if (filter != null) {
+            try {
+                paramsMap = MAPPER.convertValue(filter, java.util.Map.class);
+            } catch (IllegalArgumentException ex) {
+                // fallback to empty map if conversion fails
+                paramsMap = new java.util.HashMap<>();
+            }
+        }
+
         ReportRun run = ReportRun.builder()
                 .reportDefinitionId(definitionId)
-                .params(new HashMap<>())
+                .params(paramsMap)
                 .status("PENDING")
                 .startedAt(LocalDateTime.now())
                 .createdBy(actor)
