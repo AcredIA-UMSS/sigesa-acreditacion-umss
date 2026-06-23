@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-001
 nombre: Autenticación y sesión
-estado: Pendiente
+estado: Hecho
 release: v1.0
 actor_principal: Usuario interno ([CC], [TD], [JD])
 trazabilidad_prd: PRD-US-001, PRD-US-003
 modulo: MOD-AUTH
 reglas: FSD-BR-12
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-06-22"
 ---
 
 # FSD-UC-001 — Autenticación y sesión

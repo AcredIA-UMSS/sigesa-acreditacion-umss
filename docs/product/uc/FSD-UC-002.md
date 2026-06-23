@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-002
 nombre: Gestión de usuarios [JD]
-estado: Pendiente
+estado: Hecho
 release: v1.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-002
 modulo: MOD-AUTH
 reglas: —
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-06-22"
 ---
 
 # FSD-UC-002 — Gestión de usuarios [JD]

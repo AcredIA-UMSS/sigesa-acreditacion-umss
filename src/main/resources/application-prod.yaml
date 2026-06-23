@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sigesa}
+    username: ${DATABASE_USERNAME:sigesa}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+sigesa:
+  jwt:
+    secret: ${SIGESA_JWT_SECRET}
+    expiration-seconds: ${SIGESA_JWT_EXPIRATION_SECONDS:86400}

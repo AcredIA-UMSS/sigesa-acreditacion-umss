@@ -37,7 +37,7 @@ Crea un **design doc por feature** (`DD-UC-NNN`) trazable al FSD, siguiendo el m
 - [ ] Paso 2: Asignar el ID DD-UC-NNN (siguiente correlativo en docs/design/)
 - [ ] Paso 3: Redactar el design doc desde la plantilla
 - [ ] Paso 4: Registrar el/los prompt(s) PR-IMPL-NNN
-- [ ] Paso 5: Enlazar en PROMPT_MAPPING.md y validar trazabilidad
+- [ ] Paso 5: Validar trazabilidad (PM-NNN se registra con @save-prompt-mapping tras ejecutar el PR-IMPL)
 ```
 
 ### Paso 1 — Resolver FSD-UC
@@ -56,12 +56,13 @@ Crea un **design doc por feature** (`DD-UC-NNN`) trazable al FSD, siguiendo el m
 ### Paso 4 — Prompt(s)
 - Por cada generación asistida por IA del feature, crear `docs/prompts/impl/PR-IMPL-NNN.md` con [`PROMPT_TEMPLATE.md`](../../m4/plantillas/PROMPT_TEMPLATE.md) (6 elementos + invariantes + trazabilidad al `FSD-UC`).
 
-### Paso 5 — Enlazar y validar
-- Añadir el prompt a `docs/PROMPT_MAPPING.md` (sección de trazabilidad requerimiento → prompt → artefacto).
-- Validar la cadena: `FSD-UC → DD-UC → PR-IMPL → (artefacto)`. Reportar gaps.
+### Paso 5 — Validar trazabilidad (pre-implementación)
+- Validar la cadena: `FSD-UC → DD-UC → PR-IMPL → (artefacto pendiente)`. Reportar gaps.
+- **No** registrar aquí la entrada `PM-NNN` completa; eso corresponde a [`@save-prompt-mapping`](../save-prompt-mapping/SKILL.md) **después de ejecutar** el `PR-IMPL` (regla [`.cursor/rules/save-prompt-mapping.mdc`](../../rules/save-prompt-mapping.mdc)).
 
 ## Salida (reporte en el chat)
 - Ruta del design doc creado y su `DD-UC-NNN`.
 - FSD-UC cubiertos y enlaces.
 - Prompts registrados (`PR-IMPL-*`) y si se creó/enlazó algún ADR.
-- Deltas vs DTI vFinal detectados (si los hay) y recordatorio de correr `@dtp-sync` tras implementar.
+- Deltas vs DTI vFinal detectados (si los hay).
+- Recordatorio post-implementación: `@save-prompt-mapping <PR-IMPL-NNN>` → luego `@dtp-sync`.

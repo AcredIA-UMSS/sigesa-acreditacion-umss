@@ -192,14 +192,16 @@ journey
 
 ### 5.1 Épica E1 — Identidad, roles y configuración
 
-| ID | Historia | Pri. | BRD / MRD |
-|----|----------|------|-----------|
-| PRD-US-001 | Como usuario interno, quiero iniciar sesión con correo UMSS para acceder según mi rol | Must | BRD-REQ-001 / MRD-N-09 |
-| PRD-US-002 | Como [JD], quiero crear usuarios y asignar roles | Must | BRD-REQ-001 |
-| PRD-US-003 | Como sistema, quiero rechazar acciones sin sesión válida | Must | BRD-REQ-001 |
-| PRD-US-023 | Como [JD], quiero configurar plantillas CEUB/ARCU-SUR (Fases, Indicadores) | Must | BRD-REQ-004 / MRD-N-01 |
+| ID | Historia | Pri. | Estado backend | BRD / MRD |
+|----|----------|------|----------------|-----------|
+| PRD-US-001 | Como usuario interno, quiero iniciar sesión con correo UMSS para acceder según mi rol | Must | **Hecho** (`FSD-UC-001`, DD-UC-001) | BRD-REQ-001 / MRD-N-09 |
+| PRD-US-002 | Como [JD], quiero crear usuarios y asignar roles | Must | **Hecho** (`FSD-UC-002`, DD-UC-001) | BRD-REQ-001 |
+| PRD-US-003 | Como sistema, quiero rechazar acciones sin sesión válida | Must | **Hecho** (perímetro JWT; `AuthenticatedApiSmokeTest`) | BRD-REQ-001 |
+| PRD-US-023 | Como [JD], quiero configurar plantillas CEUB/ARCU-SUR (Fases, Indicadores) | Must | En curso | BRD-REQ-004 / MRD-N-01 |
 
 #### PRD-US-001 — Inicio de sesión
+
+> **Implementación backend (2026-06-22):** `POST /api/v1/auth/login`, JWT, A1 estricto → 401. Frontend `/login` fuera de alcance MOD-AUTH v1.0.
 
 ```gherkin
 # language: es
@@ -218,6 +220,8 @@ Escenario: Credenciales inválidas
 
 #### PRD-US-002 — Gestión de usuarios [JD]
 
+> **Implementación backend (2026-06-22):** `POST/PATCH /api/v1/admin/users*` ([JD]), alta INACTIVE, revoke soft. Password temporal: canal offline v1.0.
+
 ```gherkin
 Escenario: Alta de usuario con rol
   Dado un [JD] autenticado
@@ -233,6 +237,8 @@ Escenario: Revocación de acceso
 ```
 
 #### PRD-US-003 — Sin sesión
+
+> **Implementación backend (2026-06-22):** `SecurityConfig` + `JwtAuthenticationFilter`; smoke en `/fases` y `/processes`.
 
 ```gherkin
 Escenario: Acción sensible sin autenticación
@@ -704,14 +710,14 @@ La matriz **autoritativa** (28 `PRD-REQ`, 24 `PRD-US`, 18 `FSD-UC`, NFR, ADR, TC
 
 **Muestra (Must P1):**
 
-| PRD-REQ | BRD-REQ | FSD-UC |
-|---------|---------|--------|
-| PRD-REQ-001 | BRD-REQ-001 | FSD-UC-001, UC-002 |
-| PRD-REQ-005 | BRD-REQ-005 | FSD-UC-004 |
-| PRD-REQ-007 | BRD-REQ-007 | FSD-UC-005 |
-| PRD-REQ-009 | BRD-REQ-009 | FSD-UC-008, UC-009 |
-| PRD-REQ-011 | BRD-REQ-010 | FSD-UC-013 |
-| PRD-REQ-015 | BRD-REQ-020 | FSD-UC-007 |
+| PRD-REQ | BRD-REQ | FSD-UC | Estado backend |
+|---------|---------|--------|----------------|
+| PRD-REQ-001 | BRD-REQ-001 | FSD-UC-001, UC-002 | **Hecho** (MOD-AUTH) |
+| PRD-REQ-005 | BRD-REQ-005 | FSD-UC-004 | Pendiente |
+| PRD-REQ-007 | BRD-REQ-007 | FSD-UC-005 | Pendiente |
+| PRD-REQ-009 | BRD-REQ-009 | FSD-UC-008, UC-009 | Pendiente |
+| PRD-REQ-011 | BRD-REQ-010 | FSD-UC-013 | Pendiente |
+| PRD-REQ-015 | BRD-REQ-020 | FSD-UC-007 | Pendiente |
 
 > La tabla resumida anterior en esta sección contenía IDs FSD incorrectos; corregido en auditoría v1.1 (ver informe E-01).
 

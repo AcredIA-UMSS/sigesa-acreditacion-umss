@@ -6,7 +6,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-06-22"
 ---
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
@@ -36,8 +36,8 @@ ultima_actualizacion: "2026-06-15"
 
 | ID | Nombre | Actor | Release | Estado | Enlace |
 |----|--------|-------|---------|--------|--------|
-| `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-001.md) |
-| `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-002.md) |
+| `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) |
+| `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) |
 | `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-003.md) |
 | `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-004.md) |
 | `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) |

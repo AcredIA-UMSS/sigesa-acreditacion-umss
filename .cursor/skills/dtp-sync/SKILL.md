@@ -46,7 +46,7 @@ Mantiene **viva y coherente** la documentación del producto tras implementar c�
 
 ### Paso 2 — Mapear a la cadena de trazabilidad
 - Para cada cambio relevante de `src/`, `tests/`, `migrations/`, identificar el `FSD-UC` y el `DD-UC` correspondiente (en `docs/design/`).
-- Verificar que existe el/los `PR-IMPL-NNN` en `docs/prompts/impl/` y en `PROMPT_MAPPING.md`. Si falta el design doc, sugerir correr `@feature-design-doc`.
+- Verificar que existe el/los `PR-IMPL-NNN` en `docs/prompts/impl/` y que ya hay una entrada `PM-NNN` en `docs/PROMPT_MAPPING.md` (registrada con [`@save-prompt-mapping`](../save-prompt-mapping/SKILL.md)). Si falta el PM, **detener** y ejecutar `@save-prompt-mapping` antes de continuar. Si falta el design doc, sugerir correr `@feature-design-doc`.
 
 ### Paso 3 — Deltas y ADRs
 - Comparar lo implementado contra el **DTI vFinal** (`docs/baseline/`). Cualquier diferencia deliberada es un **delta** (§A.2 del DTP) y exige un ADR.
@@ -59,7 +59,7 @@ Mantiene **viva y coherente** la documentación del producto tras implementar c�
   - §A.2 Deltas vs DTI vFinal (si aplica).
   - §A.3 Estado de implementación por FSD-UC.
   - §A.4 / §B: actualizar solo las secciones técnicas que cambiaron.
-- Ampliar `PROMPT_MAPPING.md` con los `PR-IMPL-*` nuevos.
+- Confirmar en `docs/PROMPT_MAPPING.md` que `@save-prompt-mapping` ya registró el `PM-NNN` del `PR-IMPL-*` ejecutado (no duplicar entradas manualmente).
 
 ### Paso 5 — Verificación
 - Confirmar que **ningún** archivo de `docs/baseline/` aparece en el diff. Si aparece, **bloquear** y proponer mover el cambio a `docs/product/`.

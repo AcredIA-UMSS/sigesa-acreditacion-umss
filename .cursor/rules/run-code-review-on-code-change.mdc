@@ -91,5 +91,7 @@ metadata:
     This rule MUST append a session prompt entry to team/<owner>/log_interno.md
     following the session logging rule (02_session_prompt_logging). It MUST NOT
     commit secrets or modify source. If the skill proposes code changes, open a
-    PR and attach the generated report.
+    PR and attach the generated report. After code-review completes, the agent
+    MUST still run @save-prompt-mapping (see .cursor/rules/save-prompt-mapping.mdc)
+    before closing the implementation task.
 ---

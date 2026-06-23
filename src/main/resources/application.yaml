@@ -8,18 +8,23 @@ spring:
     password:
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: create-drop # Esto crea las tablas automáticamente basadas en tus @Entity
+      ddl-auto: create-drop
     show-sql: false
-    # ELIMINA ESTA LÍNEA O PONLA EN FALSE:
     defer-datasource-initialization: false
     properties:
       hibernate:
         format_sql: true
   sql:
     init:
-      # Si tienes un data.sql, este modo lo ejecutará SIEMPRE después de que Hibernate cree las tablas
       mode: never
+  flyway:
+    enabled: false
+
+sigesa:
+  jwt:
+    secret: ${SIGESA_JWT_SECRET:sigesa-dev-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256}
+    expiration-seconds: ${SIGESA_JWT_EXPIRATION_SECONDS:86400}

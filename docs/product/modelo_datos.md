@@ -131,6 +131,7 @@ Transiciones válidas: ver [`FSD.md`](FSD.md) §4.1 y `team/alexAlvarez/docs/con
 | `Faculty` | `faculty` |
 | `AcademicProgram` | `academic_program` |
 | `AppUser` | `app_user` |
+| `UserProgramAssignment` | `user_program_assignment` |
 | `AccreditationProcess` | `accreditation_process` |
 | `Phase` | `phase` |
 | `Indicator` | `indicator` |
@@ -160,4 +161,5 @@ Detalle de columnas, índices y FK: ver DTI §2–3.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.1 | 2026-06-22 | `@dtp-sync` DD-UC-001: tabla `user_program_assignment` en mapeo lógico→físico (MOD-AUTH) |
 | Dorada v1.0 | 2026-05-16 | Vista funcional extraída de FSD.md; enlace a DTI |

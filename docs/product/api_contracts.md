@@ -78,8 +78,8 @@ security:
 | **UC** | FSD-UC-001 |
 | **Roles** | — (público) |
 | **Body** | `{ "email": "user@umss.edu.bo", "password": "***" }` |
-| **201** | `{ "accessToken", "expiresIn", "role", "programScope" }` |
-| **401** | `AUTH_INVALID_CREDENTIALS` (mensaje genérico) |
+| **200** | `{ "accessToken", "expiresIn", "role", "programScope" }` |
+| **401** | `AUTH_INVALID_CREDENTIALS` (mensaje genérico; A1: dominio inválido, vacío, user/password incorrecto) |
 
 ### API-USER-01 — `POST /admin/users`
 
@@ -89,6 +89,7 @@ security:
 | **x-allowed-roles** | `[JD]` |
 | **Body** | `{ "email", "role", "programId?" }` |
 | **201** | `{ "userId", "status": "INACTIVE" }` |
+| **409** | `EMAIL_ALREADY_REGISTERED` (mensaje genérico) |
 | **422** | `INVALID_EMAIL_DOMAIN` si no es `@umss.edu.bo` |
 
 ### API-USER-02 — `PATCH /admin/users/{id}/deactivate`
@@ -97,7 +98,7 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-002 |
 | **x-allowed-roles** | `[JD]` |
-| **200** | Usuario desactivado; historial conservado |
+| **204** | Usuario desactivado; historial conservado |
 
 ---
 

@@ -16,6 +16,7 @@
 - **Cero Divergencia Silenciosa:** Si encuentras un bloqueo técnico que obliga a desviar la implementación de lo especificado en el diseño original, DETENTE. Informa del problema y solicita la creación de un ADR (Architectural Decision Record) en la carpeta `docs/adr/`.
 - **Sincronización del DTP:** Si introduces una nueva dependencia, cambias un contrato de API (DTO) o modificas el modelo de datos, debes sugerir inmediatamente la actualización del Documento Técnico del Producto (`docs/product/DTP.md`).
 - **Commits y PRs:** Todo código generado debe estar respaldado por un prompt documentado en `docs/prompts/impl/` y registrado en `docs/PROMPT_MAPPING.md`.
+- **Registro PM obligatorio:** Al finalizar cualquier prompt de implementación (`PR-IMPL-*`) o cualquier tarea que genere/modifique código, ejecutar `@save-prompt-mapping` (regla `.cursor/rules/save-prompt-mapping.mdc`, skill `.cursor/skills/save-prompt-mapping/SKILL.md`) **antes** de considerar la tarea cerrada.
 
 # Reglas de Comportamiento del Agente
 

@@ -1,0 +1,43 @@
+---
+description: Registro obligatorio de trazabilidad. Se activa al ejecutar prompts de implementación o al generar/modificar código en el proyecto.
+globs: ["src/**", "**/*.java", "**/pom.xml", "**/*.sql", "src/test/**", "docs/prompts/impl/**"]
+---
+# 📋 Registro obligatorio en PROMPT_MAPPING
+
+Cada ejecución de un **prompt de implementación** (`PR-IMPL-NNN`) o de **cualquier prompt que genere o modifique código** en este repositorio debe cerrarse registrando la trazabilidad correspondiente.
+
+## Cuándo aplica
+
+- Prompts documentados en `docs/prompts/impl/PR-IMPL-*.md`.
+- Cualquier instrucción al agente que cree, edite o elimine archivos de código (`src/`, tests, `pom.xml`, migraciones SQL, etc.).
+- Refactors, fixes o features implementados con asistencia de IA, aunque no exista aún un `PR-IMPL` formal.
+
+## Regla de cierre (no negociable)
+
+**La tarea NO se considera cerrada** hasta que exista una entrada **`PM-NNN`** en [`docs/PROMPT_MAPPING.md`](../../docs/PROMPT_MAPPING.md).
+
+Antes de dar por finalizada la respuesta al usuario:
+
+1. **Invocar** la skill [`@save-prompt-mapping`](../../.cursor/skills/save-prompt-mapping/SKILL.md) siguiendo su flujo completo.
+2. **Asignar** el siguiente ID `PM-NNN` secuencial (append-only; nunca editar entradas previas).
+3. **Registrar** el prompt usado **exacto** (sin paráfrasis) y los archivos **realmente** modificados (verificar con `git status` / `git diff`).
+4. **Informar** al usuario el ID `PM-NNN` asignado y el estado del registro.
+
+## Si falta PR-IMPL
+
+- Si hubo cambios de código pero no existe `docs/prompts/impl/PR-IMPL-NNN.md`, **detener el cierre**, avisar al usuario y proponer crear el PR-IMPL (p. ej. con `@feature-design-doc`) antes de registrar el PM.
+- Si el usuario autoriza registrar sin PR-IMPL, documentar en el campo *Riesgos/observaciones* de la entrada PM el gap de trazabilidad.
+
+## Relación con otras reglas
+
+- **Baseline:** no modificar `docs/baseline/` (ver `baseline-congelado.mdc`).
+- **DTP:** cambios estructurales pueden requerir además `@dtp-sync` (ver `dtp-sync.mdc`).
+- **Gobernanza:** alineado con [`AGENTS.md`](../../agents.md) — todo código generado debe estar respaldado por prompt documentado y registro en `PROMPT_MAPPING.md`.
+
+## Formato de invocación
+
+```
+@save-prompt-mapping <PR-IMPL-NNN> [estado=completado|en_progreso|bloqueado|fallido] [solicitante="<nombre>"]
+```
+
+Si la skill no puede ejecutarse por falta de datos (prompt, diff, PR-IMPL), reportarlo explícitamente y **no** marcar la tarea como completada.
