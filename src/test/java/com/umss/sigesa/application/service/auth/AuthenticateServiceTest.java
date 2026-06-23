@@ -65,11 +65,42 @@ class AuthenticateServiceTest {
     }
 
     @Test
-    void authenticate_invalidCredentialsThrows401() {
+    void authenticate_activeUserSkipsActivationUpdate() {
+        UUID userId = UUID.randomUUID();
+        Email email = Email.of("td@umss.edu.bo");
+        AuthenticatedIdentity identity = new AuthenticatedIdentity(userId, email, Role.TD, List.of());
+        AppUser activeUser = new AppUser(userId, email, Role.TD, UserStatus.ACTIVE,
+                LocalDateTime.now(), LocalDateTime.now());
+
+        when(authPort.authenticate(email, "secret".toCharArray())).thenReturn(Optional.of(identity));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(tokenPort.issue(identity)).thenReturn(new IssuedToken("token", 3600L));
+
+        authenticateService.authenticate("td@umss.edu.bo", "secret");
+
+        verify(userRepository, never()).update(any(AppUser.class));
+    }
+
+    @Test
+    void authenticate_invalidCredentialsThrows401ForMissingUser() {
         when(authPort.authenticate(any(Email.class), any(char[].class))).thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialsException.class,
+        InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("ghost@umss.edu.bo", "bad"));
+        assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+    }
+
+    @Test
+    void authenticate_invalidCredentialsThrows401WhenUserMissingAfterAuth() {
+        UUID userId = UUID.randomUUID();
+        Email email = Email.of("cc@umss.edu.bo");
+        AuthenticatedIdentity identity = new AuthenticatedIdentity(userId, email, Role.CC, List.of());
+
+        when(authPort.authenticate(email, "secret".toCharArray())).thenReturn(Optional.of(identity));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticateService.authenticate("cc@umss.edu.bo", "secret"));
     }
 
     @Test

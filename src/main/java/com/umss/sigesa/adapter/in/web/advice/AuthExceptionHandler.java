@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.InvalidCredentialsException;
 import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
+import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.InvalidScopeException;
 import com.umss.sigesa.domain.exception.RoleNotAssignedException;
 import com.umss.sigesa.domain.exception.UserNotFoundException;
@@ -40,6 +41,12 @@ public class AuthExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidScope(InvalidScopeException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(Map.of("error", "INVALID_SCOPE", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidRoleException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidRole(InvalidRoleException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", "INVALID_ROLE", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundException.class)

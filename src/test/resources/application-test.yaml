@@ -8,3 +8,8 @@ spring:
   sql:
     init:
       mode: never
+
+sigesa:
+  jwt:
+    secret: "sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256"
+    expiration-seconds: 3600

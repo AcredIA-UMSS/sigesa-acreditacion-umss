@@ -49,10 +49,6 @@ public class UserJpaAdapter implements UserRepositoryPort {
         return toDomain(jpaRepository.save(entity));
     }
 
-    Optional<AppUserEntity> findEntityByEmail(Email email) {
-        return jpaRepository.findByEmail(email.value());
-    }
-
     private AppUserEntity toEntity(AppUser user) {
         AppUserEntity entity = new AppUserEntity();
         entity.setId(user.getId());

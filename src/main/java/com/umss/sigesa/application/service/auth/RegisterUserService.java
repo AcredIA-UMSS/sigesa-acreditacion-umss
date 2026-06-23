@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.InvalidScopeException;
 import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
@@ -29,8 +30,9 @@ public class RegisterUserService implements RegisterUserUseCase {
     }
 
     @Override
-    public RegisterResult register(String email, Role role, UUID programId, char[] temporaryPassword) {
+    public RegisterResult register(String email, String roleName, UUID programId, char[] temporaryPassword) {
         Email emailVo = Email.of(email);
+        Role role = parseRole(roleName);
         validateScope(role, programId);
 
         LocalDateTime now = LocalDateTime.now();
@@ -63,6 +65,17 @@ public class RegisterUserService implements RegisterUserUseCase {
     private void validateScope(Role role, UUID programId) {
         if (role == Role.CC && programId == null) {
             throw new InvalidScopeException("El rol [CC] requiere programId.");
+        }
+    }
+
+    private Role parseRole(String roleName) {
+        if (roleName == null || roleName.isBlank()) {
+            throw new InvalidRoleException("null");
+        }
+        try {
+            return Role.valueOf(roleName.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new InvalidRoleException(roleName);
         }
     }
 }

@@ -1,10 +1,9 @@
 package com.umss.sigesa.adapter.in.web;
 
-import com.umss.sigesa.adapter.in.web.dto.RegisterUserRequest;
-import com.umss.sigesa.adapter.in.web.dto.RegisterUserResponse;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
-import com.umss.sigesa.domain.model.Role;
+import com.umss.sigesa.adapter.in.web.dto.RegisterUserRequest;
+import com.umss.sigesa.adapter.in.web.dto.RegisterUserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,12 +35,11 @@ public class UserAdminController {
 
     @PostMapping
     public ResponseEntity<RegisterUserResponse> register(@RequestBody RegisterUserRequest request) {
-        Role role = Role.valueOf(request.role());
         char[] tempPassword = generateTemporaryPassword();
 
         RegisterUserUseCase.RegisterResult result = registerUserUseCase.register(
                 request.email(),
-                role,
+                request.role(),
                 request.programId(),
                 tempPassword
         );
