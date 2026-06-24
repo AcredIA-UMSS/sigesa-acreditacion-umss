@@ -1,0 +1,40 @@
+﻿gantt
+    title Plan de Releases SIGESA â€” v1.0 a v2.0 (2026â€“2027)
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+
+    section Release v0.1 â€” MVP Interno
+    AutenticaciÃ³n JWT + RBAC (MOD-01)               :done,    r01_01, 2026-05-20, 14d
+    Repositorio evidencias bÃ¡sico (MOD-02)           :done,    r01_02, 2026-06-01, 14d
+    Log auditorÃ­a append-only (MOD-09)               :done,    r01_03, 2026-05-22, 5d
+    Deploy interno dev â€” demo equipo AcredIA         :milestone, mvp,  2026-06-15, 0d
+
+    section Release v0.5 â€” Beta DUEA
+    Flujo aprobaciÃ³n completo CCâ†’TDâ†’JD (MOD-03)     :         r05_01, 2026-06-17, 14d
+    Notificaciones SMTP (MOD-07)                     :         r05_02, 2026-06-08, 10d
+    Dashboard semÃ¡foros (MOD-05)                     :         r05_03, 2026-06-17, 10d
+    Buscador full-text (MOD-08)                      :         r05_04, 2026-06-24, 7d
+    Tests E2E flujos crÃ­ticos (Playwright)           :         r05_05, 2026-07-13, 4d
+    Deploy beta â€” piloto 3 carreras DUEA             :milestone, beta, 2026-07-17, 0d
+
+    section Release v1.0 â€” ProducciÃ³n UMSS
+    Reportes ejecutivos PDF (MOD-06)                 :         r10_01, 2026-07-01, 10d
+    Portal pÃºblico consulta estado (MOD-10)          :         r10_02, 2026-07-01, 5d
+    Certificados + QR verificaciÃ³n (MOD-11)          :         r10_03, 2026-07-05, 7d
+    Respaldo automÃ¡tico diario SHA-256 (MOD-12)      :         r10_04, 2026-07-10, 4d
+    Pruebas seguridad OWASP ZAP                      :         r10_05, 2026-07-20, 5d
+    CapacitaciÃ³n DUEA + carga datos iniciales        :         r10_06, 2026-08-01, 5d
+    Go-live v1.0 â€” producciÃ³n UMSS                   :milestone, v10,  2026-08-21, 0d
+
+    section EstabilizaciÃ³n v1.x (post go-live)
+    Monitoreo y correcciÃ³n defectos crÃ­ticos         :         stab,   2026-08-21, 30d
+    Ajustes UX por feedback DUEA (retro piloto)      :         ux_fix, 2026-09-01, 14d
+    Release v1.1 â€” correcciones + UC-008/009 formales :milestone, v11, 2026-09-20, 0d
+
+    section Release v2.0 â€” IA Asistida
+    Sugerencias IA para indicadores (orientativas)   :         ai_01,  2026-10-01, 30d
+    MigraciÃ³n almacenamiento a S3-compatible         :         s3_01,  2026-10-15, 21d
+    Portal pÃºblico mejorado (bÃºsqueda avanzada)      :         pub_v2, 2026-11-01, 21d
+    IntegraciÃ³n evaluador externo [EE] (solo lectura) :        ee_01,  2026-11-15, 14d
+    Tests regresiÃ³n completa v2.0                    :         reg_v2, 2026-12-01, 14d
+    Release v2.0                                     :milestone, v20,  2026-12-15, 0d

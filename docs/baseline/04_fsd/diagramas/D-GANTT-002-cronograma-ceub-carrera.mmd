@@ -1,0 +1,15 @@
+﻿%% diagramId: D-GANTT-002
+%% fsdTrace: docs/LFSD.md convocatoria CEUB RB-05
+%% version: 1.0
+gantt
+    title Cronograma tipo acreditacion CEUB carrera UMSS
+    dateFormat YYYY-MM-DD
+    section Autoevaluacion
+    Carga indicadores fase 1          :b1, 2026-08-01, 30d
+    Carga indicadores fase 2          :b2, after b1, 25d
+    section DUEA
+    Revision TD ciclo 1               :b3, after b1, 20d
+    Revision TD ciclo 2               :b4, after b2, 20d
+    section Cierre
+    Preparacion paquete auditoria     :b5, after b4, 15d
+    Entrega convocatoria              :milestone, m2, after b5, 0d

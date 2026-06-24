@@ -1,0 +1,15 @@
+﻿%% FSD-UC-004 / UC-008 â€” Estados en Fase 1 y auditoria
+
+stateDiagram-v2
+    direction LR
+    state Fase1 {
+        [*] --> PENDIENTE
+        PENDIENTE --> SUBIDO : CC_upload
+        SUBIDO --> APROBADO : TD_aprueba
+        SUBIDO --> OBSERVADO : TD_observa
+    }
+    state EvidenciaVersion {
+        [*] --> v1_activa
+        v1_activa --> v2_nueva : CC_subsanacion
+        note right of v1_activa : v1 nunca DELETE
+    }

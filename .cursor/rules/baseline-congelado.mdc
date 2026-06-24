@@ -1,0 +1,15 @@
+---
+description: Regla de seguridad estricta para proteger el registro histórico de M4. Se activa al interactuar con la documentación.
+globs: ["docs/baseline/**/*.md"]
+---
+# 🛡️ Protección de Baseline (Solo Lectura)
+
+ESTRICTAMENTE PROHIBIDO: Tienes prohibido editar, eliminar, renombrar o sobrescribir cualquier archivo dentro del directorio `docs/baseline/`.
+
+## Contexto
+Esta carpeta contiene el registro histórico congelado del diseño del sistema (M4). Es el "baseline" evaluado y no puede evolucionar con el código.
+
+## Instrucciones de Acción
+1. **Si se te pide leer:** Puedes analizar los archivos de esta carpeta para obtener contexto de cómo se diseñó originalmente el sistema.
+2. **Si el código actual difiere del baseline:** NO modifiques el baseline para arreglar la discrepancia. 
+3. **Redirección:** Cualquier cambio en el alcance, diseño o arquitectura técnica debe documentarse en la capa viva: `docs/product/FSD.md` o `docs/product/DTP.md`.

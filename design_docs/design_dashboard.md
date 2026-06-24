@@ -1,9 +1,80 @@
-# Diseño Técnico — Reporting / Dashboard (Backend) — v1.1 (Final)
+# Diseño Técnico — Reporting / Dashboard (Backend) — v1.2
 
-> **Proyecto:** SIGESA — Sistema de Gestión de Acreditación Universitaria
-> **Feature:** Reporting / Dashboard (backend)
-> **Versión del documento:** 1.1
+> **Proyecto:** SIGESA — Sistema de Gestión de Acreditación Universitaria  
+> **Feature:** Reporting / Dashboard (backend) — MOD-DASH · MOD-REPORT  
+> **Versión del documento:** 1.2  
+> **Autor:** alexAlvarez  
+> **Fecha:** 2026-06-23  
 > **Stack:** Java 21 · Spring Boot · Spring Data JPA · Hibernate Types (jsonb) · H2 (dev) / PostgreSQL (prod)
+
+---
+
+## 0. Trazabilidad y referencias
+
+### 0.1 Cadena de especificación
+
+| Capa | ID | Descripción |
+|------|-----|-------------|
+| PRD | PRD-REQ-011 | Panel semáforo [JD] |
+| PRD | PRD-REQ-012 | Dashboard [CC] / bandeja [TD] |
+| PRD | PRD-REQ-014 | Reporte ejecutivo PDF |
+| PRD-US | US-012, US-015 | Dashboard [CC] y observaciones abiertas |
+| PRD-US | US-013 | Panel semáforo [JD] |
+| PRD-US | US-014 | Bandeja auditoría [TD] |
+| PRD-US | US-021 | Reporte PDF ≤ 2 clics |
+| FSD | FSD-UC-011 | Dashboard [CC] — `/coordinator/dashboard` |
+| FSD | FSD-UC-012 | Bandeja [TD] — `/technician/inbox` |
+| FSD | FSD-UC-013 | Semáforo [JD] — `/executive/semaphore` |
+| FSD | FSD-UC-014 | Reporte PDF — `POST /reports/executive/pdf` |
+| ADR | [ADR-0015](../../../docs/adr/ADR-0015-dashboard-sync-async-reporting.md) | Sync dashboard + async export |
+| ADR | ADR-0007 | JWT/RBAC |
+| ADR | ADR-0013 | S3/MinIO blobs |
+| PC | [PC-MOD-DASH-01](../../../docs/06_prompt_contracts/contract_fsd_008_mod_dash_backend.md) | Prompt contract backend |
+| PM | PM-056 | Registro prompt mapping (2026-06-23) |
+
+Documentos canónicos (repo padre `sigesa-docs`, no duplicar en submodule):
+
+- FSD casos de uso: `docs/04_fsd/casos_uso.md`
+- Contratos API: `docs/04_fsd/api_contracts.md` §7–8 (MOD-DASH, MOD-REPORT)
+- MVP runtime: `docs/05_dti/api_contracts_mvp_runtime.md` §4
+- Matriz trazabilidad: `docs/09_trazabilidad/matriz_trazabilidad.md`
+- Gherkin: `docs/04_fsd/gherkin.md` (TC-09a/b/c, TC-11)
+
+### 0.2 Mapeo sección → FSD-UC
+
+| Sección diseño | FSD-UC | Actor | Test case |
+|----------------|--------|-------|-----------|
+| §7 DashboardService sync | UC-011, UC-012, UC-013 | [CC], [TD], [JD] | TC-09a, TC-09b, TC-09 |
+| §7 ReportService async | UC-014 | [JD] | TC-11 |
+| §7 SecurityInjector | UC-011, UC-012 | [CC], [TD] | TC-09c, NFR-009 |
+| §8 Export Engine | UC-014 | [JD] | TC-11 |
+
+### 0.3 Alineación API (canónico vs implementación)
+
+| ID | Contrato FSD | MVP runtime | Implementación Java actual | Estado |
+|----|--------------|-------------|----------------------------|--------|
+| API-DASH-01 | `GET /dashboard/coordinator` | ✓ MVP | Pendiente (usa `/kpis` genérico) | Drift |
+| API-DASH-02 | `GET /dashboard/technician` | ✓ MVP | Pendiente (usa `/data` genérico) | Drift |
+| API-DASH-03 | `GET /dashboard/executive` | Excluido MVP | No implementado | v1.1 |
+| — | `GET /dashboard/kpis` | — | ✓ `DashboardController` | Provisional |
+| — | `GET /dashboard/data` | — | ✓ `DashboardController` | Provisional |
+| API-REP-01 | `POST /reports/executive/pdf` | Documentado | Pendiente | Próximo paso |
+
+**Plan de alineación:** exponer rutas por rol que deleguen a `DashboardService` con `SecurityInjector`; deprecar `/kpis` y `/data` tras migración front.
+
+### 0.4 UI — AcredIA Design System
+
+El frontend consume estos endpoints según frames Figma:
+
+| Rol | Frame Figma | Componentes DS |
+|-----|-------------|----------------|
+| [JD] | `figma/frames/prototipo/jd-admin-dashboard.md` | Sidebar rol, alertas auditoría, semáforos |
+| [CC] | Coordinator dashboard (MVP front) | KPIs fase, observaciones abiertas |
+| [TD] | Technician inbox | Bandeja filtrable por carrera/fase/estado |
+
+Tokens y layout: `figma/tokens/css-variables.css`, `figma/layouts/layout-system.md`.
+
+Diagramas de secuencia: `docs/07_diagramas/seq-004-004-dashboard-semaforos.mmd`, `seq-004-004-dashboard-drilldown.mmd`.
 
 ---
 
@@ -242,18 +313,47 @@ Security: pre-signed URLs expire; set short TTL and require auth when appropriat
 ---
 
 ## 9. API REST — endpoints, semantics y por qué
-Explicar cada ruta y su propósito.
 
-| Método | Ruta | Descripción detallada (por qué) |
-|---|---|---|
-| GET | /api/v1/dashboard/kpis | Endpoint Sync para KPIs de dashboard. Recupera KPIs usando FilterPayload inyectado. No crea ReportRun. Rápido para UI. |
-| GET | /api/v1/dashboard/data | Endpoint Sync paginado para filas detalladas. Ideal para tables; limita page/size to reasonable maxima. |
-| POST | /api/v1/reports | Crea ReportDefinition (roles: [CC],[TD]). Se versiona. |
-| PUT  | /api/v1/reports/{id} | Actualiza definition; increments version; invalidates cache. |
-| POST | /api/v1/reports/{id}/export | Endpoint Async: crea ReportRun (PROCESSING) y devuelve 202 + runId. Delegates to Virtual Threads worker for Excel generation. |
-| GET  | /api/v1/reports/runs/{runId} | Estado de la ejecución y, si COMPLETED, `download_url`. |
+### 9.1 Endpoints canónicos (FSD / MOD-DASH)
 
-Request/Response semantics:
+| Método | Ruta | ID | UC | Roles | Descripción |
+|--------|------|-----|-----|-------|-------------|
+| GET | `/api/v1/dashboard/coordinator` | API-DASH-01 | FSD-UC-011 | [CC] | Avance por fase + observaciones abiertas de su carrera |
+| GET | `/api/v1/dashboard/technician` | API-DASH-02 | FSD-UC-012 | [TD] | Bandeja Indicadores filtrable (`programId`, `phaseId`, `status`) |
+| GET | `/api/v1/dashboard/executive` | API-DASH-03 | FSD-UC-013 | [JD] | Semáforo por carrera/facultad (fuera MVP front) |
+| POST | `/api/v1/reports/executive/pdf` | API-REP-01 | FSD-UC-014 | [JD] | Job async PDF ejecutivo (202 + jobId) |
+
+### 9.2 Endpoints de agregación (implementación provisional)
+
+| Método | Ruta | Descripción | Notas |
+|--------|------|-------------|-------|
+| GET | `/api/v1/dashboard/kpis` | KPIs sync vía `FilterPayload` | Reemplazar por API-DASH-01/03 |
+| GET | `/api/v1/dashboard/data` | Filas paginadas sync | Reemplazar por API-DASH-02 |
+| POST | `/api/v1/reports` | Crear `ReportDefinition` | [CC], [TD] |
+| PUT | `/api/v1/reports/{id}` | Actualizar definition | Invalida cache |
+| POST | `/api/v1/reports/{id}/export` | Export async Excel | 202 + runId |
+| GET | `/api/v1/reports/runs/{runId}` | Estado export + `download_url` | Poll hasta COMPLETED |
+
+### 9.3 Ejemplo — Dashboard coordinador (API-DASH-01)
+
+```bash
+curl -s -H "Authorization: Bearer $JWT_CC" \
+  "http://localhost:8080/api/v1/dashboard/coordinator"
+```
+
+```json
+{
+  "programId": 42,
+  "phases": [
+    { "phaseId": 1, "name": "Autoevaluación", "progressPct": 75, "status": "EN_PROCESO" }
+  ],
+  "openObservations": [
+    { "observationId": 101, "indicatorCode": "IND-3.2", "dueDate": "2026-07-01", "daysRemaining": 8 }
+  ]
+}
+```
+
+### 9.4 Semántica request/response
 - POST export: body = FilterPayload (client filters). Server will mutate via SecurityInjector and persist mutated `params` in ReportRun for audit.
 - Responses include clear guidance on next steps (e.g., poll `/reports/runs/{runId}`).
 
@@ -287,16 +387,42 @@ Rationale: separación clara entre sync and async simplifies testing and prevent
 
 ---
 
-## 12. Pruebas (detalladas)
-Targets: Service unit tests >= 90% coverage; Controller integration `@WebMvcTest`; Repository `@DataJpaTest`.
+## 12. Pruebas
 
-Critical tests:
-- SecurityInjector enforces scope for CC (attempt to request data outside career -> 403/filtered)
-- DashboardService returns cached KPIs and respects pagination
-- ReportService.submitExport creates ReportRun and worker completes: file generated, upload invoked, run status COMPLETED
-- Export worker sanitization: verify exported DTO columns, no internal ids
-- Sad Path: invalid filter values -> 422
-- Failure: worker transient failure -> retry and eventual FAILED with metadata
+### 12.1 Cobertura por capa
+
+| Capa | Enfoque | Cobertura objetivo | Artefacto test |
+|------|---------|-------------------|----------------|
+| `DashboardServiceImpl` | Unit tests Mockito | ≥ 90 % (JaCoCo) | `DashboardServiceImplTest` |
+| `ReportServiceImpl` | Unit + worker mock | ≥ 90 % (JaCoCo) | `ReportServiceImplTest` (pendiente) |
+| `DashboardController` | `@WebMvcTest` | Endpoints + RBAC | `DashboardControllerTest` |
+| `ReportRunRepository` | `@DataJpaTest` | JSONB + status enum | `ReportRunRepositoryTest` (pendiente) |
+| `SecurityInjector` | Unit | 100 % ramas RBAC | `SecurityInjectorTest` (pendiente) |
+
+Regla de proyecto: `agents.md` y `AGENTS.md` exigen ≥ 90 % en capa servicio. Configurar JaCoCo en `pom.xml` para `DashboardServiceImpl` (análogo a `FaseServiceImpl`).
+
+### 12.2 Casos críticos y trazabilidad Gherkin
+
+| ID | Escenario | Capa | FSD-UC | TC |
+|----|-----------|------|--------|-----|
+| T-DASH-01 | [CC] obtiene KPIs solo de su carrera | Service + SecurityInjector | UC-011 | TC-09a |
+| T-DASH-02 | [CC] intenta filtrar carrera ajena → 403 | Controller | UC-011 | TC-09a |
+| T-DASH-03 | [TD] bandeja filtrada por fase y estado | Service | UC-012 | TC-09b |
+| T-DASH-04 | Observaciones abiertas ordenadas por plazo | Service | UC-011 | TC-09c |
+| T-DASH-05 | [JD] semáforo Rojo/Amarillo/Verde correcto | Service | UC-013 | TC-09 |
+| T-DASH-06 | KPIs cacheados respetan TTL Caffeine | Service | UC-011 | NFR-001 |
+| T-DASH-07 | Paginación `/data` respeta page/size max | Controller | UC-012 | — |
+| T-DASH-08 | Filtro inválido (careerId inexistente) → 422 | Controller | UC-011 | Sad Path |
+| T-RPT-01 | Export crea ReportRun PROCESSING → COMPLETED | Service + worker | UC-014 | TC-11 |
+| T-RPT-02 | Export no incluye columnas técnicas | Worker | UC-014 | TC-11 |
+| T-RPT-03 | Worker falla 3 veces → status FAILED | Service | UC-014 | Sad Path |
+| T-RPT-04 | Solo [JD] puede POST executive/pdf → 403 otros roles | Controller | UC-014 | FSD-BR-14 |
+
+### 12.3 Sad Paths obligatorios
+
+- SecurityInjector: actor [CC] con `careerIds` manipulados en query → filtros sobrescritos o 403.
+- Export worker: fallo S3 transitorio → reintento exponencial (max 3).
+- Dashboard timeout: consulta > 3 s → métrica + posible 504 (NFR-001).
 
 ---
 
@@ -308,11 +434,15 @@ Critical tests:
 ---
 
 ## 14. Próximos pasos (implementación inmediata)
-1. Add hibernate-types dependency and configure `@Type` mapping.
-2. Implement FilterPayload POJO and SecurityInjector Aspect.
-3. Implement DashboardService (sync) first; add Caffeine cache for KPIs.
-4. Implement ReportService.submitExport: create ReportRun, enqueue Virtual Thread to run export; implement export worker producing .xlsx streaming to MinIO and update run.
-5. Write unit + integration tests and CI job with JaCoCo threshold.
+
+1. Promover ADR-0015 y PC-MOD-DASH-01 en catálogo `docs/06_prompt_contracts/`.
+2. Alinear `DashboardController` a rutas API-DASH-01/02/03 (delegar a servicio existente).
+3. Add hibernate-types dependency and configure `@Type` mapping.
+4. Implement FilterPayload POJO and SecurityInjector Aspect (tests T-DASH-01/02).
+5. Implement DashboardService (sync) first; add Caffeine cache for KPIs.
+6. Implement ReportService.submitExport + Virtual Thread worker; S3 upload (ADR-0013).
+7. Write unit + integration tests; JaCoCo ≥ 90 % en `DashboardServiceImpl`.
+8. Actualizar submodule pointer en repo padre tras demo integrante.
 
 ---
 
@@ -325,5 +455,5 @@ Critical tests:
 
 ---
 
-*Este documento respeta la plantilla de `base_design_system.md` y documenta el porqué de las decisiones clave (seguridad, performance, export hygiene).*
+*Este documento respeta la plantilla de `base_design_system.md`, traza FSD-UC-011–014 y documenta ADR-0015 (sync/async). Versión 1.2 — 2026-06-23.*
 

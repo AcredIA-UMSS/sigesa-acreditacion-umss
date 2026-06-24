@@ -1,0 +1,25 @@
+﻿%% diagramId: MAR-SEQ-011
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-011 BR-012
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Operaciones
+    participant DB as PostgreSQL
+    participant SCH as Scheduler_Backup
+    participant TI as Equipo_TI_UMSS
+
+    JD->>SPA: panel salud respaldos
+    SPA->>API: GET /health/backups
+    API->>SCH: ultima corrida DB y objetos
+    SCH-->>API: timestamp duracion estado OK FAIL
+    API-->>SPA: 200 resumen semaforo
+    alt ultimo backup FAIL
+        API->>TI: webhook Teams o correo alerta
+        SPA-->>JD: banner critico BR-012
+    else OK
+        SPA-->>JD: ultima corrida verde
+    end
+    opt rol sin permiso
+        API-->>SPA: 403
+    end

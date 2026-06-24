@@ -1,0 +1,33 @@
+﻿---
+title: "STATE-04a Â· Estados del proceso de acreditaciÃ³n (BR-008, BR-009, BR-010)"
+---
+stateDiagram-v2
+    [*] --> EnProceso : Admin DUEA crea proceso\ncon datos obligatorios (BR-003)
+
+    EnProceso --> EnProceso : Coordinador carga evidencias\nDUEA emite/responde observaciones\nActividades se actualizan
+
+    EnProceso --> Bloqueado : Intento de cierre con\ntareas pendientes (BR-009)
+    Bloqueado --> EnProceso : Coordinador completa\ntareas pendientes
+
+    EnProceso --> BajoRevision : Admin DUEA inicia\nrevisiÃ³n final de fases
+    BajoRevision --> EnProceso : DUEA devuelve con\nobservaciones abiertas
+    BajoRevision --> Acreditado : DUEA aprueba resoluciÃ³n final\n(solo rol autorizado, BR-010)
+    BajoRevision --> Vencido : Fecha fin alcanzada\nsin resoluciÃ³n favorable
+
+    EnProceso --> Vencido : Fecha fin superada\nsin completar (scheduler)
+
+    Acreditado --> [*] : Proceso archivado\nen historial institucional
+    Vencido --> [*] : Proceso archivado\ncomo no completado
+
+    note right of EnProceso
+        Fases internas:
+        AutoevaluaciÃ³n â†’ DocumentaciÃ³n
+        â†’ Visita de pares
+        â†’ Informe externo
+        â†’ ResoluciÃ³n final
+    end note
+
+    note right of Acreditado
+        KPI-01: evidencias crÃ­ticas
+        al dÃ­a â‰¥ 80% (BRD Â§8)
+    end note

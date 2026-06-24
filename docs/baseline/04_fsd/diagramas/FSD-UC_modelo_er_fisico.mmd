@@ -1,0 +1,135 @@
+﻿---
+title: "ER-05 Â· Modelo de datos funcional â€” SIGESA (FSD Â§6)"
+---
+erDiagram
+
+    USUARIO {
+        UUID id PK
+        string email UK
+        string nombre
+        boolean activo
+        timestamp created_at
+    }
+
+    ROL {
+        UUID id PK
+        string nombre
+        string descripcion
+    }
+
+    USUARIO_ROL {
+        UUID usuario_id FK
+        UUID rol_id FK
+        timestamp asignado_at
+    }
+
+    FACULTAD {
+        UUID id PK
+        string nombre
+        string codigo UK
+    }
+
+    CARRERA {
+        UUID id PK
+        string nombre
+        string codigo UK
+        UUID facultad_id FK
+    }
+
+    PROCESO {
+        UUID id PK
+        UUID carrera_id FK
+        UUID facultad_id FK
+        enum tipo_acreditacion
+        string organismo
+        int gestion_anio
+        date fecha_inicio
+        date fecha_fin
+        enum estado
+    }
+
+    FASE {
+        UUID id PK
+        UUID proceso_id FK
+        enum nombre_fase
+        enum estado
+        int orden
+        timestamp completada_at
+    }
+
+    ACTIVIDAD {
+        UUID id PK
+        UUID fase_id FK
+        string descripcion
+        UUID responsable_id FK
+        enum estado
+        date fecha_limite
+    }
+
+    CRITERIO {
+        UUID id PK
+        string codigo UK
+        string descripcion
+        string marco_normativo
+    }
+
+    EVIDENCIA {
+        UUID id PK
+        UUID proceso_id FK
+        UUID fase_id FK
+        UUID criterio_id FK
+        UUID usuario_id FK
+        int version
+        string url_archivo
+        string hash_archivo
+        timestamp cargada_at
+    }
+
+    OBSERVACION {
+        UUID id PK
+        UUID proceso_id FK
+        UUID fase_id FK
+        UUID autor_id FK
+        string detalle
+        enum estado
+        timestamp creada_at
+        timestamp resuelta_at
+    }
+
+    RESPUESTA_OBSERVACION {
+        UUID id PK
+        UUID observacion_id FK
+        UUID autor_id FK
+        string texto
+        UUID evidencia_adjunta FK
+        timestamp creada_at
+    }
+
+    LOG_AUDITORIA {
+        UUID id PK
+        UUID actor_user_id FK
+        enum accion
+        string entidad_tipo
+        UUID entidad_id
+        jsonb detalle
+        timestamp fecha_hora
+    }
+
+    USUARIO ||--o{ USUARIO_ROL : "tiene"
+    ROL ||--o{ USUARIO_ROL : "asignado a"
+    FACULTAD ||--o{ CARRERA : "tiene"
+    FACULTAD ||--o{ PROCESO : "agrupa"
+    CARRERA ||--o{ PROCESO : "tiene"
+    PROCESO ||--o{ FASE : "contiene"
+    FASE ||--o{ ACTIVIDAD : "tiene"
+    PROCESO ||--o{ EVIDENCIA : "almacena"
+    FASE ||--o{ EVIDENCIA : "clasifica en"
+    CRITERIO ||--o{ EVIDENCIA : "categoriza"
+    USUARIO ||--o{ EVIDENCIA : "carga"
+    PROCESO ||--o{ OBSERVACION : "recibe"
+    FASE ||--o{ OBSERVACION : "vinculada a"
+    USUARIO ||--o{ OBSERVACION : "crea"
+    OBSERVACION ||--o{ RESPUESTA_OBSERVACION : "tiene"
+    USUARIO ||--o{ RESPUESTA_OBSERVACION : "responde"
+    EVIDENCIA ||--o| RESPUESTA_OBSERVACION : "adjunta en"
+    USUARIO ||--o{ LOG_AUDITORIA : "genera"

@@ -1,15 +1,19 @@
 # Prompt Contract: Reporting / Dashboard (Backend)
 
-**Versión:** 1.0
-**Autor:** sigesa-prompt-contract-architect
-**Fecha:** 2026-06-20
-**Estado:** Draft
+**Versión:** 1.1
+**Autor:** sigesa-prompt-contract-architect / alexAlvarez
+**Fecha:** 2026-06-23
+**Estado:** Aprobado
 
 ---
 
 ## Header
 - Project: SIGESA — Sistema de Gestión de Acreditación Universitaria
-- Feature: Reporting / Dashboard (backend)
+- Feature: Reporting / Dashboard (backend) — MOD-DASH · MOD-REPORT
+- FSD-UC: UC-011, UC-012, UC-013, UC-014
+- ADR: ADR-0015 (sync dashboard + async export)
+- PC catálogo: docs/06_prompt_contracts/contract_fsd_008_mod_dash_backend.md (PC-MOD-DASH-01)
+- UI: AcredIA Design System — figma/frames/prototipo/jd-admin-dashboard.md
 - Primary file output: ./app/sigesa-backend/design_docs/design_dashboard.md
 - Sprint copy: ./app/sigesa-backend/design_docs/sprint1/design_dashboard.md
 - Base design system output: ./app/sigesa-backend/design_docs/base_design_system.md

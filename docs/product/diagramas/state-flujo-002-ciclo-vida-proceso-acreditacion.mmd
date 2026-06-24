@@ -1,0 +1,54 @@
+﻿stateDiagram-v2
+    title Estado â€” Ciclo de Vida del Proceso de AcreditaciÃ³n (SIGESA)
+
+    [*] --> CONFIGURACION : "(JD) crea proceso\nselecciona carrera + tipo CEUB/ARCU-SUR\nverifica RBN-13"
+
+    state "CONFIGURACION" as CONFIGURACION
+    state "ACTIVO" as ACTIVO
+    state "EN_FASE" as EN_FASE
+    state "ACREDITADA" as ACREDITADA
+    state "VENCIDA" as VENCIDA
+    state "SUSPENDIDO" as SUSPENDIDO
+
+    CONFIGURACION --> ACTIVO : "(JD) activa el proceso\nFases e indicadores cargados\nFecha inicio registrada"
+
+    ACTIVO --> EN_FASE : "Primera subfase abierta\n(CC) comienza carga de evidencias"
+
+    state EN_FASE {
+        [*] --> Autoevaluacion
+        Autoevaluacion --> EvaluacionExterna : "Todas las evidencias APROBADO_FINAL\n(JD) cierra la subfase"
+        EvaluacionExterna --> PlanMejoras : Misma condiciÃ³n
+        PlanMejoras --> Seguimiento : Misma condiciÃ³n
+        Seguimiento --> [*]
+    }
+
+    EN_FASE --> ACREDITADA : "Organismo externo CEUB/ARCU-SUR\nemite resolucion de acreditacion\n(JD) registra la resolucion"
+
+    EN_FASE --> SUSPENDIDO : "(JD) registra suspension\ncon resolucion DUEA documentada\nRBN-06"
+
+    ACREDITADA --> VENCIDA : "Job nocturno detecta\nfecha_fin menor a fecha_actual\nEstado automatico"
+
+    VENCIDA --> CONFIGURACION : "(JD) inicia proceso de renovacion\n(nuevo ciclo, mismo carrera_id)"
+
+    SUSPENDIDO --> ACTIVO : "(JD) reactiva con resolucion\nDocumentada en LOG_AUDITORIA"
+
+    note right of ACREDITADA
+        SemÃ¡foro = VERDE en dashboard
+        Certificado emitible (FSD-UC-009)
+        Portal pÃºblico muestra ACREDITADA
+    end note
+
+    note right of EN_FASE
+        SemÃ¡foro calculado por avance:
+        mayor o igual 80 por ciento: VERDE
+        50 a 79 por ciento: AMARILLO
+        menor a 50 por ciento: ROJO
+        RBN-12
+    end note
+
+    note left of VENCIDA
+        Certificados pasan a estado VENCIDO
+        Portal pÃºblico muestra VENCIDA
+        No se pueden emitir nuevos certs
+        CERT-002
+    end note

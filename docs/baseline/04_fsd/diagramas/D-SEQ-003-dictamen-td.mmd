@@ -1,0 +1,19 @@
+﻿%% diagramId: D-SEQ-003
+%% fsdTrace: docs/LFSD.md FSD-UC-003 RB-03 PRD-REQ-005
+%% version: 1.0
+sequenceDiagram
+    autonumber
+    actor TD as Tecnico_TD
+    participant API as API_Workflow
+    participant DB as PostgreSQL
+    participant OUT as Outbox_Notificaciones
+
+    TD->>API: PATCH /indicadores/id/decision APROBAR o RECHAZAR
+    alt RECHAZAR sin justificacion suficiente
+        API-->>TD: 422 VAL_JUSTIFICATION_SHORT
+    else decision valida
+        API->>DB: update INDICADOR estado
+        API->>DB: append AUDITORIA APROBACION o RECHAZO
+        API->>OUT: NOTIF_DICTAMEN a CC
+        API-->>TD: 200 nuevoEstado
+    end

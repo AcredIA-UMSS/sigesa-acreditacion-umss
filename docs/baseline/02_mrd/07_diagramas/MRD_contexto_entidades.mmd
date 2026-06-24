@@ -1,0 +1,127 @@
+erDiagram
+    title ER â€” Modelo de Datos Completo SIGESA / AcredIA
+
+    FACULTAD {
+        int id PK
+        string nombre
+        string decano
+    }
+
+    CARRERA {
+        int id PK
+        string nombre
+        int facultad_id FK
+        string modalidad
+        string codigo_ceub
+    }
+
+    USUARIO {
+        int id PK
+        string correo UK "CHECK @umss.edu.bo"
+        string nombre_completo
+        string rol "COORDINADOR|TECNICO|JEFATURA|PUBLICO"
+        int carrera_id FK "NULL si TECNICO/JEFATURA"
+        boolean activo
+        int intentos_fallidos
+        timestamp bloqueado_hasta
+        timestamp created_at
+    }
+
+    PROCESO_ACREDITACION {
+        int id PK
+        int carrera_id FK
+        string tipo_acreditacion "CEUB|ARCU_SUR"
+        string organismo_acreditador
+        int gestion
+        date fecha_inicio
+        date fecha_fin
+        string estado "CONFIGURACION|ACTIVO|EN_FASE|ACREDITADA|VENCIDA|SUSPENDIDO"
+        int creado_por FK
+    }
+
+    FASE {
+        int id PK
+        int proceso_id FK
+        string nombre
+        int orden
+        date fecha_limite
+        string estado "ABIERTA|CERRADA|VENCIDA"
+    }
+
+    INDICADOR {
+        int id PK
+        int fase_id FK
+        string nombre
+        string descripcion
+        string estado "PENDIENTE|EN_REVISION|APROBADO_TD|RECHAZADO_TD|APROBADO_FINAL|RECHAZADO_JD"
+        int tecnico_id FK
+    }
+
+    EVIDENCIA {
+        int id PK
+        int indicador_id FK
+        int version
+        string ruta_relativa
+        string hash_sha256
+        int autor_id FK
+        timestamp fecha_carga
+        string estado "EN_REVISION|APROBADO|RECHAZADO"
+        text observacion_td
+    }
+
+    NOTIFICACION {
+        int id PK
+        int destinatario_id FK
+        string tipo "CARGA|APROBACION|RECHAZO|VENCIMIENTO|AVANCE_FASE|BACKUP_FAILED"
+        string mensaje_texto
+        string enlace_directo
+        string estado "PENDIENTE|ENVIADO|FALLIDO|FALLIDO_DEFINITIVO"
+        int intentos
+        timestamp created_at
+        timestamp enviado_at
+    }
+
+    LOG_AUDITORIA {
+        bigint id PK
+        int usuario_id FK "NULL para consultas pÃºblicas"
+        string accion "LOGIN|LOGOUT|CARGA|APROBACION|RECHAZO|REPORTE|PUBLIC_QUERY|BACKUP_COMPLETED|CERTIFICATE_ISSUED"
+        string entidad_tipo
+        int entidad_id
+        jsonb detalle
+        inet ip_origen
+        timestamp fecha_hora
+    }
+
+    CERTIFICADO {
+        int id PK
+        string numero_cert UK "CERT-{YYYY}-{CARRERA_ID}-{SEQ}"
+        int proceso_id FK
+        int emisor_id FK
+        string hash_sha256
+        uuid codigo_qr UK
+        string ruta_relativa
+        timestamp fecha_emision
+        string estado "ACTIVO|VENCIDO|REVOCADO"
+    }
+
+    REFRESH_TOKEN {
+        int id PK
+        int usuario_id FK
+        uuid token UK
+        timestamp expira_at
+        boolean revocado
+    }
+
+    FACULTAD ||--o{ CARRERA : "agrupa"
+    CARRERA ||--o{ PROCESO_ACREDITACION : "tiene"
+    CARRERA }o--|| USUARIO : "asignada a [CC]"
+    PROCESO_ACREDITACION ||--o{ FASE : "contiene"
+    FASE ||--o{ INDICADOR : "agrupa"
+    INDICADOR ||--o{ EVIDENCIA : "versiona"
+    USUARIO ||--o{ EVIDENCIA : "carga"
+    USUARIO ||--o{ LOG_AUDITORIA : "genera"
+    USUARIO ||--o{ NOTIFICACION : "recibe"
+    USUARIO ||--o{ REFRESH_TOKEN : "posee"
+    PROCESO_ACREDITACION ||--o{ CERTIFICADO : "genera"
+    USUARIO ||--o{ CERTIFICADO : "emite"
+    INDICADOR }o--|| USUARIO : "asignado a [TD]"

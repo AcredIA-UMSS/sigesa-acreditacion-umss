@@ -1,0 +1,50 @@
+﻿%% diagramId: seq-002
+%% fsdTrace: team/aylenGonzales/04_fsd/FSD_v2.md FSD-UC-003 PC-003
+sequenceDiagram
+    autonumber
+    title FSD-UC-003 â€” Aprobacion rechazo y avance subfase
+
+    actor TD as Tecnico_DUEA
+    actor CC as Coordinador_Carrera
+    participant FE as Frontend_React
+    participant API as API_Workflow
+    participant DB as PostgreSQL
+    participant Q as Cola_Notificaciones
+    participant LOG as LOG_AUDITORIA
+
+    TD->>FE: Abre cola EN_REVISION
+    FE->>API: GET /indicadores/{id}
+    API->>DB: SELECT evidencia vigente
+    API-->>FE: Detalle y URL descarga
+
+    alt dictamen RECHAZAR
+        TD->>FE: Rechazar sin justificacion
+        FE->>API: PATCH /indicadores/{id}/rechazar
+        alt AP-002 justificacion menor 20
+            API-->>FE: 400 AP-002
+        else rechazo valido
+            API->>DB: UPDATE RECHAZADO observacion_td
+            API->>LOG: INSERT RECHAZO
+            API->>Q: Notificar CC con texto
+            API-->>FE: 200 RECHAZADO
+        end
+    else dictamen APROBAR
+        FE->>API: PATCH /indicadores/{id}/aprobar
+        alt AP-001 estado invalido
+            API-->>FE: 409 AP-001
+        else aprobacion OK
+            API->>DB: UPDATE APROBADO
+            API->>LOG: INSERT APROBACION
+            API->>Q: Notificar CC
+            API-->>FE: 200 APROBADO
+        end
+    end
+
+    TD->>FE: Cerrar subfase
+    FE->>API: POST /fases/{id}/cerrar
+    alt AP-004 indicadores pendientes
+        API-->>FE: 409 AP-004
+    else cierre OK
+        API->>DB: Avanzar subfase siguiente
+        API-->>FE: 200 subfase cerrada
+    end

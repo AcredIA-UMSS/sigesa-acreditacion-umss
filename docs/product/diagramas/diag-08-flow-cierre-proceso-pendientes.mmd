@@ -1,0 +1,26 @@
+﻿%% Flujo cierre de proceso con validacion de pendientes â€” Fuente: FSD-UC-002 / BR-009 / CU-004
+flowchart TD
+  start([Admin DUEA solicita cierre]) --> auth{Sesion valida y rol autorizado?}
+  auth -->|No| deny403["403 Forbidden â€” BR-010"]
+  auth -->|Si| loadProc["Cargar proceso y actividades â€” FSD-UC-002"]
+
+  loadProc --> checkPending{Existen actividades pendientes?}
+  checkPending -->|Si| blockClose["Rechazar cierre â€” estado Bloqueado â€” BR-009"]
+  blockClose --> notifyCC["Mostrar listado de pendientes al coordinador"]
+  notifyCC --> endBlock([Proceso permanece En proceso])
+
+  checkPending -->|No| checkDates{Fechas inicio menor que fin?}
+  checkDates -->|No| rejectDates["Rechazar â€” fechas incoherentes BR-003 BR-009"]
+  rejectDates --> endBlock
+
+  checkDates -->|Si| checkObs{Observaciones abiertas sin resolver?}
+  checkObs -->|Si| returnReview["Devolver a BajoRevision â€” diag-04a"]
+  returnReview --> endBlock
+
+  checkObs -->|No| transition["Transicion autorizada a Acreditado â€” BR-010"]
+  transition --> auditLog["INSERT evento CIERRE_PROCESO â€” LOG_AUDITORIA NFR-004"]
+  auditLog --> endOk([Proceso Acreditado archivado])
+
+  style blockClose fill:#f9e0e0
+  style endOk fill:#e0f5e0
+  style deny403 fill:#f5f5f5

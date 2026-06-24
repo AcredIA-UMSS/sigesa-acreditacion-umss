@@ -1,0 +1,32 @@
+﻿%% diagramId: MAR-SEQ-002
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-002 RB-02 RB-04
+sequenceDiagram
+    autonumber
+    actor CC as Coordinador_Carrera
+    participant SPA as SPA_SIGESA
+    participant API as API_Evidencias
+    participant DB as PostgreSQL
+    participant OBJ as ObjectStore_S3
+    participant OUT as notification_outbox
+
+    CC->>SPA: adjuntar archivo indicador
+    SPA->>API: POST multipart indicadorId file meta
+    API->>API: validar MIME y tamano max 50MB
+    alt DOC_SIZE o DOC_MIME
+        API-->>SPA: 413 o 415
+    else indicador APROBADO politica reapertura
+        API-->>SPA: confirmar nueva version UI
+    else flujo nominal
+        API->>API: calcular SHA-256
+        API->>OBJ: PUT blob key versionada
+        alt STORAGE_ERROR
+            API->>DB: rollback transaccion
+            API-->>SPA: 502 STORAGE_ERROR
+        else persistencia OK
+            API->>DB: INSERT documento version increment
+            API->>DB: UPDATE indicador EN_REVISION
+            API->>OUT: INSERT evento CARGA
+            API-->>SPA: 201 documentoId version
+            Note over OUT: dispara FSD-UC-006 worker SMTP
+        end
+    end

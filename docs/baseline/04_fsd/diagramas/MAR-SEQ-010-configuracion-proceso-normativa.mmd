@@ -1,0 +1,28 @@
+﻿%% diagramId: MAR-SEQ-010
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-010 RB-01 RB-05 RB-08 BR-013
+sequenceDiagram
+    autonumber
+    actor JD as Jefatura_DUEA
+    participant SPA as SPA_SIGESA
+    participant API as API_Procesos
+    participant DB as PostgreSQL
+
+    JD->>SPA: crear proceso carrera gestion normativa
+    SPA->>API: POST /procesos plantillaId carreraId
+    API->>API: validar BR-013 plantilla CEUB ARCU-SUR
+    alt ARCU-SUR sin RB-01
+        API-->>SPA: 400 NORM_INVALID
+    else proceso activo duplicado
+        API-->>SPA: 409 PROC_DUPLICATE
+    else validacion OK
+        API->>DB: BEGIN transaccion
+        API->>DB: INSERT proceso EN_PROCESO
+        API->>DB: clonar fases subfases indicadores
+        API->>DB: asignar TD referente opcional
+        API->>DB: COMMIT
+        API-->>SPA: 201 procesoId
+    end
+    opt clonar desde plantilla tipo
+        JD->>SPA: usar proceso modelo
+        SPA->>API: POST /procesos clonar desdeId
+    end

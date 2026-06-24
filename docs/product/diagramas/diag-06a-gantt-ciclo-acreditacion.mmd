@@ -1,0 +1,42 @@
+﻿---
+title: "GANTT-06a Â· Timeline del ciclo de acreditaciÃ³n ARCU-SUR/CEUB â€” Carrera piloto 2026"
+---
+gantt
+    dateFormat  YYYY-MM-DD
+    axisFormat  %b %Y
+    todayMarker on
+
+    section PreparaciÃ³n
+    ConfiguraciÃ³n datos maestros (carreras/facultades)   :done,    prep1, 2026-03-01, 2026-03-14
+    Onboarding y capacitaciÃ³n equipos piloto             :done,    prep2, 2026-03-10, 2026-03-21
+    Carga inicial de actividades (importaciÃ³n masiva)    :active,  prep3, 2026-03-18, 2026-03-28
+
+    section Fase 1 - AutoevaluaciÃ³n
+    Carga de evidencias por criterio                     :         fase1a, 2026-04-01, 2026-05-15
+    RevisiÃ³n interna y observaciones DUEA                :         fase1b, 2026-05-01, 2026-05-31
+    âš  Hito: entrega autoevaluaciÃ³n completa             :crit, milestone, m1, 2026-05-31, 1d
+
+    section Fase 2 - DocumentaciÃ³n
+    OrganizaciÃ³n y completitud documental                :         fase2a, 2026-06-01, 2026-07-15
+    RevisiÃ³n DUEA + cierre de observaciones              :         fase2b, 2026-07-01, 2026-07-31
+    âš  Hito: documentaciÃ³n aprobada                      :crit, milestone, m2, 2026-07-31, 1d
+
+    section Fase 3 - Visita de pares
+    PreparaciÃ³n de agenda y logÃ­stica                    :         fase3a, 2026-08-01, 2026-08-20
+    Visita de evaluadores externos                       :         fase3b, 2026-08-21, 2026-08-28
+    âš  Hito: visita de pares completada                  :crit, milestone, m3, 2026-08-28, 1d
+
+    section Fase 4 - Informe externo
+    RecepciÃ³n y revisiÃ³n del informe de pares            :         fase4a, 2026-09-01, 2026-09-20
+    Respuesta institucional a observaciones              :         fase4b, 2026-09-15, 2026-09-30
+    âš  Hito: informe externo aceptado                    :crit, milestone, m4, 2026-09-30, 1d
+
+    section Fase 5 - ResoluciÃ³n final
+    PresentaciÃ³n ante organismo acreditador              :         fase5a, 2026-10-01, 2026-10-20
+    Espera de resoluciÃ³n CEUB/ARCU-SUR                  :         fase5b, 2026-10-15, 2026-11-14
+    âš  Hito: resoluciÃ³n final emitida                    :crit, milestone, m5, 2026-11-14, 1d
+
+    section MediciÃ³n y cierre
+    Encuesta de satisfacciÃ³n post-piloto (KPI-04)        :         med1, 2026-11-15, 2026-11-28
+    AnÃ¡lisis de mÃ©tricas KPI-01 a KPI-03                 :         med2, 2026-11-20, 2026-11-30
+    Informe de resultados piloto                         :         med3, 2026-11-28, 2026-12-05

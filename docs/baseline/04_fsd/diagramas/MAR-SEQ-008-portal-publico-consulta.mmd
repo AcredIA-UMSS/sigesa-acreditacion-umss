@@ -1,0 +1,27 @@
+﻿%% diagramId: MAR-SEQ-008
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-008 BR-010 RB-07
+sequenceDiagram
+    autonumber
+    actor P as Publico_consulta
+    participant PUB as Portal_Publico
+    participant API as API_Publico
+    participant DB as PostgreSQL
+    participant RL as RateLimiter
+
+    P->>PUB: buscar carrera slug o nombre
+    PUB->>RL: verificar cuota IP
+    alt rate limit excedido
+        RL-->>PUB: 429
+        PUB-->>P: mensaje reintentar
+    else dentro de cuota
+        PUB->>API: GET /publico/carreras slug
+        API->>DB: SELECT vista publicada true
+        alt no publicado
+            API-->>PUB: 404 PUBLIC_NOT_FOUND
+            Note over API: sin filtrar existencia interna
+        else publicado
+            API-->>PUB: 200 estado oficial campos publicos
+            API->>DB: INSERT metrica visita anonimizada
+        end
+        PUB-->>P: render estado acreditacion
+    end

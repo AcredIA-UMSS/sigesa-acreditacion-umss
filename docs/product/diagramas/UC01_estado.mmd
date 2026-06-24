@@ -1,0 +1,13 @@
+﻿%% FSD-UC-006 â€” Maquina de estados del Indicador (subsanacion)
+%% Fuente: context/04_state_machine.md
+
+stateDiagram-v2
+    direction TB
+    [*] --> PENDIENTE
+    PENDIENTE --> SUBIDO : CC_carga_v1
+    SUBIDO --> OBSERVADO : TD_registra_Observacion
+    OBSERVADO --> SUBSANADO : CC_carga_v2_anclada
+    SUBSANADO --> APROBADO : TD_aprueba
+    SUBSANADO --> OBSERVADO : TD_nueva_Observacion
+    SUBIDO --> APROBADO : TD_aprueba_sin_observacion
+    APROBADO --> [*]

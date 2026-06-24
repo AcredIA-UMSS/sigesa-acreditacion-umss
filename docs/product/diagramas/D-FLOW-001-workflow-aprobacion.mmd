@@ -1,0 +1,14 @@
+﻿%% diagramId: D-FLOW-001
+%% fsdTrace: docs/LFSD.md FSD-UC-002 UC-003 RB-03
+%% version: 1.0
+flowchart TB
+    subgraph Gestion_UMSS["Gestion acreditacion UMSS"]
+        A[JD crea proceso CEUB o ARCU_SUR] --> B[CC carga evidencias por indicador]
+        B --> C{TD revision}
+        C -->|aprobar| D{Todos indicadores subfase OK RB03}
+        C -->|rechazar| B
+        D -->|si| E[TD cierra subfase avanza fase]
+        D -->|no| B
+        E --> F[JD dashboard y reporte PDF]
+        F --> G[Publicacion portal controlada JD]
+    end

@@ -1,0 +1,73 @@
+﻿sequenceDiagram
+    title FSD-UC-006 â€” AutenticaciÃ³n JWT y GestiÃ³n de Roles (SIGESA)
+
+    actor U as Usuario
+    participant FE as Frontend React
+    participant API as Backend API
+    participant DB as PostgreSQL
+    participant SMTP as Servidor SMTP UMSS
+    participant LOG as LOG_AUDITORIA
+
+    U->>FE: Accede a https://sigesa.umss.edu.bo/login
+    FE-->>U: Formulario de login
+
+    U->>FE: Ingresa correo y contraseÃ±a
+    FE->>FE: Valida formato @umss.edu.bo (cliente)
+
+    alt Dominio invÃ¡lido (no @umss.edu.bo)
+        FE-->>U: "Solo se admiten correos institucionales UMSS."
+    else Dominio vÃ¡lido
+        FE->>API: POST /auth/login {correo, password}
+        API->>DB: SELECT usuario WHERE correo = ? AND activo = true
+        DB-->>API: Registro del usuario (o vacÃ­o)
+
+        alt Usuario no encontrado o contraseÃ±a incorrecta
+            API->>DB: UPDATE intentos_fallidos += 1
+            DB-->>API: intentos_fallidos = N
+
+            alt intentos_fallidos >= 3
+                API->>DB: UPDATE usuario SET bloqueado_hasta = NOW() + 15min
+                API->>SMTP: EnvÃ­a correo "Cuenta bloqueada â€” 15 min"
+                API->>LOG: INSERT (accion='BLOQUEO_CUENTA', usuario_id, ip_origen)
+                API-->>FE: 401 AUTH-003 "Cuenta bloqueada por 15 minutos."
+            else intentos < 3
+                API->>LOG: INSERT (accion='LOGIN_FALLIDO', ip_origen)
+                API-->>FE: 401 AUTH-002 "Credenciales invÃ¡lidas."
+            end
+            FE-->>U: Muestra error genÃ©rico
+
+        else Credenciales vÃ¡lidas
+            API->>API: Genera JWT {user_id, rol, carrera_id, exp: +24h}
+            API->>API: Genera refresh_token (UUID, TTL 7 dÃ­as)
+            API->>DB: INSERT refresh_tokens (token, usuario_id, expira_at)
+            API->>DB: UPDATE intentos_fallidos = 0
+            API->>LOG: INSERT (accion='LOGIN', usuario_id, ip_origen, timestamp)
+            API-->>FE: 200 {jwt, refresh_token, rol, carrera_id}
+
+            alt rol = COORDINADOR
+                FE-->>U: Redirige a /dashboard/coordinador
+            else rol = TECNICO
+                FE-->>U: Redirige a /dashboard/tecnico
+            else rol = JEFATURA
+                FE-->>U: Redirige a /dashboard/jefatura
+            else sin rol asignado
+                FE-->>U: "Tu acceso estÃ¡ pendiente de configuraciÃ³n por la DUEA."
+            end
+        end
+    end
+
+    Note over FE,API: JWT expira en 24h â€” Flujo de renovaciÃ³n
+
+    FE->>API: Cualquier request con JWT expirado
+    API-->>FE: 401 Unauthorized
+    FE->>API: POST /auth/refresh {refresh_token}
+
+    alt refresh_token vÃ¡lido
+        API->>DB: SELECT refresh_token WHERE token = ? AND expira_at > NOW()
+        API->>API: Genera nuevo JWT
+        API-->>FE: 200 {jwt_nuevo}
+        FE->>FE: Reintenta la request original â€” usuario no nota la interrupciÃ³n
+    else refresh_token expirado o invÃ¡lido
+        API-->>FE: 401 AUTH-004
+        FE-->>U: "SesiÃ³n expirada. Por favor, inicie sesiÃ³n nuevamente."
+    end

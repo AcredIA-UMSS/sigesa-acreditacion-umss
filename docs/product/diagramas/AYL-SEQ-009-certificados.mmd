@@ -1,0 +1,31 @@
+﻿%% diagramId: AYL-SEQ-009
+%% fsdTrace: FSD-UC-009 PC-009
+sequenceDiagram
+    autonumber
+    title FSD-UC-009 â€” Emision certificado acreditacion
+
+    actor JD as Jefatura_DUEA
+    participant FE as Frontend_React
+    participant API as API_Certificados
+    participant PDF as Motor_PDF
+    participant DB as PostgreSQL
+    participant LOG as LOG_AUDITORIA
+
+    JD->>FE: Solicita certificado carrera periodo
+    FE->>API: POST /certificados emitir
+
+    API->>DB: SELECT estado carrera periodo
+    alt no ACREDITADA CERT-001
+        API-->>FE: 409 estado actual
+    else vencida CERT-002
+        API-->>FE: 409 fecha vencimiento
+    else emision OK
+        API->>PDF: generar PDF QR verificacion
+        alt CERT-003 fallo PDF
+            API-->>FE: 503
+        else exito
+            API->>DB: INSERT certificado numero unico
+            API->>LOG: INSERT CERTIFICATE_ISSUED
+            API-->>FE: 200 url descarga
+        end
+    end

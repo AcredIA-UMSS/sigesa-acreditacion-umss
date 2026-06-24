@@ -1,0 +1,32 @@
+﻿%% diagramId: MAR-SEQ-001
+%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-001 RB-06
+%% version: 1.0 Â· carpeta: 07_diagramas (no duplicar en 08_agents)
+sequenceDiagram
+    autonumber
+    actor U as Usuario_CC_TD_JD
+    participant SPA as SPA_SIGESA
+    participant API as API_Auth
+    participant DB as PostgreSQL
+    participant AUD as audit_log_append_only
+
+    U->>SPA: credenciales login
+    SPA->>API: POST /auth/login
+    API->>API: validar formato y dominio @umss.edu.bo
+    alt dominio no institucional
+        API-->>SPA: 403 AUTH_DOMAIN
+        SPA-->>U: mensaje acceso restringido UMSS
+    else dominio valido
+        API->>DB: SELECT usuario activo hash_rol
+        alt credencial invalida
+            API->>AUD: LOGIN_FALLIDO intento
+            API-->>SPA: 401 AUTH_INVALID
+        else usuario inactivo
+            API-->>SPA: 403 AUTH_INACTIVE
+        else bloqueo por intentos
+            API-->>SPA: 429 AUTH_LOCKED
+        else exito
+            API->>AUD: LOGIN_OK sub rol carreraIds
+            API-->>SPA: 200 JWT accessToken
+            SPA-->>U: redireccion panel segun rol
+        end
+    end

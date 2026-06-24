@@ -1,0 +1,17 @@
+﻿%% FSD-UC-010 â€” Agregacion de Fase (hard stop)
+
+stateDiagram-v2
+    direction TB
+    state Proceso {
+        [*] --> Fase1_ABIERTA
+        Fase1_ABIERTA --> Fase1_COMPLETADA : todos_indicadores_APROBADO
+        Fase1_COMPLETADA --> Fase2_ABIERTA
+        Fase2_ABIERTA --> Fase2_COMPLETADA : todos_indicadores_APROBADO
+        Fase2_COMPLETADA --> Fase3_ABIERTA
+        Fase3_ABIERTA --> Proceso_CERRADO : dictamen_JD
+    }
+    note right of Fase1_ABIERTA
+        Bloqueo si existe
+        PENDIENTE SUBIDO
+        OBSERVADO o SUBSANADO
+    end note

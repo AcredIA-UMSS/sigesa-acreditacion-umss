@@ -1,0 +1,84 @@
+﻿%% Modelo de clases de dominio â€” Fuente: DTI_v1 Â§4.2 / FSD Â§6
+classDiagram
+  direction TB
+
+  class Proceso {
+    <<Aggregate Root>>
+    +UUID id
+    +UUID carrera_id
+    +UUID facultad_id
+    +enum tipo_acreditacion
+    +date fecha_inicio
+    +date fecha_fin
+    +enum estado
+    +validarUnicidadActivo()
+    +puedeCerrarse()
+  }
+
+  class Fase {
+    +UUID id
+    +enum nombre_fase
+    +int orden
+    +enum estado
+  }
+
+  class Actividad {
+    +UUID id
+    +UUID responsable_id
+    +enum estado
+    +date fecha_limite
+  }
+
+  class Evidencia {
+    <<Aggregate Root>>
+    +UUID id
+    +UUID criterio_id
+    +int version
+    +string hash_archivo
+    +crearVersion()
+    +requiereConfirmacionDestructiva()
+  }
+
+  class Criterio {
+    +UUID id
+    +string codigo
+    +string marco_normativo
+  }
+
+  class Observacion {
+    <<Aggregate Root>>
+    +UUID id
+    +enum estado
+    +string detalle
+    +responder()
+    +cerrar()
+  }
+
+  class RespuestaObservacion {
+    +UUID id
+    +string texto
+    +UUID evidencia_adjunta_id
+  }
+
+  class EventoAuditoria {
+    +UUID id
+    +enum accion
+    +timestamp fecha_hora
+    +registrarInmutable()
+  }
+
+  class Usuario {
+    +UUID id
+    +string email
+    +tieneRol()
+  }
+
+  Proceso --> Fase : contiene
+  Fase --> Actividad : tiene
+  Proceso --> Evidencia : almacena
+  Criterio --> Evidencia : clasifica
+  Proceso --> Observacion : recibe
+  Observacion --> RespuestaObservacion : tiene
+  Evidencia --> RespuestaObservacion : adjunta opcional
+  Usuario --> EventoAuditoria : genera
+  Usuario --> Evidencia : carga

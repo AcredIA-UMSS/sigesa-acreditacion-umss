@@ -1,0 +1,26 @@
+﻿%% diagramId: MAR-GANTT-002
+%% fsdTrace: team/Marlene/01_brd/BRD.md piloto CEUB carrera
+gantt
+    title Piloto carrera UMSS â€” Hitos vs convocatoria CEUB
+    dateFormat YYYY-MM-DD
+    axisFormat %b %Y
+
+    section Preparacion DUEA
+    Validacion plantilla normativa     :prep1, 2026-05-15, 14d
+    Capacitacion CC y TD               :prep2, after prep1, 10d
+    Alta proceso FSD-UC-010            :prep3, after prep2, 7d
+
+    section Carga evidencias
+    Subfase 1 indicadores criticos     :carga1, 2026-06-20, 21d
+    Subfase 2 indicadores apoyo        :carga2, after carga1, 21d
+    Revision TD FSD-UC-003             :rev1, 2026-06-25, 35d
+
+    section Entregables CEUB
+    Informe avance interno JD          :ent1, 2026-08-01, 5d
+    Reporte PDF ejecutivo UC-005       :ent2, after ent1, 7d
+    Publicacion portal UC-008          :ent3, after ent2, 5d
+
+    section Cierre ciclo
+    Simulacro auditoria UC-009         :cierre1, 2026-08-20, 10d
+    Plan mejora UC-012 si observaciones :cierre2, after cierre1, 14d
+    Acta cierre proceso                :cierre3, after cierre2, 3d

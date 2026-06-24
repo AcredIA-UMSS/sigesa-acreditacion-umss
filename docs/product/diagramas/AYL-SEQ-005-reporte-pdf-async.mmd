@@ -1,0 +1,37 @@
+﻿%% diagramId: AYL-SEQ-005
+%% fsdTrace: FSD-UC-005 PC-005
+sequenceDiagram
+    autonumber
+    title FSD-UC-005 â€” Reporte ejecutivo PDF asincrono
+
+    actor JD as Jefatura_DUEA
+    participant FE as Frontend_React
+    participant API as API_Reportes
+    participant WRK as Worker_PDF
+    participant DB as PostgreSQL
+    participant LOG as LOG_AUDITORIA
+    participant SMTP as SMTP_UMSS
+
+    JD->>FE: Configura carrera periodo tipo
+    FE->>API: POST /reportes/jobs
+
+    alt parametros incompletos
+        API-->>FE: 400 seleccione carrera y periodo
+    else job creado
+        API->>DB: INSERT job PENDIENTE
+        API-->>FE: 202 jobId
+        WRK->>DB: poll job PENDIENTE
+        WRK->>DB: SELECT datos agregados
+        alt motor PDF falla NFR-006
+            WRK->>DB: job ERROR
+            WRK-->>FE: notificacion error sin afectar dashboard
+        else PDF listo menor 5 min
+            WRK->>WRK: render PDF portada semaforos
+            WRK->>DB: job COMPLETADO url temporal
+            WRK->>LOG: INSERT REPORTE
+        else supera 5 min
+            WRK->>SMTP: correo enlace descarga
+        end
+        JD->>FE: GET /reportes/jobs/{id}
+        FE-->>JD: Descarga PDF
+    end

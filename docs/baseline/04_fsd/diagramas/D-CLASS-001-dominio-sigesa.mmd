@@ -1,0 +1,40 @@
+﻿%% diagramId: D-CLASS-001
+%% fsdTrace: docs/LFSD.md dominio NFR-013 auditoria
+%% version: 1.0
+classDiagram
+    class Usuario {
+        +UUID id
+        +String email
+        +Rol rol
+        +Boolean activo
+    }
+    class Carrera {
+        +UUID id
+        +String nombre
+    }
+    class ProcesoAcreditacion {
+        +UUID id
+        +TipoAcreditacion tipo
+        +Integer gestion
+        +EstadoProceso estado
+    }
+    class Indicador {
+        +UUID id
+        +String codigo
+        +EstadoIndicador estado
+    }
+    class Documento {
+        +UUID id
+        +Integer version
+        +String hash
+    }
+    class LogAuditoria {
+        +BigInt id
+        +String accion
+        +DateTime creadoEn
+    }
+    Usuario "1" --> "*" Documento : carga
+    Carrera "1" --> "*" ProcesoAcreditacion
+    ProcesoAcreditacion "1" --> "*" Indicador : contiene via subfase
+    Indicador "1" --> "*" Documento : versiona
+    Usuario "1" --> "*" LogAuditoria : genera

@@ -1,0 +1,30 @@
+﻿%% diagramId: AYL-SEQ-008
+%% fsdTrace: FSD-UC-008 PC-008
+sequenceDiagram
+    autonumber
+    title FSD-UC-008 â€” Portal publico consulta estado
+
+    actor P as Usuario_Publico
+    participant PUB as Portal_Publico
+    participant API as API_Publico
+    participant DB as PostgreSQL
+    participant LOG as LOG_AUDITORIA
+    participant RL as RateLimiter
+
+    P->>PUB: GET portal sin credenciales
+    PUB->>RL: verificar 100 req hora IP
+    alt PUB-003 rate limit
+        RL-->>PUB: 429 Retry-After
+    else dentro cuota
+        PUB->>API: GET /publico/carreras/{id}
+        alt portal deshabilitado PUB-001
+            API-->>PUB: 503
+        else carrera sin estado PUB-002
+            API-->>PUB: 200 SIN_INFORMACION
+        else publicado
+            API->>DB: SELECT campos publicos only
+            API->>LOG: INSERT PUBLIC_QUERY usuario NULL
+            API-->>PUB: 200 estado fase fecha
+        end
+        PUB-->>P: Render sin datos internos
+    end

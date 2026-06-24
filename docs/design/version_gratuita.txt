@@ -1,0 +1,70 @@
+🛠️ Flujo de Trabajo: Paso a Paso (Versión Gratuita Cursor)
+Paso 1: Seleccionar el Caso de Uso (FSD)
+(Este paso se mantiene igual, es trabajo humano).
+
+Abre el archivo de especificaciones vivas: docs/product/04_fsd/FSD.md.
+
+Identifica el ID del caso de uso que te fue asignado (ej. FSD-UC-005).
+
+Lee las reglas de negocio y criterios de aceptación.
+
+Paso 2: Generar el Documento de Diseño (El Plano)
+No improvisamos arquitectura en el chat de IA. Primero diseñamos.
+
+Abre el chat de Cursor (Composer).
+
+Escribe exactamente este prompt (asegúrate de que al escribir @ selecciones el archivo correcto de la lista desplegable):
+
+"Por favor, lee las instrucciones de @SKILL.md (selecciona el de la carpeta feature-design-doc). A partir del caso de uso @FSD-UC-005.md y usando la plantilla @FEATURE_DESIGN_DOC_TEMPLATE.md, redacta el documento de diseño para el feature 'Nombre del Feature'. Genera el contenido para que yo lo guarde en docs/design/DD-UC-005.md."
+
+¿Qué sucede? La IA redactará todo el documento basándose en tus reglas. Revísalo, cópialo y guárdalo en su archivo.
+
+Paso 3: Crear el Contrato de Prompt (Las Instrucciones)
+Los prompts vagos generan código espagueti. Todo código debe nacer de un contrato escrito.
+
+En el chat, escribe este prompt:
+
+"Actúa como el rol definido en @SKILL.md (selecciona el de prompt-contract-architect). Lee mi diseño en @DD-UC-005.md y usa el formato de @PROMPT_TEMPLATE.md para diseñarme un prompt estricto que implemente este caso de uso en Spring Boot. Dame el resultado para guardarlo en docs/prompts/impl/PR-IMPL-005.md."
+
+¿Qué sucede? Se generará un prompt estructurado con las restricciones exactas.
+
+📝 Acción Manual: Abre docs/PROMPT_MAPPING.md y añade una fila vinculando tu FSD-UC-005, tu design doc DD-UC-005 y tu nuevo prompt PR-IMPL-005.
+
+Paso 4: Escribir el Código
+¡Ahora sí! Con las reglas claras, dejamos que la IA genere el código. (Este paso se mantiene igual).
+
+Copia el contenido de tu archivo PR-IMPL-005.md.
+
+Pégalo en el chat de Cursor y permite que genere las clases, interfaces y repositorios. Si necesitas que lea archivos de código existentes, etiquétalos con @.
+
+Haz las pruebas locales necesarias y asegúrate de que el código compila.
+
+Paso 5: Revisión Arquitectónica (El Auditor)
+Antes de preparar el commit, validamos que la IA no haya roto ninguna regla del proyecto.
+
+Invoca al revisor de código manualmente con este prompt:
+
+"Actúa como el auditor definido en @SKILL.md (selecciona el de architectural-code-reviewer). Revisa los archivos de código que acabo de modificar o crear en este chat. Compáralos estrictamente contra el diseño de @DD-UC-005.md y el documento técnico @DTP.md. Entrégame tu reporte de Violaciones Arquitectónicas."
+
+¿Qué sucede? El agente cruzará la información y te dará un reporte. Si expusiste una entidad JPA en el controlador, te lo advertirá. Debes corregir el código antes de avanzar.
+
+Paso 6: Sincronizar el DTP (El Cierre Documental)
+Si el código funciona y fue aprobado, debemos actualizar el "expediente médico" de SIGESA.
+
+En el chat, invoca al sincronizador con este prompt:
+
+"Sigue las reglas establecidas en @SKILL.md (selecciona el de dtp-sync) y el reglamento @MODELO_DOCUMENTAL_IMPLEMENTACION.md. Analiza los cambios de código que acabamos de hacer para @DD-UC-005.md y propón las actualizaciones exactas que debo pegar en el Changelog y el estado de implementación de @DTP.md."
+
+¿Qué sucede? El agente te dará el texto exacto en Markdown para que vayas al DTP y lo pegues, manteniendo la historia viva sin tocar el Baseline.
+Nota: Si cambiaste de tecnología, te sugerirá crear un ADR.
+
+Paso 7: Commit y Pull Request (PR)
+Tu feature está terminado, blindado y trazable. (Este paso se mantiene igual).
+
+Haz commit de tus cambios incluyendo los archivos .md generados y los archivos de código fuente.
+
+En la descripción de tu PR, incluye siempre la trazabilidad:
+
+Implementa: FSD-UC-005
+Diseño: DD-UC-005
+Prompt usado: PR-IMPL-005

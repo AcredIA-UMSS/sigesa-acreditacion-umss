@@ -1,0 +1,27 @@
+﻿%% diagramId: D-SEQ-002
+%% fsdTrace: docs/LFSD.md FSD-UC-002 RB-02 RB-04 BR-015 PRD-REQ-003 PRD-REQ-004
+%% version: 1.0
+sequenceDiagram
+    autonumber
+    actor CC as Coordinador_CC
+    participant API as API_Documentos
+    participant S3 as Object_Storage
+    participant DB as PostgreSQL
+    participant OUT as Outbox_Notificaciones
+    participant WORK as Worker_SMTP
+
+    CC->>API: POST /documentos multipart
+    API->>API: validar MIME tamano RB02
+    alt error validacion
+        API-->>CC: 413 415 403
+    else ok
+        API->>S3: PUT objeto binario
+        S3-->>API: storageKey
+        API->>DB: transaccion insert DOCUMENTO version++
+        API->>DB: update INDICADOR EN_REVISION
+        API->>DB: append AUDITORIA CARGA
+        API->>OUT: evento NOTIF_CARGA
+        API-->>CC: 201 documentoId version hash
+        OUT-->>WORK: async consume
+        WORK->>WORK: SMTP a TD asignado
+    end

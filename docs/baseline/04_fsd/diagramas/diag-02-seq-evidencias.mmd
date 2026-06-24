@@ -1,0 +1,52 @@
+﻿%% SEQ-02 Carga y versionado de evidencias â€” Fuente: FSD-UC-003 / PC-004 PC-005
+---
+title: "SEQ-02 Â· Carga y versionado de evidencias (FSD-UC-003)"
+---
+sequenceDiagram
+    actor C as Coordinador
+    participant F as Frontend
+    participant API as Evidence API
+    participant VAL as Validador
+    participant STG as Storage
+    participant AUD as AuditorÃ­a
+
+    C->>F: Abre vista de evidencias (proceso/fase)
+    F->>API: GET /procesos/{id}/criterios
+    API-->>F: Lista de criterios con estado de evidencias
+    F-->>C: Muestra criterios disponibles
+
+    C->>F: Selecciona criterio + sube Evidence
+    F->>API: POST /indicators/{id}/evidences {criterio_id, proceso_id, fase_id, evidenceBlob}
+
+    API->>VAL: Valida clasificaciÃ³n obligatoria
+    alt Sin criterio seleccionado
+        VAL-->>API: ERROR: EVIDENCIA_SIN_CLASIFICACION
+        API-->>F: 400 Bad Request
+        F-->>C: Resalta campo "Criterio" con mensaje de error
+    else Evidence vacÃ­a o formato invÃ¡lido
+        VAL-->>API: ERROR: EVIDENCE_INVALID
+        API-->>F: 400 Bad Request {detalle}
+        F-->>C: Mensaje descriptivo del error
+    else ValidaciÃ³n exitosa
+        VAL-->>API: OK
+        API->>STG: Almacena blob de Evidence + genera hash
+        STG-->>API: {url, hash, tamaÃ±o}
+        API->>API: Crea versiÃ³n incremental (v1, v2â€¦)
+        API->>AUD: INSERT CARGA {user_id, evidencia_id, version, timestamp}
+        API-->>F: 201 Created {evidencia_id, version, autor, fecha}
+        F-->>C: ConfirmaciÃ³n con nÃºmero de versiÃ³n
+
+        Note over C,AUD: AcciÃ³n destructiva (borrado/reemplazo)
+        C->>F: Solicita eliminar evidencia
+        F-->>C: Modal: "Â¿Confirmar eliminaciÃ³n de acta_reunion.pdf?"
+        alt Confirma
+            C->>F: Clic "Confirmar"
+            F->>API: DELETE /evidencias/{id}
+            API->>AUD: INSERT ELIMINACION {user_id, evidencia_id, timestamp}
+            API-->>F: 200 OK
+            F-->>C: ConfirmaciÃ³n de operaciÃ³n completada
+        else Cancela
+            C->>F: Clic "Cancelar"
+            F-->>C: Modal cerrado, repositorio sin cambios
+        end
+    end
