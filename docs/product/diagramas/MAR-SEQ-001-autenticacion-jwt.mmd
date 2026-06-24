@@ -1,6 +1,6 @@
 ﻿%% diagramId: MAR-SEQ-001
-%% fsdTrace: team/Marlene/04_fsd/FSD.md FSD-UC-001 RB-06
-%% version: 1.0 Â· carpeta: 07_diagramas (no duplicar en 08_agents)
+%% fsdTrace: docs/product/FSD.md FSD-UC-001 DD-UC-001
+%% version: 1.1 · MOD-AUTH v1.0 (A1 estricto → 401; sin AUTH_LOCKED v1.0)
 sequenceDiagram
     autonumber
     actor U as Usuario_CC_TD_JD
@@ -10,23 +10,21 @@ sequenceDiagram
     participant AUD as audit_log_append_only
 
     U->>SPA: credenciales login
-    SPA->>API: POST /auth/login
-    API->>API: validar formato y dominio @umss.edu.bo
-    alt dominio no institucional
-        API-->>SPA: 403 AUTH_DOMAIN
-        SPA-->>U: mensaje acceso restringido UMSS
-    else dominio valido
-        API->>DB: SELECT usuario activo hash_rol
-        alt credencial invalida
-            API->>AUD: LOGIN_FALLIDO intento
-            API-->>SPA: 401 AUTH_INVALID
-        else usuario inactivo
-            API-->>SPA: 403 AUTH_INACTIVE
-        else bloqueo por intentos
-            API-->>SPA: 429 AUTH_LOCKED
+    SPA->>API: POST /api/v1/auth/login
+    API->>API: Email.forLogin validar dominio @umss.edu.bo
+    alt credencial invalida o dominio invalido A1
+        API-->>SPA: 401 AUTH_INVALID_CREDENTIALS mensaje generico
+        SPA-->>U: mensaje error sin revelar existencia usuario
+    else credencial valida
+        API->>DB: SELECT usuario hash rol asignaciones activas
+        alt sin rol asignado A2
+            API-->>SPA: 403 ACCESS_DENIED
         else exito
-            API->>AUD: LOGIN_OK sub rol carreraIds
-            API-->>SPA: 200 JWT accessToken
+            opt status INACTIVE
+                API->>DB: UPDATE status ACTIVE primer login
+            end
+            API->>AUD: LOGIN_OK sub rol programScope stub
+            API-->>SPA: 200 accessToken expiresIn role programScope
             SPA-->>U: redireccion panel segun rol
         end
     end

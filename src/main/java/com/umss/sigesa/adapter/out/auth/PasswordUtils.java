@@ -4,12 +4,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 
-final class PasswordUtils {
+public final class PasswordUtils {
 
     private PasswordUtils() {
     }
 
-    static String encode(PasswordEncoder encoder, char[] rawPassword) {
+    public static String encode(PasswordEncoder encoder, char[] rawPassword) {
         try {
             return encoder.encode(new String(rawPassword));
         } finally {
@@ -17,7 +17,7 @@ final class PasswordUtils {
         }
     }
 
-    static boolean matches(PasswordEncoder encoder, char[] rawPassword, String passwordHash) {
+    public static boolean matches(PasswordEncoder encoder, char[] rawPassword, String passwordHash) {
         try {
             return encoder.matches(new String(rawPassword), passwordHash);
         } finally {
@@ -25,7 +25,7 @@ final class PasswordUtils {
         }
     }
 
-    static void clear(char[] password) {
+    public static void clear(char[] password) {
         if (password != null) {
             Arrays.fill(password, '\0');
         }

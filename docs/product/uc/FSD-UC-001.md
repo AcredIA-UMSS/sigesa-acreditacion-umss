@@ -7,7 +7,7 @@ actor_principal: Usuario interno ([CC], [TD], [JD])
 trazabilidad_prd: PRD-US-001, PRD-US-003
 modulo: MOD-AUTH
 reglas: FSD-BR-12
-ultima_actualizacion: "2026-06-22"
+ultima_actualizacion: "2026-06-23"
 ---
 
 # FSD-UC-001 — Autenticación y sesión
@@ -45,7 +45,7 @@ Sesión activa con permisos acotados al rol y alcance de carrera/facultad.
 | Dirección | Campos |
 |-----------|--------|
 | Entrada | `email`, `password` |
-| Salida | `sessionToken`, `role`, `programScope` |
+| Salida | `accessToken`, `expiresIn`, `role`, `programScope` |
 
 ## Diagramas
 

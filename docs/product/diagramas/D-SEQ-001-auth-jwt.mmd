@@ -1,6 +1,6 @@
 ﻿%% diagramId: D-SEQ-001
-%% fsdTrace: docs/LFSD.md FSD-UC-001 RB-06 PRD-REQ-001 PRD-REQ-002
-%% version: 1.0
+%% fsdTrace: docs/product/FSD.md FSD-UC-001 DD-UC-001 PRD-REQ-001
+%% version: 1.1 · MOD-AUTH v1.0 (A1 estricto → 401)
 sequenceDiagram
     autonumber
     actor U as Usuario_CC_TD_JD
@@ -8,17 +8,20 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant AUD as Log_Auditoria
 
-    U->>API: POST /auth/login email password
-    API->>API: validar dominio umss.edu.bo
-    alt dominio invalido
-        API-->>U: 403 AUTH_DOMAIN
-    else dominio valido
-        API->>DB: buscar usuario por email activo
-        DB-->>API: usuario hash rol
-        alt credencial invalida
-            API-->>U: 401 AUTH_INVALID
-        else credencial valida
-            API->>AUD: append LOGIN exitoso
-            API-->>U: 200 JWT accessToken claims rol
+    U->>API: POST /api/v1/auth/login email password
+    API->>API: Email.forLogin validar dominio @umss.edu.bo
+    alt credencial invalida o dominio invalido A1
+        API-->>U: 401 AUTH_INVALID_CREDENTIALS mensaje generico
+    else credencial valida
+        API->>DB: buscar usuario hash rol asignaciones
+        DB-->>API: usuario hash rol programScope
+        alt sin rol asignado A2
+            API-->>U: 403 ACCESS_DENIED
+        else exito
+            opt status INACTIVE
+                API->>DB: UPDATE status ACTIVE primer login
+            end
+            API->>AUD: append LOGIN exitoso stub
+            API-->>U: 200 accessToken role programScope
         end
     end

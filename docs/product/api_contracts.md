@@ -20,7 +20,7 @@
 | Base URL | `/api/v1` |
 | Formato | `application/json` (salvo upload: `multipart/form-data`) |
 | Auth | `Authorization: Bearer {token}` |
-| Errores | `{ "code": "ERROR_CODE", "message": "...", "details": {} }` |
+| Errores | `{ "error": "ERROR_CODE", "message": "...", "details": {} }` (campo `error` en v1.0; specs legacy pueden decir `code`) |
 | Paginación | `?page=&size=`; respuesta `{ "items": [], "total": n }` |
 | Idempotencia | `Idempotency-Key` en POST críticos (carga, importación) |
 
@@ -28,7 +28,7 @@
 
 | Código | Uso |
 |--------|-----|
-| 401 | Sin sesión / token inválido |
+| 401 | Sin sesión / token inválido (`UNAUTHORIZED` en perímetro JWT); login A1 → `AUTH_INVALID_CREDENTIALS` |
 | 403 | Rol o alcance insuficiente |
 | 409 | Conflicto de estado (`EVIDENCE_IMMUTABLE`, `FASE_CIERRE_BLOQUEADO`, `PROCESS_ALREADY_ACTIVE`) |
 | 422 | Validación (`JUSTIFICATION_REQUIRED`, `EVIDENCE_UNCLASSIFIED`) |
@@ -54,9 +54,9 @@ components:
   schemas:
     Error:
       type: object
-      required: [code, message]
+      required: [error, message]
       properties:
-        code:
+        error:
           type: string
         message:
           type: string
@@ -70,6 +70,8 @@ security:
 ---
 
 ## 3. MOD-AUTH
+
+> Rutas relativas a Base URL `/api/v1`. Errores MOD-AUTH usan campo `error` (no `code`).
 
 ### API-AUTH-01 — `POST /auth/login`
 
@@ -312,4 +314,5 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |
 | Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8; RBAC y errores de estado |

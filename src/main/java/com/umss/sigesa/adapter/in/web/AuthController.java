@@ -3,7 +3,6 @@ package com.umss.sigesa.adapter.in.web;
 import com.umss.sigesa.adapter.in.web.dto.LoginRequest;
 import com.umss.sigesa.adapter.in.web.dto.LoginResponse;
 import com.umss.sigesa.application.port.in.AuthenticateUseCase;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +20,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         AuthenticateUseCase.LoginResult result = authenticateUseCase.authenticate(
                 request.email(),
                 request.password()

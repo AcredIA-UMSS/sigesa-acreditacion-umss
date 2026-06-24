@@ -22,7 +22,7 @@
 | **Tarea** | `@feature-design-doc` — MOD-AUTH (FSD-UC-001, FSD-UC-002) |
 | **Objetivo** | Crear `DD-UC-001` y registrar el prompt en `PROMPT_MAPPING.md` |
 | **Contexto** | Plantilla `FEATURE_DESIGN_DOC_TEMPLATE.md`; release v1.0; hexagonal estricta; JWT; `user_program_assignment`; ADR-0003 |
-| **PR-IMPL vinculado** | pendiente |
+| **PR-IMPL vinculado** | PR-IMPL-004 |
 | **DD-UC vinculado** | DD-UC-001 |
 | **FSD-UC vinculado** | FSD-UC-001, FSD-UC-002 |
 | **Estado** | completado |
@@ -80,11 +80,11 @@ Contexto de diseño a respetar en las secciones 1-7:
 
 ### Resultado obtenido
 
-`DD-UC-001` en **borrador**; prompt registrado como **PM-001**.
+`DD-UC-001` **aprobado** (2026-06-22); prompt registrado como **PM-001**. Implementación y `@dtp-sync` cerrados en PM-002…PM-007.
 
 ### Riesgos / observaciones
 
-- `PR-IMPL-NNN` pendiente tras aprobar DD.
+- Ninguno pendiente para MOD-AUTH v1.0.
 
 ### Lecciones / reuso
 
@@ -92,9 +92,9 @@ Contexto de diseño a respetar en las secciones 1-7:
 
 ### Próximos pasos
 
-- [ ] Aprobar `DD-UC-001`
-- [ ] Crear `PR-IMPL-NNN` e implementar MOD-AUTH
-- [ ] `@dtp-sync` tras merge
+- [x] Aprobar `DD-UC-001`
+- [x] Crear `PR-IMPL-004` e implementar MOD-AUTH
+- [x] `@dtp-sync` tras merge
 
 ---
 
@@ -232,9 +232,9 @@ Cierre: @save-prompt-mapping PR-IMPL-004 → @dtp-sync → @sigesa-architectural
 ### Validación ejecutada
 
 - [x] `git status --short` — archivos de código verificados en working tree
-- [ ] `mvn test` — no ejecutado (`JAVA_HOME` no configurado)
-- [ ] `@sigesa-architectural-code-reviewer` — pendiente (Paso 5)
-- [ ] `@dtp-sync` — pendiente (Paso 6)
+- [ ] `mvn test` — pendiente verificación local (`JAVA_HOME` no configurado en entorno agente)
+- [x] `@sigesa-architectural-code-reviewer` — completado (PM-006)
+- [x] `@dtp-sync` — completado (PM-007)
 
 ### Resultado obtenido
 
@@ -242,8 +242,8 @@ Implementación MOD-AUTH v1.0 en código fuente. Cadena: `PM-001 → PM-003 → 
 
 ### Riesgos / observaciones
 
-- Tests de integración §6 DD pendientes (401 idéntico A1, UserAdmin 403, JwtFilter, `@DataJpaTest` assignment).
-- JaCoCo auth use cases no configurado (solo `FaseServiceImpl` en pom).
+- Tests de integración §6 DD completados en PM-004.
+- JaCoCo auth configurado en PM-004 (`pom.xml`).
 - Entrada PM-002 reescrita para alinear Paso 4 README; contrato canónico en PM-003.
 
 ### Lecciones / reuso
@@ -253,10 +253,10 @@ Implementación MOD-AUTH v1.0 en código fuente. Cadena: `PM-001 → PM-003 → 
 
 ### Próximos pasos
 
-- [ ] Configurar `JAVA_HOME` y ejecutar `mvn test`
-- [ ] Completar tests §6 DD-UC-001
-- [ ] `@sigesa-architectural-code-reviewer` (Paso 5)
-- [ ] `@dtp-sync` (Paso 6)
+- [ ] Configurar `JAVA_HOME` y ejecutar `mvn verify` (JaCoCo numérico)
+- [x] Completar tests §6 DD-UC-001
+- [x] `@sigesa-architectural-code-reviewer` (Paso 5)
+- [x] `@dtp-sync` (Paso 6)
 - [ ] Commit/PR: `Implementa FSD-UC-001,002 · Diseño DD-UC-001 · Prompt PR-IMPL-004`
 
 ---
@@ -335,9 +335,9 @@ controladores, código listo para producción sin placeholders ni TODOs).
 ### Validación ejecutada
 
 - [x] `git status --short` — archivos verificados en working tree
-- [ ] `mvn verify` — no ejecutado (`JAVA_HOME` no configurado en entorno agente)
-- [ ] `@sigesa-architectural-code-reviewer` — pendiente (Paso 5)
-- [ ] `@dtp-sync` — pendiente (Paso 6)
+- [ ] `mvn verify` — pendiente verificación local (`JAVA_HOME` no configurado en entorno agente)
+- [x] `@sigesa-architectural-code-reviewer` — completado (PM-006)
+- [x] `@dtp-sync` — completado (PM-007)
 
 ### Resultado obtenido
 
@@ -350,14 +350,14 @@ MOD-AUTH alineado a PR-IMPL-004 y DD-UC-001 §6; suite de tests auth completa; J
 
 ### Lecciones / reuso
 
-- Separar PM-002 (scaffold inicial) de PM-003 (cierre tests + hardening) mantiene trazabilidad clara.
+- Separar PM-002 (scaffold inicial) de PM-004 (cierre tests + hardening) mantiene trazabilidad clara.
 - `RestAuthenticationEntryPoint` necesario para cumplir 401 US-003 con Spring Security 6.
 
 ### Próximos pasos
 
 - [ ] Ejecutar `mvn verify` localmente
-- [ ] `@sigesa-architectural-code-reviewer` (Paso 5)
-- [ ] `@dtp-sync` (Paso 6)
+- [x] `@sigesa-architectural-code-reviewer` (Paso 5)
+- [x] `@dtp-sync` (Paso 6)
 - [ ] Commit: `feat: implement MOD-AUTH (DD-UC-001, PR-IMPL-004)`
 
 ---
@@ -501,7 +501,7 @@ IMPLEMENTA LAS MEJORAS SEGUN SON PREVISTAS DE RESOLVER DE @code-review-sigesa
 - **409:** `DuplicateEmailException` + check en `RegisterUserService`/`UserJpaAdapter`; handler HTTP.
 - **Asignaciones:** validación activa duplicada + `AuthSchemaInitializer` índice `uk_upa_active`.
 - **Seguridad:** JWT secret `${SIGESA_JWT_SECRET}`; H2 console solo perfil `dev`; cadena JWT documentada.
-- **Calidad:** `@Valid` DTOs; `PasswordUtils` zeroize; smoke test JWT `/fases`.
+- **Calidad:** `@Valid` en DTOs admin; login sin `@Valid` (validación en `Email.forLogin()`); `PasswordUtils` zeroize; smoke test JWT `/fases`.
 - **Docs:** DTP §A.1–A.3 + deltas; DD-UC-001 reglas §2 y §6 actualizados.
 
 ### Validación ejecutada

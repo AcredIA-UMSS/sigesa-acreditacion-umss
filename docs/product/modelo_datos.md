@@ -59,8 +59,8 @@ erDiagram
 |--------------|-----|-----------------|-------|
 | `Faculty` | Facultad | `id`, `code`, `name` | Dato maestro UMSS |
 | `AcademicProgram` | Carrera | `id`, `facultyId`, `code`, `name`, `status` | Unidad de acreditación |
-| `AppUser` | Usuario | `id`, `email`, `displayName`, `status` | Email `@umss.edu.bo` |
-| `UserProgramAssignment` | Asignación rol | `userId`, `programId`, `roleCode` | CC → una carrera; TD/JD alcance configurable |
+| `AppUser` | Usuario | `id`, `email`, `role`, `status` | Rol único (`CC`/`TD`/`JD`); email `@umss.edu.bo`; estados `INACTIVE`→`ACTIVE`→`DEACTIVATED` |
+| `UserProgramAssignment` | Asignación alcance | `id`, `userId`, `programId`, `assignedAt`, `revokedAt` | Rol en `AppUser`; alcance carrera aquí (FSD-BR-09); revocación soft (`revokedAt`) |
 
 ### 3.2 Plantilla normativa
 
@@ -117,7 +117,10 @@ Transiciones válidas: ver [`FSD.md`](FSD.md) §4.1 y `team/alexAlvarez/docs/con
 | `EvidenceVersion` | `observationId` | UUID | cond. | Obligatorio si subsanación |
 | `Indicator` | `currentState` | enum derivado | sí | Valores §4; se obtiene desde `indicator_current_view` |
 | `Observation` | `justification` | text | sí | min 20 caracteres (configurable) |
-| `AppUser` | `email` | string | sí | Dominio `@umss.edu.bo` |
+| `AppUser` | `email` | string | sí | Dominio `@umss.edu.bo`; login inválido → `401` (A1); alta inválida → `422` |
+| `AppUser` | `role` | enum | sí | `CC`, `TD`, `JD` (un rol por usuario) |
+| `AppUser` | `status` | enum | sí | `INACTIVE`, `ACTIVE`, `DEACTIVATED` |
+| `UserProgramAssignment` | `revokedAt` | timestamp | no | `null` = asignación activa; índice único parcial activas |
 | `AuditLog` | `action` | string | sí | Catálogo cerrado (`AUDIT_LOGIN`, `AUDIT_DELETE_DENIED`, …) |
 
 **Prohibido:** `isDeleted` / `deletedAt` en `Evidence` o `EvidenceVersion` aprobados, y `UPDATE` destructivo para transiciones de estado de `Indicator`.
@@ -152,7 +155,8 @@ Detalle de columnas, índices y FK: ver DTI §2–3.
 | FSD-BR-02 | Sin DELETE en `evidence_version` aprobada |
 | FSD-BR-06 | FK `observation_id` en versión subsanatoria |
 | FSD-BR-08 | Índice único parcial `accreditation_process` activo |
-| FSD-BR-09 | Filtro `program_id` en queries [CC] |
+| FSD-BR-09 | Filtro `program_id` en queries [CC]; alcance vía `user_program_assignment` |
+| FSD-BR-12 | Dominio `@umss.edu.bo` en `app_user`; login A1 → `401` genérico |
 | Máquina de estados | `indicator_state_history` append-only + `indicator_current_view` |
 
 ---
@@ -161,5 +165,6 @@ Detalle de columnas, índices y FK: ver DTI §2–3.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.2 | 2026-06-23 | MOD-AUTH: atributos `AppUser`/`UserProgramAssignment` alineados a DD-UC-001 (sin `displayName`/`roleCode`) |
 | v1.1 | 2026-06-22 | `@dtp-sync` DD-UC-001: tabla `user_program_assignment` en mapeo lógico→físico (MOD-AUTH) |
 | Dorada v1.0 | 2026-05-16 | Vista funcional extraída de FSD.md; enlace a DTI |

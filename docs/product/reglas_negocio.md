@@ -180,7 +180,7 @@
 | **Origen BRD** | BRD-RB-13 |
 | **UC** | UC-001, UC-002 |
 | **Enunciado** | Cuentas internas con dominio institucional UMSS. |
-| **Violación** | `422 INVALID_EMAIL_DOMAIN` en alta de usuario. |
+| **Violación** | Alta (UC-002): `422 INVALID_EMAIL_DOMAIN`. Login (UC-001 A1): dominio inválido, vacío o credencial incorrecta → mismo `401 AUTH_INVALID_CREDENTIALS` genérico (no revelar causa). |
 
 ---
 

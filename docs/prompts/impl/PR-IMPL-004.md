@@ -219,5 +219,5 @@ src/test/...                          → tests §6 DD-UC-001
 - [x] Sin suposiciones fuera de `DD-UC-001` aprobado.
 - [x] No viola invariantes SIGESA (append-only auditoría, roles DUEA, hexagonal).
 - [x] Generado por `@sigesa-prompt-contract-architect` (Paso 3 README).
-- [ ] Implementación ejecutada (Paso 4) y registrada en `PROMPT_MAPPING.md` (`@save-prompt-mapping`).
-- [ ] Revisión arquitectónica (Paso 5) y `@dtp-sync` (Paso 6) pendientes de cierre.
+- [x] Implementación ejecutada (Paso 4) y registrada en `PROMPT_MAPPING.md` (`@save-prompt-mapping`).
+- [x] Revisión arquitectónica (Paso 5) y `@dtp-sync` (Paso 6) completados (PM-006, PM-007).

@@ -28,7 +28,7 @@ autores:
 >
 > **Relación con otros documentos**:
 > - **Trazabilidad obligatoria al FSD**: `FSD-UC-001`, `FSD-UC-002`.
-> - **Implementa** [`ADR-0003`](../baseline/05_dti/adrs/ADR_003_adapter_autenticacion.md) (`AuthPort` + `LocalAuthAdapter` v1.0).
+> - **Implementa** [`ADR-0003`](../adr/ADR-0003-authentication-adapter.md) (`AuthPort` + `LocalAuthAdapter` v1.0).
 > - Complementa JWT/RBAC (ADR_007 baseline); no reemplaza el ADR.
 > - Alimenta el **DTP** vía `@dtp-sync` tras implementar.
 
@@ -48,16 +48,17 @@ autores:
   | Activación INACTIVE→ACTIVE en primer login | Recuperación de contraseña |
   | 401 genérico sin revelar existencia (A1 UC-001) | Blocklist refresh token (opcional) |
   | Validación `@umss.edu.bo` (FSD-BR-12) | UC-017 completo (stub `AuditLogPort`) |
+  | Columnas `failed_attempts`/`locked_until` en DDL (reservadas) | Bloqueo por intentos / `429 AUTH_LOCKED` (v1.1) |
 
 ## 2. Diseño (el "cómo") `[humano+máquina]`
 
-- **Enfoque elegido**: Módulo hexagonal `com.umss.sigesa.auth`. **Dominio y aplicación sin dependencias de Spring/JPA.** Spring Security y JPA solo en adaptadores de entrada/salida. Credenciales vía `AuthPort` → `LocalAuthAdapter` (ADR-0003).
+- **Enfoque elegido**: Módulo hexagonal bajo `com.umss.sigesa` (dominio, `application.service.auth`, adaptadores `adapter.in`/`adapter.out`). **Dominio y aplicación sin dependencias de Spring/JPA.** Spring Security y JPA solo en adaptadores de entrada/salida. Credenciales vía `AuthPort` → `LocalAuthAdapter` (ADR-0003).
 
 - **Componentes tocados** (capas hexagonales):
 
   | Capa | Componentes |
   |---|---|
-  | **Dominio** | `User`, `Role`, `UserStatus`, `UserProgramAssignment`, `Email`, `ProgramScope`, excepciones |
+  | **Dominio** | `AppUser`, `Role`, `UserStatus`, `UserProgramAssignment`, `Email`, `ProgramScope`, excepciones |
   | **Aplicación** | `AuthenticateUseCase`, `RegisterUserUseCase`, `DeactivateUserUseCase` |
   | **Puertos out** | `AuthPort`, `UserRepositoryPort`, `UserProgramAssignmentRepositoryPort`, `TokenPort`, `AuditLogPort` |
   | **Adaptadores in** | `AuthController`, `UserAdminController`, `JwtAuthenticationFilter`, `SecurityConfig` |
@@ -65,7 +66,7 @@ autores:
 
 - **Reglas de dominio**:
   1. Un usuario = un rol (`CC`, `TD`, `JD`).
-  2. **`User` sin `programId` plano**; alcance en **`UserProgramAssignment`**.
+  2. **`AppUser` sin `programId` plano**; alcance en **`UserProgramAssignment`**.
   3. `UserStatus`: `INACTIVE` → `ACTIVE` (primer login) → `DEACTIVATED` (revocación).
   4. Login A1: **todo** fallo de autenticación en `POST /auth/login` (usuario inexistente, password incorrecto/vacío, `DEACTIVATED`, email vacío o dominio ≠ `@umss.edu.bo`) → mismo `401 AUTH_INVALID_CREDENTIALS`. Login **no** usa `@Valid` en DTO; validación en `Email.forLogin()` + `AuthenticateService`.
   5. Registro/admin: dominio email inválido → `422 INVALID_EMAIL_DOMAIN`; email duplicado → `409 EMAIL_ALREADY_REGISTERED` (mensaje genérico, sin revelar el valor).
@@ -157,9 +158,13 @@ flowchart LR
 | `docs/product/uc/FSD-UC-001.md` | Estado → **Hecho** | no | `@dtp-sync` 2026-06-22 |
 | `docs/product/uc/FSD-UC-002.md` | Estado → **Hecho** | no | `@dtp-sync` 2026-06-22 |
 | `docs/product/03_prd/PRD.md` | US-001/002/003 → **Hecho backend** | no | `@dtp-sync` 2026-06-22 |
-| `docs/product/api_contracts.md` | Códigos 401/409/204 MOD-AUTH | no | `@dtp-sync` 2026-06-22 |
+| `docs/product/api_contracts.md` | Códigos 401/409/204 MOD-AUTH; campo `error` global | no | sync 2026-06-23 |
 | `docs/product/DTP.md` | §A.1, §A.3, §B.1 MOD-AUTH | no | `@dtp-sync` 2026-06-22 |
 | `docs/product/modelo_datos.md` | `user_program_assignment` en §6 | no | `@dtp-sync` 2026-06-22 |
+| `docs/product/diagramas/D-SEQ-001-auth-jwt.mmd` | A1 → 401; activación INACTIVE | no | sync 2026-06-23 |
+| `docs/product/diagramas/MAR-SEQ-001-autenticacion-jwt.mmd` | A1 → 401; sin AUTH_LOCKED v1.0 | no | sync 2026-06-23 |
+| `docs/product/reglas_negocio.md` | FSD-BR-12 login A1 → 401 | no | sync 2026-06-23 |
+| `docs/adr/ADR-0003-authentication-adapter.md` | ADR vivo MOD-AUTH | no | sync 2026-06-23 |
 | `docs/product/FSD.md` | UC-001/002 → **Hecho** | no | `@dtp-sync` 2026-06-22 |
 
 > **Recordatorio**: `docs/baseline/` **no se toca**.
@@ -213,9 +218,9 @@ Regla en `pom.xml` — umbral **≥ 90% líneas** en:
 
 | Clase | Cobertura verificada | Comando |
 |---|---|---|
-| `AuthenticateService` | pendiente ejecución local | `mvn verify` |
-| `RegisterUserService` | pendiente ejecución local | `mvn verify` |
-| `DeactivateUserService` | pendiente ejecución local | `mvn verify` |
+| `AuthenticateService` | pendiente — requiere `JAVA_HOME` + `mvn verify` local | `mvn verify` |
+| `RegisterUserService` | pendiente — requiere `JAVA_HOME` + `mvn verify` local | `mvn verify` |
+| `DeactivateUserService` | pendiente — requiere `JAVA_HOME` + `mvn verify` local | `mvn verify` |
 
 Reporte esperado: `target/site/jacoco/index.html` tras `mvn verify`.
 
