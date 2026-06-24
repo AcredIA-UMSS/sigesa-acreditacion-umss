@@ -47,6 +47,8 @@ artefactos_vivos:
 | 22/06/2026 | Implementación MOD-AUTH (JWT, login, admin users, user_program_assignment, hardening code-review). | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | `5cd14df`…`f38976b` | Cursor Agent |
 | 22/06/2026 | Implementación core de MOD-PROCESS (Dominio, Casos de Uso, Controladores y Stubs JPA para plantillas). | FSD-UC-003 / DD-UC-003 | N/A | Pendiente | Boris Angulo |
 | 22/06/2026 | Inicialización de la arquitectura base Spring Boot y DTP vivo. | N/A | N/A | `init` | Boris Angulo |
+| 23/06/2026 | Realineación documental MOD-DASH: `DD-UC-004`, `ADR-0015`, `PR-IMPL-005` (migración desde `design_docs/`). | FSD-UC-011–014 / DD-UC-004 | ADR-0015 | pendiente | alexAlvarez |
+| 23/06/2026 | Implementación parcial MOD-DASH/MOD-REPORT (`com.umss.sigesa.reports`). | FSD-UC-011–014 / DD-UC-004 | ADR-0015 | `feature/dashboard` | alexAlvarez |
 
 ### A.2 Deltas respecto al DTI vFinal
 
@@ -65,6 +67,10 @@ artefactos_vivos:
 | `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | JWT + LocalAuthAdapter; A1 estricto → 401 |
 | `FSD-UC-002` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | hecho (core) | `release/3.0.0` | Pendiente | Faltan queries SQL nativas en JPA Adapters |
+| `FSD-UC-011` | `DD-UC-004` | en progreso | `release/3.0.0` | `DashboardServiceImplTest` parcial | `/kpis` provisional; migrar API-DASH-01 |
+| `FSD-UC-012` | `DD-UC-004` | en progreso | `release/3.0.0` | parcial | `/data` provisional; migrar API-DASH-02 |
+| `FSD-UC-013` | `DD-UC-004` | pendiente | `release/3.0.0` | — | API-DASH-03 fuera MVP front |
+| `FSD-UC-014` | `DD-UC-004` | en progreso | `release/3.0.0` | Excel E2E; PDF pendiente | `POST /reports/{id}/export` async |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -84,6 +90,7 @@ artefactos_vivos:
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | no | DTI vFinal §5 |
 | **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design doc `DD-UC-001` |
+| **MOD-DASH / MOD-REPORT** | **sí** | Ver §B.2 abajo; design doc `DD-UC-004` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/PROMPT_MAPPING.md` |
 | §21 ADRs | **sí (crece)** | `docs/adr/` (referencia baseline ADR-0003) |
@@ -104,3 +111,20 @@ artefactos_vivos:
 | **Password temporal alta** | Generado en servidor; entrega **offline** v1.0 (delta §A.2 #2) |
 | **Audit** | `AuditLogPort` → `NoOpAuditLogAdapter` (stub UC-017) |
 | **Seed dev** | `jd@umss.edu.bo` / `ChangeMe123!` (`AuthDataLoader`) |
+
+### B.2 MOD-DASH / MOD-REPORT — contrato técnico vigente (DD-UC-004)
+
+**Design doc:** [`DD-UC-004`](../design/DD-UC-004.md) · **ADR:** [`ADR-0015`](../adr/ADR-0015-dashboard-sync-async-reporting.md) · **Prompt:** `PR-IMPL-005` · **PM:** PM-008, PM-009
+
+| Área | Detalle vigente |
+|---|---|
+| **Paquete** | `com.umss.sigesa.reports` (domain, repository, service, web, security) |
+| **Endpoints sync** | `GET /api/v1/dashboard/kpis`, `GET /api/v1/dashboard/data` (*provisional*; target API-DASH-01/02) |
+| **Endpoints async** | `POST /api/v1/reports/{id}/export` (202 + runId); `GET /api/v1/reports/runs/{runId}` |
+| **Tablas JPA** | `report_definition`, `report_run` (JSON columns vía `MapToJsonConverter`) |
+| **RBAC** | `SecurityInjector` sobre `FilterPayload`; JWT de MOD-AUTH (DD-UC-001) |
+| **Cache** | Caffeine KPIs TTL ≤ 5 min (ADR-0015) |
+| **Export** | POI SXSSF → `app.reports.export-dir` o S3/MinIO pre-signed URL |
+| **Tests** | JaCoCo target ≥ 90 % `DashboardServiceImpl`; E2E `ReportsE2ETest` (Docker) |
+| **Drift conocido** | Rutas canónicas `/dashboard/coordinator|technician|executive` pendientes de alineación front |
+| **Documentación canónica** | `docs/design/DD-UC-004.md` (no `design_docs/`) |

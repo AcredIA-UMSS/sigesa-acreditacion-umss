@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
+import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotValidException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,5 +23,11 @@ public class ProcessExceptionHandler {
     public ResponseEntity<Map<String, String>> handleTemplateNotValid(TemplateNotValidException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY) // 422
                 .body(Map.of("error", "TEMPLATE_NOT_VALID", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TemplateNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTemplateNotFound(TemplateNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "TEMPLATE_NOT_FOUND", "message", ex.getMessage()));
     }
 }

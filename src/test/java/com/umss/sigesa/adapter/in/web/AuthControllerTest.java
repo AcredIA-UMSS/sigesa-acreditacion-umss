@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
 import com.umss.sigesa.application.port.in.AuthenticateUseCase;
 import com.umss.sigesa.application.port.out.IssuedToken;
@@ -36,6 +37,8 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthenticateUseCase authenticateUseCase;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Test
     void login_returnsJwtOnSuccess() throws Exception {

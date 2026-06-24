@@ -188,7 +188,7 @@ Derivado de Gherkin FSD-UC-001 y FSD-UC-002.
 | **Integración HTTP** | `AuthControllerTest` | UC-001 200 JWT; A1 body idéntico | implementado |
 | **Integración HTTP** | `UserAdminControllerTest` | UC-002 POST [JD] 201; 401/403 roles | implementado |
 | **Integración HTTP** | `JwtAuthenticationFilterTest` | UC-001 E3 / US-003 → 401 | implementado |
-| **Integración HTTP** | `AuthenticatedApiSmokeTest` | Perímetro JWT `/fases` y `/processes`; A1 dominio/vacíos en login | implementado |
+| **Integración HTTP** | `AuthenticatedApiSmokeTest` | Perímetro JWT `/dashboard/kpis` y `/processes`; A1 dominio/vacíos en login | implementado |
 | **Integración JPA** | `UserProgramAssignmentRepositoryTest` | FK; revoke soft; historial preservado | implementado |
 
 > **Nota de nombres:** `AuthenticateService` ≡ AuthenticationService del dominio; `RegisterUserService` ≡ CreateUserService (caso de uso `RegisterUserUseCase`).

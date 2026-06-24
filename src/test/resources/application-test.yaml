@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: test
   datasource:
-    url: jdbc:h2:mem:sigesa-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:sigesa-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -16,3 +16,7 @@ sigesa:
   jwt:
     secret: "sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256"
     expiration-seconds: 3600
+
+app:
+  reports:
+    export-dir: ${java.io.tmpdir}/sigesa-exports-test

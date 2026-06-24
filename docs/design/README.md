@@ -11,7 +11,7 @@ Esta guía define el flujo de trabajo estándar para todo el equipo de desarroll
 
 Antes de abrir el editor para tirar código, debes saber exactamente qué vas a construir.
 
-1. Abre el archivo de especificaciones vivas: `docs/product/04_fsd/FSD.md`.
+1. Abre el archivo de especificaciones vivas: [`docs/product/FSD.md`](../product/FSD.md).
 2. Identifica el ID del caso de uso que te fue asignado (ej. `FSD-UC-005`).
 3. Lee las reglas de negocio y criterios de aceptación.
 
@@ -30,7 +30,7 @@ No improvisamos arquitectura en el chat de IA. Primero diseñamos.
 
 ### ¿Qué sucede?
 
-La IA creará automáticamente el archivo `docs/design/DD-UC-005.md`.
+La IA creará automáticamente el archivo `docs/design/DD-UC-NNN.md` (siguiente correlativo; ver `DD-UC-001` … `DD-UC-004`).
 
 Revisa este documento para asegurarte de que los puertos, adaptadores (Arquitectura Hexagonal) y DTOs están bien definidos.
 

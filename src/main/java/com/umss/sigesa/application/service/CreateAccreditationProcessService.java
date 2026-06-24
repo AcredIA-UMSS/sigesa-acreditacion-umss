@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
 import com.umss.sigesa.application.port.out.AccreditationProcessRepositoryPort;
 import com.umss.sigesa.application.port.out.TemplateRepositoryPort;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
+import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotValidException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.ProcessStatus;
@@ -38,7 +39,7 @@ public class CreateAccreditationProcessService implements CreateAccreditationPro
         }
 
         Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new IllegalArgumentException("Plantilla no encontrada."));
+                .orElseThrow(() -> new TemplateNotFoundException("Plantilla no encontrada."));
 
         if (!template.isValidated()) {
             throw new TemplateNotValidException("La plantilla seleccionada no ha sido validada por el comité normativo.");

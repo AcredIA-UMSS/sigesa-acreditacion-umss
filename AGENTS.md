@@ -78,4 +78,4 @@ Notes specific to this project
 - Persistence: Spring Data JPA; enforce rule to never return JPA Entities directly from controllers — use DTOs.
 - Build/test: use existing Maven/Gradle steps in CI; prefer `task` agent to run `mvn -q test` and summarize failures.
 
-If you want, add more specific per-agent instruction files under `.github/` or request a tailored AGENTS.md with stricter rules.
+If you want, add more specific per-agent instruction files under `.cursor/` or request a tailored AGENTS.md with stricter rules + `./agents.md`.

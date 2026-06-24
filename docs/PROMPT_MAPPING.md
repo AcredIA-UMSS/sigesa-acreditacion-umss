@@ -6,6 +6,8 @@
 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Tests Gherkin Authenticate/RegisterUser + DD-UC-001 §6 | PM-005 |
 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Hardening post code-review MOD-AUTH (PM-006) | PM-006 |
 | — | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Cierre review: A1 login estricto + 409 genérico (PM-007) | PM-007 |
+| — | DD-UC-004 | FSD-UC-011–014 | Design doc MOD-DASH (`@feature-design-doc`) | PM-008 |
+| PR-IMPL-005 | DD-UC-004 | FSD-UC-011–014 | Contrato + implementación MOD-DASH/MOD-REPORT | PM-009 |
 
 ---
 
@@ -522,4 +524,69 @@ Todas las mejoras del code review implementadas en código y documentación viva
 
 - [ ] `mvn verify` local y registrar % JaCoCo en DD §6
 - [ ] Commit sugerido: `fix: MOD-AUTH hardening from code review (PM-005)`
+
+---
+
+## PM-008
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-008 |
+| **Fecha** | 2026-06-23 |
+| **Solicitante** | alexAlvarez |
+| **Agente/Entorno** | Cursor Agent |
+| **Tarea** | `@feature-design-doc` — realineación MOD-DASH a `docs/design/DD-UC-004.md` |
+| **Objetivo** | Migrar `design_docs/design_dashboard.md` al modelo documental AI-SDLC (`docs/design/`) |
+| **DD-UC vinculado** | DD-UC-004 |
+| **FSD-UC vinculado** | FSD-UC-011, FSD-UC-012, FSD-UC-013, FSD-UC-014 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```
+@feature-design-doc FSD-UC-011,FSD-UC-012,FSD-UC-013,FSD-UC-014 titulo="Reporting/Dashboard MOD-DASH"
+Realinear documentación al layout de main: docs/design/, docs/prompts/impl/, docs/adr/, docs/PROMPT_MAPPING.md
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| creado | `docs/design/DD-UC-004.md` |
+| creado | `docs/adr/ADR-0015-dashboard-sync-async-reporting.md` |
+| creado | `docs/adr/README.md` |
+| creado | `docs/plantillas/BASE_DESIGN_SYSTEM_BACKEND.md` |
+| creado | `docs/prompts/impl/PR-IMPL-005.md` |
+| actualizado | `docs/product/DTP.md` §A.1, §A.3, §B.2 |
+| eliminado | `design_docs/**` (legacy) |
+
+---
+
+## PM-009
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-009 |
+| **Fecha** | 2026-06-23 |
+| **Solicitante** | alexAlvarez |
+| **Agente/Entorno** | Cursor Agent |
+| **Tarea** | `@sigesa-prompt-contract-architect` — `PR-IMPL-005` MOD-DASH implementación |
+| **PR-IMPL vinculado** | PR-IMPL-005 |
+| **DD-UC vinculado** | DD-UC-004 |
+| **FSD-UC vinculado** | FSD-UC-011–014 |
+| **Estado** | completado (código parcial en `feature/dashboard`) |
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| creado | `docs/prompts/impl/PR-IMPL-005.md` |
+| implementado | `src/main/java/com/umss/sigesa/reports/**` |
+| implementado | `src/test/java/com/umss/sigesa/reports/**` |
+
+### Próximos pasos
+
+- [ ] Alinear `DashboardController` a API-DASH-01/02
+- [ ] JaCoCo ≥ 90 % verificado con `mvn verify`
+- [ ] `@dtp-sync` tras cierre de implementación
 
