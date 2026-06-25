@@ -106,3 +106,8 @@ artefactos_vivos:
 | **Audit** | `AuditLogPort` → `NoOpAuditLogAdapter` (stub UC-017) |
 | **Bloqueo por intentos** | Columnas `failed_attempts`/`locked_until` en DDL; lógica **diferida v1.1** (sin `429 AUTH_LOCKED` en v1.0) |
 | **Seed dev** | `jd@umss.edu.bo` / `ChangeMe123!` (`AuthDataLoader`) |
+
+## C. Integraciones
+
+### C.1 React Orval
+El consumo de la API REST se realiza exclusivamente mediante hooks de React Query autogenerados por Orval (frontend/src/api/). Cualquier cambio en los DTOs del backend requiere ejecutar pnpm run generate:api en el frontend

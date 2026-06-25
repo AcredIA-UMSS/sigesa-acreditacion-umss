@@ -1,12 +1,14 @@
-| PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación de Plantillas y Creación de Procesos |
-| — | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Design doc MOD-AUTH (`@feature-design-doc`) | PM-001 |
-| PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Contrato implementación (`@sigesa-prompt-contract-architect`, Paso 3) | PM-003 |
-| PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Implementación MOD-AUTH hexagonal + JWT (Paso 4) | PM-002 |
-| PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Completar MOD-AUTH §6 DD + JaCoCo ≥90% (Paso 4 cierre) | PM-004 |
-| PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Tests Gherkin Authenticate/RegisterUser + DD-UC-001 §6 | PM-005 |
-| PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Hardening post code-review MOD-AUTH (PM-006) | PM-006 |
-| — | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Cierre review: A1 login estricto + 409 genérico (PM-007) | PM-007 |
-
+| ID Mapeo | PR-IMPL | Design Doc | FSD Asociado | Descripción de la Tarea |
+| :--- | :--- | :--- | :--- | :--- |
+| PM-001 | N/A | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Design doc MOD-AUTH (@feature-design-doc) |
+| PM-002 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Implementación MOD-AUTH hexagonal + JWT (Paso 4) |
+| PM-003 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Contrato implementación (@sigesa-prompt-contract-architect, Paso 3) |
+| PM-004 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Completar MOD-AUTH §6 DD + JaCoCo ≥90% (Paso 4 cierre) |
+| PM-005 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Tests Gherkin Authenticate/RegisterUser + DD-UC-001 §6 |
+| PM-006 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Hardening post code-review MOD-AUTH |
+| PM-007 | N/A | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Cierre review: A1 login estricto + 409 genérico |
+| PM-008 | N/A | ADR-004 | Todas | Configuración de Monorepo, React 19, OxLint y autogeneración API con Orval |
+| PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación de Plantillas y Creación de Procesos |
 ---
 
 ## PM-001
