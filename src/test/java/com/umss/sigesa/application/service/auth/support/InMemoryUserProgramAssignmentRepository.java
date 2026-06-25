@@ -41,7 +41,7 @@ public class InMemoryUserProgramAssignmentRepository implements UserProgramAssig
                 .forEach(UserProgramAssignment::revoke);
     }
 
-    List<UserProgramAssignment> allAssignments() {
+    public List<UserProgramAssignment> allAssignments() {
         return List.copyOf(assignments);
     }
 }

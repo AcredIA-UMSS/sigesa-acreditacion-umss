@@ -6,8 +6,8 @@ import com.umss.sigesa.domain.model.Role;
 import com.umss.sigesa.domain.model.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,8 +46,8 @@ class UserProgramAssignmentRepositoryTest {
 
         List<UserProgramAssignmentEntity> active = assignmentRepository.findByUserIdAndRevokedAtIsNull(user.getId());
         assertEquals(1, active.size());
-        assertEquals(programId, active.get(0).getProgramId());
-        assertNull(active.get(0).getRevokedAt());
+        assertEquals(programId, active.getFirst().getProgramId());
+        assertNull(active.getFirst().getRevokedAt());
     }
 
     @Test

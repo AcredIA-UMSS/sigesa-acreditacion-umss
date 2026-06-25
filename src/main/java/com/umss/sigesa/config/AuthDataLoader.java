@@ -15,8 +15,8 @@ import java.util.UUID;
 @Component
 public class AuthDataLoader implements ApplicationRunner {
 
-    static final String SEED_JD_EMAIL = "jd@umss.edu.bo";
-    static final String SEED_PASSWORD = "ChangeMe123!";
+    public static final String SEED_JD_EMAIL = "jd@umss.edu.bo";
+    public static final String SEED_PASSWORD = "ChangeMe123!";
 
     private final AppUserJpaRepository userRepository;
     private final PasswordEncoder passwordEncoder;
