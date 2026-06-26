@@ -13,3 +13,5 @@ export * from './processResponse';
 export * from './processResponseStatus';
 export * from './registerUserRequest';
 export * from './registerUserResponse';
+export * from './reportTypes';
+export * from './evidenceTypes';

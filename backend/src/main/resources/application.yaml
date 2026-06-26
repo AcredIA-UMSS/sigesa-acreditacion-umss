@@ -23,8 +23,17 @@ spring:
       mode: never
   flyway:
     enabled: false
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
 
 sigesa:
   jwt:
     secret: ${SIGESA_JWT_SECRET:sigesa-dev-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256}
     expiration-seconds: ${SIGESA_JWT_EXPIRATION_SECONDS:86400}
+  report:
+    storage-path: ${SIGESA_REPORT_STORAGE_PATH:./data/reports}
+  evidence:
+    storage-path: ${SIGESA_EVIDENCE_STORAGE_PATH:./data/evidences}
+    async-threshold-bytes: ${SIGESA_EVIDENCE_ASYNC_THRESHOLD:5242880}

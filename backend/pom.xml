@@ -116,6 +116,11 @@
              <artifactId>bcprov-jdk18on</artifactId>
              <version>1.84</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -202,6 +207,11 @@
                                         <include>com.umss.sigesa.application.service.auth.AuthenticateService</include>
                                         <include>com.umss.sigesa.application.service.auth.RegisterUserService</include>
                                         <include>com.umss.sigesa.application.service.auth.DeactivateUserService</include>
+                                        <include>com.umss.sigesa.application.service.report.GenerateExecutiveReportService</include>
+                                        <include>com.umss.sigesa.application.service.report.GetReportJobStatusService</include>
+                                        <include>com.umss.sigesa.application.service.report.ProcessReportJobService</include>
+                                        <include>com.umss.sigesa.application.service.report.DownloadReportArtifactService</include>
+                                        <include>com.umss.sigesa.application.service.evidence.UploadEvidenceService</include>
                                     </includes>
                                     <limits>
                                         <limit>

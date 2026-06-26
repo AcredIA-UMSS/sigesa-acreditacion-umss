@@ -39,7 +39,7 @@ ultima_actualizacion: "2026-06-22"
 | `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) |
 | `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) |
 | `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-003.md) |
-| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-004.md) |
+| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-004.md) |
 | `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) |
 | `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-006.md) |
 | `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-007.md) |
@@ -49,7 +49,7 @@ ultima_actualizacion: "2026-06-22"
 | `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-011.md) |
 | `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) |
 | `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-013.md) |
-| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-014.md) |
+| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-014.md) |
 | `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) |
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) |
 | `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) |

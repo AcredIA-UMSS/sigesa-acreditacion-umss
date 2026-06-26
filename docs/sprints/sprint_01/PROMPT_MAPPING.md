@@ -9,6 +9,9 @@
 | PM-007 | N/A | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Cierre review: A1 login estricto + 409 genérico |
 | PM-008 | N/A | ADR-004 | Todas | Configuración de Monorepo, React 19, OxLint y autogeneración API con Orval |
 | PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación de Plantillas y Creación de Procesos |
+| PM-010 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Implementación MOD-REPORT — reporte ejecutivo PDF asíncrono |
+| PM-011 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
+| PM-012 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
 ---
 
 ## PM-001
@@ -524,4 +527,78 @@ Todas las mejoras del code review implementadas en código y documentación viva
 
 - [ ] `mvn verify` local y registrar % JaCoCo en DD §6
 - [ ] Commit sugerido: `fix: MOD-AUTH hardening from code review (PM-005)`
+
+---
+
+## PM-010
+
+| Campo | Valor |
+|---|---|
+| **Fecha** | 2026-06-26 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor IDE — @sigesa-orchestrator |
+| **Tarea** | Pipeline AI-SDLC MOD-REPORT (FSD-UC-014) |
+| **Objetivo** | Design doc, contrato PR-IMPL-005, backend hexagonal + frontend panel reportes |
+| **PR-IMPL vinculado** | PR-IMPL-005 |
+| **DD-UC vinculado** | DD-UC-014 |
+| **FSD-UC vinculado** | FSD-UC-014 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```
+@sigesa-orchestrator Necesito implementar el módulo de reportes definido en FSD-UC-004. Hazte cargo del proceso.
+```
+
+### Nota de trazabilidad
+
+El usuario citó FSD-UC-004; el módulo de reportes corresponde a **FSD-UC-014** (MOD-REPORT) según LFSD vivo.
+
+---
+
+## PM-011
+
+| Campo | Valor |
+|---|---|
+| **Fecha** | 2026-06-26 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor IDE |
+| **Tarea** | Code review + DTP sync + puente UC-013 |
+| **PR-IMPL vinculado** | PR-IMPL-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```
+proximos pasos 
+@code-review-sigesa — revisión arquitectónica del diff
+@dtp-sync — registrar OpenPDF, tabla report_job y endpoints en DTP.md
+Conectar ExecutiveDataPort al panel semáforo real cuando se implemente FSD-UC-013
+```
+
+### Resultado
+
+- Code review MOD-REPORT; fix `REPORT_GENERATION_FAILED` en `ProcessReportJobService`.
+- DTP §B.2, deltas §A.2 #4-6, api_contracts API-REP-01..03.
+- `ExecutiveDashboardQueryPort` + `ExecutiveDataDashboardAdapter` listos para UC-013.
+
+---
+
+## PM-012
+
+| Campo | Valor |
+|---|---|
+| **Fecha** | 2026-06-26 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor IDE — @sigesa-orchestrator |
+| **Tarea** | Pipeline AI-SDLC MOD-EVIDENCE (FSD-UC-004) |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD-UC vinculado** | DD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```
+@sigesa-orchestrator Necesito implementar el módulo de Cargar Evidencia en FSD-UC-004. Hazte cargo del proceso.
+```
 
