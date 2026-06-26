@@ -253,13 +253,33 @@ security:
 
 ## 8. MOD-REPORT · MOD-NOTIFY · MOD-PUBLIC · MOD-AUDIT
 
-### API-REP-01 — `POST /reports/executive/pdf`
+### API-REP-01 — `POST /api/v1/reports/executive/pdf`
 
-| UC | FSD-UC-014 |
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-014 |
 | **x-allowed-roles** | `[JD]` |
 | **Body** | `{ "facultyId?", "programId?", "managementYear" }` |
-| **202** | `{ "jobId" }` o **200** con `application/pdf` si síncrono |
+| **202** | `{ "jobId" }` |
 | **SLA** | P95 ≤ 5 min (NFR-003) |
+
+### API-REP-02 — `GET /api/v1/reports/executive/pdf/{jobId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-014 |
+| **x-allowed-roles** | `[JD]` (solo solicitante del job) |
+| **200** | `{ "jobId", "status", "downloadUrl?", "errorCode?" }` |
+| **404** | Job inexistente |
+
+### API-REP-03 — `GET /api/v1/reports/executive/pdf/{jobId}/download`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-014 |
+| **x-allowed-roles** | `[JD]` (solo solicitante; job `COMPLETED`) |
+| **200** | `application/pdf` |
+| **409** | `REPORT_NOT_READY` |
 
 ### API-NOTIF-01 — Outbox interno
 
@@ -314,5 +334,6 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.2 | 2026-06-26 | MOD-REPORT: API-REP-01..03 job async PDF; rutas `/api/v1/reports/executive/pdf` |
 | v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |
 | Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8; RBAC y errores de estado |
