@@ -13,6 +13,7 @@
 | PM-007 | N/A | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Cierre review: A1 login estricto + 409 genérico |
 | PM-008 | N/A | ADR-004 | Todas | Configuración de Monorepo, React 19, OxLint y autogeneración API con Orval |
 | PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación de Plantillas y Creación de Procesos |
+| PM-010 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación UI Layout e Inicialización de Procesos |
 
 > **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---
@@ -530,4 +531,73 @@ Todas las mejoras del code review implementadas en código y documentación viva
 
 - [ ] `mvn verify` local y registrar % JaCoCo en DD §6
 - [ ] Commit sugerido: `fix: MOD-AUTH hardening from code review (PM-005)`
+
+---
+
+## PM-010
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-010 |
+| **Fecha** | 2026-06-29 |
+| **Hora** | 16:08 |
+| **Solicitante** | Equipo de Desarrollo |
+| **Agente/Entorno** | Cursor |
+| **Modelo** | Claude 3.5 Sonnet / GPT-4o (Orquestador) |
+| **Tarea** | Implementación UI Layout e Inicialización de Procesos |
+| **Objetivo** | Construir el layout global (Sidebar desplegable) y la vista pura de inicialización de procesos aplicando el sistema de diseño estricto. |
+| **Contexto** | Se requiere maquetar la vista sin conectar aún la API (Orval comentado) debido a que el backend está pendiente de despliegue local. |
+| **PR-IMPL vinculado** | PR-IMPL-003 |
+| **DD-UC vinculado** | DD-UC-003 |
+| **FSD-UC vinculado** | FSD-UC-003 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@generate-frontend-feature Crea el componente del sidebar como en la imagen y lo demas debe tener un diseño similar al de la imagen. 
+Aplica estrictamente las siguientes reglas del Frontend Design & UI Guidelines (design.md):
+- Framework: React 19 + TypeScript estricto.
+- Tailwind CSS: Usa EXCLUSIVAMENTE las variables de color primario (Azul UMSS), secundario (Rojo UMSS) y rampas definidas.
+- Tipografía: IBM Plex Mono (posteriormente ajustado a Inter).
+- Que el sidebar sea desplegable.
+```
+## Resumen de cambios
+
+### Entradas auxiliares
+
+- `docs/design/design.md` (Reglas de diseño UI frontend)
+- Imagen de referencia del Mockup UI
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|--------|------|
+| Generado | `frontend/src/features/procesos/components/CreateProcessUI.tsx` |
+| Generado | `frontend/src/features/procesos/CreateProcessPage.tsx` |
+| Generado | `frontend/src/components/layout/Sidebar.tsx` |
+| Modificado | `frontend/src/App.tsx` |
+| Modificado | `frontend/src/index.css` |
+| Eliminado | `frontend/tailwind.config.ts` |
+| Eliminado | `frontend/postcss.config.js` |
+
+### Cambios realizados
+
+- Estructuración de la página con separación de responsabilidades (UI pura vs Contenedor).
+- Refactorización del ecosistema a Tailwind CSS v4 nativo.
+- Creación de un sidebar colapsable gestionando estado local.
+
+### Validación ejecutada
+
+- [x] Compilación de Vite (`pnpm dev`) — **Resultado:** exitoso.
+- [x] Renderizado de componentes sin errores de tipado en TypeScript.
+
+### Resultado obtenido
+
+Interfaz maquetada correctamente con responsive design base, colores institucionales y rutas configuradas. El hook de Orval fue dejado comentado intencionalmente.
+
+### Próximos pasos
+
+- [ ] Implementar React Hook Form + Zod para validación de datos.
+- [ ] Descomentar el hook de Orval y realizar el *wiring* final con el backend de Spring Boot.
 

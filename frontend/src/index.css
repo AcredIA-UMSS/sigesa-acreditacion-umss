@@ -1,111 +1,86 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/* Inyectamos nuestros tokens de diseño directamente en el tema de Tailwind v4
+*/
+@theme {
+  /* Tipografía */
+  --font-sans: "Inter", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Tamaños de Texto Customizados */
+  --text-display-lg: 3rem;
+  --text-display-lg--font-weight: 700;
+  
+  --text-heading-xl: 1.875rem;
+  --text-heading-xl--font-weight: 600;
+  
+  --text-heading-lg: 1.5rem;
+  --text-heading-lg--font-weight: 600;
+  
+  --text-heading-md: 1.25rem;
+  --text-heading-md--font-weight: 600;
+  
+  --text-heading-sm: 1.125rem;
+  --text-heading-sm--font-weight: 600;
+  
+  --text-body-lg: 1rem;
+  --text-body-lg--font-weight: 400;
+  
+  --text-body-md: 0.875rem;
+  --text-body-md--font-weight: 400;
+  
+  --text-label-md: 0.75rem;
+  --text-label-md--font-weight: 500;
+  
+  --text-code: 0.875rem;
+  --text-code--font-weight: 400;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* Colores: Primary (Azul UMSS) */
+  --color-primary-50: #E8F1FF;
+  --color-primary-100: #D6E3FF;
+  --color-primary-200: #A9C7FF;
+  --color-primary-300: #7CA2E1;
+  --color-primary-400: #375F9A;
+  --color-primary-500: #1B4780;
+  --color-primary-600: #003770;
+  --color-primary-700: #002249;
+  --color-primary-800: #001B3D;
+  --color-primary-900: #001026;
+
+  /* Colores: Secondary (Rojo UMSS) */
+  --color-secondary-50: #FFECE8;
+  --color-secondary-100: #FFDAD5;
+  --color-secondary-200: #FFB4AA;
+  --color-secondary-300: #FF897A;
+  --color-secondary-400: #FF5449;
+  --color-secondary-500: #E80F16;
+  --color-secondary-600: #BC000C;
+  --color-secondary-700: #930007;
+  --color-secondary-800: #690003;
+  --color-secondary-900: #410001;
+
+  /* Colores: Grises */
+  --color-gray-50: #F8F9FA;
+  --color-gray-100: #F3F4F5;
+  --color-gray-200: #EDEEEF;
+  --color-gray-300: #E7E8E9;
+  --color-gray-400: #E1E3E4;
+  --color-gray-500: #C3C6D1;
+  --color-gray-600: #9396A1;
+  --color-gray-700: #737781;
+  --color-gray-800: #434750;
+  --color-gray-900: #191C1D;
+
+  /* Colores: Semánticos y Base */
+  --color-body: #FFFFFF;
+  --color-success: #198754;
+  --color-warning: #FFC107;
+  --color-danger: #DC3545;
+  --color-info: #0D6EFD;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* Base styles usando variables CSS estándar */
+html, body, #root {
+  height: 100%;
+  background-color: var(--color-body);
 }

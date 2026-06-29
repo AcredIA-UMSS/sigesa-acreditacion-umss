@@ -1,16 +1,20 @@
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CreateProcessPage } from './features/procesos/CreateProcessPage';
 
 function App() {
-
   return (
-    <>
-      <section id="center">
-      <h1 className="text-3xl font-bold text-center">
-        SIGESA SISTEMA USANDO TAILWIND CSS
-      </h1>
-      </section>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* Redirección por defecto */}
+        <Route path="/" element={<Navigate to="/procesos/nuevo" replace />} />
+        
+        {/* Tu nueva ruta */}
+        <Route path="/procesos/nuevo" element={<CreateProcessPage />} />
+        
+        {/* Aquí irán creciendo tus demás rutas (ej. /reportes, /historial) */}
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

@@ -49,7 +49,16 @@ artefactos_vivos:
 | 22/06/2026 | Implementación MOD-AUTH (JWT, login, admin users, user_program_assignment, hardening code-review). | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | `5cd14df`…`f38976b` | Cursor Agent |
 | 22/06/2026 | Implementación core de MOD-PROCESS (Dominio, Casos de Uso, Controladores y Stubs JPA para plantillas). | FSD-UC-003 / DD-UC-003 | N/A | Pendiente | Boris Angulo |
 | 22/06/2026 | Inicialización de la arquitectura base Spring Boot y DTP vivo. | N/A | N/A | `init` | Boris Angulo |
+## [2026-06-29] - Actualización de Arquitectura Frontend (FSD-UC-003)
 
+### Dependencias Añadidas
+- `lucide-react`: Adoptado como estándar para la iconografía de la interfaz.
+- `react-router-dom`: Configurado para la gestión de rutas del lado del cliente.
+
+### Decisiones Técnicas y Refactorización
+- **Migración a Tailwind CSS v4:** Se eliminaron los archivos de configuración legados (`tailwind.config.ts`, `postcss.config.js`). El sistema de diseño institucional y los tokens de color ahora se gestionan nativamente mediante la directiva `@theme` en `src/index.css`.
+- **Tipografía:** Se estableció `Inter` como la tipografía principal sin serifa (`sans`), manteniendo `IBM Plex Mono` para contextos específicos.
+- **Enrutamiento:** Se registró la ruta `/procesos/nuevo` conectada al contenedor lógico `CreateProcessPage`.
 ### A.2 Deltas respecto al DTI vFinal
 
 > Diferencias **deliberadas** entre lo diseñado y lo construido. 
