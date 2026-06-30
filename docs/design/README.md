@@ -15,9 +15,9 @@ Esta guía define el flujo de trabajo estándar para todo el equipo de desarroll
 
 Antes de abrir el editor para tirar código, debes saber exactamente qué vas a construir.
 
-1. Abre el archivo de especificaciones vivas: `docs/product/04_fsd/FSD.md`.
-2. Identifica el ID del caso de uso que te fue asignado (ej. `FSD-UC-005`).
-3. Lee las reglas de negocio y criterios de aceptación.
+1. Abre el archivo de especificaciones vivas: [`docs/product/FSD.md`](../product/FSD.md).
+2. Identifica el ID del caso de uso que te fue asignado (ej. `FSD-UC-005`) y su **Design Doc** enlazado (`DD-UC-NNN`, relación 1:1).
+3. Lee las reglas de negocio y criterios de aceptación en [`docs/product/uc/FSD-UC-NNN.md`](../product/uc/).
 
 ---
 

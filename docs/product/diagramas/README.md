@@ -1,4 +1,4 @@
-# Diagramas FSD — vista `docs/04_fsd/07_diagramas/`
+# Diagramas FSD — vista [`docs/baseline/04_fsd/07_diagramas/`](../../baseline/04_fsd/07_diagramas/)
 
 Enlaces simbólicos a la carpeta canónica [`../../07_diagramas/`](../../07_diagramas/README.md). **No editar aquí:** modificar el archivo real en `docs/07_diagramas/`.
 

@@ -18,7 +18,7 @@ agents_md: "/AGENTS.md"
 artefactos_vivos:
   prd: "docs/product/PRD.md"          
   fsd: "docs/product/FSD.md"          
-  prompt_mapping: "docs/PROMPT_MAPPING.md"
+  prompt_mapping: "docs/sprints/sprint_<N>/PROMPT_MAPPING.md"
   design_docs_dir: "docs/design/"     
   adr_dir: "docs/adr/"
 ---
@@ -73,7 +73,7 @@ artefactos_vivos:
 | §4 Modelo de dominio | no / sí | `<…>` |
 | §5 Arquitectura hexagonal del core | no / sí | `<…>` |
 | §8 Despliegue cloud | no / sí | `<…>` |
-| §10 Prompt mapping | sí (crece con PR-IMPL-*) | `docs/PROMPT_MAPPING.md` |
+| §10 Prompt mapping | sí (crece con PR-IMPL-*) | `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` |
 | §21 ADRs | sí (crece) | `docs/adr/` |
 
 ---
@@ -86,6 +86,6 @@ artefactos_vivos:
 - [ ] §A.3 Estado por FSD-UC con su Design Doc.
 - [ ] §A.4 Trazabilidad código ↔ DTP reconstruible para cada feature.
 - [ ] §B: solo secciones cambiadas reescritas; el resto referencia al DTI vFinal.
-- [ ] `docs/PROMPT_MAPPING.md` ampliado con prompts de implementación (`PR-IMPL-*`).
+- [ ] `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` ampliado con prompts de implementación (`PR-IMPL-*`) vía `@save-prompt-mapping`.
 - [ ] `AGENTS.md` sincronizado.
 - [ ] Baseline congelado (`docs/baseline/`) **intacto** (sin commits que lo modifiquen).

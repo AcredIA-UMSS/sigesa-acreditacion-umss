@@ -6,7 +6,7 @@
 | **Estado** | **Aceptada** |
 | **Fecha** | 2026-06-23 |
 | **Alcance** | MOD-AUTH · FSD-UC-001 |
-| **Trazabilidad** | BRD Q-02 · PRD-REQ-001 · FSD-UC-001 · DD-UC-001 |
+| **Trazabilidad** | BRD Q-02 · PRD-REQ-001 · FSD-UC-001 · `DD-UC-001` · FSD-UC-002 · `DD-UC-002` |
 | **Baseline congelado** | [`docs/baseline/05_dti/adrs/ADR_003_adapter_autenticacion.md`](../baseline/05_dti/adrs/ADR_003_adapter_autenticacion.md) |
 
 ## Contexto
@@ -47,6 +47,7 @@ Restricciones de negocio: solo correos `@umss.edu.bo` (FSD-BR-12); dominio valid
 
 ## Referencias
 
-- [`docs/design/DD-UC-001.md`](../design/DD-UC-001.md) — implementación MOD-AUTH v1.0
+- [`docs/design/DD-UC-001.md`](../design/DD-UC-001.md) — login y sesión JWT (FSD-UC-001)
+- [`docs/design/DD-UC-002.md`](../design/DD-UC-002.md) — gestión de usuarios e identidad (FSD-UC-002)
 - [`docs/product/api_contracts.md`](../product/api_contracts.md) — API-AUTH-01
 - [`docs/baseline/05_dti/adrs/ADR_007_jwt_rbac.md`](../baseline/05_dti/adrs/ADR_007_jwt_rbac.md)

@@ -1,0 +1,65 @@
+---
+alwaysApply: true
+---
+# Frontend Design & UI Guidelines (design.md)
+
+**Descripción:** Este documento define el Sistema de Diseño estricto para el frontend del proyecto SIGESA. Todo agente de IA que genere componentes UI debe adherirse OBLIGATORIAMENTE a estos tokens, colores y reglas de arquitectura.
+
+## 1. Arquitectura y Stack Base
+- **Framework:** React 19 + TypeScript estricto.
+- **Herramientas:** Vite (Bundler), pnpm (Gestor de paquetes), OxLint (Linting).
+- **Consumo de API:** Uso EXCLUSIVO de hooks autogenerados por Orval (`src/api/`). PROHIBIDO escribir `fetch` o `axios` a mano.
+- **Separación de Responsabilidades:** - **Componentes de Presentación (UI):** Deben ser funciones puras, recibir datos por `props` y emitir eventos. No deben saber de dónde vienen los datos.
+  - **Componentes Contenedores / Hooks:** Manejan el estado, llaman a React Query (Orval) y pasan la data limpia a la UI.
+
+## 2. Sistema de Diseño y Tokens (Tailwind CSS)
+
+PROHIBIDO el uso de colores arbitrarios o valores hexadecimales en las clases (ej. `text-[#123456]`). Se deben usar EXCLUSIVAMENTE las variables definidas en la configuración de Tailwind.
+
+### 2.1 Paleta de Colores Institucional (UMSS)
+- **Primary:** `bg-primary` / `text-primary` (Azul UMSS - `#003770`)
+- **Secondary:** `bg-secondary` / `text-secondary` (Rojo UMSS - `#E30613`)
+- **Body:** `bg-body` / `text-body` (Blanco - `#FFFFFF`)
+
+### 2.2 Rampas de Color
+Usar la nomenclatura estándar de Tailwind (50 a 900) mapeada a la rampa institucional:
+
+| Tono | Azul (Primary) | Rojo (Secondary) | Grises (Gray/Neutral) |
+| :--- | :--- | :--- | :--- |
+| **50** | `#E8F1FF` | `#FFECE8` | `#F8F9FA` |
+| **100** | `#D6E3FF` | `#FFDAD5` | `#F3F4F5` |
+| **200** | `#A9C7FF` | `#FFB4AA` | `#EDEEEF` |
+| **300** | `#7CA2E1` | `#FF897A` | `#E7E8E9` |
+| **400** | `#375F9A` | `#FF5449` | `#E1E3E4` |
+| **500** | `#1B4780` | `#E80F16` | `#C3C6D1` |
+| **600** | `#003770` | `#BC000C` | `#9396A1` |
+| **700** | `#002249` | `#930007` | `#737781` |
+| **800** | `#001B3D` | `#690003` | `#434750` |
+| **900** | `#001026` | `#410001` | `#191C1D` |
+
+### 2.3 Colores Semánticos
+Para alertas, estados y validaciones de formularios:
+- **Success:** `bg-success` (`#198754`)
+- **Warning:** `bg-warning` (`#FFC107`)
+- **Danger:** `bg-danger` (`#DC3545`)
+- **Info:** `bg-info` (`#0D6EFD`)
+
+### 2.4 Tipografía: Inter
+La fuente principal y monospace del sistema es `Inter`. PROHIBIDO usar tamaños arbitrarios como `text-[15px]`. Se deben usar los siguientes tokens tipográficos configurados en Tailwind:
+
+| Token Tailwind | Uso Semántico | Tamaño Real | Peso Font |
+| :--- | :--- | :--- | :--- |
+| `text-display-lg` | Títulos enormes/Héroes | 3rem (48px) | `font-bold` (700) |
+| `text-heading-xl` | Títulos principales (H1) | 1.875rem (30px) | `font-semibold` (600) |
+| `text-heading-lg` | Subtítulos de sección (H2) | 1.5rem (24px) | `font-semibold` (600) |
+| `text-heading-md` | Títulos de tarjetas/modales (H3) | 1.25rem (20px) | `font-semibold` (600) |
+| `text-heading-sm` | Títulos de bloques (H4) | 1.125rem (18px) | `font-semibold` (600) |
+| `text-body-lg` | Párrafos principales | 1rem (16px) | `font-normal` (400) |
+| `text-body-md` | Textos secundarios | 0.875rem (14px) | `font-normal` (400) |
+| `text-label-md` | Etiquetas form/Botones | 0.75rem (12px) | `font-medium` (500) |
+| `text-code` | Bloques de código | 0.875rem (14px) | `font-normal` (400) |
+
+## 3. Reglas de Generación de Código UI
+1. **Composición sobre Configuración:** Crea componentes pequeños y reutilizables (ej. `<Button>`, `<TextInput>`) aplicando estos tokens en ellos, y luego reutilízalos en las páginas.
+2. **Iconografía:** Si se requiere, sugerir el uso de una librería estándar compatible (ej. `lucide-react`) y aplicar los colores de la rampa de grises o semánticos según el contexto.
+3. **Responsive Design:** Aplica las clases de Tailwind (`sm:`, `md:`, `lg:`) usando un enfoque "Mobile-first".

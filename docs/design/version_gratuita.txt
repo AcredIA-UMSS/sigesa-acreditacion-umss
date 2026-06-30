@@ -2,9 +2,9 @@
 Paso 1: Seleccionar el Caso de Uso (FSD)
 (Este paso se mantiene igual, es trabajo humano).
 
-Abre el archivo de especificaciones vivas: docs/product/04_fsd/FSD.md.
+Abre el archivo de especificaciones vivas: docs/product/FSD.md.
 
-Identifica el ID del caso de uso que te fue asignado (ej. FSD-UC-005).
+Identifica el ID del caso de uso que te fue asignado (ej. FSD-UC-005) y su Design Doc enlazado (DD-UC-NNN, relación 1:1).
 
 Lee las reglas de negocio y criterios de aceptación.
 
@@ -28,7 +28,7 @@ En el chat, escribe este prompt:
 
 ¿Qué sucede? Se generará un prompt estructurado con las restricciones exactas.
 
-📝 Acción Manual: Abre docs/PROMPT_MAPPING.md y añade una fila vinculando tu FSD-UC-005, tu design doc DD-UC-005 y tu nuevo prompt PR-IMPL-005.
+📝 Acción Manual: Tras implementar, usa @save-prompt-mapping sprint=<N> pr=PR-IMPL-005 para registrar la trazabilidad en docs/sprints/sprint_<N>/PROMPT_MAPPING.md.
 
 Paso 4: Escribir el Código
 ¡Ahora sí! Con las reglas claras, dejamos que la IA genere el código. (Este paso se mantiene igual).

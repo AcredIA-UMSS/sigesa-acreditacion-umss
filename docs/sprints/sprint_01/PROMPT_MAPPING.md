@@ -1,6 +1,10 @@
+# PROMPT_MAPPING — Sprint 01
+
+> **Ubicación vigente del registro PM.** No existe `docs/PROMPT_MAPPING.md` en raíz. Las entradas PM históricas (PM-001…PM-007) pueden mencionar esa ruta legada en *Archivos modificados*; el contenido vive aquí.
+
 | ID Mapeo | PR-IMPL | Design Doc | FSD Asociado | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
-| PM-001 | N/A | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Design doc MOD-AUTH (@feature-design-doc) |
+| PM-001 | N/A | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Design doc MOD-AUTH (@feature-design-doc); **split 1:1** 2026-06-23 → `DD-UC-001` + `DD-UC-002` |
 | PM-002 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Implementación MOD-AUTH hexagonal + JWT (Paso 4) |
 | PM-003 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Contrato implementación (@sigesa-prompt-contract-architect, Paso 3) |
 | PM-004 | PR-IMPL-004 | DD-UC-001 | FSD-UC-001, FSD-UC-002 | Completar MOD-AUTH §6 DD + JaCoCo ≥90% (Paso 4 cierre) |
@@ -12,6 +16,9 @@
 | PM-010 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Implementación MOD-REPORT — reporte ejecutivo PDF asíncrono |
 | PM-011 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
 | PM-012 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
+| PM-013 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación UI Layout e Inicialización de Procesos |
+
+> **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---
 
 ## PM-001
@@ -160,11 +167,11 @@ dependencias spring-boot-starter-security + JJWT 0.12.x.
 Cierre: @save-prompt-mapping PR-IMPL-004 → @dtp-sync → @sigesa-architectural-code-reviewer.
 ```
 
-> **Nota:** El contrato íntegro (§1–§8) vive en `docs/prompts/impl/PR-IMPL-004.md`. PM-002 registra la **ejecución** del Paso 4, no la redacción del contrato (PM-003).
+> **Nota:** El contrato íntegro (§1–§8) vivía en `PR-IMPL-004`; hoy archivado en [`archive/PR-IMPL-004.md`](../../prompts/impl/archive/PR-IMPL-004.md). PM-002 registra la **ejecución** del Paso 4, no la redacción del contrato (PM-003).
 
 ### Entradas auxiliares
 
-- `docs/prompts/impl/PR-IMPL-004.md` (contrato PM-003)
+- `docs/prompts/impl/archive/PR-IMPL-004.md` (contrato unificado PM-003; archivado 2026-06-23)
 - `docs/design/DD-UC-001.md`
 - `docs/design/README.md` (Paso 4)
 - `docs/product/uc/FSD-UC-001.md`
@@ -534,6 +541,7 @@ Todas las mejoras del code review implementadas en código y documentación viva
 
 | Campo | Valor |
 |---|---|
+| **ID** | PM-010 |
 | **Fecha** | 2026-06-26 |
 | **Solicitante** | Usuario |
 | **Agente/Entorno** | Cursor IDE — @sigesa-orchestrator |
@@ -601,4 +609,74 @@ Conectar ExecutiveDataPort al panel semáforo real cuando se implemente FSD-UC-0
 ```
 @sigesa-orchestrator Necesito implementar el módulo de Cargar Evidencia en FSD-UC-004. Hazte cargo del proceso.
 ```
+
+---
+
+## PM-013
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-013 |
+| **Fecha** | 2026-06-29 |
+| **Hora** | 16:08 |
+| **Solicitante** | Equipo de Desarrollo |
+| **Agente/Entorno** | Cursor |
+| **Modelo** | Claude 3.5 Sonnet / GPT-4o (Orquestador) |
+| **Tarea** | Implementación UI Layout e Inicialización de Procesos |
+| **Objetivo** | Construir el layout global (Sidebar desplegable) y la vista pura de inicialización de procesos aplicando el sistema de diseño estricto. |
+| **Contexto** | Se requiere maquetar la vista sin conectar aún la API (Orval comentado) debido a que el backend está pendiente de despliegue local. |
+| **PR-IMPL vinculado** | PR-IMPL-003 |
+| **DD-UC vinculado** | DD-UC-003 |
+| **FSD-UC vinculado** | FSD-UC-003 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@generate-frontend-feature Crea el componente del sidebar como en la imagen y lo demas debe tener un diseño similar al de la imagen. 
+Aplica estrictamente las siguientes reglas del Frontend Design & UI Guidelines (design.md):
+- Framework: React 19 + TypeScript estricto.
+- Tailwind CSS: Usa EXCLUSIVAMENTE las variables de color primario (Azul UMSS), secundario (Rojo UMSS) y rampas definidas.
+- Tipografía: IBM Plex Mono (posteriormente ajustado a Inter).
+- Que el sidebar sea desplegable.
+```
+
+## Resumen de cambios
+
+### Entradas auxiliares
+
+- `docs/design/design.md` (Reglas de diseño UI frontend)
+- Imagen de referencia del Mockup UI
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|--------|------|
+| Generado | `frontend/src/features/procesos/components/CreateProcessUI.tsx` |
+| Generado | `frontend/src/features/procesos/CreateProcessPage.tsx` |
+| Generado | `frontend/src/components/layout/Sidebar.tsx` |
+| Modificado | `frontend/src/App.tsx` |
+| Modificado | `frontend/src/index.css` |
+| Eliminado | `frontend/tailwind.config.ts` |
+| Eliminado | `frontend/postcss.config.js` |
+
+### Cambios realizados
+
+- Estructuración de la página con separación de responsabilidades (UI pura vs Contenedor).
+- Refactorización del ecosistema a Tailwind CSS v4 nativo.
+- Creación de un sidebar colapsable gestionando estado local.
+
+### Validación ejecutada
+
+- [x] Compilación de Vite (`pnpm dev`) — **Resultado:** exitoso.
+- [x] Renderizado de componentes sin errores de tipado en TypeScript.
+
+### Resultado obtenido
+
+Interfaz maquetada correctamente con responsive design base, colores institucionales y rutas configuradas. El hook de Orval fue dejado comentado intencionalmente.
+
+### Próximos pasos
+
+- [ ] Implementar React Hook Form + Zod para validación de datos.
+- [ ] Descomentar el hook de Orval y realizar el *wiring* final con el backend de Spring Boot.
 

@@ -6,7 +6,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-06-22"
+ultima_actualizacion: "2026-06-23"
 ---
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
@@ -28,32 +28,32 @@ ultima_actualizacion: "2026-06-22"
 | Máquina de estados Indicador | `PENDIENTE` → `SUBIDO` ↔ `OBSERVADO` / `APROBADO` · [`diagramas/D-STA-001-indicador.mmd`](diagramas/D-STA-001-indicador.mmd) · [`diagramas/FSD-UC-006_008_009_estados_indicador.mmd`](diagramas/FSD-UC-006_008_009_estados_indicador.mmd) |
 | Modelo documental AI-SDLC | [`../MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUMENTAL_IMPLEMENTACION.md) |
 
-**Artefactos descompuestos (solo lectura / histórico):** [`04_fsd/`](04_fsd/) — fuente de extracción del baseline.
+**Artefactos descompuestos (solo lectura / histórico):** [`docs/baseline/04_fsd/`](../baseline/04_fsd/) — fuente de extracción del baseline.
 
 ---
 
 ## 2. Índice de casos de uso (módulos funcionales)
 
-| ID | Nombre | Actor | Release | Estado | Enlace |
-|----|--------|-------|---------|--------|--------|
-| `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) |
-| `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) |
-| `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-003.md) |
-| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-004.md) |
-| `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) |
-| `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-006.md) |
-| `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-007.md) |
-| `FSD-UC-008` | Rechazar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-008.md) |
-| `FSD-UC-009` | Aprobar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-009.md) |
-| `FSD-UC-010` | Avanzar/cerrar Fase | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-010.md) |
-| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-011.md) |
-| `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) |
-| `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-013.md) |
-| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-014.md) |
-| `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) |
-| `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) |
-| `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) |
-| `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) |
+| ID | Nombre | Actor | Release | Estado | FSD | Design Doc | PR-IMPL |
+|----|--------|-------|---------|--------|-----|------------|---------|
+| `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) | [`DD-UC-001`](../design/DD-UC-001.md) | [`PR-IMPL-001`](../prompts/impl/PR-IMPL-001.md) |
+| `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) | [`DD-UC-002`](../design/DD-UC-002.md) | [`PR-IMPL-002`](../prompts/impl/PR-IMPL-002.md) |
+| `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-003.md) | [`DD-UC-003`](../design/DD-UC-003.md) | [`PR-IMPL-003`](../prompts/impl/PR-IMPL-003.md) |
+| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-004.md) | [`DD-UC-004`](../design/DD-UC-004.md) | [`PR-IMPL-006`](../prompts/impl/PR-IMPL-006.md) |
+| `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) | — | — |
+| `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-006.md) | — | — |
+| `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-007.md) | — | — |
+| `FSD-UC-008` | Rechazar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-008.md) | — | — |
+| `FSD-UC-009` | Aprobar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-009.md) | — | — |
+| `FSD-UC-010` | Avanzar/cerrar Fase | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-010.md) | — | — |
+| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-011.md) | — | — |
+| `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) | — | — |
+| `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-013.md) | — | — |
+| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-014.md) | [`DD-UC-014`](../design/DD-UC-014.md) | [`PR-IMPL-005`](../prompts/impl/PR-IMPL-005.md) |
+| `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) | — | — |
+| `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
+| `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |
+| `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Verificado` · `Obsoleto`
 
@@ -109,3 +109,4 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 |-------|--------|
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en [`uc/`](uc/) |
 | 2026-06-15 | UC-003 marcado **En Curso** (scaffolding Gestión de Fases en código) |
+| 2026-06-23 | Separación trazabilidad 1:1: `DD-UC-001`/`DD-UC-002`; prompts `PR-IMPL-001`/`PR-IMPL-002` (histórico `PR-IMPL-004`) |

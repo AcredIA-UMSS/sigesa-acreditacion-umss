@@ -23,7 +23,7 @@ agents_md: "/AGENTS.md"
 artefactos_vivos:
   prd: "docs/product/03_prd/PRD.md"          
   fsd: "docs/product/FSD.md"          
-  prompt_mapping: "docs/PROMPT_MAPPING.md"
+  prompt_mapping: "docs/sprints/sprint_01/PROMPT_MAPPING.md"
   design_docs_dir: "docs/design/"     
   adr_dir: "docs/adr/"
 ---
@@ -45,12 +45,22 @@ artefactos_vivos:
 |-------|--------|--------------------------|-----|-------------|-------|
 | 26/06/2026 | Implementación MOD-EVIDENCE: carga v1 multipart, SHA-256, `indicator_state_history`, outbox stub, seed CC. | FSD-UC-004 / DD-UC-004 | N/A | PM-012 / PR-IMPL-006 | Cursor Agent |
 | 26/06/2026 | Implementación MOD-REPORT: jobs PDF asíncronos, OpenPDF, tabla `report_job`, endpoints polling/descarga; stub datos ejecutivos + puente `ExecutiveDashboardQueryPort` para UC-013. | FSD-UC-014 / DD-UC-014 | N/A | PM-010 / PR-IMPL-005 | Cursor Agent |
-| 23/06/2026 | Sync inconsistencias MOD-AUTH: diagramas, modelo_datos, api_contracts, ADR-0003 vivo, FSD-BR-12. | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | docs sync | Cursor Agent |
+| 23/06/2026 | Trazabilidad 1:1 MOD-AUTH: split `DD-UC-001`/`DD-UC-002`; prompts `PR-IMPL-001`/`PR-IMPL-002`; `PR-IMPL-004` → `archive/`. | FSD-UC-001 / DD-UC-001 · FSD-UC-002 / DD-UC-002 | ADR-0003 | docs sync | Cursor Agent |
+| 23/06/2026 | Sync inconsistencias MOD-AUTH: diagramas, modelo_datos, api_contracts, ADR-0003 vivo, FSD-BR-12. | FSD-UC-001, FSD-UC-002 / DD-UC-001, DD-UC-002 | ADR-0003 | docs sync | Cursor Agent |
 | 22/06/2026 | `@dtp-sync` DD-UC-001: consolidación MOD-AUTH en DTP, FSD, api_contracts, modelo_datos. | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | `f38976b` / PM-007 | Cursor Agent |
 | 22/06/2026 | Implementación MOD-AUTH (JWT, login, admin users, user_program_assignment, hardening code-review). | FSD-UC-001, FSD-UC-002 / DD-UC-001 | ADR-0003 | `5cd14df`…`f38976b` | Cursor Agent |
 | 22/06/2026 | Implementación core de MOD-PROCESS (Dominio, Casos de Uso, Controladores y Stubs JPA para plantillas). | FSD-UC-003 / DD-UC-003 | N/A | Pendiente | Boris Angulo |
 | 22/06/2026 | Inicialización de la arquitectura base Spring Boot y DTP vivo. | N/A | N/A | `init` | Boris Angulo |
+## [2026-06-29] - Actualización de Arquitectura Frontend (FSD-UC-003)
 
+### Dependencias Añadidas
+- `lucide-react`: Adoptado como estándar para la iconografía de la interfaz.
+- `react-router-dom`: Configurado para la gestión de rutas del lado del cliente.
+
+### Decisiones Técnicas y Refactorización
+- **Migración a Tailwind CSS v4:** Se eliminaron los archivos de configuración legados (`tailwind.config.ts`, `postcss.config.js`). El sistema de diseño institucional y los tokens de color ahora se gestionan nativamente mediante la directiva `@theme` en `src/index.css`.
+- **Tipografía:** Se estableció `Inter` como la tipografía principal sin serifa (`sans`), manteniendo `IBM Plex Mono` para contextos específicos.
+- **Enrutamiento:** Se registró la ruta `/procesos/nuevo` conectada al contenedor lógico `CreateProcessPage`.
 ### A.2 Deltas respecto al DTI vFinal
 
 > Diferencias **deliberadas** entre lo diseñado y lo construido. 
@@ -67,14 +77,14 @@ artefactos_vivos:
 
 ### A.3 Estado de implementación por FSD-UC
 
-| FSD-UC | Design Doc | Estado | Release | Tests/Evals | Notas |
-|--------|------------|--------|---------|-------------|-------|
-| `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | JWT + LocalAuthAdapter; A1 estricto → 401 |
-| `FSD-UC-002` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | Alta INACTIVE; revoke soft; 409 email dup |
-| `FSD-UC-003` | `DD-UC-003` | hecho (core) | `release/3.0.0` | Pendiente | Faltan queries SQL nativas en JPA Adapters |
-| `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | v1 carga; UC-006 subsanación pendiente |
-| `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
-| `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
+| FSD-UC | Design Doc | Estado | Release | Tests/Evals | PR-IMPL | Notas |
+|--------|------------|--------|---------|-------------|---------|-------|
+| `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | `PR-IMPL-001` | JWT + LocalAuthAdapter; A1 estricto → 401 |
+| `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
+| `FSD-UC-003` | `DD-UC-003` | hecho (core) | `release/3.0.0` | Pendiente | `PR-IMPL-003` | Faltan queries SQL nativas en JPA Adapters |
+| `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
+| `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
+| `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -93,16 +103,16 @@ artefactos_vivos:
 | §3 Arquitectura de alto nivel (C4 N2/N3) | no | DTI vFinal §3 |
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | no | DTI vFinal §5 |
-| **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design doc `DD-UC-001` |
+| **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design docs `DD-UC-001`, `DD-UC-002` |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.2 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-004` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
-| §10 Prompt mapping | **sí (crece)** | `docs/PROMPT_MAPPING.md` |
+| §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` (sprint actual: [`sprint_01`](../sprints/sprint_01/PROMPT_MAPPING.md)) |
 | §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH; baseline en `docs/baseline/05_dti/adrs/`) |
 
-### B.1 MOD-AUTH — contrato técnico vigente (DD-UC-001)
+### B.1 MOD-AUTH — contrato técnico vigente (`DD-UC-001` + `DD-UC-002`)
 
-**Implementación:** `5cd14df` … `f38976b` · **Prompts:** `PR-IMPL-004` · **PM:** PM-001…PM-007
+**Implementación:** `5cd14df` … `f38976b` · **Prompts vigentes:** `PR-IMPL-001`, `PR-IMPL-002` · **Histórico:** [`PR-IMPL-004`](../prompts/impl/archive/PR-IMPL-004.md) · **PM:** PM-001…PM-007
 
 | Área | Detalle vigente |
 |---|---|

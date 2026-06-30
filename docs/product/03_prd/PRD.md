@@ -30,7 +30,7 @@
 | Glosario | `context/03_domain_glossary.md` |
 | **Roadmap de producto** | **[`ROADMAP.md`](ROADMAP.md)** — fases F0–F5, releases, Gantt, trazabilidad |
 | **Diagramas (`.mmd`)** | [`07_diagramas/`](07_diagramas/README.md) → [`../07_diagramas/`](../07_diagramas/README.md) |
-| FSD | [`docs/04_fsd/FSD.md`](../04_fsd/FSD.md) Dorada v1.0 |
+| FSD | LFSD vivo [`docs/product/FSD.md`](../FSD.md) · Baseline Dorada v1.0 [`docs/baseline/04_fsd/FSD.md`](../../baseline/04_fsd/FSD.md) |
 | Trazabilidad | [`matriz_trazabilidad.md`](../../matriz_trazabilidad.md) |
 | Fuentes consolidadas | `team/borisAngulo/docs/03_prd/PRD_v1.md` · `team/alexAlvarez/docs/03_prd/user_stories.md` · `team/aylenGonzales/03_prd/PRD_v1.md` · `team/Marlene/03_prd/PRD.md` |
 | Skill aplicada | `sigesa-generacion-documentos-negocio` (negocio) · regla QA Gherkin (`.cursor/rules/04_sigesa_qa_gherkin_coverage.mdc`) |
@@ -194,9 +194,9 @@ journey
 
 | ID | Historia | Pri. | Estado backend | BRD / MRD |
 |----|----------|------|----------------|-----------|
-| PRD-US-001 | Como usuario interno, quiero iniciar sesión con correo UMSS para acceder según mi rol | Must | **Hecho** (`FSD-UC-001`, DD-UC-001) | BRD-REQ-001 / MRD-N-09 |
-| PRD-US-002 | Como [JD], quiero crear usuarios y asignar roles | Must | **Hecho** (`FSD-UC-002`, DD-UC-001) | BRD-REQ-001 |
-| PRD-US-003 | Como sistema, quiero rechazar acciones sin sesión válida | Must | **Hecho** (perímetro JWT; `AuthenticatedApiSmokeTest`) | BRD-REQ-001 |
+| PRD-US-001 | Como usuario interno, quiero iniciar sesión con correo UMSS para acceder según mi rol | Must | **Hecho** (`FSD-UC-001`, `DD-UC-001`, `PR-IMPL-001`) | BRD-REQ-001 / MRD-N-09 |
+| PRD-US-002 | Como [JD], quiero crear usuarios y asignar roles | Must | **Hecho** (`FSD-UC-002`, `DD-UC-002`, `PR-IMPL-002`) | BRD-REQ-001 |
+| PRD-US-003 | Como sistema, quiero rechazar acciones sin sesión válida | Must | **Hecho** (`FSD-UC-001`, `DD-UC-001`, `PR-IMPL-001` — perímetro JWT) | BRD-REQ-001 |
 | PRD-US-023 | Como [JD], quiero configurar plantillas CEUB/ARCU-SUR (Fases, Indicadores) | Must | En curso | BRD-REQ-004 / MRD-N-01 |
 
 #### PRD-US-001 — Inicio de sesión
@@ -238,7 +238,7 @@ Escenario: Revocación de acceso
 
 #### PRD-US-003 — Sin sesión
 
-> **Implementación backend (2026-06-22):** `SecurityConfig` + `JwtAuthenticationFilter`; smoke en `/fases` y `/processes`.
+> **Implementación backend (2026-06-22):** `SecurityConfig` + `JwtAuthenticationFilter` ([`DD-UC-001`](../../design/DD-UC-001.md), [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md)); smoke en `/fases` y `/processes`.
 
 ```gherkin
 Escenario: Acción sensible sin autenticación
@@ -778,7 +778,7 @@ Heredadas BRD-Q-01…Q-03, Q-05…Q-08: ver BRD §21.
 | Regla QA @Tag PRD-US | Cumple (NFR-014) |
 | Sin prescribir stack en PRD | Cumple |
 
-**Veredicto:** listo para **FSD Dorado** en `docs/04_fsd/FSD.md`.
+**Veredicto:** listo para **FSD Dorado** en [`docs/baseline/04_fsd/FSD.md`](../../baseline/04_fsd/FSD.md).
 
 ---
 

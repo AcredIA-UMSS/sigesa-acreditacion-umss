@@ -22,7 +22,7 @@
 # Flujo de Trabajo y Toma de Decisiones
 - **Cero Divergencia Silenciosa:** Si encuentras un bloqueo técnico que obliga a desviar la implementación de lo especificado, DETENTE. Informa del problema y solicita la creación de un ADR (`docs/adr/`).
 - **Sincronización del DTP:** Si introduces una nueva dependencia (npm/maven), cambias un contrato de API (DTO) o modificas el modelo de datos, sugiere inmediatamente la actualización del `docs/product/DTP.md`.
-- **Commits y PRs:** Todo código generado debe estar respaldado por un prompt documentado en `docs/prompts/impl/` y registrado en `docs/PROMPT_MAPPING.md`.
+- **Commits y PRs:** Todo código generado debe estar respaldado por un prompt documentado en `docs/prompts/impl/` y registrado en `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` (vía `@save-prompt-mapping`).
 - **Registro PM obligatorio:** Al finalizar cualquier prompt de implementación (`PR-IMPL-*`) o tarea de código, ejecutar `@save-prompt-mapping` **antes** de considerar la tarea cerrada.
 
 # Reglas de Comportamiento del Agente

@@ -72,7 +72,7 @@ flowchart LR
 |--------|-------|--------------------|
 | `PR-IMPL-NNN` | `<generación de código / tests / migración>` | `<src/… , tests/…>` |
 
-> Cada prompt sigue [`PROMPT_TEMPLATE.md`](PROMPT_TEMPLATE.md), vive en `docs/prompts/impl/PR-IMPL-NNN.md` y se referencia desde `docs/PROMPT_MAPPING.md`.
+> Cada prompt sigue [`PROMPT_TEMPLATE.md`](PROMPT_TEMPLATE.md), vive en `docs/prompts/impl/PR-IMPL-NNN.md` y se registra en `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` (vía `@save-prompt-mapping`).
 
 ## 6. Plan de pruebas y evals
 

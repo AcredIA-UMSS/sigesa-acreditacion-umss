@@ -6,7 +6,9 @@ Este documento rige las reglas de comportamiento para el desarrollo del proyecto
 1. **El Baseline es Intocable:** La carpeta `docs/baseline/` contiene el DTI y FSD evaluados. Está estrictamente prohibido que agentes humanos o IA editen, eliminen o modifiquen archivos aquí.
 2. **Cero Divergencia Silenciosa:** Si la implementación difiere del diseño original, el cambio se documenta PRIMERO en la capa viva (`docs/product/` y `docs/adr/`) antes de hacer *merge* del código.
 3. **El DTP como Contrato Vivo:** El Documento Técnico del Producto (`docs/product/DTP.md`) es la única fuente de verdad técnica de lo que está actualmente en el código.
-4. **Trazabilidad Total:** Todo código nuevo (PR/Commit) debe poder rastrearse hacia atrás en esta cadena:
+4. **Trazabilidad Total:** Todo código nuevo (PR/Commit) debe poder rastrearse hacia atrás en esta cadena (relación **1:1** por caso de uso):
    `Código → PR-IMPL-NNN → DD-UC-NNN → FSD-UC-NNN → DTP / PRD Vivo`
+   
+   Ejemplo MOD-AUTH: `PR-IMPL-001` ↔ `DD-UC-001` ↔ `FSD-UC-001`; `PR-IMPL-002` ↔ `DD-UC-002` ↔ `FSD-UC-002`. Contrato histórico unificado: `docs/prompts/impl/archive/PR-IMPL-004.md`.
 
 Cualquier agente de IA que opere en este repositorio debe detener sus operaciones si se le pide romper alguna de estas reglas.

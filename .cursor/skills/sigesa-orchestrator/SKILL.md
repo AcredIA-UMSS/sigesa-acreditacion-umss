@@ -24,7 +24,7 @@ Cuando el usuario te pida implementar una nueva funcionalidad (ej. "Implementa F
 
 **Paso 5: Trazabilidad y Cierre (Docs)**
 - Usa el skill `@dtp-sync` para actualizar el Data Tracker Plan si hubo cambios en modelos de datos o dependencias.
-- Finalmente, usa `@save-prompt-mapping` para registrar todo el trabajo en `docs/PROMPT_MAPPING.md`.
+- Finalmente, usa `@save-prompt-mapping sprint=<N> pr=<PR-IMPL-NNN>` para registrar todo el trabajo en `docs/sprints/sprint_<N>/PROMPT_MAPPING.md`.
 
 ## Comportamiento del Agente
 1. Al recibir un comando, evalúa el estado actual del proyecto (¿qué archivos ya existen?).

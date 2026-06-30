@@ -8,6 +8,8 @@ trazabilidad_prd: PRD-US-001, PRD-US-003
 modulo: MOD-AUTH
 reglas: FSD-BR-12
 ultima_actualizacion: "2026-06-23"
+design_doc: DD-UC-001
+pr_impl: PR-IMPL-001
 ---
 
 # FSD-UC-001 — Autenticación y sesión
@@ -16,6 +18,8 @@ ultima_actualizacion: "2026-06-23"
 
 | Campo | Valor |
 |-------|-------|
+| **Design Doc** | [`DD-UC-001`](../../design/DD-UC-001.md) |
+| **Prompt impl** | [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) |
 | **Trazabilidad** | PRD-REQ-001 · PRD-US-001, 003 · BRD-REQ-001 · MRD-N-09 |
 | **Disparador** | Submit en pantalla `/login` |
 | **Precondiciones** | Cuenta registrada con correo `@umss.edu.bo`; rol asignado |

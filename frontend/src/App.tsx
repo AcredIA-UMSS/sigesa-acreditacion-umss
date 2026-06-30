@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CreateProcessPage } from './features/procesos/CreateProcessPage';
 import { EvidenceUploadPanel } from './features/evidence/components/EvidenceUploadPanel';
 import { ExecutiveReportPanel } from './features/reports/components/ExecutiveReportPanel';
 
@@ -8,11 +9,28 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <main className="min-h-screen space-y-10 bg-gray-100 py-10">
-        <h1 className="text-center text-3xl font-bold text-gray-900">SIGESA</h1>
-        <EvidenceUploadPanel />
-        <ExecutiveReportPanel />
-      </main>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/procesos/nuevo" replace />} />
+          <Route path="/procesos/nuevo" element={<CreateProcessPage />} />
+          <Route
+            path="/dev/evidencias"
+            element={
+              <main className="min-h-screen space-y-10 bg-gray-50 py-10">
+                <EvidenceUploadPanel />
+              </main>
+            }
+          />
+          <Route
+            path="/dev/reportes"
+            element={
+              <main className="min-h-screen space-y-10 bg-gray-50 py-10">
+                <ExecutiveReportPanel />
+              </main>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

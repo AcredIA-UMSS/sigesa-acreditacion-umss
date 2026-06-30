@@ -2,9 +2,11 @@
 description: Registro obligatorio de trazabilidad. Se activa al ejecutar prompts de implementación o al generar/modificar código en el proyecto.
 globs: ["src/**", "**/*.java", "**/pom.xml", "**/*.sql", "src/test/**", "docs/prompts/impl/**"]
 ---
-# 📋 Registro obligatorio en PROMPT_MAPPING
+# 📋 Registro obligatorio en PROMPT_MAPPING (por sprint)
 
 Cada ejecución de un **prompt de implementación** (`PR-IMPL-NNN`) o de **cualquier prompt que genere o modifique código** en este repositorio debe cerrarse registrando la trazabilidad correspondiente.
+
+> **Ubicación vigente:** `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` (no existe `docs/PROMPT_MAPPING.md` en raíz). Usar `@save-prompt-mapping sprint=<N>`.
 
 ## Cuándo aplica
 
@@ -14,7 +16,7 @@ Cada ejecución de un **prompt de implementación** (`PR-IMPL-NNN`) o de **cualq
 
 ## Regla de cierre (no negociable)
 
-**La tarea NO se considera cerrada** hasta que exista una entrada **`PM-NNN`** en [`docs/PROMPT_MAPPING.md`](../../docs/PROMPT_MAPPING.md).
+**La tarea NO se considera cerrada** hasta que exista una entrada **`PM-NNN`** en el `PROMPT_MAPPING.md` del sprint activo (`docs/sprints/sprint_<N>/PROMPT_MAPPING.md`).
 
 Antes de dar por finalizada la respuesta al usuario:
 
@@ -32,12 +34,12 @@ Antes de dar por finalizada la respuesta al usuario:
 
 - **Baseline:** no modificar `docs/baseline/` (ver `baseline-congelado.mdc`).
 - **DTP:** cambios estructurales pueden requerir además `@dtp-sync` (ver `dtp-sync.mdc`).
-- **Gobernanza:** alineado con [`AGENTS.md`](../../agents.md) — todo código generado debe estar respaldado por prompt documentado y registro en `PROMPT_MAPPING.md`.
+- **Gobernanza:** alineado con [`AGENTS.md`](../../agents.md) — todo código generado debe estar respaldado por prompt documentado y registro PM en el sprint activo.
 
 ## Formato de invocación
 
 ```
-@save-prompt-mapping <PR-IMPL-NNN> [estado=completado|en_progreso|bloqueado|fallido] [solicitante="<nombre>"]
+@save-prompt-mapping sprint=<N> pr=<PR-IMPL-NNN> [estado=completado|en_progreso|bloqueado|fallido] [solicitante="<nombre>"]
 ```
 
 Si la skill no puede ejecutarse por falta de datos (prompt, diff, PR-IMPL), reportarlo explícitamente y **no** marcar la tarea como completada.

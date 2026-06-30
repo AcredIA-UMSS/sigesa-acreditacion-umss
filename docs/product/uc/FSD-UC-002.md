@@ -7,7 +7,9 @@ actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-002
 modulo: MOD-AUTH
 reglas: —
-ultima_actualizacion: "2026-06-22"
+ultima_actualizacion: "2026-06-23"
+design_doc: DD-UC-002
+pr_impl: PR-IMPL-002
 ---
 
 # FSD-UC-002 — Gestión de usuarios [JD]
@@ -16,6 +18,8 @@ ultima_actualizacion: "2026-06-22"
 
 | Campo | Valor |
 |-------|-------|
+| **Design Doc** | [`DD-UC-002`](../../design/DD-UC-002.md) |
+| **Prompt impl** | [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md) |
 | **Trazabilidad** | PRD-REQ-001 · PRD-US-002 |
 | **Precondiciones** | [JD] autenticado |
 | **Pantalla** | `/admin/users` |
