@@ -19,8 +19,7 @@ import type {
   ProcessResponse
 } from '../../model';
 
-
-
+import { customFetch } from '../../../lib/api/customFetch';
 
 
 export type createProcessResponse200 = {
@@ -44,21 +43,13 @@ export const getCreateProcessUrl = () => {
 }
 
 export const createProcess = async (createProcessRequest: CreateProcessRequest, options?: RequestInit): Promise<createProcessResponse> => {
-
-  const res = await fetch(getCreateProcessUrl(),
-  {
+  const res = await customFetch<ProcessResponse>(getCreateProcessUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createProcessRequest)
-  }
-)
+    body: JSON.stringify(createProcessRequest),
+  });
 
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createProcessResponse['data'] = body !== null ? body : ''
-  return { data, status: res.status, headers: res.headers } as createProcessResponse
+  return { data: res.data, status: res.status as 200, headers: res.headers };
 }
 
 

@@ -4,6 +4,7 @@ import com.umss.sigesa.domain.exception.DuplicateActiveAssignmentException;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.exception.InvalidCredentialsException;
 import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
+import com.umss.sigesa.domain.exception.InvalidFilterException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.InvalidScopeException;
 import com.umss.sigesa.domain.exception.RoleNotAssignedException;
@@ -62,6 +63,12 @@ public class AuthExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidRole(InvalidRoleException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(Map.of("error", "INVALID_ROLE", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidFilterException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidFilter(InvalidFilterException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", "INVALID_FILTER", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
