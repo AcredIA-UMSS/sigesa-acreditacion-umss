@@ -1,11 +1,26 @@
+import { useState } from 'react';
 import { Bell, Settings } from 'lucide-react';
 import { Sidebar } from '../../../../components/layout/Sidebar';
+import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import { RegisterUserFormUI } from '../components/RegisterUserFormUI';
-import { UsersTablePlaceholderUI } from '../components/UsersTablePlaceholderUI';
+import { UsersTableUI } from '../components/UsersTableUI';
+import { useDeactivateUserAction } from '../hooks/useDeactivateUserAction';
 import { useRegisterUserForm } from '../hooks/useRegisterUserForm';
+import { useUsersList } from '../hooks/useUsersList';
 
 export function UsersAdminPage() {
   const registerForm = useRegisterUserForm();
+  const usersList = useUsersList();
+  const deactivateAction = useDeactivateUserAction();
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const handleDeactivate = async (userId: string) => {
+    setActionError(null);
+    const result = await deactivateAction.deactivateUser(userId);
+    if (!result.ok) {
+      setActionError(result.message);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -36,11 +51,20 @@ export function UsersAdminPage() {
               </p>
             </div>
 
+            {actionError && (
+              <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-md text-danger">
+                {actionError}
+              </div>
+            )}
+
             <RegisterUserFormUI
               email={registerForm.form.email}
               role={registerForm.form.role}
+              programId={registerForm.form.programId}
               roleOptions={registerForm.roleOptions}
+              programOptions={registerForm.programOptions}
               requiresProgram={registerForm.requiresProgram}
+              isProgramsLoading={registerForm.isProgramsLoading}
               emailError={registerForm.fieldErrors.email}
               programError={registerForm.fieldErrors.programId}
               submitError={registerForm.submitError}
@@ -48,10 +72,19 @@ export function UsersAdminPage() {
               isSubmitting={registerForm.isPending}
               onEmailChange={registerForm.setEmail}
               onRoleChange={registerForm.setRole}
+              onProgramChange={registerForm.setProgramId}
               onSubmit={registerForm.handleSubmit}
             />
 
-            <UsersTablePlaceholderUI />
+            <UsersTableUI
+              users={usersList.users}
+              isLoading={usersList.isLoading}
+              isError={usersList.isError}
+              errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
+              isDeactivating={deactivateAction.isDeactivating}
+              deactivatingUserId={deactivateAction.deactivatingUserId}
+              onDeactivate={handleDeactivate}
+            />
           </div>
         </main>
       </div>

@@ -19,8 +19,8 @@ Implementar el frontend de **MOD-AUTH** (UC-001 Login + UC-002 Gestión de usuar
 - Proxy Vite `/api` → backend.
 
 ## Bloqueos backend documentados (no resueltos en frontend)
-1. **`GET /api/v1/admin/users`** — requerido para listado y revocación en fila. Tabla = placeholder explícito.
-2. **`GET /api/v1/programs`** — requerido para `<select>` de `programId` en rol Coordinador (CC). Alta CC bloqueada en UI.
+~~1. GET /api/v1/admin/users~~ → **Resuelto en PR-IMPL-006**
+~~2. GET /api/v1/programs~~ → **Resuelto en PR-IMPL-006** (catálogo estático v1.0)
 
 ## Redirect post-login
 - `JD` → `/admin/users`

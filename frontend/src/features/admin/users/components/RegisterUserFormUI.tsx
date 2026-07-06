@@ -1,21 +1,29 @@
+import type { ChangeEvent } from 'react';
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import { Select } from '../../../../components/ui/Select';
 import { TextInput } from '../../../../components/ui/TextInput';
 import type { BackendRoleCode } from '../../../../lib/auth/roleLabels';
 import { UMSS_EMAIL_SUFFIX } from '../../../../lib/auth/types';
-import type { ChangeEvent } from 'react';
 
 interface RoleOption {
   value: BackendRoleCode;
   label: string;
 }
 
+interface ProgramOption {
+  value: string;
+  label: string;
+}
+
 interface RegisterUserFormUIProps {
   email: string;
   role: BackendRoleCode;
+  programId: string;
   roleOptions: RoleOption[];
+  programOptions: ProgramOption[];
   requiresProgram: boolean;
+  isProgramsLoading: boolean;
   emailError?: string;
   programError?: string;
   submitError?: string | null;
@@ -23,14 +31,18 @@ interface RegisterUserFormUIProps {
   isSubmitting: boolean;
   onEmailChange: (value: string) => void;
   onRoleChange: (value: BackendRoleCode) => void;
+  onProgramChange: (value: string) => void;
   onSubmit: () => void;
 }
 
 export function RegisterUserFormUI({
   email,
   role,
+  programId,
   roleOptions,
+  programOptions,
   requiresProgram,
+  isProgramsLoading,
   emailError,
   programError,
   submitError,
@@ -38,6 +50,7 @@ export function RegisterUserFormUI({
   isSubmitting,
   onEmailChange,
   onRoleChange,
+  onProgramChange,
   onSubmit,
 }: RegisterUserFormUIProps) {
   return (
@@ -91,17 +104,20 @@ export function RegisterUserFormUI({
           <div className="md:col-span-2">
             <Select
               label="Carrera (programId)"
-              value=""
-              disabled
-              options={[{ value: '', label: 'Pendiente — GET /api/v1/programs' }]}
+              value={programId}
+              disabled={isProgramsLoading || programOptions.length === 0}
+              onChange={(event: ChangeEvent<HTMLSelectElement>) => onProgramChange(event.target.value)}
+              options={[
+                { value: '', label: isProgramsLoading ? 'Cargando carreras…' : 'Seleccione una carrera' },
+                ...programOptions,
+              ]}
               error={programError}
-              helperText="El catálogo de programas se habilitará cuando el backend exponga GET /api/v1/programs."
             />
           </div>
         )}
 
         <div className="md:col-span-2">
-          <Button type="submit" isLoading={isSubmitting} disabled={requiresProgram}>
+          <Button type="submit" isLoading={isSubmitting}>
             Registrar usuario
           </Button>
         </div>

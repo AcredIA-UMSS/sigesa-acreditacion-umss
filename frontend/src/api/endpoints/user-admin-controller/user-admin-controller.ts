@@ -5,22 +5,84 @@
  * OpenAPI spec version: v0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
+  QueryFunction,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
   RegisterUserRequest,
-  RegisterUserResponse
+  RegisterUserResponse,
+  UserAdminSummaryResponse
 } from '../../model';
 
 import { customFetch } from '../../../lib/api/customFetch';
 
+export interface ListUsersParams {
+  role?: string;
+  status?: string;
+}
+
+export type listUsersResponse200 = {
+  data: UserAdminSummaryResponse[];
+  status: 200;
+};
+
+export const getListUsersUrl = (params?: ListUsersParams) => {
+  const search = new URLSearchParams();
+  if (params?.role) {
+    search.set('role', params.role);
+  }
+  if (params?.status) {
+    search.set('status', params.status);
+  }
+  const query = search.toString();
+  return query.length > 0 ? `/api/v1/admin/users?${query}` : `/api/v1/admin/users`;
+};
+
+export const listUsers = async (
+  params?: ListUsersParams,
+  options?: RequestInit,
+): Promise<listUsersResponse200> => {
+  const res = await customFetch<UserAdminSummaryResponse[]>(getListUsersUrl(params), {
+    ...options,
+    method: 'GET',
+  });
+
+  return { data: res.data, status: res.status as 200 };
+};
+
+export const getListUsersQueryKey = (params?: ListUsersParams) =>
+  ['listUsers', params?.role ?? null, params?.status ?? null] as const;
+
+export const getListUsersQueryOptions = <TError = unknown>(
+  params?: ListUsersParams,
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError>>; fetch?: RequestInit },
+) => {
+  const queryKey = getListUsersQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listUsers>>> = () => listUsers(params, options?.fetch);
+
+  return { queryKey, queryFn, ...options?.query } as UseQueryOptions<
+    Awaited<ReturnType<typeof listUsers>>,
+    TError
+  >;
+};
+
+export const useListUsers = <TError = unknown>(
+  params?: ListUsersParams,
+  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError>>; fetch?: RequestInit },
+  queryClient?: QueryClient,
+): UseQueryResult<Awaited<ReturnType<typeof listUsers>>, TError> => {
+  return useQuery(getListUsersQueryOptions(params, options), queryClient);
+};
 
 export type registerResponse200 = {
   data: RegisterUserResponse

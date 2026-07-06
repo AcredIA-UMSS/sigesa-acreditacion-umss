@@ -1,15 +1,15 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useDeactivate } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { getListUsersQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 
-/**
- * Hook listo para revocación desde filas de la tabla cuando exista GET /admin/users.
- * No se expone UI de revocación hasta contar con listado backend.
- */
-export function useDeactivateUser() {
+export function useDeactivateUserAction() {
+  const queryClient = useQueryClient();
+
   const mutation = useDeactivate({
     mutation: {
-      onError: () => {
-        /* Consumido por la futura tabla */
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: getListUsersQueryKey(undefined) });
       },
     },
   });
@@ -26,5 +26,6 @@ export function useDeactivateUser() {
   return {
     deactivateUser,
     isDeactivating: mutation.isPending,
+    deactivatingUserId: mutation.variables?.id ?? null,
   };
 }

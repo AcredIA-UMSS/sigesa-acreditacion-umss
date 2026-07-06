@@ -1,20 +1,25 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
+import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.adapter.in.web.dto.RegisterUserRequest;
 import com.umss.sigesa.adapter.in.web.dto.RegisterUserResponse;
+import com.umss.sigesa.adapter.in.web.dto.UserAdminSummaryResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -30,12 +35,30 @@ public class UserAdminController {
 
     private final RegisterUserUseCase registerUserUseCase;
     private final DeactivateUserUseCase deactivateUserUseCase;
+    private final ListUsersUseCase listUsersUseCase;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public UserAdminController(RegisterUserUseCase registerUserUseCase,
-                               DeactivateUserUseCase deactivateUserUseCase) {
+                               DeactivateUserUseCase deactivateUserUseCase,
+                               ListUsersUseCase listUsersUseCase) {
         this.registerUserUseCase = registerUserUseCase;
         this.deactivateUserUseCase = deactivateUserUseCase;
+        this.listUsersUseCase = listUsersUseCase;
+    }
+
+    @GetMapping
+    public List<UserAdminSummaryResponse> list(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status) {
+        return listUsersUseCase.list(role, status).stream()
+                .map(summary -> new UserAdminSummaryResponse(
+                        summary.userId(),
+                        summary.email(),
+                        summary.role(),
+                        summary.status(),
+                        summary.programIds()
+                ))
+                .toList();
     }
 
     @PostMapping

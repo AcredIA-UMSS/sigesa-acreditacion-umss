@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRegister } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { getListUsersQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { useListPrograms } from '../../../../api/endpoints/program-catalog-controller/program-catalog-controller';
 import type { RegisterUserResponse } from '../../../../api/model';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import {
@@ -9,16 +11,21 @@ import {
   type BackendRoleCode,
 } from '../../../../lib/auth/roleLabels';
 import { UMSS_EMAIL_PATTERN } from '../../../../lib/auth/types';
+import { useState } from 'react';
 
 interface RegisterUserFormState {
   email: string;
   role: BackendRoleCode;
+  programId: string;
 }
 
 export function useRegisterUserForm() {
+  const queryClient = useQueryClient();
+  const programsQuery = useListPrograms();
   const [form, setForm] = useState<RegisterUserFormState>({
     email: '',
     role: 'TD',
+    programId: '',
   });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'email' | 'role' | 'programId', string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -26,14 +33,15 @@ export function useRegisterUserForm() {
 
   const { mutate, isPending, reset } = useRegister({
     mutation: {
-      onSuccess: (response) => {
+      onSuccess: async (response) => {
         const payload = response.data as RegisterUserResponse;
         setSuccessMessage(
           `Usuario registrado (${payload.userId ?? '—'}) con estado inicial ${payload.status ?? 'INACTIVE'}. La contraseña temporal se entrega por canal offline.`,
         );
         setSubmitError(null);
-        setForm({ email: '', role: 'TD' });
+        setForm({ email: '', role: 'TD', programId: '' });
         setFieldErrors({});
+        await queryClient.invalidateQueries({ queryKey: getListUsersQueryKey(undefined) });
       },
       onError: (error) => {
         setSubmitError(getApiErrorMessage(error));
@@ -43,6 +51,12 @@ export function useRegisterUserForm() {
   });
 
   const requiresProgram = ROLE_REQUIRES_PROGRAM[form.role];
+  const programOptions = (programsQuery.data?.data ?? [])
+    .filter((program) => program.id && program.name)
+    .map((program) => ({
+      value: program.id as string,
+      label: program.code ? `${program.code} — ${program.name}` : (program.name as string),
+    }));
 
   const validate = (): boolean => {
     const nextErrors: Partial<Record<'email' | 'role' | 'programId', string>> = {};
@@ -53,9 +67,8 @@ export function useRegisterUserForm() {
       nextErrors.email = 'Solo se permiten correos institucionales @umss.edu.bo.';
     }
 
-    if (requiresProgram) {
-      nextErrors.programId =
-        'La asignación de carrera requiere el catálogo de programas (pendiente GET /api/v1/programs).';
+    if (requiresProgram && !form.programId) {
+      nextErrors.programId = 'Seleccione una carrera para el rol Coordinador.';
     }
 
     setFieldErrors(nextErrors);
@@ -70,14 +83,11 @@ export function useRegisterUserForm() {
       return;
     }
 
-    if (requiresProgram) {
-      return;
-    }
-
     mutate({
       data: {
         email: form.email.trim().toLowerCase(),
         role: form.role,
+        ...(requiresProgram ? { programId: form.programId } : {}),
       },
     });
   };
@@ -88,12 +98,18 @@ export function useRegisterUserForm() {
   };
 
   const setRole = (role: BackendRoleCode) => {
-    setForm((current) => ({ ...current, role }));
+    setForm((current) => ({ ...current, role, programId: '' }));
     setFieldErrors((current) => ({ ...current, programId: undefined }));
     reset();
   };
 
-  const roleOptions = ASSIGNABLE_ROLES.map((role) => ({
+  const setProgramId = (programId: string) => {
+    setForm((current) => ({ ...current, programId }));
+    setFieldErrors((current) => ({ ...current, programId: undefined }));
+    reset();
+  };
+
+  const roleOptions = ASSIGNABLE_ROLES.map((role: BackendRoleCode) => ({
     value: role,
     label: ROLE_LABELS[role],
   }));
@@ -106,8 +122,11 @@ export function useRegisterUserForm() {
     isPending,
     requiresProgram,
     roleOptions,
+    programOptions,
+    isProgramsLoading: programsQuery.isLoading,
     setEmail,
     setRole,
+    setProgramId,
     handleSubmit,
   };
 }

@@ -14,6 +14,10 @@
 | PM-008 | N/A | ADR-004 | Todas | Configuración de Monorepo, React 19, OxLint y autogeneración API con Orval |
 | PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación de Plantillas y Creación de Procesos |
 | PM-010 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Implementación UI Layout e Inicialización de Procesos |
+| PM-011 | PR-IMPL-001 | DD-UC-001 | FSD-UC-001 | Contrato formal implementación login JWT (Paso 3 AI-SDLC) |
+| PM-012 | PR-IMPL-002 | DD-UC-002 | FSD-UC-002 | Contrato formal implementación admin users (Paso 3 AI-SDLC) |
+| PM-013 | PR-IMPL-005 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Frontend MOD-AUTH: login, sesión, guards, admin parcial |
+| PM-014 | PR-IMPL-006 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Cierre MOD-AUTH: GET users/programs + UI admin completa |
 
 > **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---
@@ -600,4 +604,199 @@ Interfaz maquetada correctamente con responsive design base, colores institucion
 
 - [ ] Implementar React Hook Form + Zod para validación de datos.
 - [ ] Descomentar el hook de Orval y realizar el *wiring* final con el backend de Spring Boot.
+
+---
+
+## PM-011
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-011 |
+| **Fecha** | 2026-06-22 |
+| **Hora** | 23:15 |
+| **Solicitante** | Aylen |
+| **Agente/Entorno** | Cursor IDE — @sigesa-prompt-contract-architect |
+| **Modelo** | Composer |
+| **Tarea** | Paso 3 AI-SDLC — contrato `PR-IMPL-001` login JWT |
+| **Objetivo** | Formalizar prompt ejecutable para UC-001 sin ambigüedad arquitectónica |
+| **Contexto** | Split trazabilidad 1:1 post `DD-UC-001`; derivado histórico de `PR-IMPL-004` |
+| **PR-IMPL vinculado** | PR-IMPL-001 |
+| **DD-UC vinculado** | DD-UC-001 |
+| **FSD-UC vinculado** | FSD-UC-001 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@sigesa-prompt-contract-architect Genera el contrato PR-IMPL-001 para implementar DD-UC-001 (login JWT, AuthPort, LocalAuthAdapter, perímetro Bearer, reglas A1/A2/E3). Fuente: docs/design/DD-UC-001.md. Out-of-scope: admin users, frontend, LDAP. Incluye reglas R1-R13, JaCoCo ≥90% AuthenticateService, trazabilidad @save-prompt-mapping.
+```
+
+### Entradas auxiliares
+
+- [`docs/design/DD-UC-001.md`](../../design/DD-UC-001.md)
+- [`docs/prompts/impl/PR-IMPL-001.md`](../../prompts/impl/PR-IMPL-001.md)
+- [`docs/adr/ADR-0003-authentication-adapter.md`](../../adr/ADR-0003-authentication-adapter.md)
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/prompts/impl/PR-IMPL-001.md` |
+
+### Resultado obtenido
+
+Contrato aprobado v1.0 — base para implementación backend UC-001 (`AuthenticateService`, `AuthController`, JWT filter). Ejecución material registrada históricamente en PM-002…PM-007 vía `PR-IMPL-004`.
+
+---
+
+## PM-012
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-012 |
+| **Fecha** | 2026-06-22 |
+| **Hora** | 23:18 |
+| **Solicitante** | Aylen |
+| **Agente/Entorno** | Cursor IDE — @sigesa-prompt-contract-architect |
+| **Modelo** | Composer |
+| **Tarea** | Paso 3 AI-SDLC — contrato `PR-IMPL-002` admin users |
+| **Objetivo** | Formalizar prompt ejecutable para UC-002 (alta INACTIVE, assignment, revoke soft) |
+| **Contexto** | Split trazabilidad 1:1 post `DD-UC-002`; depende de JWT `PR-IMPL-001` |
+| **PR-IMPL vinculado** | PR-IMPL-002 |
+| **DD-UC vinculado** | DD-UC-002 |
+| **FSD-UC vinculado** | FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@sigesa-prompt-contract-architect Genera el contrato PR-IMPL-002 para implementar DD-UC-002 (RegisterUser, DeactivateUser, user_program_assignment, POST/PATCH admin users). Password temporal offline v1.0. Out-of-scope: login JWT, frontend. Incluye reglas R6-R12, JaCoCo ≥90% Register/Deactivate services.
+```
+
+### Entradas auxiliares
+
+- [`docs/design/DD-UC-002.md`](../../design/DD-UC-002.md)
+- [`docs/prompts/impl/PR-IMPL-002.md`](../../prompts/impl/PR-IMPL-002.md)
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/prompts/impl/PR-IMPL-002.md` |
+
+### Resultado obtenido
+
+Contrato aprobado v1.0 — base para `RegisterUserService`, `DeactivateUserService`, `UserAdminController`. Ejecución material en PM-002…PM-007.
+
+---
+
+## PM-013
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-013 |
+| **Fecha** | 2026-07-05 |
+| **Hora** | 22:00 |
+| **Solicitante** | Aylen |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Frontend MOD-AUTH UC-001 + UC-002 (PR-IMPL-005) |
+| **Objetivo** | Login JWT, sesión, guards, `/admin/users` (alta JD/TD), mapeo roles, customFetch Orval |
+| **Contexto** | Backend UC-001/002 DoD cumplido; bloqueos GET users/programs documentados; prototipo login |
+| **PR-IMPL vinculado** | PR-IMPL-005 |
+| **DD-UC vinculado** | DD-UC-001, DD-UC-002 |
+| **FSD-UC vinculado** | FSD-UC-001, FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Generar Frontend para MOD-AUTH (UC-001 Login + UC-002 Gestión de usuarios).
+Leer: AGENTS.md, DD-UC-001, DD-UC-002, api_contracts.md, DTP.md, frontend-design.mdc, @generate-frontend-feature.
+Implementar /login, /admin/users (JD), hooks sesión, roleLabels, customFetch, guards.
+Bloqueos: sin GET /admin/users ni GET /programs — placeholder tabla y CC bloqueado.
+Redirect: JD→/admin/users; CC/TD→/procesos/nuevo.
+Documentar en PR-IMPL-005 y @save-prompt-mapping sprint_01.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/features/auth/**`, `frontend/src/features/admin/users/**` |
+| generado | `frontend/src/lib/auth/**`, `frontend/src/lib/api/customFetch.ts` |
+| generado | `frontend/src/components/auth/**`, `frontend/src/components/ui/**` |
+| modificado | `frontend/src/App.tsx`, `frontend/src/main.tsx`, `frontend/vite.config.ts` |
+| modificado | `frontend/src/components/layout/Sidebar.tsx` |
+| modificado | `frontend/src/api/endpoints/auth-controller/*`, `user-admin-controller/*` |
+| generado | `docs/prompts/impl/PR-IMPL-005.md` |
+| modificado | `backend/.../AuthDataLoader.java` (3 cuentas seed dev) |
+
+### Validación ejecutada
+
+- [x] `pnpm run build` — exitoso
+- [ ] Backend `mvn verify` — pendiente entorno Java local
+
+### Resultado obtenido
+
+MOD-AUTH frontend base operativo. Bloqueos API B-1/B-2 registrados. Acceso rápido login removido; cuentas seed `*Demo2026!`.
+
+### Próximos pasos
+
+- [x] Continuar en PR-IMPL-006 (GET users + programs)
+
+---
+
+## PM-014
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-014 |
+| **Fecha** | 2026-07-06 |
+| **Hora** | 02:30 |
+| **Solicitante** | Aylen |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Cierre brechas MOD-AUTH UC-001/UC-002 (PR-IMPL-006) |
+| **Objetivo** | GET `/admin/users`, GET `/programs`, UI listado/revocación/alta CC |
+| **Contexto** | Continuación PM-013; catálogo programas estático v1.0 |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD-UC vinculado** | DD-UC-001, DD-UC-002 |
+| **FSD-UC vinculado** | FSD-UC-001, FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Completa lo pendiente UC-001/UC-002: backend GET /api/v1/admin/users (filtros role/status), GET /api/v1/programs (catálogo estático dev), frontend tabla usuarios + desactivar + alta CC con select. Actualizar api_contracts.md, DTP.md, PR-IMPL-006, PROMPT_MAPPING sprint_01 con Aylen.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/.../ListUsersService.java`, `ListProgramsService.java`, `ProgramCatalogController.java` |
+| generado | `backend/.../StaticProgramCatalogAdapter.java`, DTOs, `InvalidFilterException.java` |
+| modificado | `UserAdminController.java`, `UserRepositoryPort`, `AppUserJpaRepository`, `AuthModuleConfig` |
+| generado | `ProgramCatalogControllerTest.java`; ampliado `UserAdminControllerTest.java` |
+| generado | `frontend/src/api/endpoints/program-catalog-controller/*` |
+| generado | `UsersTableUI.tsx`, `useUsersList.ts`, `useDeactivateUserAction.ts` |
+| modificado | `RegisterUserFormUI.tsx`, `useRegisterUserForm.ts`, `UsersAdminPage.tsx` |
+| modificado | `docs/product/api_contracts.md`, `docs/product/DTP.md` |
+| generado | `docs/prompts/impl/PR-IMPL-006.md` |
+
+### Validación ejecutada
+
+- [x] `pnpm run build` — exitoso
+- [ ] `mvn test` — pendiente entorno Java (PKIX/certificados en máquina dev)
+
+### Resultado obtenido
+
+MOD-AUTH UC-001/UC-002 **cerrado en frontend + contratos API ampliados**. Listado y revocación operativos con backend up. Catálogo programas v1.0 estático (3 carreras demo).
+
+### Próximos pasos
+
+- [ ] Regenerar Orval con backend en `:8080` (`pnpm run generate:api`)
+- [ ] Resolver JDK/Maven en entorno dev para validar backend
+- [ ] MOD-PROCESS frontend (UC-003)
 

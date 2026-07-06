@@ -115,7 +115,9 @@ artefactos_vivos:
 | **Password temporal alta** | Generado en servidor; entrega **offline** v1.0 (delta §A.2 #2) |
 | **Audit** | `AuditLogPort` → `NoOpAuditLogAdapter` (stub UC-017) |
 | **Bloqueo por intentos** | Columnas `failed_attempts`/`locked_until` en DDL; lógica **diferida v1.1** (sin `429 AUTH_LOCKED` en v1.0) |
-| **Seed dev** | `jd@umss.edu.bo` / `ChangeMe123!` (`AuthDataLoader`) |
+| **Seed dev** | `jd@umss.edu.bo` / `JefeDemo2026!`; `td@umss.edu.bo` / `TecnicoDemo2026!`; `cc@umss.edu.bo` / `CoordDemo2026!` (`AuthDataLoader`) |
+| **Listado admin** | `GET /api/v1/admin/users` ([JD]); filtros opcionales `role`, `status` |
+| **Catálogo programas v1.0** | `GET /api/v1/programs` — catálogo estático dev para alta CC |
 
 ## C. Integraciones
 
