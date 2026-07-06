@@ -1,7 +1,9 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessEntity;
 import com.umss.sigesa.application.port.out.AccreditationProcessRepositoryPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
+import com.umss.sigesa.domain.model.ProcessStatus;
 import com.umss.sigesa.domain.model.ProcessType;
 import org.springframework.stereotype.Repository;
 
@@ -10,17 +12,47 @@ import java.util.UUID;
 @Repository
 public class AccreditationProcessJpaAdapter implements AccreditationProcessRepositoryPort {
 
-    // private final AccreditationProcessSpringDataRepository jpaRepository;
+    private final AccreditationProcessJpaRepository jpaRepository;
+
+    public AccreditationProcessJpaAdapter(AccreditationProcessJpaRepository jpaRepository) {
+        this.jpaRepository = jpaRepository;
+    }
 
     @Override
     public boolean existsActiveProcessByCareerAndTypeAndPeriod(UUID careerId, ProcessType type, String period) {
-        // TODO: Hacer la consulta real a la base de datos
-        return false;
+        return jpaRepository.existsByCareerIdAndTypeAndPeriodAndStatus(
+                careerId, type, period, ProcessStatus.ACTIVE);
     }
 
     @Override
     public AccreditationProcess save(AccreditationProcess process) {
-        // TODO: Mapear el 'process' de dominio a entidad JPA y guardarlo en BD
-        return process;
+        AccreditationProcessEntity saved = jpaRepository.save(toEntity(process));
+        return toDomain(saved);
+    }
+
+    private AccreditationProcessEntity toEntity(AccreditationProcess process) {
+        AccreditationProcessEntity entity = new AccreditationProcessEntity();
+        entity.setId(process.getId());
+        entity.setTemplateId(process.getTemplateId());
+        entity.setCareerId(process.getCareerId());
+        entity.setPeriod(process.getPeriod());
+        entity.setType(process.getType());
+        entity.setStatus(process.getStatus());
+        entity.setTaxonomySnapshotVersion(process.getTaxonomySnapshotVersion());
+        entity.setCreatedAt(process.getCreatedAt());
+        return entity;
+    }
+
+    private AccreditationProcess toDomain(AccreditationProcessEntity entity) {
+        return new AccreditationProcess(
+                entity.getId(),
+                entity.getTemplateId(),
+                entity.getCareerId(),
+                entity.getPeriod(),
+                entity.getType(),
+                entity.getStatus(),
+                entity.getTaxonomySnapshotVersion(),
+                entity.getCreatedAt()
+        );
     }
 }

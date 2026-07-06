@@ -23,4 +23,10 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY) // 422
                 .body(Map.of("error", "TEMPLATE_NOT_VALID", "message", ex.getMessage()));
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "BAD_REQUEST", "message", ex.getMessage()));
+    }
 }

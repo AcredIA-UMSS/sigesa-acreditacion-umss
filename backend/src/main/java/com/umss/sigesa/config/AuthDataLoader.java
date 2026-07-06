@@ -8,6 +8,8 @@ import com.umss.sigesa.domain.model.Role;
 import com.umss.sigesa.domain.model.UserStatus;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -18,18 +20,25 @@ import java.util.UUID;
  * Cuentas de prueba para desarrollo local (H2). No usar en producción.
  */
 @Component
+@Profile("!prod")
+@Order(100)
 public class AuthDataLoader implements ApplicationRunner {
 
     public static final String SEED_JD_EMAIL = "jd@umss.edu.bo";
     public static final String SEED_TD_EMAIL = "td@umss.edu.bo";
     public static final String SEED_CC_EMAIL = "cc@umss.edu.bo";
+    public static final String SEED_CC2_EMAIL = "cc2@umss.edu.bo";
+    public static final String SEED_PENDING_EMAIL = "pendiente@umss.edu.bo";
 
     public static final String SEED_JD_PASSWORD = "JefeDemo2026!";
     public static final String SEED_TD_PASSWORD = "TecnicoDemo2026!";
     public static final String SEED_CC_PASSWORD = "CoordDemo2026!";
+    public static final String SEED_CC2_PASSWORD = "Coord2Demo2026!";
+    public static final String SEED_PENDING_PASSWORD = "PendienteDemo2026!";
 
-    /** Carrera ficticia de prueba para asignación del coordinador seed. */
-    public static final UUID SEED_PROGRAM_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+    /** @deprecated Usar {@link DevSeedData#PROGRAM_INF_SIS}. */
+    @Deprecated
+    public static final UUID SEED_PROGRAM_ID = DevSeedData.PROGRAM_INF_SIS;
 
     private final AppUserJpaRepository userRepository;
     private final UserProgramAssignmentJpaRepository assignmentRepository;
@@ -45,12 +54,14 @@ public class AuthDataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        seedUser(SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, null);
-        seedUser(SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, null);
-        seedUser(SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, SEED_PROGRAM_ID);
+        seedUser(SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, UserStatus.ACTIVE, null);
+        seedUser(SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, null);
+        seedUser(SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
+        seedUser(SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_CEUB);
+        seedUser(SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_ARCUSUR);
     }
 
-    private void seedUser(String email, String password, Role role, UUID programId) {
+    private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
         if (userRepository.findByEmail(email).isPresent()) {
             return;
         }
@@ -63,7 +74,7 @@ public class AuthDataLoader implements ApplicationRunner {
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(status);
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         userRepository.save(user);
