@@ -84,11 +84,6 @@ export function useLoginForm() {
     }
   };
 
-  const applyQuickAccessEmail = (email: string) => {
-    setEmail(email);
-    setSubmitError(null);
-  };
-
   return {
     form,
     fieldErrors,
@@ -97,6 +92,5 @@ export function useLoginForm() {
     setEmail,
     setPassword,
     handleSubmit,
-    applyQuickAccessEmail,
   };
 }

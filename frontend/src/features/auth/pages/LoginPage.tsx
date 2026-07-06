@@ -56,7 +56,6 @@ export function LoginPage() {
           onEmailChange={loginForm.setEmail}
           onPasswordChange={loginForm.setPassword}
           onSubmit={loginForm.handleSubmit}
-          onQuickAccess={loginForm.applyQuickAccessEmail}
         />
       </section>
     </div>
