@@ -31,3 +31,13 @@
 - **Restricción de Refactorización:** No refactorices archivos enteros si no se te ha pedido. Limítate al alcance ("scope") actual.
 - **TypeScript Estricto:** Tipado fuerte obligatorio. PROHIBIDO el uso de `any`. Utiliza `types` o `interfaces` explícitas para las props y el estado.
 - **Aislamiento de Monorepo:** Nunca mezcles imports entre los directorios `/backend` y `/frontend`.
+
+# Orquestador AI-SDLC (subagente)
+
+Para implementar features de punta a punta, delega en el subagente de proyecto:
+
+- **Archivo:** `.cursor/agents/sigesa-orchestrator.md`
+- **Invocación:** `Use the sigesa-orchestrator agent to implement FSD-UC-NNN` o `@sigesa-orchestrator`
+- **Pipeline:** FSD → DD-UC → PR-IMPL → backend → Orval → frontend → code review → `@dtp-sync` → `@save-prompt-mapping`
+
+El skill `.cursor/skills/sigesa-orchestrator/` está deprecado; el subagente es la fuente de verdad.
