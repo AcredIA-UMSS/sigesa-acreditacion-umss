@@ -19,8 +19,7 @@ import type {
   LoginResponse
 } from '../../model';
 
-
-
+import { customFetch } from '../../../lib/api/customFetch';
 
 
 export type loginResponse200 = {
@@ -44,21 +43,14 @@ export const getLoginUrl = () => {
 }
 
 export const login = async (loginRequest: LoginRequest, options?: RequestInit): Promise<loginResponse> => {
-
-  const res = await fetch(getLoginUrl(),
-  {
+  const res = await customFetch<LoginResponse>(getLoginUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(loginRequest)
-  }
-)
+    body: JSON.stringify(loginRequest),
+    auth: false,
+  });
 
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: loginResponse['data'] = body !== null ? body : ''
-  return { data, status: res.status, headers: res.headers } as loginResponse
+  return { data: res.data, status: res.status as 200, headers: res.headers };
 }
 
 

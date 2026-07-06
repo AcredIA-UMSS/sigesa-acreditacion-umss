@@ -19,8 +19,7 @@ import type {
   RegisterUserResponse
 } from '../../model';
 
-
-
+import { customFetch } from '../../../lib/api/customFetch';
 
 
 export type registerResponse200 = {
@@ -44,21 +43,13 @@ export const getRegisterUrl = () => {
 }
 
 export const register = async (registerUserRequest: RegisterUserRequest, options?: RequestInit): Promise<registerResponse> => {
-
-  const res = await fetch(getRegisterUrl(),
-  {
+  const res = await customFetch<RegisterUserResponse>(getRegisterUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(registerUserRequest)
-  }
-)
+    body: JSON.stringify(registerUserRequest),
+  });
 
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: registerResponse['data'] = body !== null ? body : ''
-  return { data, status: res.status, headers: res.headers } as registerResponse
+  return { data: res.data, status: res.status as 200, headers: res.headers };
 }
 
 
@@ -126,21 +117,12 @@ export const getDeactivateUrl = (id: string,) => {
 }
 
 export const deactivate = async (id: string, options?: RequestInit): Promise<deactivateResponse> => {
-
-  const res = await fetch(getDeactivateUrl(id),
-  {
+  const res = await customFetch<void>(getDeactivateUrl(id), {
     ...options,
-    method: 'PATCH'
+    method: 'PATCH',
+  });
 
-
-  }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deactivateResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deactivateResponse
+  return { data: res.data, status: res.status as 200, headers: res.headers };
 }
 
 
