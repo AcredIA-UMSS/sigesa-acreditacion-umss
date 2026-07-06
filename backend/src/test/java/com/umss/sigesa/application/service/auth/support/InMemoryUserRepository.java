@@ -4,8 +4,11 @@ import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
+import com.umss.sigesa.domain.model.Role;
+import com.umss.sigesa.domain.model.UserStatus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +48,15 @@ public class InMemoryUserRepository implements UserRepositoryPort {
         }
         usersById.put(user.getId(), new StoredUser(user, existing.password()));
         return user;
+    }
+
+    @Override
+    public List<AppUser> findAllFiltered(Role role, UserStatus status) {
+        return usersById.values().stream()
+                .map(StoredUser::user)
+                .filter(user -> role == null || user.getRole() == role)
+                .filter(user -> status == null || user.getStatus() == status)
+                .toList();
     }
 
     Optional<StoredUser> findStoredByEmail(Email email) {

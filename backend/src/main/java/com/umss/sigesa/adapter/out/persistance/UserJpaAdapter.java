@@ -6,10 +6,13 @@ import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
+import com.umss.sigesa.domain.model.Role;
+import com.umss.sigesa.domain.model.UserStatus;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,6 +56,13 @@ public class UserJpaAdapter implements UserRepositoryPort {
         entity.setStatus(user.getStatus());
         entity.setUpdatedAt(user.getUpdatedAt());
         return toDomain(jpaRepository.save(entity));
+    }
+
+    @Override
+    public List<AppUser> findAllFiltered(Role role, UserStatus status) {
+        return jpaRepository.findFiltered(role, status).stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     private AppUserEntity toEntity(AppUser user) {

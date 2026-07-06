@@ -107,7 +107,7 @@ class AuthenticatedApiSmokeTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"%s"}
-                                """.formatted(AuthDataLoader.SEED_JD_EMAIL, AuthDataLoader.SEED_PASSWORD)))
+                                """.formatted(AuthDataLoader.SEED_JD_EMAIL, AuthDataLoader.SEED_JD_PASSWORD)))
                 .andExpect(status().isOk())
                 .andReturn();
 

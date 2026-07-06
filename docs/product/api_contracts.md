@@ -102,6 +102,25 @@ security:
 | **x-allowed-roles** | `[JD]` |
 | **204** | Usuario desactivado; historial conservado |
 
+### API-USER-03 — `GET /admin/users`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-002 |
+| **x-allowed-roles** | `[JD]` |
+| **Query** | `role?` (`CC`/`TD`/`JD`), `status?` (`INACTIVE`/`ACTIVE`/`DEACTIVATED`) |
+| **200** | `[{ "userId", "email", "role", "status", "programIds" }]` |
+| **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
+
+### API-CAT-01 — `GET /programs`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-002 (catálogo para alta CC) |
+| **Auth** | JWT Bearer (cualquier rol autenticado) |
+| **200** | `[{ "id", "code", "name" }]` |
+| **Nota v1.0** | Catálogo estático en dev (`StaticProgramCatalogAdapter`); tabla `academic_program` diferida |
+
 ---
 
 ## 4. MOD-PROCESS

@@ -5,8 +5,9 @@ Esta guía define el flujo de trabajo estándar para todo el equipo de desarroll
 > ⚠️ **Regla de Oro:** La carpeta `docs/baseline/` es nuestro registro histórico intocable. Todo el diseño evolutivo y las decisiones ocurren en la capa viva (`docs/product/`, `docs/design/`, `docs/adr/`).
 
 ---
-# Si tiene tokens ilimitados o con poder, solo dile a la ia lo siguiente:
-    @sigesa-orchestrator Necesito implementar el módulo de reportes definido en FSD-UC-005. Hazte cargo del proceso.
+# Si tiene tokens ilimitados o con poder, invoca al orquestador (subagente de proyecto):
+    Use the sigesa-orchestrator agent to implement FSD-UC-005 end-to-end.
+    # o en Composer: @sigesa-orchestrator Necesito implementar el módulo definido en FSD-UC-005.
 ---
 ---
 # 🛠️ Flujo de Trabajo: Paso a Paso
