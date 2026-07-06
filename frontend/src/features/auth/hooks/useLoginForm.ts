@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLogin } from '../../../api/endpoints/auth-controller/auth-controller';
 import { getLoginErrorMessage } from '../../../lib/api/mapApiError';
-import { getPostLoginPath, useAuth } from '../../../lib/auth/AuthContext';
+import { getPostLoginPath } from '../../../lib/auth/getPostLoginPath';
+import { useAuth } from '../../../lib/auth/useAuth';
 import { UMSS_EMAIL_PATTERN } from '../../../lib/auth/types';
 import type { LoginResponse } from '../../../api/model';
 

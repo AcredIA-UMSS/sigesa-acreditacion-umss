@@ -2,7 +2,8 @@ import { GraduationCap } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { LoginFormUI } from '../components/LoginFormUI';
 import { useLoginForm } from '../hooks/useLoginForm';
-import { getPostLoginPath, useAuth } from '../../../lib/auth/AuthContext';
+import { getPostLoginPath } from '../../../lib/auth/getPostLoginPath';
+import { useAuth } from '../../../lib/auth/useAuth';
 
 export function LoginPage() {
   const { isAuthenticated, session } = useAuth();

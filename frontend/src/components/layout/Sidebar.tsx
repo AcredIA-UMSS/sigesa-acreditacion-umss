@@ -12,7 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
-import { useAuth } from '../../lib/auth/AuthContext';
+import { useAuth } from '../../lib/auth/useAuth';
 
 type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'reports' | 'history' | 'help';
 

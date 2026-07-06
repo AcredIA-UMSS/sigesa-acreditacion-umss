@@ -1,5 +1,5 @@
-import { useDeactivate } from '../../../api/endpoints/user-admin-controller/user-admin-controller';
-import { getApiErrorMessage } from '../../../lib/api/mapApiError';
+import { useDeactivate } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 
 /**
  * Hook listo para revocación desde filas de la tabla cuando exista GET /admin/users.

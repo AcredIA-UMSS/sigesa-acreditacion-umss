@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { getPostLoginPath, useAuth } from '../../lib/auth/AuthContext';
+import { getPostLoginPath } from '../../lib/auth/getPostLoginPath';
+import { useAuth } from '../../lib/auth/useAuth';
 
 interface JdOnlyRouteProps {
   children: React.ReactNode;

@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { useRegister } from '../../../api/endpoints/user-admin-controller/user-admin-controller';
-import type { RegisterUserResponse } from '../../../api/model';
-import { getApiErrorMessage } from '../../../lib/api/mapApiError';
+import { useRegister } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import type { RegisterUserResponse } from '../../../../api/model';
+import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import {
   ASSIGNABLE_ROLES,
   ROLE_LABELS,
   ROLE_REQUIRES_PROGRAM,
   type BackendRoleCode,
-} from '../../../lib/auth/roleLabels';
-import { UMSS_EMAIL_PATTERN } from '../../../lib/auth/types';
+} from '../../../../lib/auth/roleLabels';
+import { UMSS_EMAIL_PATTERN } from '../../../../lib/auth/types';
 
 interface RegisterUserFormState {
   email: string;

@@ -1,5 +1,5 @@
 import { Bell, Settings } from 'lucide-react';
-import { Sidebar } from '../../../components/layout/Sidebar';
+import { Sidebar } from '../../../../components/layout/Sidebar';
 import { RegisterUserFormUI } from '../components/RegisterUserFormUI';
 import { UsersTablePlaceholderUI } from '../components/UsersTablePlaceholderUI';
 import { useRegisterUserForm } from '../hooks/useRegisterUserForm';

@@ -1,9 +1,10 @@
-import { Alert } from '../../../components/ui/Alert';
-import { Button } from '../../../components/ui/Button';
-import { Select } from '../../../components/ui/Select';
-import { TextInput } from '../../../components/ui/TextInput';
-import type { BackendRoleCode } from '../../../lib/auth/roleLabels';
-import { UMSS_EMAIL_SUFFIX } from '../../../lib/auth/types';
+import { Alert } from '../../../../components/ui/Alert';
+import { Button } from '../../../../components/ui/Button';
+import { Select } from '../../../../components/ui/Select';
+import { TextInput } from '../../../../components/ui/TextInput';
+import type { BackendRoleCode } from '../../../../lib/auth/roleLabels';
+import { UMSS_EMAIL_SUFFIX } from '../../../../lib/auth/types';
+import type { ChangeEvent } from 'react';
 
 interface RoleOption {
   value: BackendRoleCode;
@@ -73,14 +74,16 @@ export function RegisterUserFormUI({
           type="email"
           placeholder={`nombre${UMSS_EMAIL_SUFFIX}`}
           value={email}
-          onChange={(event) => onEmailChange(event.target.value)}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => onEmailChange(event.target.value)}
           error={emailError}
         />
 
         <Select
           label="Rol"
           value={role}
-          onChange={(event) => onRoleChange(event.target.value as BackendRoleCode)}
+          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+            onRoleChange(event.target.value as BackendRoleCode)
+          }
           options={roleOptions.map((option) => ({ value: option.value, label: option.label }))}
         />
 

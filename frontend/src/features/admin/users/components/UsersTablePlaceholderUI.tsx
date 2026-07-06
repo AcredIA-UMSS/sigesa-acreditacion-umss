@@ -1,4 +1,4 @@
-import { Alert } from '../../../components/ui/Alert';
+import { Alert } from '../../../../components/ui/Alert';
 
 export function UsersTablePlaceholderUI() {
   return (

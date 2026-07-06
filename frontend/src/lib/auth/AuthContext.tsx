@@ -1,7 +1,6 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useMemo,
   useState,
   type ReactNode,
@@ -11,14 +10,14 @@ import { isBackendRoleCode } from './roleLabels';
 import { clearSession, loadSession, saveSession } from './tokenStorage';
 import type { AuthSession } from './types';
 
-interface AuthContextValue {
+export interface AuthContextValue {
   session: AuthSession | null;
   isAuthenticated: boolean;
   login: (response: LoginResponse) => void;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 function toSession(response: LoginResponse): AuthSession | null {
   const accessToken = response.accessToken;
@@ -66,19 +65,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth(): AuthContextValue {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider.');
-  }
-  return context;
-}
-
-export function getPostLoginPath(role: string): string {
-  if (role === 'JD') {
-    return '/admin/users';
-  }
-  return '/procesos/nuevo';
 }
