@@ -34,7 +34,7 @@ function resolveHttpErrorMessage(status: number, rawBody: string | null): string
 export async function customFetch<TData>(
   url: string,
   options: CustomFetchOptions = {},
-): Promise<{ data: TData; status: number; headers: Headers }> {
+): Promise<TData> {
   const { auth = true, headers: initHeaders, ...init } = options;
   const headers = new Headers(initHeaders);
 
@@ -79,7 +79,7 @@ export async function customFetch<TData>(
     throw new ApiError(response.status, code, resolveHttpErrorMessage(response.status, rawBody));
   }
 
-  const data = rawBody && rawBody.length > 0 ? (JSON.parse(rawBody) as TData) : (undefined as TData);
+  const data = rawBody && rawBody.length > 0 ? (JSON.parse(rawBody) as any) : undefined;
 
-  return { data, status: response.status, headers: response.headers };
+  return { data, status: response.status, headers: response.headers } as unknown as TData;
 }

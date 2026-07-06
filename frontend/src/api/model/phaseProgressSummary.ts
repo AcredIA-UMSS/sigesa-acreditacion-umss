@@ -5,8 +5,9 @@
  * OpenAPI spec version: v0
  */
 
-export interface ProgramSummaryResponse {
-  id?: string;
-  code?: string;
+export interface PhaseProgressSummary {
+  phaseId?: number;
   name?: string;
+  percentage?: number;
+  status?: string;
 }

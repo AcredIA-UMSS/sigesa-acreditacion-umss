@@ -30,7 +30,6 @@ public class SecurityConfig {
                                             RestAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .securityContext(context -> context.securityContextRepository(new org.springframework.security.web.context.RequestAttributeSecurityContextRepository()))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()

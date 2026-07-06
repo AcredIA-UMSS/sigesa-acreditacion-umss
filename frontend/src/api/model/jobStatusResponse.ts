@@ -5,10 +5,10 @@
  * OpenAPI spec version: v0
  */
 
-export interface UserAdminSummaryResponse {
-  userId?: string;
-  email?: string;
-  role?: string;
+export interface JobStatusResponse {
+  jobId?: string;
   status?: string;
-  programIds?: string[];
+  progressPercentage?: number;
+  downloadUrl?: string;
+  errorMessage?: string;
 }

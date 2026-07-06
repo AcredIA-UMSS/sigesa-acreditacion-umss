@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useRegister } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
-import { getListUsersQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
-import { useListPrograms } from '../../../../api/endpoints/program-catalog-controller/program-catalog-controller';
-import type { RegisterUserResponse } from '../../../../api/model';
+import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { useList1 } from '../../../../api/endpoints/program-catalog-controller/program-catalog-controller';
+import type { RegisterUserResponse, ProgramSummaryResponse } from '../../../../api/model';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import {
   ASSIGNABLE_ROLES,
@@ -21,7 +21,7 @@ interface RegisterUserFormState {
 
 export function useRegisterUserForm() {
   const queryClient = useQueryClient();
-  const programsQuery = useListPrograms();
+  const programsQuery = useList1();
   const [form, setForm] = useState<RegisterUserFormState>({
     email: '',
     role: 'TD',
@@ -41,7 +41,7 @@ export function useRegisterUserForm() {
         setSubmitError(null);
         setForm({ email: '', role: 'TD', programId: '' });
         setFieldErrors({});
-        await queryClient.invalidateQueries({ queryKey: getListUsersQueryKey(undefined) });
+        await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
       },
       onError: (error) => {
         setSubmitError(getApiErrorMessage(error));
@@ -52,8 +52,8 @@ export function useRegisterUserForm() {
 
   const requiresProgram = ROLE_REQUIRES_PROGRAM[form.role];
   const programOptions = (programsQuery.data?.data ?? [])
-    .filter((program) => program.id && program.name)
-    .map((program) => ({
+    .filter((program: ProgramSummaryResponse) => program.id && program.name)
+    .map((program: ProgramSummaryResponse) => ({
       value: program.id as string,
       label: program.code ? `${program.code} — ${program.name}` : (program.name as string),
     }));

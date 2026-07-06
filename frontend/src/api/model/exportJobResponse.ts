@@ -5,8 +5,9 @@
  * OpenAPI spec version: v0
  */
 
-export interface ProgramSummaryResponse {
-  id?: string;
-  code?: string;
-  name?: string;
+export interface ExportJobResponse {
+  jobId?: string;
+  status?: string;
+  message?: string;
+  statusUrl?: string;
 }

@@ -113,7 +113,8 @@ class UserAdminControllerTest {
     @Test
     @WithMockUser(roles = "CC")
     void list_withCcRoleReturns403() throws Exception {
-        mockMvc.perform(get("/api/v1/admin/users"))
+        mockMvc.perform(get("/api/v1/admin/users")
+                        .with(user("testcc").roles("CC")))
                 .andExpect(status().isForbidden());
     }
 
@@ -125,7 +126,8 @@ class UserAdminControllerTest {
                 new ListUsersUseCase.UserSummary(userId, "cc@umss.edu.bo", "CC", "ACTIVE", List.of())
         ));
 
-        mockMvc.perform(get("/api/v1/admin/users"))
+        mockMvc.perform(get("/api/v1/admin/users")
+                        .with(user("testjd").roles("JD")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userId").value(userId.toString()))
                 .andExpect(jsonPath("$[0].email").value("cc@umss.edu.bo"))

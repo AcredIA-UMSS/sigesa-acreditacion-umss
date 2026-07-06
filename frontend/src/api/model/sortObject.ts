@@ -5,8 +5,8 @@
  * OpenAPI spec version: v0
  */
 
-export interface ProgramSummaryResponse {
-  id?: string;
-  code?: string;
-  name?: string;
+export interface SortObject {
+  sorted?: boolean;
+  unsorted?: boolean;
+  empty?: boolean;
 }

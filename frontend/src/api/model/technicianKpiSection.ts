@@ -5,8 +5,7 @@
  * OpenAPI spec version: v0
  */
 
-export interface ProgramSummaryResponse {
-  id?: string;
-  code?: string;
-  name?: string;
+export interface TechnicianKpiSection {
+  evidencesPendingReview?: number;
+  assignedIndicators?: number;
 }

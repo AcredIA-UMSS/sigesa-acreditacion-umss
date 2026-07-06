@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useDeactivate } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
-import { getListUsersQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
+import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 
 export function useDeactivateUserAction() {
@@ -9,7 +9,7 @@ export function useDeactivateUserAction() {
   const mutation = useDeactivate({
     mutation: {
       onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: getListUsersQueryKey(undefined) });
+        await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
       },
     },
   });
