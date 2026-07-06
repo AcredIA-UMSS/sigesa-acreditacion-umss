@@ -23,5 +23,13 @@ export function getLoginErrorMessage(error: unknown): string {
     return error.message;
   }
 
+  if (isApiError(error) && error.code === 'NETWORK_ERROR') {
+    return error.message;
+  }
+
+  if (isApiError(error) && (error.status === 502 || error.status === 503 || error.status === 504)) {
+    return error.message;
+  }
+
   return getApiErrorMessage(error, 'No fue posible iniciar sesión. Intente nuevamente.');
 }
