@@ -1,23 +1,9 @@
-import {
-  createContext,
-  useCallback,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { LoginResponse } from '../../api/model';
+import { AuthContext, type AuthContextValue } from './auth-context';
 import { isBackendRoleCode } from './roleLabels';
 import { clearSession, loadSession, saveSession } from './tokenStorage';
 import type { AuthSession } from './types';
-
-export interface AuthContextValue {
-  session: AuthSession | null;
-  isAuthenticated: boolean;
-  login: (response: LoginResponse) => void;
-  logout: () => void;
-}
-
-export const AuthContext = createContext<AuthContextValue | null>(null);
 
 function toSession(response: LoginResponse): AuthSession | null {
   const accessToken = response.accessToken;
