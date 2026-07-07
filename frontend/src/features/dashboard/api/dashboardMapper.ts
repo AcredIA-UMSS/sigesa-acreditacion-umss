@@ -2,6 +2,7 @@ import type {
   CompositeDashboardSummary,
   CoordinatorKpiSection,
   TechnicianKpiSection,
+  ExecutiveKpiSection,
   ObservationSummary,
   PageObservationSummary,
 } from '../../../api/model';
@@ -9,8 +10,10 @@ import type {
   CompositeSummaryResponse,
   CoordinatorSection,
   TechnicianSection,
+  ExecutiveSection,
   ObservationDetail,
   PaginatedObservationsResponse,
+  DashboardRolePermission,
 } from '../types';
 
 export function mapCompositeSummary(
@@ -28,10 +31,10 @@ export function mapCompositeSummary(
 
   return {
     userId: dto.userId ?? '',
-    grantedPermissions: dto.grantedPermissions ?? [],
+    grantedPermissions: (dto.grantedPermissions ?? []) as DashboardRolePermission[],
     coordinatorSection: mapCoordinatorSection(dto.coordinatorSection),
     technicianSection: mapTechnicianSection(dto.technicianSection),
-    executiveSection: dto.executiveSection ? (dto.executiveSection as Record<string, unknown>) : null,
+    executiveSection: mapExecutiveSection(dto.executiveSection),
   };
 }
 
@@ -70,6 +73,19 @@ function mapTechnicianSection(
   return {
     evidenciasPendientesRevision: dto.evidencesPendingReview ?? 0,
     indicadoresAsignados: dto.assignedIndicators ?? 0,
+    ultimasEvaluaciones: (dto as any).ultimasEvaluaciones ?? [],
+  };
+}
+
+function mapExecutiveSection(
+  dto?: ExecutiveKpiSection
+): ExecutiveSection | null {
+  if (!dto) return null;
+
+  return {
+    totalProgramasEnAcreditacion: dto.totalPrograms ?? 0,
+    porcentajeAvanceInstitucional: dto.averageGlobalProgress ?? 0,
+    semaforoProgramas: (dto as any).semaforoProgramas ?? [],
   };
 }
 

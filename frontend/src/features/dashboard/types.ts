@@ -1,12 +1,14 @@
-// 1. Composite Summary Contract
+export type DashboardRolePermission = 'READ_CC_DASHBOARD' | 'READ_TD_DASHBOARD' | 'READ_JD_DASHBOARD';
+
 export interface CompositeSummaryResponse {
   userId: string;
-  grantedPermissions: string[];
+  grantedPermissions: DashboardRolePermission[];
   coordinatorSection: CoordinatorSection | null;
   technicianSection: TechnicianSection | null;
   executiveSection: ExecutiveSection | null;
 }
 
+// [CC] Coordinador de Carrera Contract
 export interface CoordinatorSection {
   programId: string;
   programName: string;
@@ -28,12 +30,29 @@ export interface CoordinatorSection {
   }>;
 }
 
+// [TD] Técnico DUEA Contract
 export interface TechnicianSection {
   evidenciasPendientesRevision: number;
   indicadoresAsignados: number;
+  ultimasEvaluaciones?: Array<{
+    evidenciaId: string;
+    programa: string;
+    fechaRevision: string;
+    resultado: 'APROBADO' | 'RECHAZADO';
+  }>;
 }
 
-export type ExecutiveSection = Record<string, unknown>; // Expandable per v1.0 specs
+// [JD] Jefatura DUEA Contract
+export interface ExecutiveSection {
+  totalProgramasEnAcreditacion?: number;
+  porcentajeAvanceInstitucional?: number;
+  semaforoProgramas?: Array<{
+    programaId: string;
+    nombre: string;
+    estado: 'VERDE' | 'AMARILLO' | 'ROJO';
+    observacionesCriticas: number;
+  }>;
+}
 
 // 2. Paginated Details Contract
 export interface ObservationDetail {

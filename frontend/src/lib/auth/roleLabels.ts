@@ -3,9 +3,9 @@ export const BACKEND_ROLES = ['JD', 'CC', 'TD'] as const;
 export type BackendRoleCode = (typeof BACKEND_ROLES)[number];
 
 export const ROLE_LABELS: Record<BackendRoleCode, string> = {
-  JD: 'Jefe',
-  CC: 'Coordinador',
-  TD: 'Técnico',
+  JD: 'Jefatura DUEA [JD]',
+  CC: 'Coordinador de Carrera [CC]',
+  TD: 'Técnico DUEA [TD]',
 };
 
 /** Roles assignable in user registration (excludes public/unauthenticated access). */

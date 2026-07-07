@@ -13,6 +13,7 @@ adrs:
   - "ADR_002_monolito_modular"
 prompts:
   - "PR-IMPL-011"
+  - "PR-CONTRACT-FE-DASHBOARD-012-MASTER"
 release: "v1.0"
 status: borrador
 fecha: "2026-06-27"
@@ -211,6 +212,7 @@ flowchart TD
 | Prompt | Tarea | Artefacto generado |
 |--------|-------|--------------------|
 | `PR-IMPL-011` | Generación del controlador compuesto, evaluador de permisos PBAC, servicios de aplicación y DTOs híbridos. | `DashboardCompositeController.java`, services y tests. |
+| `PR-CONTRACT-FE-DASHBOARD-012-MASTER` | UI Audit, Role-Mapping Fixes, Binary Stream Debugging, Mock Expansion, and Complete Feature Implementation. | `customFetch.ts`, `dashboardHooks.ts`, `dashboardFixtures.ts`, `roleLabels.ts`, `DashboardPage.tsx` |
 
 ---
 
