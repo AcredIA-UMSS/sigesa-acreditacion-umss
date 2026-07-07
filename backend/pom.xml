@@ -116,6 +116,16 @@
              <artifactId>bcprov-jdk18on</artifactId>
              <version>1.84</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>de.siegmar</groupId>
+            <artifactId>fastcsv</artifactId>
+            <version>3.4.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -202,6 +212,8 @@
                                         <include>com.umss.sigesa.application.service.auth.AuthenticateService</include>
                                         <include>com.umss.sigesa.application.service.auth.RegisterUserService</include>
                                         <include>com.umss.sigesa.application.service.auth.DeactivateUserService</include>
+                                        <include>com.umss.sigesa.application.service.report.ReportExportJobService</include>
+                                        <include>com.umss.sigesa.application.service.dashboard.DashboardSummaryAggregationService</include>
                                     </includes>
                                     <limits>
                                         <limit>

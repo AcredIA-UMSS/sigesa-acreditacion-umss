@@ -240,6 +240,21 @@ sigesa-acreditacion-umss/
 └── agents.md         # Contexto técnico para agentes de IA
 ```
 
+## Panel de Control Híbrido (PBAC Dashboard)
+
+El frontend de SIGESA incluye un panel de control híbrido basado en permisos (PBAC) que adapta la interfaz de usuario dinámicamente según las autorizaciones del usuario (`READ_CC_DASHBOARD`, `READ_TD_DASHBOARD`, `READ_JD_DASHBOARD`):
+- **Coordinador de Carrera [CC]**: Acceso a indicadores de avance del programa académico asignado, progreso de fases, alertas de cuellos de botella y tabla de observaciones pendientes con paginación y ordenamiento.
+- **Técnico DUEA [TD]**: Visualización de evidencias pendientes de revisión y últimas evaluaciones realizadas.
+- **Jefatura DUEA [JD]**: Panel ejecutivo con semáforo de calidad de programas y KPIs agregados institucionales.
+
+### Simulación de Roles (Entorno Local)
+En entorno de desarrollo (`DEV`), se despliega una barra de herramientas de simulación de rol en la cabecera del dashboard. Esta herramienta está protegida por compilación condicional (`import.meta.env.DEV`) para evitar fugas en producción.
+
+### Exportación de Reportes
+Soporta exportaciones binarias robustas en formato Excel (`.xlsx`), PDF (`.pdf`), y CSV (`.csv`):
+- Los clientes HTTP detectan automáticamente respuestas binarias para prevenir la corrupción de datos.
+- En entorno de desarrollo con rol simulado, las descargas binarias se interceptan con un aviso y se descargan en formato CSV para inspección.
+
 ---
 
 ## Solución de problemas

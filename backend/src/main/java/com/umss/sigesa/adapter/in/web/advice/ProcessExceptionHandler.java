@@ -26,7 +26,7 @@ public class ProcessExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST) // 400
                 .body(Map.of("error", "BAD_REQUEST", "message", ex.getMessage()));
     }
 }

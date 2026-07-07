@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  getListUsersQueryKey,
-  useListUsers,
+  getListQueryKey,
+  useList,
 } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import type { UserAdminSummaryResponse } from '../../../../api/model/userAdminSummaryResponse';
 import { getRoleLabel, isBackendRoleCode } from '../../../../lib/auth/roleLabels';
@@ -30,14 +30,14 @@ function toRow(user: UserAdminSummaryResponse): UserRowViewModel | null {
 
 export function useUsersList() {
   const queryClient = useQueryClient();
-  const query = useListUsers(undefined);
+  const query = useList(undefined);
 
   const users = (query.data?.data ?? [])
     .map(toRow)
-    .filter((row): row is UserRowViewModel => row !== null);
+    .filter((row: UserRowViewModel | null): row is UserRowViewModel => row !== null);
 
   const refresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: getListUsersQueryKey(undefined) });
+    await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
   };
 
   return {

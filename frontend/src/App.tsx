@@ -4,12 +4,22 @@ import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessPage } from './features/procesos/CreateProcessPage';
+import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/admin/users"
@@ -31,8 +41,8 @@ function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to="/procesos/nuevo" replace />} />
-        <Route path="*" element={<Navigate to="/procesos/nuevo" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );

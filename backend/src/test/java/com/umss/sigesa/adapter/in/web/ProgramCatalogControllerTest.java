@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,7 +55,8 @@ class ProgramCatalogControllerTest {
                 new ListProgramsUseCase.ProgramSummary(programId, "INF-SIS", "Ingeniería de Sistemas")
         ));
 
-        mockMvc.perform(get("/api/v1/programs"))
+        mockMvc.perform(get("/api/v1/programs")
+                        .with(user("testjd").roles("JD")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(programId.toString()))
                 .andExpect(jsonPath("$[0].code").value("INF-SIS"))

@@ -46,7 +46,7 @@ ultima_actualizacion: "2026-06-23"
 | `FSD-UC-008` | Rechazar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-008.md) | — | — |
 | `FSD-UC-009` | Aprobar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-009.md) | — | — |
 | `FSD-UC-010` | Avanzar/cerrar Fase | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-010.md) | — | — |
-| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-011.md) | — | — |
+| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | En Curso | [Ver detalle](uc/FSD-UC-011.md) | [`DD-UC-011`](../design/DD-UC-011.md) | [`PR-IMPL-011`](../prompts/impl/PR-IMPL-011.md) |
 | `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) | — | — |
 | `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-013.md) | — | — |
 | `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-014.md) | — | — |

@@ -26,9 +26,9 @@ class AuthenticatedApiSmokeTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("US-003: /api/v1/fases sin token → 401")
-    void fasesWithoutTokenReturns401() throws Exception {
-        mockMvc.perform(get("/api/v1/fases"))
+    @DisplayName("US-003: /api/v1/dashboards/me/summary sin token → 401")
+    void dashboardSummaryWithoutTokenReturns401() throws Exception {
+        mockMvc.perform(get("/api/v1/dashboards/me/summary"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHORIZED"));
     }
@@ -93,11 +93,11 @@ class AuthenticatedApiSmokeTest {
     }
 
     @Test
-    @DisplayName("Perímetro JWT: /api/v1/fases con token válido → 200")
-    void fasesWithValidJwtReturns200() throws Exception {
+    @DisplayName("Perímetro JWT: /api/v1/dashboards/me/summary con token válido → 200")
+    void dashboardSummaryWithValidJwtReturns200() throws Exception {
         String token = obtainSeedJdToken();
 
-        mockMvc.perform(get("/api/v1/fases")
+        mockMvc.perform(get("/api/v1/dashboards/me/summary")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }

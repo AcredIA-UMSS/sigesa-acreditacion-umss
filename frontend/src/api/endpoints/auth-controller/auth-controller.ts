@@ -22,6 +22,8 @@ import type {
 import { customFetch } from '../../../lib/api/customFetch';
 
 
+
+
 export type loginResponse200 = {
   data: LoginResponse
   status: 200
@@ -43,29 +45,29 @@ export const getLoginUrl = () => {
 }
 
 export const login = async (loginRequest: LoginRequest, options?: RequestInit): Promise<loginResponse> => {
-  const res = await customFetch<LoginResponse>(getLoginUrl(), {
+
+  return customFetch<loginResponse>(getLoginUrl(),
+  {
     ...options,
     method: 'POST',
-    body: JSON.stringify(loginRequest),
-    auth: false,
-  });
-
-  return { data: res.data, status: res.status as 200, headers: res.headers };
-}
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(loginRequest)
+  }
+);}
 
 
 
 
 export const getLoginMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext> => {
 
 const mutationKey = ['login'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }};
 
 
 
@@ -73,7 +75,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof login>>, {data: LoginRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  login(data,fetchOptions)
+          return  login(data,)
         }
 
 
@@ -88,7 +90,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type LoginMutationError = unknown
 
     export const useLogin = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,{data: LoginRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof login>>,
         TError,

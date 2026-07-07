@@ -70,6 +70,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           isExpanded={isExpanded}
           hasDropdown
           active={activeNav === 'dashboard'}
+          to="/dashboard"
         />
 
         <NavItem
