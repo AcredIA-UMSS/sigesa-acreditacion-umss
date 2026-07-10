@@ -257,13 +257,10 @@ El frontend de SIGESA incluye un panel de control híbrido basado en permisos (P
 - **Técnico DUEA [TD]**: Visualización de evidencias pendientes de revisión y últimas evaluaciones realizadas.
 - **Jefatura DUEA [JD]**: Panel ejecutivo con semáforo de calidad de programas y KPIs agregados institucionales.
 
-### Simulación de Roles (Entorno Local)
-En entorno de desarrollo (`DEV`), se despliega una barra de herramientas de simulación de rol en la cabecera del dashboard. Esta herramienta está protegida por compilación condicional (`import.meta.env.DEV`) para evitar fugas en producción.
-
 ### Exportación de Reportes
 Soporta exportaciones binarias robustas en formato Excel (`.xlsx`), PDF (`.pdf`), y CSV (`.csv`):
 - Los clientes HTTP detectan automáticamente respuestas binarias para prevenir la corrupción de datos.
-- En entorno de desarrollo con rol simulado, las descargas binarias se interceptan con un aviso y se descargan en formato CSV para inspección.
+- El dashboard adapta secciones CC / TD / JD según permisos PBAC de `GET /api/v1/dashboards/me/summary` (sin simulador de roles en UI).
 
 ---
 

@@ -4,7 +4,6 @@ import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
 import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
-import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.in.web.advice.WorkflowExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.ApproveIndicatorUseCase;

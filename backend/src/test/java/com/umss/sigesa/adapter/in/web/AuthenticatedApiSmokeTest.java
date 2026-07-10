@@ -102,12 +102,46 @@ class AuthenticatedApiSmokeTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    @DisplayName("MOD-PROCESS: JD list templates → 200")
+    void listTemplatesAsJdReturns200() throws Exception {
+        String token = obtainSeedJdToken();
+
+        mockMvc.perform(get("/api/v1/templates")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("MOD-EVIDENCE: CC list indicators → 200")
+    void listIndicatorsAsCcReturns200() throws Exception {
+        String token = obtainSeedToken(AuthDataLoader.SEED_CC_EMAIL, AuthDataLoader.SEED_CC_PASSWORD);
+
+        mockMvc.perform(get("/api/v1/indicators")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("MOD-EVIDENCE: CC search evidences → 200")
+    void searchEvidencesAsCcReturns200() throws Exception {
+        String token = obtainSeedToken(AuthDataLoader.SEED_CC_EMAIL, AuthDataLoader.SEED_CC_PASSWORD);
+
+        mockMvc.perform(get("/api/v1/evidences/search")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
     private String obtainSeedJdToken() throws Exception {
+        return obtainSeedToken(AuthDataLoader.SEED_JD_EMAIL, AuthDataLoader.SEED_JD_PASSWORD);
+    }
+
+    private String obtainSeedToken(String email, String password) throws Exception {
         MvcResult login = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"email":"%s","password":"%s"}
-                                """.formatted(AuthDataLoader.SEED_JD_EMAIL, AuthDataLoader.SEED_JD_PASSWORD)))
+                                """.formatted(email, password)))
                 .andExpect(status().isOk())
                 .andReturn();
 
