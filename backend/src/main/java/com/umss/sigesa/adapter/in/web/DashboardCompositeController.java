@@ -133,7 +133,14 @@ public class DashboardCompositeController {
         String ext = job.getFormat() == ReportFormat.CSV ? "csv" : (job.getFormat() == ReportFormat.PDF ? "pdf" : "xlsx");
         String filename = "dashboard_report_" + job.getJobId().toString().substring(0, 8) + "." + ext;
 
-        MediaType mediaType = job.getFormat() == ReportFormat.CSV ? MediaType.TEXT_PLAIN : MediaType.APPLICATION_OCTET_STREAM;
+        MediaType mediaType;
+        if (job.getFormat() == ReportFormat.CSV) {
+            mediaType = MediaType.TEXT_PLAIN;
+        } else if (job.getFormat() == ReportFormat.PDF) {
+            mediaType = MediaType.APPLICATION_PDF;
+        } else {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")

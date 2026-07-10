@@ -55,7 +55,7 @@ class DashboardSummaryAggregationServiceTest {
         UUID userId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
         CoordinatorKpiSection ccKpi = new CoordinatorKpiSection(programId, "Systems", 10, 50.0, 5, 2, 3, List.of(), List.of());
-        TechnicianKpiSection tdKpi = new TechnicianKpiSection(4, 8);
+        TechnicianKpiSection tdKpi = new TechnicianKpiSection(4, 8, 2, 6, List.of());
 
         when(queryPort.findCoordinatorKpi(programId)).thenReturn(ccKpi);
         when(queryPort.findTechnicianKpi(userId)).thenReturn(tdKpi);
@@ -72,7 +72,7 @@ class DashboardSummaryAggregationServiceTest {
     @DisplayName("User with JD permission receives executiveSection")
     void summaryJd_retornaExecutiveSection() {
         UUID userId = UUID.randomUUID();
-        ExecutiveKpiSection jdKpi = new ExecutiveKpiSection(5, 75.0);
+        ExecutiveKpiSection jdKpi = new ExecutiveKpiSection(5, 75.0, 10, 2, List.of());
 
         when(queryPort.findExecutiveKpi()).thenReturn(jdKpi);
 
