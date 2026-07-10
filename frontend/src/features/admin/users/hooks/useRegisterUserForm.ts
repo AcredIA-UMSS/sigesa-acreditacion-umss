@@ -41,7 +41,7 @@ export function useRegisterUserForm() {
         setSubmitError(null);
         setForm({ email: '', role: 'TD', programId: '' });
         setFieldErrors({});
-        await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
+        await queryClient.invalidateQueries({ queryKey: getListQueryKey() });
       },
       onError: (error) => {
         setSubmitError(getApiErrorMessage(error));

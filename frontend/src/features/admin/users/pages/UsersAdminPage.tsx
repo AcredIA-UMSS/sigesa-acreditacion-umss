@@ -83,6 +83,12 @@ export function UsersAdminPage() {
               errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
               isDeactivating={deactivateAction.isDeactivating}
               deactivatingUserId={deactivateAction.deactivatingUserId}
+              roleFilter={usersList.roleFilter}
+              statusFilter={usersList.statusFilter}
+              roleOptions={usersList.roleOptions}
+              statusOptions={usersList.statusOptions}
+              onRoleFilterChange={usersList.setRoleFilter}
+              onStatusFilterChange={usersList.setStatusFilter}
               onDeactivate={handleDeactivate}
             />
           </div>

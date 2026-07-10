@@ -73,14 +73,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           to="/dashboard"
         />
 
-        <NavItem
-          icon={<Network size={20} />}
-          label="GESTIÓN PROCESOS"
-          isExpanded={isExpanded}
-          hasDropdown
-          active={activeNav === 'processes'}
-          to="/procesos/nuevo"
-        />
+        {session?.role === 'JD' && (
+          <NavItem
+            icon={<Network size={20} />}
+            label="GESTIÓN PROCESOS"
+            isExpanded={isExpanded}
+            hasDropdown
+            active={activeNav === 'processes'}
+            to="/procesos/nuevo"
+          />
+        )}
 
         {session?.role === 'JD' && (
           <NavItem

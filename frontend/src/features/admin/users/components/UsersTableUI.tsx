@@ -1,6 +1,12 @@
+import { Filter } from 'lucide-react';
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import type { UserRowViewModel } from '../hooks/useUsersList';
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 interface UsersTableUIProps {
   users: UserRowViewModel[];
@@ -9,6 +15,12 @@ interface UsersTableUIProps {
   errorMessage?: string;
   isDeactivating: boolean;
   deactivatingUserId: string | null;
+  roleFilter: string;
+  statusFilter: string;
+  roleOptions: SelectOption[];
+  statusOptions: readonly SelectOption[];
+  onRoleFilterChange: (value: string) => void;
+  onStatusFilterChange: (value: string) => void;
   onDeactivate: (userId: string) => void;
 }
 
@@ -25,15 +37,55 @@ export function UsersTableUI({
   errorMessage,
   isDeactivating,
   deactivatingUserId,
+  roleFilter,
+  statusFilter,
+  roleOptions,
+  statusOptions,
+  onRoleFilterChange,
+  onStatusFilterChange,
   onDeactivate,
 }: UsersTableUIProps) {
   return (
     <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-heading-md text-primary-800">Usuarios registrados</h2>
-        <p className="mt-1 text-body-md text-gray-600">
-          Listado institucional con revocación soft (estado DEACTIVATED).
-        </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-heading-md text-primary-800">Usuarios registrados</h2>
+          <p className="mt-1 text-body-md text-gray-600">
+            Listado institucional con revocación soft (estado DEACTIVATED).
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3.5 py-2 shadow-sm">
+            <Filter size={16} className="text-primary-500" />
+            <select
+              value={roleFilter}
+              onChange={(e) => onRoleFilterChange(e.target.value)}
+              className="cursor-pointer bg-transparent text-label-md font-semibold text-primary-800 focus:outline-none"
+            >
+              {roleOptions.map((option) => (
+                <option key={option.value || 'all-roles'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3.5 py-2 shadow-sm">
+            <Filter size={16} className="text-primary-500" />
+            <select
+              value={statusFilter}
+              onChange={(e) => onStatusFilterChange(e.target.value)}
+              className="cursor-pointer bg-transparent text-label-md font-semibold text-primary-800 focus:outline-none"
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value || 'all-status'} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {isError && (

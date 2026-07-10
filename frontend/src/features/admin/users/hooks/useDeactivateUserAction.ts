@@ -9,7 +9,7 @@ export function useDeactivateUserAction() {
   const mutation = useDeactivate({
     mutation: {
       onSuccess: async () => {
-        await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
+        await queryClient.invalidateQueries({ queryKey: getListQueryKey() });
       },
     },
   });
