@@ -100,7 +100,17 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             label="EVIDENCIAS"
             isExpanded={isExpanded}
             active={activeNav === 'evidences'}
-            to="/evidencias/subir"
+            to="/evidencias"
+          />
+        )}
+
+        {session?.role === 'TD' && (
+          <NavItem
+            icon={<BarChart size={20} />}
+            label="EVIDENCIAS"
+            isExpanded={isExpanded}
+            active={activeNav === 'evidences'}
+            to="/evidencias"
           />
         )}
 

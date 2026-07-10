@@ -8,6 +8,7 @@ import { CreateProcessPage } from './features/procesos/CreateProcessPage';
 import { ProcessesListPage } from './features/procesos/ProcessesListPage';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidencias/pages/EvidenceUploadPage';
+import { EvidencesListPage } from './features/evidencias/pages/EvidencesListPage';
 import { IndicatorsCatalogPage, WorkflowReviewPage } from './features/workflow/pages/WorkflowPages';
 
 function App() {
@@ -75,6 +76,17 @@ function App() {
             <ProtectedRoute>
               <RoleRoute allowed={['CC', 'TD', 'JD']}>
                 <IndicatorsCatalogPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowed={['CC', 'TD']}>
+                <EvidencesListPage />
               </RoleRoute>
             </ProtectedRoute>
           }

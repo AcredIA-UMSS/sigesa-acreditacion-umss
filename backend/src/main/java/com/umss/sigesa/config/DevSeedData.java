@@ -44,4 +44,17 @@ public final class DevSeedData {
     public static final UUID CRITERION_2_1 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440111");
     public static final UUID INDICATOR_305 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440120");
     public static final UUID CRITERION_3_5 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440121");
+
+    // --- Evidencias demo (MOD-EVIDENCE seed) ---
+
+    public static final UUID EVIDENCE_LABS = UUID.fromString("b50e8400-e29b-41d4-a716-446655440200");
+    public static final UUID EVIDENCE_LABS_V1 = UUID.fromString("b50e8400-e29b-41d4-a716-446655440201");
+    public static final UUID EVIDENCE_PLAN = UUID.fromString("b50e8400-e29b-41d4-a716-446655440210");
+    public static final UUID EVIDENCE_PLAN_V1 = UUID.fromString("b50e8400-e29b-41d4-a716-446655440211");
+    public static final UUID EVIDENCE_BIBLIO = UUID.fromString("b50e8400-e29b-41d4-a716-446655440220");
+    public static final UUID EVIDENCE_BIBLIO_V1 = UUID.fromString("b50e8400-e29b-41d4-a716-446655440221");
+
+    public static final String DEMO_EVIDENCE_STORAGE_LABS = "demo-evidence-labs.pdf";
+    public static final String DEMO_EVIDENCE_STORAGE_PLAN = "demo-evidence-plan.pdf";
+    public static final String DEMO_EVIDENCE_STORAGE_BIBLIO = "demo-evidence-biblio.pdf";
 }

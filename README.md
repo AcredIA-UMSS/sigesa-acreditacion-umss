@@ -50,6 +50,16 @@ Además de los usuarios, el backend inserta registros de demostración para todo
 | `cc2@umss.edu.bo` | CEUB |
 | `pendiente@umss.edu.bo` | ARCU-SUR |
 
+**Evidencias demo** (`evidence` / `evidence_version`, seed MOD-EVIDENCE):
+
+| ID evidencia | Indicador | Descripción | Estado indicador |
+| --- | --- | --- | --- |
+| `b50e8400-e29b-41d4-a716-446655440200` | IND-3.1.2 (Labs) | Inventario fotográfico laboratorios | SUBIDO |
+| `b50e8400-e29b-41d4-a716-446655440210` | IND-2.1.1 (Plan) | Resolución plan de estudios | SUBIDO |
+| `b50e8400-e29b-41d4-a716-446655440220` | IND-3.5.4 (Biblioteca) | Reporte recursos bibliográficos | APROBADO |
+
+Archivos PDF mínimos en `uploads/evidences/demo-evidence-*.pdf`. Consulta: `GET /api/v1/evidences/search` (CC/TD).
+
 Los identificadores y contraseñas están definidos en `backend/src/main/java/com/umss/sigesa/config/AuthDataLoader.java` y `DevSeedData.java`.
 
 ---
