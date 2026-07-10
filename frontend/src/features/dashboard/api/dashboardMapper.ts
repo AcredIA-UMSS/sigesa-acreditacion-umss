@@ -73,7 +73,14 @@ function mapTechnicianSection(
   return {
     evidenciasPendientesRevision: dto.evidencesPendingReview ?? 0,
     indicadoresAsignados: dto.assignedIndicators ?? 0,
-    ultimasEvaluaciones: (dto as any).ultimasEvaluaciones ?? [],
+    openActions: dto.openActions ?? 0,
+    available: dto.available ?? 0,
+    ultimasEvaluaciones: (dto.recentEvaluations ?? []).map((e) => ({
+      evidenciaId: e.evidenceId ?? '',
+      programa: e.program ?? '',
+      fechaRevision: e.revisionDate ?? '',
+      resultado: (e.result ?? 'APROBADO') as 'APROBADO' | 'RECHAZADO',
+    })),
   };
 }
 
@@ -85,7 +92,14 @@ function mapExecutiveSection(
   return {
     totalProgramasEnAcreditacion: dto.totalPrograms ?? 0,
     porcentajeAvanceInstitucional: dto.averageGlobalProgress ?? 0,
-    semaforoProgramas: (dto as any).semaforoProgramas ?? [],
+    criticalObservations: dto.criticalObservations ?? 0,
+    alertPrograms: dto.alertPrograms ?? 0,
+    semaforoProgramas: (dto.programTrafficLights ?? []).map((t) => ({
+      programaId: t.programId ?? '',
+      nombre: t.name ?? '',
+      estado: (t.status ?? 'VERDE') as 'VERDE' | 'AMARILLO' | 'ROJO',
+      observacionesCriticas: t.criticalObservations ?? 0,
+    })),
   };
 }
 

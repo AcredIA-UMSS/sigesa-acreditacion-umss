@@ -26,7 +26,13 @@ export const mockPersonaCC: CompositeSummaryResponse = {
       },
       {
         "faseId": 3,
-        "nombre": "Fase 3: Visita de Pares",
+        "nombre": "Fase 3: Visita de Pares Externos",
+        "porcentaje": 45.0,
+        "estado": "EN_PROCESO"
+      },
+      {
+        "faseId": 4,
+        "nombre": "Fase 4: Plan de Mejoras Post-Acreditación",
         "porcentaje": 0.0,
         "estado": "PENDIENTE"
       }
@@ -41,6 +47,11 @@ export const mockPersonaCC: CompositeSummaryResponse = {
         "indicadorId": "IND-201",
         "codigoCriterio": "CRIT-6.1",
         "diasEstancado": 11
+      },
+      {
+        "indicadorId": "IND-305",
+        "codigoCriterio": "CRIT-3.3",
+        "diasEstancado": 25
       }
     ]
   },
@@ -53,8 +64,10 @@ export const mockPersonaTD: CompositeSummaryResponse = {
   "grantedPermissions": ["READ_TD_DASHBOARD"],
   "coordinatorSection": null,
   "technicianSection": {
-    "evidenciasPendientesRevision": 14,
-    "indicadoresAsignados": 22,
+    "evidenciasPendientesRevision": 28,
+    "indicadoresAsignados": 45,
+    "openActions": 12,
+    "available": 24,
     "ultimasEvaluaciones": [
       {
         "evidenciaId": "EVID-2026-101",
@@ -73,6 +86,24 @@ export const mockPersonaTD: CompositeSummaryResponse = {
         "programa": "Ingeniería Química",
         "fechaRevision": "2026-07-03",
         "resultado": "APROBADO"
+      },
+      {
+        "evidenciaId": "EVID-2026-090",
+        "programa": "Ingeniería Electrónica",
+        "fechaRevision": "2026-07-01",
+        "resultado": "APROBADO"
+      },
+      {
+        "evidenciaId": "EVID-2026-085",
+        "programa": "Ingeniería Mecánica",
+        "fechaRevision": "2026-06-28",
+        "resultado": "RECHAZADO"
+      },
+      {
+        "evidenciaId": "EVID-2026-081",
+        "programa": "Licenciatura en Biología",
+        "fechaRevision": "2026-06-25",
+        "resultado": "APROBADO"
       }
     ]
   },
@@ -85,8 +116,10 @@ export const mockPersonaJD: CompositeSummaryResponse = {
   "coordinatorSection": null,
   "technicianSection": null,
   "executiveSection": {
-    "totalProgramasEnAcreditacion": 15,
-    "porcentajeAvanceInstitucional": 64.8,
+    "totalProgramasEnAcreditacion": 24,
+    "porcentajeAvanceInstitucional": 71.3,
+    "criticalObservations": 42,
+    "alertPrograms": 4,
     "semaforoProgramas": [
       {
         "programaId": "prog-sistemas-umss",
@@ -111,6 +144,30 @@ export const mockPersonaJD: CompositeSummaryResponse = {
         "nombre": "Ingeniería Eléctrica",
         "estado": "VERDE",
         "observacionesCriticas": 0
+      },
+      {
+        "programaId": "prog-industrial-umss",
+        "nombre": "Ingeniería Industrial",
+        "estado": "AMARILLO",
+        "observacionesCriticas": 5
+      },
+      {
+        "programaId": "prog-mecanica-umss",
+        "nombre": "Ingeniería Mecánica",
+        "estado": "ROJO",
+        "observacionesCriticas": 11
+      },
+      {
+        "programaId": "prog-alimentos-umss",
+        "nombre": "Ingeniería de Alimentos",
+        "estado": "VERDE",
+        "observacionesCriticas": 1
+      },
+      {
+        "programaId": "prog-biologia-umss",
+        "nombre": "Licenciatura en Biología",
+        "estado": "VERDE",
+        "observacionesCriticas": 2
       }
     ]
   }
@@ -134,10 +191,13 @@ export const mockPersonaMulti: CompositeSummaryResponse = {
     "cuellosDeBotella": []
   },
   "technicianSection": {
-    "evidenciasPendientesRevision": 4,
-    "indicadoresAsignados": 10,
+    "evidenciasPendientesRevision": 9,
+    "indicadoresAsignados": 15,
+    "openActions": 5,
+    "available": 10,
     "ultimasEvaluaciones": [
-      { "evidenciaId": "EVID-2026-105", "programa": "Ingeniería Mecánica", "fechaRevision": "2026-07-06", "resultado": "APROBADO" }
+      { "evidenciaId": "EVID-2026-105", "programa": "Ingeniería Mecánica", "fechaRevision": "2026-07-06", "resultado": "APROBADO" },
+      { "evidenciaId": "EVID-2026-108", "programa": "Ingeniería Electrónica", "fechaRevision": "2026-07-07", "resultado": "RECHAZADO" }
     ]
   },
   "executiveSection": null

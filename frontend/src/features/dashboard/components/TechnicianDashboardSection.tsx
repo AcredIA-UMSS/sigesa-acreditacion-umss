@@ -6,6 +6,7 @@ import {
   FileCheck,
   FolderDot,
   XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import type { TechnicianSection } from '../types';
 
@@ -34,7 +35,8 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
       </div>
 
       {/* KPI Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Card 1: Evidencias Pendientes */}
         <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
             <span className="text-label-md font-semibold text-gray-700 uppercase">Evidencias Pendientes</span>
@@ -48,6 +50,7 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
           </div>
         </div>
 
+        {/* Card 2: Indicadores Asignados */}
         <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
             <span className="text-label-md font-semibold text-gray-700 uppercase">Indicadores Asignados</span>
@@ -58,6 +61,34 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary-50 text-primary-500">
             <Award size={32} />
+          </div>
+        </div>
+
+        {/* Card 3: Acciones Abiertas */}
+        <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div>
+            <span className="text-label-md font-semibold text-gray-700 uppercase">Acciones Abiertas</span>
+            <h4 className="text-display-lg font-bold leading-none text-secondary-650 mt-2">
+              {section.openActions ?? 0}
+            </h4>
+            <p className="mt-2 text-xs text-gray-600">Observaciones que requieren atención</p>
+          </div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary-100/50 text-secondary-500">
+            <AlertTriangle size={32} />
+          </div>
+        </div>
+
+        {/* Card 4: Disponibles */}
+        <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div>
+            <span className="text-label-md font-semibold text-gray-700 uppercase">Disponibles</span>
+            <h4 className="text-display-lg font-bold leading-none text-indigo-700 mt-2">
+              {section.available ?? 0}
+            </h4>
+            <p className="mt-2 text-xs text-gray-600">Evidencias listas para validación</p>
+          </div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+            <CheckCircle2 size={32} />
           </div>
         </div>
       </div>

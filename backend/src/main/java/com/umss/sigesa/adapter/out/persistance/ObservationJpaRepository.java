@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -26,4 +27,12 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
     Stream<ObservationEntity> streamByProgramIdAndPhaseId(
             @Param("programId") UUID programId,
             @Param("phaseId") Integer phaseId);
+
+    long countByStatus(String status);
+
+    @Query("SELECT COUNT(DISTINCT o.indicatorId) FROM ObservationEntity o")
+    long countDistinctIndicators();
+
+    @Query("SELECT o FROM ObservationEntity o WHERE o.status IN ('APROBADO', 'RECHAZADO') ORDER BY o.issueDate DESC")
+    List<ObservationEntity> findRecentEvaluations(Pageable pageable);
 }

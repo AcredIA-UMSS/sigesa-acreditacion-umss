@@ -33,7 +33,7 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Total Programs */}
         <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
@@ -59,6 +59,34 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-success/10 text-success">
             <TrendingUp size={32} />
+          </div>
+        </div>
+
+        {/* Critical Observations */}
+        <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div>
+            <span className="text-label-md font-semibold text-gray-700 uppercase">Observaciones Críticas</span>
+            <h4 className="text-display-lg font-bold leading-none text-secondary-650 mt-2">
+              {section.criticalObservations ?? 0}
+            </h4>
+            <p className="mt-2 text-xs text-gray-600">Observaciones pendientes en toda la institución</p>
+          </div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary-100/50 text-secondary-500">
+            <AlertTriangle size={32} />
+          </div>
+        </div>
+
+        {/* Alert Programs */}
+        <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div>
+            <span className="text-label-md font-semibold text-gray-700 uppercase">Programas en Alerta</span>
+            <h4 className="text-display-lg font-bold leading-none text-warning mt-2">
+              {section.alertPrograms ?? 0}
+            </h4>
+            <p className="mt-2 text-xs text-gray-600">Programas con semáforo Rojo o Amarillo</p>
+          </div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-warning/10 text-warning">
+            <AlertOctagon size={32} />
           </div>
         </div>
       </div>

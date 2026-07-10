@@ -4,8 +4,12 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { ProgramTrafficLight } from './programTrafficLight';
 
 export interface ExecutiveKpiSection {
   totalPrograms?: number;
   averageGlobalProgress?: number;
+  criticalObservations?: number;
+  alertPrograms?: number;
+  programTrafficLights?: ProgramTrafficLight[];
 }

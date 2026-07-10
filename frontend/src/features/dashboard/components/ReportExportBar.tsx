@@ -19,11 +19,11 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-primary-200/20 bg-primary-900/40 p-6 backdrop-blur-md">
+    <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-body p-6 shadow-sm">
       <div className="flex flex-col flex-wrap gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-heading-sm font-semibold text-body">Exportar Reportes del Dashboard</h3>
-          <p className="text-body-md text-primary-200">
+          <h3 className="text-heading-sm font-bold text-primary-800">Exportar Reportes del Dashboard</h3>
+          <p className="text-body-md text-gray-600">
             Descarga un reporte detallado del estado de las fases e indicadores del programa actual.
           </p>
         </div>
@@ -36,7 +36,7 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
               disabled={isPending}
               className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-label-md font-medium transition-all ${
                 format === 'xlsx'
-                  ? 'bg-secondary text-body shadow-md shadow-secondary/20'
+                  ? 'bg-primary-600 text-body shadow-md shadow-primary-600/20'
                   : 'text-primary-200 hover:text-body'
               }`}
             >
@@ -49,7 +49,7 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
               disabled={isPending}
               className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-label-md font-medium transition-all ${
                 format === 'csv'
-                  ? 'bg-secondary text-body shadow-md shadow-secondary/20'
+                  ? 'bg-primary-600 text-body shadow-md shadow-primary-600/20'
                   : 'text-primary-200 hover:text-body'
               }`}
             >
@@ -62,7 +62,7 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
               disabled={isPending}
               className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-label-md font-medium transition-all ${
                 format === 'pdf'
-                  ? 'bg-secondary text-body shadow-md shadow-secondary/20'
+                  ? 'bg-primary-600 text-body shadow-md shadow-primary-600/20'
                   : 'text-primary-200 hover:text-body'
               }`}
             >
@@ -75,7 +75,7 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
             type="button"
             onClick={handleExport}
             disabled={isPending}
-            className="flex items-center gap-2 rounded-xl bg-secondary hover:bg-secondary-600 active:scale-95 disabled:bg-primary-800 disabled:text-primary-300 disabled:scale-100 disabled:cursor-not-allowed text-body px-5 py-3 text-label-md font-semibold transition-all shadow-lg shadow-secondary/15"
+            className="flex items-center gap-2 rounded-xl bg-primary-600 hover:bg-primary-700 active:scale-95 disabled:bg-primary-800 disabled:text-primary-300 disabled:scale-100 disabled:cursor-not-allowed text-body px-5 py-3 text-label-md font-semibold transition-all shadow-lg shadow-primary-600/15"
           >
             {isPending ? (
               <Loader2 size={18} className="animate-spin text-primary-300" />
@@ -88,20 +88,20 @@ export const ReportExportBar = ({ phaseId }: ReportExportBarProps) => {
       </div>
 
       {isPending && (
-        <div className="relative mt-2 overflow-hidden rounded-full bg-primary-800 h-2">
+        <div className="relative mt-2 overflow-hidden rounded-full bg-gray-150 h-2">
           <div
             className="h-full bg-secondary rounded-full transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />
-          <div className="absolute right-0 top-0 text-[10px] pr-2 text-primary-200 -mt-4">
+          <div className="absolute right-0 top-0 text-[10px] pr-2 text-gray-650 -mt-4">
             Procesando: {progress}%
           </div>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-secondary-500/20 bg-secondary-950/20 p-4 text-secondary-200">
-          <AlertCircle size={20} className="shrink-0 text-secondary-500" />
+        <div className="flex items-center gap-3 rounded-xl border border-secondary-200 bg-secondary-50 p-4 text-secondary-700">
+          <AlertCircle size={20} className="shrink-0 text-secondary-600" />
           <span className="text-body-md font-medium">{error}</span>
         </div>
       )}

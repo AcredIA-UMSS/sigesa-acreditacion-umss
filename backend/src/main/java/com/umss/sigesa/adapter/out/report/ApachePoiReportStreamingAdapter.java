@@ -19,7 +19,7 @@ public class ApachePoiReportStreamingAdapter implements ReportGeneratorPort {
 
     @Override
     public boolean supports(ReportFormat format) {
-        return format == ReportFormat.XLSX || format == ReportFormat.PDF;
+        return format == ReportFormat.XLSX;
     }
 
     @Override
