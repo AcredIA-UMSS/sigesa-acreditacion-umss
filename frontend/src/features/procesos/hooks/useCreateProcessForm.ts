@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateProcess } from '../../../api/endpoints/accreditation-process-controller/accreditation-process-controller';
 import { useList1 } from '../../../api/endpoints/program-catalog-controller/program-catalog-controller';
-import type { ProcessResponse, ProgramSummaryResponse } from '../../../api/model';
+import { useListTemplates } from '../../../api/endpoints/template-controller/template-controller';
+import type { ProcessResponse, ProgramSummaryResponse, TemplateSummaryResponse } from '../../../api/model';
 import { getApiErrorMessage } from '../../../lib/api/mapApiError';
-import { SEED_PERIODS, SEED_VALIDATED_TEMPLATES } from '../constants/devSeedCatalog';
 
 interface CreateProcessFormState {
   careerId: string;
@@ -12,9 +12,17 @@ interface CreateProcessFormState {
   period: string;
 }
 
+interface TemplateOption {
+  id: string;
+  label: string;
+  type: NonNullable<TemplateSummaryResponse['type']>;
+  taxonomyVersion: string;
+}
+
 export function useCreateProcessForm() {
   const navigate = useNavigate();
   const programsQuery = useList1();
+  const templatesQuery = useListTemplates();
   const [form, setForm] = useState<CreateProcessFormState>({
     careerId: '',
     templateId: '',
@@ -36,7 +44,7 @@ export function useCreateProcessForm() {
         setSubmitError(null);
         setFieldErrors({});
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/procesos');
         }, 2000);
       },
       onError: (error) => {
@@ -53,17 +61,29 @@ export function useCreateProcessForm() {
       label: program.code ? `${program.code} — ${program.name}` : (program.name as string),
     }));
 
-  const templateOptions = SEED_VALIDATED_TEMPLATES.map((template) => ({
-    value: template.id,
-    label: template.label,
-  }));
+  const templateOptions: TemplateOption[] = (templatesQuery.data?.data ?? [])
+    .filter((template) => template.validated && template.id && template.type)
+    .map((template) => ({
+      id: template.id as string,
+      label: `${template.type} (${template.taxonomyVersion ?? 'sin versión'})`,
+      type: template.type as NonNullable<TemplateSummaryResponse['type']>,
+      taxonomyVersion: template.taxonomyVersion ?? '',
+    }));
 
-  const periodOptions = SEED_PERIODS.map((period) => ({
+  const periodOptions = Array.from(
+    new Set(
+      (templatesQuery.data?.data ?? [])
+        .map((template) => template.activePeriod)
+        .filter((period): period is string => Boolean(period)),
+    ),
+  ).map((period) => ({ value: period, label: period }));
+
+  const fallbackPeriods = ['2026-1', '2025-2', '2026-2'].map((period) => ({
     value: period,
     label: period,
   }));
 
-  const selectedTemplate = SEED_VALIDATED_TEMPLATES.find((t) => t.id === form.templateId);
+  const selectedTemplate = templateOptions.find((template) => template.id === form.templateId);
 
   const validate = (): boolean => {
     const nextErrors: Partial<Record<'careerId' | 'templateId' | 'period', string>> = {};
@@ -120,7 +140,7 @@ export function useCreateProcessForm() {
   };
 
   const handleCancel = () => {
-    navigate('/dashboard');
+    navigate('/procesos');
   };
 
   return {
@@ -131,9 +151,14 @@ export function useCreateProcessForm() {
     isPending,
     isProgramsLoading: programsQuery.isLoading,
     isProgramsError: programsQuery.isError,
+    isTemplatesLoading: templatesQuery.isLoading,
+    isTemplatesError: templatesQuery.isError,
     programOptions,
-    templateOptions,
-    periodOptions,
+    templateOptions: templateOptions.map((template) => ({
+      value: template.id,
+      label: template.label,
+    })),
+    periodOptions: periodOptions.length > 0 ? periodOptions : fallbackPeriods,
     selectedTemplate,
     setCareerId,
     setTemplateId,

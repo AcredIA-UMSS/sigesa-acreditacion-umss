@@ -14,7 +14,7 @@ import {
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
 
-type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'reports' | 'history' | 'help';
+type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'reports' | 'history' | 'help' | 'indicators' | 'evidences' | 'review';
 
 interface SidebarProps {
   activeNav?: SidebarNavKey;
@@ -80,7 +80,37 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             isExpanded={isExpanded}
             hasDropdown
             active={activeNav === 'processes'}
-            to="/procesos/nuevo"
+            to="/procesos"
+          />
+        )}
+
+        {(session?.role === 'CC' || session?.role === 'TD') && (
+          <NavItem
+            icon={<Network size={20} />}
+            label="INDICADORES"
+            isExpanded={isExpanded}
+            active={activeNav === 'indicators'}
+            to="/indicadores"
+          />
+        )}
+
+        {session?.role === 'CC' && (
+          <NavItem
+            icon={<BarChart size={20} />}
+            label="EVIDENCIAS"
+            isExpanded={isExpanded}
+            active={activeNav === 'evidences'}
+            to="/evidencias/subir"
+          />
+        )}
+
+        {session?.role === 'TD' && (
+          <NavItem
+            icon={<BarChart size={20} />}
+            label="REVISIÓN TÉCNICA"
+            isExpanded={isExpanded}
+            active={activeNav === 'review'}
+            to="/procesos/evaluacion"
           />
         )}
 
@@ -100,6 +130,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           isExpanded={isExpanded}
           hasDropdown
           active={activeNav === 'reports'}
+          to="/dashboard"
         />
         <NavItem
           icon={<History size={20} />}

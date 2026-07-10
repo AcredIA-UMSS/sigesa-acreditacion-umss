@@ -2,11 +2,15 @@ import { ArrowLeft, CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-rea
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Select';
-import type { SeedTemplateOption } from '../constants/devSeedCatalog';
 
 interface SelectOption {
   value: string;
   label: string;
+}
+
+interface SelectedTemplateInfo {
+  type: string;
+  taxonomyVersion: string;
 }
 
 interface CreateProcessUIProps {
@@ -19,10 +23,12 @@ interface CreateProcessUIProps {
   isPending: boolean;
   isProgramsLoading: boolean;
   isProgramsError: boolean;
+  isTemplatesLoading: boolean;
+  isTemplatesError: boolean;
   programOptions: SelectOption[];
   templateOptions: SelectOption[];
   periodOptions: SelectOption[];
-  selectedTemplate: SeedTemplateOption | undefined;
+  selectedTemplate: SelectedTemplateInfo | undefined;
   onCareerIdChange: (value: string) => void;
   onTemplateIdChange: (value: string) => void;
   onPeriodChange: (value: string) => void;
@@ -41,6 +47,8 @@ export function CreateProcessUI({
   isPending,
   isProgramsLoading,
   isProgramsError,
+  isTemplatesLoading,
+  isTemplatesError,
   programOptions,
   templateOptions,
   periodOptions,
@@ -111,6 +119,14 @@ export function CreateProcessUI({
             </div>
           )}
 
+          {isTemplatesError && (
+            <div className="mb-6">
+              <Alert variant="error" title="Plantillas normativas">
+                No se pudo cargar el catálogo de plantillas desde GET /templates.
+              </Alert>
+            </div>
+          )}
+
           <form onSubmit={onSubmit} className="space-y-6">
             <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
               <div className="mb-6 flex items-center gap-4">
@@ -125,10 +141,10 @@ export function CreateProcessUI({
                 </div>
               </div>
 
-              {isProgramsLoading ? (
+              {isProgramsLoading || isTemplatesLoading ? (
                 <div className="flex items-center gap-2 py-8 text-gray-500">
                   <Loader2 className="animate-spin" size={20} />
-                  <span className="text-body-md">Cargando programas…</span>
+                  <span className="text-body-md">Cargando catálogos…</span>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -147,7 +163,7 @@ export function CreateProcessUI({
                     onChange={(e) => onTemplateIdChange(e.target.value)}
                     options={[{ value: '', label: 'Seleccione una plantilla validada' }, ...templateOptions]}
                     error={fieldErrors.templateId}
-                    helperText="Plantillas validadas según seed de desarrollo (sin endpoint de listado)."
+                    helperText="Plantillas validadas expuestas por GET /api/v1/templates."
                     disabled={isPending}
                   />
 
@@ -195,7 +211,7 @@ export function CreateProcessUI({
               <Button variant="ghost" onClick={onCancel} disabled={isPending}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="primary" isLoading={isPending} disabled={isProgramsLoading}>
+              <Button type="submit" variant="primary" isLoading={isPending} disabled={isProgramsLoading || isTemplatesLoading}>
                 Inicializar Proceso
               </Button>
             </div>

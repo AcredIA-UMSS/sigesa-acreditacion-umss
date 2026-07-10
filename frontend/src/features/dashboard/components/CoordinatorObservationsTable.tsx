@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDashboardDetails } from '../api/dashboardHooks';
 import {
   getObservationStatusLabel,
@@ -172,14 +173,14 @@ export const CoordinatorObservationsTable = ({
                     })()}
                   </td>
                   <td className="px-6 py-4.5 whitespace-nowrap text-right">
-                    {obs.urlSubsanacion ? (
-                      <a
-                        href={obs.urlSubsanacion}
+                    {obs.indicadorId ? (
+                      <Link
+                        to={`/evidencias/${obs.indicadorId}/subsanar`}
                         className="inline-flex items-center gap-1.5 rounded-lg bg-primary-800/80 hover:bg-primary-700 text-body hover:text-body px-3 py-1.5 text-xs font-medium transition-all border border-primary-800 hover:border-primary-600 active:scale-95"
                       >
                         Subsanar
                         <ExternalLink size={12} />
-                      </a>
+                      </Link>
                     ) : (
                       <span className="text-xs text-gray-400">N/A</span>
                     )}

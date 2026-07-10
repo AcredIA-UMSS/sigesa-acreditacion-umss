@@ -5,18 +5,22 @@
  * OpenAPI spec version: v0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
   MutationFunction,
   QueryClient,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions
 } from '@tanstack/react-query';
 
 import type {
   CreateProcessRequest,
-  ProcessResponse
+  ListProcessesParams,
+  ProcessResponse,
+  ProcessSummaryResponse
 } from '../../model';
 
 import { customFetch } from '../../../lib/api/customFetch';
@@ -99,3 +103,31 @@ const {mutation: mutationOptions} = options ?
       > => {
       return useMutation(getCreateProcessMutationOptions(options), queryClient);
     }
+
+type ListProcessesResponse = { data: ProcessSummaryResponse[]; status: number; headers: Headers };
+type GetProcessResponse = { data: ProcessSummaryResponse; status: number; headers: Headers };
+
+const buildListProcessesUrl = (params?: ListProcessesParams) => {
+  const search = new URLSearchParams();
+  if (params?.status) search.set('status', params.status);
+  if (params?.careerId) search.set('careerId', params.careerId);
+  if (params?.period) search.set('period', params.period);
+  const query = search.toString();
+  return query ? `/api/v1/processes?${query}` : '/api/v1/processes';
+};
+
+export const listProcesses = async (params?: ListProcessesParams): Promise<ListProcessesResponse> =>
+  customFetch<ListProcessesResponse>(buildListProcessesUrl(params), { method: 'GET' });
+
+export const getProcessById = async (processId: string): Promise<GetProcessResponse> =>
+  customFetch<GetProcessResponse>(`/api/v1/processes/${processId}`, { method: 'GET' });
+
+export const useListProcesses = (
+  params?: ListProcessesParams,
+  options?: { query?: Partial<UseQueryOptions<ListProcessesResponse>> },
+) =>
+  useQuery({
+    queryKey: ['listProcesses', params],
+    queryFn: () => listProcesses(params),
+    ...options?.query,
+  });

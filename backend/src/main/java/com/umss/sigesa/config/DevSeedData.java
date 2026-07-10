@@ -35,4 +35,13 @@ public final class DevSeedData {
 
     public static final String PERIOD_2026_1 = "2026-1";
     public static final String PERIOD_2025_2 = "2025-2";
+
+    // --- Indicadores y criterios (catálogo estático demo) ---
+
+    public static final UUID INDICATOR_102 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440100");
+    public static final UUID CRITERION_3_1 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440101");
+    public static final UUID INDICATOR_201 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440110");
+    public static final UUID CRITERION_2_1 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440111");
+    public static final UUID INDICATOR_305 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440120");
+    public static final UUID CRITERION_3_5 = UUID.fromString("a50e8400-e29b-41d4-a716-446655440121");
 }

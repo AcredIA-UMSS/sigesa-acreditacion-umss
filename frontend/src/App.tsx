@@ -1,10 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
+import { RoleRoute } from './components/auth/RoleRoute';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessPage } from './features/procesos/CreateProcessPage';
+import { ProcessesListPage } from './features/procesos/ProcessesListPage';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
+import { EvidenceUploadPage } from './features/evidencias/pages/EvidenceUploadPage';
+import { IndicatorsCatalogPage, WorkflowReviewPage } from './features/workflow/pages/WorkflowPages';
 
 function App() {
   return (
@@ -33,12 +37,67 @@ function App() {
         />
 
         <Route
+          path="/procesos"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <ProcessesListPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/procesos/nuevo"
           element={
             <ProtectedRoute>
               <JdOnlyRoute>
                 <CreateProcessPage />
               </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/evaluacion"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowed={['TD']}>
+                <WorkflowReviewPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/indicadores"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowed={['CC', 'TD', 'JD']}>
+                <IndicatorsCatalogPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias/subir"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowed={['CC']}>
+                <EvidenceUploadPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias/:indicatorId/subsanar"
+          element={
+            <ProtectedRoute>
+              <RoleRoute allowed={['CC']}>
+                <EvidenceUploadPage />
+              </RoleRoute>
             </ProtectedRoute>
           }
         />

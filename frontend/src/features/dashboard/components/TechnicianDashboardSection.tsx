@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
   Activity,
   Award,
@@ -104,20 +105,20 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
             </p>
           </div>
           <div className="space-y-3">
-            <a
-              href="/procesos/evaluacion"
+            <Link
+              to="/procesos/evaluacion"
               className="flex items-center justify-between rounded-xl bg-primary-600 hover:bg-primary-700 text-body p-4 text-label-md font-semibold transition-all hover:translate-x-1"
             >
               <span>Ir a Bandeja de Revisión</span>
               <ExternalLink size={16} />
-            </a>
-            <a
-              href="/indicadores"
+            </Link>
+            <Link
+              to="/indicadores"
               className="flex items-center justify-between rounded-xl border border-primary-200 hover:bg-gray-50 text-primary-700 p-4 text-label-md font-semibold transition-all hover:translate-x-1"
             >
               <span>Ver Criterios e Indicadores</span>
               <FolderDot size={16} className="text-primary-500" />
-            </a>
+            </Link>
           </div>
         </div>
 

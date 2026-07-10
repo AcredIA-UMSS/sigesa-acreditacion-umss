@@ -8,6 +8,7 @@ import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.ActivateTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
+import com.umss.sigesa.application.port.in.GetProcessUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
 import com.umss.sigesa.domain.model.ProcessStatus;
@@ -62,6 +63,8 @@ class ProcessModuleControllerTest {
     private ListProcessesUseCase listProcessesUseCase;
     @MockitoBean
     private CreateAccreditationProcessUseCase createAccreditationProcessUseCase;
+    @MockitoBean
+    private GetProcessUseCase getProcessUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
 
@@ -138,6 +141,33 @@ class ProcessModuleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].processId").value(processId.toString()))
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"));
+    }
+
+    @Test
+    @WithMockUser(roles = "JD")
+    void getProcessById_asJdReturns200() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        LocalDateTime createdAt = LocalDateTime.of(2026, 1, 15, 10, 0);
+        when(getProcessUseCase.getById(processId)).thenReturn(java.util.Optional.of(
+                new GetProcessUseCase.ProcessDetail(
+                        processId,
+                        templateId,
+                        careerId,
+                        "2026-1",
+                        ProcessType.CEUB,
+                        ProcessStatus.ACTIVE,
+                        "CEUB-2026.1",
+                        createdAt
+                )
+        ));
+
+        mockMvc.perform(get("/api/v1/processes/{id}", processId)
+                        .with(user("testjd").roles("JD")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.processId").value(processId.toString()))
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
     }
 
     @Test

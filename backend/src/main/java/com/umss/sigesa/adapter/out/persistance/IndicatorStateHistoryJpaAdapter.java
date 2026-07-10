@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -30,5 +31,19 @@ public class IndicatorStateHistoryJpaAdapter implements IndicatorStateHistoryPor
         entity.setRole(role.name());
         entity.setCreatedAt(LocalDateTime.now());
         repository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<String> findLatestState(UUID indicatorId) {
+        return repository.findTopByIndicatorIdOrderByCreatedAtDesc(indicatorId)
+                .map(IndicatorStateHistoryEntity::getNewState);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<UUID> findLatestHistoryId(UUID indicatorId) {
+        return repository.findTopByIndicatorIdOrderByCreatedAtDesc(indicatorId)
+                .map(IndicatorStateHistoryEntity::getId);
     }
 }
