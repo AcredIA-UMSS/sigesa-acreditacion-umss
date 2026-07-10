@@ -20,6 +20,8 @@ export const CreateProcessPage = () => {
         isProgramsError={form.isProgramsError}
         isTemplatesLoading={form.isTemplatesLoading}
         isTemplatesError={form.isTemplatesError}
+        templatesErrorMessage={form.templatesErrorMessage}
+        templatesEmpty={form.templatesEmpty}
         programOptions={form.programOptions}
         templateOptions={form.templateOptions}
         periodOptions={form.periodOptions}

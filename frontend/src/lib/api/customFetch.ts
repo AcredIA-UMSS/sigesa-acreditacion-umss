@@ -46,7 +46,10 @@ export async function customFetch<TData>(
   }
 
   if (init.body !== undefined && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+    // FormData debe omitir Content-Type para que el navegador añada el boundary multipart.
+    if (!(init.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
   }
 
   let response: Response;

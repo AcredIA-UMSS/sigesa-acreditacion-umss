@@ -44,13 +44,14 @@ public class DevDataLoader implements ApplicationRunner {
     }
 
     private void seedTemplate(java.util.UUID id, boolean validated, String taxonomyVersion) {
-        if (templateRepository.existsById(id)) {
-            return;
-        }
-        TemplateEntity template = new TemplateEntity();
+        TemplateEntity template = templateRepository.findById(id).orElseGet(TemplateEntity::new);
         template.setId(id);
         template.setValidated(validated);
         template.setTaxonomyVersion(taxonomyVersion);
+        if (validated && template.getActivePeriod() == null) {
+            template.setActivePeriod(DevSeedData.PERIOD_2026_1);
+            template.setActivatedAt(LocalDateTime.of(2026, 1, 1, 0, 0));
+        }
         templateRepository.save(template);
     }
 

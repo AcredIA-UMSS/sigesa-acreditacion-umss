@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Loader2, Upload } from 'lucide-react';
 import { Sidebar } from '../../../components/layout/Sidebar';
@@ -27,13 +27,31 @@ export function EvidenceUploadPage() {
     (item: IndicatorSummaryResponse) => item.id === indicatorId,
   );
 
+  useEffect(() => {
+    if (preselectedIndicatorId && !indicatorId) {
+      setIndicatorId(preselectedIndicatorId);
+    }
+  }, [preselectedIndicatorId, indicatorId]);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitError(null);
     setSuccessMessage(null);
 
-    if (!indicatorId || !selectedIndicator?.criterionId || !file) {
+    if (indicatorsQuery.isError) {
+      setSubmitError('No se pudo cargar el catálogo de indicadores. Verifique que el backend esté activo.');
+      return;
+    }
+
+    if (!indicatorId || !file) {
       setSubmitError('Seleccione indicador y archivo PDF/imagen válido.');
+      return;
+    }
+
+    if (!selectedIndicator?.criterionId) {
+      setSubmitError(
+        'No se encontró el criterio del indicador. Recargue la página o verifique su alcance de carrera (rol CC).',
+      );
       return;
     }
 
@@ -70,6 +88,14 @@ export function EvidenceUploadPage() {
                 <Loader2 className="animate-spin" size={20} />
                 Cargando indicadores...
               </div>
+            ) : indicatorsQuery.isError ? (
+              <p className="text-body-md text-danger">
+                No se pudo cargar indicadores. ¿Backend en http://localhost:8080?
+              </p>
+            ) : indicators.length === 0 ? (
+              <p className="text-body-md text-gray-500">
+                No hay indicadores disponibles para su carrera. Inicie sesión como CC asignado a INF-SIS.
+              </p>
             ) : (
               <div>
                 <label htmlFor="indicatorId" className="mb-2 block text-label-md font-medium text-gray-700">

@@ -25,6 +25,8 @@ interface CreateProcessUIProps {
   isProgramsError: boolean;
   isTemplatesLoading: boolean;
   isTemplatesError: boolean;
+  templatesErrorMessage: string | null;
+  templatesEmpty: boolean;
   programOptions: SelectOption[];
   templateOptions: SelectOption[];
   periodOptions: SelectOption[];
@@ -49,6 +51,8 @@ export function CreateProcessUI({
   isProgramsError,
   isTemplatesLoading,
   isTemplatesError,
+  templatesErrorMessage,
+  templatesEmpty,
   programOptions,
   templateOptions,
   periodOptions,
@@ -122,7 +126,17 @@ export function CreateProcessUI({
           {isTemplatesError && (
             <div className="mb-6">
               <Alert variant="error" title="Plantillas normativas">
-                No se pudo cargar el catálogo de plantillas desde GET /templates.
+                {templatesErrorMessage ??
+                  'No se pudo cargar el catálogo de plantillas desde GET /api/v1/templates.'}
+              </Alert>
+            </div>
+          )}
+
+          {templatesEmpty && (
+            <div className="mb-6">
+              <Alert variant="error" title="Sin plantillas validadas">
+                No hay plantillas validadas en el servidor. Inicie sesión como JD, reinicie el backend
+                (seed de desarrollo) o active una plantilla con POST /templates/{'{id}'}/activate.
               </Alert>
             </div>
           )}
@@ -163,8 +177,8 @@ export function CreateProcessUI({
                     onChange={(e) => onTemplateIdChange(e.target.value)}
                     options={[{ value: '', label: 'Seleccione una plantilla validada' }, ...templateOptions]}
                     error={fieldErrors.templateId}
-                    helperText="Plantillas validadas expuestas por GET /api/v1/templates."
-                    disabled={isPending}
+                    helperText="Solo rol JD. Plantillas validadas desde GET /api/v1/templates."
+                    disabled={isPending || templatesEmpty}
                   />
 
                   {selectedTemplate && (
@@ -193,8 +207,11 @@ export function CreateProcessUI({
               <h3 className="mb-3 text-heading-sm text-primary-800">Notas</h3>
               <ul className="list-disc space-y-2 pl-5 text-body-md text-gray-600">
                 <li>
-                  La regla FSD-BR-08 se valida en servidor (HTTP 409 si ya existe un proceso
-                  activo).
+                  Use periodo <strong>2026-2</strong> para INF-SIS + CEUB: ya existe un proceso activo
+                  en <strong>2026-1</strong> en el seed de demo.
+                </li>
+                <li>
+                  La regla FSD-BR-08 se valida en servidor (HTTP 409 si ya existe un proceso activo).
                 </li>
                 <li>
                   Plantillas no validadas (p. ej. DRAFT-0.1) devuelven HTTP 422

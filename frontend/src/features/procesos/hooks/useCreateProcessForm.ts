@@ -2,9 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCreateProcess } from '../../../api/endpoints/accreditation-process-controller/accreditation-process-controller';
 import { useList1 } from '../../../api/endpoints/program-catalog-controller/program-catalog-controller';
-import { useListTemplates } from '../../../api/endpoints/template-controller/template-controller';
-import type { ProcessResponse, ProgramSummaryResponse, TemplateSummaryResponse } from '../../../api/model';
+import {
+  isTemplateValidated,
+  mapTemplateToOption,
+  useListTemplates,
+} from '../../../api/endpoints/template-controller/template-controller';
+import type { CreateProcessRequestType, ProcessResponse, ProgramSummaryResponse } from '../../../api/model';
 import { getApiErrorMessage } from '../../../lib/api/mapApiError';
+import { useAuth } from '../../../lib/auth/useAuth';
 
 interface CreateProcessFormState {
   careerId: string;
@@ -15,14 +20,18 @@ interface CreateProcessFormState {
 interface TemplateOption {
   id: string;
   label: string;
-  type: NonNullable<TemplateSummaryResponse['type']>;
+  type: CreateProcessRequestType;
   taxonomyVersion: string;
+  activePeriod?: string;
 }
 
 export function useCreateProcessForm() {
   const navigate = useNavigate();
+  const { session } = useAuth();
   const programsQuery = useList1();
-  const templatesQuery = useListTemplates();
+  const templatesQuery = useListTemplates({
+    query: { enabled: session?.role === 'JD' },
+  });
   const [form, setForm] = useState<CreateProcessFormState>({
     careerId: '',
     templateId: '',
@@ -62,28 +71,39 @@ export function useCreateProcessForm() {
     }));
 
   const templateOptions: TemplateOption[] = (templatesQuery.data?.data ?? [])
-    .filter((template) => template.validated && template.id && template.type)
-    .map((template) => ({
-      id: template.id as string,
-      label: `${template.type} (${template.taxonomyVersion ?? 'sin versión'})`,
-      type: template.type as NonNullable<TemplateSummaryResponse['type']>,
-      taxonomyVersion: template.taxonomyVersion ?? '',
-    }));
+    .filter((template) => isTemplateValidated(template) && template.id && template.type)
+    .map((template) => {
+      const mapped = mapTemplateToOption(template);
+      return {
+        id: mapped.id,
+        label: mapped.label,
+        type: mapped.type as CreateProcessRequestType,
+        taxonomyVersion: mapped.taxonomyVersion,
+        activePeriod: mapped.activePeriod,
+      };
+    });
 
   const periodOptions = Array.from(
     new Set(
-      (templatesQuery.data?.data ?? [])
+      templateOptions
         .map((template) => template.activePeriod)
         .filter((period): period is string => Boolean(period)),
     ),
   ).map((period) => ({ value: period, label: period }));
 
-  const fallbackPeriods = ['2026-1', '2025-2', '2026-2'].map((period) => ({
+  const fallbackPeriods = ['2026-2', '2026-1', '2025-2'].map((period) => ({
     value: period,
     label: period,
   }));
 
   const selectedTemplate = templateOptions.find((template) => template.id === form.templateId);
+
+  const templatesErrorMessage = templatesQuery.isError
+    ? getApiErrorMessage(
+        templatesQuery.error,
+        'No se pudo cargar plantillas. Verifique que el backend esté activo y que inició sesión como JD.',
+      )
+    : null;
 
   const validate = (): boolean => {
     const nextErrors: Partial<Record<'careerId' | 'templateId' | 'period', string>> = {};
@@ -107,7 +127,24 @@ export function useCreateProcessForm() {
     setSubmitError(null);
     setSuccessMessage(null);
 
-    if (!validate() || !selectedTemplate) {
+    if (templatesQuery.isError) {
+      setSubmitError(templatesErrorMessage ?? 'No se pudieron cargar las plantillas.');
+      return;
+    }
+
+    if (templateOptions.length === 0) {
+      setSubmitError(
+        'No hay plantillas validadas disponibles. Reinicie el backend (seed dev) o active una plantilla.',
+      );
+      return;
+    }
+
+    if (!validate()) {
+      return;
+    }
+
+    if (!selectedTemplate) {
+      setSubmitError('La plantilla seleccionada no es válida. Vuelva a elegirla en el listado.');
       return;
     }
 
@@ -128,7 +165,12 @@ export function useCreateProcessForm() {
   };
 
   const setTemplateId = (templateId: string) => {
-    setForm((current) => ({ ...current, templateId }));
+    const template = templateOptions.find((item) => item.id === templateId);
+    setForm((current) => ({
+      ...current,
+      templateId,
+      period: template?.activePeriod ?? current.period,
+    }));
     setFieldErrors((current) => ({ ...current, templateId: undefined }));
     reset();
   };
@@ -153,6 +195,8 @@ export function useCreateProcessForm() {
     isProgramsError: programsQuery.isError,
     isTemplatesLoading: templatesQuery.isLoading,
     isTemplatesError: templatesQuery.isError,
+    templatesErrorMessage,
+    templatesEmpty: !templatesQuery.isLoading && !templatesQuery.isError && templateOptions.length === 0,
     programOptions,
     templateOptions: templateOptions.map((template) => ({
       value: template.id,

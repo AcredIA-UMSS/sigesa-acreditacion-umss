@@ -57,15 +57,20 @@ export const uploadEvidence = async (indicatorId: string,
     params: UploadEvidenceParams,
     uploadEvidenceBody?: UploadEvidenceBody, options?: RequestInit): Promise<uploadEvidenceResponse> => {
     const formData = new FormData();
-if(uploadEvidenceBody?.file !== undefined) {
- formData.append(`file`, uploadEvidenceBody.file);
- }
+    if (uploadEvidenceBody?.file !== undefined) {
+      const file = uploadEvidenceBody.file;
+      const filename = file instanceof File ? file.name : 'evidence';
+      formData.append('file', file, filename);
+    }
+    formData.append('criterionId', params.criterionId);
+    if (params.description !== undefined && params.description !== '') {
+      formData.append('description', params.description);
+    }
 
-  return customFetch<uploadEvidenceResponse>(getUploadEvidenceUrl(indicatorId,params),
+  return customFetch<uploadEvidenceResponse>(`/api/v1/indicators/${indicatorId}/evidences`,
   {
     ...options,
-    method: 'POST'
-    ,
+    method: 'POST',
     body: formData
   }
 );}
