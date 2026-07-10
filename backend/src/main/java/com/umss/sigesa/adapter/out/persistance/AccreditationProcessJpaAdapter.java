@@ -5,8 +5,11 @@ import com.umss.sigesa.application.port.out.AccreditationProcessRepositoryPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.ProcessStatus;
 import com.umss.sigesa.domain.model.ProcessType;
+import com.umss.sigesa.domain.model.ProcessStatus;
+import com.umss.sigesa.domain.model.ProcessType;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -28,6 +31,16 @@ public class AccreditationProcessJpaAdapter implements AccreditationProcessRepos
     public AccreditationProcess save(AccreditationProcess process) {
         AccreditationProcessEntity saved = jpaRepository.save(toEntity(process));
         return toDomain(saved);
+    }
+
+    @Override
+    public List<AccreditationProcess> findAll(ProcessStatus status, UUID careerId, String period) {
+        return jpaRepository.findAll().stream()
+                .map(this::toDomain)
+                .filter(process -> status == null || process.getStatus() == status)
+                .filter(process -> careerId == null || process.getCareerId().equals(careerId))
+                .filter(process -> period == null || period.isBlank() || process.getPeriod().equals(period))
+                .toList();
     }
 
     private AccreditationProcessEntity toEntity(AccreditationProcess process) {

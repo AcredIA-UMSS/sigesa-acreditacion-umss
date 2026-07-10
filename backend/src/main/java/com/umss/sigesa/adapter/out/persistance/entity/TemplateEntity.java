@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -25,4 +26,10 @@ public class TemplateEntity {
 
     @Column(name = "taxonomy_version", nullable = false, length = 50)
     private String taxonomyVersion;
+
+    @Column(name = "active_period", length = 20)
+    private String activePeriod;
+
+    @Column(name = "activated_at")
+    private LocalDateTime activatedAt;
 }

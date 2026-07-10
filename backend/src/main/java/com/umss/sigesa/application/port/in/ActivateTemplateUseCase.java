@@ -1,9 +1,9 @@
 package com.umss.sigesa.application.port.in;
 
+import com.umss.sigesa.domain.model.Template;
+
 import java.util.UUID;
-import com.umss.sigesa.domain.model.AccreditationProcess;
-import com.umss.sigesa.domain.model.ProcessType;
 
 public interface ActivateTemplateUseCase {
-    void activate(UUID templateId, String period);
+    Template activate(UUID templateId, String period);
 }

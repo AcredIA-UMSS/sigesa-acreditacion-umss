@@ -34,6 +34,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
+                        .requestMatchers("/api/v1/templates", "/api/v1/templates/**").hasRole("JD")
+                        .requestMatchers("/api/v1/processes", "/api/v1/processes/**").hasRole("JD")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Perímetro JWT v1.0: todo /api/v1/** (excepto login) exige Bearer token.
                         .anyRequest().authenticated())

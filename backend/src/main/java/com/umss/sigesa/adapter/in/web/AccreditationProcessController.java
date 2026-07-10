@@ -3,19 +3,52 @@ package com.umss.sigesa.adapter.in.web;
 import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequest;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponse;
+import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponse;
+import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.domain.model.AccreditationProcess;
+import com.umss.sigesa.domain.model.ProcessStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/processes")
 public class AccreditationProcessController {
 
     private final CreateAccreditationProcessUseCase createProcessUseCase;
+    private final ListProcessesUseCase listProcessesUseCase;
 
-    public AccreditationProcessController(CreateAccreditationProcessUseCase createProcessUseCase) {
+    public AccreditationProcessController(CreateAccreditationProcessUseCase createProcessUseCase,
+                                          ListProcessesUseCase listProcessesUseCase) {
         this.createProcessUseCase = createProcessUseCase;
+        this.listProcessesUseCase = listProcessesUseCase;
+    }
+
+    @GetMapping
+    public List<ProcessSummaryResponse> list(
+            @RequestParam(required = false) ProcessStatus status,
+            @RequestParam(required = false) UUID careerId,
+            @RequestParam(required = false) String period) {
+        return listProcessesUseCase.list(status, careerId, period).stream()
+                .map(summary -> new ProcessSummaryResponse(
+                        summary.processId(),
+                        summary.templateId(),
+                        summary.careerId(),
+                        summary.period(),
+                        summary.type(),
+                        summary.status(),
+                        summary.taxonomySnapshotVersion(),
+                        summary.createdAt()
+                ))
+                .toList();
     }
 
     @PostMapping
@@ -27,7 +60,6 @@ public class AccreditationProcessController {
                 request.type()
         );
 
-        // Mapeo manual (o mediante MapStruct) de Dominio a DTO para no exponer el modelo interno
         ProcessResponse response = new ProcessResponse(
                 process.getId(),
                 process.getStatus(),
