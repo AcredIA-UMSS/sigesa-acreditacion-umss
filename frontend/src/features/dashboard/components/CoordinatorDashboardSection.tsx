@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -16,6 +17,8 @@ interface CoordinatorDashboardSectionProps {
 }
 
 export function CoordinatorDashboardSection({ section }: CoordinatorDashboardSectionProps) {
+  const [phaseId, setPhaseId] = useState<number | undefined>(undefined);
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* CC Program Context Card */}
@@ -150,10 +153,10 @@ export function CoordinatorDashboardSection({ section }: CoordinatorDashboardSec
       </div>
 
       {/* Report Export Control */}
-      <ReportExportBar phaseId={undefined} />
+      <ReportExportBar phaseId={phaseId} />
 
       {/* Observations Table */}
-      <CoordinatorObservationsTable />
+      <CoordinatorObservationsTable phaseId={phaseId} onPhaseIdChange={setPhaseId} />
     </div>
   );
 }

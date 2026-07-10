@@ -1,18 +1,34 @@
-// frontend/src/features/procesos/CreateProcessPage.tsx
 import { Sidebar } from '../../components/layout/Sidebar';
 import { CreateProcessUI } from './components/CreateProcessUI';
-// import { useCreateProcessMutation } from '../../api/endpoints/procesos'; // <--- Hook de Orval
+import { useCreateProcessForm } from './hooks/useCreateProcessForm';
 
 export const CreateProcessPage = () => {
-  // Lógica de React Query (Orval) iría aquí:
-  // const { mutate: createProcess, isPending } = useCreateProcessMutation();
-
-  // Handlers para el formulario...
+  const form = useCreateProcessForm();
 
   return (
     <div className="flex h-screen bg-body">
-      <Sidebar />
-      <CreateProcessUI />
+      <Sidebar activeNav="processes" />
+      <CreateProcessUI
+        careerId={form.form.careerId}
+        templateId={form.form.templateId}
+        period={form.form.period}
+        fieldErrors={form.fieldErrors}
+        submitError={form.submitError}
+        successMessage={form.successMessage}
+        isPending={form.isPending}
+        isProgramsLoading={form.isProgramsLoading}
+        isProgramsError={form.isProgramsError}
+        programOptions={form.programOptions}
+        templateOptions={form.templateOptions}
+        periodOptions={form.periodOptions}
+        selectedTemplate={form.selectedTemplate}
+        onCareerIdChange={form.setCareerId}
+        onTemplateIdChange={form.setTemplateId}
+        onPeriodChange={form.setPeriod}
+        onSubmit={form.handleSubmit}
+        onCancel={form.handleCancel}
+        onBack={form.handleCancel}
+      />
     </div>
   );
 };

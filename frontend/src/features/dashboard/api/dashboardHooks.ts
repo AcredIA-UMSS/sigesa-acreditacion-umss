@@ -254,7 +254,7 @@ export function useExportReport() {
       let attempts = 0;
       const maxAttempts = 60; // 60 seconds timeout
 
-      while (jobStatus === 'PENDING' || jobStatus === 'RUNNING') {
+      while (jobStatus === 'PENDING' || jobStatus === 'PROCESSING') {
         if (attempts >= maxAttempts) {
           throw new Error('La generación del reporte excedió el límite de tiempo.');
         }

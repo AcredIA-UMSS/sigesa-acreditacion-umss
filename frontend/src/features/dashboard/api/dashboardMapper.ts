@@ -16,6 +16,18 @@ import type {
   DashboardRolePermission,
 } from '../types';
 
+function mapPhaseStatus(
+  status?: string
+): 'COMPLETADA' | 'EN_PROCESO' | 'PENDIENTE' {
+  if (status === 'COMPLETED' || status === 'COMPLETADA') {
+    return 'COMPLETADA';
+  }
+  if (status === 'IN_PROGRESS' || status === 'EN_PROCESO') {
+    return 'EN_PROCESO';
+  }
+  return 'PENDIENTE';
+}
+
 export function mapCompositeSummary(
   dto?: CompositeDashboardSummary
 ): CompositeSummaryResponse {
@@ -55,7 +67,7 @@ function mapCoordinatorSection(
       faseId: p.phaseId ?? 0,
       nombre: p.name ?? '',
       porcentaje: p.percentage ?? 0,
-      estado: (p.status ?? 'PENDIENTE') as 'COMPLETADA' | 'EN_PROCESO' | 'PENDIENTE',
+      estado: mapPhaseStatus(p.status),
     })),
     cuellosDeBotella: (dto.bottlenecks ?? []).map((b) => ({
       indicadorId: b.indicatorId ?? '',

@@ -1,13 +1,29 @@
 import { useState } from 'react';
 import { useDashboardDetails } from '../api/dashboardHooks';
+import {
+  getObservationStatusLabel,
+  getObservationStatusTone,
+  OBSERVATION_STATUS_BADGE,
+  OBSERVATION_STATUS_OPTIONS,
+} from '../constants/observationStatuses';
 import { ArrowUpDown, ChevronLeft, ChevronRight, ExternalLink, Filter, HelpCircle, Loader2 } from 'lucide-react';
 
-export const CoordinatorObservationsTable = () => {
+interface CoordinatorObservationsTableProps {
+  phaseId?: number;
+  onPhaseIdChange?: (phaseId: number | undefined) => void;
+}
+
+export const CoordinatorObservationsTable = ({
+  phaseId: controlledPhaseId,
+  onPhaseIdChange,
+}: CoordinatorObservationsTableProps) => {
   const [page, setPage] = useState(0);
   const [size] = useState(5);
-  const [sort, setSort] = useState('dueDate,asc'); // default sort is fechaLimite (dueDate) asc
-  const [phaseId, setPhaseId] = useState<number | undefined>(undefined);
+  const [sort, setSort] = useState('dueDate,asc');
+  const [internalPhaseId, setInternalPhaseId] = useState<number | undefined>(undefined);
   const [estado, setEstado] = useState<string | undefined>(undefined);
+
+  const phaseId = controlledPhaseId ?? internalPhaseId;
 
   const { details, isLoading, isFetching } = useDashboardDetails({
     page,
@@ -24,7 +40,12 @@ export const CoordinatorObservationsTable = () => {
 
   const handlePhaseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setPhaseId(value ? Number(value) : undefined);
+    const nextPhaseId = value ? Number(value) : undefined;
+    if (onPhaseIdChange) {
+      onPhaseIdChange(nextPhaseId);
+    } else {
+      setInternalPhaseId(nextPhaseId);
+    }
     setPage(0);
   };
 
@@ -71,9 +92,11 @@ export const CoordinatorObservationsTable = () => {
               className="bg-transparent text-label-md font-semibold text-primary-800 focus:outline-none cursor-pointer"
             >
               <option value="" className="bg-body text-primary-900">Todos los Estados</option>
-              <option value="PENDIENTE_SUBSANACION" className="bg-body text-primary-900">Pendiente Subsanación</option>
-              <option value="EN_REVISION" className="bg-body text-primary-900">En Revisión</option>
-              <option value="APROBADO" className="bg-body text-primary-900">Aprobado</option>
+              {OBSERVATION_STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value} className="bg-body text-primary-900">
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -137,17 +160,16 @@ export const CoordinatorObservationsTable = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4.5 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
-                        obs.estado === 'PENDIENTE_SUBSANACION'
-                          ? 'bg-secondary-50 text-secondary-600 border-secondary-200'
-                          : obs.estado === 'EN_REVISION'
-                          ? 'bg-warning/10 text-amber-800 border-warning/20'
-                          : 'bg-success/10 text-success border-success/20'
-                      }`}
-                    >
-                      {obs.estado.replace(/_/g, ' ')}
-                    </span>
+                    {(() => {
+                      const tone = getObservationStatusTone(obs.estado);
+                      return (
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${OBSERVATION_STATUS_BADGE[tone]}`}
+                        >
+                          {getObservationStatusLabel(obs.estado)}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4.5 whitespace-nowrap text-right">
                     {obs.urlSubsanacion ? (
