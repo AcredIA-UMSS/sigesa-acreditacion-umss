@@ -18,7 +18,7 @@ public interface ListIndicatorsUseCase {
             UUID criterionId,
             String currentState
     ) {
-        static IndicatorSummary from(IndicatorEntry entry, String currentState) {
+        public static IndicatorSummary from(IndicatorEntry entry, String currentState) {
             return new IndicatorSummary(
                     entry.id(),
                     entry.code(),
