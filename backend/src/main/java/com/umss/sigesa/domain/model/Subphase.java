@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -15,10 +13,8 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Template {
+public class Subphase {
     private UUID id;
     private String name;
-    private String type;
-    @Builder.Default
-    private List<TemplatePhase> phases = new ArrayList<>();
+    private Integer order;
 }

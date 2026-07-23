@@ -11,13 +11,13 @@ import type { SortObject } from './sortObject';
 export interface PageObservationSummary {
   totalElements?: number;
   totalPages?: number;
-  pageable?: PageableObject;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: ObservationSummary[];
   number?: number;
+  pageable?: PageableObject;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   empty?: boolean;
 }
