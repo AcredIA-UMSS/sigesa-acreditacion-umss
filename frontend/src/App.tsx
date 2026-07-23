@@ -3,7 +3,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
-import { CreateProcessPage } from './features/procesos/CreateProcessPage';
+import { CreateProcessView } from './features/accreditation-process';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 
 function App() {
@@ -36,7 +36,7 @@ function App() {
           path="/procesos/nuevo"
           element={
             <ProtectedRoute>
-              <CreateProcessPage />
+              <CreateProcessView />
             </ProtectedRoute>
           }
         />

@@ -15,10 +15,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Template {
+public class TemplatePhase {
     private UUID id;
     private String name;
-    private String type;
+    private Integer order;
     @Builder.Default
-    private List<TemplatePhase> phases = new ArrayList<>();
+    private List<TemplateSubphase> subphases = new ArrayList<>();
 }
