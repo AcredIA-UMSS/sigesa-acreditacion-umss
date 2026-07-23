@@ -4,8 +4,12 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { RecentEvaluation } from './recentEvaluation';
 
 export interface TechnicianKpiSection {
   evidencesPendingReview?: number;
   assignedIndicators?: number;
+  openActions?: number;
+  available?: number;
+  recentEvaluations?: RecentEvaluation[];
 }

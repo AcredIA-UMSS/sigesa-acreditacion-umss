@@ -38,70 +38,70 @@ export const CoordinatorObservationsTable = () => {
   const content = details?.content ?? [];
 
   return (
-    <div className="flex flex-col gap-6 rounded-2xl border border-primary-200/10 bg-primary-900/20 p-6 backdrop-blur-md">
+    <div className="flex flex-col gap-6 rounded-2xl border border-gray-100 bg-body p-6 shadow-sm">
       {/* Header and Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-heading-sm font-semibold text-body">Observaciones Pendientes de Subsanación</h3>
-          <p className="text-body-md text-primary-200">
+          <h3 className="text-heading-sm font-bold text-primary-800">Observaciones Pendientes de Subsanación</h3>
+          <p className="text-body-md text-gray-600">
             Listado detallado de las observaciones emitidas que requieren subsanación.
           </p>
         </div>
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 rounded-xl bg-primary-900/60 border border-primary-800 px-3.5 py-2">
-            <Filter size={16} className="text-primary-200" />
+          <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3.5 py-2 shadow-sm">
+            <Filter size={16} className="text-primary-500" />
             <select
               value={phaseId ?? ''}
               onChange={handlePhaseChange}
-              className="bg-transparent text-label-md font-medium text-body focus:outline-none cursor-pointer"
+              className="bg-transparent text-label-md font-semibold text-primary-800 focus:outline-none cursor-pointer"
             >
-              <option value="" className="bg-primary-900 text-body">Todas las Fases</option>
-              <option value="1" className="bg-primary-900 text-body">Fase 1: Autoevaluación</option>
-              <option value="2" className="bg-primary-900 text-body">Fase 2: Verificación</option>
+              <option value="" className="bg-body text-primary-900">Todas las Fases</option>
+              <option value="1" className="bg-body text-primary-900">Fase 1: Autoevaluación</option>
+              <option value="2" className="bg-body text-primary-900">Fase 2: Verificación</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-2 rounded-xl bg-primary-900/60 border border-primary-800 px-3.5 py-2">
-            <Filter size={16} className="text-primary-200" />
+          <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3.5 py-2 shadow-sm">
+            <Filter size={16} className="text-primary-500" />
             <select
               value={estado ?? ''}
               onChange={handleEstadoChange}
-              className="bg-transparent text-label-md font-medium text-body focus:outline-none cursor-pointer"
+              className="bg-transparent text-label-md font-semibold text-primary-800 focus:outline-none cursor-pointer"
             >
-              <option value="" className="bg-primary-900 text-body">Todos los Estados</option>
-              <option value="PENDIENTE_SUBSANACION" className="bg-primary-900 text-body">Pendiente Subsanación</option>
-              <option value="EN_REVISION" className="bg-primary-900 text-body">En Revisión</option>
-              <option value="APROBADO" className="bg-primary-900 text-body">Aprobado</option>
+              <option value="" className="bg-body text-primary-900">Todos los Estados</option>
+              <option value="PENDIENTE_SUBSANACION" className="bg-body text-primary-900">Pendiente Subsanación</option>
+              <option value="EN_REVISION" className="bg-body text-primary-900">En Revisión</option>
+              <option value="APROBADO" className="bg-body text-primary-900">Aprobado</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="relative overflow-x-auto rounded-xl border border-primary-800/80 bg-primary-900/10">
+      <div className="relative overflow-x-auto rounded-xl border border-gray-200 bg-body">
         {isLoading ? (
-          <div className="flex h-64 items-center justify-center gap-2 text-primary-200">
+          <div className="flex h-64 items-center justify-center gap-2 text-gray-500">
             <Loader2 className="animate-spin" size={24} />
             <span className="text-body-md font-medium">Cargando observaciones...</span>
           </div>
         ) : content.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center gap-2 text-primary-300">
-            <HelpCircle size={32} className="text-primary-400" />
+          <div className="flex h-64 flex-col items-center justify-center gap-2 text-gray-400">
+            <HelpCircle size={32} className="text-gray-300" />
             <span className="text-body-md font-medium">No se encontraron observaciones</span>
           </div>
         ) : (
-          <table className="w-full text-left text-body-md text-primary-100">
-            <thead className="bg-primary-900/50 text-label-md uppercase font-semibold text-primary-300 border-b border-primary-800/60">
+          <table className="w-full text-left text-body-md text-gray-700">
+            <thead className="bg-gray-50 text-label-sm uppercase font-semibold text-gray-600 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-4">Indicador</th>
                 <th className="px-6 py-4">Descripción</th>
                 <th className="px-6 py-4">F. Emisión</th>
-                <th className="px-6 py-4 cursor-pointer hover:bg-primary-800/30 transition-colors" onClick={toggleSort}>
+                <th className="px-6 py-4 cursor-pointer hover:bg-gray-100/70 transition-colors" onClick={toggleSort}>
                   <div className="flex items-center gap-1">
                     F. Límite
-                    <ArrowUpDown size={14} className="text-primary-400" />
+                    <ArrowUpDown size={14} className="text-gray-400" />
                   </div>
                 </th>
                 <th className="px-6 py-4">Días Rest.</th>
@@ -109,28 +109,28 @@ export const CoordinatorObservationsTable = () => {
                 <th className="px-6 py-4 text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-primary-800/40">
+            <tbody className="divide-y divide-gray-100 bg-body">
               {content.map((obs) => (
-                <tr key={obs.observacionId} className="hover:bg-primary-900/35 transition-colors duration-150">
+                <tr key={obs.observacionId} className="hover:bg-gray-50/50 transition-colors duration-150">
                   <td className="px-6 py-4.5 whitespace-nowrap">
-                    <span className="font-semibold text-secondary-300 block">{obs.codigoIndicador}</span>
-                    <span className="text-xs text-primary-300 block max-w-[180px] truncate" title={obs.tituloIndicador}>
+                    <span className="font-semibold text-secondary-600 block">{obs.codigoIndicador}</span>
+                    <span className="text-xs text-gray-500 block max-w-[180px] truncate" title={obs.tituloIndicador}>
                       {obs.tituloIndicador}
                     </span>
                   </td>
-                  <td className="px-6 py-4.5 max-w-sm truncate" title={obs.descripcion}>
+                  <td className="px-6 py-4.5 max-w-sm truncate text-gray-700" title={obs.descripcion}>
                     {obs.descripcion}
                   </td>
-                  <td className="px-6 py-4.5 whitespace-nowrap text-primary-200">{obs.fechaEmision}</td>
-                  <td className="px-6 py-4.5 whitespace-nowrap font-medium text-body">{obs.fechaLimite}</td>
+                  <td className="px-6 py-4.5 whitespace-nowrap text-gray-600">{obs.fechaEmision}</td>
+                  <td className="px-6 py-4.5 whitespace-nowrap font-medium text-gray-800">{obs.fechaLimite}</td>
                   <td className="px-6 py-4.5 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                         obs.diasRestantes <= 3
-                          ? 'bg-secondary-900/40 text-secondary-200 border border-secondary-800'
+                          ? 'bg-secondary-50 text-secondary-600 border-secondary-200'
                           : obs.diasRestantes <= 7
-                          ? 'bg-warning/20 text-warning border border-warning/30'
-                          : 'bg-primary-800/60 text-primary-200 border border-primary-800'
+                          ? 'bg-warning/10 text-amber-800 border-warning/30'
+                          : 'bg-gray-100 text-gray-700 border-gray-200'
                       }`}
                     >
                       {obs.diasRestantes} días
@@ -138,12 +138,12 @@ export const CoordinatorObservationsTable = () => {
                   </td>
                   <td className="px-6 py-4.5 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                         obs.estado === 'PENDIENTE_SUBSANACION'
-                          ? 'bg-secondary-900/30 text-secondary-200 border border-secondary-800/50'
+                          ? 'bg-secondary-50 text-secondary-600 border-secondary-200'
                           : obs.estado === 'EN_REVISION'
-                          ? 'bg-warning/10 text-warning border border-warning/20'
-                          : 'bg-success/15 text-success border border-success/20'
+                          ? 'bg-warning/10 text-amber-800 border-warning/20'
+                          : 'bg-success/10 text-success border-success/20'
                       }`}
                     >
                       {obs.estado.replace(/_/g, ' ')}
@@ -159,7 +159,7 @@ export const CoordinatorObservationsTable = () => {
                         <ExternalLink size={12} />
                       </a>
                     ) : (
-                      <span className="text-xs text-primary-400">N/A</span>
+                      <span className="text-xs text-gray-400">N/A</span>
                     )}
                   </td>
                 </tr>
@@ -171,9 +171,9 @@ export const CoordinatorObservationsTable = () => {
 
       {/* Pagination Controls */}
       {!isLoading && content.length > 0 && (
-        <div className="flex items-center justify-between border-t border-primary-800/50 pt-4">
-          <span className="text-body-md text-primary-300">
-            Total: <span className="font-semibold text-body">{details?.totalElements}</span> observaciones
+        <div className="flex items-center justify-between border-t border-gray-150 pt-4">
+          <span className="text-body-md text-gray-500">
+            Total: <span className="font-semibold text-gray-800">{details?.totalElements}</span> observaciones
           </span>
 
           <div className="flex items-center gap-2">
@@ -185,8 +185,8 @@ export const CoordinatorObservationsTable = () => {
             >
               <ChevronLeft size={18} />
             </button>
-            <span className="text-body-md text-primary-200 font-medium">
-              Pág. <span className="text-body">{page + 1}</span> de {totalPages}
+            <span className="text-body-md text-gray-600 font-medium">
+              Pág. <span className="text-gray-800 font-bold">{page + 1}</span> de {totalPages}
             </span>
             <button
               type="button"

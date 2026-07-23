@@ -34,6 +34,8 @@ export interface CoordinatorSection {
 export interface TechnicianSection {
   evidenciasPendientesRevision: number;
   indicadoresAsignados: number;
+  openActions?: number;
+  available?: number;
   ultimasEvaluaciones?: Array<{
     evidenciaId: string;
     programa: string;
@@ -46,6 +48,8 @@ export interface TechnicianSection {
 export interface ExecutiveSection {
   totalProgramasEnAcreditacion?: number;
   porcentajeAvanceInstitucional?: number;
+  criticalObservations?: number;
+  alertPrograms?: number;
   semaforoProgramas?: Array<{
     programaId: string;
     nombre: string;

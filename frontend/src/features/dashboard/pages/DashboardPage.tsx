@@ -15,9 +15,9 @@ export function DashboardPage() {
   const { summary, isLoading, error, refetch, mockPersona, changeMockPersona } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
 
-  const hasCc = summary?.grantedPermissions?.includes('READ_CC_DASHBOARD') && summary?.coordinatorSection !== null && summary?.coordinatorSection !== undefined;
-  const hasTd = summary?.grantedPermissions?.includes('READ_TD_DASHBOARD') && summary?.technicianSection !== null && summary?.technicianSection !== undefined;
-  const hasJd = summary?.grantedPermissions?.includes('READ_JD_DASHBOARD') && summary?.executiveSection !== null && summary?.executiveSection !== undefined;
+  const hasCc = ((summary?.grantedPermissions as string[])?.includes('READ_CC_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_CC') || (summary?.grantedPermissions as string[])?.includes('CC')) && summary?.coordinatorSection !== null && summary?.coordinatorSection !== undefined;
+  const hasTd = ((summary?.grantedPermissions as string[])?.includes('READ_TD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_TD') || (summary?.grantedPermissions as string[])?.includes('TD')) && summary?.technicianSection !== null && summary?.technicianSection !== undefined;
+  const hasJd = ((summary?.grantedPermissions as string[])?.includes('READ_JD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_JD') || (summary?.grantedPermissions as string[])?.includes('JD')) && summary?.executiveSection !== null && summary?.executiveSection !== undefined;
 
   // Sync activeTab when summary loads or changes (like after switching mock personas)
   useEffect(() => {
