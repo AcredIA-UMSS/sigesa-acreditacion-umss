@@ -13,4 +13,5 @@ public interface DashboardQueryPort {
     ExecutiveKpiSection findExecutiveKpi();
     Page<ObservationSummary> findObservationDetails(UUID programId, Integer phaseId, String status, Pageable pageable);
     Stream<ObservationSummary> streamAllObservationsForReport(UUID programId, Integer phaseId);
+    void updateDashboardMetrics(UUID programId, int approvedDelta, int rejectedDelta, int pendingObsDelta);
 }

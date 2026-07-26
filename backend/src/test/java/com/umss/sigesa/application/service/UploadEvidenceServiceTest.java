@@ -4,6 +4,7 @@ import com.umss.sigesa.adapter.in.web.dto.EvidenceResponse;
 import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.FileStoragePort;
 import com.umss.sigesa.application.port.out.IndicatorStateHistoryPort;
+import com.umss.sigesa.application.port.out.ObservationRepositoryPort;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.ForbiddenProgramScopeException;
 import com.umss.sigesa.domain.exception.InvalidFileFormatException;
@@ -39,6 +40,9 @@ class UploadEvidenceServiceTest {
     @Mock
     private IndicatorStateHistoryPort indicatorStateHistory;
 
+    @Mock
+    private ObservationRepositoryPort observationRepository;
+
     private UploadEvidenceService service;
 
     private UUID indicatorId;
@@ -48,7 +52,7 @@ class UploadEvidenceServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new UploadEvidenceService(evidenceRepository, fileStorage, indicatorStateHistory);
+        service = new UploadEvidenceService(evidenceRepository, fileStorage, indicatorStateHistory, observationRepository);
         indicatorId = UUID.randomUUID();
         criterionId = UUID.randomUUID();
         programId = UUID.randomUUID();

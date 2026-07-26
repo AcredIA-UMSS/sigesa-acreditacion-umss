@@ -7,11 +7,51 @@ services:
     environment:
       POSTGRES_DB: sigesa
       POSTGRES_USER: sigesa
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: sigesapassword
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - sigesa_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigesa -d sigesa"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigesa-backend-app
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sigesa
+      SPRING_DATASOURCE_USERNAME: sigesa
+      SPRING_DATASOURCE_PASSWORD: sigesapassword
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_FLYWAY_ENABLED: "false"
+      SIGESA_JWT_SECRET: "9a7f34c2b5d8e1f0a3c4b5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6"
+      SIGESA_JWT_EXPIRATION_SECONDS: 86400
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sigesa-frontend-app
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
 
 volumes:
-  pgdata:
+  sigesa_postgres_data:
+  uploads_data:

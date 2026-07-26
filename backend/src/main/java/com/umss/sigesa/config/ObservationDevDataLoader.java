@@ -1,7 +1,9 @@
 package com.umss.sigesa.config;
 
+import com.umss.sigesa.adapter.out.persistance.AppUserJpaRepository;
 import com.umss.sigesa.adapter.out.persistance.IndicatorStateHistoryJpaRepository;
 import com.umss.sigesa.adapter.out.persistance.ObservationJpaRepository;
+import com.umss.sigesa.adapter.out.persistance.entity.AppUserEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.ObservationEntity;
 import org.springframework.boot.ApplicationArguments;
@@ -15,20 +17,23 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Observaciones y estados de indicadores de demostración para dashboard y workflow local.
+ * Observaciones y estados de indicadores de demostración para el dashboard y el workflow local.
  */
 @Component
 @Profile("!prod")
-@Order(250)
+@Order(270) // Runs after EvidenceDevDataLoader (Order 260) to ensure foreign keys are satisfied
 public class ObservationDevDataLoader implements ApplicationRunner {
 
     private final ObservationJpaRepository observationRepository;
     private final IndicatorStateHistoryJpaRepository stateHistoryRepository;
+    private final AppUserJpaRepository userRepository;
 
     public ObservationDevDataLoader(ObservationJpaRepository observationRepository,
-                                    IndicatorStateHistoryJpaRepository stateHistoryRepository) {
+                                    IndicatorStateHistoryJpaRepository stateHistoryRepository,
+                                    AppUserJpaRepository userRepository) {
         this.observationRepository = observationRepository;
         this.stateHistoryRepository = stateHistoryRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -38,6 +43,10 @@ public class ObservationDevDataLoader implements ApplicationRunner {
     }
 
     private void seedObservations() {
+        UUID tdUserId = userRepository.findByEmail(AuthDataLoader.SEED_TD_EMAIL)
+                .map(AppUserEntity::getId)
+                .orElse(UUID.fromString("00000000-0000-0000-0000-000000000088"));
+
         seedObservation(
                 "OBS-DEMO-001",
                 DevSeedData.INDICATOR_102,
@@ -47,7 +56,9 @@ public class ObservationDevDataLoader implements ApplicationRunner {
                 2,
                 "PENDING_REMEDIATION",
                 LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(9)
+                LocalDate.now().plusDays(9),
+                DevSeedData.EVIDENCE_LABS_V1,
+                tdUserId
         );
 
         seedObservation(
@@ -59,7 +70,9 @@ public class ObservationDevDataLoader implements ApplicationRunner {
                 1,
                 "PENDING_SUBSANACION",
                 LocalDate.now().minusDays(12),
-                LocalDate.now().plusDays(2)
+                LocalDate.now().plusDays(2),
+                DevSeedData.EVIDENCE_PLAN_V1,
+                tdUserId
         );
 
         seedObservation(
@@ -71,7 +84,9 @@ public class ObservationDevDataLoader implements ApplicationRunner {
                 2,
                 "APROBADO",
                 LocalDate.now().minusDays(20),
-                LocalDate.now().minusDays(6)
+                LocalDate.now().minusDays(6),
+                DevSeedData.EVIDENCE_BIBLIO_V1,
+                tdUserId
         );
 
         seedObservation(
@@ -83,7 +98,9 @@ public class ObservationDevDataLoader implements ApplicationRunner {
                 2,
                 "EN_REVISION_TECNICA",
                 LocalDate.now().minusDays(2),
-                LocalDate.now().plusDays(12)
+                LocalDate.now().plusDays(12),
+                DevSeedData.EVIDENCE_LABS_V1,
+                tdUserId
         );
     }
 
@@ -95,23 +112,30 @@ public class ObservationDevDataLoader implements ApplicationRunner {
                                  int phaseId,
                                  String status,
                                  LocalDate issueDate,
-                                 LocalDate dueDate) {
-        if (observationRepository.existsById(observationId)) {
+                                 LocalDate dueDate,
+                                 UUID evidenceVersionId,
+                                 UUID observerId) {
+        UUID id = UUID.nameUUIDFromBytes(observationId.getBytes());
+        if (observationRepository.existsById(id)) {
             return;
         }
 
         ObservationEntity entity = new ObservationEntity();
-        entity.setObservationId(observationId);
+        entity.setId(id);
+        entity.setEvidenceVersionId(evidenceVersionId);
+        entity.setObserverId(observerId);
+        entity.setRoleCode("TD");
+        entity.setObservations(description);
+        entity.setCreatedAt(issueDate.atStartOfDay());
+        
         entity.setProgramId(DevSeedData.PROGRAM_INF_SIS);
         entity.setIndicatorId(indicatorId.toString());
         entity.setIndicatorCode(indicatorCode);
         entity.setIndicatorTitle(indicatorTitle);
-        entity.setDescription(description);
-        entity.setIssueDate(issueDate);
         entity.setDueDate(dueDate);
-        entity.setPhaseId(phaseId);
         entity.setStatus(status);
         entity.setRemediationUrl("/evidencias/" + indicatorId + "/subsanar");
+        
         observationRepository.save(entity);
     }
 

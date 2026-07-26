@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tb_report_export_job")
+@Table(name = "report_export_job")
 public class ReportExportJobEntity {
 
     @Id

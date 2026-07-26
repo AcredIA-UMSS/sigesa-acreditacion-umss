@@ -7,6 +7,10 @@ public interface ObservationRepositoryPort {
 
     void savePendingObservation(PendingObservation observation);
 
+    int resolveObservationForIndicator(UUID programId, String indicatorId, String status);
+
+    void transitionObservationStatus(UUID programId, String indicatorId, String oldStatus, String newStatus);
+
     record PendingObservation(
             String observationId,
             UUID programId,
@@ -18,7 +22,10 @@ public interface ObservationRepositoryPort {
             LocalDate dueDate,
             Integer phaseId,
             String status,
-            String remediationUrl
+            String remediationUrl,
+            UUID evidenceVersionId,
+            UUID observerId,
+            String roleCode
     ) {
     }
 }

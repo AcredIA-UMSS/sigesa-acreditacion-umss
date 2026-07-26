@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public interface ObservationJpaRepository extends JpaRepository<ObservationEntity, String> {
+public interface ObservationJpaRepository extends JpaRepository<ObservationEntity, UUID> {
 
     @Query("SELECT o FROM ObservationEntity o WHERE o.programId = :programId " +
            "AND (:phaseId IS NULL OR o.phaseId = :phaseId) " +
@@ -33,6 +33,8 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
     @Query("SELECT COUNT(DISTINCT o.indicatorId) FROM ObservationEntity o")
     long countDistinctIndicators();
 
-    @Query("SELECT o FROM ObservationEntity o WHERE o.status IN ('APROBADO', 'RECHAZADO') ORDER BY o.issueDate DESC")
+    @Query("SELECT o FROM ObservationEntity o WHERE o.status IN ('APROBADO', 'RECHAZADO') ORDER BY o.createdAt DESC")
     List<ObservationEntity> findRecentEvaluations(Pageable pageable);
+
+    List<ObservationEntity> findByProgramIdAndIndicatorIdAndStatus(UUID programId, String indicatorId, String status);
 }

@@ -14,6 +14,8 @@ public interface EvidenceRepositoryPort {
 
     Optional<Evidence> findById(UUID evidenceId);
 
+    Optional<Evidence> findByIndicatorId(UUID indicatorId);
+
     List<Evidence> findAll();
 
     List<EvidenceVersion> findVersionsByEvidenceId(UUID evidenceId);

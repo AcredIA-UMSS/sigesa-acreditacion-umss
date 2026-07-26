@@ -1,8 +1,10 @@
 package com.umss.sigesa.application.service;
 
 import com.umss.sigesa.application.port.in.ApproveIndicatorUseCase;
+import com.umss.sigesa.application.port.out.DashboardQueryPort;
 import com.umss.sigesa.application.port.out.IndicatorCatalogPort;
 import com.umss.sigesa.application.port.out.IndicatorStateHistoryPort;
+import com.umss.sigesa.application.port.out.ObservationRepositoryPort;
 import com.umss.sigesa.domain.exception.ForbiddenProgramScopeException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
 import com.umss.sigesa.domain.model.AuthenticatedIdentity;
@@ -20,11 +22,17 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
 
     private final IndicatorCatalogPort indicatorCatalog;
     private final IndicatorStateHistoryPort indicatorStateHistory;
+    private final ObservationRepositoryPort observationRepository;
+    private final DashboardQueryPort dashboardQueryPort;
 
     public ApproveIndicatorService(IndicatorCatalogPort indicatorCatalog,
-                                   IndicatorStateHistoryPort indicatorStateHistory) {
+                                   IndicatorStateHistoryPort indicatorStateHistory,
+                                   ObservationRepositoryPort observationRepository,
+                                   DashboardQueryPort dashboardQueryPort) {
         this.indicatorCatalog = indicatorCatalog;
         this.indicatorStateHistory = indicatorStateHistory;
+        this.observationRepository = observationRepository;
+        this.dashboardQueryPort = dashboardQueryPort;
     }
 
     @Override
@@ -34,7 +42,7 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
             throw new ForbiddenProgramScopeException("Solo el Técnico DUEA [TD] puede aprobar indicadores.");
         }
 
-        indicatorCatalog.findById(indicatorId)
+        IndicatorCatalogPort.IndicatorEntry indicator = indicatorCatalog.findById(indicatorId)
                 .orElseThrow(() -> new IllegalArgumentException("Indicador no encontrado."));
 
         String currentState = indicatorStateHistory.findLatestState(indicatorId).orElse("PENDIENTE");
@@ -42,6 +50,11 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
             throw new InvalidIndicatorStateException(
                     "No se puede aprobar un indicador en estado '" + currentState + "'.");
         }
+
+        int resolvedCount = observationRepository.resolveObservationForIndicator(
+                indicator.programId(), indicator.id().toString(), "APROBADO");
+
+        dashboardQueryPort.updateDashboardMetrics(indicator.programId(), 1, 0, -resolvedCount);
 
         indicatorStateHistory.recordTransition(
                 indicatorId, currentState, "APROBADO", identity.userId(), identity.role());

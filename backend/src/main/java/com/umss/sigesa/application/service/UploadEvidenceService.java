@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
 import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.FileStoragePort;
 import com.umss.sigesa.application.port.out.IndicatorStateHistoryPort;
+import com.umss.sigesa.application.port.out.ObservationRepositoryPort;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.ForbiddenProgramScopeException;
 import com.umss.sigesa.domain.exception.InvalidFileFormatException;
@@ -23,6 +24,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
     private final EvidenceRepositoryPort evidenceRepository;
     private final FileStoragePort fileStorage;
     private final IndicatorStateHistoryPort indicatorStateHistory;
+    private final ObservationRepositoryPort observationRepository;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
@@ -37,10 +39,12 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
 
     public UploadEvidenceService(EvidenceRepositoryPort evidenceRepository,
                                  FileStoragePort fileStorage,
-                                 IndicatorStateHistoryPort indicatorStateHistory) {
+                                 IndicatorStateHistoryPort indicatorStateHistory,
+                                 ObservationRepositoryPort observationRepository) {
         this.evidenceRepository = evidenceRepository;
         this.fileStorage = fileStorage;
         this.indicatorStateHistory = indicatorStateHistory;
+        this.observationRepository = observationRepository;
     }
 
     @Override
@@ -92,7 +96,15 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
 
         evidenceRepository.save(evidence, version);
 
-        indicatorStateHistory.recordTransition(indicatorId, "PENDIENTE", "SUBIDO", identity.userId(), identity.role());
+        String currentState = indicatorStateHistory.findLatestState(indicatorId).orElse("PENDIENTE");
+        String newState = "OBSERVADO".equals(currentState) ? "SUBSANADO" : "SUBIDO";
+
+        if ("OBSERVADO".equals(currentState)) {
+            observationRepository.transitionObservationStatus(
+                    indicatorProgramId, indicatorId.toString(), "PENDING_REMEDIATION", "PENDIENTE_SUBSANACION");
+        }
+
+        indicatorStateHistory.recordTransition(indicatorId, currentState, newState, identity.userId(), identity.role());
 
         return new EvidenceResponse(evidenceId, 1, storageResult.contentHash(), "EvidenceUploaded");
     }

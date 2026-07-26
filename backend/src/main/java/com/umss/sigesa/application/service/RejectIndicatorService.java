@@ -1,6 +1,8 @@
 package com.umss.sigesa.application.service;
 
 import com.umss.sigesa.application.port.in.RejectIndicatorUseCase;
+import com.umss.sigesa.application.port.out.DashboardQueryPort;
+import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.IndicatorCatalogPort;
 import com.umss.sigesa.application.port.out.IndicatorStateHistoryPort;
 import com.umss.sigesa.application.port.out.ObservationRepositoryPort;
@@ -8,6 +10,7 @@ import com.umss.sigesa.domain.exception.ForbiddenProgramScopeException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
 import com.umss.sigesa.domain.exception.JustificationRequiredException;
 import com.umss.sigesa.domain.model.AuthenticatedIdentity;
+import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.Role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +27,19 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
     private final IndicatorCatalogPort indicatorCatalog;
     private final IndicatorStateHistoryPort indicatorStateHistory;
     private final ObservationRepositoryPort observationRepository;
+    private final DashboardQueryPort dashboardQueryPort;
+    private final EvidenceRepositoryPort evidenceRepository;
 
     public RejectIndicatorService(IndicatorCatalogPort indicatorCatalog,
                                   IndicatorStateHistoryPort indicatorStateHistory,
-                                  ObservationRepositoryPort observationRepository) {
+                                  ObservationRepositoryPort observationRepository,
+                                  DashboardQueryPort dashboardQueryPort,
+                                  EvidenceRepositoryPort evidenceRepository) {
         this.indicatorCatalog = indicatorCatalog;
         this.indicatorStateHistory = indicatorStateHistory;
         this.observationRepository = observationRepository;
+        this.dashboardQueryPort = dashboardQueryPort;
+        this.evidenceRepository = evidenceRepository;
     }
 
     @Override
@@ -53,7 +62,11 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
                     "No se puede observar un indicador en estado '" + currentState + "'.");
         }
 
-        String observationId = "OBS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        UUID evidenceVersionId = evidenceRepository.findByIndicatorId(indicatorId)
+                .map(Evidence::getLatestVersionId)
+                .orElseThrow(() -> new IllegalStateException("No se encontró evidencia para el indicador a observar."));
+
+        String observationId = UUID.randomUUID().toString();
         LocalDate today = LocalDate.now();
 
         observationRepository.savePendingObservation(new ObservationRepositoryPort.PendingObservation(
@@ -67,8 +80,13 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
                 today.plusDays(14),
                 indicator.phaseId(),
                 "PENDING_REMEDIATION",
-                "/evidencias/" + indicator.id() + "/subsanar"
+                "/evidencias/" + indicator.id() + "/subsanar",
+                evidenceVersionId,
+                identity.userId(),
+                identity.role().name()
         ));
+
+        dashboardQueryPort.updateDashboardMetrics(indicator.programId(), 0, 1, 1);
 
         indicatorStateHistory.recordTransition(
                 indicatorId, currentState, "OBSERVADO", identity.userId(), identity.role());

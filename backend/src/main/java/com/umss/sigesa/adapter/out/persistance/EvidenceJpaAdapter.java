@@ -59,6 +59,12 @@ public class EvidenceJpaAdapter implements EvidenceRepositoryPort {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<Evidence> findByIndicatorId(UUID indicatorId) {
+        return evidenceRepository.findByIndicatorId(indicatorId).map(this::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Evidence> findAll() {
         return evidenceRepository.findAll().stream().map(this::toDomain).toList();
     }
