@@ -1,17 +1,51 @@
-version: '3.8'
+# docker-compose.yml
 
 services:
   db:
     image: postgres:16-alpine
-    container_name: sigesa-postgres-db
+    container_name: sigesa-postgres
+    restart: always
     environment:
+      POSTGRES_USER: sigesa_user
+      POSTGRES_PASSWORD: sigesa_password
       POSTGRES_DB: sigesa
-      POSTGRES_USER: sigesa
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigesa-backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_URL=jdbc:postgresql://db:5432/sigesa
+      - DB_USERNAME=sigesa_user
+      - DB_PASSWORD=sigesa_password
+      - SIGESA_JWT_SECRET=xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
+      - SPRING_DATASOURCE_USERNAME=sigesa_user
+      - SPRING_DATASOURCE_PASSWORD=sigesa_password
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sigesa-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
 
 volumes:
-  pgdata:
+  postgres_data:

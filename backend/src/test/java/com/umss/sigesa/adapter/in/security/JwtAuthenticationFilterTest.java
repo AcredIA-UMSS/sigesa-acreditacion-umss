@@ -1,8 +1,8 @@
 package com.umss.sigesa.adapter.in.security;
 
-import com.umss.sigesa.adapter.in.web.AccreditationProcessController;
+import com.umss.sigesa.adapter.in.web.ProcessController;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
-import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
+import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +27,7 @@ class JwtAuthenticationFilterTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreateAccreditationProcessUseCase createProcessUseCase;
+    private CreateProcessUseCase createProcessUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
 

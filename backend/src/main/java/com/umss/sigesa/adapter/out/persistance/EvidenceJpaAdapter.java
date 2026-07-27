@@ -1,9 +1,10 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.ObservationEntity;
-import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessEntity;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataAccreditationProcessRepository;
 import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.config.DevSeedData;
 import com.umss.sigesa.domain.model.Evidence;
@@ -20,12 +21,12 @@ public class EvidenceJpaAdapter implements EvidenceRepositoryPort {
     private final EvidenceJpaRepository evidenceRepository;
     private final EvidenceVersionJpaRepository versionRepository;
     private final ObservationJpaRepository observationRepository;
-    private final AccreditationProcessJpaRepository processRepository;
+    private final SpringDataAccreditationProcessRepository processRepository;
 
     public EvidenceJpaAdapter(EvidenceJpaRepository evidenceRepository,
-                               EvidenceVersionJpaRepository versionRepository,
-                               ObservationJpaRepository observationRepository,
-                               AccreditationProcessJpaRepository processRepository) {
+                              EvidenceVersionJpaRepository versionRepository,
+                              ObservationJpaRepository observationRepository,
+                              SpringDataAccreditationProcessRepository processRepository) {
         this.evidenceRepository = evidenceRepository;
         this.versionRepository = versionRepository;
         this.observationRepository = observationRepository;
@@ -65,9 +66,11 @@ public class EvidenceJpaAdapter implements EvidenceRepositoryPort {
             }
         }
 
-        List<AccreditationProcessEntity> activeProcesses = processRepository.findAll().stream()
-                .filter(p -> p.getStatus() == com.umss.sigesa.domain.model.ProcessStatus.ACTIVE)
+        // AQUÍ ESTABA EL ERROR: El tipo de la lista debe ser AccreditationProcessJpaEntity, no el Repositorio
+        List<AccreditationProcessJpaEntity> activeProcesses = processRepository.findAll().stream()
+                .filter(p -> com.umss.sigesa.domain.model.ProcessStatus.ACTIVE.name().equals(p.getStatus()))
                 .toList();
+
         if (!activeProcesses.isEmpty()) {
             return activeProcesses.get(0).getCareerId();
         }

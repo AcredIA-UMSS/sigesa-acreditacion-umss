@@ -1,7 +1,8 @@
 // frontend/src/features/accreditation-process/hooks/useCreateAccreditationProcess.ts
 import { useState } from 'react';
-import { useCreateProcess } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación'; 
+import { useCreateProcess } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
 import type { CreateProcessRequestDto, ProcessResponseDto } from '../../../api/model';
+import { isApiError } from '../../../lib/api/apiError';
 
 interface UseCreateAccreditationProcessReturn {
   submitProcess: (data: CreateProcessRequestDto) => void;
@@ -32,11 +33,12 @@ export const useCreateAccreditationProcess = (): UseCreateAccreditationProcessRe
               setErrorMessage('Ocurrió un error inesperado al inicializar el proceso.');
             }
           },
-      onError: (error: any) => {
-        // Orval típicamente envuelve el error de Axios. Evaluamos el status HTTP.
-        const status = error?.response?.status;
-        
-        if (status === 409) {
+      onError: (error: unknown) => {
+        const status = isApiError(error) ? error.status : undefined;
+
+        if (status === 401) {
+          setErrorMessage('Sesión expirada o no autenticada. Inicie sesión nuevamente.');
+        } else if (status === 409) {
           setErrorMessage('La carrera seleccionada ya cuenta con un proceso de acreditación ACTIVO.');
         } else if (status === 403) {
           setErrorMessage('No tienes permisos suficientes (Se requiere rol de Jefe de Departamento).');

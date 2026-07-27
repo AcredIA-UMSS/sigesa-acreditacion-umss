@@ -112,6 +112,73 @@ corepack prepare pnpm@latest --activate
 
 El flujo recomendado es levantar **primero el backend** y luego el frontend. El servidor de desarrollo de Vite redirige las peticiones `/api` hacia `http://localhost:8080`.
 
+### 🐳 Despliegue Local con Docker
+
+El proyecto está completamente dockerizado utilizando construcciones multi-etapa (multi-stage builds) para generar entornos ligeros y reproducibles. 
+
+#### 📋 Prerrequisitos
+
+- [Docker Engine](https://docs.docker.com/engine/install/) ejecutándose.
+- [Docker Compose](https://docs.docker.com/compose/install/) (V2 recomendado).
+
+#### 🚀 Arranque Rápido
+
+1. Posiciónate en la raíz del proyecto (donde se encuentra el `docker-compose.yml`).
+2. Construye las imágenes y levanta los contenedores en segundo plano ejecutando:
+
+   ```bash
+   docker-compose up -d --build
+   ```
+
+> Nota: Dependiendo de tu versión, el comando podría ser docker compose up -d --build).
+
+#### 🌐 Accesos y Puertos
+
+Una vez que los contenedores estén corriendo (Started), los servicios estarán disponibles en las siguientes direcciones:
+
+💻 Frontend (UI - React/Vite): `http://localhost:3000`
+
+⚙️ Backend (API): `http://localhost:8080`
+
+📚 Swagger Docs (OpenAPI): `http://localhost:8080/swagger-ui/index.html`
+
+🗄️ PostgreSQL: localhost:5432
+
+Base de datos: sigesa
+
+Usuario: sigesa_user
+Contraseña: sigesa_password
+
+🛠️ Comandos Útiles de Mantenimiento
+Ver los logs en tiempo real (todos los servicios):
+
+```Bash
+docker-compose logs -f
+Ver los logs de un servicio específico (ej. backend):
+```
+
+```Bash
+docker-compose logs -f backend
+Detener los contenedores (sin borrar la base de datos):
+```
+
+```Bash
+docker-compose down
+Reiniciar todo desde cero (⚠️ ESTO BORRARÁ LA BASE DE DATOS LOCAL):
+```
+
+```Bash
+docker-compose down -v
+```
+
+#### ⚠️ Solución de Problemas Frecuentes (Troubleshooting)
+
+`Error: connect: permission denied (Linux)`: Tu usuario no tiene permisos sobre el socket de Docker. Ejecuta `sudo usermod -aG docker $USER`, luego reinicia tu terminal o ejecuta `newgrp docker`.
+
+`Warning: attribute "version" is obsolete`: Es una advertencia inofensiva de Docker Compose V2. Para quitarla, elimina la línea version: '3.8' al inicio del archivo docker-compose.yml.
+
+El Backend falla al conectar a la BD al iniciar: A veces el backend levanta milisegundos antes que PostgreSQL acepte conexiones. El contenedor del backend se reiniciará automáticamente (restart: always) e intentará reconectar exitosamente.
+
 ### 1. Backend
 
 Por defecto el backend usa una base de datos **H2 en memoria** y carga automáticamente usuarios, plantillas y procesos de prueba al iniciar (ver sección [Credenciales de acceso](#credenciales-de-acceso-desarrollo-local)).

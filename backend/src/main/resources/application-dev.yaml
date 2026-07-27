@@ -1,4 +1,10 @@
 spring:
-  h2:
-    console:
-      enabled: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/sigesa}
+    username: ${SPRING_DATASOURCE_USERNAME:sigesa_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:sigesa_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update

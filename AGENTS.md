@@ -3,10 +3,10 @@
 ## Backend
 
 - **Stack:** Java 21, Spring Boot 4.x, Maven.
-- **Persistencia:** Spring Data JPA, Hibernate, H2 (memoria/archivo).
+- **Persistencia:** PostgreSQL (Principal) / H2 (Pruebas), Spring Data JPA, Hibernate, Flyway.
 - **Productividad:** Uso estricto de Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`).
-- **Arquitectura:** Limpia por capas (Controller -> Service -> Repository).
-- **Regla de Oro:** Nunca exponer Entidades JPA en los Controladores. Usar siempre DTOs para Request y Response.
+- **Arquitectura:** Hexagonal Estricta (Puertos y Adaptadores). Separación inquebrantable entre Capa de Dominio (pura), Capa de Aplicación (Casos de uso e Interfaces de puertos) y Capa de Infraestructura (Adaptadores REST/JPA).
+- **Regla de Oro:** El Dominio no debe tener dependencias de Spring ni JPA. NUNCA exponer Entidades JPA en los Controladores ni en los Casos de Uso. Usar siempre DTOs en la entrada/salida web y Mappers explícitos en los adaptadores de persistencia.
 - **Calidad:** Cobertura de pruebas unitarias > 90% (JaCoCo).
 
 ## Frontend
