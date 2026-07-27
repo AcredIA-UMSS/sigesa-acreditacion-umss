@@ -1,23 +1,70 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
+import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
+import { LoginPage } from './features/auth/pages/LoginPage';
+import { CreateProcessView } from './features/accreditation-process';
+import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
-import { CreateProcessPage } from './features/procesos/CreateProcessPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
-
-const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/procesos/nuevo" replace />} />
-          <Route path="/procesos/nuevo" element={<CreateProcessPage />} />
-          <Route path="/evidencias/cargar" element={<EvidenceUploadPage />} />
-          <Route path="/reportes/ejecutivo" element={<ExecutiveReportPage />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <UsersAdminPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/nuevo"
+          element={
+            <ProtectedRoute>
+              <CreateProcessView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias/cargar"
+          element={
+            <ProtectedRoute>
+              <EvidenceUploadPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reportes/ejecutivo"
+          element={
+            <ProtectedRoute>
+              <ExecutiveReportPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

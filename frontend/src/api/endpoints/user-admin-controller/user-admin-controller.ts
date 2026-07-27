@@ -5,19 +5,159 @@
  * OpenAPI spec version: v0
  */
 import {
-  useMutation
+  useMutation,
+  useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  ListParams,
   RegisterUserRequest,
-  RegisterUserResponse
+  RegisterUserResponse,
+  UserAdminSummaryResponse
 } from '../../model';
+
+import { customFetch } from '../../../lib/api/customFetch';
+
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
+
+export type listResponse200 = {
+  data: UserAdminSummaryResponse[]
+  status: 200
+}
+
+export type listResponseSuccess = (listResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listResponse = (listResponseSuccess)
+
+export const getListUrl = (params?: ListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/users?${stringifiedParams}` : `/api/v1/admin/users`
+}
+
+export const list = async (params?: ListParams, options?: RequestInit): Promise<listResponse> => {
+
+  return customFetch<listResponse>(getListUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListQueryKey = (params?: ListParams,) => {
+    return [
+    `/api/v1/admin/users`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListQueryOptions = <TData = Awaited<ReturnType<typeof list>>, TError = unknown>(params?: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list>>> = ({ signal }) => list(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListQueryResult = NonNullable<Awaited<ReturnType<typeof list>>>
+export type ListQueryError = unknown
+
+
+export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
+ params: undefined |  ListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof list>>,
+          TError,
+          Awaited<ReturnType<typeof list>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
+ params?: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof list>>,
+          TError,
+          Awaited<ReturnType<typeof list>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
+ params?: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
+ params?: ListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 
 
 
@@ -45,35 +185,28 @@ export const getRegisterUrl = () => {
 
 export const register = async (registerUserRequest: RegisterUserRequest, options?: RequestInit): Promise<registerResponse> => {
 
-  const res = await fetch(getRegisterUrl(),
+  return customFetch<registerResponse>(getRegisterUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(registerUserRequest)
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: registerResponse['data'] = body !== null ? body : ''
-  return { data, status: res.status, headers: res.headers } as registerResponse
-}
+);}
 
 
 
 
 export const getRegisterMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterUserRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterUserRequest}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterUserRequest}, TContext> => {
 
 const mutationKey = ['register'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }};
 
 
 
@@ -81,7 +214,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof register>>, {data: RegisterUserRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  register(data,fetchOptions)
+          return  register(data,)
         }
 
 
@@ -96,7 +229,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type RegisterMutationError = unknown
 
     export const useRegister = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterUserRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: RegisterUserRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof register>>,
         TError,
@@ -127,35 +260,28 @@ export const getDeactivateUrl = (id: string,) => {
 
 export const deactivate = async (id: string, options?: RequestInit): Promise<deactivateResponse> => {
 
-  const res = await fetch(getDeactivateUrl(id),
+  return customFetch<deactivateResponse>(getDeactivateUrl(id),
   {
     ...options,
     method: 'PATCH'
 
 
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deactivateResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deactivateResponse
-}
+);}
 
 
 
 
 export const getDeactivateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate>>, TError,{id: string}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof deactivate>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['deactivate'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }};
 
 
 
@@ -163,7 +289,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deactivate>>, {id: string}> = (props) => {
           const {id} = props ?? {};
 
-          return  deactivate(id,fetchOptions)
+          return  deactivate(id,)
         }
 
 
@@ -178,7 +304,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type DeactivateMutationError = unknown
 
     export const useDeactivate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate>>, TError,{id: string}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate>>, TError,{id: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deactivate>>,
         TError,

@@ -17,8 +17,8 @@ ultima_actualizacion: "2026-06-15"
 | Campo | Valor |
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-012 · PRD-US-012, 015 |
-| **Pantalla** | `/coordinator/dashboard` |
-| **API** | `GET /dashboard/coordinator` |
+| **Pantalla** | `/dashboard` (Shell Híbrido PBAC) / `/coordinator/dashboard` |
+| **API** | Suite Híbrida: `GET /api/v1/dashboards/me/summary` (KPIs PBAC), `GET /api/v1/dashboards/coordinator/details`, `GET /api/v1/dashboards/coordinator/export` |
 
 ## Flujo principal
 

@@ -74,6 +74,7 @@ artefactos_vivos:
 | 5 | API reportes | Solo `POST /reports/executive/pdf` en catálogo baseline | Job asíncrono: `POST` 202 + `GET /{jobId}` + `GET /{jobId}/download` bajo `/api/v1` | Alineado a MAR-SEQ-005 y DD-UC-014 | DD-UC-014 |
 | 6 | Fuente datos PDF | Proyección CQRS `proj_executive_semaphore` (DTI async) | v1.0: `ExecutiveDataStubAdapter`; v1.0+UC-013: `ExecutiveDashboardQueryPort` → `ExecutiveDataDashboardAdapter` | UC-013 pendiente | DD-UC-014 |
 | 7 | Storage evidencias | S3 en DTI cloud | Filesystem local `sigesa.evidence.storage-path` v1.0 | Piloto local H2 | DD-UC-004 |
+| 8 | Dashboard Architecture | `GET /dashboard/coordinator` aislado por rol | Arquitectura Híbrida Compuesta PBAC (`GET /api/v1/dashboards/me/summary`) + endpoints modulares (`/details`, `/export`) | Optimizar peticiones HTTP para usuarios multi-rol y renderizado dinámico en UI | N/A (DD-UC-011) |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -83,6 +84,7 @@ artefactos_vivos:
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | hecho (core) | `release/3.0.0` | Pendiente | `PR-IMPL-003` | Faltan queries SQL nativas en JPA Adapters |
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
+| `FSD-UC-011` | `DD-UC-011` | en diseño | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) + streaming binario |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 
@@ -126,7 +128,9 @@ artefactos_vivos:
 | **Password temporal alta** | Generado en servidor; entrega **offline** v1.0 (delta §A.2 #2) |
 | **Audit** | `AuditLogPort` → `NoOpAuditLogAdapter` (stub UC-017) |
 | **Bloqueo por intentos** | Columnas `failed_attempts`/`locked_until` en DDL; lógica **diferida v1.1** (sin `429 AUTH_LOCKED` en v1.0) |
-| **Seed dev** | `jd@umss.edu.bo` / `ChangeMe123!` (`AuthDataLoader`) |
+| **Seed dev** | `jd@umss.edu.bo` / `JefeDemo2026!`; `td@umss.edu.bo` / `TecnicoDemo2026!`; `cc@umss.edu.bo` / `CoordDemo2026!` (`AuthDataLoader`) |
+| **Listado admin** | `GET /api/v1/admin/users` ([JD]); filtros opcionales `role`, `status` |
+| **Catálogo programas v1.0** | `GET /api/v1/programs` — catálogo estático dev para alta CC |
 
 ### B.2 MOD-REPORT — contrato técnico vigente (DD-UC-014)
 

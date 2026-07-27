@@ -1,19 +1,24 @@
 package com.umss.sigesa.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Template {
-    private final UUID id;
-    private final boolean validated;
-    private final Taxonomy taxonomy;
-
-    public Template(UUID id, boolean validated, Taxonomy taxonomy) {
-        this.id = id;
-        this.validated = validated;
-        this.taxonomy = taxonomy;
-    }
-
-    public UUID getId() { return id; }
-    public boolean isValidated() { return validated; }
-    public Taxonomy getTaxonomy() { return taxonomy; }
+    private UUID id;
+    private String name;
+    private String type;
+    @Builder.Default
+    private List<TemplatePhase> phases = new ArrayList<>();
 }

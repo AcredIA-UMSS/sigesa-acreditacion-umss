@@ -102,6 +102,25 @@ security:
 | **x-allowed-roles** | `[JD]` |
 | **204** | Usuario desactivado; historial conservado |
 
+### API-USER-03 — `GET /admin/users`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-002 |
+| **x-allowed-roles** | `[JD]` |
+| **Query** | `role?` (`CC`/`TD`/`JD`), `status?` (`INACTIVE`/`ACTIVE`/`DEACTIVATED`) |
+| **200** | `[{ "userId", "email", "role", "status", "programIds" }]` |
+| **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
+
+### API-CAT-01 — `GET /programs`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-002 (catálogo para alta CC) |
+| **Auth** | JWT Bearer (cualquier rol autenticado) |
+| **200** | `[{ "id", "code", "name" }]` |
+| **Nota v1.0** | Catálogo estático en dev (`StaticProgramCatalogAdapter`); tabla `academic_program` diferida |
+
 ---
 
 ## 4. MOD-PROCESS
@@ -227,13 +246,34 @@ security:
 
 ## 7. MOD-DASH
 
-### API-DASH-01 — `GET /dashboard/coordinator`
+### API-DASH-01 — Suite Híbrida Compuesta Dashboard (`FSD-UC-011` / `DD-UC-011`)
 
+#### API-DASH-01a — `GET /api/v1/dashboards/me/summary` (Composite PBAC Summary)
 | Campo | Valor |
 |-------|-------|
-| **UC** | FSD-UC-011 |
+| **UC** | FSD-UC-011, FSD-UC-012, FSD-UC-013 (`DD-UC-011`) |
+| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` (Evaluación dinámica por permisos PBAC) |
+| **Filtro Scope** | `academic_program_id` y autorizaciones extraídas del JWT |
+| **200 OK** | `{ "userId", "grantedPermissions": [...], "coordinatorSection": {...}, "technicianSection": {...}, "executiveSection": {...} }` |
+
+
+#### API-DASH-01b — `GET /api/v1/dashboards/coordinator/details`
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-011 (`DD-UC-011`) |
 | **x-allowed-roles** | `[CC]` |
-| **200** | `{ "programId", "phases": [...], "openObservations": [...] }` |
+| **Query Params** | `page` (default 0), `size` (default 10), `sort` (default `fechaLimite,asc`), `faseId`, `estado` |
+| **200 OK** | Page JSON Object (`content`: listado de observaciones/indicadores, `totalElements`, `totalPages`, etc.) |
+
+#### API-DASH-01c — `GET /api/v1/dashboards/coordinator/export`
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-011 (`DD-UC-011`) |
+| **x-allowed-roles** | `[CC]` |
+| **Query Params** | `format` (`xlsx` \| `csv` \| `pdf`), `faseId`, `estado` |
+| **Headers** | `Content-Disposition: attachment; filename="reporte_dashboard_coordinator_{timestamp}.xlsx"` |
+| **200 OK** | Binary File Stream (StreamingResponseBody) filtrado por rol y programa |
+
 
 ### API-DASH-02 — `GET /dashboard/technician`
 

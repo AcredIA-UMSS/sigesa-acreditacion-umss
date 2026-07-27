@@ -37,7 +37,7 @@ owner: Módulo 4 – UMSS (Equipo SIGESA)
 1. **Propósito y Objetivo** (`Purpose`)
    - ¿Qué es lo que el agente debe lograr?
    - ¿Por qué existe este contrato?
-   
+  
 2. **Rol y Persona** (`Role & Persona`)
    - Identidad específica del agente.
    - Tono, nivel de expertise.
@@ -74,7 +74,7 @@ owner: Módulo 4 – UMSS (Equipo SIGESA)
 
 **Ejemplo de Clarification Request:**
 
-```
+```text
 ⚠️ Para diseñar este contrato de prompt necesito claridad en:
 
 1. **Restricciones y Reglas** — ¿Hay palabras prohibidas o formatos exactos?
@@ -97,6 +97,7 @@ Responde brevemente cada pregunta y procederemos al contrato final.
 - **Si el contrato viola un invariante SIGESA:** Detener y alertar.
 
 **Ejemplos de violaciones:**
+
 - Permitir `DELETE` físico de Evidencia aprobada.
 - Permitir saltos de Fase sin validación de máquina de estados.
 - Usar términos genéricos como «Cliente» o «Super Admin» en lugar de roles DUEA.
@@ -182,6 +183,7 @@ Usar template estructurado (ver §4).
 ```
 
 **Ejemplo válido:**
+
 ```json
 {
   "evidencia_id": "EVD-001",
@@ -197,6 +199,7 @@ Usar template estructurado (ver §4).
 **Formato:** [JSON | Markdown | Tabla | etc.]
 
 **Estructura obligatoria:**
+
 ```json
 {
   "validacion": {
@@ -209,6 +212,7 @@ Usar template estructurado (ver §4).
 ```
 
 **Ejemplo de salida válida:**
+
 ```json
 {
   "validacion": {
@@ -251,11 +255,13 @@ Usar template estructurado (ver §4).
 
 ## 9. Flujo de Interacción (Ejemplo Real)
 
-### Usuario solicita:
+### Usuario solicita
+
 > «Quiero un contrato de prompt para validar si un Indicador puede transicionar a APROBADO según la máquina de estados.»
 
-### Agente (Fase 1 - Gap Analysis):
-```
+### Agente (Fase 1 - Gap Analysis)
+
+```text
 ⚠️ Necesito 2 preguntas más:
 
 1. ¿Qué formato quieres para la entrada?
@@ -264,13 +270,15 @@ Usar template estructurado (ver §4).
 2. ¿La salida debe ser JSON estructurado o un análisis en prosa?
 ```
 
-### Usuario responde:
-```
+### Usuario responde
+
+```text
 1. JSON: { indicador_id, estado_actual, actor, contexto_carrera }
 2. JSON con: { es_valida: bool, motivo: string, estados_siguientes_permitidos: [] }
 ```
 
 ### Agente (Fase 2-3 - Draft & Validation):
+
 ✅ Valida que `04_state_machine.md` existe.  
 ✅ Valida roles [CC], [TD], [JD] contra FSD.  
 ✅ Genera contrato completo con ejemplo.
@@ -280,13 +288,14 @@ Usar template estructurado (ver §4).
 ## 10. Modo de Fallo Conocido
 
 Si el usuario solicita un contrato que:
+
 - Permite borrado de Evidencia aprobada.
 - Omite validación RBAC.
 - Contradice máquina de estados.
 
 **Acción:** Detener, alertar, proponer ajuste.
 
-```
+```alert
 🛑 ALERTA DE INVARIANTE: Este contrato permite borrar Evidencia aprobada,
 lo que viola ADR-0001 (append-only). ¿Deseas permitir ANULACIÓN (versionado)
 en su lugar?
@@ -342,6 +351,7 @@ y los permisos del actor (RBAC). Salida: JSON con validez y motivo.
 ```
 
 ## 6. Especificaciones de Salida
+
 ```json
 {
   "es_valida": boolean,
@@ -350,9 +360,7 @@ y los permisos del actor (RBAC). Salida: JSON con validez y motivo.
   "requisitos_no_cumplidos": ["string"]
 }
 ```
-```
 
 ---
 
 **Fin del Skill.**
-

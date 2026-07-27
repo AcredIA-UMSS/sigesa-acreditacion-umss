@@ -19,6 +19,7 @@ import type {
   ProcessResponse
 } from '../../model';
 
+import { customFetch } from '../../../lib/api/customFetch';
 
 
 
@@ -45,35 +46,28 @@ export const getCreateProcessUrl = () => {
 
 export const createProcess = async (createProcessRequest: CreateProcessRequest, options?: RequestInit): Promise<createProcessResponse> => {
 
-  const res = await fetch(getCreateProcessUrl(),
+  return customFetch<createProcessResponse>(getCreateProcessUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(createProcessRequest)
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createProcessResponse['data'] = body !== null ? body : ''
-  return { data, status: res.status, headers: res.headers } as createProcessResponse
-}
+);}
 
 
 
 
 export const getCreateProcessMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProcess>>, TError,{data: CreateProcessRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProcess>>, TError,{data: CreateProcessRequest}, TContext>, }
 ): UseMutationOptions<Awaited<ReturnType<typeof createProcess>>, TError,{data: CreateProcessRequest}, TContext> => {
 
 const mutationKey = ['createProcess'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }};
 
 
 
@@ -81,7 +75,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProcess>>, {data: CreateProcessRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  createProcess(data,fetchOptions)
+          return  createProcess(data,)
         }
 
 
@@ -96,7 +90,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
     export type CreateProcessMutationError = unknown
 
     export const useCreateProcess = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProcess>>, TError,{data: CreateProcessRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProcess>>, TError,{data: CreateProcessRequest}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProcess>>,
         TError,
