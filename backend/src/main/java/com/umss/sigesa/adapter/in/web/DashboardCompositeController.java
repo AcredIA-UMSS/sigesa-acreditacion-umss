@@ -6,7 +6,7 @@ import com.umss.sigesa.adapter.in.web.dto.JobStatusResponse;
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
 import com.umss.sigesa.application.port.in.GetCompositeDashboardSummaryUseCase;
 import com.umss.sigesa.application.port.in.GetCoordinatorObservationsDetailsUseCase;
-import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
+import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.model.CompositeDashboardSummary;
 import com.umss.sigesa.domain.model.ObservationSummary;
@@ -39,18 +39,18 @@ public class DashboardCompositeController {
     private final GetCompositeDashboardSummaryUseCase compositeSummaryUseCase;
     private final GetCoordinatorObservationsDetailsUseCase detailsUseCase;
     private final ExportReportJobUseCase exportReportJobUseCase;
-    private final GetReportJobStatusUseCase getReportJobStatusUseCase;
+    private final GetExportReportJobStatusUseCase getExportReportJobStatusUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
 
     public DashboardCompositeController(GetCompositeDashboardSummaryUseCase compositeSummaryUseCase,
                                         GetCoordinatorObservationsDetailsUseCase detailsUseCase,
                                         ExportReportJobUseCase exportReportJobUseCase,
-                                        GetReportJobStatusUseCase getReportJobStatusUseCase,
+                                        GetExportReportJobStatusUseCase getExportReportJobStatusUseCase,
                                         UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort) {
         this.compositeSummaryUseCase = compositeSummaryUseCase;
         this.detailsUseCase = detailsUseCase;
         this.exportReportJobUseCase = exportReportJobUseCase;
-        this.getReportJobStatusUseCase = getReportJobStatusUseCase;
+        this.getExportReportJobStatusUseCase = getExportReportJobStatusUseCase;
         this.userProgramAssignmentRepositoryPort = userProgramAssignmentRepositoryPort;
     }
 
@@ -106,7 +106,7 @@ public class DashboardCompositeController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UUID userId = extractUserId(auth);
 
-        ReportExportJob job = getReportJobStatusUseCase.getJobStatus(jobId, userId);
+        ReportExportJob job = getExportReportJobStatusUseCase.getJobStatus(jobId, userId);
         String downloadUrl = job.getStatus() == com.umss.sigesa.domain.model.JobStatus.COMPLETED
                 ? "/api/v1/dashboards/export-jobs/" + job.getJobId() + "/download"
                 : null;
@@ -127,8 +127,8 @@ public class DashboardCompositeController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UUID userId = extractUserId(auth);
 
-        ReportExportJob job = getReportJobStatusUseCase.getJobStatus(jobId, userId);
-        InputStream fileStream = getReportJobStatusUseCase.getJobFileStream(jobId, userId);
+        ReportExportJob job = getExportReportJobStatusUseCase.getJobStatus(jobId, userId);
+        InputStream fileStream = getExportReportJobStatusUseCase.getJobFileStream(jobId, userId);
 
         String ext = job.getFormat() == ReportFormat.CSV ? "csv" : (job.getFormat() == ReportFormat.PDF ? "pdf" : "xlsx");
         String filename = "dashboard_report_" + job.getJobId().toString().substring(0, 8) + "." + ext;

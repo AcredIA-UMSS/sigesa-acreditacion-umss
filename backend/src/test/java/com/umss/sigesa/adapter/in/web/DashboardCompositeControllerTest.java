@@ -5,7 +5,7 @@ import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
 import com.umss.sigesa.application.port.in.GetCompositeDashboardSummaryUseCase;
 import com.umss.sigesa.application.port.in.GetCoordinatorObservationsDetailsUseCase;
-import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
+import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.model.CompositeDashboardSummary;
 import com.umss.sigesa.domain.model.ReportExportJob;
@@ -49,7 +49,7 @@ class DashboardCompositeControllerTest {
     private ExportReportJobUseCase exportReportJobUseCase;
 
     @MockitoBean
-    private GetReportJobStatusUseCase getReportJobStatusUseCase;
+    private GetExportReportJobStatusUseCase getExportReportJobStatusUseCase;
 
     @MockitoBean
     private UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
