@@ -6,8 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
-import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
-import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
@@ -16,12 +14,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.stream.Collectors;
 
@@ -34,7 +30,7 @@ public class ProcessController {
     private final CreateProcessUseCase createProcessUseCase;
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_JD')")
+    @PreAuthorize("hasRole('JD')")
     @Operation(summary = "Crear un nuevo proceso", description = "Inicia un proceso clonando la taxonomía de una plantilla (Fase -> Subfase).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Proceso creado exitosamente"),
@@ -65,15 +61,5 @@ public class ProcessController {
                                 .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
                 .build();
-    }
-
-    @ExceptionHandler(ProcessAlreadyActiveException.class)
-    public ResponseEntity<String> handleProcessAlreadyActive(ProcessAlreadyActiveException ex) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "PROCESS_ALREADY_ACTIVE", ex);
-    }
-
-    @ExceptionHandler(TemplateNotFoundException.class)
-    public ResponseEntity<String> handleTemplateNotFound(TemplateNotFoundException ex) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "TEMPLATE_NOT_FOUND", ex);
     }
 }

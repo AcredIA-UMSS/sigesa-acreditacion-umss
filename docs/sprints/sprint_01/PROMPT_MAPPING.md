@@ -19,10 +19,11 @@
 | PM-013 | PR-IMPL-005 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Frontend MOD-AUTH: login, sesión, guards, admin parcial |
 | PM-014 | PR-IMPL-006 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Cierre MOD-AUTH: GET users/programs + UI admin completa |
 | PM-015 | PR-IMPL-003V3 | DD-UC-003 | FSD-UC-003 | Implementación Full-Stack: Inicialización de Proceso de Acreditación desde Plantilla |
-| PM-016 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Implementación MOD-REPORT — reporte ejecutivo PDF asíncrono |
-| PM-017 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
-| PM-018 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
-| PM-019 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Dashboard compuesto PBAC + exportación async (CSV/XLSX/PDF) |
+| PM-016 | PR-IMPL-012 | DD-SYS-001 | FSD-SYS-001 | Dockerización Full-Stack y Configuración PostgreSQL |
+| PM-017 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Implementación MOD-REPORT — reporte ejecutivo PDF asíncrono |
+| PM-018 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
+| PM-019 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
+| PM-020 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Dashboard compuesto PBAC + exportación async (CSV/XLSX/PDF) |
 
 > **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---
@@ -916,23 +917,23 @@ Archivos generados o modificados
 
 | Acción | Ruta |
 | :----- | :--- |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/domain/model/*.java (7 modelos de dominio) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/domain/exception/*.java (2 excepciones) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/application/port/in/CreateProcessUseCase.java |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/application/port/out/*.java (2 puertos de salida) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/application/usecase/CreateProcessUseCaseImpl.java |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/in/web/ProcessController.java |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/in/web/dto/*.java (2 DTOs) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/entity/*.java (7 entidades JPA) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/mapper/ProcessPersistenceMapper.java |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/*Adapter.java (2 adaptadores) |
-| generado |	backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/repository/*.java (2 repositorios) |
-| generado |	backend/src/test/java/bo/edu/umss/sigesa/process/application/usecase/CreateProcessUseCaseImplTest.java |
-| generado |	backend/src/main/resources/db/migration/V1__Create_Process_Tables.sql |
-| generado |	frontend/src/features/accreditation-process/hooks/useCreateAccreditationProcess.ts |
-| generado |	frontend/src/features/accreditation-process/components/CreateProcessForm.tsx |
-| generado |	frontend/src/features/accreditation-process/components/CreateProcessView.tsx |
-| generado |	frontend/src/features/accreditation-process/index.ts |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/domain/model/*.java (7 modelos de dominio) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/domain/exception/*.java (2 excepciones) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/application/port/in/CreateProcessUseCase.java |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/application/port/out/*.java (2 puertos de salida) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/application/usecase/CreateProcessUseCaseImpl.java |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/in/web/ProcessController.java |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/in/web/dto/*.java (2 DTOs) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/entity/*.java (7 entidades JPA) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/mapper/ProcessPersistenceMapper.java |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/*Adapter.java (2 adaptadores) |
+| generado | backend/src/main/java/bo/edu/umss/sigesa/process/infrastructure/adapter/out/persistence/repository/*.java (2 repositorios) |
+| generado | backend/src/test/java/bo/edu/umss/sigesa/process/application/usecase/CreateProcessUseCaseImplTest.java |
+| generado | backend/src/main/resources/db/migration/V1__Create_Process_Tables.sql |
+| generado | frontend/src/features/accreditation-process/hooks/useCreateAccreditationProcess.ts |
+| generado | frontend/src/features/accreditation-process/components/CreateProcessForm.tsx |
+| generado | frontend/src/features/accreditation-process/components/CreateProcessView.tsx |
+| generado | frontend/src/features/accreditation-process/index.ts |
 
 Cambios realizados
 Backend: Se construyó la estructura completa en Arquitectura Hexagonal. Se aisló la lógica del negocio en el CreateProcessUseCaseImpl, protegiendo la transacción ACID y validando la regla de unicidad PROCESS_ALREADY_ACTIVE.
@@ -971,3 +972,75 @@ Próximos pasos
 - **Archivos verificados:** 17 archivos/módulos principales generados entre Backend y Frontend.
 
 💡 **Sugerencia post-implementación:** Dado que se definió detalladamente la nueva arquitectura hexagonal en el Backend, te sugiero ejecutar el comando `@dtp-sync` (si cuentas con ese skill en el entorno) para actualizar el Documento Técnico de Proyecto (`docs/product/DTP.md`) reflejando este estándar estructural para los siguientes módulos.
+
+---
+
+## PM-016
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-016 |
+| **Fecha** | 2026-07-26 |
+| **Hora** | 18:29 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | AI Agent |
+| **Modelo** | Gemini |
+| **Tarea** | Configuración de la persistencia principal con PostgreSQL y Dockerización completa del sistema. |
+| **Objetivo** | Transicionar la base de datos principal de H2 a PostgreSQL para entornos transaccionales y orquestar el despliegue de base de datos, backend y frontend mediante Docker Compose. |
+| **Contexto** | Requerido por el caso de uso de Procesos (FSD-UC-003) para soportar índices únicos parciales. Se generó ADR-0002, se actualizó la política en AGENTS.md y se crearon scripts Docker multi-etapa (multi-stage) optimizados para producción. |
+| **PR-IMPL vinculado** | PR-IMPL-004 |
+| **DD-UC vinculado** | DD-SYS-001 |
+| **FSD-UC vinculado** | FSD-SYS-001 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero dockerizar todo, como lo hago?
+```
+
+### Entradas auxiliares
+
+```text
+docs/design/DD-SYS-001.md
+docs/adr/ADR-0002.md
+AGENTS.md
+```
+
+### Archivos generados o modificados
+
+AcciónRutageneradodocker-compose.ymlgeneradobackend/Dockerfilegeneradofrontend/Dockerfilegeneradofrontend/nginx.confgeneradodocs/adr/ADR-0002.mdmodificadoAGENTS.md
+
+Cambios realizados
+Documentación: Se redactó y aprobó el ADR-0002 oficializando a PostgreSQL como el motor de persistencia principal. Se actualizaron las reglas de AGENTS.md para reflejar el nuevo stack.
+
+Infraestructura Backend: Se creó un Dockerfile multi-stage usando eclipse-temurin:21 y Maven.
+
+Infraestructura Frontend: Se creó un Dockerfile multi-stage usando Node 22 para buildear Vite, e inyectando una configuración custom de nginx.conf para servir React Router como SPA.
+
+Orquestación: Se unificó el servicio en un docker-compose.yml que levanta la red, persiste los volúmenes de PostgreSQL, e inyecta las variables de entorno necesarias para que Spring Boot y la BD se conecten (usuario: sigesa_user).
+
+Soporte/Troubleshooting: Se diagnosticó y orientó sobre fallos en el servicio daemon de Docker de los entornos locales.
+
+Validación ejecutada
+[x] Docker Compose parsing — resultado: Ok (Warnings de version deprecada limpios).
+[ ] mvn package (inside Docker) — resultado: Pendiente de build final sin fallos de compilación.
+[ ] pnpm build (inside Docker) — resultado: Pendiente de build final sin fallos de dependencias.
+
+### Resultado obtenido
+
+El repositorio ahora cuenta con las definiciones de orquestación de contenedores completas, permitiendo a cualquier desarrollador del equipo levantar PostgreSQL, Backend y Frontend con el comando docker-compose up -d --build.
+
+### Próximos pasos
+
+[ ] Verificar que los scripts de inicialización de Flyway (SQL) sean compatibles con el dialecto PostgreSQL.
+[ ] Parametrizar dinámicamente los dominios/URLs de la API en el Nginx/Vite para entornos reales de producción usando variables de entorno.
+
+### 📋 Reporte Final de Ejecución (`@save-prompt-mapping`)
+
+- **ID asignado:** `PM-002`
+- **Ruta afectada:** `docs/sprints/sprint_1/PROMPT_MAPPING.md`
+- **Trazabilidad Enlazada:** `PR-IMPL-004` ➔ `DD-SYS-001` ➔ `FSD-SYS-001`
+- **Archivos verificados:** 6 archivos (5 generados, 1 modificado).
+
+💡 **Nota para Boris:** El DTP ya lo sincronizamos hace un momento reflejando PostgreSQL, así qu

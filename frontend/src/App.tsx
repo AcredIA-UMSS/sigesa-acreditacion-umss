@@ -38,7 +38,9 @@ function App() {
           path="/procesos/nuevo"
           element={
             <ProtectedRoute>
-              <CreateProcessView />
+              <JdOnlyRoute>
+                <CreateProcessView />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />

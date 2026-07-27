@@ -16,7 +16,7 @@ import type {
 
 import type {
   CreateProcessRequest,
-  ProcessResponse
+  ProcessResponseDto
 } from '../../model';
 
 import { customFetch } from '../../../lib/api/customFetch';
@@ -25,7 +25,7 @@ import { customFetch } from '../../../lib/api/customFetch';
 
 
 export type createProcessResponse200 = {
-  data: ProcessResponse
+  data: ProcessResponseDto
   status: 200
 }
 
