@@ -1,7 +1,7 @@
 package com.umss.sigesa.application.service.report;
 
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
-import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
+import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
-public class ReportExportJobService implements ExportReportJobUseCase, GetReportJobStatusUseCase {
+public class ReportExportJobService implements ExportReportJobUseCase, GetExportReportJobStatusUseCase {
 
     private final ReportExportJobRepositoryPort repositoryPort;
     private final DashboardQueryPort queryPort;

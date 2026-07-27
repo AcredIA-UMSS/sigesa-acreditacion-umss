@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,9 +12,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "evidence_version", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_evidence_version", columnNames = {"evidence_id", "version_number"})
-})
+@Table(name = "evidence_version")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,17 +27,17 @@ public class EvidenceVersionEntity {
     @Column(name = "version_number", nullable = false)
     private int versionNumber;
 
-    @Column(length = 1000)
-    private String description;
-
-    @Column(name = "storage_key", nullable = false)
-    private String storageKey;
-
     @Column(name = "content_hash", nullable = false, length = 64)
     private String contentHash;
 
-    @Column(name = "observation_id")
-    private UUID observationId;
+    @Column(name = "criterion_id", nullable = false)
+    private UUID criterionId;
+
+    @Column(nullable = false, length = 2000)
+    private String description;
+
+    @Column(name = "storage_key", nullable = false, length = 500)
+    private String storageKey;
 
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;

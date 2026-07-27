@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Evidence {
+
     private final UUID id;
     private final UUID indicatorId;
     private UUID latestVersionId;

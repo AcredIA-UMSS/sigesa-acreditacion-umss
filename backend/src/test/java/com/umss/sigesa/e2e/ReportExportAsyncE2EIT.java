@@ -1,7 +1,7 @@
 package com.umss.sigesa.e2e;
 
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
-import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
+import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,7 @@ class ReportExportAsyncE2EIT {
     private ExportReportJobUseCase exportReportJobUseCase;
 
     @Autowired
-    private GetReportJobStatusUseCase getReportJobStatusUseCase;
+    private GetExportReportJobStatusUseCase getExportReportJobStatusUseCase;
 
     @Test
     @DisplayName("Flujo completo: Encolar -> Procesar -> Verificar Estado")
@@ -37,7 +37,7 @@ class ReportExportAsyncE2EIT {
 
         exportReportJobUseCase.processJobAsync(job.getJobId());
 
-        ReportExportJob fetched = getReportJobStatusUseCase.getJobStatus(job.getJobId(), userId);
+        ReportExportJob fetched = getExportReportJobStatusUseCase.getJobStatus(job.getJobId(), userId);
         assertNotNull(fetched);
         assertEquals(userId, fetched.getUserId());
     }

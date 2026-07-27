@@ -27,4 +27,15 @@ public class NoOpAuditLogAdapter implements AuditLogPort {
     public void logUserDeactivated(UUID userId, Email email) {
         log.info("AUDIT_USER_DEACTIVATED userId={} email={}", userId, email.value());
     }
+
+    @Override
+    public void logReportRequested(UUID requesterId, UUID jobId) {
+        log.info("AUDIT_REPORT_REQUESTED requesterId={} jobId={}", requesterId, jobId);
+    }
+
+    @Override
+    public void logEvidenceUploaded(UUID uploadedBy, UUID evidenceId, UUID indicatorId) {
+        log.info("AUDIT_EVIDENCE_UPLOADED uploadedBy={} evidenceId={} indicatorId={}",
+                uploadedBy, evidenceId, indicatorId);
+    }
 }

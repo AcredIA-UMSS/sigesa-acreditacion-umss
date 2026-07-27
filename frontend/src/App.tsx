@@ -5,6 +5,8 @@ import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessView } from './features/accreditation-process';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
+import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
+import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 
 function App() {
   return (
@@ -37,6 +39,24 @@ function App() {
           element={
             <ProtectedRoute>
               <CreateProcessView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias/cargar"
+          element={
+            <ProtectedRoute>
+              <EvidenceUploadPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reportes/ejecutivo"
+          element={
+            <ProtectedRoute>
+              <ExecutiveReportPage />
             </ProtectedRoute>
           }
         />

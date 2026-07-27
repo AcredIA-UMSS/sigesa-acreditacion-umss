@@ -2,9 +2,15 @@ package com.umss.sigesa.application.port.out;
 
 import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.EvidenceVersion;
+
 import java.util.UUID;
 
 public interface EvidenceRepositoryPort {
-    void save(Evidence evidence, EvidenceVersion version);
-    UUID findProgramIdForIndicator(UUID indicatorId);
+
+    boolean existsByIndicatorId(UUID indicatorId);
+
+    SavedEvidence saveEvidenceWithVersion(Evidence evidence, EvidenceVersion version);
+
+    record SavedEvidence(Evidence evidence, EvidenceVersion version) {
+    }
 }

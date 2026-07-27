@@ -21,7 +21,7 @@ public class EvidenceEntity {
     @Id
     private UUID id;
 
-    @Column(name = "indicator_id", nullable = false)
+    @Column(name = "indicator_id", nullable = false, unique = true)
     private UUID indicatorId;
 
     @Column(name = "latest_version_id")

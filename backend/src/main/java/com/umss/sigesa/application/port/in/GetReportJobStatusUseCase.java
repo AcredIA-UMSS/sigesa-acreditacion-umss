@@ -1,11 +1,16 @@
 package com.umss.sigesa.application.port.in;
 
-import com.umss.sigesa.domain.model.ReportExportJob;
+import com.umss.sigesa.domain.model.ReportJobStatus;
 
-import java.io.InputStream;
 import java.util.UUID;
 
+/**
+ * Estado de job del reporte ejecutivo PDF (UC-014 / MOD-REPORT).
+ */
 public interface GetReportJobStatusUseCase {
-    ReportExportJob getJobStatus(UUID jobId, UUID requestingUserId);
-    InputStream getJobFileStream(UUID jobId, UUID requestingUserId);
+
+    JobStatus getStatus(UUID jobId, UUID requesterId);
+
+    record JobStatus(UUID jobId, ReportJobStatus status, String downloadPath, String errorCode) {
+    }
 }

@@ -26,6 +26,16 @@ public class RecordingAuditLogPort implements AuditLogPort {
         events.add("DEACTIVATE:" + userId);
     }
 
+    @Override
+    public void logReportRequested(UUID requesterId, UUID jobId) {
+        events.add("REPORT:" + requesterId + ":" + jobId);
+    }
+
+    @Override
+    public void logEvidenceUploaded(UUID uploadedBy, UUID evidenceId, UUID indicatorId) {
+        events.add("EVIDENCE:" + uploadedBy + ":" + evidenceId + ":" + indicatorId);
+    }
+
     public List<String> events() {
         return List.copyOf(events);
     }

@@ -217,8 +217,13 @@
                                         <include>com.umss.sigesa.application.service.auth.AuthenticateService</include>
                                         <include>com.umss.sigesa.application.service.auth.RegisterUserService</include>
                                         <include>com.umss.sigesa.application.service.auth.DeactivateUserService</include>
+                                        <include>com.umss.sigesa.application.service.report.GenerateExecutiveReportService</include>
+                                        <include>com.umss.sigesa.application.service.report.GetReportJobStatusService</include>
+                                        <include>com.umss.sigesa.application.service.report.ProcessReportJobService</include>
+                                        <include>com.umss.sigesa.application.service.report.DownloadReportArtifactService</include>
                                         <include>com.umss.sigesa.application.service.report.ReportExportJobService</include>
                                         <include>com.umss.sigesa.application.service.dashboard.DashboardSummaryAggregationService</include>
+                                        <include>com.umss.sigesa.application.service.evidence.UploadEvidenceService</include>
                                     </includes>
                                     <limits>
                                         <limit>
