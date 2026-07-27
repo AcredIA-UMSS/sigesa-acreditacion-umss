@@ -7,7 +7,7 @@ actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
 reglas: FSD-BR-08, FSD-BR-17
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-07-23"
 ---
 
 # FSD-UC-003 — Plantillas y Proceso CEUB/ARCU-SUR
@@ -15,30 +15,31 @@ ultima_actualizacion: "2026-06-15"
 ## Contexto
 
 | Campo | Valor |
-|-------|-------|
+| ------- | ------- |
 | **Trazabilidad** | PRD-REQ-002, 004, 016 · PRD-US-023 |
 | **Precondiciones** | Plantilla CEUB o ARCU-SUR validada por comité normativo |
-| **Nota implementación viva** | Submódulo **Gestión de Fases** (API `/api/v1/fases`) en curso — ver [`DTP.md`](../DTP.md) |
+| **Nota implementación viva** | Se pueden tener varias plantillas disponibles en el sistema (ARCU-SUR o CEUB). Las plantillas son estrictamente un conjunto de fases y subfases ya diseñadas. |
 
-Taxonomía: **Proceso → Fase → Dimensión → Criterio → Indicador**.
+Taxonomía: **Proceso → Fase → Subfase**.
+*(Una plantilla/proceso puede tener múltiples fases y múltiples subfases).*
 
 ## Flujo principal
 
-1. [JD] activa plantilla para periodo vigente (`POST /templates/{id}/activate`).
-2. Sistema fija taxonomía Fase → Dimensión → Criterio → Indicador para nuevos Procesos.
-3. [JD] o proceso automático crea `AccreditationProcess` para carrera.
-4. Sistema valida **un solo Proceso activo** por tipo/carrera/periodo.
+1. [JD] gestiona las plantillas (ARCU-SUR o CEUB), conformadas por un conjunto predefinido de Fases y Subfases.
+2. [JD] o proceso automático crea e inicia un `AccreditationProcess` para una carrera específica, seleccionando una de las plantillas disponibles.
+3. El sistema fija la taxonomía **Fase → Subfase** para el nuevo Proceso clonando la estructura de la plantilla elegida.
+4. El sistema valida que exista **un solo Proceso activo** por carrera a la vez.
 
 ## Excepciones y flujos alternos
 
 | ID | Condición | Respuesta |
 |----|-----------|-----------|
-| A1 | Proceso duplicado | Rechaza con `PROCESS_ALREADY_ACTIVE` |
-| A2 | Proceso en curso | Conserva plantilla con la que inició; no migra retroactivamente |
+| A1 | Proceso activo existente | Si la carrera ya tiene un proceso activo, se rechaza la creación con `PROCESS_ALREADY_ACTIVE` |
+| A2 | Actualización de plantilla base | Si una plantilla es modificada, los Procesos que ya están en curso conservan las fases/subfases con las que iniciaron; no migran retroactivamente |
 
 ## Postcondiciones
 
-Proceso activo con instancias de Fase e Indicador.
+Proceso activo para la carrera con sus respectivas instancias de Fase y Subfase.
 
 ## Diagramas
 
@@ -54,9 +55,13 @@ Proceso activo con instancias de Fase e Indicador.
 @PRD-US-023 @FSD-UC-003 @TC-03
 Característica: Plantillas normativas CEUB/ARCU-SUR
 
-  Escenario: Activación de plantilla CEUB
-    Dado un [JD] con plantilla CEUB validada
-    Cuando activa la plantilla para el periodo vigente
-    Entonces los nuevos Procesos usan Fases e Indicadores de esa plantilla
-    Y los Procesos en curso conservan la plantilla con la que iniciaron
-```
+  Escenario: Inicio de proceso con plantilla de fases y subfases
+    Dado que existen múltiples plantillas ARCU-SUR y CEUB configuradas con fases y subfases
+    Cuando un [JD] inicia un Proceso de acreditación para una carrera utilizando una plantilla elegida
+    Entonces el nuevo Proceso adopta la estructura de Fases y Subfases de esa plantilla
+    Y el sistema garantiza que la carrera tenga un único Proceso activo a la vez
+
+  Escenario: Intento de iniciar un proceso cuando ya existe uno activo
+    Dado que una carrera tiene un Proceso de acreditación actualmente en curso
+    Cuando un [JD] intenta iniciar un nuevo Proceso para la misma carrera
+    Entonces el sistema rechaza la operación con el error PROCESS_ALREADY_ACTIVE

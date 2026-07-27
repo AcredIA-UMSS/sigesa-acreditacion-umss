@@ -1,7 +1,7 @@
 package com.umss.sigesa.application.service;
 
 import com.umss.sigesa.application.port.in.GetProcessUseCase;
-import com.umss.sigesa.application.port.out.AccreditationProcessRepositoryPort;
+import com.umss.sigesa.application.port.out.AccreditationProcessPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +12,9 @@ import java.util.UUID;
 @Service
 public class GetProcessService implements GetProcessUseCase {
 
-    private final AccreditationProcessRepositoryPort processRepository;
+    private final AccreditationProcessPort processRepository;
 
-    public GetProcessService(AccreditationProcessRepositoryPort processRepository) {
+    public GetProcessService(AccreditationProcessPort processRepository) {
         this.processRepository = processRepository;
     }
 

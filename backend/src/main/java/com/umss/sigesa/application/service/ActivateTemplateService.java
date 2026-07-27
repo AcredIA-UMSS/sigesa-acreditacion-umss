@@ -1,7 +1,7 @@
 package com.umss.sigesa.application.service;
 
 import com.umss.sigesa.application.port.in.ActivateTemplateUseCase;
-import com.umss.sigesa.application.port.out.TemplateRepositoryPort;
+import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.exception.TemplateNotValidException;
 import com.umss.sigesa.domain.model.Template;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,9 @@ import java.util.UUID;
 @Service
 public class ActivateTemplateService implements ActivateTemplateUseCase {
 
-    private final TemplateRepositoryPort templateRepository;
+    private final TemplatePort templateRepository;
 
-    public ActivateTemplateService(TemplateRepositoryPort templateRepository) {
+    public ActivateTemplateService(TemplatePort templateRepository) {
         this.templateRepository = templateRepository;
     }
 

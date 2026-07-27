@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface TemplateRepositoryPort {
+public interface TemplatePort {
     Optional<Template> findById(UUID id);
 
     List<Template> findAll();
 
     Template save(Template template);
 }
-

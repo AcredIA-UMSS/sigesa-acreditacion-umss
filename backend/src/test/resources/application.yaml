@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: sigesa
+  datasource:
+    url: jdbc:h2:mem:sigesa-test-${random.uuid};DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: false
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: never
+  flyway:
+    enabled: false
+
+sigesa:
+  jwt:
+    secret: ${SIGESA_JWT_SECRET:sigesa-dev-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256}
+    expiration-seconds: ${SIGESA_JWT_EXPIRATION_SECONDS:86400}

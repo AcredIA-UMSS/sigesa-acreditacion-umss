@@ -1,52 +1,59 @@
 package com.umss.sigesa.domain.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Template {
-    private final UUID id;
-    private final boolean validated;
-    private final Taxonomy taxonomy;
-    private final String activePeriod;
-    private final LocalDateTime activatedAt;
+    private UUID id;
+    private String name;
+    private String type;
+    private boolean validated;
+    private Taxonomy taxonomy;
+    private String activePeriod;
+    private LocalDateTime activatedAt;
+
+    @Builder.Default
+    private List<TemplatePhase> phases = new ArrayList<>();
 
     public Template(UUID id, boolean validated, Taxonomy taxonomy) {
-        this(id, validated, taxonomy, null, null);
+        this.id = id;
+        this.validated = validated;
+        this.taxonomy = taxonomy;
+        this.phases = new ArrayList<>();
     }
 
-    public Template(UUID id,
-                    boolean validated,
-                    Taxonomy taxonomy,
-                    String activePeriod,
-                    LocalDateTime activatedAt) {
+    public Template(UUID id, boolean validated, Taxonomy taxonomy, String activePeriod, LocalDateTime activatedAt) {
         this.id = id;
         this.validated = validated;
         this.taxonomy = taxonomy;
         this.activePeriod = activePeriod;
         this.activatedAt = activatedAt;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public boolean isValidated() {
-        return validated;
-    }
-
-    public Taxonomy getTaxonomy() {
-        return taxonomy;
-    }
-
-    public String getActivePeriod() {
-        return activePeriod;
-    }
-
-    public LocalDateTime getActivatedAt() {
-        return activatedAt;
+        this.phases = new ArrayList<>();
     }
 
     public Template withActivation(String period, LocalDateTime activatedAt) {
-        return new Template(id, validated, taxonomy, period, activatedAt);
+        return Template.builder()
+                .id(this.id)
+                .name(this.name)
+                .type(this.type)
+                .validated(this.validated)
+                .taxonomy(this.taxonomy)
+                .activePeriod(period)
+                .activatedAt(activatedAt)
+                .phases(this.phases)
+                .build();
     }
 }

@@ -1,6 +1,6 @@
 package com.umss.sigesa.application.service;
 
-import com.umss.sigesa.application.port.out.TemplateRepositoryPort;
+import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.exception.TemplateNotValidException;
 import com.umss.sigesa.domain.model.Taxonomy;
 import com.umss.sigesa.domain.model.Template;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class ActivateTemplateServiceTest {
 
     @Mock
-    private TemplateRepositoryPort templateRepository;
+    private TemplatePort templateRepository;
 
     @InjectMocks
     private ActivateTemplateService service;

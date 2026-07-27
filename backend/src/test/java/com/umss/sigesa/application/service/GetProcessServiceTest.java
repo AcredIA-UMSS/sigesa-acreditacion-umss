@@ -1,6 +1,6 @@
 package com.umss.sigesa.application.service;
 
-import com.umss.sigesa.application.port.out.AccreditationProcessRepositoryPort;
+import com.umss.sigesa.application.port.out.AccreditationProcessPort;
 import com.umss.sigesa.config.DevSeedData;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.ProcessStatus;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class GetProcessServiceTest {
 
     @Mock
-    private AccreditationProcessRepositoryPort processRepository;
+    private AccreditationProcessPort processRepository;
 
     @InjectMocks
     private GetProcessService service;
@@ -33,16 +33,17 @@ class GetProcessServiceTest {
     @DisplayName("Retorna detalle cuando el proceso existe")
     void getById_existingProcess() {
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 15, 10, 0);
-        AccreditationProcess process = new AccreditationProcess(
-                DevSeedData.PROCESS_INF_SIS_CEUB_ACTIVE,
-                DevSeedData.TEMPLATE_CEUB_2026,
-                DevSeedData.PROGRAM_INF_SIS,
-                DevSeedData.PERIOD_2026_1,
-                ProcessType.CEUB,
-                ProcessStatus.ACTIVE,
-                DevSeedData.TAXONOMY_CEUB_VERSION,
-                createdAt
-        );
+        AccreditationProcess process = AccreditationProcess.builder()
+                .id(DevSeedData.PROCESS_INF_SIS_CEUB_ACTIVE)
+                .templateId(DevSeedData.TEMPLATE_CEUB_2026)
+                .careerId(DevSeedData.PROGRAM_INF_SIS)
+                .period(DevSeedData.PERIOD_2026_1)
+                .type(ProcessType.CEUB)
+                .status(ProcessStatus.ACTIVE)
+                .taxonomySnapshotVersion(DevSeedData.TAXONOMY_CEUB_VERSION)
+                .startDate(createdAt)
+                .createdAt(createdAt)
+                .build();
 
         when(processRepository.findById(DevSeedData.PROCESS_INF_SIS_CEUB_ACTIVE))
                 .thenReturn(Optional.of(process));

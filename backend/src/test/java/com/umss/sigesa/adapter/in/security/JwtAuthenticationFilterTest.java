@@ -1,8 +1,8 @@
 package com.umss.sigesa.adapter.in.security;
 
-import com.umss.sigesa.adapter.in.web.AccreditationProcessController;
+import com.umss.sigesa.adapter.in.web.ProcessController;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
-import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
+import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +27,7 @@ class JwtAuthenticationFilterTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CreateAccreditationProcessUseCase createProcessUseCase;
+    private CreateProcessUseCase createProcessUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
 
@@ -36,7 +36,7 @@ class JwtAuthenticationFilterTest {
         mockMvc.perform(post("/api/v1/processes")
                         .contentType("application/json")
                         .content("""
-                                {"templateId":"550e8400-e29b-41d4-a716-446655440000","careerId":"550e8400-e29b-41d4-a716-446655440001","period":"2026-1","type":"CEUB"}
+                                {"templateId":"850e8400-e29b-41d4-a716-446655440010","careerId":"550e8400-e29b-41d4-a716-446655440001"}
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHORIZED"));

@@ -6,6 +6,7 @@ import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessPage } from './features/procesos/CreateProcessPage';
 import { ProcessesListPage } from './features/procesos/ProcessesListPage';
+import { CreateProcessView } from './features/accreditation-process';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidencias/pages/EvidenceUploadPage';
 import { EvidencesListPage } from './features/evidencias/pages/EvidencesListPage';
@@ -55,6 +56,15 @@ function App() {
               <JdOnlyRoute>
                 <CreateProcessPage />
               </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/nuevo-view"
+          element={
+            <ProtectedRoute>
+              <CreateProcessView />
             </ProtectedRoute>
           }
         />

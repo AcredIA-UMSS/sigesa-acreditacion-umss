@@ -4,10 +4,9 @@ import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
 import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
-import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.ActivateTemplateUseCase;
-import com.umss.sigesa.application.port.in.CreateAccreditationProcessUseCase;
+import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
@@ -38,13 +37,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {TemplateController.class, AccreditationProcessController.class})
+@WebMvcTest(controllers = {TemplateController.class, ProcessController.class})
 @Import({
         SecurityConfig.class,
         JwtAuthenticationFilter.class,
         RestAuthenticationEntryPoint.class,
-        AuthExceptionHandler.class,
-        ProcessExceptionHandler.class
+        AuthExceptionHandler.class
 })
 @TestPropertySource(properties = {
         "sigesa.jwt.secret=sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256",
@@ -62,7 +60,7 @@ class ProcessModuleControllerTest {
     @MockitoBean
     private ListProcessesUseCase listProcessesUseCase;
     @MockitoBean
-    private CreateAccreditationProcessUseCase createAccreditationProcessUseCase;
+    private CreateProcessUseCase createProcessUseCase;
     @MockitoBean
     private GetProcessUseCase getProcessUseCase;
     @MockitoBean
@@ -179,9 +177,7 @@ class ProcessModuleControllerTest {
                         .content("""
                                 {
                                   "templateId":"850e8400-e29b-41d4-a716-446655440010",
-                                  "careerId":"660e8400-e29b-41d4-a716-446655440001",
-                                  "period":"2026-2",
-                                  "type":"CEUB"
+                                  "careerId":"660e8400-e29b-41d4-a716-446655440001"
                                 }
                                 """))
                 .andExpect(status().isForbidden());

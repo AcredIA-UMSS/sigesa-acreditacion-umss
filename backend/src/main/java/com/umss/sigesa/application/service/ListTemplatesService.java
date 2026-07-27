@@ -1,7 +1,7 @@
 package com.umss.sigesa.application.service;
 
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
-import com.umss.sigesa.application.port.out.TemplateRepositoryPort;
+import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.model.ProcessType;
 import com.umss.sigesa.domain.model.Template;
 import org.springframework.stereotype.Service;
@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ListTemplatesService implements ListTemplatesUseCase {
 
-    private final TemplateRepositoryPort templateRepository;
+    private final TemplatePort templateRepository;
 
-    public ListTemplatesService(TemplateRepositoryPort templateRepository) {
+    public ListTemplatesService(TemplatePort templateRepository) {
         this.templateRepository = templateRepository;
     }
 
@@ -25,13 +25,14 @@ public class ListTemplatesService implements ListTemplatesUseCase {
     }
 
     private TemplateSummary toSummary(Template template) {
+        String taxonomyVersion = template.getTaxonomy() != null ? template.getTaxonomy().version() : "1.0";
         return new TemplateSummary(
                 template.getId(),
                 template.isValidated(),
-                template.getTaxonomy().version(),
+                taxonomyVersion,
                 template.getActivePeriod(),
                 template.getActivatedAt(),
-                inferProcessType(template.getTaxonomy().version())
+                inferProcessType(taxonomyVersion)
         );
     }
 
