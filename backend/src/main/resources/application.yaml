@@ -41,3 +41,12 @@ sigesa:
   evidence:
     storage-path: ${SIGESA_EVIDENCE_STORAGE_PATH:./data/evidences}
     async-threshold-bytes: ${SIGESA_EVIDENCE_ASYNC_THRESHOLD:5242880}
+  assistant:
+    enabled: ${SIGESA_ASSISTANT_ENABLED:true}
+    base-url: ${SIGESA_ASSISTANT_BASE_URL:http://localhost:3001/api}
+    api-key: ${SIGESA_ASSISTANT_API_KEY:}
+    model: ${SIGESA_ASSISTANT_MODEL:llama3.2:3b}
+    system-prompt: >-
+      Eres el asistente virtual de SIGESA (Sistema de Gestión de Acreditación UMSS).
+      Ayudas a coordinadores, jefes de departamento y técnicos con procesos de acreditación,
+      evidencias, indicadores y uso del sistema. Responde en español, de forma clara y concisa.

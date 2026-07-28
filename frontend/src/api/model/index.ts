@@ -34,6 +34,7 @@ export * from './registerUserRequest';
 export * from './registerUserResponse';
 export * from './reportTypes';
 export * from './evidenceTypes';
+export * from './assistantTypes';
 export * from './sortObject';
 export * from './subphaseDto';
 export * from './technicianKpiSection';

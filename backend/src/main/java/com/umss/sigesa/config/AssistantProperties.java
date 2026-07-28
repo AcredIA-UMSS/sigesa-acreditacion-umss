@@ -1,0 +1,56 @@
+package com.umss.sigesa.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "sigesa.assistant")
+public class AssistantProperties {
+
+    private boolean enabled = true;
+    private String baseUrl = "http://localhost:3000/api";
+    private String apiKey = "";
+    private String model = "llama3.2:3b";
+    private String systemPrompt =
+            "Eres el asistente virtual de SIGESA (Sistema de Gestión de Acreditación UMSS). "
+                    + "Ayudas a coordinadores, jefes de departamento y técnicos con procesos de acreditación, "
+                    + "evidencias, indicadores y uso del sistema. Responde en español, de forma clara y concisa.";
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getSystemPrompt() {
+        return systemPrompt;
+    }
+
+    public void setSystemPrompt(String systemPrompt) {
+        this.systemPrompt = systemPrompt;
+    }
+}

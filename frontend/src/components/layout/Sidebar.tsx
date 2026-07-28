@@ -110,6 +110,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           label="AYUDA"
           isExpanded={isExpanded}
           active={activeNav === 'help'}
+          to="/ayuda"
         />
       </nav>
 

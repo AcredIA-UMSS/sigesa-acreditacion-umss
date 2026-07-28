@@ -19,7 +19,7 @@
 | PM-013 | PR-IMPL-005 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Frontend MOD-AUTH: login, sesión, guards, admin parcial |
 | PM-014 | PR-IMPL-006 | DD-UC-001, DD-UC-002 | FSD-UC-001, FSD-UC-002 | Cierre MOD-AUTH: GET users/programs + UI admin completa |
 | PM-015 | PR-IMPL-003V3 | DD-UC-003 | FSD-UC-003 | Implementación Full-Stack: Inicialización de Proceso de Acreditación desde Plantilla |
-| PM-016 | PR-IMPL-012 | DD-SYS-001 | FSD-SYS-001 | Dockerización Full-Stack y Configuración PostgreSQL |
+| PM-016 | PR-IMPL-004 | DD-SYS-001 | FSD-SYS-001 | Dockerización Full-Stack y Configuración PostgreSQL |
 | PM-017 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Implementación MOD-REPORT — reporte ejecutivo PDF asíncrono |
 | PM-018 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
 | PM-019 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |

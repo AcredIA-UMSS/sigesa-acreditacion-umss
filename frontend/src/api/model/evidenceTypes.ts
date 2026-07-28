@@ -6,7 +6,7 @@ export interface UploadEvidenceResponse {
   currentState: string;
 }
 
-export interface UploadEvidenceParams {
+export interface EvidenceUploadParams {
   indicatorId: string;
   criterionId: string;
   description: string;
