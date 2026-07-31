@@ -54,6 +54,7 @@ ultima_actualizacion: "2026-06-23"
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
 | `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |
 | `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
+| `FSD-UC-019` | Diagnóstico Semántico de Fases | [CC], [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-019.md) | [`DD-UC-019`](../design/DD-UC-019.md) | [`PR-IMPL-019`](../prompts/impl/PR-IMPL-019.md) |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Verificado` · `Obsoleto`
 

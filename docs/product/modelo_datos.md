@@ -40,6 +40,7 @@ erDiagram
   EVALUATION_CRITERION ||--o{ INDICATOR_CATALOG : defines
   TEMPLATE_PHASE ||--o{ INDICATOR_CATALOG : scopes
   PHASE ||--o{ INDICATOR : instantiates
+  PHASE ||--o| PHASE_DIAGNOSTIC : has_cache
   INDICATOR ||--o{ EVIDENCE : proves
   EVIDENCE ||--o{ EVIDENCE_VERSION : versions
   INDICATOR ||--o{ OBSERVATION : may_have
@@ -47,6 +48,7 @@ erDiagram
   APP_USER ||--o{ USER_PROGRAM_ASSIGNMENT : assigned
   APP_USER ||--o{ AUDIT_LOG : performs
   APP_USER ||--o{ STATE_TRANSITION : triggers
+  INDICATOR_CATALOG ||--o{ DOCUMENT_EMBEDDING : RAG_source
 ```
 
 ---
@@ -79,6 +81,7 @@ erDiagram
 | `AccreditationProcess` | `programId`, `templateId`, `managementYear`, `status` | EN_PROCESO \| ACREDITADO \| VENCIDO |
 | `Phase` | `processId`, `templatePhaseId` | Estado derivado por reglas agregadas |
 | `Indicator` | `phaseId`, `catalogId` | Estado derivado desde `indicator_state_history` |
+| `PhaseDiagnostic` | `phaseId`, `result`, `updatedAt` | Caché 1:1 de diagnósticos semánticos de IA |
 
 ### 3.4 Evidencia y auditoría
 
@@ -91,6 +94,13 @@ erDiagram
 | `AuditLog` | `action`, `actorId`, `entityType`, `entityId`, `payload` | Login, DELETE denegado, etc. |
 | `NotificationOutbox` | `eventType`, `recipientId`, `payload`, `sentAt` | Patrón outbox |
 | `PublicationSnapshot` | `programId`, `publishedAt`, `publishedBy` | Portal [P] |
+
+### 3.5 IA y RAG (Base de datos vectorial en PostgreSQL)
+
+| Entidad | Atributos clave | Notas |
+|---------|-----------------|-------|
+| `DocumentEmbedding` | `id`, `content`, `embedding` (VECTOR), `metadata` (JSONB) | Almacenamiento vectorial en PostgreSQL (`pgvector`) para la normativa CEUB/ARCUSUR de RAG |
+
 
 ---
 
