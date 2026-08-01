@@ -4,11 +4,11 @@ title: Asistente Virtual SIGESA (MOD-ASSISTANT)
 fsd_uc: PRD-REQ-028 (Chatbot FAQ normativo — MVP proxy Open WebUI)
 prd_refs: [PRD-REQ-028, BRD-REQ-024]
 modulo: MOD-ASSISTANT
-prompts: [PR-IMPL-012]
+prompts: [PR-IMPL-012, PR-IMPL-013]
 prompt_mapping: docs/sprints/sprint_02/PROMPT_MAPPING.md#pm-001
-release: v1.0-mvp
+release: v1.1-tools
 status: Implemented
-ultima_actualizacion: "2026-07-27"
+ultima_actualizacion: "2026-07-31"
 ---
 
 # DD-SYS-002: Asistente Virtual SIGESA
@@ -35,6 +35,8 @@ Este documento resume la implementación del **asistente virtual** integrado en 
 - RAG / embeddings sobre documentos normativos aprobados.
 - Rate limiting, auditoría de prompts o moderación de contenido.
 - Cambio de modelo desde la UI (solo lectura del modelo configurado).
+
+> **Tool calling (v1.1):** implementado en [§11](#11-tool-calling-fase-11--read-only) — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md).
 
 ---
 
@@ -357,11 +359,12 @@ docker exec sigesa-backend sh -c \
 
 ## 8. Evolución prevista
 
-1. **Streaming SSE** — respuesta progresiva en `AssistantChatUI`.
-2. **RAG normativo** — embeddings sobre documentos aprobados por DUEA (alineado a PRD-REQ-028).
-3. **Persistencia opcional** — tabla `assistant_conversation` / `assistant_message` con TTL.
-4. **Regeneración Orval** — ejecutar `pnpm run generate:api` con backend activo para sincronizar OpenAPI.
-5. **Actualización DTP.md** — registrar dependencias (`ollama`, `open-webui`) y variables de entorno en el contrato técnico vivo.
+1. **Tool calling read-only** — loop de orquestación en backend; catálogo en [`assistant/TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md) (§11).
+2. **Streaming SSE** — respuesta progresiva en `AssistantChatUI`.
+3. **RAG normativo** — embeddings sobre documentos aprobados por DUEA (alineado a PRD-REQ-028).
+4. **Persistencia opcional** — tabla `assistant_conversation` / `assistant_message` con TTL.
+5. **Regeneración Orval** — ejecutar `pnpm run generate:api` con backend activo para sincronizar OpenAPI.
+6. **Actualización DTP.md** — registrar dependencias (`ollama`, `open-webui`) y variables de entorno en el contrato técnico vivo.
 
 ---
 
@@ -406,4 +409,122 @@ docker exec sigesa-backend sh -c \
 | Prompt implementación | [PR-IMPL-012](../prompts/impl/PR-IMPL-012.md) |
 | Prompt mapping | [Sprint 02 PM-001](../sprints/sprint_02/PROMPT_MAPPING.md) |
 | DTP vivo | `docs/product/DTP.md` §B.5 |
+| Catálogo tools | [`assistant/TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md) |
+| Contrato API tool `list_users` | [`docs/product/api/API-USER-03.md`](../product/api/API-USER-03.md) |
 | Rama desarrollo | `feature/chatbot-boris` |
+
+---
+
+## 11. Tool calling (Fase 1.1 — read-only)
+
+Esta sección define la **evolución arquitectónica** del asistente hacia **tool calling**: el LLM puede invocar operaciones de lectura del dominio SIGESA, ejecutadas en el backend con el contexto JWT del usuario.
+
+> **Fuente de verdad del catálogo:** [`docs/design/assistant/TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md)
+
+### 11.1 Principio de diseño
+
+| Regla | Descripción |
+|-------|-------------|
+| **Orquestación en backend** | El loop tool-call vive en `SendChatMessageService` (o servicio dedicado `AssistantOrchestrator`). Open WebUI/Ollama solo inferencia. |
+| **Use cases como única puerta** | Cada tool delega en un puerto de aplicación existente (`ListUsersUseCase`, etc.). Prohibido acceder a JPA o REST interno desde el executor. |
+| **Registro dinámico por rol** | Las tools se incluyen en el payload al LLM **solo** si el JWT cumple `allowed_roles`. |
+| **Defensa en profundidad** | `AssistantToolExecutor` revalida rol y parámetros antes de ejecutar. |
+| **Sin side-effects en Fase 1** | Solo tools `read`. Escritura (ej. `create_process`) queda para fase posterior con confirmación explícita en UI. |
+
+### 11.2 Arquitectura del loop
+
+```mermaid
+sequenceDiagram
+  participant FE as Frontend /ayuda
+  participant BE as SendChatMessageService
+  participant EX as AssistantToolExecutor
+  participant LLM as Open WebUI / Ollama
+  participant UC as Use Cases
+
+  FE->>BE: POST /assistant/chat (JWT)
+  BE->>BE: Resolver tools[] según rol JWT
+  BE->>LLM: messages + tools[]
+  LLM-->>BE: tool_call { name, arguments }
+  BE->>EX: execute(name, args, authContext)
+  EX->>EX: Validar rol + schema
+  EX->>UC: invocar puerto aplicación
+  UC-->>EX: resultado dominio
+  EX-->>BE: JSON tool result
+  BE->>LLM: role=tool, content=result
+  LLM-->>BE: respuesta natural language
+  BE-->>FE: { reply }
+```
+
+### 11.3 Componentes previstos (implementación)
+
+| Capa | Componente | Responsabilidad |
+|------|------------|-----------------|
+| **Aplicación** | `SendChatMessageService` (extendido) | Loop multi-turno con límite de iteraciones |
+| **Aplicación** | `AssistantToolExecutor` | Dispatch por `toolId`; validación rol + args |
+| **Aplicación** | `AssistantToolRegistry` | Catálogo en memoria desde definiciones tipadas |
+| **Aplicación** | `AssistantAuthContext` | `userId`, `role`, `programScope` extraídos del JWT |
+| **Puerto out** | `ChatCompletionPort` (extendido) | Soporte `tools[]` y respuestas `tool_calls` |
+| **Adaptador out** | `OpenWebUiChatAdapter` | Serializar/deserializar formato OpenAI function calling |
+
+### 11.4 Tools registradas — Fase 1
+
+Ver detalle completo (schemas, ejemplos, tests) en [`TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md).
+
+| Tool ID | Side-effect | Roles | Use case | Contrato API |
+|---------|-------------|-------|----------|--------------|
+| `list_users` | `read` | **JD** | `ListUsersUseCase` | [API-USER-03](../product/api/API-USER-03.md) |
+
+### 11.5 Autorización — tool `list_users`
+
+- **Quién puede invocar:** exclusivamente usuarios con rol `JD` en el JWT.
+- **CC / TD:** la tool **no se registra** en `tools[]`; el LLM responde con texto genérico sin datos de usuarios.
+- **Alineación REST:** mismo perímetro que `GET /api/v1/admin/users` (`SecurityConfig.hasRole("JD")`).
+
+### 11.6 Formato de respuesta de tools
+
+Envoltura estándar devuelta al LLM como contenido `role=tool`:
+
+```json
+{
+  "ok": true,
+  "data": { "users": [], "total": 0 },
+  "error": null
+}
+```
+
+En fallo:
+
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": { "code": "ACCESS_DENIED", "message": "..." }
+}
+```
+
+### 11.7 Límites operativos
+
+| Parámetro | Valor propuesto |
+|-----------|-----------------|
+| Max iteraciones tool-call por mensaje | 3 |
+| Timeout por tool | Hereda timeout LLM (120 s) |
+| Tools con escritura | Fuera de Fase 1 |
+
+### 11.8 Estado e implementación
+
+| Aspecto | Estado |
+|---------|--------|
+| Catálogo `TOOL-CATALOG.md` | **Implementado** (Fase 1 — `list_users`) |
+| Contrato `API-USER-03.md` | **Documentado** |
+| Loop backend + executor | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
+| Extensión `ChatCompletionPort` | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
+| Tests tool `list_users` | **Implementado** — unit + WebMvc |
+
+### 11.9 Trazabilidad §11
+
+| Artefacto | Referencia |
+|-----------|------------|
+| Catálogo tools | [`assistant/TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md) |
+| API listado usuarios | [`docs/product/api/API-USER-03.md`](../product/api/API-USER-03.md) |
+| FSD gestión usuarios | [FSD-UC-002](../product/uc/FSD-UC-002.md) |
+| Prompt implementación | [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |

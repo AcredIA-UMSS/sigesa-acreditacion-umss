@@ -1,0 +1,89 @@
+package com.umss.sigesa.adapter.in.web;
+
+import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
+import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
+import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.config.AssistantProperties;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AssistantControllerToolCallingTest {
+
+    @Mock
+    private SendChatMessageUseCase sendChatMessageUseCase;
+
+    @Mock
+    private AssistantProperties assistantProperties;
+
+    @Mock
+    private UserProgramAssignmentRepositoryPort assignmentRepository;
+
+    private AssistantController controller;
+
+    @BeforeEach
+    void setUp() {
+        controller = new AssistantController(sendChatMessageUseCase, assistantProperties, assignmentRepository);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    void chat_withJdPassesAuthContextToUseCase() {
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                userId,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_JD"))));
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
+        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn("Respuesta del asistente.");
+
+        ResponseEntity<?> response = controller.chat(new SendChatMessageRequest("¿Qué usuarios tenemos?", null));
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+
+        ArgumentCaptor<AssistantAuthContext> authCaptor = ArgumentCaptor.forClass(AssistantAuthContext.class);
+        verify(sendChatMessageUseCase).send(eq("¿Qué usuarios tenemos?"), any(), authCaptor.capture());
+        assertThat(authCaptor.getValue().role()).isEqualTo("JD");
+        assertThat(authCaptor.getValue().userId()).isEqualTo(userId);
+    }
+
+    @Test
+    void chat_withCcPassesCcRole() {
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                userId,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_CC"))));
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
+        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn("No puedo listar usuarios.");
+
+        controller.chat(new SendChatMessageRequest("Lista usuarios", null));
+
+        ArgumentCaptor<AssistantAuthContext> authCaptor = ArgumentCaptor.forClass(AssistantAuthContext.class);
+        verify(sendChatMessageUseCase).send(any(), any(), authCaptor.capture());
+        assertThat(authCaptor.getValue().role()).isEqualTo("CC");
+    }
+}

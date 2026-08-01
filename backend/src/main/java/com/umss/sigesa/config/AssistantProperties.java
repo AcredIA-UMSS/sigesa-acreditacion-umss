@@ -13,6 +13,7 @@ public class AssistantProperties {
             "Eres el asistente virtual de SIGESA (Sistema de Gestión de Acreditación UMSS). "
                     + "Ayudas a coordinadores, jefes de departamento y técnicos con procesos de acreditación, "
                     + "evidencias, indicadores y uso del sistema. Responde en español, de forma clara y concisa.";
+    private int maxToolIterations = 3;
 
     public boolean isEnabled() {
         return enabled;
@@ -52,5 +53,13 @@ public class AssistantProperties {
 
     public void setSystemPrompt(String systemPrompt) {
         this.systemPrompt = systemPrompt;
+    }
+
+    public int getMaxToolIterations() {
+        return maxToolIterations;
+    }
+
+    public void setMaxToolIterations(int maxToolIterations) {
+        this.maxToolIterations = maxToolIterations;
     }
 }
