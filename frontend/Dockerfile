@@ -3,13 +3,15 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install
+ENV CI=true
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
-
-# 👇 Reemplazamos "RUN npm run build" por npx 👇
-RUN npx tsc -b && npx vite build
+RUN pnpm exec tsc -b && pnpm exec vite build
 
 # Etapa 2: Servidor Web
 FROM nginx:alpine

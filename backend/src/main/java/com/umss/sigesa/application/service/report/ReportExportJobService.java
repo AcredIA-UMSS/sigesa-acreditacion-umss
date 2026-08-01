@@ -12,7 +12,6 @@ import com.umss.sigesa.domain.model.ObservationSummary;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@Service
 public class ReportExportJobService implements ExportReportJobUseCase, GetExportReportJobStatusUseCase {
 
     private final ReportExportJobRepositoryPort repositoryPort;

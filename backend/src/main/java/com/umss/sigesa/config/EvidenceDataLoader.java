@@ -58,7 +58,7 @@ public class EvidenceDataLoader implements ApplicationRunner {
         AppUserEntity cc = new AppUserEntity();
         cc.setId(userId);
         cc.setEmail(SEED_CC_EMAIL);
-        cc.setPasswordHash(passwordEncoder.encode(AuthDataLoader.SEED_PASSWORD));
+        cc.setPasswordHash(passwordEncoder.encode(AuthDataLoader.SEED_CC_PASSWORD));
         cc.setRole(Role.CC);
         cc.setStatus(UserStatus.ACTIVE);
         cc.setCreatedAt(now);

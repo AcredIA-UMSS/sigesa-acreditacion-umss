@@ -7,6 +7,7 @@ import { CreateProcessView } from './features/accreditation-process';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
+import { AssistantPage } from './features/assistant/AssistantPage';
 
 function App() {
   return (
@@ -59,6 +60,15 @@ function App() {
           element={
             <ProtectedRoute>
               <ExecutiveReportPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ayuda"
+          element={
+            <ProtectedRoute>
+              <AssistantPage />
             </ProtectedRoute>
           }
         />

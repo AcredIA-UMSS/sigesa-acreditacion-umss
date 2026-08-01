@@ -2,8 +2,8 @@
 producto: "SIGESA"
 grupo: "ACREDIA"
 documento: DTP                 
-version: v1.1                  
-fecha: "2026-07-26"
+version: v1.2                  
+fecha: "2026-07-27"
 status: vivo                   
 audiencia: dual               
 baseline_ref:                 
@@ -17,13 +17,15 @@ stack:
   - "Hibernate / Spring Data JPA"
   - "PostgreSQL (Principal) / H2 (Pruebas)"
   - "React 19"
+  - "Ollama (inferencia LLM local — MOD-ASSISTANT dev)"
+  - "Open WebUI (API OpenAI-compatible — MOD-ASSISTANT dev)"
   - "AWS"
 repo: "ruta/a/tu/repo/sigesa"
 agents_md: "/AGENTS.md"
 artefactos_vivos:
   prd: "docs/product/03_prd/PRD.md"          
   fsd: "docs/product/FSD.md"          
-  prompt_mapping: "docs/sprints/sprint_1/PROMPT_MAPPING.md"
+  prompt_mapping: "docs/sprints/sprint_02/PROMPT_MAPPING.md"
   design_docs_dir: "docs/design/"     
   adr_dir: "docs/adr/"
 ---
@@ -43,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
 | 23/07/2026 | **Full-Stack MOD-PROCESS:** Arquitectura Hexagonal estricta Backend y UI Frontend (React/Orval) para clonación de Plantillas (`PROCESS_ALREADY_ACTIVE`). | FSD-UC-003 / DD-UC-003 | N/A | PM-001 | AI Agent |
 | 26/06/2026 | Implementación MOD-EVIDENCE: carga v1 multipart, SHA-256, `indicator_state_history`, outbox stub, seed CC. | FSD-UC-004 / DD-UC-004 | N/A | PM-012 / PR-IMPL-006 | Cursor Agent |
@@ -83,6 +86,7 @@ artefactos_vivos:
 | 8 | Dashboard Architecture | `GET /dashboard/coordinator` aislado por rol | Arquitectura Híbrida Compuesta PBAC (`GET /api/v1/dashboards/me/summary`) + endpoints modulares (`/details`, `/export`) | Optimizar peticiones HTTP para usuarios multi-rol y renderizado dinámico en UI | N/A (DD-UC-011) |
 | 9 | Stack Persistencia | H2 (Memoria/Archivo) para todo | **PostgreSQL** (Principal) + H2 (Test) | Las reglas de negocio (índices únicos activos) requieren motor transaccional robusto | ADR-0002 |
 | 10 | Acreditación (MOD-PROCESS) | Arquitectura por capas implícita | **Arquitectura Hexagonal Estricta** (Puertos In/Out, Dominio Puro, Adaptadores) | Escalabilidad del modelo normativo y desacoplamiento de frameworks (JPA) | N/A (DD-UC-003) |
+| 11 | Asistente / IA | Chatbot FAQ normativo (Could, v2.0 PRD) | **MOD-ASSISTANT MVP:** proxy backend → Open WebUI → Ollama; sin RAG ni persistencia de chats | Piloto self-hosted local; API key Open WebUI solo en servidor | DD-SYS-002 |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -96,6 +100,7 @@ artefactos_vivos:
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
+| `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -118,8 +123,9 @@ artefactos_vivos:
 | **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design doc `DD-UC-003` |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
+| **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
-| §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_1/PROMPT_MAPPING.md` (Entradas vigentes PM-001+) |
+| §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
 | §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**; baseline en `docs/baseline/05_dti/adrs/`) |
 
 ### B.1 MOD-AUTH — contrato técnico vigente (`DD-UC-001` + `DD-UC-002`)
@@ -184,7 +190,41 @@ artefactos_vivos:
 | **Notificaciones** | `NoOpNotificationOutboxAdapter` → `EvidenceUploaded` (UC-015 stub) |
 | **Seed dev** | `cc@umss.edu.bo` / indicador `550e8400-…-440003` PENDIENTE |
 
+### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
+
+**Implementación:** Sprint 02 PM-001 · **Prompts:** `PR-IMPL-012` · **PRD:** PRD-REQ-028
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `GET /api/v1/assistant/status`; `POST /api/v1/assistant/chat` |
+| **RBAC** | Todo usuario autenticado con JWT válido (sin rol adicional en MVP) |
+| **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1) |
+| **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
+| **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
+| **Config YAML** | `sigesa.assistant.*` en `application.yaml` |
+| **Variables entorno** | `SIGESA_ASSISTANT_ENABLED`, `SIGESA_ASSISTANT_BASE_URL`, `SIGESA_ASSISTANT_API_KEY`, `SIGESA_ASSISTANT_MODEL` |
+| **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
+| **Frontend** | Ruta `/ayuda`; feature `frontend/src/features/assistant/`; cliente `assistant-controller.ts` |
+| **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED` |
+| **Persistencia chats** | Ninguna (historial en memoria del navegador) |
+| **Streaming** | No (`stream: false`) |
+| **Design doc** | [`docs/design/DD-SYS-002.md`](../design/DD-SYS-002.md) |
+
 ## C. Integraciones
+
+### C.2 Open WebUI + Ollama (MOD-ASSISTANT, dev local)
+
+Stack opcional para desarrollo/demo self-hosted:
+
+| Servicio | Imagen | Puerto host | Rol |
+| --- | --- | --- | --- |
+| Ollama | `ollama/ollama:latest` | 11434 | Runtime de modelos |
+| Open WebUI | `ghcr.io/open-webui/open-webui:main` | 3001 | UI admin + API compatible OpenAI |
+
+El backend SIGESA en Docker usa `SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api`. La API key se genera en Open WebUI (Settings → Account → API Keys) y se define en `.env` raíz (gitignored).
+
+**Nota operativa:** forzar HTTP/1.1 en `OpenWebUiChatAdapter` — Java `HttpClient` con HTTP/2 provoca `400 Invalid HTTP request` en uvicorn.
+
 
 ### C.1 React + Orval (Frontend)
 

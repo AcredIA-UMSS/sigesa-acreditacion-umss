@@ -14,6 +14,45 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sigesa-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_MODELS: /root/.ollama
+    volumes:
+      - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
+      - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
+      - ollama_state:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "3001:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
   backend:
     build:
       context: ./backend
@@ -21,7 +60,10 @@ services:
     container_name: sigesa-backend
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_started
+      open-webui:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - DB_URL=jdbc:postgresql://db:5432/sigesa
@@ -33,6 +75,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=sigesa_password
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
+      - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY}
+      - SIGESA_ASSISTANT_MODEL=llama3.2:3b
     ports:
       - "8080:8080"
 
@@ -49,3 +94,5 @@ services:
 
 volumes:
   postgres_data:
+  open-webui:
+  ollama_state:

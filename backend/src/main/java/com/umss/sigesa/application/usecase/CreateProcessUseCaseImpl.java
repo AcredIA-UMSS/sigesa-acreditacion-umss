@@ -8,12 +8,10 @@ import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Template;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@Service
 @RequiredArgsConstructor
 public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
 

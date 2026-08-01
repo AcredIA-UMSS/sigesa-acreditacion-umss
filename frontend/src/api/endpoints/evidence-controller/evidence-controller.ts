@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 
-import type { UploadEvidenceParams, UploadEvidenceResponse } from '../../model';
+import type { EvidenceUploadParams, UploadEvidenceResponse } from '../../model/evidenceTypes';
 
 const authHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('sigesa_token');
@@ -18,7 +18,7 @@ export const getUploadEvidenceUrl = (indicatorId: string) =>
 export type UploadProgressHandler = (percent: number) => void;
 
 export const uploadEvidence = async (
-  params: UploadEvidenceParams,
+  params: EvidenceUploadParams,
   onProgress?: UploadProgressHandler,
 ): Promise<UploadEvidenceResponse> => {
   const formData = new FormData();
@@ -46,12 +46,12 @@ export const useUploadEvidence = (
   options?: UseMutationOptions<
     UploadEvidenceResponse,
     Error,
-    { data: UploadEvidenceParams; onProgress?: UploadProgressHandler }
+    { data: EvidenceUploadParams; onProgress?: UploadProgressHandler }
   >,
 ): UseMutationResult<
   UploadEvidenceResponse,
   Error,
-  { data: UploadEvidenceParams; onProgress?: UploadProgressHandler }
+  { data: EvidenceUploadParams; onProgress?: UploadProgressHandler }
 > =>
   useMutation({
     mutationFn: ({ data, onProgress }) => uploadEvidence(data, onProgress),
