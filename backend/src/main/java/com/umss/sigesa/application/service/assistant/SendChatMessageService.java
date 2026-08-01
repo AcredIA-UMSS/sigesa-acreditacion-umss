@@ -1,29 +1,74 @@
 package com.umss.sigesa.application.service.assistant;
 
+import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
+import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
+import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
+import com.umss.sigesa.application.model.assistant.ToolCall;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
+import com.umss.sigesa.domain.model.ChatToolCall;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SendChatMessageService implements SendChatMessageUseCase {
 
-    private final ChatCompletionPort chatCompletionPort;
-    private final String systemPrompt;
+    private static final String MAX_ITERATIONS_FALLBACK =
+            "No pude completar la consulta en el número máximo de pasos. Intente reformular su pregunta.";
 
-    public SendChatMessageService(ChatCompletionPort chatCompletionPort, String systemPrompt) {
+    private final ChatCompletionPort chatCompletionPort;
+    private final AssistantToolRegistry toolRegistry;
+    private final AssistantToolExecutor toolExecutor;
+    private final String systemPrompt;
+    private final int maxToolIterations;
+
+    public SendChatMessageService(ChatCompletionPort chatCompletionPort,
+                                  AssistantToolRegistry toolRegistry,
+                                  AssistantToolExecutor toolExecutor,
+                                  String systemPrompt,
+                                  int maxToolIterations) {
         this.chatCompletionPort = chatCompletionPort;
+        this.toolRegistry = toolRegistry;
+        this.toolExecutor = toolExecutor;
         this.systemPrompt = systemPrompt;
+        this.maxToolIterations = maxToolIterations;
     }
 
     @Override
-    public String send(String userMessage, List<ChatMessage> history) {
+    public String send(String userMessage, List<ChatMessage> history, AssistantAuthContext authContext) {
         if (userMessage == null || userMessage.isBlank()) {
             throw new IllegalArgumentException("El mensaje no puede estar vacío.");
         }
+        if (authContext == null) {
+            throw new IllegalArgumentException("El contexto de autenticación es obligatorio.");
+        }
 
+        List<ChatMessage> conversation = buildConversation(history, userMessage);
+        List<AssistantToolDefinition> tools = toolRegistry.toolsForRole(authContext.role());
+
+        for (int iteration = 0; iteration < maxToolIterations; iteration++) {
+            ChatCompletionResult result = chatCompletionPort.complete(
+                    new ChatCompletionRequest(conversation, tools));
+
+            if (!result.hasToolCalls()) {
+                return requireNonBlankContent(result.content());
+            }
+
+            conversation.add(toAssistantToolCallMessage(result.toolCalls()));
+
+            for (ToolCall call : result.toolCalls()) {
+                String toolJson = toolExecutor.execute(call.name(), call.argumentsJson(), authContext);
+                conversation.add(new ChatMessage(ChatRole.TOOL, toolJson, call.id()));
+            }
+        }
+
+        return MAX_ITERATIONS_FALLBACK;
+    }
+
+    private List<ChatMessage> buildConversation(List<ChatMessage> history, String userMessage) {
         List<ChatMessage> conversation = new ArrayList<>();
         conversation.add(new ChatMessage(ChatRole.SYSTEM, systemPrompt));
 
@@ -34,6 +79,20 @@ public class SendChatMessageService implements SendChatMessageUseCase {
         }
 
         conversation.add(new ChatMessage(ChatRole.USER, userMessage.trim()));
-        return chatCompletionPort.complete(conversation);
+        return conversation;
+    }
+
+    private static ChatMessage toAssistantToolCallMessage(List<ToolCall> toolCalls) {
+        List<ChatToolCall> domainToolCalls = toolCalls.stream()
+                .map(call -> new ChatToolCall(call.id(), call.name(), call.argumentsJson()))
+                .toList();
+        return new ChatMessage(ChatRole.ASSISTANT, null, null, domainToolCalls);
+    }
+
+    private static String requireNonBlankContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalStateException("El asistente no devolvió contenido en la respuesta.");
+        }
+        return content;
     }
 }

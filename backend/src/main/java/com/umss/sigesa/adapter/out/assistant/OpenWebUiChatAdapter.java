@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
+import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
+import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
+import com.umss.sigesa.application.model.assistant.ToolCall;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantCompletionException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
+import com.umss.sigesa.domain.model.ChatToolCall;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -17,6 +22,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -30,7 +36,6 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
 
     public OpenWebUiChatAdapter(AssistantProperties properties) {
         this.properties = properties;
-        // Open WebUI (uvicorn) rejects Java's default HTTP/2 requests with "Invalid HTTP request received."
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(TIMEOUT)
@@ -38,7 +43,7 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
     }
 
     @Override
-    public String complete(List<ChatMessage> messages) {
+    public ChatCompletionResult complete(ChatCompletionRequest request) {
         if (!properties.isEnabled()) {
             throw new AssistantUnavailableException("El asistente está deshabilitado.");
         }
@@ -48,10 +53,10 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
         }
 
         try {
-            String requestBody = buildRequestBody(messages);
+            String requestBody = buildRequestBody(request);
             String endpoint = normalizeBaseUrl(properties.getBaseUrl()) + "/v1/chat/completions";
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(URI.create(endpoint))
                     .timeout(TIMEOUT)
                     .header("Content-Type", "application/json")
@@ -59,7 +64,7 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 401 || response.statusCode() == 403) {
                 throw new AssistantUnavailableException(
@@ -71,7 +76,7 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
                         "Open WebUI respondió con HTTP " + response.statusCode() + ": " + truncate(response.body()));
             }
 
-            return extractAssistantReply(response.body());
+            return extractCompletionResult(response.body());
         } catch (AssistantUnavailableException | AssistantCompletionException ex) {
             throw ex;
         } catch (InterruptedException ex) {
@@ -83,30 +88,87 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
         }
     }
 
-    private String buildRequestBody(List<ChatMessage> messages) throws Exception {
+    private String buildRequestBody(ChatCompletionRequest request) throws Exception {
         ObjectNode root = objectMapper.createObjectNode();
         root.put("model", properties.getModel());
         root.put("stream", false);
 
         ArrayNode messagesNode = root.putArray("messages");
-        for (ChatMessage message : messages) {
-            ObjectNode messageNode = messagesNode.addObject();
-            messageNode.put("role", message.role().name().toLowerCase());
-            messageNode.put("content", message.content());
+        for (ChatMessage message : request.messages()) {
+            appendMessageNode(messagesNode, message);
+        }
+
+        List<AssistantToolDefinition> tools = request.tools();
+        if (tools != null && !tools.isEmpty()) {
+            ArrayNode toolsNode = root.putArray("tools");
+            for (AssistantToolDefinition tool : tools) {
+                ObjectNode toolNode = toolsNode.addObject();
+                toolNode.put("type", "function");
+                ObjectNode functionNode = toolNode.putObject("function");
+                functionNode.put("name", tool.id());
+                functionNode.put("description", tool.description());
+                functionNode.set("parameters", objectMapper.valueToTree(tool.parameterSchema()));
+            }
         }
 
         return objectMapper.writeValueAsString(root);
     }
 
-    private String extractAssistantReply(String responseBody) throws Exception {
-        JsonNode root = objectMapper.readTree(responseBody);
-        JsonNode content = root.path("choices").path(0).path("message").path("content");
+    private void appendMessageNode(ArrayNode messagesNode, ChatMessage message) {
+        ObjectNode messageNode = messagesNode.addObject();
+        messageNode.put("role", message.role().name().toLowerCase());
 
-        if (content.isMissingNode() || content.asText().isBlank()) {
+        if (message.role() == ChatRole.TOOL) {
+            messageNode.put("tool_call_id", message.toolCallId());
+            messageNode.put("content", message.content());
+            return;
+        }
+
+        if (message.role() == ChatRole.ASSISTANT
+                && message.toolCalls() != null
+                && !message.toolCalls().isEmpty()) {
+            if (message.content() != null) {
+                messageNode.put("content", message.content());
+            } else {
+                messageNode.putNull("content");
+            }
+            ArrayNode toolCallsNode = messageNode.putArray("tool_calls");
+            for (ChatToolCall toolCall : message.toolCalls()) {
+                ObjectNode toolCallNode = toolCallsNode.addObject();
+                toolCallNode.put("id", toolCall.id());
+                toolCallNode.put("type", "function");
+                ObjectNode functionNode = toolCallNode.putObject("function");
+                functionNode.put("name", toolCall.name());
+                functionNode.put("arguments", toolCall.argumentsJson());
+            }
+            return;
+        }
+
+        messageNode.put("content", message.content() != null ? message.content() : "");
+    }
+
+    private ChatCompletionResult extractCompletionResult(String responseBody) throws Exception {
+        JsonNode message = objectMapper.readTree(responseBody).path("choices").path(0).path("message");
+        JsonNode toolCallsNode = message.path("tool_calls");
+
+        if (toolCallsNode.isArray() && !toolCallsNode.isEmpty()) {
+            List<ToolCall> toolCalls = new ArrayList<>();
+            for (JsonNode toolCallNode : toolCallsNode) {
+                toolCalls.add(new ToolCall(
+                        toolCallNode.path("id").asText(),
+                        toolCallNode.path("function").path("name").asText(),
+                        toolCallNode.path("function").path("arguments").asText()
+                ));
+            }
+            return new ChatCompletionResult(null, toolCalls);
+        }
+
+        JsonNode content = message.path("content");
+        if (content.isMissingNode() || content.isNull() || content.asText().isBlank()) {
             throw new AssistantCompletionException("Open WebUI no devolvió contenido en la respuesta.");
         }
 
-        return content.asText();
+        return new ChatCompletionResult(content.asText(), List.of());
     }
 
     private static String normalizeBaseUrl(String baseUrl) {

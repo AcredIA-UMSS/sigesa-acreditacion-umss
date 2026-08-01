@@ -1,10 +1,9 @@
 package com.umss.sigesa.application.port.out;
 
-import com.umss.sigesa.domain.model.ChatMessage;
-
-import java.util.List;
+import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
+import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
 
 public interface ChatCompletionPort {
 
-    String complete(List<ChatMessage> messages);
+    ChatCompletionResult complete(ChatCompletionRequest request);
 }

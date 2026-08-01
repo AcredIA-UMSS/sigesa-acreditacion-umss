@@ -1,10 +1,11 @@
 # PROMPT_MAPPING — Sprint 02
 
-> Registro PM del sprint 02. Trazabilidad: `Código → PR-IMPL-012 → DD-SYS-002 → PRD-REQ-028 → DTP`.
+> Registro PM del sprint 02. Trazabilidad: `Código → PR-IMPL → DD-SYS-002 → PRD-REQ-028 → DTP`.
 
 | ID Mapeo | PR-IMPL | Design Doc | FSD / PRD | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
+| PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
 
 ---
 
@@ -107,3 +108,59 @@ docker-compose.yml
 - Primera inferencia puede tardar 5–10 s (carga del modelo en Ollama).
 - No commitear `.env` con `SIGESA_ASSISTANT_API_KEY`.
 - Evolución: streaming, RAG normativo, persistencia — ver DD-SYS-002 §8.
+
+---
+
+## PM-002
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-002 |
+| **Fecha** | 2026-07-31 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Contrato implementación tool calling read-only (Fase 1.1 MOD-ASSISTANT) |
+| **Objetivo** | Documentar e implementar loop de tool calling en backend con tool `list_users` exclusiva JD |
+| **Contexto** | Extiende PR-IMPL-012 / DD-SYS-002 §11. Catálogo [`TOOL-CATALOG.md`](../../design/assistant/TOOL-CATALOG.md). API [`API-USER-03`](../../product/api/API-USER-03.md). |
+| **PR-IMPL vinculado** | [PR-IMPL-013](../../prompts/impl/PR-IMPL-013.md) |
+| **DD vinculado** | [DD-SYS-002 §11](../../design/DD-SYS-002.md#11-tool-calling-fase-11--read-only) |
+| **PRD / FSD vinculado** | PRD-REQ-028 · FSD-UC-002 (listado usuarios vía `ListUsersUseCase`) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Crear PR-IMPL-013 con el loop de tool calling:
+- SendChatMessageService multi-turno (max 3 iteraciones).
+- AssistantToolRegistry + AssistantToolExecutor.
+- Tool list_users (solo JD) → ListUsersUseCase.
+- Extender ChatCompletionPort / OpenWebUiChatAdapter (tools + tool_calls).
+- Sin cambios contrato frontend POST /assistant/chat.
+```
+
+### Entradas auxiliares
+
+```text
+docs/design/DD-SYS-002.md §11
+docs/design/assistant/TOOL-CATALOG.md
+docs/product/api/API-USER-03.md
+docs/prompts/impl/PR-IMPL-012.md
+AGENTS.md
+```
+
+### Entregables documentales (esta fase)
+
+| Tipo | Ruta |
+| --- | --- |
+| Contrato prompt | `docs/prompts/impl/PR-IMPL-013.md` |
+| Catálogo tools | `docs/design/assistant/TOOL-CATALOG.md` |
+| Contrato API | `docs/product/api/API-USER-03.md` |
+| DD §11 | `docs/design/DD-SYS-002.md` |
+
+### Criterios de cierre implementación
+
+1. Loop tool calling operativo con `list_users` para JD.
+2. CC/TD no reciben tool en payload LLM.
+3. Tests §10 PR-IMPL-013 verdes; JaCoCo ≥ 90% clases assistant tocadas.
+4. `@dtp-sync` actualiza DTP §B.5.
+5. Estado PM-002 → completado.

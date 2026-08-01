@@ -46,6 +46,7 @@ artefactos_vivos:
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
+| 31/07/2026 | **MOD-ASSISTANT tool calling Fase 1.1:** loop backend read-only; tool `list_users` (solo JD) vía `ListUsersUseCase`; max 3 iteraciones. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | PM-002 / PR-IMPL-013 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
 | 23/07/2026 | **Full-Stack MOD-PROCESS:** Arquitectura Hexagonal estricta Backend y UI Frontend (React/Orval) para clonación de Plantillas (`PROCESS_ALREADY_ACTIVE`). | FSD-UC-003 / DD-UC-003 | N/A | PM-001 | AI Agent |
 | 26/06/2026 | Implementación MOD-EVIDENCE: carga v1 multipart, SHA-256, `indicator_state_history`, outbox stub, seed CC. | FSD-UC-004 / DD-UC-004 | N/A | PM-012 / PR-IMPL-006 | Cursor Agent |
@@ -192,23 +193,26 @@ artefactos_vivos:
 
 ### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
 
-**Implementación:** Sprint 02 PM-001 · **Prompts:** `PR-IMPL-012` · **PRD:** PRD-REQ-028
+**Implementación:** Sprint 02 PM-001 + PM-002 · **Prompts:** `PR-IMPL-012`, `PR-IMPL-013` · **PRD:** PRD-REQ-028
 
 | Área | Detalle vigente |
 | --- | --- |
 | **Endpoints** | `GET /api/v1/assistant/status`; `POST /api/v1/assistant/chat` |
-| **RBAC** | Todo usuario autenticado con JWT válido (sin rol adicional en MVP) |
+| **RBAC chat** | Todo usuario autenticado con JWT válido |
+| **RBAC tools** | Registro dinámico por rol JWT; Fase 1.1: `list_users` **solo JD** |
 | **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1) |
+| **Tool calling** | Loop en `SendChatMessageService` (max 3 iter.); `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
+| **Tools Fase 1.1** | `list_users` → `ListUsersUseCase` (read-only); catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
-| **Config YAML** | `sigesa.assistant.*` en `application.yaml` |
-| **Variables entorno** | `SIGESA_ASSISTANT_ENABLED`, `SIGESA_ASSISTANT_BASE_URL`, `SIGESA_ASSISTANT_API_KEY`, `SIGESA_ASSISTANT_MODEL` |
+| **Config YAML** | `sigesa.assistant.*` — incluye `max-tool-iterations` (default 3) |
+| **Variables entorno** | `SIGESA_ASSISTANT_ENABLED`, `SIGESA_ASSISTANT_BASE_URL`, `SIGESA_ASSISTANT_API_KEY`, `SIGESA_ASSISTANT_MODEL`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` |
 | **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
-| **Frontend** | Ruta `/ayuda`; feature `frontend/src/features/assistant/`; cliente `assistant-controller.ts` |
+| **Frontend** | Ruta `/ayuda`; feature `frontend/src/features/assistant/`; contrato REST sin cambios (`{ reply }`) |
 | **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED` |
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |
 | **Streaming** | No (`stream: false`) |
-| **Design doc** | [`docs/design/DD-SYS-002.md`](../design/DD-SYS-002.md) |
+| **Design doc** | [`docs/design/DD-SYS-002.md`](../design/DD-SYS-002.md) §11 |
 
 ## C. Integraciones
 

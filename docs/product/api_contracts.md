@@ -104,13 +104,18 @@ security:
 
 ### API-USER-03 — `GET /admin/users`
 
+> **Contrato completo:** [`docs/product/api/API-USER-03.md`](api/API-USER-03.md)
+
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-002 |
 | **x-allowed-roles** | `[JD]` |
 | **Query** | `role?` (`CC`/`TD`/`JD`), `status?` (`INACTIVE`/`ACTIVE`/`DEACTIVATED`) |
 | **200** | `[{ "userId", "email", "role", "status", "programIds" }]` |
+| **401** | `UNAUTHORIZED` — sin JWT o token inválido |
+| **403** | Rol distinto de JD |
 | **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
+| **Tool asistente** | `list_users` — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
 
 ### API-CAT-01 — `GET /programs`
 
@@ -359,6 +364,7 @@ security:
 | POST /reports/executive/pdf | | | ✓ | |
 | GET /public/programs/* | | | | ✓ |
 | POST /admin/users | | | ✓ | |
+| GET /admin/users | | | ✓ | |
 
 ---
 
@@ -377,6 +383,6 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
-| v1.3 | 2026-06-26 | MOD-EVIDENCE: API-EVD-01 multipart bajo `/api/v1`; códigos 409/413/422 |
+| v1.4 | 2026-07-31 | API-USER-03: contrato formal `docs/product/api/API-USER-03.md`; GET `/admin/users`; tool `list_users` |
 | v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |
 | Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8; RBAC y errores de estado |
