@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.auth;
 
+import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
@@ -50,10 +51,12 @@ class RegisterUserServiceTest {
         UUID userId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
         AppUser saved = new AppUser(userId, Email.of("cc@umss.edu.bo"), Role.CC, UserStatus.INACTIVE,
-                LocalDateTime.now(), LocalDateTime.now());
+                LocalDateTime.now(), LocalDateTime.now(), "Juan", "Coordinador", "70123456");
         when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
 
-        var result = registerUserService.register("cc@umss.edu.bo", "CC", programId, "temp".toCharArray());
+        var command = new RegisterUserUseCase.RegisterUserCommand(
+                "cc@umss.edu.bo", "CC", programId, "Juan", "Coordinador", "70123456", "Segura2026!".toCharArray());
+        var result = registerUserService.register(command);
 
         assertEquals(UserStatus.INACTIVE, result.status());
         assertEquals(userId, result.userId());
@@ -70,10 +73,12 @@ class RegisterUserServiceTest {
     void altaTd_inactivoSinAssignment() {
         UUID userId = UUID.randomUUID();
         AppUser saved = new AppUser(userId, Email.of("td@umss.edu.bo"), Role.TD, UserStatus.INACTIVE,
-                LocalDateTime.now(), LocalDateTime.now());
+                LocalDateTime.now(), LocalDateTime.now(), "Ana", "Técnica", "72345678");
         when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
 
-        var result = registerUserService.register("td@umss.edu.bo", "TD", null, "temp".toCharArray());
+        var command = new RegisterUserUseCase.RegisterUserCommand(
+                "td@umss.edu.bo", "TD", null, "Ana", "Técnica", "72345678", "Segura2026!".toCharArray());
+        var result = registerUserService.register(command);
 
         assertEquals(UserStatus.INACTIVE, result.status());
         verify(assignmentRepository, never()).save(any());
@@ -85,10 +90,11 @@ class RegisterUserServiceTest {
     void altaJd_inactivoSinAssignment() {
         UUID userId = UUID.randomUUID();
         AppUser saved = new AppUser(userId, Email.of("jd@umss.edu.bo"), Role.JD, UserStatus.INACTIVE,
-                LocalDateTime.now(), LocalDateTime.now());
+                LocalDateTime.now(), LocalDateTime.now(), "Carlos", "Jefe", "73456789");
         when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
 
-        registerUserService.register("jd@umss.edu.bo", "jd", null, "temp".toCharArray());
+        registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                "jd@umss.edu.bo", "jd", null, "Carlos", "Jefe", "73456789", "Segura2026!".toCharArray()));
 
         verify(assignmentRepository, never()).save(any());
     }
@@ -97,21 +103,24 @@ class RegisterUserServiceTest {
     @DisplayName("Email no @umss.edu.bo rechazado (FSD-BR-12)")
     void emailNoUmss_rechazado() {
         assertThrows(InvalidEmailDomainException.class,
-                () -> registerUserService.register("user@gmail.com", "TD", null, "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "user@gmail.com", "TD", null, "Ana", "López", "71234567", "Segura2026!".toCharArray())));
     }
 
     @Test
     @DisplayName("[CC] sin programId — error de dominio")
     void ccSinProgramId_rechazado() {
         assertThrows(InvalidScopeException.class,
-                () -> registerUserService.register("cc@umss.edu.bo", "CC", null, "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "cc@umss.edu.bo", "CC", null, "Juan", "Pérez", "71234567", "Segura2026!".toCharArray())));
     }
 
     @Test
     @DisplayName("Rol inválido rechazado")
     void rolInvalido_rechazado() {
         assertThrows(InvalidRoleException.class,
-                () -> registerUserService.register("cc@umss.edu.bo", "SUPERADMIN", null, "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "cc@umss.edu.bo", "SUPERADMIN", null, "Juan", "Pérez", "71234567", "Segura2026!".toCharArray())));
     }
 
     @Test
@@ -122,7 +131,8 @@ class RegisterUserServiceTest {
                         LocalDateTime.now(), LocalDateTime.now())));
 
         assertThrows(DuplicateEmailException.class,
-                () -> registerUserService.register("cc@umss.edu.bo", "CC", UUID.randomUUID(), "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "cc@umss.edu.bo", "CC", UUID.randomUUID(), "Juan", "Pérez", "71234567", "Segura2026!".toCharArray())));
         verify(userRepository, never()).save(any(), any(char[].class));
     }
 
@@ -132,10 +142,11 @@ class RegisterUserServiceTest {
         UUID userId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
         AppUser saved = new AppUser(userId, Email.of("ee@umss.edu.bo"), Role.EE, UserStatus.INACTIVE,
-                LocalDateTime.now(), LocalDateTime.now());
+                LocalDateTime.now(), LocalDateTime.now(), "Pedro", "Evaluador", "74567890");
         when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
 
-        var result = registerUserService.register("ee@umss.edu.bo", "EE", programId, "temp".toCharArray());
+        var result = registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                "ee@umss.edu.bo", "EE", programId, "Pedro", "Evaluador", "74567890", "Segura2026!".toCharArray()));
 
         assertEquals(UserStatus.INACTIVE, result.status());
         verify(assignmentRepository).save(any());
@@ -145,13 +156,15 @@ class RegisterUserServiceTest {
     @DisplayName("[EE] sin programId — error de dominio")
     void eeSinProgramId_rechazado() {
         assertThrows(InvalidScopeException.class,
-                () -> registerUserService.register("ee@umss.edu.bo", "EE", null, "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "ee@umss.edu.bo", "EE", null, "Pedro", "Evaluador", "74567890", "Segura2026!".toCharArray())));
     }
 
     @Test
     @DisplayName("Rol vacío rechazado")
     void rolVacio_rechazado() {
         assertThrows(InvalidRoleException.class,
-                () -> registerUserService.register("cc@umss.edu.bo", "  ", null, "temp".toCharArray()));
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "cc@umss.edu.bo", "  ", null, "Juan", "Pérez", "71234567", "Segura2026!".toCharArray())));
     }
 }

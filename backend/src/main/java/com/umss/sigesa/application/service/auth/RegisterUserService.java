@@ -11,6 +11,7 @@ import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Email;
 import com.umss.sigesa.domain.model.Role;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
+import com.umss.sigesa.domain.model.UserProfile;
 import com.umss.sigesa.domain.model.UserStatus;
 
 import java.time.LocalDateTime;
@@ -31,10 +32,15 @@ public class RegisterUserService implements RegisterUserUseCase {
     }
 
     @Override
-    public RegisterResult register(String email, String roleName, UUID programId, char[] temporaryPassword) {
-        Email emailVo = Email.of(email);
-        Role role = parseRole(roleName);
-        validateScope(role, programId);
+    public RegisterResult register(RegisterUserCommand command) {
+        Email emailVo = Email.of(command.email());
+        Role role = parseRole(command.roleName());
+        validateScope(role, command.programId());
+
+        String firstName = UserProfile.normalizeName(command.firstName(), "Nombre(s)");
+        String lastName = UserProfile.normalizeName(command.lastName(), "Apellido(s)");
+        String phoneNumber = UserProfile.normalizePhone(command.phoneNumber());
+        UserProfile.validatePassword(command.password());
 
         if (userRepository.findByEmail(emailVo).isPresent()) {
             throw new DuplicateEmailException();
@@ -47,16 +53,19 @@ public class RegisterUserService implements RegisterUserUseCase {
                 role,
                 UserStatus.INACTIVE,
                 now,
-                now
+                now,
+                firstName,
+                lastName,
+                phoneNumber
         );
 
-        AppUser saved = userRepository.save(user, temporaryPassword);
+        AppUser saved = userRepository.save(user, command.password());
 
-        if (requiresProgramAssignment(role) && programId != null) {
+        if (requiresProgramAssignment(role) && command.programId() != null) {
             UserProgramAssignment assignment = new UserProgramAssignment(
                     UUID.randomUUID(),
                     saved.getId(),
-                    programId,
+                    command.programId(),
                     now,
                     null
             );

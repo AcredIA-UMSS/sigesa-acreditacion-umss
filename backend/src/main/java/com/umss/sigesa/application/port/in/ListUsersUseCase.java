@@ -5,7 +5,18 @@ import java.util.UUID;
 
 public interface ListUsersUseCase {
 
-    record UserSummary(UUID userId, String email, String role, String status, List<UUID> programIds) {}
+    record UserSummary(
+            UUID userId,
+            String email,
+            String role,
+            String status,
+            List<UUID> programIds,
+            String firstName,
+            String lastName,
+            String fullName,
+            String phoneNumber
+    ) {
+    }
 
     List<UserSummary> list(String roleFilter, String statusFilter);
 }

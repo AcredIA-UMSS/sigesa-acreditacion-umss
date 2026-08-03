@@ -6,7 +6,18 @@ import java.util.UUID;
 
 public interface RegisterUserUseCase {
 
-    RegisterResult register(String email, String roleName, UUID programId, char[] temporaryPassword);
+    RegisterResult register(RegisterUserCommand command);
+
+    record RegisterUserCommand(
+            String email,
+            String roleName,
+            UUID programId,
+            String firstName,
+            String lastName,
+            String phoneNumber,
+            char[] password
+    ) {
+    }
 
     record RegisterResult(UUID userId, UserStatus status) {
     }

@@ -18,25 +18,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.UUID;
 
 /**
- * Alta de usuarios por [JD]. La contraseña temporal se genera en servidor y debe
- * entregarse al usuario por canal offline acordado con DUEA (v1.0: no via API).
+ * Alta de usuarios por [JD]. La contraseña la define [JD] en el alta;
+ * no se almacena en texto plano ni puede recuperarse después.
  */
 @RestController
 @RequestMapping("/api/v1/admin/users")
 public class UserAdminController {
 
-    private static final String TEMP_PASSWORD_ALPHABET =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
-
     private final RegisterUserUseCase registerUserUseCase;
     private final DeactivateUserUseCase deactivateUserUseCase;
     private final ListUsersUseCase listUsersUseCase;
-    private final SecureRandom secureRandom = new SecureRandom();
 
     public UserAdminController(RegisterUserUseCase registerUserUseCase,
                                DeactivateUserUseCase deactivateUserUseCase,
@@ -56,26 +51,35 @@ public class UserAdminController {
                         summary.email(),
                         summary.role(),
                         summary.status(),
-                        summary.programIds()
+                        summary.programIds(),
+                        summary.firstName(),
+                        summary.lastName(),
+                        summary.fullName(),
+                        summary.phoneNumber()
                 ))
                 .toList();
     }
 
     @PostMapping
     public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
-        char[] tempPassword = generateTemporaryPassword();
+        char[] password = request.password().toCharArray();
         try {
             RegisterUserUseCase.RegisterResult result = registerUserUseCase.register(
-                    request.email(),
-                    request.role(),
-                    request.programId(),
-                    tempPassword
+                    new RegisterUserUseCase.RegisterUserCommand(
+                            request.email(),
+                            request.role(),
+                            request.programId(),
+                            request.firstName(),
+                            request.lastName(),
+                            request.phoneNumber(),
+                            password
+                    )
             );
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new RegisterUserResponse(result.userId(), result.status().name()));
         } finally {
-            java.util.Arrays.fill(tempPassword, '\0');
+            java.util.Arrays.fill(password, '\0');
         }
     }
 
@@ -83,13 +87,5 @@ public class UserAdminController {
     public ResponseEntity<Void> deactivate(@PathVariable UUID id) {
         deactivateUserUseCase.deactivate(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private char[] generateTemporaryPassword() {
-        char[] password = new char[16];
-        for (int i = 0; i < password.length; i++) {
-            password[i] = TEMP_PASSWORD_ALPHABET.charAt(secureRandom.nextInt(TEMP_PASSWORD_ALPHABET.length()));
-        }
-        return password;
     }
 }

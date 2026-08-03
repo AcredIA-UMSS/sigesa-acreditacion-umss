@@ -80,6 +80,9 @@ public class AuthDataLoader implements ApplicationRunner {
         user.setStatus(status);
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
+        user.setFirstName("Demo");
+        user.setLastName(role.name());
+        user.setPhoneNumber("71234567");
         userRepository.save(user);
 
         if (programId != null) {

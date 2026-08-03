@@ -174,7 +174,7 @@ AGENTS.md
 | --- | --- |
 | **ID** | PM-003 |
 | **Fecha** | 2026-08-03 |
-| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Solicitante** | Aylen Gonzáles |
 | **Agente/Entorno** | Cursor IDE — Agent |
 | **Tarea** | Habilitación rol evaluador externo [EE] (MOD-REVIEW) |
 | **Objetivo** | Documentar e implementar acceso solo lectura de [EE] a documentación de carrera asignada |
