@@ -7,6 +7,7 @@
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
 | PM-003 | PR-IMPL-014 | DD-UC-019 | PRD-REQ-029 / FSD-UC-019 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
+| PM-004 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
 
 ---
 
@@ -230,3 +231,89 @@ Implementar rol EE (evaluador externo):
 2. [EE] inicia sesión y ve dashboard solo lectura de su carrera.
 3. POST evidencias / export / admin → 403 para EE.
 4. Documentación viva actualizada (PRD, FSD, reglas, DTP).
+
+---
+
+## PM-004
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-004 |
+| **Fecha** | 2026-08-03 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Mejora UI gestión de usuarios [JD] (MOD-AUTH) |
+| **Objetivo** | Listado con nombre completo, modal de alta según mockup, validaciones de campos y entrega de credenciales solo al crear usuario |
+| **Contexto** | Extiende FSD-UC-002 / DD-UC-002. Perfil extendido en BD; contraseña definida por JD (no recuperable después del alta). Sin campo cédula. |
+| **PR-IMPL vinculado** | [PR-IMPL-015](../../prompts/impl/PR-IMPL-015.md) |
+| **DD vinculado** | [DD-UC-002](../../design/DD-UC-002.md) |
+| **PRD / FSD vinculado** | PRD-REQ-001 · PRD-US-002 · FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+En la pantalla de gestión de usuarios debe verse la lista de usuarios registrados con nombre completo.
+Botón "Agregar Usuario" → pop up centralizado (mockup Datos personales) con:
+  Nombre(s), Apellido(s), Correo, Celular, Rol, Contraseña, Repetir contraseña.
+  Sin Cédula de Identidad. Botones Guardar y Cerrar.
+  Diálogo de confirmación al guardar con credenciales para compartir (contraseña no recuperable después).
+Validaciones con mensajes claros:
+  - Nombre/Apellido: al menos una letra; no solo números ni símbolos.
+  - Celular: numérico 8 dígitos, rango 60000000–79999999 (Bolivia).
+  - Correo: formato email estándar @umss.edu.bo.
+  - Contraseña: coincidir y regla mínima de seguridad del sistema.
+Backend: persistir firstName, lastName, phoneNumber; password del JD en POST.
+Registrar PM-004 en sprint_02/PROMPT_MAPPING.md.
+```
+
+### Entradas auxiliares
+
+```text
+docs/design/DD-UC-002.md
+docs/product/uc/FSD-UC-002.md
+AGENTS.md
+.cursor/rules/frontend-design.mdc
+Mockup UI "AÑADIR USUARIO" (Aylen)
+```
+
+### Archivos generados o modificados
+
+**Documentación**
+
+- `docs/prompts/impl/PR-IMPL-015.md`
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-004)
+
+**Backend**
+
+- `db/migration/V3__app_user_profile_fields.sql`
+- `domain/model/UserProfile.java`, `AppUser.java`
+- `domain/exception/InvalidUserProfileException.java`, `WeakPasswordException.java`
+- `application/port/in/RegisterUserUseCase.java`, `ListUsersUseCase.java`
+- `application/service/auth/RegisterUserService.java`, `ListUsersService.java`
+- `adapter/in/web/UserAdminController.java`
+- `adapter/in/web/dto/RegisterUserRequest.java`, `UserAdminSummaryResponse.java`
+- `adapter/in/web/advice/AuthExceptionHandler.java`
+- `adapter/out/persistance/entity/AppUserEntity.java`
+- `config/AuthDataLoader.java`
+- `RegisterUserServiceTest.java`, `UserAdminControllerTest.java`, `ModAuthServiceIntegrationTest.java`
+
+**Frontend**
+
+- `features/admin/users/pages/UsersAdminPage.tsx`
+- `features/admin/users/components/UsersTableUI.tsx`
+- `features/admin/users/components/AddUserModalUI.tsx`
+- `features/admin/users/components/UserSaveSuccessDialog.tsx`
+- `features/admin/users/lib/userFormValidation.ts`
+- `features/admin/users/hooks/useRegisterUserForm.ts`, `useUsersList.ts`
+- `components/ui/TextInput.tsx`, `Select.tsx` (prop `requiredMark`)
+- `api/model/registerUserRequest.ts`, `userAdminSummaryResponse.ts`
+- Eliminado: `RegisterUserFormUI.tsx`
+
+### Criterios de cierre
+
+1. Listado muestra nombre completo, correo, celular, rol y estado desde BD.
+2. Modal de alta con validaciones y diseño institucional UMSS.
+3. Diálogo post-alta con credenciales copiables (solo al crear).
+4. Contraseñas existentes no visibles (hash Argon2).
+5. PM-004 registrado en este archivo.
