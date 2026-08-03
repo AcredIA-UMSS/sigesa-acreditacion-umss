@@ -18,8 +18,8 @@ public class AccreditationProcessPersistenceAdapter implements AccreditationProc
     private final ProcessPersistenceMapper mapper;
 
     @Override
-    public boolean existsActiveProcessByCareer(UUID careerId) {
-        return repository.existsByCareerIdAndStatus(careerId, "ACTIVE");
+    public boolean existsActiveProcessByCareerAndTemplateType(UUID careerId, String templateType) {
+        return repository.existsActiveByCareerIdAndTemplateType(careerId, templateType);
     }
 
     @Override
