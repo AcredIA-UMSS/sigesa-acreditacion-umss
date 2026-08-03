@@ -127,6 +127,28 @@ class RegisterUserServiceTest {
     }
 
     @Test
+    @DisplayName("Alta [EE] — INACTIVE + assignment a carrera autorizada")
+    void altaEe_inactivoConAssignment() {
+        UUID userId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        AppUser saved = new AppUser(userId, Email.of("ee@umss.edu.bo"), Role.EE, UserStatus.INACTIVE,
+                LocalDateTime.now(), LocalDateTime.now());
+        when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
+
+        var result = registerUserService.register("ee@umss.edu.bo", "EE", programId, "temp".toCharArray());
+
+        assertEquals(UserStatus.INACTIVE, result.status());
+        verify(assignmentRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("[EE] sin programId — error de dominio")
+    void eeSinProgramId_rechazado() {
+        assertThrows(InvalidScopeException.class,
+                () -> registerUserService.register("ee@umss.edu.bo", "EE", null, "temp".toCharArray()));
+    }
+
+    @Test
     @DisplayName("Rol vacío rechazado")
     void rolVacio_rechazado() {
         assertThrows(InvalidRoleException.class,

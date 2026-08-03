@@ -19,7 +19,7 @@
 |------|-----|
 | Validación | BR-01, BR-05, BR-07 |
 | Política | BR-02, BR-03, BR-10, BR-14, BR-16, BR-18 |
-| Autorización | BR-04, BR-09, BR-12 |
+| Autorización | BR-04, BR-09, BR-12, BR-19 |
 | Trazabilidad | BR-06, BR-15 |
 | Estado | BR-07 |
 | Negocio | BR-08, BR-17 |
@@ -244,6 +244,19 @@
 
 ---
 
+### FSD-BR-19 — [EE] solo lectura documental
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Autorización |
+| **Origen BRD** | BRD-REQ-001 |
+| **UC** | UC-019 |
+| **Enunciado** | El evaluador externo [EE] solo consulta documentación de su carrera asignada. Prohibidas carga/subsanación de Evidencia, dictamen de Indicador, cierre de Fase, administración de usuarios y exportación de reportes. |
+| **Violación** | `403 FORBIDDEN_ROLE` |
+| **Verificación** | PRD-US-026; tests security EE vs POST evidencias/export. |
+
+---
+
 ### FSD-BR-18 — Progreso obligatorio en cargas > umbral
 
 | Campo | Valor |
@@ -274,6 +287,7 @@
 | BR-13 | 015 |
 | BR-14 | 014 |
 | BR-18 | 004 |
+| BR-19 | 019 |
 
 ---
 

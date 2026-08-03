@@ -25,8 +25,10 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
   const { session, logout } = useAuth();
   const navigate = useNavigate();
 
-  const initials = session?.role === 'JD' ? 'JD' : session?.role ?? 'U';
+  const isExternalEvaluator = session?.role === 'EE';
+  const initials = session?.role ?? 'U';
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
+  const panelSubtitle = isExternalEvaluator ? 'REVISIÓN DOCUMENTAL' : 'PANEL ADMINISTRATIVO';
 
   const handleLogout = () => {
     logout();
@@ -58,7 +60,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         {isExpanded && (
           <div className="overflow-hidden whitespace-nowrap">
             <h1 className="text-heading-sm font-bold leading-tight">UMSS DUEA</h1>
-            <p className="text-label-md text-primary-200">PANEL ADMINISTRATIVO</p>
+            <p className="text-label-md text-primary-200">{panelSubtitle}</p>
           </div>
         )}
       </div>
@@ -73,14 +75,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           to="/dashboard"
         />
 
-        <NavItem
-          icon={<Network size={20} />}
-          label="GESTIÓN PROCESOS"
-          isExpanded={isExpanded}
-          hasDropdown
-          active={activeNav === 'processes'}
-          to="/procesos/nuevo"
-        />
+        {!isExternalEvaluator && (
+          <NavItem
+            icon={<Network size={20} />}
+            label="GESTIÓN PROCESOS"
+            isExpanded={isExpanded}
+            hasDropdown
+            active={activeNav === 'processes'}
+            to="/procesos/nuevo"
+          />
+        )}
 
         {session?.role === 'JD' && (
           <NavItem
@@ -92,19 +96,24 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           />
         )}
 
-        <NavItem
-          icon={<BarChart size={20} />}
-          label="REPORTES"
-          isExpanded={isExpanded}
-          hasDropdown
-          active={activeNav === 'reports'}
-        />
-        <NavItem
-          icon={<History size={20} />}
-          label="HISTORIAL"
-          isExpanded={isExpanded}
-          active={activeNav === 'history'}
-        />
+        {!isExternalEvaluator && (
+          <>
+            <NavItem
+              icon={<BarChart size={20} />}
+              label="REPORTES"
+              isExpanded={isExpanded}
+              hasDropdown
+              active={activeNav === 'reports'}
+            />
+            <NavItem
+              icon={<History size={20} />}
+              label="HISTORIAL"
+              isExpanded={isExpanded}
+              active={activeNav === 'history'}
+            />
+          </>
+        )}
+
         <NavItem
           icon={<HelpCircle size={20} />}
           label="AYUDA"

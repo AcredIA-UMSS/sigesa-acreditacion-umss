@@ -6,6 +6,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
+| PM-003 | PR-IMPL-014 | DD-UC-019 | PRD-REQ-029 / FSD-UC-019 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
 
 ---
 
@@ -164,3 +165,68 @@ AGENTS.md
 3. Tests §10 PR-IMPL-013 verdes; JaCoCo ≥ 90% clases assistant tocadas.
 4. `@dtp-sync` actualiza DTP §B.5.
 5. Estado PM-002 → completado.
+
+---
+
+## PM-003
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-003 |
+| **Fecha** | 2026-08-03 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Habilitación rol evaluador externo [EE] (MOD-REVIEW) |
+| **Objetivo** | Documentar e implementar acceso solo lectura de [EE] a documentación de carrera asignada |
+| **Contexto** | Rol planificado en BRD/MRD/PRD; v1.1. Alcance: login JWT, alta por [JD], dashboard KPI reutilizado, sin mutaciones. |
+| **PR-IMPL vinculado** | [PR-IMPL-014](../../prompts/impl/PR-IMPL-014.md) |
+| **DD vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
+| **PRD / FSD vinculado** | PRD-REQ-029 · PRD-US-026 · FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Implementar rol EE (evaluador externo):
+- Documentación: FSD-UC-019, DD-UC-019, PR-IMPL-014, PRD-US-026, FSD-BR-19.
+- Backend: Role.EE, RegisterUserService scope, dashboard aggregation, SecurityConfig export.
+- Frontend: roleLabels, CcOnlyRoute, Sidebar acotado, dashboard read-only.
+- Seed dev: ee@umss.edu.bo / EvalDemo2026!
+- Registrar PM-003 en sprint_02/PROMPT_MAPPING.md
+```
+
+### Archivos generados o modificados
+
+**Documentación**
+
+- `docs/product/uc/FSD-UC-019.md`
+- `docs/design/DD-UC-019.md`
+- `docs/prompts/impl/PR-IMPL-014.md`
+- `docs/product/glosario.md`, `FSD.md`, `PRD.md`, `reglas_negocio.md`, `FSD-UC-002.md`, `DTP.md`
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-003)
+
+**Backend**
+
+- `domain/model/Role.java`
+- `application/service/auth/RegisterUserService.java`
+- `application/service/dashboard/DashboardSummaryAggregationService.java`
+- `adapter/in/security/SecurityConfig.java`
+- `config/AuthDataLoader.java`
+- `application/service/assistant/AssistantToolRegistry.java`
+- `RegisterUserServiceTest.java`
+
+**Frontend**
+
+- `lib/auth/roleLabels.ts`
+- `components/auth/CcOnlyRoute.tsx`
+- `App.tsx`, `Sidebar.tsx`
+- `features/dashboard/pages/DashboardPage.tsx`
+- `features/dashboard/components/CoordinatorDashboardSection.tsx`
+- `README.md`
+
+### Criterios de cierre
+
+1. [JD] registra [EE] con carrera asignada.
+2. [EE] inicia sesión y ve dashboard solo lectura de su carrera.
+3. POST evidencias / export / admin → 403 para EE.
+4. Documentación viva actualizada (PRD, FSD, reglas, DTP).

@@ -54,6 +54,7 @@ ultima_actualizacion: "2026-06-23"
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
 | `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |
 | `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
+| `FSD-UC-019` | Revisión documental [EE] | [EE] | v1.1 | **En Curso** | [Ver detalle](uc/FSD-UC-019.md) | [`DD-UC-019`](../design/DD-UC-019.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Verificado` · `Obsoleto`
 
@@ -77,6 +78,7 @@ ultima_actualizacion: "2026-06-23"
 | [TD] | Revisa, aprueba/rechaza Indicador; cierra Fase |
 | [JD] | Usuarios, plantillas, semáforo, PDF, publicación |
 | [P] | Consulta pública (solo publicados) |
+| [EE] | Revisión documental solo lectura de carrera asignada |
 
 ---
 
@@ -110,3 +112,4 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en [`uc/`](uc/) |
 | 2026-06-15 | UC-003 marcado **En Curso** (scaffolding Gestión de Fases en código) |
 | 2026-06-23 | Separación trazabilidad 1:1: `DD-UC-001`/`DD-UC-002`; prompts `PR-IMPL-001`/`PR-IMPL-002` (histórico `PR-IMPL-004`) |
+| 2026-08-03 | Rol [EE] operativo v1.1: `FSD-UC-019`, `DD-UC-019`, `PR-IMPL-014`, `FSD-BR-19` |

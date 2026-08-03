@@ -52,7 +52,7 @@ public class RegisterUserService implements RegisterUserUseCase {
 
         AppUser saved = userRepository.save(user, temporaryPassword);
 
-        if (role == Role.CC && programId != null) {
+        if (requiresProgramAssignment(role) && programId != null) {
             UserProgramAssignment assignment = new UserProgramAssignment(
                     UUID.randomUUID(),
                     saved.getId(),
@@ -68,9 +68,13 @@ public class RegisterUserService implements RegisterUserUseCase {
     }
 
     private void validateScope(Role role, UUID programId) {
-        if (role == Role.CC && programId == null) {
-            throw new InvalidScopeException("El rol [CC] requiere programId.");
+        if (requiresProgramAssignment(role) && programId == null) {
+            throw new InvalidScopeException("El rol [" + role.name() + "] requiere programId.");
         }
+    }
+
+    private static boolean requiresProgramAssignment(Role role) {
+        return role == Role.CC || role == Role.EE;
     }
 
     private Role parseRole(String roleName) {

@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 03/08/2026 | **MOD-REVIEW:** Rol evaluador externo [EE] — login JWT, alta [JD] con carrera, dashboard solo lectura, FSD-BR-19. | FSD-UC-019 / DD-UC-019 | N/A | PM-003 / PR-IMPL-014 | Cursor Agent |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
 | 31/07/2026 | **MOD-ASSISTANT tool calling Fase 1.1:** loop backend read-only; tool `list_users` (solo JD) vía `ListUsersUseCase`; max 3 iteraciones. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | PM-002 / PR-IMPL-013 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
@@ -102,6 +103,7 @@ artefactos_vivos:
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
+| `FSD-UC-019` | `DD-UC-019` | **hecho** | `release/3.0.0` | `RegisterUserServiceTest` EE; manual E2E dashboard | `PR-IMPL-014` | Rol EE solo lectura; scope carrera; seed `ee@umss.edu.bo` |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -125,6 +127,7 @@ artefactos_vivos:
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
+| **MOD-REVIEW (evaluador externo [EE])** | **sí** | Ver §B.6 abajo; design doc `DD-UC-019` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
 | §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**; baseline en `docs/baseline/05_dti/adrs/`) |
@@ -213,6 +216,19 @@ artefactos_vivos:
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |
 | **Streaming** | No (`stream: false`) |
 | **Design doc** | [`docs/design/DD-SYS-002.md`](../design/DD-SYS-002.md) §11 |
+
+### B.6 MOD-REVIEW — evaluador externo [EE] (`DD-UC-019`)
+
+**Implementación:** Sprint 02 PM-003 · **Prompt:** `PR-IMPL-014` · **FSD:** FSD-UC-019
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Rol dominio** | `Role.EE` en enum JWT |
+| **Alta usuario** | [JD] vía `POST /api/v1/admin/users`; `programId` obligatorio |
+| **Scope** | `user_program_assignment` — una carrera (FSD-BR-09) |
+| **Lectura** | `GET /api/v1/dashboards/me/summary`, `GET /api/v1/dashboards/coordinator/details` |
+| **Prohibido** | Carga evidencias, export dashboard, admin, reportes PDF (FSD-BR-19) |
+| **Seed dev** | `ee@umss.edu.bo` / `EvalDemo2026!` → carrera INF-SIS |
 
 ## C. Integraciones
 
