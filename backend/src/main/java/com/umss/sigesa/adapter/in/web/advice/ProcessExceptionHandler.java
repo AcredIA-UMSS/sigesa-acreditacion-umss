@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
+import com.umss.sigesa.domain.exception.ProcessNotFoundException;
+import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +23,29 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(ProgramNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleProgramNotFound(ProgramNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", "PROGRAM_NOT_FOUND",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(TemplateNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleTemplateNotFound(TemplateNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
                         "error", "TEMPLATE_NOT_FOUND",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ProcessNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleProcessNotFound(ProcessNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", "PROCESS_NOT_FOUND",
                         "message", ex.getMessage()
                 ));
     }

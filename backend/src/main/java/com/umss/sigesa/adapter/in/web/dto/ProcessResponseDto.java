@@ -11,6 +11,11 @@ import java.util.UUID;
 public class ProcessResponseDto {
     private UUID id;
     private UUID careerId;
+    private String careerCode;
+    private String careerName;
+    private UUID templateId;
+    private String templateName;
+    private String templateType;
     private String status;
     private LocalDateTime startDate;
     private List<PhaseDto> phases;
