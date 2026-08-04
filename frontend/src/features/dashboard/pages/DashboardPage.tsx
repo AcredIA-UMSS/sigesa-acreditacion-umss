@@ -7,12 +7,11 @@ import { ExecutiveDashboardSection } from '../components/ExecutiveDashboardSecti
 import {
   ShieldCheck,
   XCircle,
-  Users,
   AlertTriangle,
 } from 'lucide-react';
 
 export function DashboardPage() {
-  const { summary, isLoading, error, refetch, mockPersona, changeMockPersona } = useDashboardSummary();
+  const { summary, isLoading, error, refetch } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
 
   const hasCc = ((summary?.grantedPermissions as string[])?.includes('READ_CC_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_CC') || (summary?.grantedPermissions as string[])?.includes('CC')) && summary?.coordinatorSection !== null && summary?.coordinatorSection !== undefined;
@@ -58,29 +57,7 @@ export function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Mock Persona Switcher (Local Testing Option) */}
-            {import.meta.env.DEV && (
-              <div className="border-l pl-4 ml-4 border-amber-500">
-                <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3 py-2 shadow-sm text-xs font-semibold text-primary-750">
-                  <Users size={16} className="text-primary-500" />
-                  <span className="text-[11px] text-gray-600 font-medium">Simular Rol:</span>
-                  <select
-                    value={mockPersona || 'real'}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      changeMockPersona(val === 'real' ? null : val);
-                    }}
-                    className="bg-transparent focus:outline-none cursor-pointer text-label-md font-bold text-primary-800 border-l pl-2 border-gray-200/70 ml-1"
-                  >
-                    <option value="real">API Real (Sin Mock)</option>
-                    <option value="CC">Coordinador de Carrera [CC]</option>
-                    <option value="TD">Técnico DUEA [TD]</option>
-                    <option value="JD">Jefatura DUEA [JD]</option>
-                    <option value="MULTI">Multi-Rol [CC + TD]</option>
-                  </select>
-                </div>
-              </div>
-            )}
+
 
             {summary && (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary-200/40 bg-primary-100/35 px-4 py-2.5 text-primary-600 shadow-sm backdrop-blur-sm">

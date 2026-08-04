@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 03/08/2026 | **MOD-DASH:** Conexión completa a Postgres/H2, eliminación de fallbacks mock/hardcoded en el backend y frontend. Creación de DashboardDataLoader para H2/dev. | FSD-UC-011 / DD-UC-011 | N/A | PR-IMPL-011 | Antigravity Agent |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
 | 31/07/2026 | **MOD-ASSISTANT tool calling Fase 1.1:** loop backend read-only; tool `list_users` (solo JD) vía `ListUsersUseCase`; max 3 iteraciones. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | PM-002 / PR-IMPL-013 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
@@ -69,7 +70,7 @@ artefactos_vivos:
 
 - **Migración a Tailwind CSS v4:** Se eliminaron los archivos de configuración legados (`tailwind.config.ts`, `postcss.config.js`). El sistema de diseño institucional y los tokens de color ahora se gestionan nativamente mediante la directiva `@theme` en `src/index.css`.
 - **Tipografía:** Se estableció `Inter` como la tipografía principal sin serifa (`sans`), manteniendo `IBM Plex Mono` para contextos específicos.
-- **Enrutamiento y Vistas:** Se registró la ruta `/procesos/nuevo` conectada al contenedor lógico `CreateProcessView`. Se implementaron mocks temporales a la espera de los endpoints `GET /careers` y `GET /templates`.
+- **Enrutamiento y Vistas:** Se registró la ruta `/procesos/nuevo` conectada al contenedor lógico `CreateProcessView`. Se implementaron mocks temporales a la espera de los endpoints `GET /careers` and `GET /templates`.
 
 ### A.2 Deltas respecto al DTI vFinal
 
@@ -97,7 +98,7 @@ artefactos_vivos:
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-003V3` | Arquitectura Hexagonal (Backend) + UI React c/ Orval |
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
-| `FSD-UC-011` | `DD-UC-011` | en diseño | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) + streaming binario |
+| `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |

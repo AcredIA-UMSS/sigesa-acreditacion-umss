@@ -6,6 +6,7 @@
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
+| PM-003 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Conexión completa a base de datos real en el Dashboard (UC-011), remoción total de stubs y mocks. |
 
 ---
 
@@ -164,3 +165,74 @@ AGENTS.md
 3. Tests §10 PR-IMPL-013 verdes; JaCoCo ≥ 90% clases assistant tocadas.
 4. `@dtp-sync` actualiza DTP §B.5.
 5. Estado PM-002 → completado.
+
+---
+
+## PM-003
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-003 |
+| **Fecha** | 2026-08-03 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini |
+| **Tarea** | Implementación Real Database Persistence para UC-011 Dashboard (Frontend & Backend) |
+| **Objetivo** | Quitar fallbacks mock, conectar a Postgres/H2, poblar datos via ApplicationRunner y remover select de simulación en frontend. |
+| **Contexto** | FSD-UC-011 (Dashboard) / DD-UC-011. Integración completa de persistencia JPA y APIs sin stubs. |
+| **PR-IMPL vinculado** | [PR-IMPL-011](../../prompts/impl/PR-IMPL-011.md) |
+| **DD vinculado** | [DD-UC-011](../../design/DD-UC-011.md) |
+| **PRD / FSD vinculado** | FSD-UC-011 (Dashboard) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pls check the function specs and the development contract for the uc-011 (dashbord) some actions are pointing to an specific harcoded data instead of the real database (postgres) so you need to review this and fix the documentation + this function from backend and frontend to show the real data instead of mocked data
+```
+
+### Entradas auxiliares
+
+```text
+AGENTS.md
+docs/product/DTP.md
+docs/design/DD-UC-011.md
+```
+
+### Archivos generados o modificados
+
+**Backend (nuevos)**
+
+- `config/DashboardDataLoader.java` (Semillado de datos del dashboard para H2/dev)
+- `config/JpaConfig.java` (Aislamiento de la configuración JPA para tests)
+- `db/seed.sql` (Semilla SQL inicial para inicialización limpia en el contenedor de Postgres)
+
+**Backend (modificados)**
+
+- `SigesaApplication.java` (Desacoplamiento de JPA bootstrapping)
+- `adapter/out/persistance/JpaDashboardQueryAdapter.java` (Cálculo dinámico e integración multitenant)
+- `adapter/out/persistance/IndicatorJpaRepository.java` (Consultas JPQL para filtrado de indicadores por fase)
+- `adapter/out/persistance/ObservationJpaRepository.java` (Conteos programáticos de observaciones por estado)
+- `adapter/out/persistance/repository/SpringDataAccreditationProcessRepository.java` (Conteo de procesos activos por carrera)
+- `config/EvidenceDataLoader.java` (Alineación de SEED_PROGRAM_ID y robustez de asignaciones)
+- `config/AuthDataLoader.java` (Robustez de inicialización de asignación de usuarios)
+
+**Frontend (modificados)**
+
+- `features/dashboard/api/dashboardHooks.ts` (Remoción completa de interceptores mock)
+- `features/dashboard/pages/DashboardPage.tsx` (Remoción del selector de Persona)
+
+**Infraestructura (modificados)**
+
+- `docker-compose.yml` (Montaje de `db/seed.sql` para el servicio `db` y refactorización de healthcheck/dependencias de `open-webui`)
+
+### Cambios realizados
+
+1. **Persistencia Dinámica del Dashboard:** Implementación de cálculo en tiempo real en `JpaDashboardQueryAdapter`. Si existe un proceso de acreditación activo para la carrera, los KPIs, avances globales y fases se calculan en caliente desde las tablas operativas de evidencias e indicadores. Si no existe, se muestra el estado semillado en `tb_program_dashboard_summary`.
+2. **Alineación de Datos de Desarrollo:** Corrección de la desalineación de IDs en `EvidenceDataLoader` hacia `DevSeedData.PROGRAM_INF_SIS`.
+3. **Frontend React:** Eliminación definitiva de todos los fallbacks mock y refresco automático al impactar datos reales.
+4. **Isolación de Tests Slice:** Creación de `JpaConfig` para que `@WebMvcTest` no intente inicializar repositorios JPA.
+5. **Semillado Postgres Seguro:** Creación de un archivo `seed.sql` e integración a través de `/docker-entrypoint-initdb.d/` en `docker-compose.yml` para garantizar que cuando se inicie la base de datos Postgres por primera vez, cuente con la estructura y semilla lista de manera nativa.
+6. **Robustez de Carga en Inits:** Corrección de `EvidenceDataLoader` y `AuthDataLoader` para garantizar la inserción de las relaciones `user_program_assignment` en cualquier reinicio, incluso si el usuario existía previamente.
+
+

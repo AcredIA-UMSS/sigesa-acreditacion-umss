@@ -15,7 +15,7 @@ prompts:
   - "PR-IMPL-011"
   - "PR-CONTRACT-FE-DASHBOARD-012-MASTER"
 release: "v1.0"
-status: borrador
+status: aprobado
 fecha: "2026-06-27"
 autores:
   - "Design Product Owner & Lead Solutions Architect"

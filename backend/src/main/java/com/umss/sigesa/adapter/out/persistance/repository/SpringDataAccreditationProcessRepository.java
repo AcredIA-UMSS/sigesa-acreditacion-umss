@@ -9,4 +9,6 @@ import java.util.UUID;
 @Repository
 public interface SpringDataAccreditationProcessRepository extends JpaRepository<AccreditationProcessJpaEntity, UUID> {
     boolean existsByCareerIdAndStatus(UUID careerId, String status);
+
+    long countByCareerId(UUID careerId);
 }
