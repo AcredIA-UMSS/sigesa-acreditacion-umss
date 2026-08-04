@@ -6,8 +6,9 @@
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
-| PM-003 | PR-IMPL-014 | DD-UC-019 | PRD-REQ-029 / FSD-UC-019 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
-| PM-004 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
+| PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
+| PM-004 | PR-IMPL-014 | DD-UC-020 | PRD-REQ-029 / FSD-UC-020 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
+| PM-005 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
 
 ---
 
@@ -175,36 +176,58 @@ AGENTS.md
 | --- | --- |
 | **ID** | PM-003 |
 | **Fecha** | 2026-08-03 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Tarea** | Consulta de procesos de acreditación |
+| **Objetivo** | Exponer `GET /api/v1/processes` y `GET /api/v1/processes/{id}` con RBAC JD/TD/CC; UI listado + detalle |
+| **PR-IMPL vinculado** | [PR-IMPL-019](../../prompts/impl/PR-IMPL-019.md) |
+| **DD vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
+| **FSD / PRD vinculado** | FSD-UC-019 |
+| **Estado** | completado |
+
+### Criterios de cierre
+
+1. GET listado + detalle con RBAC y filtro [CC] por carrera.
+2. UI `/procesos` con sidebar desplegable.
+3. Tests ProcessAccessPolicy / ListProcesses / GetProcessDetail verdes.
+
+---
+
+## PM-004
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-004 |
+| **Fecha** | 2026-08-03 |
 | **Solicitante** | Aylen Gonzáles |
 | **Agente/Entorno** | Cursor IDE — Agent |
 | **Tarea** | Habilitación rol evaluador externo [EE] (MOD-REVIEW) |
 | **Objetivo** | Documentar e implementar acceso solo lectura de [EE] a documentación de carrera asignada |
 | **Contexto** | Rol planificado en BRD/MRD/PRD; v1.1. Alcance: login JWT, alta por [JD], dashboard KPI reutilizado, sin mutaciones. |
 | **PR-IMPL vinculado** | [PR-IMPL-014](../../prompts/impl/PR-IMPL-014.md) |
-| **DD vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
-| **PRD / FSD vinculado** | PRD-REQ-029 · PRD-US-026 · FSD-UC-019 |
+| **DD vinculado** | [DD-UC-020](../../design/DD-UC-020.md) |
+| **PRD / FSD vinculado** | PRD-REQ-029 · PRD-US-026 · FSD-UC-020 |
 | **Estado** | completado |
 
 ### Prompt usado exacto
 
 ```text
 Implementar rol EE (evaluador externo):
-- Documentación: FSD-UC-019, DD-UC-019, PR-IMPL-014, PRD-US-026, FSD-BR-19.
+- Documentación: FSD-UC-020, DD-UC-020, PR-IMPL-014, PRD-US-026, FSD-BR-19.
 - Backend: Role.EE, RegisterUserService scope, dashboard aggregation, SecurityConfig export.
 - Frontend: roleLabels, CcOnlyRoute, Sidebar acotado, dashboard read-only.
 - Seed dev: ee@umss.edu.bo / EvalDemo2026!
-- Registrar PM-003 en sprint_02/PROMPT_MAPPING.md
+- Registrar PM-004 en sprint_02/PROMPT_MAPPING.md
 ```
 
 ### Archivos generados o modificados
 
 **Documentación**
 
-- `docs/product/uc/FSD-UC-019.md`
-- `docs/design/DD-UC-019.md`
+- `docs/product/uc/FSD-UC-020.md`
+- `docs/design/DD-UC-020.md`
 - `docs/prompts/impl/PR-IMPL-014.md`
 - `docs/product/glosario.md`, `FSD.md`, `PRD.md`, `reglas_negocio.md`, `FSD-UC-002.md`, `DTP.md`
-- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-003)
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-004)
 
 **Backend**
 
@@ -234,11 +257,11 @@ Implementar rol EE (evaluador externo):
 
 ---
 
-## PM-004
+## PM-005
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-004 |
+| **ID** | PM-005 |
 | **Fecha** | 2026-08-03 |
 | **Solicitante** | Aylen Gonzáles |
 | **Agente/Entorno** | Cursor IDE — Agent |
@@ -264,7 +287,7 @@ Validaciones con mensajes claros:
   - Correo: formato email estándar @umss.edu.bo.
   - Contraseña: coincidir y regla mínima de seguridad del sistema.
 Backend: persistir firstName, lastName, phoneNumber; password del JD en POST.
-Registrar PM-004 en sprint_02/PROMPT_MAPPING.md.
+Registrar PM-005 en sprint_02/PROMPT_MAPPING.md.
 ```
 
 ### Entradas auxiliares
@@ -282,11 +305,11 @@ Mockup UI "AÑADIR USUARIO" (Aylen)
 **Documentación**
 
 - `docs/prompts/impl/PR-IMPL-015.md`
-- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-004)
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-005)
 
 **Backend**
 
-- `db/migration/V3__app_user_profile_fields.sql`
+- `db/migration/V4__app_user_profile_fields.sql`
 - `domain/model/UserProfile.java`, `AppUser.java`
 - `domain/exception/InvalidUserProfileException.java`, `WeakPasswordException.java`
 - `application/port/in/RegisterUserUseCase.java`, `ListUsersUseCase.java`
@@ -316,4 +339,4 @@ Mockup UI "AÑADIR USUARIO" (Aylen)
 2. Modal de alta con validaciones y diseño institucional UMSS.
 3. Diálogo post-alta con credenciales copiables (solo al crear).
 4. Contraseñas existentes no visibles (hash Argon2).
-5. PM-004 registrado en este archivo.
+5. PM-005 registrado en este archivo.

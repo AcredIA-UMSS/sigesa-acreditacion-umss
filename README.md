@@ -9,7 +9,7 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 | **JD** | Jefe de Departamento | `jd@umss.edu.bo` | `JefeDemo2026!` |
 | **TD** | Técnico DUEA | `td@umss.edu.bo` | `TecnicoDemo2026!` |
 | **CC** | Coordinador — Ing. Sistemas | `cc@umss.edu.bo` | `CoordDemo2026!` |
-| **CC** | Coordinador — CEUB | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
+| **CC** | Coordinador — Ing. Civil | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
 | **CC** | Usuario inactivo (pruebas admin) | `pendiente@umss.edu.bo` | `PendienteDemo2026!` |
 | **EE** | Evaluador externo — Ing. Sistemas | `ee@umss.edu.bo` | `EvalDemo2026!` |
 
@@ -19,15 +19,18 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 
 Además de los usuarios, el backend inserta registros de demostración para todos los modelos persistidos:
 
-**Programas** (catálogo estático):
+**Carreras** (tabla `programs`, seed dev — 25 carreras UMSS):
 
-| ID | Código | Nombre |
+| ID (ejemplo) | Código | Nombre |
 | --- | ------ | ------ |
-| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas (demo UMSS) |
-| `660e8400-e29b-41d4-a716-446655440001` | CEUB | Coordinación CEUB (demo) |
-| `770e8400-e29b-41d4-a716-446655440002` | ARCU-SUR | Coordinación ARCU-SUR (demo) |
+| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas |
+| `550e8400-e29b-41d4-a716-446655440001` | ING-CIV | Ingeniería Civil |
+| `550e8400-e29b-41d4-a716-44665544000b` | MED | Medicina |
+| … | … | Ver `ProgramSeedDataLoader.java` |
 
-**Plantillas** (`template`):
+API: `GET /api/v1/programs?q=ingen` — autocompletado por nombre o código.
+
+**Plantillas** (`templates` — solo CEUB y ARCU-SUR operativas):
 
 | ID | Validada | Taxonomía |
 | --- | -------- | --------- |
@@ -45,11 +48,11 @@ Además de los usuarios, el backend inserta registros de demostración para todo
 
 **Asignaciones usuario–programa** (`user_program_assignment`):
 
-| Usuario | Programa asignado |
-| ------- | ----------------- |
-| `cc@umss.edu.bo` | INF-SIS |
-| `cc2@umss.edu.bo` | CEUB |
-| `pendiente@umss.edu.bo` | ARCU-SUR |
+| Usuario | Carrera asignada |
+| ------- | ---------------- |
+| `cc@umss.edu.bo` | Ingeniería de Sistemas |
+| `cc2@umss.edu.bo` | Ingeniería Civil |
+| `pendiente@umss.edu.bo` | Medicina |
 
 Los identificadores y contraseñas están definidos en `backend/src/main/java/com/umss/sigesa/config/AuthDataLoader.java` y `DevSeedData.java`.
 

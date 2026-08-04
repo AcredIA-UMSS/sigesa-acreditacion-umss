@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
 import {
-  downloadReportPdf,
-  useGenerateExecutiveReport,
-  useReportJobStatus,
+  download,
+  useGenerate,
+  useGetStatus,
 } from '../../../api/endpoints/report-controller/report-controller';
 import type {
   GenerateExecutiveReportRequest,
@@ -53,6 +53,20 @@ function toPayload(form: ExecutiveReportFormState): GenerateExecutiveReportReque
   return payload;
 }
 
+async function downloadReportPdf(jobId: string): Promise<void> {
+  const response = await download(jobId);
+  const fileData = response.data as unknown;
+  if (response.status !== 200 || !(fileData instanceof Blob)) {
+    throw new Error('Download failed: REPORT_NOT_READY');
+  }
+  const url = window.URL.createObjectURL(fileData);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `reporte-ejecutivo-${jobId}.pdf`;
+  anchor.click();
+  window.URL.revokeObjectURL(url);
+}
+
 export function useExecutiveReport() {
   const [form, setForm] = useState<ExecutiveReportFormState>(defaultForm);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -61,15 +75,31 @@ export function useExecutiveReport() {
   const [validationErrors, setValidationErrors] =
     useState<ExecutiveReportValidationErrors>({});
 
-  const generateMutation = useGenerateExecutiveReport({
-    onSuccess: (data) => {
-      setActiveJobId(data.jobId);
-      setValidationErrors({});
-      setDownloadError(null);
+  const generateMutation = useGenerate({
+    mutation: {
+      onSuccess: (response) => {
+        setActiveJobId(response.data.jobId ?? null);
+        setValidationErrors({});
+        setDownloadError(null);
+      },
     },
   });
 
-  const statusQuery = useReportJobStatus(activeJobId);
+  const statusQuery = useGetStatus(activeJobId ?? '', {
+    query: {
+      enabled: activeJobId !== null,
+      refetchInterval: (query) => {
+        const status = query.state.data?.data?.status;
+        if (status === 'COMPLETED' || status === 'FAILED') {
+          return false;
+        }
+        return 2000;
+      },
+    },
+  });
+
+  const jobStatus: ReportJobStatusResponse | undefined =
+    statusQuery.data?.status === 200 ? statusQuery.data.data : undefined;
 
   const updateField = useCallback(
     <K extends ExecutiveReportField>(
@@ -100,7 +130,7 @@ export function useExecutiveReport() {
     generateMutation.mutate({ data: toPayload(form) });
   }, [form, generateMutation]);
 
-  const download = useCallback(async () => {
+  const downloadPdf = useCallback(async () => {
     if (!activeJobId) return;
     setIsDownloading(true);
     setDownloadError(null);
@@ -125,23 +155,27 @@ export function useExecutiveReport() {
 
   const isPolling =
     activeJobId !== null &&
-    statusQuery.data?.status !== 'COMPLETED' &&
-    statusQuery.data?.status !== 'FAILED';
+    jobStatus?.status !== 'COMPLETED' &&
+    jobStatus?.status !== 'FAILED';
 
-  const submitErrorMessage = mapReportError(generateMutation.error?.message);
-  const statusErrorMessage = mapReportError(statusQuery.error?.message);
+  const submitErrorMessage = mapReportError(
+    generateMutation.error instanceof Error ? generateMutation.error.message : null,
+  );
+  const statusErrorMessage = mapReportError(
+    statusQuery.error instanceof Error ? statusQuery.error.message : null,
+  );
 
   return {
     form,
     updateField,
     submit,
-    download,
+    download: downloadPdf,
     reset,
     validationErrors,
     submitErrorMessage,
     statusErrorMessage,
     downloadErrorMessage: downloadError,
-    jobStatus: statusQuery.data as ReportJobStatusResponse | undefined,
+    jobStatus,
     activeJobId,
     isSubmitting: generateMutation.isPending,
     isDownloading,

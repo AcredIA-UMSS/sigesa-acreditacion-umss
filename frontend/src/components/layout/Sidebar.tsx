@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Network,
@@ -8,8 +8,11 @@ import {
   HelpCircle,
   LogOut,
   ChevronLeft,
+  ChevronDown,
   Menu,
   Users,
+  List,
+  Plus,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -22,17 +25,37 @@ interface SidebarProps {
 
 export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const location = useLocation();
   const { session, logout } = useAuth();
   const navigate = useNavigate();
 
   const isExternalEvaluator = session?.role === 'EE';
+  const isProcessRoute = location.pathname.startsWith('/procesos');
+  const [processesOpen, setProcessesOpen] = useState(isProcessRoute);
+
+  useEffect(() => {
+    if (isProcessRoute) {
+      setProcessesOpen(true);
+    }
+  }, [isProcessRoute]);
+
   const initials = session?.role ?? 'U';
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
   const panelSubtitle = isExternalEvaluator ? 'REVISIÓN DOCUMENTAL' : 'PANEL ADMINISTRATIVO';
+  const isJd = session?.role === 'JD';
 
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
+  };
+
+  const toggleProcesses = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      setProcessesOpen(true);
+      return;
+    }
+    setProcessesOpen((prev) => !prev);
   };
 
   return (
@@ -76,17 +99,84 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         />
 
         {!isExternalEvaluator && (
-          <NavItem
-            icon={<Network size={20} />}
-            label="GESTIÓN PROCESOS"
-            isExpanded={isExpanded}
-            hasDropdown
-            active={activeNav === 'processes'}
-            to="/procesos/nuevo"
-          />
+          <div>
+            <button
+              type="button"
+              onClick={toggleProcesses}
+              className={`flex w-full items-center rounded-lg p-3 transition-colors ${
+                isExpanded ? 'justify-between' : 'justify-center'
+              } ${
+                activeNav === 'processes' || isProcessRoute
+                  ? 'border-l-4 border-secondary bg-primary-800 text-body'
+                  : 'text-primary-200 hover:bg-primary-800 hover:text-body'
+              }`}
+              title={!isExpanded ? 'Gestión procesos' : undefined}
+              aria-expanded={processesOpen}
+            >
+              <div className="flex items-center gap-3">
+                <div className="min-w-[20px]">
+                  <Network size={20} />
+                </div>
+                {isExpanded && (
+                  <span className="overflow-hidden whitespace-nowrap text-left text-label-md">
+                    GESTIÓN PROCESOS
+                  </span>
+                )}
+              </div>
+              {isExpanded && (
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${processesOpen ? 'rotate-180' : ''}`}
+                />
+              )}
+            </button>
+
+            {isExpanded && processesOpen && (
+              <ul className="mt-1 ml-5 space-y-1 border-l border-primary-700 pl-4">
+                <SubNavItem
+                  icon={<List size={16} />}
+                  label="Ver procesos"
+                  to="/procesos"
+                  active={
+                    location.pathname === '/procesos' ||
+                    /^\/procesos\/[0-9a-f-]{36}$/i.test(location.pathname)
+                  }
+                />
+                {isJd && (
+                  <SubNavItem
+                    icon={<Plus size={16} />}
+                    label="Nuevo proceso"
+                    to="/procesos/nuevo"
+                    active={location.pathname === '/procesos/nuevo'}
+                  />
+                )}
+              </ul>
+            )}
+
+            {!isExpanded && isProcessRoute && (
+              <ul className="mt-1 space-y-1">
+                <SubNavItem
+                  icon={<List size={16} />}
+                  label="Ver procesos"
+                  to="/procesos"
+                  active={location.pathname === '/procesos'}
+                  compact
+                />
+                {isJd && (
+                  <SubNavItem
+                    icon={<Plus size={16} />}
+                    label="Nuevo"
+                    to="/procesos/nuevo"
+                    active={location.pathname === '/procesos/nuevo'}
+                    compact
+                  />
+                )}
+              </ul>
+            )}
+          </div>
         )}
 
-        {session?.role === 'JD' && (
+        {isJd && (
           <NavItem
             icon={<Users size={20} />}
             label="GESTIÓN USUARIOS"
@@ -156,6 +246,37 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
     </aside>
   );
 };
+
+const SubNavItem = ({
+  icon,
+  label,
+  to,
+  active,
+  compact = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  to: string;
+  active?: boolean;
+  compact?: boolean;
+}) => (
+  <li>
+    <Link
+      to={to}
+      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-label-md transition-colors ${
+        compact ? 'justify-center' : ''
+      } ${
+        active
+          ? 'bg-primary-700 font-medium text-body'
+          : 'text-primary-300 hover:bg-primary-800 hover:text-body'
+      }`}
+      title={compact ? label : undefined}
+    >
+      {icon}
+      {!compact && <span>{label}</span>}
+    </Link>
+  </li>
+);
 
 const NavItem = ({
   icon,

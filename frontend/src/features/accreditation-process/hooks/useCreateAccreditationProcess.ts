@@ -12,6 +12,9 @@ interface UseCreateAccreditationProcessReturn {
   resetState: () => void;
 }
 
+const PROCESS_ALREADY_ACTIVE_MESSAGE =
+  'Esta carrera ya tiene un proceso ACTIVO del mismo tipo (CEUB o ARCU-SUR).';
+
 export const useCreateAccreditationProcess = (): UseCreateAccreditationProcessReturn => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<ProcessResponseDto | null>(null);
@@ -24,7 +27,7 @@ export const useCreateAccreditationProcess = (): UseCreateAccreditationProcessRe
               // 👇 Aquí agregamos "as ProcessResponseDto" para calmar a TypeScript
               setSuccessData(response.data as ProcessResponseDto);
             } else if (response.status === 409) {
-              setErrorMessage('La carrera seleccionada ya cuenta con un proceso de acreditación ACTIVO.');
+              setErrorMessage(PROCESS_ALREADY_ACTIVE_MESSAGE);
             } else if (response.status === 403) {
               setErrorMessage('No tienes permisos suficientes (Se requiere rol de Jefe de Departamento).');
             } else if (response.status === 404) {
@@ -39,7 +42,7 @@ export const useCreateAccreditationProcess = (): UseCreateAccreditationProcessRe
         if (status === 401) {
           setErrorMessage('Sesión expirada o no autenticada. Inicie sesión nuevamente.');
         } else if (status === 409) {
-          setErrorMessage('La carrera seleccionada ya cuenta con un proceso de acreditación ACTIVO.');
+          setErrorMessage(PROCESS_ALREADY_ACTIVE_MESSAGE);
         } else if (status === 403) {
           setErrorMessage('No tienes permisos suficientes (Se requiere rol de Jefe de Departamento).');
         } else if (status === 404) {

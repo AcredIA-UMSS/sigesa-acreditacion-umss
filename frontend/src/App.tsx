@@ -4,7 +4,8 @@ import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
 import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
-import { CreateProcessView } from './features/accreditation-process';
+import { CreateProcessPage } from './features/accreditation-process';
+import { ProcessListPage, ProcessDetailPage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
@@ -41,8 +42,26 @@ function App() {
           element={
             <ProtectedRoute>
               <JdOnlyRoute>
-                <CreateProcessView />
+                <CreateProcessPage />
               </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos"
+          element={
+            <ProtectedRoute>
+              <ProcessListPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId"
+          element={
+            <ProtectedRoute>
+              <ProcessDetailPage />
             </ProtectedRoute>
           }
         />

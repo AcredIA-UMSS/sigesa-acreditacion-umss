@@ -1,4 +1,4 @@
-import { notifyUnauthorized, resolveAccessToken } from '../auth/authBridge';
+import { resolveAccessToken } from '../auth/authBridge';
 import { ApiError } from './apiError';
 
 export interface CustomFetchOptions extends RequestInit {
@@ -43,14 +43,17 @@ export async function customFetch<TData>(
   const headers = new Headers(initHeaders);
 
 
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  // Vacío = rutas relativas (/api/...) vía proxy Vite o nginx en Docker
+  const baseUrl = process.env.VITE_API_URL ?? '';
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
   const shouldAttachAuth = auth && !fullUrl.includes('/auth/login');
 
+  let authorizationAttached = false;
   if (shouldAttachAuth) {
     const accessToken = resolveAccessToken();
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`);
+      authorizationAttached = true;
     }
   }
 
@@ -85,8 +88,9 @@ export async function customFetch<TData>(
       }
     }
 
-    if (response.status === 401 && shouldAttachAuth && code === 'UNAUTHORIZED') {
-      notifyUnauthorized();
+    if (response.status === 401 && authorizationAttached && code === 'UNAUTHORIZED') {
+      // No cerrar sesión automáticamente: evita redirección al login en errores transitorios.
+      // La UI muestra el error; el usuario puede reintentar o cerrar sesión manualmente.
     }
 
     throw new ApiError(response.status, code, resolveHttpErrorMessage(response.status, rawBody));

@@ -11,6 +11,8 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
+ARG VITE_API_URL=
+ENV VITE_API_URL=$VITE_API_URL
 RUN pnpm exec tsc -b && pnpm exec vite build
 
 # Etapa 2: Servidor Web

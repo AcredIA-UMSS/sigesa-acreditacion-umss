@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |-------|-------|
-| **FSD-UC** | FSD-UC-019 |
-| **DD** | DD-UC-019 |
+| **FSD-UC** | FSD-UC-020 |
+| **DD** | DD-UC-020 |
 | **PRD** | PRD-REQ-029, PRD-US-026 |
 | **Sprint** | sprint_02 / PM-003 |
 | **Release** | v1.1 |
@@ -43,7 +43,7 @@ Habilitar el rol **[EE]** (External Evaluator) para revisión documental **solo 
 ## Documentación
 
 - Actualizar: `glosario.md`, `FSD.md`, `PRD.md`, `reglas_negocio.md`, `FSD-UC-002.md`, `DTP.md`.
-- Crear: `FSD-UC-019.md`, `DD-UC-019.md` (hecho).
+- Crear: `FSD-UC-020.md`, `DD-UC-020.md` (hecho).
 - Registrar: `docs/sprints/sprint_02/PROMPT_MAPPING.md` PM-003.
 
 ## Criterios de cierre

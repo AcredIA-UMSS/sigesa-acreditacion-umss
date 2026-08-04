@@ -7,7 +7,7 @@ actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
 reglas: FSD-BR-08, FSD-BR-17
-ultima_actualizacion: "2026-07-23"
+ultima_actualizacion: "2026-08-03"
 ---
 
 # FSD-UC-003 — Plantillas y Proceso CEUB/ARCU-SUR
@@ -17,8 +17,8 @@ ultima_actualizacion: "2026-07-23"
 | Campo | Valor |
 | ------- | ------- |
 | **Trazabilidad** | PRD-REQ-002, 004, 016 · PRD-US-023 |
-| **Precondiciones** | Plantilla CEUB o ARCU-SUR validada por comité normativo |
-| **Nota implementación viva** | Se pueden tener varias plantillas disponibles en el sistema (ARCU-SUR o CEUB). Las plantillas son estrictamente un conjunto de fases y subfases ya diseñadas. |
+| **Precondiciones** | Plantilla CEUB o ARCU-SUR validada por comité normativo; carrera registrada en catálogo `programs` |
+| **Nota implementación viva** | Catálogo de **carreras UMSS** persistido en BD (`programs`) con búsqueda `GET /programs?q=`. Las **plantillas** de proceso son exclusivamente CEUB o ARCU-SUR (taxonomía Fase → Subfase predefinida). UI: autocomplete de carrera en `/procesos/nuevo`. |
 
 Taxonomía: **Proceso → Fase → Subfase**.
 *(Una plantilla/proceso puede tener múltiples fases y múltiples subfases).*

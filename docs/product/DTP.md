@@ -47,6 +47,8 @@ artefactos_vivos:
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
 | 03/08/2026 | **MOD-REVIEW:** Rol evaluador externo [EE] — login JWT, alta [JD] con carrera, dashboard solo lectura, FSD-BR-19. | FSD-UC-019 / DD-UC-019 | N/A | PM-003 / PR-IMPL-014 | Cursor Agent |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
+| 03/08/2026 | **MOD-PROCESS consulta (FSD-UC-019):** `GET /processes` + `GET /processes/{id}`; `ProcessQueryPort` CQRS read; RBAC JD/TD/CC + `programScope`; frontend `/procesos`, `/procesos/{id}`; sidebar desplegable. | FSD-UC-019 / DD-UC-019 | N/A | PR-IMPL-019 / PM-003 | Cursor Agent |
+| 03/08/2026 | **MOD-PROCESS catálogo carreras:** tabla `programs` persistida; `GET /programs?q=`; autocomplete frontend; validación `career_id` y plantillas CEUB/ARCU-SUR únicamente. | FSD-UC-003 / DD-UC-003 | N/A | docs sync | Cursor Agent |
 | 31/07/2026 | **MOD-ASSISTANT tool calling Fase 1.1:** loop backend read-only; tool `list_users` (solo JD) vía `ListUsersUseCase`; max 3 iteraciones. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | PM-002 / PR-IMPL-013 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
 | 23/07/2026 | **Full-Stack MOD-PROCESS:** Arquitectura Hexagonal estricta Backend y UI Frontend (React/Orval) para clonación de Plantillas (`PROCESS_ALREADY_ACTIVE`). | FSD-UC-003 / DD-UC-003 | N/A | PM-001 | AI Agent |
@@ -89,6 +91,7 @@ artefactos_vivos:
 | 9 | Stack Persistencia | H2 (Memoria/Archivo) para todo | **PostgreSQL** (Principal) + H2 (Test) | Las reglas de negocio (índices únicos activos) requieren motor transaccional robusto | ADR-0002 |
 | 10 | Acreditación (MOD-PROCESS) | Arquitectura por capas implícita | **Arquitectura Hexagonal Estricta** (Puertos In/Out, Dominio Puro, Adaptadores) | Escalabilidad del modelo normativo y desacoplamiento de frameworks (JPA) | N/A (DD-UC-003) |
 | 11 | Asistente / IA | Chatbot FAQ normativo (Could, v2.0 PRD) | **MOD-ASSISTANT MVP:** proxy backend → Open WebUI → Ollama; sin RAG ni persistencia de chats | Piloto self-hosted local; API key Open WebUI solo en servidor | DD-SYS-002 |
+| 12 | RBAC consulta proceso [CC] | 403 Forbidden cross-scope (patrón REST típico) | **404 `PROCESS_NOT_FOUND`** cuando `career_id ∉ programScope` | No revelar existencia de procesos ajenos al coordinador | N/A (DD-UC-019) |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -97,6 +100,7 @@ artefactos_vivos:
 | `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | `PR-IMPL-001` | JWT + LocalAuthAdapter; A1 estricto → 401 |
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-003V3` | Arquitectura Hexagonal (Backend) + UI React c/ Orval |
+| `FSD-UC-019` | `DD-UC-019` | **hecho (Full-Stack)** | `v1.0` | Unit `ListProcessesService`, `GetProcessDetailService`, `ProcessAccessPolicy`; WebMvc standalone | `PR-IMPL-019` / PM-003 | GET listado + detalle; [CC] 404 cross-carrera |
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
 | `FSD-UC-011` | `DD-UC-011` | en diseño | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) + streaming binario |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
@@ -123,7 +127,7 @@ artefactos_vivos:
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | **sí** | Confirmada su exigencia estricta en FSD-UC-003. Dominio encapsulado. |
 | **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design docs `DD-UC-001`, `DD-UC-002` |
-| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design doc `DD-UC-003` |
+| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019` |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
@@ -145,18 +149,25 @@ artefactos_vivos:
 | **Password hashing** | Argon2id (`Argon2PasswordEncoder`) |
 | **JWT** | HS256; claims `sub`, `email`, `role`, `programScope[]`; secret `SIGESA_JWT_SECRET` |
 
-### B.2 MOD-PROCESS — contrato técnico vigente (`DD-UC-003`)
+### B.2 MOD-PROCESS — contrato técnico vigente (`DD-UC-003` + `DD-UC-019`)
 
-**Implementación:** PM-001 · **Prompts vigentes:** `PR-IMPL-003V3`
+**Implementación creación:** PM-001 · **Prompts vigentes:** `PR-IMPL-003V3`  
+**Implementación consulta:** `PR-IMPL-019` · **Design doc consulta:** `DD-UC-019`
 
 | Área | Detalle vigente |
 | --- | --- |
-| **Endpoints (Web Adapter)** | `POST /api/v1/processes` ([JD]) |
-| **DTOs (Web Adapter)** | `CreateProcessRequestDto`, `ProcessResponseDto` |
-| **Lógica de Negocio (Use Case)** | Clonación profunda de estructura (Plantilla → Proceso Vivo). Aislamiento ACID (`@Transactional`). |
-| **Tablas JPA (Persistencia)** | `templates`, `template_phases`, `template_subphases`, `accreditation_processes`, `phases`, `subphases` |
-| **Regla Unicidad (BD + App)** | Error HTTP 409 `PROCESS_ALREADY_ACTIVE`. Flyway script con `CREATE UNIQUE INDEX idx_unique_active_process ON accreditation_processes (career_id) WHERE status = 'ACTIVE'` |
-| **Modelos de Dominio** | Puros (sin `@Entity`, sin anotaciones Spring). Interfaz con JPA a través de `ProcessPersistenceMapper`. |
+| **Endpoints (Web Adapter)** | `POST /api/v1/processes` ([JD]); `GET /api/v1/processes` ([JD], [TD], [CC]); `GET /api/v1/processes/{processId}` ([JD], [TD], [CC]); catálogo `GET /api/v1/programs?q=` |
+| **DTOs (Web Adapter)** | `CreateProcessRequestDto`, `ProcessResponseDto` (enriquecido), `ProcessSummaryResponseDto`, `ProgramSummaryResponse` |
+| **Puertos aplicación (consulta)** | `ListProcessesUseCase`, `GetProcessDetailUseCase`; OUT: `ProcessQueryPort` (separado de `AccreditationProcessPort`) |
+| **RBAC consulta** | JD/TD: todos los procesos; CC: filtro `career_id ∈ JWT.programScope`; acceso ajeno → **404 `PROCESS_NOT_FOUND`** (no 403) |
+| **Lógica de Negocio (Use Case)** | Clonación profunda Plantilla → Proceso (POST); enriquecimiento carrera/plantilla vía `ProgramCatalogPort` + `TemplatePort` (GET) |
+| **Tablas JPA (Persistencia)** | `programs`, `templates`, `template_phases`, `template_subphases`, `accreditation_processes`, `phases`, `subphases` |
+| **Seed dev carreras** | `ProgramSeedDataLoader` — 25 carreras UMSS (`DevSeedData.PROGRAM_*`) |
+| **Regla Unicidad (BD + App)** | Error HTTP 409 `PROCESS_ALREADY_ACTIVE`. Índice parcial `career_id` WHERE `status = 'ACTIVE'` |
+| **Errores proceso** | 404 `PROGRAM_NOT_FOUND`, 404 `TEMPLATE_NOT_FOUND`, 404 `PROCESS_NOT_FOUND`, 409 `PROCESS_ALREADY_ACTIVE` |
+| **Frontend** | `/procesos` (listado); `/procesos/{processId}` (detalle árbol fases/subfases); `/procesos/nuevo` ([JD]); sidebar desplegable «Ver procesos» / «Nuevo proceso» |
+| **Hooks Orval** | `useListProcesses`, `useGetProcess`, `useCreateProcess` en `procesos-de-acreditación.ts` |
+| **Modelos de Dominio** | Puros (sin `@Entity`); JPA vía mappers/adapters hexagonales |
 
 ---
 
