@@ -62,6 +62,7 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
             }
 
             double progress = (approved * 100.0) / total;
+            progress = Math.round(progress * 100.0) / 100.0;
 
             summary.setTotalIndicators(total);
             summary.setOverallProgressPercentage(progress);
@@ -84,6 +85,7 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                             }
                         }
                         double phaseProgress = (phaseApproved * 100.0) / phaseTotal;
+                        phaseProgress = Math.round(phaseProgress * 100.0) / 100.0;
                         phaseSummary.setPercentage(phaseProgress);
                         if (phaseProgress == 100.0) {
                             phaseSummary.setStatus("COMPLETED");
@@ -153,6 +155,7 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                 .mapToDouble(ProgramDashboardSummaryEntity::getOverallProgressPercentage)
                 .average()
                 .orElse(0.0);
+        averageProgress = Math.round(averageProgress * 100.0) / 100.0;
 
         int criticalObs = summaries.stream()
                 .mapToInt(ProgramDashboardSummaryEntity::getPendingObservations)

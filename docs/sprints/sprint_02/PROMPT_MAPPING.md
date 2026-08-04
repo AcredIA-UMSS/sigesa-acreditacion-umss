@@ -6,11 +6,9 @@
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
-<<<<<<< HEAD
 | PM-003 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Conexión completa a base de datos real en el Dashboard (UC-011), remoción total de stubs y mocks. |
-=======
-| PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
->>>>>>> origin/main
+| PM-004 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
+| PM-005 | N/A (Hotfix) | DD-UC-011 | FSD-UC-011 | Corrección de decimales a exactamente 2 decimales en los KPIs del Dashboard |
 
 ---
 
@@ -239,8 +237,45 @@ docs/design/DD-UC-011.md
 5. **Semillado Postgres Seguro:** Creación de un archivo `seed.sql` e integración a través de `/docker-entrypoint-initdb.d/` en `docker-compose.yml` para garantizar que cuando se inicie la base de datos Postgres por primera vez, cuente con la estructura y semilla lista de manera nativa.
 6. **Robustez de Carga en Inits:** Corrección de `EvidenceDataLoader` y `AuthDataLoader` para garantizar la inserción de las relaciones `user_program_assignment` en cualquier reinicio, incluso si el usuario existía previamente.
 
+---
 
-=======
+## PM-004
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-004 |
+| **Fecha** | 2026-08-03 |
+| **Hora** | 19:26 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Consulta de procesos de acreditación |
+| **Objetivo** | Exponer `GET /api/v1/processes` y `GET /api/v1/processes/{id}` con RBAC JD/TD/CC; UI listado + detalle con árbol fases/subfases |
+| **Contexto** | FSD-UC-019 · DD-UC-019 · PR-IMPL-019 (contrato backend v1.1). Hexagonal estricta; [CC] cross-carrera → 404 `PROCESS_NOT_FOUND`. Branch `feature/FSD-019`. |
+| **PR-IMPL vinculado** | [PR-IMPL-019](../../prompts/impl/PR-IMPL-019.md) |
+| **DD-UC vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
+| **FSD-UC vinculado** | [FSD-UC-019](../../product/uc/FSD-UC-019.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@PR-IMPL-019.md (1-359)
+```
+
+### Entradas auxiliares
+
+```text
+docs/design/DD-UC-019.md
+docs/product/uc/FSD-UC-019.md
+docs/prompts/impl/PR-IMPL-019.md
+docs/product/api_contracts.md (API-PROC-03, API-PROC-04)
+AGENTS.md
+.cursor/rules/frontend-design.mdc
+```
+
+### Archivos generados o modificados
+
 **Backend — generados (PR-IMPL-019 in-scope)**
 
 | Acción | Ruta |
@@ -334,4 +369,59 @@ Full-stack FSD-UC-019 operativo en código: backend GET con RBAC + UI `/procesos
 - [ ] Rebuild backend Docker + `pnpm run generate:api`
 - [ ] Verificación E2E con `jd@umss.edu.bo` y usuario CC seed
 - [ ] JaCoCo ≥ 90% en servicios `process/*`
->>>>>>> origin/main
+
+---
+
+## PM-005
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-005 |
+| **Fecha** | 2026-08-04 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Redondeo de KPIs a exactamente 2 decimales (Dashboard) |
+| **Objetivo** | Resolver errores visuales donde los porcentajes de avance global, avance de fases y promedio global presentaban más de dos decimales tanto en las consultas de backend como en el renderizado del frontend. |
+| **Contexto** | FSD-UC-011 (Dashboard) / DD-UC-011. Hotfix directo sobre lógica de persistencia backend y formateo en componentes de UI. |
+| **PR-IMPL vinculado** | N/A (Hotfix / Tarea de código) |
+| **DD vinculado** | [DD-UC-011](../../design/DD-UC-011.md) |
+| **PRD / FSD vinculado** | FSD-UC-011 (Dashboard) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+hi pls review the UC-011 related to the dashbaord for the backend, pls fix that the kpis shoudl be rounded to 2 decimals
+the frontend is still the same showing more thn 2 decimals, pls check as well the frontned and backend for this
+```
+
+### Entradas auxiliares
+
+```text
+AGENTS.md
+docs/design/DD-UC-011.md
+```
+
+### Archivos generados o modificados
+
+**Backend (modificados)**
+
+- `adapter/out/persistance/JpaDashboardQueryAdapter.java` (Redondeo matemático con Math.round en cálculos de progreso general, de fases y promedio general)
+
+**Frontend (modificados)**
+
+- `features/dashboard/components/CoordinatorDashboardSection.tsx` (Formateo .toFixed(2) para avance global e individual de fases)
+- `features/dashboard/components/ExecutiveDashboardSection.tsx` (Formateo .toFixed(2) para avance institucional)
+
+### Cambios realizados
+
+1. **Ajuste en Backend:** Se agregaron operaciones de redondeo matemático `Math.round(value * 100.0) / 100.0` a las variables `progress`, `phaseProgress` y `averageProgress` calculadas dinámicamente en `JpaDashboardQueryAdapter.java`.
+2. **Ajuste en Frontend:** Se implementó formateo de presentación `.toFixed(2)` en los componentes de React (`CoordinatorDashboardSection.tsx` y `ExecutiveDashboardSection.tsx`) para asegurar que todos los valores porcentuales se muestren con exactamente 2 decimales sin importar la representación exacta del tipo `number`.
+3. **Mantenimiento y Resolución de Conflictos:** Se resolvieron conflictos Git legados en `PROMPT_MAPPING.md`, ordenando los identificadores de trazabilidad cronológicos.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **OK** (119 pruebas verdes, regresiones completas limpias en persistencia y controladores)
+- [x] `npx oxlint` — **OK** (Cero warnings y errores en 135 archivos frontend analizados)
+- [x] `npx tsc -b` — **OK** (Verificación estricta de compilador TypeScript sin errores de tipos)
