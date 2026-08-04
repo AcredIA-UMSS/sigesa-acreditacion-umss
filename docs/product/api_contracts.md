@@ -121,10 +121,14 @@ security:
 
 | Campo | Valor |
 |-------|-------|
-| **UC** | FSD-UC-002 (catálogo para alta CC) |
+| **UC** | FSD-UC-002 (alta CC), FSD-UC-003 (selección carrera al crear proceso) |
 | **Auth** | JWT Bearer (cualquier rol autenticado) |
+| **Query** | `q?` — búsqueda parcial por nombre o código (autocomplete) |
 | **200** | `[{ "id", "code", "name" }]` |
-| **Nota v1.0** | Catálogo estático en dev (`StaticProgramCatalogAdapter`); tabla `academic_program` diferida |
+| **Persistencia** | Tabla `programs` (PostgreSQL); seed dev vía `ProgramSeedDataLoader` (25 carreras UMSS) |
+| **Migración** | Flyway `V3__programs_catalog.sql` |
+| **Adapter** | `ProgramCatalogJpaAdapter` → `ProgramCatalogPort` |
+| **Frontend** | `CareerAutocomplete` en `/procesos/nuevo` (debounce 300 ms) |
 
 ---
 
@@ -136,8 +140,10 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-003 |
 | **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "programId", "templateId", "managementYear" }` |
-| **201** | `{ "processId", "status": "EN_PROCESO" }` |
+| **Body** | `{ "career_id": "uuid", "template_id": "uuid" }` |
+| **Plantillas permitidas** | Solo tipos **CEUB** y **ARCU-SUR** (validación en use case) |
+| **201** | Proceso creado con fases/subfases clonadas (`ProcessResponseDto`) |
+| **404** | `PROGRAM_NOT_FOUND` / `TEMPLATE_NOT_FOUND` |
 | **409** | `PROCESS_ALREADY_ACTIVE` |
 
 ### API-PROC-02 — `POST /templates/{templateId}/activate`
@@ -148,6 +154,25 @@ security:
 | **x-allowed-roles** | `[JD]` |
 | **Body** | `{ "effectiveFrom": "2026-01-01" }` |
 | **200** | Plantilla activa para nuevos procesos |
+
+### API-PROC-03 — `GET /processes`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-019 |
+| **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
+| **200** | `[ProcessSummaryResponseDto]` — carrera, plantilla, estado, conteos fase/subfase |
+| **Filtrado [CC]** | Solo procesos con `career_id ∈ JWT.programScope` |
+| **200 vacío** | `[]` si [CC] sin carreras asignadas o sin procesos en alcance |
+
+### API-PROC-04 — `GET /processes/{processId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-019 |
+| **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
+| **200** | `ProcessResponseDto` enriquecido con árbol Fase → Subfase ordenado por `order` |
+| **404** | `PROCESS_NOT_FOUND` — ID inexistente o [CC] fuera de `programScope` |
 
 ---
 
@@ -383,6 +408,7 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.5 | 2026-08-03 | API-CAT-01: catálogo `programs` en BD + query `q`; FSD-UC-003 autocomplete carreras; plantillas proceso solo CEUB/ARCU-SUR |
 | v1.4 | 2026-07-31 | API-USER-03: contrato formal `docs/product/api/API-USER-03.md`; GET `/admin/users`; tool `list_users` |
 | v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |
 | Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8; RBAC y errores de estado |

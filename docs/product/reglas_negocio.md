@@ -140,7 +140,7 @@
 |-------|-------|
 | **Tipo** | Seguridad |
 | **Origen BRD** | BRD-CST-04 |
-| **UC** | UC-011, UC-007 |
+| **UC** | UC-007, UC-011, UC-019 |
 | **Enunciado** | Consultas y mutaciones de [CC] filtradas por `academic_program_id` de su asignación. |
 | **Violación** | `403 FORBIDDEN_SCOPE`; 0 incidentes críticos (NFR-009). |
 | **Verificación** | Test aislamiento carrera A vs B. |
@@ -268,7 +268,7 @@
 | BR-06 | 006 |
 | BR-07 | 010 |
 | BR-08 | 003 |
-| BR-09 | 007, 011 |
+| BR-09 | 007, 011, 019 |
 | BR-10 | 016 |
 | BR-12 | 001, 002 |
 | BR-13 | 015 |

@@ -10,6 +10,7 @@ export default defineConfig({
       target: 'src/api/endpoints',
       schemas: 'src/api/model',
       client: 'react-query',
+      tsconfig: './tsconfig.app.json',
       override: {
         mutator: {
           path: 'src/lib/api/customFetch.ts',

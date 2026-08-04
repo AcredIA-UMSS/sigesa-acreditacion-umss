@@ -51,7 +51,7 @@ class ProgramCatalogControllerTest {
     @WithMockUser(roles = "JD")
     void list_withAuthenticationReturns200() throws Exception {
         UUID programId = UUID.randomUUID();
-        when(listProgramsUseCase.list()).thenReturn(List.of(
+        when(listProgramsUseCase.list(null)).thenReturn(List.of(
                 new ListProgramsUseCase.ProgramSummary(programId, "INF-SIS", "Ingeniería de Sistemas")
         ));
 
@@ -60,6 +60,21 @@ class ProgramCatalogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(programId.toString()))
                 .andExpect(jsonPath("$[0].code").value("INF-SIS"))
+                .andExpect(jsonPath("$[0].name").value("Ingeniería de Sistemas"));
+    }
+
+    @Test
+    @WithMockUser(roles = "JD")
+    void list_withSearchQueryDelegatesToUseCase() throws Exception {
+        UUID programId = UUID.randomUUID();
+        when(listProgramsUseCase.list("sistem")).thenReturn(List.of(
+                new ListProgramsUseCase.ProgramSummary(programId, "INF-SIS", "Ingeniería de Sistemas")
+        ));
+
+        mockMvc.perform(get("/api/v1/programs")
+                        .param("q", "sistem")
+                        .with(user("testjd").roles("JD")))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Ingeniería de Sistemas"));
     }
 }
