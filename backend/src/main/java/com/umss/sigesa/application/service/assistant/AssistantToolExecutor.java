@@ -91,6 +91,8 @@ public class AssistantToolExecutor {
         map.put("role", user.role());
         map.put("status", user.status());
         map.put("programIds", user.programIds().stream().map(Object::toString).toList());
+        map.put("fullName", user.fullName());
+        map.put("phoneNumber", user.phoneNumber());
         return map;
     }
 

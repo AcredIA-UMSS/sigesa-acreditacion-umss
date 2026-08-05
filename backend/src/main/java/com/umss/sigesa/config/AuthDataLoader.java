@@ -29,12 +29,14 @@ public class AuthDataLoader implements ApplicationRunner {
     public static final String SEED_CC_EMAIL = "cc@umss.edu.bo";
     public static final String SEED_CC2_EMAIL = "cc2@umss.edu.bo";
     public static final String SEED_PENDING_EMAIL = "pendiente@umss.edu.bo";
+    public static final String SEED_EE_EMAIL = "ee@umss.edu.bo";
 
     public static final String SEED_JD_PASSWORD = "JefeDemo2026!";
     public static final String SEED_TD_PASSWORD = "TecnicoDemo2026!";
     public static final String SEED_CC_PASSWORD = "CoordDemo2026!";
     public static final String SEED_CC2_PASSWORD = "Coord2Demo2026!";
     public static final String SEED_PENDING_PASSWORD = "PendienteDemo2026!";
+    public static final String SEED_EE_PASSWORD = "EvalDemo2026!";
 
     /** @deprecated Usar {@link DevSeedData#PROGRAM_INF_SIS}. */
     @Deprecated
@@ -59,23 +61,25 @@ public class AuthDataLoader implements ApplicationRunner {
         seedUser(SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
         seedUser(SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_ING_CIVIL);
         seedUser(SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_MEDICINA);
+        seedUser(SEED_EE_EMAIL, SEED_EE_PASSWORD, Role.EE, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
     }
 
     private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
         AppUserEntity user = userRepository.findByEmail(email).orElse(null);
         LocalDateTime now = LocalDateTime.now();
 
-        if (user == null) {
-            user = new AppUserEntity();
-            user.setId(UUID.randomUUID());
-            user.setEmail(email);
-            user.setPasswordHash(passwordEncoder.encode(password));
-            user.setRole(role);
-            user.setStatus(status);
-            user.setCreatedAt(now);
-            user.setUpdatedAt(now);
-            user = userRepository.save(user);
-        }
+        AppUserEntity user = new AppUserEntity();
+        user.setId(userId);
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setRole(role);
+        user.setStatus(status);
+        user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+        user.setFirstName("Demo");
+        user.setLastName(role.name());
+        user.setPhoneNumber("71234567");
+        userRepository.save(user);
 
         if (programId != null) {
             boolean hasAssignment = assignmentRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(user.getId(), programId);

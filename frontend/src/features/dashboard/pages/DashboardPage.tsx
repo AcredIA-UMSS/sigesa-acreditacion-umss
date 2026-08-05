@@ -10,18 +10,24 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
+import { useAuth } from '../../../lib/auth/useAuth';
+
 export function DashboardPage() {
   const { summary, isLoading, error, refetch } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
 
-  const hasCc = ((summary?.grantedPermissions as string[])?.includes('READ_CC_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_CC') || (summary?.grantedPermissions as string[])?.includes('CC')) && summary?.coordinatorSection !== null && summary?.coordinatorSection !== undefined;
-  const hasTd = ((summary?.grantedPermissions as string[])?.includes('READ_TD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_TD') || (summary?.grantedPermissions as string[])?.includes('TD')) && summary?.technicianSection !== null && summary?.technicianSection !== undefined;
-  const hasJd = ((summary?.grantedPermissions as string[])?.includes('READ_JD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_JD') || (summary?.grantedPermissions as string[])?.includes('JD')) && summary?.executiveSection !== null && summary?.executiveSection !== undefined;
+  const permissions = (summary?.grantedPermissions as string[]) ?? [];
+  const hasCc = (permissions.includes('READ_CC_DASHBOARD') || permissions.includes('ROLE_CC') || permissions.includes('CC')) && summary?.coordinatorSection != null;
+  const hasEe = (permissions.includes('READ_EE_DASHBOARD') || permissions.includes('ROLE_EE') || permissions.includes('EE')) && summary?.coordinatorSection != null;
+  const hasTd = (permissions.includes('READ_TD_DASHBOARD') || permissions.includes('ROLE_TD') || permissions.includes('TD')) && summary?.technicianSection != null;
+  const hasJd = (permissions.includes('READ_JD_DASHBOARD') || permissions.includes('ROLE_JD') || permissions.includes('JD')) && summary?.executiveSection != null;
+  const isExternalEvaluator = session?.role === 'EE';
+  const showCoordinatorSection = (hasCc || hasEe) && summary?.coordinatorSection != null;
 
   // Sync activeTab when summary loads or changes (like after switching mock personas)
   useEffect(() => {
     if (summary) {
-      if (hasCc) {
+      if (hasCc || hasEe) {
         setActiveTab('cc');
       } else if (hasTd) {
         setActiveTab('td');
@@ -31,14 +37,14 @@ export function DashboardPage() {
         setActiveTab(null);
       }
     }
-  }, [summary, hasCc, hasTd, hasJd]);
+  }, [summary, hasCc, hasEe, hasTd, hasJd]);
 
   const handleReload = () => {
     refetch();
   };
 
   // Determine if user has no assigned sections
-  const hasNoData = summary && !hasCc && !hasTd && !hasJd;
+  const hasNoData = summary && !hasCc && !hasEe && !hasTd && !hasJd;
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-primary-900/10">
@@ -49,10 +55,12 @@ export function DashboardPage() {
         <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="text-heading-xl font-bold tracking-tight text-primary-800">
-              Panel de Control Acreditación
+              {isExternalEvaluator ? 'Revisión Documental de Acreditación' : 'Panel de Control Acreditación'}
             </h1>
             <p className="mt-1 text-body-lg text-gray-700">
-              SIGESA · Gestión Integrada de Acreditación de Calidad Académica
+              {isExternalEvaluator
+                ? 'SIGESA · Consulta de evidencias e indicadores de la carrera asignada (solo lectura)'
+                : 'SIGESA · Gestión Integrada de Acreditación de Calidad Académica'}
             </p>
           </div>
 
@@ -109,9 +117,9 @@ export function DashboardPage() {
         {!isLoading && !error && summary && !hasNoData && (
           <div className="space-y-8 animate-fadeIn">
             {/* Multi-Role Tabs Selector (if user has multiple roles) */}
-            {((hasCc ? 1 : 0) + (hasTd ? 1 : 0) + (hasJd ? 1 : 0)) > 1 && (
+            {((hasCc ? 1 : 0) + (hasEe ? 1 : 0) + (hasTd ? 1 : 0) + (hasJd ? 1 : 0)) > 1 && (
               <div className="flex border-b border-primary-200/50 pb-px mb-6">
-                {hasCc && (
+                {(hasCc || hasEe) && (
                   <button
                     type="button"
                     onClick={() => setActiveTab('cc')}
@@ -121,7 +129,7 @@ export function DashboardPage() {
                         : 'border-transparent text-gray-600 hover:text-primary-800'
                     }`}
                   >
-                    Coordinador de Carrera [CC]
+                    {hasEe && !hasCc ? 'Evaluador externo [EE]' : 'Coordinador de Carrera [CC]'}
                   </button>
                 )}
                 {hasTd && (
@@ -154,8 +162,11 @@ export function DashboardPage() {
             )}
 
             {/* Render Selected Role Dashboard */}
-            {activeTab === 'cc' && summary.coordinatorSection && (
-              <CoordinatorDashboardSection section={summary.coordinatorSection} />
+            {activeTab === 'cc' && showCoordinatorSection && summary.coordinatorSection && (
+              <CoordinatorDashboardSection
+                section={summary.coordinatorSection}
+                readOnly={isExternalEvaluator || (hasEe && !hasCc)}
+              />
             )}
 
             {activeTab === 'td' && summary.technicianSection && (

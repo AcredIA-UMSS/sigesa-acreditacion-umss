@@ -22,7 +22,7 @@ pr_impl: PR-IMPL-001
 | **Prompt impl** | [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) |
 | **Trazabilidad** | PRD-REQ-001 · PRD-US-001, 003 · BRD-REQ-001 · MRD-N-09 |
 | **Disparador** | Submit en pantalla `/login` |
-| **Precondiciones** | Cuenta registrada con correo `@umss.edu.bo`; rol asignado |
+| **Precondiciones** | Cuenta registrada con correo `@umss.edu.bo`; rol asignado ([CC], [TD], [JD] o [EE]) |
 
 ## Flujo principal
 

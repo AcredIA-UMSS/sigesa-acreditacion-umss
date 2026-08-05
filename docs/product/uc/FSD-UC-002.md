@@ -27,7 +27,7 @@ pr_impl: PR-IMPL-002
 ## Flujo principal
 
 1. [JD] accede a `/admin/users`.
-2. Registra usuario con correo UMSS, rol y carrera (si [CC]).
+2. Registra usuario con correo UMSS, rol y carrera (si [CC] o [EE]).
 3. Sistema crea cuenta **inactiva** hasta primer acceso.
 4. Asocia `user_program_assignment` con alcance mínimo necesario.
 

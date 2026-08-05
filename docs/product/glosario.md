@@ -21,7 +21,7 @@
 | [TD] | Técnico DUEA | `DueaTechnician` | Valida, aprueba/rechaza Indicadores; bandeja global |
 | [JD] | Jefatura DUEA | `DueaAdministrator` | Configuración, semáforo, reportes, publicación |
 | [P] | Público | `Public` | Consulta portal sin login; solo contenido publicado |
-| [EE] | Evaluador externo | `ExternalEvaluator` | Rol reservado normativa (futuro); no operativo v1.0 piloto |
+| [EE] | Evaluador externo | `ExternalEvaluator` | Revisión documental **solo lectura** de la carrera asignada (FSD-UC-019); sin carga ni dictamen |
 
 ---
 

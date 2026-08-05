@@ -15,7 +15,7 @@ public class AssistantToolRegistry {
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
             "Lista los usuarios registrados en SIGESA con su correo institucional, rol y estado de cuenta. "
-                    + "Opcionalmente filtra por rol (JD, CC, TD) o por estado (INACTIVE, ACTIVE, DEACTIVATED). "
+                    + "Opcionalmente filtra por rol (JD, CC, TD, EE) o por estado (INACTIVE, ACTIVE, DEACTIVATED). "
                     + "Solo disponible para Jefatura DUEA (JD). Usa esta tool cuando el usuario pregunte quiénes "
                     + "están registrados, qué rol tienen, cuántos coordinadores hay, o quién está inactivo o desactivado. "
                     + "No expone contraseñas ni permite modificar usuarios.",
@@ -48,7 +48,7 @@ public class AssistantToolRegistry {
     private static Map<String, Object> listUsersParameterSchema() {
         Map<String, Object> roleProperty = new LinkedHashMap<>();
         roleProperty.put("type", "string");
-        roleProperty.put("enum", List.of("JD", "CC", "TD"));
+        roleProperty.put("enum", List.of("JD", "CC", "TD", "EE"));
         roleProperty.put("description", "Filtro opcional por rol de usuario.");
 
         Map<String, Object> statusProperty = new LinkedHashMap<>();

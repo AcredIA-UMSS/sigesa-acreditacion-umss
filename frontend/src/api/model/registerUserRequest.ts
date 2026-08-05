@@ -11,4 +11,12 @@ export interface RegisterUserRequest {
   /** @minLength 1 */
   role: string;
   programId?: string;
+  /** @minLength 1 */
+  firstName: string;
+  /** @minLength 1 */
+  lastName: string;
+  /** @minLength 1 */
+  phoneNumber: string;
+  /** @minLength 8 */
+  password: string;
 }

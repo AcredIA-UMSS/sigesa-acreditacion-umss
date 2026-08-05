@@ -13,9 +13,10 @@ import { CoordinatorObservationsTable } from './CoordinatorObservationsTable';
 
 interface CoordinatorDashboardSectionProps {
   section: CoordinatorSection;
+  readOnly?: boolean;
 }
 
-export function CoordinatorDashboardSection({ section }: CoordinatorDashboardSectionProps) {
+export function CoordinatorDashboardSection({ section, readOnly = false }: CoordinatorDashboardSectionProps) {
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* CC Program Context Card */}
@@ -26,10 +27,10 @@ export function CoordinatorDashboardSection({ section }: CoordinatorDashboardSec
           </div>
           <div>
             <h2 className="text-heading-lg font-bold">
-              {section.programName}
+              {readOnly ? `Revisión documental — ${section.programName}` : section.programName}
             </h2>
             <p className="text-body-md text-primary-100">
-              Programa Scope ID: {section.programId}
+              {readOnly ? 'Modo solo lectura · Evaluador externo [EE]' : `Programa Scope ID: ${section.programId}`}
             </p>
           </div>
         </div>
@@ -149,10 +150,8 @@ export function CoordinatorDashboardSection({ section }: CoordinatorDashboardSec
         </div>
       </div>
 
-      {/* Report Export Control */}
-      <ReportExportBar phaseId={undefined} />
+      {!readOnly && <ReportExportBar phaseId={undefined} />}
 
-      {/* Observations Table */}
       <CoordinatorObservationsTable />
     </div>
   );

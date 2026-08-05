@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers(HttpMethod.POST, "/api/v1/indicators/*/evidences").hasRole("CC")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/dashboards/**/export-jobs").hasAnyRole("CC", "TD", "JD")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Perímetro JWT v1.0: todo /api/v1/** (excepto login) exige Bearer token.
                         .anyRequest().authenticated())
