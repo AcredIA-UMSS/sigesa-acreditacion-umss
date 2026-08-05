@@ -11,4 +11,8 @@ export interface UserAdminSummaryResponse {
   role?: string;
   status?: string;
   programIds?: string[];
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  phoneNumber?: string;
 }

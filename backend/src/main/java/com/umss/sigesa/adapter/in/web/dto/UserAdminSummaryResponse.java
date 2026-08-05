@@ -8,6 +8,10 @@ public record UserAdminSummaryResponse(
         String email,
         String role,
         String status,
-        List<UUID> programIds
+        List<UUID> programIds,
+        String firstName,
+        String lastName,
+        String fullName,
+        String phoneNumber
 ) {
 }

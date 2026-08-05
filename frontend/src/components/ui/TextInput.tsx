@@ -3,6 +3,7 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
+  requiredMark?: boolean;
   prefixIcon?: ReactNode;
   suffixIcon?: ReactNode;
 }
@@ -10,6 +11,7 @@ interface TextInputProps extends InputHTMLAttributes<HTMLInputElement> {
 export function TextInput({
   label,
   error,
+  requiredMark = false,
   prefixIcon,
   suffixIcon,
   id,
@@ -22,6 +24,7 @@ export function TextInput({
     <div className="space-y-1">
       <label htmlFor={inputId} className="block text-label-md text-gray-700">
         {label}
+        {requiredMark && <span className="ml-0.5 text-secondary">*</span>}
       </label>
       <div className="relative">
         {prefixIcon && (

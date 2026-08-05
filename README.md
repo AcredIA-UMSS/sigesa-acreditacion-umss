@@ -11,6 +11,7 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 | **CC** | Coordinador — Ing. Sistemas | `cc@umss.edu.bo` | `CoordDemo2026!` |
 | **CC** | Coordinador — Ing. Civil | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
 | **CC** | Usuario inactivo (pruebas admin) | `pendiente@umss.edu.bo` | `PendienteDemo2026!` |
+| **EE** | Evaluador externo — Ing. Sistemas | `ee@umss.edu.bo` | `EvalDemo2026!` |
 
 > Solo cuentas con estado **ACTIVE** pueden autenticarse. `pendiente@umss.edu.bo` sirve para probar activación desde el panel de administración.
 

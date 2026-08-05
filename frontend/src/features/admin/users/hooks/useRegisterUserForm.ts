@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useRegister } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import { useList1 } from '../../../../api/endpoints/program-catalog-controller/program-catalog-controller';
@@ -10,47 +11,65 @@ import {
   ROLE_REQUIRES_PROGRAM,
   type BackendRoleCode,
 } from '../../../../lib/auth/roleLabels';
-import { UMSS_EMAIL_PATTERN } from '../../../../lib/auth/types';
-import { useState } from 'react';
+import type { AddUserFormViewModel } from '../components/AddUserModalUI';
+import {
+  normalizePhoneDigits,
+  validateUserForm,
+  type UserFormErrors,
+} from '../lib/userFormValidation';
 
-interface RegisterUserFormState {
+const EMPTY_FORM: AddUserFormViewModel = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phoneNumber: '',
+  role: '',
+  programId: '',
+  password: '',
+  confirmPassword: '',
+};
+
+export interface SaveSuccessState {
+  fullName: string;
   email: string;
-  role: BackendRoleCode;
-  programId: string;
+  password: string;
 }
 
 export function useRegisterUserForm() {
   const queryClient = useQueryClient();
   const programsQuery = useList1();
-  const [form, setForm] = useState<RegisterUserFormState>({
-    email: '',
-    role: 'TD',
-    programId: '',
-  });
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'email' | 'role' | 'programId', string>>>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form, setForm] = useState<AddUserFormViewModel>(EMPTY_FORM);
+  const [fieldErrors, setFieldErrors] = useState<UserFormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<SaveSuccessState | null>(null);
+  const [pendingPassword, setPendingPassword] = useState('');
 
   const { mutate, isPending, reset } = useRegister({
     mutation: {
       onSuccess: async (response) => {
         const payload = response.data as RegisterUserResponse;
-        setSuccessMessage(
-          `Usuario registrado (${payload.userId ?? '—'}) con estado inicial ${payload.status ?? 'INACTIVE'}. La contraseña temporal se entrega por canal offline.`,
-        );
+        const fullName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim();
+        setSaveSuccess({
+          fullName,
+          email: form.email.trim().toLowerCase(),
+          password: pendingPassword,
+        });
         setSubmitError(null);
-        setForm({ email: '', role: 'TD', programId: '' });
+        setIsModalOpen(false);
+        setForm(EMPTY_FORM);
         setFieldErrors({});
+        setPendingPassword('');
         await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
+        void payload;
       },
       onError: (error) => {
         setSubmitError(getApiErrorMessage(error));
-        setSuccessMessage(null);
       },
     },
   });
 
-  const requiresProgram = ROLE_REQUIRES_PROGRAM[form.role];
+  const requiresProgram = form.role !== '' ? ROLE_REQUIRES_PROGRAM[form.role] : false;
   const programOptions = (programsQuery.data?.data ?? [])
     .filter((program: ProgramSummaryResponse) => program.id && program.name)
     .map((program: ProgramSummaryResponse) => ({
@@ -58,28 +77,48 @@ export function useRegisterUserForm() {
       label: program.code ? `${program.code} — ${program.name}` : (program.name as string),
     }));
 
-  const validate = (): boolean => {
-    const nextErrors: Partial<Record<'email' | 'role' | 'programId', string>> = {};
+  const openModal = () => {
+    setForm(EMPTY_FORM);
+    setFieldErrors({});
+    setSubmitError(null);
+    setIsModalOpen(true);
+    reset();
+  };
 
-    if (!form.email.trim()) {
-      nextErrors.email = 'El correo es obligatorio.';
-    } else if (!UMSS_EMAIL_PATTERN.test(form.email.trim())) {
-      nextErrors.email = 'Solo se permiten correos institucionales @umss.edu.bo.';
-    }
+  const closeModal = () => {
+    if (isPending) return;
+    setIsModalOpen(false);
+    setSubmitError(null);
+    setFieldErrors({});
+  };
 
-    if (requiresProgram && !form.programId) {
-      nextErrors.programId = 'Seleccione una carrera para el rol Coordinador.';
-    }
-
-    setFieldErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+  const closeSuccessDialog = () => {
+    setSaveSuccess(null);
   };
 
   const handleSubmit = () => {
     setSubmitError(null);
-    setSuccessMessage(null);
 
-    if (!validate()) {
+    const errors = validateUserForm({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      phoneNumber: form.phoneNumber,
+      role: form.role,
+      programId: form.programId,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+      requiresProgram,
+    });
+
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    setPendingPassword(form.password);
+
+    if (!form.role) {
       return;
     }
 
@@ -87,27 +126,25 @@ export function useRegisterUserForm() {
       data: {
         email: form.email.trim().toLowerCase(),
         role: form.role,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        phoneNumber: normalizePhoneDigits(form.phoneNumber),
+        password: form.password,
         ...(requiresProgram ? { programId: form.programId } : {}),
       },
     });
   };
 
-  const setEmail = (email: string) => {
-    setForm((current) => ({ ...current, email }));
-    reset();
-  };
-
-  const setRole = (role: BackendRoleCode) => {
-    setForm((current) => ({ ...current, role, programId: '' }));
-    setFieldErrors((current) => ({ ...current, programId: undefined }));
-    reset();
-  };
-
-  const setProgramId = (programId: string) => {
-    setForm((current) => ({ ...current, programId }));
-    setFieldErrors((current) => ({ ...current, programId: undefined }));
-    reset();
-  };
+  const setFirstName = (firstName: string) => setForm((c) => ({ ...c, firstName }));
+  const setLastName = (lastName: string) => setForm((c) => ({ ...c, lastName }));
+  const setEmail = (email: string) => setForm((c) => ({ ...c, email }));
+  const setPhoneNumber = (phoneNumber: string) =>
+    setForm((c) => ({ ...c, phoneNumber: normalizePhoneDigits(phoneNumber) }));
+  const setRole = (role: BackendRoleCode | '') =>
+    setForm((c) => ({ ...c, role, programId: '' }));
+  const setProgramId = (programId: string) => setForm((c) => ({ ...c, programId }));
+  const setPassword = (password: string) => setForm((c) => ({ ...c, password }));
+  const setConfirmPassword = (confirmPassword: string) => setForm((c) => ({ ...c, confirmPassword }));
 
   const roleOptions = ASSIGNABLE_ROLES.map((role: BackendRoleCode) => ({
     value: role,
@@ -115,18 +152,27 @@ export function useRegisterUserForm() {
   }));
 
   return {
+    isModalOpen,
     form,
     fieldErrors,
     submitError,
-    successMessage,
+    saveSuccess,
     isPending,
     requiresProgram,
     roleOptions,
     programOptions,
     isProgramsLoading: programsQuery.isLoading,
+    openModal,
+    closeModal,
+    closeSuccessDialog,
+    handleSubmit,
+    setFirstName,
+    setLastName,
     setEmail,
+    setPhoneNumber,
     setRole,
     setProgramId,
-    handleSubmit,
+    setPassword,
+    setConfirmPassword,
   };
 }

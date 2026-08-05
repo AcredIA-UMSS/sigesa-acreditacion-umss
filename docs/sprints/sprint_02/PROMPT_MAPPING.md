@@ -7,6 +7,8 @@
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
 | PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
+| PM-004 | PR-IMPL-014 | DD-UC-020 | PRD-REQ-029 / FSD-UC-020 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
+| PM-005 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
 
 ---
 
@@ -174,127 +176,167 @@ AGENTS.md
 | --- | --- |
 | **ID** | PM-003 |
 | **Fecha** | 2026-08-03 |
-| **Hora** | 19:26 |
 | **Solicitante** | Boris Anthony Angulo Urquieta |
-| **Agente/Entorno** | Cursor IDE — Agent |
-| **Modelo** | Composer |
 | **Tarea** | Consulta de procesos de acreditación |
-| **Objetivo** | Exponer `GET /api/v1/processes` y `GET /api/v1/processes/{id}` con RBAC JD/TD/CC; UI listado + detalle con árbol fases/subfases |
-| **Contexto** | FSD-UC-019 · DD-UC-019 · PR-IMPL-019 (contrato backend v1.1). Hexagonal estricta; [CC] cross-carrera → 404 `PROCESS_NOT_FOUND`. Branch `feature/FSD-019`. |
+| **Objetivo** | Exponer `GET /api/v1/processes` y `GET /api/v1/processes/{id}` con RBAC JD/TD/CC; UI listado + detalle |
 | **PR-IMPL vinculado** | [PR-IMPL-019](../../prompts/impl/PR-IMPL-019.md) |
-| **DD-UC vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
-| **FSD-UC vinculado** | [FSD-UC-019](../../product/uc/FSD-UC-019.md) |
+| **DD vinculado** | [DD-UC-019](../../design/DD-UC-019.md) |
+| **FSD / PRD vinculado** | FSD-UC-019 |
+| **Estado** | completado |
+
+### Criterios de cierre
+
+1. GET listado + detalle con RBAC y filtro [CC] por carrera.
+2. UI `/procesos` con sidebar desplegable.
+3. Tests ProcessAccessPolicy / ListProcesses / GetProcessDetail verdes.
+
+---
+
+## PM-004
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-004 |
+| **Fecha** | 2026-08-03 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Habilitación rol evaluador externo [EE] (MOD-REVIEW) |
+| **Objetivo** | Documentar e implementar acceso solo lectura de [EE] a documentación de carrera asignada |
+| **Contexto** | Rol planificado en BRD/MRD/PRD; v1.1. Alcance: login JWT, alta por [JD], dashboard KPI reutilizado, sin mutaciones. |
+| **PR-IMPL vinculado** | [PR-IMPL-014](../../prompts/impl/PR-IMPL-014.md) |
+| **DD vinculado** | [DD-UC-020](../../design/DD-UC-020.md) |
+| **PRD / FSD vinculado** | PRD-REQ-029 · PRD-US-026 · FSD-UC-020 |
 | **Estado** | completado |
 
 ### Prompt usado exacto
 
 ```text
-@PR-IMPL-019.md (1-359)
+Implementar rol EE (evaluador externo):
+- Documentación: FSD-UC-020, DD-UC-020, PR-IMPL-014, PRD-US-026, FSD-BR-19.
+- Backend: Role.EE, RegisterUserService scope, dashboard aggregation, SecurityConfig export.
+- Frontend: roleLabels, CcOnlyRoute, Sidebar acotado, dashboard read-only.
+- Seed dev: ee@umss.edu.bo / EvalDemo2026!
+- Registrar PM-004 en sprint_02/PROMPT_MAPPING.md
+```
+
+### Archivos generados o modificados
+
+**Documentación**
+
+- `docs/product/uc/FSD-UC-020.md`
+- `docs/design/DD-UC-020.md`
+- `docs/prompts/impl/PR-IMPL-014.md`
+- `docs/product/glosario.md`, `FSD.md`, `PRD.md`, `reglas_negocio.md`, `FSD-UC-002.md`, `DTP.md`
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-004)
+
+**Backend**
+
+- `domain/model/Role.java`
+- `application/service/auth/RegisterUserService.java`
+- `application/service/dashboard/DashboardSummaryAggregationService.java`
+- `adapter/in/security/SecurityConfig.java`
+- `config/AuthDataLoader.java`
+- `application/service/assistant/AssistantToolRegistry.java`
+- `RegisterUserServiceTest.java`
+
+**Frontend**
+
+- `lib/auth/roleLabels.ts`
+- `components/auth/CcOnlyRoute.tsx`
+- `App.tsx`, `Sidebar.tsx`
+- `features/dashboard/pages/DashboardPage.tsx`
+- `features/dashboard/components/CoordinatorDashboardSection.tsx`
+- `README.md`
+
+### Criterios de cierre
+
+1. [JD] registra [EE] con carrera asignada.
+2. [EE] inicia sesión y ve dashboard solo lectura de su carrera.
+3. POST evidencias / export / admin → 403 para EE.
+4. Documentación viva actualizada (PRD, FSD, reglas, DTP).
+
+---
+
+## PM-005
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-005 |
+| **Fecha** | 2026-08-03 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Mejora UI gestión de usuarios [JD] (MOD-AUTH) |
+| **Objetivo** | Listado con nombre completo, modal de alta según mockup, validaciones de campos y entrega de credenciales solo al crear usuario |
+| **Contexto** | Extiende FSD-UC-002 / DD-UC-002. Perfil extendido en BD; contraseña definida por JD (no recuperable después del alta). Sin campo cédula. |
+| **PR-IMPL vinculado** | [PR-IMPL-015](../../prompts/impl/PR-IMPL-015.md) |
+| **DD vinculado** | [DD-UC-002](../../design/DD-UC-002.md) |
+| **PRD / FSD vinculado** | PRD-REQ-001 · PRD-US-002 · FSD-UC-002 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+En la pantalla de gestión de usuarios debe verse la lista de usuarios registrados con nombre completo.
+Botón "Agregar Usuario" → pop up centralizado (mockup Datos personales) con:
+  Nombre(s), Apellido(s), Correo, Celular, Rol, Contraseña, Repetir contraseña.
+  Sin Cédula de Identidad. Botones Guardar y Cerrar.
+  Diálogo de confirmación al guardar con credenciales para compartir (contraseña no recuperable después).
+Validaciones con mensajes claros:
+  - Nombre/Apellido: al menos una letra; no solo números ni símbolos.
+  - Celular: numérico 8 dígitos, rango 60000000–79999999 (Bolivia).
+  - Correo: formato email estándar @umss.edu.bo.
+  - Contraseña: coincidir y regla mínima de seguridad del sistema.
+Backend: persistir firstName, lastName, phoneNumber; password del JD en POST.
+Registrar PM-005 en sprint_02/PROMPT_MAPPING.md.
 ```
 
 ### Entradas auxiliares
 
 ```text
-docs/design/DD-UC-019.md
-docs/product/uc/FSD-UC-019.md
-docs/prompts/impl/PR-IMPL-019.md
-docs/product/api_contracts.md (API-PROC-03, API-PROC-04)
+docs/design/DD-UC-002.md
+docs/product/uc/FSD-UC-002.md
 AGENTS.md
 .cursor/rules/frontend-design.mdc
+Mockup UI "AÑADIR USUARIO" (Aylen)
 ```
 
 ### Archivos generados o modificados
 
-**Backend — generados (PR-IMPL-019 in-scope)**
-
-| Acción | Ruta |
-| --- | --- |
-| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/ProcessQueryPort.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/ListProcessesUseCase.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/GetProcessDetailUseCase.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/model/process/ProcessQueryContext.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/model/process/ProcessSummary.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/model/process/EnrichedProcessDetail.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/service/process/ListProcessesService.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/service/process/GetProcessDetailService.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/service/process/ProcessAccessPolicy.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/application/service/process/ProcessEnrichmentHelper.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/ProcessQueryJpaAdapter.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/ProcessSummaryResponseDto.java` |
-| generado | `backend/src/main/java/com/umss/sigesa/domain/exception/ProcessNotFoundException.java` |
-| generado | `backend/src/test/java/com/umss/sigesa/application/service/process/ProcessAccessPolicyTest.java` |
-| generado | `backend/src/test/java/com/umss/sigesa/application/service/process/ListProcessesServiceTest.java` |
-| generado | `backend/src/test/java/com/umss/sigesa/application/service/process/GetProcessDetailServiceTest.java` |
-| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ProcessControllerQueryTest.java` |
-
-**Backend — modificados**
-
-| Acción | Ruta |
-| --- | --- |
-| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessController.java` |
-| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/ProcessExceptionHandler.java` |
-| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/ProcessResponseDto.java` |
-| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/repository/SpringDataAccreditationProcessRepository.java` |
-| modificado | `backend/src/main/java/com/umss/sigesa/config/ProcessModuleConfig.java` |
-
-**Frontend — generados (fuera de alcance PR-IMPL-019; misma sesión FSD-UC-019)**
-
-| Acción | Ruta |
-| --- | --- |
-| generado | `frontend/src/features/processes/**` (10 archivos: pages, hooks, components) |
-| generado | `frontend/src/api/model/processSummaryResponseDto.ts` |
-
-**Frontend — modificados**
-
-| Acción | Ruta |
-| --- | --- |
-| modificado | `frontend/src/App.tsx` (rutas `/procesos`, `/procesos/:processId`) |
-| modificado | `frontend/src/components/layout/Sidebar.tsx` (desplegable Gestión procesos) |
-| modificado | `frontend/src/api/endpoints/procesos-de-acreditación/procesos-de-acreditación.ts` (`useListProcesses`, `useGetProcess`) |
-| modificado | `frontend/src/api/model/processResponseDto.ts`, `index.ts` |
-| modificado | `frontend/orval.config.ts`, `frontend/vite.config.ts`, `frontend/src/lib/api/customFetch.ts` |
-| generado | `frontend/src/vite-env.d.ts` |
-
 **Documentación**
 
-| Acción | Ruta |
-| --- | --- |
-| generado | `docs/design/DD-UC-019.md` |
-| generado | `docs/product/uc/FSD-UC-019.md` |
-| generado | `docs/prompts/impl/PR-IMPL-019.md` |
-| modificado | `docs/product/api_contracts.md` |
-| modificado | `docs/product/DTP.md`, `docs/product/FSD.md` |
-| modificado | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (este archivo) |
+- `docs/prompts/impl/PR-IMPL-015.md`
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-005)
 
-### Cambios realizados
+**Backend**
 
-1. **Backend hexagonal:** puerto read `ProcessQueryPort` + adaptador JPA; casos de uso `ListProcessesService` / `GetProcessDetailService` con `ProcessAccessPolicy` (JD/TD global; CC filtrado por `programScope`).
-2. **REST:** `GET /api/v1/processes` (resumen) y `GET /api/v1/processes/{processId}` (detalle con fases/subfases ordenadas por `order`); OpenAPI annotations.
-3. **RBAC:** [CC] acceso cross-carrera → **404** `PROCESS_NOT_FOUND` (no 403).
-4. **Tests:** 15 tests verdes en subset PR-IMPL-019; WebMvc standalone (evita conflicto `entityManagerFactory`).
-5. **Frontend FSD-UC-019:** feature `processes/` con listado, detalle, badges de estado, árbol fases/subfases; sidebar desplegable «Ver procesos» / «Nuevo proceso».
-6. **Orval:** hooks GET añadidos manualmente hasta rebuild backend Docker exponga GET en OpenAPI.
+- `db/migration/V4__app_user_profile_fields.sql`
+- `domain/model/UserProfile.java`, `AppUser.java`
+- `domain/exception/InvalidUserProfileException.java`, `WeakPasswordException.java`
+- `application/port/in/RegisterUserUseCase.java`, `ListUsersUseCase.java`
+- `application/service/auth/RegisterUserService.java`, `ListUsersService.java`
+- `adapter/in/web/UserAdminController.java`
+- `adapter/in/web/dto/RegisterUserRequest.java`, `UserAdminSummaryResponse.java`
+- `adapter/in/web/advice/AuthExceptionHandler.java`
+- `adapter/out/persistance/entity/AppUserEntity.java`
+- `config/AuthDataLoader.java`
+- `RegisterUserServiceTest.java`, `UserAdminControllerTest.java`, `ModAuthServiceIntegrationTest.java`
 
-### Validación ejecutada
+**Frontend**
 
-- [x] `./mvnw test -Dtest=ProcessAccessPolicyTest,ListProcessesServiceTest,GetProcessDetailServiceTest,ProcessControllerQueryTest` — **OK** (15 tests)
-- [x] `CreateProcessUseCaseImplTest` — regresión POST OK
-- [ ] JaCoCo ≥ 90% servicios nuevos — no verificado en esta sesión
-- [ ] `pnpm run lint` frontend — no ejecutado
-- [ ] E2E manual Docker — pendiente (rebuild backend para OpenAPI GET)
+- `features/admin/users/pages/UsersAdminPage.tsx`
+- `features/admin/users/components/UsersTableUI.tsx`
+- `features/admin/users/components/AddUserModalUI.tsx`
+- `features/admin/users/components/UserSaveSuccessDialog.tsx`
+- `features/admin/users/lib/userFormValidation.ts`
+- `features/admin/users/hooks/useRegisterUserForm.ts`, `useUsersList.ts`
+- `components/ui/TextInput.tsx`, `Select.tsx` (prop `requiredMark`)
+- `api/model/registerUserRequest.ts`, `userAdminSummaryResponse.ts`
+- Eliminado: `RegisterUserFormUI.tsx`
 
-### Resultado obtenido
+### Criterios de cierre
 
-Full-stack FSD-UC-019 operativo en código: backend GET con RBAC + UI `/procesos` integrada en sidebar. Cadena documental: `FSD-UC-019 → DD-UC-019 → PR-IMPL-019 → PM-003`. `@dtp-sync` aplicado (§A.1, §A.2 #12, §A.3, §B.2).
-
-### Riesgos / observaciones
-
-- **Alcance expandido:** PR-IMPL-019 declara *backend only*; frontend React se implementó en la misma sesión sin PR-IMPL separado. Considerar PR-IMPL frontend dedicado en sprint futuro.
-- **Hooks Orval manuales:** regenerar con `pnpm run generate:api` tras `docker compose up -d --build backend`.
-- **Rama mezclada:** el working tree incluye cambios UC-003 (catálogo carreras) y otros no listados arriba; este PM cubre exclusivamente FSD-UC-019 / PR-IMPL-019.
-
-### Próximos pasos
-
-- [ ] Rebuild backend Docker + `pnpm run generate:api`
-- [ ] Verificación E2E con `jd@umss.edu.bo` y usuario CC seed
-- [ ] JaCoCo ≥ 90% en servicios `process/*`
+1. Listado muestra nombre completo, correo, celular, rol y estado desde BD.
+2. Modal de alta con validaciones y diseño institucional UMSS.
+3. Diálogo post-alta con credenciales copiables (solo al crear).
+4. Contraseñas existentes no visibles (hash Argon2).
+5. PM-005 registrado en este archivo.

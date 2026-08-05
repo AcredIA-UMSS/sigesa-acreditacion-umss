@@ -1,3 +1,4 @@
+import { UserPlus } from 'lucide-react';
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import type { UserRowViewModel } from '../hooks/useUsersList';
@@ -9,6 +10,7 @@ interface UsersTableUIProps {
   errorMessage?: string;
   isDeactivating: boolean;
   deactivatingUserId: string | null;
+  onAddUser: () => void;
   onDeactivate: (userId: string) => void;
 }
 
@@ -18,6 +20,12 @@ const STATUS_LABELS: Record<string, string> = {
   DEACTIVATED: 'Revocado',
 };
 
+const STATUS_STYLES: Record<string, string> = {
+  INACTIVE: 'bg-warning/15 text-warning',
+  ACTIVE: 'bg-success/15 text-success',
+  DEACTIVATED: 'bg-gray-100 text-gray-600',
+};
+
 export function UsersTableUI({
   users,
   isLoading,
@@ -25,15 +33,23 @@ export function UsersTableUI({
   errorMessage,
   isDeactivating,
   deactivatingUserId,
+  onAddUser,
   onDeactivate,
 }: UsersTableUIProps) {
   return (
     <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-heading-md text-primary-800">Usuarios registrados</h2>
-        <p className="mt-1 text-body-md text-gray-600">
-          Listado institucional con revocación soft (estado DEACTIVATED).
-        </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-heading-md text-primary-800">Usuarios registrados</h2>
+          <p className="mt-1 max-w-2xl text-body-md text-gray-600">
+            Listado institucional con nombre completo, contacto y rol. Las contraseñas no se
+            almacenan en texto plano: solo podrá verlas al crear un usuario nuevo.
+          </p>
+        </div>
+        <Button type="button" onClick={onAddUser} className="shrink-0">
+          <UserPlus size={18} />
+          Agregar usuario
+        </Button>
       </div>
 
       {isError && (
@@ -42,11 +58,11 @@ export function UsersTableUI({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {['Correo', 'Rol', 'Estado', 'Acciones'].map((header) => (
+              {['Nombre completo', 'Correo', 'Celular', 'Rol', 'Estado', 'Acciones'].map((header) => (
                 <th
                   key={header}
                   className="px-4 py-3 text-left text-label-md font-medium uppercase tracking-wide text-gray-600"
@@ -59,7 +75,7 @@ export function UsersTableUI({
           <tbody className="divide-y divide-gray-100 bg-body">
             {isLoading && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-body-md text-gray-500">
+                <td colSpan={6} className="px-4 py-10 text-center text-body-md text-gray-500">
                   Cargando usuarios…
                 </td>
               </tr>
@@ -67,19 +83,27 @@ export function UsersTableUI({
 
             {!isLoading && users.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-body-md text-gray-500">
-                  No hay usuarios registrados.
+                <td colSpan={6} className="px-4 py-10 text-center text-body-md text-gray-500">
+                  No hay usuarios registrados. Use &quot;Agregar usuario&quot; para crear el primero.
                 </td>
               </tr>
             )}
 
             {!isLoading &&
               users.map((user) => (
-                <tr key={user.userId}>
-                  <td className="px-4 py-3 text-body-md text-gray-800">{user.email}</td>
+                <tr key={user.userId} className="hover:bg-gray-50/80">
+                  <td className="px-4 py-3 text-body-md font-medium text-gray-900">{user.fullName}</td>
+                  <td className="px-4 py-3 text-body-md text-gray-700">{user.email}</td>
+                  <td className="px-4 py-3 text-body-md text-gray-700">{user.phoneNumber}</td>
                   <td className="px-4 py-3 text-body-md text-gray-700">{user.roleLabel}</td>
-                  <td className="px-4 py-3 text-body-md text-gray-700">
-                    {STATUS_LABELS[user.status] ?? user.status}
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-label-md font-medium ${
+                        STATUS_STYLES[user.status] ?? 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {STATUS_LABELS[user.status] ?? user.status}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     {user.canDeactivate ? (
@@ -89,7 +113,7 @@ export function UsersTableUI({
                         isLoading={isDeactivating && deactivatingUserId === user.userId}
                         onClick={() => {
                           const confirmed = window.confirm(
-                            `¿Desactivar la cuenta ${user.email}? El historial se conservará.`,
+                            `¿Desactivar la cuenta de ${user.fullName} (${user.email})? El historial se conservará.`,
                           );
                           if (confirmed) {
                             onDeactivate(user.userId);

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
+import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessPage } from './features/accreditation-process';
@@ -69,7 +70,9 @@ function App() {
           path="/evidencias/cargar"
           element={
             <ProtectedRoute>
-              <EvidenceUploadPage />
+              <CcOnlyRoute>
+                <EvidenceUploadPage />
+              </CcOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -78,7 +81,9 @@ function App() {
           path="/reportes/ejecutivo"
           element={
             <ProtectedRoute>
-              <ExecutiveReportPage />
+              <JdOnlyRoute>
+                <ExecutiveReportPage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />
