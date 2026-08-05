@@ -16,6 +16,8 @@ import java.util.UUID;
 public interface SpringDataAccreditationProcessRepository extends JpaRepository<AccreditationProcessJpaEntity, UUID> {
     boolean existsByCareerIdAndStatus(UUID careerId, String status);
 
+    long countByCareerId(UUID careerId);
+
     @Query("""
             SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END
             FROM AccreditationProcessJpaEntity p

@@ -6,6 +6,9 @@
 | :--- | :--- | :--- | :--- | :--- |
 | PM-001 | PR-IMPL-012 | DD-SYS-002 | PRD-REQ-028 | Asistente virtual SIGESA (MOD-ASSISTANT): backend proxy Open WebUI + frontend `/ayuda` + Docker Ollama |
 | PM-002 | PR-IMPL-013 | DD-SYS-002 §11 | PRD-REQ-028 / FSD-UC-002 | Tool calling read-only: loop backend + tool `list_users` (solo JD) |
+| PM-003 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Conexión completa a base de datos real en el Dashboard (UC-011), remoción total de stubs y mocks. |
+| PM-004 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
+| PM-005 | N/A (Hotfix) | DD-UC-011 | FSD-UC-011 | Corrección de decimales a exactamente 2 decimales en los KPIs del Dashboard |
 | PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
 | PM-004 | PR-IMPL-014 | DD-UC-020 | PRD-REQ-029 / FSD-UC-020 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
 | PM-005 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
@@ -176,6 +179,76 @@ AGENTS.md
 | --- | --- |
 | **ID** | PM-003 |
 | **Fecha** | 2026-08-03 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini |
+| **Tarea** | Implementación Real Database Persistence para UC-011 Dashboard (Frontend & Backend) |
+| **Objetivo** | Quitar fallbacks mock, conectar a Postgres/H2, poblar datos via ApplicationRunner y remover select de simulación en frontend. |
+| **Contexto** | FSD-UC-011 (Dashboard) / DD-UC-011. Integración completa de persistencia JPA y APIs sin stubs. |
+| **PR-IMPL vinculado** | [PR-IMPL-011](../../prompts/impl/PR-IMPL-011.md) |
+| **DD vinculado** | [DD-UC-011](../../design/DD-UC-011.md) |
+| **PRD / FSD vinculado** | FSD-UC-011 (Dashboard) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pls check the function specs and the development contract for the uc-011 (dashbord) some actions are pointing to an specific harcoded data instead of the real database (postgres) so you need to review this and fix the documentation + this function from backend and frontend to show the real data instead of mocked data
+```
+
+### Entradas auxiliares
+
+```text
+AGENTS.md
+docs/product/DTP.md
+docs/design/DD-UC-011.md
+```
+
+### Archivos generados o modificados
+
+**Backend (nuevos)**
+
+- `config/DashboardDataLoader.java` (Semillado de datos del dashboard para H2/dev)
+- `config/JpaConfig.java` (Aislamiento de la configuración JPA para tests)
+- `db/seed.sql` (Semilla SQL inicial para inicialización limpia en el contenedor de Postgres)
+
+**Backend (modificados)**
+
+- `SigesaApplication.java` (Desacoplamiento de JPA bootstrapping)
+- `adapter/out/persistance/JpaDashboardQueryAdapter.java` (Cálculo dinámico e integración multitenant)
+- `adapter/out/persistance/IndicatorJpaRepository.java` (Consultas JPQL para filtrado de indicadores por fase)
+- `adapter/out/persistance/ObservationJpaRepository.java` (Conteos programáticos de observaciones por estado)
+- `adapter/out/persistance/repository/SpringDataAccreditationProcessRepository.java` (Conteo de procesos activos por carrera)
+- `config/EvidenceDataLoader.java` (Alineación de SEED_PROGRAM_ID y robustez de asignaciones)
+- `config/AuthDataLoader.java` (Robustez de inicialización de asignación de usuarios)
+
+**Frontend (modificados)**
+
+- `features/dashboard/api/dashboardHooks.ts` (Remoción completa de interceptores mock)
+- `features/dashboard/pages/DashboardPage.tsx` (Remoción del selector de Persona)
+
+**Infraestructura (modificados)**
+
+- `docker-compose.yml` (Montaje de `db/seed.sql` para el servicio `db` y refactorización de healthcheck/dependencias de `open-webui`)
+
+### Cambios realizados
+
+1. **Persistencia Dinámica del Dashboard:** Implementación de cálculo en tiempo real en `JpaDashboardQueryAdapter`. Si existe un proceso de acreditación activo para la carrera, los KPIs, avances globales y fases se calculan en caliente desde las tablas operativas de evidencias e indicadores. Si no existe, se muestra el estado semillado en `tb_program_dashboard_summary`.
+2. **Alineación de Datos de Desarrollo:** Corrección de la desalineación de IDs en `EvidenceDataLoader` hacia `DevSeedData.PROGRAM_INF_SIS`.
+3. **Frontend React:** Eliminación definitiva de todos los fallbacks mock y refresco automático al impactar datos reales.
+4. **Isolación de Tests Slice:** Creación de `JpaConfig` para que `@WebMvcTest` no intente inicializar repositorios JPA.
+5. **Semillado Postgres Seguro:** Creación de un archivo `seed.sql` e integración a través de `/docker-entrypoint-initdb.d/` en `docker-compose.yml` para garantizar que cuando se inicie la base de datos Postgres por primera vez, cuente con la estructura y semilla lista de manera nativa.
+6. **Robustez de Carga en Inits:** Corrección de `EvidenceDataLoader` y `AuthDataLoader` para garantizar la inserción de las relaciones `user_program_assignment` en cualquier reinicio, incluso si el usuario existía previamente.
+
+---
+
+## PM-004
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-004 |
+| **Fecha** | 2026-08-03 |
+| **Hora** | 19:26 |
 | **Solicitante** | Boris Anthony Angulo Urquieta |
 | **Tarea** | Consulta de procesos de acreditación |
 | **Objetivo** | Exponer `GET /api/v1/processes` y `GET /api/v1/processes/{id}` con RBAC JD/TD/CC; UI listado + detalle |
@@ -304,6 +377,65 @@ Mockup UI "AÑADIR USUARIO" (Aylen)
 
 **Documentación**
 
+- [ ] Rebuild backend Docker + `pnpm run generate:api`
+- [ ] Verificación E2E con `jd@umss.edu.bo` y usuario CC seed
+- [ ] JaCoCo ≥ 90% en servicios `process/*`
+
+---
+
+## PM-005
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-005 |
+| **Fecha** | 2026-08-04 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Redondeo de KPIs a exactamente 2 decimales (Dashboard) |
+| **Objetivo** | Resolver errores visuales donde los porcentajes de avance global, avance de fases y promedio global presentaban más de dos decimales tanto en las consultas de backend como en el renderizado del frontend. |
+| **Contexto** | FSD-UC-011 (Dashboard) / DD-UC-011. Hotfix directo sobre lógica de persistencia backend y formateo en componentes de UI. |
+| **PR-IMPL vinculado** | N/A (Hotfix / Tarea de código) |
+| **DD vinculado** | [DD-UC-011](../../design/DD-UC-011.md) |
+| **PRD / FSD vinculado** | FSD-UC-011 (Dashboard) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+hi pls review the UC-011 related to the dashbaord for the backend, pls fix that the kpis shoudl be rounded to 2 decimals
+the frontend is still the same showing more thn 2 decimals, pls check as well the frontned and backend for this
+```
+
+### Entradas auxiliares
+
+```text
+AGENTS.md
+docs/design/DD-UC-011.md
+```
+
+### Archivos generados o modificados
+
+**Backend (modificados)**
+
+- `adapter/out/persistance/JpaDashboardQueryAdapter.java` (Redondeo matemático con Math.round en cálculos de progreso general, de fases y promedio general)
+
+**Frontend (modificados)**
+
+- `features/dashboard/components/CoordinatorDashboardSection.tsx` (Formateo .toFixed(2) para avance global e individual de fases)
+- `features/dashboard/components/ExecutiveDashboardSection.tsx` (Formateo .toFixed(2) para avance institucional)
+
+### Cambios realizados
+
+1. **Ajuste en Backend:** Se agregaron operaciones de redondeo matemático `Math.round(value * 100.0) / 100.0` a las variables `progress`, `phaseProgress` y `averageProgress` calculadas dinámicamente en `JpaDashboardQueryAdapter.java`.
+2. **Ajuste en Frontend:** Se implementó formateo de presentación `.toFixed(2)` en los componentes de React (`CoordinatorDashboardSection.tsx` y `ExecutiveDashboardSection.tsx`) para asegurar que todos los valores porcentuales se muestren con exactamente 2 decimales sin importar la representación exacta del tipo `number`.
+3. **Mantenimiento y Resolución de Conflictos:** Se resolvieron conflictos Git legados en `PROMPT_MAPPING.md`, ordenando los identificadores de trazabilidad cronológicos.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **OK** (119 pruebas verdes, regresiones completas limpias en persistencia y controladores)
+- [x] `npx oxlint` — **OK** (Cero warnings y errores en 135 archivos frontend analizados)
+- [x] `npx tsc -b` — **OK** (Verificación estricta de compilador TypeScript sin errores de tipos)
 - `docs/prompts/impl/PR-IMPL-015.md`
 - `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-005)
 

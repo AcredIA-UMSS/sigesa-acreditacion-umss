@@ -46,7 +46,7 @@ export function CoordinatorDashboardSection({ section, readOnly = false }: Coord
         />
         <KpiCard
           title="Avance Global"
-          value={`${section.porcentajeAvanceGlobal}%`}
+          value={`${section.porcentajeAvanceGlobal.toFixed(2)}%`}
           subtitle="Progreso promedio"
           icon={<TrendingUp className="text-primary-500" size={24} />}
         />
@@ -98,7 +98,7 @@ export function CoordinatorDashboardSection({ section, readOnly = false }: Coord
                     </span>
                   </div>
                   <span className="text-heading-sm font-bold text-primary-700">
-                    {fase.porcentaje}%
+                    {fase.porcentaje.toFixed(2)}%
                   </span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">

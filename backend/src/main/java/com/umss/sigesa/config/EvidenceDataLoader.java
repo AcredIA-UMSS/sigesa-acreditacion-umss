@@ -22,7 +22,7 @@ import java.util.UUID;
 public class EvidenceDataLoader implements ApplicationRunner {
 
     public static final String SEED_CC_EMAIL = "cc@umss.edu.bo";
-    public static final UUID SEED_PROGRAM_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+    public static final UUID SEED_PROGRAM_ID = DevSeedData.PROGRAM_INF_SIS;
     public static final UUID SEED_CRITERION_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440002");
     public static final UUID SEED_INDICATOR_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440003");
     public static final UUID SEED_PHASE_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440004");
@@ -49,29 +49,31 @@ public class EvidenceDataLoader implements ApplicationRunner {
     }
 
     private void seedCoordinatorUser() {
-        if (userRepository.findByEmail(SEED_CC_EMAIL).isPresent()) {
-            return;
-        }
+        AppUserEntity cc = userRepository.findByEmail(SEED_CC_EMAIL).orElse(null);
         LocalDateTime now = LocalDateTime.now();
-        UUID userId = UUID.randomUUID();
 
-        AppUserEntity cc = new AppUserEntity();
-        cc.setId(userId);
-        cc.setEmail(SEED_CC_EMAIL);
-        cc.setPasswordHash(passwordEncoder.encode(AuthDataLoader.SEED_CC_PASSWORD));
-        cc.setRole(Role.CC);
-        cc.setStatus(UserStatus.ACTIVE);
-        cc.setCreatedAt(now);
-        cc.setUpdatedAt(now);
-        userRepository.save(cc);
+        if (cc == null) {
+            cc = new AppUserEntity();
+            cc.setId(UUID.randomUUID());
+            cc.setEmail(SEED_CC_EMAIL);
+            cc.setPasswordHash(passwordEncoder.encode(AuthDataLoader.SEED_CC_PASSWORD));
+            cc.setRole(Role.CC);
+            cc.setStatus(UserStatus.ACTIVE);
+            cc.setCreatedAt(now);
+            cc.setUpdatedAt(now);
+            cc = userRepository.save(cc);
+        }
 
-        UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
-        assignment.setId(UUID.randomUUID());
-        assignment.setUserId(userId);
-        assignment.setProgramId(SEED_PROGRAM_ID);
-        assignment.setAssignedAt(now);
-        assignment.setRevokedAt(null);
-        assignmentRepository.save(assignment);
+        boolean hasAssignment = assignmentRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(cc.getId(), SEED_PROGRAM_ID);
+        if (!hasAssignment) {
+            UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
+            assignment.setId(UUID.randomUUID());
+            assignment.setUserId(cc.getId());
+            assignment.setProgramId(SEED_PROGRAM_ID);
+            assignment.setAssignedAt(now);
+            assignment.setRevokedAt(null);
+            assignmentRepository.save(assignment);
+        }
     }
 
     private void seedIndicator() {

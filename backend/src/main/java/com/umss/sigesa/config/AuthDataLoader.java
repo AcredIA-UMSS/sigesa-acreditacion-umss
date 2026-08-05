@@ -65,12 +65,8 @@ public class AuthDataLoader implements ApplicationRunner {
     }
 
     private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            return;
-        }
-
+        AppUserEntity user = userRepository.findByEmail(email).orElse(null);
         LocalDateTime now = LocalDateTime.now();
-        UUID userId = UUID.randomUUID();
 
         AppUserEntity user = new AppUserEntity();
         user.setId(userId);
@@ -86,12 +82,15 @@ public class AuthDataLoader implements ApplicationRunner {
         userRepository.save(user);
 
         if (programId != null) {
-            UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
-            assignment.setId(UUID.randomUUID());
-            assignment.setUserId(userId);
-            assignment.setProgramId(programId);
-            assignment.setAssignedAt(now);
-            assignmentRepository.save(assignment);
+            boolean hasAssignment = assignmentRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(user.getId(), programId);
+            if (!hasAssignment) {
+                UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
+                assignment.setId(UUID.randomUUID());
+                assignment.setUserId(user.getId());
+                assignment.setProgramId(programId);
+                assignment.setAssignedAt(now);
+                assignmentRepository.save(assignment);
+            }
         }
     }
 }

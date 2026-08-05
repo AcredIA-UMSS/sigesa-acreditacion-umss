@@ -30,6 +30,10 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
 
     long countByStatus(String status);
 
+    long countByProgramIdAndStatusNot(UUID programId, String status);
+
+    long countByProgramIdAndStatus(UUID programId, String status);
+
     @Query("SELECT COUNT(DISTINCT o.indicatorId) FROM ObservationEntity o")
     long countDistinctIndicators();
 
