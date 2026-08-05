@@ -1,17 +1,100 @@
-version: '3.8'
+# docker-compose.yml
 
 services:
   db:
     image: postgres:16-alpine
-    container_name: sigesa-postgres-db
+    container_name: sigesa-postgres
+    restart: always
     environment:
+      POSTGRES_USER: sigesa_user
+      POSTGRES_PASSWORD: sigesa_password
       POSTGRES_DB: sigesa
-      POSTGRES_USER: sigesa
-      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sigesa-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_MODELS: /root/.ollama
+    volumes:
+      - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
+      - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
+      - ollama_state:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "3001:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigesa-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_started
+      open-webui:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_URL=jdbc:postgresql://db:5432/sigesa
+      - DB_USERNAME=sigesa_user
+      - DB_PASSWORD=sigesa_password
+      - SIGESA_JWT_SECRET=xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
+      - SPRING_DATASOURCE_USERNAME=sigesa_user
+      - SPRING_DATASOURCE_PASSWORD=sigesa_password
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
+      - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-}
+      - SIGESA_ASSISTANT_MODEL=llama3.2:3b
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ""
+    container_name: sigesa-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
 
 volumes:
-  pgdata:
+  postgres_data:
+  open-webui:
+  ollama_state:
