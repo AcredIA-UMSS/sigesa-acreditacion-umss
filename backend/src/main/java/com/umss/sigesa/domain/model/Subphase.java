@@ -17,4 +17,6 @@ public class Subphase {
     private UUID id;
     private String name;
     private Integer order;
+    private String referenceUrl;
+    private String description;
 }

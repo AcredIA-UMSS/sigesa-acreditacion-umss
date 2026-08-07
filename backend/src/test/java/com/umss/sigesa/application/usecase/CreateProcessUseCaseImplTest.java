@@ -5,9 +5,11 @@ import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
+import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Template;
 import com.umss.sigesa.domain.model.TemplatePhase;
+import com.umss.sigesa.domain.model.TemplateStatus;
 import com.umss.sigesa.domain.model.TemplateSubphase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,6 +60,8 @@ class CreateProcessUseCaseImplTest {
         TemplateSubphase subphase = TemplateSubphase.builder()
                 .name("Sub 1")
                 .order(1)
+                .referenceUrl("https://duea.umss.edu.bo/guia/sub-1")
+                .description("Guía subfase")
                 .build();
 
         List<TemplateSubphase> subphasesList = new ArrayList<>();
@@ -76,6 +80,7 @@ class CreateProcessUseCaseImplTest {
                 .id(templateId)
                 .name("CEUB")
                 .type("CEUB")
+                .status(TemplateStatus.PUBLISHED)
                 .phases(phasesList)
                 .build();
     }
@@ -118,8 +123,28 @@ class CreateProcessUseCaseImplTest {
         assertEquals(1, result.getPhases().size());
         assertEquals("Fase 1", result.getPhases().get(0).getName());
         assertEquals(1, result.getPhases().get(0).getSubphases().size());
+        assertEquals("https://duea.umss.edu.bo/guia/sub-1",
+                result.getPhases().get(0).getSubphases().get(0).getReferenceUrl());
 
         verify(processPort, times(1)).save(any(AccreditationProcess.class));
+    }
+
+    @Test
+    void shouldRejectDraftTemplate() {
+        Template draftTemplate = Template.builder()
+                .id(templateId)
+                .name("CEUB")
+                .type("CEUB")
+                .status(TemplateStatus.DRAFT)
+                .phases(template.getPhases())
+                .build();
+
+        when(programCatalogPort.findById(careerId))
+                .thenReturn(Optional.of(new ProgramCatalogPort.ProgramEntry(careerId, "INF-SIS", "Ingeniería de Sistemas")));
+        when(templatePort.findById(templateId)).thenReturn(Optional.of(draftTemplate));
+
+        assertThrows(TemplateNotPublishedException.class, () -> useCase.createProcess(careerId, templateId));
+        verify(processPort, never()).save(any());
     }
 
     @Test
@@ -128,6 +153,7 @@ class CreateProcessUseCaseImplTest {
                 .id(UUID.randomUUID())
                 .name("ARCU-SUR")
                 .type("ARCU-SUR")
+                .status(TemplateStatus.PUBLISHED)
                 .phases(template.getPhases())
                 .build();
 

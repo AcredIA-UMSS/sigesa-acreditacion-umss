@@ -6,7 +6,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-08-03"
+ultima_actualizacion: "2026-08-07"
 ---
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
@@ -56,6 +56,9 @@ ultima_actualizacion: "2026-08-03"
 | `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
 | `FSD-UC-019` | Consulta de procesos de acreditación | [JD], [TD], [CC] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-019.md) | [DD-UC-019](../design/DD-UC-019.md) | [PR-IMPL-019](../prompts/impl/PR-IMPL-019.md) |
 | `FSD-UC-020` | Revisión documental [EE] | [EE] | v1.1 | **En Curso** | [Ver detalle](uc/FSD-UC-020.md) | [`DD-UC-020`](../design/DD-UC-020.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |
+| `FSD-UC-021` | Gestión de plantillas normativas | [JD] | v1.0 | **Hecho (backend)** | [Ver detalle](uc/FSD-UC-021.md) | [`DD-UC-021`](../design/DD-UC-021.md) | [`PR-IMPL-021`](../prompts/impl/PR-IMPL-021.md) |
+| `FSD-UC-022` | Gestión de fases/subfases en proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
+| `FSD-UC-023` | Asignación de responsable [CC] a proceso | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-023.md) | [`DD-UC-023`](../design/DD-UC-023.md) | [`PR-IMPL-023`](../prompts/impl/PR-IMPL-023.md) |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Verificado` · `Obsoleto`
 
@@ -90,7 +93,7 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 
 | Task Spec Kit | FSD-UC | Release |
 |---------------|--------|---------|
-| T-001 Modelo Proceso/Fase/Indicador | UC-003 | v1.0-rc |
+| T-001 Modelo Proceso/Fase/Indicador | UC-003, UC-021, UC-022, UC-023 | v1.0-rc |
 | T-002 Auth + RBAC | UC-001, UC-002 | v1.0-rc |
 | T-003 Upload + versionado | UC-004, UC-005 | v1.0-rc |
 | T-004 State machine Indicador | UC-008, UC-009, UC-010 | v1.0-rc |
@@ -112,3 +115,9 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en [`uc/`](uc/) |
 | 2026-06-15 | UC-003 marcado **En Curso** (scaffolding Gestión de Fases en código) |
 | 2026-08-03 | FSD-UC-019 implementado (consulta procesos); FSD-UC-020 rol [EE]; PM-004/PM-005 gestión usuarios |
+| 2026-08-07 | Nuevos UC-021 (plantillas CRUD), UC-022 (estructura en proceso), UC-023 (responsable [CC]); UC-003/019 actualizados |
+| 2026-08-07 | Design docs DD-UC-021, DD-UC-022, DD-UC-023 (borrador) |
+| 2026-08-07 | Contratos PR-IMPL-021, PR-IMPL-022, PR-IMPL-023 (backend) |
+| 2026-08-07 | FSD-UC-022 Full-Stack implementado (API-PROC-05…08 + UI `/procesos/{id}/estructura`); PM-009 |
+| 2026-08-07 | FSD-UC-022: contrato PR-IMPL-022 aprobado (API-PROC-05…08); PM-008 documental |
+| 2026-08-07 | FSD-UC-021 backend implementado (API-TPL-01…08); UI `/admin/plantillas` pendiente `PR-IMPL-021-FE` |

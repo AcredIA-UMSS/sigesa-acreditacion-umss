@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
+import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessPhaseTree } from './ProcessPhaseTree';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
@@ -22,8 +23,10 @@ function formatDate(iso?: string): string {
 }
 
 export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
+  const { session } = useAuth();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const canEditStructure = session?.role === 'JD' && process?.status === 'ACTIVE';
 
   return (
     <div className="space-y-6">
@@ -87,12 +90,24 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
           </section>
 
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
-            <h2 className="text-heading-lg font-semibold text-primary-800">
-              Estructura del proceso
-            </h2>
-            <p className="mt-1 mb-6 text-body-md text-gray-600">
-              Fases y subfases clonadas desde la plantilla, ordenadas por secuencia normativa.
-            </p>
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-heading-lg font-semibold text-primary-800">
+                  Estructura del proceso
+                </h2>
+                <p className="mt-1 text-body-md text-gray-600">
+                  Fases y subfases clonadas desde la plantilla, ordenadas por secuencia normativa.
+                </p>
+              </div>
+              {canEditStructure && (
+                <Link to={`/procesos/${processId}/estructura`}>
+                  <Button variant="secondary">
+                    <Pencil size={16} />
+                    Editar estructura
+                  </Button>
+                </Link>
+              )}
+            </div>
             <ProcessPhaseTree phases={process.phases ?? []} />
           </section>
         </>

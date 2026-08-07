@@ -100,7 +100,7 @@ class ListProcessesServiceTest {
     private void stubEnrichment(UUID careerId, String code, String name) {
         when(programCatalogPort.findById(careerId))
                 .thenReturn(Optional.of(new ProgramCatalogPort.ProgramEntry(careerId, code, name)));
-        when(templatePort.findById(templateId))
+        when(templatePort.findMetadataById(templateId))
                 .thenReturn(Optional.of(Template.builder().id(templateId).name("CEUB 2026").type("CEUB").build()));
     }
 }

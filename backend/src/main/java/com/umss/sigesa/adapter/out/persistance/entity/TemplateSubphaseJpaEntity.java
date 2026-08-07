@@ -35,6 +35,12 @@ public class TemplateSubphaseJpaEntity {
     @Column(name = "subphase_order", nullable = false)
     private Integer order;
 
+    @Column(name = "reference_url")
+    private String referenceUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_phase_id", nullable = false)
     private TemplatePhaseJpaEntity templatePhase;

@@ -25,6 +25,7 @@ public class ProcessResponseDto {
         private UUID id;
         private String name;
         private Integer order;
+        private String description;
         private List<SubphaseDto> subphases;
     }
 
@@ -33,5 +34,7 @@ public class ProcessResponseDto {
         private UUID id;
         private String name;
         private Integer order;
+        private String referenceUrl;
+        private String description;
     }
 }

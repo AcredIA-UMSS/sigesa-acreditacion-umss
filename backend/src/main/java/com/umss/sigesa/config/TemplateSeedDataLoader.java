@@ -12,6 +12,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -64,7 +65,11 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
         TemplateJpaEntity template = TemplateJpaEntity.builder()
                 .id(id)
                 .name(name)
+                .description("Plantilla normativa de demostración " + type)
                 .type(type)
+                .status("PUBLISHED")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .phases(new ArrayList<>())
                 .build();
 
@@ -73,14 +78,19 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
             TemplatePhaseJpaEntity phase = TemplatePhaseJpaEntity.builder()
                     .name(phaseDefinition[0])
                     .order(phaseIndex + 1)
+                    .description("Fase " + (phaseIndex + 1))
                     .template(template)
                     .subphases(new ArrayList<>())
                     .build();
 
             for (int subphaseIndex = 1; subphaseIndex < phaseDefinition.length; subphaseIndex++) {
+                String subphaseName = phaseDefinition[subphaseIndex];
                 TemplateSubphaseJpaEntity subphase = TemplateSubphaseJpaEntity.builder()
-                        .name(phaseDefinition[subphaseIndex])
+                        .name(subphaseName)
                         .order(subphaseIndex)
+                        .referenceUrl("https://duea.umss.edu.bo/normativa/"
+                                + slug(type) + "/" + slug(subphaseName))
+                        .description("Recurso normativo: " + subphaseName)
                         .templatePhase(phase)
                         .build();
                 phase.getSubphases().add(subphase);
@@ -90,5 +100,9 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
         }
 
         entityManager.persist(template);
+    }
+
+    private static String slug(String value) {
+        return value.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
     }
 }

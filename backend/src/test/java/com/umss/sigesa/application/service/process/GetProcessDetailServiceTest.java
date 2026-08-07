@@ -114,7 +114,7 @@ class GetProcessDetailServiceTest {
     private void stubEnrichment(UUID careerId) {
         when(programCatalogPort.findById(careerId))
                 .thenReturn(Optional.of(new ProgramCatalogPort.ProgramEntry(careerId, "INF-SIS", "Ingeniería de Sistemas")));
-        when(templatePort.findById(templateId))
+        when(templatePort.findMetadataById(templateId))
                 .thenReturn(Optional.of(Template.builder().id(templateId).name("CEUB 2026").type("CEUB").build()));
     }
 }

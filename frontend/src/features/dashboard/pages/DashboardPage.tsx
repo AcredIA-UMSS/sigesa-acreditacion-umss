@@ -13,6 +13,7 @@ import {
 import { useAuth } from '../../../lib/auth/useAuth';
 
 export function DashboardPage() {
+  const { session } = useAuth();
   const { summary, isLoading, error, refetch } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
 

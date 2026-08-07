@@ -11,13 +11,22 @@ Registra en **`docs/sprints/sprint-<numero>/PROMPT_MAPPING.md`** una entrada **`
 ## Invocación
 
 ```text
-@save-prompt-mapping sprint=<numero> pr=<PR-IMPL-NNN> [estado=<borrador|en_progreso|completado|bloqueado|fallido>] [solicitante="<nombre>"]
+@save-prompt-mapping sprint=<numero> fsd=FSD-UC-NNN [estado=...] [solicitante="<nombre>"]
+```
+
+Forma alternativa (si ya conoces el contrato):
+
+```text
+@save-prompt-mapping sprint=<numero> pr=<PR-IMPL-NNN> [estado=...] [solicitante="<nombre>"]
 ```
 
 - `sprint`: Número del sprint actual (ej. `1`, `02`). **Obligatorio**.
-- `pr`: ID del prompt de implementación ejecutado (ej. `PR-IMPL-005`). **Obligatorio**.
+- **`fsd`:** ID del caso de uso (`FSD-UC-NNN`). **Preferido** — el agente resuelve `PR-IMPL` desde el frontmatter de `docs/product/uc/FSD-UC-NNN.md` o la tabla `docs/product/FSD.md`.
+- `pr`: ID del prompt de implementación (ej. `PR-IMPL-022`). **Obligatorio** si no se pasa `fsd`. Si se pasa `fsd`, **resolver** `pr` antes de registrar (ver excepciones UC-004→006, UC-014→005, UC-020→014 en el orquestador).
 - `estado`: estado final de la ejecución. Por defecto `completado` si no se indica.
 - `solicitante`: persona o grupo que disparó la tarea. Si se omite, inferir del contexto o marcar `desconocido`.
+
+**Regla:** al menos uno de `fsd` o `pr` debe estar presente. **Priorizar `fsd`** (ancla funcional alineada con `@sigesa-orchestrator`).
 
 ## Archivos de referencia
 
@@ -46,9 +55,10 @@ Registra en **`docs/sprints/sprint-<numero>/PROMPT_MAPPING.md`** una entrada **`
 
 ### Paso 1 — Resolver PR-IMPL-NNN
 
-- Localizar `docs/prompts/impl/PR-IMPL-NNN.md`.
-- Extraer `feature_asociado` (DD-UC), objetivo, contexto y límites.
-- Enlazar hacia atrás: `PR-IMPL-NNN → DD-UC-NNN → FSD-UC-NNN`.
+- Si el usuario pasó **`fsd=FSD-UC-NNN`:** leer `docs/product/uc/FSD-UC-NNN.md` (frontmatter `pr_impl`, `design_doc`) o fila en `docs/product/FSD.md` → obtener `PR-IMPL-NNN` y `DD-UC-NNN`.
+- Si el usuario pasó **`pr=PR-IMPL-NNN`:** localizar `docs/prompts/impl/PR-IMPL-NNN.md` y enlazar al FSD vía frontmatter del contrato o `FSD.md`.
+- Extraer objetivo, contexto y límites del PR-IMPL.
+- Enlazar hacia atrás: `FSD-UC-NNN → DD-UC-NNN → PR-IMPL-NNN`.
 
 ### Paso 2 y 3 — Ubicación e ID correlativo PM-NNN
 

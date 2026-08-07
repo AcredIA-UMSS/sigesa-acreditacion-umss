@@ -23,7 +23,7 @@ public final class ProcessEnrichmentHelper {
                                            TemplatePort templatePort) {
         ProgramCatalogPort.ProgramEntry program = programCatalogPort.findById(item.careerId())
                 .orElse(new ProgramCatalogPort.ProgramEntry(item.careerId(), "", ""));
-        Template template = templatePort.findById(item.templateId()).orElse(null);
+        Template template = templatePort.findMetadataById(item.templateId()).orElse(null);
         String templateName = template != null ? template.getName() : "";
         String templateType = template != null ? template.getType() : "";
 
@@ -49,7 +49,7 @@ public final class ProcessEnrichmentHelper {
 
         ProgramCatalogPort.ProgramEntry program = programCatalogPort.findById(process.getCareerId())
                 .orElse(new ProgramCatalogPort.ProgramEntry(process.getCareerId(), "", ""));
-        Template template = templatePort.findById(process.getTemplateId()).orElse(null);
+        Template template = templatePort.findMetadataById(process.getTemplateId()).orElse(null);
         String templateName = template != null ? template.getName() : "";
         String templateType = template != null ? template.getType() : "";
 
