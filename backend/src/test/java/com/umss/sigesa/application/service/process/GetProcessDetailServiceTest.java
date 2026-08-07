@@ -3,8 +3,10 @@ package com.umss.sigesa.application.service.process;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
+import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Phase;
@@ -34,6 +36,10 @@ class GetProcessDetailServiceTest {
     private ProgramCatalogPort programCatalogPort;
     @Mock
     private TemplatePort templatePort;
+    @Mock
+    private ProcessResponsiblePort processResponsiblePort;
+    @Mock
+    private UserRepositoryPort userRepositoryPort;
 
     private GetProcessDetailService service;
 
@@ -44,7 +50,8 @@ class GetProcessDetailServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new GetProcessDetailService(processQueryPort, programCatalogPort, templatePort);
+        service = new GetProcessDetailService(
+                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
     }
 
     @Test

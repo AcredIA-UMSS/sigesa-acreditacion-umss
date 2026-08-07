@@ -16,6 +16,7 @@
 | PM-007 | PR-IMPL-021 | DD-UC-021 | FSD-UC-021 | Cierre documental: `@save-prompt-mapping` + `@dtp-sync` (autor Boris Anthony Angulo Urquieta) |
 | PM-008 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Contrato implementación CRUD estructura proceso ACTIVE (API-PROC-05…08); cierre documental orchestrator |
 | PM-009 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Full-Stack UC-022: backend ProcessStructure + frontend `/procesos/{id}/estructura` |
+| PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
 
 ## PM-001
 
@@ -743,6 +744,42 @@ Backend hexagonal UC-022 operativo con guardas BR-21/22/23; frontend editor estr
 ### Próximos pasos
 
 - [ ] Smoke E2E manual: JD en `/procesos/{id}/estructura`; CC → 403 en mutaciones
-- [ ] `PR-IMPL-023` — asignación responsable [CC]
+
+---
+
+## PM-010
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-010 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 17:20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Composer |
+| **Tarea** | Implementación Full-Stack FSD-UC-023 |
+| **Objetivo** | Asignación de responsable [CC] a proceso ACTIVE (API-PROC-09…11) + UI sección/modal; extensión UC-019 con campo `responsible` |
+| **Contexto** | Pipeline orchestrator Pasos 3a–5. Flyway `V7__process_responsible.sql` (V6 ocupado por rol EE). Seed CC: `cc@umss.edu.bo`, `cc2@umss.edu.bo`. |
+| **PR-IMPL vinculado** | [PR-IMPL-023](../../prompts/impl/PR-IMPL-023.md) |
+| **DD-UC vinculado** | [DD-UC-023](../../design/DD-UC-023.md) |
+| **FSD-UC vinculado** | [FSD-UC-023](../../product/uc/FSD-UC-023.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@sigesa-orchestrator fsd=FSD-UC-023 sprint=2 solicitante="Boris Anthony Angulo Urquieta"
+```
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **157 tests OK**
+- [x] `pnpm lint` + `tsc -b` — OK
+- [x] `docker compose up -d --build backend frontend`
+- [x] `pnpm run generate:api` — Orval OK
+
+### Resultado obtenido
+
+UC-023 operativo: [JD] asigna [CC] único por proceso ACTIVE con validación carrera (BR-09) y unicidad global (BR-20). Trazabilidad `FSD-UC-023 → DD-UC-023 → PR-IMPL-023 → PM-010 → DTP` cerrada.
 
 ---

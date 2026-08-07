@@ -5,6 +5,7 @@
  * OpenAPI spec version: v0
  */
 
+export * from './assignResponsibleRequestDto.ts';
 export * from './assistantStatusResponse.ts';
 export * from './bottleneckSummary.ts';
 export * from './chatMessageDto.ts';
@@ -13,6 +14,7 @@ export * from './coordinatorKpiSection.ts';
 export * from './createPhaseRequestDto.ts';
 export * from './createProcessRequestDto.ts';
 export * from './createSubphaseRequestDto.ts';
+export * from './eligibleResponsibleDto.ts';
 export * from './executiveKpiSection.ts';
 export * from './exportJobRequest.ts';
 export * from './exportJobResponse.ts';
@@ -31,6 +33,7 @@ export * from './pageObservationSummary.ts';
 export * from './phaseDto.ts';
 export * from './phaseProgressSummary.ts';
 export * from './processResponseDto.ts';
+export * from './processResponsibleDto.ts';
 export * from './processSummaryResponseDto.ts';
 export * from './programSummaryResponse.ts';
 export * from './programTrafficLight.ts';

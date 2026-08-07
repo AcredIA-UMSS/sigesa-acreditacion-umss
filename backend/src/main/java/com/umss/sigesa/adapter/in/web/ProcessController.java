@@ -16,7 +16,9 @@ import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
+import com.umss.sigesa.adapter.in.web.dto.ProcessResponsibleDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponseDto;
+import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -160,6 +162,7 @@ public class ProcessController {
                 .startDate(summary.startDate())
                 .phaseCount(summary.phaseCount())
                 .subphaseCount(summary.subphaseCount())
+                .responsible(mapResponsibleToDto(summary.responsible()))
                 .build();
     }
 
@@ -187,6 +190,7 @@ public class ProcessController {
                                 .description(s.getDescription())
                                 .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
+                .responsible(mapResponsibleToDto(detail.responsible()))
                 .build();
     }
 
@@ -208,8 +212,12 @@ public class ProcessController {
                                 .order(s.getOrder())
                                 .referenceUrl(s.getReferenceUrl())
                                 .description(s.getDescription())
-                                .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
+                .build()).collect(Collectors.toList()))
                 .build();
+    }
+
+    private ProcessResponsibleDto mapResponsibleToDto(ProcessResponsibleInfo info) {
+        return ProcessResponsibleController.mapToDto(info);
     }
 }

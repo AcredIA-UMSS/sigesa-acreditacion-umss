@@ -3,8 +3,10 @@ package com.umss.sigesa.application.service.process;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
+import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.model.Template;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +34,10 @@ class ListProcessesServiceTest {
     private ProgramCatalogPort programCatalogPort;
     @Mock
     private TemplatePort templatePort;
+    @Mock
+    private ProcessResponsiblePort processResponsiblePort;
+    @Mock
+    private UserRepositoryPort userRepositoryPort;
 
     private ListProcessesService service;
 
@@ -42,7 +49,9 @@ class ListProcessesServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ListProcessesService(processQueryPort, programCatalogPort, templatePort);
+        service = new ListProcessesService(
+                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+        lenient().when(processResponsiblePort.findAllActive()).thenReturn(List.of());
     }
 
     @Test

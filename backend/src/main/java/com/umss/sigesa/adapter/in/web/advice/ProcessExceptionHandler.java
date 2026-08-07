@@ -1,5 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.CareerScopeMismatchException;
+import com.umss.sigesa.domain.exception.CcAlreadyAssignedToProcessException;
+import com.umss.sigesa.domain.exception.InvalidResponsibleUserException;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
 import com.umss.sigesa.domain.exception.ProcessNotEditableException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
@@ -139,6 +142,33 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "error", "SUBPHASE_LINK_REQUIRED",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(CcAlreadyAssignedToProcessException.class)
+    public ResponseEntity<Map<String, String>> handleCcAlreadyAssigned(CcAlreadyAssignedToProcessException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "CC_ALREADY_ASSIGNED_TO_PROCESS",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(CareerScopeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleCareerScopeMismatch(CareerScopeMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "CAREER_SCOPE_MISMATCH",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(InvalidResponsibleUserException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidResponsibleUser(InvalidResponsibleUserException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "INVALID_RESPONSIBLE_USER",
                         "message", ex.getMessage()
                 ));
     }

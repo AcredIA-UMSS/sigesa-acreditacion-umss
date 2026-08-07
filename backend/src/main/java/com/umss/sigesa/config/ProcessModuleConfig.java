@@ -2,6 +2,7 @@ package com.umss.sigesa.config;
 
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
@@ -11,27 +12,35 @@ import com.umss.sigesa.application.port.in.DeleteTemplateUseCase;
 import com.umss.sigesa.application.port.in.DuplicateTemplateUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.GetTemplateUseCase;
+import com.umss.sigesa.application.port.in.ListEligibleResponsiblesUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
 import com.umss.sigesa.application.port.in.PublishTemplateUseCase;
+import com.umss.sigesa.application.port.in.RemoveProcessResponsibleUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateTemplateUseCase;
 import com.umss.sigesa.application.port.out.AccreditationProcessPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProcessStructurePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.SubphaseWorkflowPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
+import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.process.AddProcessPhaseService;
 import com.umss.sigesa.application.service.process.AddProcessSubphaseService;
+import com.umss.sigesa.application.service.process.AssignProcessResponsibleService;
 import com.umss.sigesa.application.service.process.DeleteProcessPhaseService;
 import com.umss.sigesa.application.service.process.DeleteProcessSubphaseService;
 import com.umss.sigesa.application.service.process.GetProcessDetailService;
+import com.umss.sigesa.application.service.process.ListEligibleResponsiblesService;
 import com.umss.sigesa.application.service.process.ListProcessesService;
 import com.umss.sigesa.application.service.process.ProcessStructureGuard;
+import com.umss.sigesa.application.service.process.RemoveProcessResponsibleService;
 import com.umss.sigesa.application.service.process.ReorderProcessStructureService;
 import com.umss.sigesa.application.service.process.UpdateProcessPhaseService;
 import com.umss.sigesa.application.service.process.UpdateProcessSubphaseService;
@@ -44,6 +53,7 @@ import com.umss.sigesa.application.service.template.ListTemplatesService;
 import com.umss.sigesa.application.service.template.PublishTemplateService;
 import com.umss.sigesa.application.service.template.TemplateStructureValidator;
 import com.umss.sigesa.application.service.template.UpdateTemplateService;
+import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.usecase.CreateProcessUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -109,15 +119,52 @@ public class ProcessModuleConfig {
     @Bean
     ListProcessesUseCase listProcessesUseCase(ProcessQueryPort processQueryPort,
                                               ProgramCatalogPort programCatalogPort,
-                                              TemplatePort templatePort) {
-        return new ListProcessesService(processQueryPort, programCatalogPort, templatePort);
+                                              TemplatePort templatePort,
+                                              ProcessResponsiblePort processResponsiblePort,
+                                              UserRepositoryPort userRepositoryPort) {
+        return new ListProcessesService(
+                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
     }
 
     @Bean
     GetProcessDetailUseCase getProcessDetailUseCase(ProcessQueryPort processQueryPort,
                                                     ProgramCatalogPort programCatalogPort,
-                                                    TemplatePort templatePort) {
-        return new GetProcessDetailService(processQueryPort, programCatalogPort, templatePort);
+                                                    TemplatePort templatePort,
+                                                    ProcessResponsiblePort processResponsiblePort,
+                                                    UserRepositoryPort userRepositoryPort) {
+        return new GetProcessDetailService(
+                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+    }
+
+    @Bean
+    AssignProcessResponsibleUseCase assignProcessResponsibleUseCase(
+            ProcessQueryPort processQueryPort,
+            UserRepositoryPort userRepositoryPort,
+            UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort,
+            ProcessResponsiblePort processResponsiblePort,
+            ProcessStructureGuard processStructureGuard) {
+        return new AssignProcessResponsibleService(
+                processQueryPort,
+                userRepositoryPort,
+                userProgramAssignmentRepositoryPort,
+                processResponsiblePort,
+                processStructureGuard);
+    }
+
+    @Bean
+    RemoveProcessResponsibleUseCase removeProcessResponsibleUseCase(
+            ProcessQueryPort processQueryPort,
+            ProcessResponsiblePort processResponsiblePort,
+            ProcessStructureGuard processStructureGuard) {
+        return new RemoveProcessResponsibleService(processQueryPort, processResponsiblePort, processStructureGuard);
+    }
+
+    @Bean
+    ListEligibleResponsiblesUseCase listEligibleResponsiblesUseCase(
+            ProcessQueryPort processQueryPort,
+            ListUsersUseCase listUsersUseCase,
+            ProcessResponsiblePort processResponsiblePort) {
+        return new ListEligibleResponsiblesService(processQueryPort, listUsersUseCase, processResponsiblePort);
     }
 
     @Bean

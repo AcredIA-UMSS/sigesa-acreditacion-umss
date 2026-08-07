@@ -38,7 +38,8 @@ public final class ProcessEnrichmentHelper {
                 item.status(),
                 item.startDate(),
                 item.phaseCount(),
-                item.subphaseCount()
+                item.subphaseCount(),
+                null
         );
     }
 
@@ -63,7 +64,8 @@ public final class ProcessEnrichmentHelper {
                 templateType,
                 process.getStatus(),
                 process.getStartDate(),
-                process.getPhases()
+                process.getPhases(),
+                null
         );
     }
 

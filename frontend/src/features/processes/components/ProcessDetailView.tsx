@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessPhaseTree } from './ProcessPhaseTree';
+import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessDetailViewProps {
@@ -88,6 +89,12 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
               Inicio: {formatDate(process.startDate)}
             </p>
           </section>
+
+          <ProcessResponsibleContainer
+            processId={processId}
+            process={process}
+            onUpdated={refetch}
+          />
 
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

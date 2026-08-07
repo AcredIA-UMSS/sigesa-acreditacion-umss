@@ -19,6 +19,7 @@ public class ProcessResponseDto {
     private String status;
     private LocalDateTime startDate;
     private List<PhaseDto> phases;
+    private ProcessResponsibleDto responsible;
 
     @Getter @Builder
     public static class PhaseDto {

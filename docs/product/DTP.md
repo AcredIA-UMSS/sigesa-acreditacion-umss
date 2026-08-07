@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — contrato:** `PR-IMPL-022` aprobado; `DD-UC-022` + API-PROC-05…08 en `api_contracts.md`; puertos planificados `ProcessStructurePort`, `SubphaseWorkflowPort` (stub). | FSD-UC-022 / DD-UC-022 | N/A | PM-008 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-TEMPLATE (FSD-UC-021):** CRUD plantillas normativas `GET/POST/PUT/DELETE /api/v1/templates` + publish/duplicate/archive; Flyway `V5__template_management.sql`; `TemplateManagementPort` CQRS; validación `PUBLISHED` en `POST /processes`; clonación `referenceUrl` a subfases de proceso. | FSD-UC-021 / DD-UC-021 | N/A | PM-006 / PR-IMPL-021 | Boris Anthony Angulo Urquieta |
@@ -107,7 +108,8 @@ artefactos_vivos:
 | `FSD-UC-003` | `DD-UC-003` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-003V3` | Arquitectura Hexagonal (Backend) + UI React c/ Orval |
 | `FSD-UC-019` | `DD-UC-019` | **hecho (Full-Stack)** | `v1.0` | Unit `ListProcessesService`, `GetProcessDetailService`, `ProcessAccessPolicy`; WebMvc standalone | `PR-IMPL-019` / PM-003 | GET listado + detalle; [CC] 404 cross-carrera |
 | `FSD-UC-021` | `DD-UC-021` | **hecho (backend)** | `v1.0` | Unit validator + services template; WebMvc `TemplateControllerWebMvcTest`; JaCoCo pendiente `mvn verify` | `PR-IMPL-021` / PM-006 | API-TPL-01…08 solo [JD]; FE pendiente `PR-IMPL-021-FE` |
-| `FSD-UC-022` | `DD-UC-022` | **hecho (Full-Stack)** | `v1.0` | Unit `ProcessStructureGuard`, `Add/Delete/Reorder*Service`; WebMvc `ProcessStructureControllerWebMvcTest`; `./mvnw test` 148 tests | `PR-IMPL-022` / PM-009 | API-PROC-05…08 [JD]; UI `/procesos/{id}/estructura`; `SubphaseWorkflowPort` stub v1.0 |
+| `FSD-UC-022` | `DD-UC-022` | **hecho (Full-Stack)** | `v1.0` | Unit `ProcessStructureGuard`, `Add/Delete/Reorder*Service`; WebMvc `ProcessStructureControllerWebMvcTest`; `./mvnw test` | `PR-IMPL-022` / PM-009 | API-PROC-05…08 [JD]; UI `/procesos/{id}/estructura`; `SubphaseWorkflowPort` stub v1.0 |
+| `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `v1.0` | Unit `Assign/RemoveProcessResponsibleService`; WebMvc `ProcessResponsibleControllerWebMvcTest`; `./mvnw test` 157 tests | `PR-IMPL-023` / PM-010 | API-PROC-09…11 [JD]; UI responsable en `/procesos/{id}` + columna listado |
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
 | `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
@@ -134,7 +136,7 @@ artefactos_vivos:
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | **sí** | Confirmada su exigencia estricta en FSD-UC-003. Dominio encapsulado. |
 | **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design docs `DD-UC-001`, `DD-UC-002` |
-| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019`, **`DD-UC-022` (§B.2.1)** |
+| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019`, **`DD-UC-022` (§B.2.1)**, **`DD-UC-023` (§B.2.2)** |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
@@ -193,6 +195,22 @@ artefactos_vivos:
 | **Dependencia** | `PR-IMPL-021` (V5 + clonación `referenceUrl` desde plantilla) |
 | **Frontend** | `/procesos/{processId}/estructura` — `ProcessStructurePage`, `useProcessStructureEditor`, Orval `estructura-de-proceso/` |
 | **Anti-patrón JPA** | No persistir agregado `AccreditationProcess` completo con colecciones reemplazadas; no preasignar UUID con `@GeneratedValue` |
+
+#### B.2.2 MOD-PROCESS — responsable [CC] (`DD-UC-023`)
+
+**Implementación:** Sprint 02 PM-010 · **Prompt:** `PR-IMPL-023` · **FSD:** FSD-UC-023 · **Estado:** **hecho (Full-Stack)**
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `PUT/DELETE /api/v1/processes/{processId}/responsible`; `GET …/responsible/candidates` |
+| **RBAC** | Solo **[JD]** mutaciones; lectura responsable en GET list/detail (UC-019) |
+| **Puertos aplicación** | IN: `AssignProcessResponsibleUseCase`, `RemoveProcessResponsibleUseCase`, `ListEligibleResponsiblesUseCase`; OUT: **`ProcessResponsiblePort`** |
+| **Tabla JPA** | `process_responsible_assignment` — soft revoke (`revoked_at`); índices únicos parciales (BR-20) |
+| **Migración Flyway** | `V7__process_responsible.sql` (prod); dev Docker: Hibernate `ddl-auto: update` |
+| **Errores clave** | 409 `CC_ALREADY_ASSIGNED_TO_PROCESS`, `CAREER_SCOPE_MISMATCH`, `PROCESS_NOT_EDITABLE`; 400 `INVALID_RESPONSIBLE_USER` |
+| **Extensión UC-019** | `ProcessSummaryResponseDto` / `ProcessResponseDto` → campo `responsible` (`ProcessResponsibleDto`) |
+| **Frontend** | Sección «Responsable del proceso» en detalle; modal asignación; columna en listado `/procesos` |
+| **Hooks Orval** | `useAssignResponsible`, `useRemoveResponsible`, `useListCandidates` en `procesos-de-acreditación.ts` |
 
 ---
 

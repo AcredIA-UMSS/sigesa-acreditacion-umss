@@ -20,4 +20,5 @@ public class ProcessSummaryResponseDto {
     private LocalDateTime startDate;
     private int phaseCount;
     private int subphaseCount;
+    private ProcessResponsibleDto responsible;
 }

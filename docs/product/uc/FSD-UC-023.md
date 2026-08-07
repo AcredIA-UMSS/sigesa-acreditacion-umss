@@ -1,7 +1,7 @@
 ---
 id: FSD-UC-023
 nombre: Asignación de responsable [CC] a proceso
-estado: Pendiente
+estado: Hecho
 release: v1.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-002, PRD-US-023

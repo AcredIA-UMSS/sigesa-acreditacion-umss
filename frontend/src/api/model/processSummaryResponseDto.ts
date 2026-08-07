@@ -4,6 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { ProcessResponsibleDto } from './processResponsibleDto.ts';
 
 export interface ProcessSummaryResponseDto {
   id?: string;
@@ -17,4 +18,5 @@ export interface ProcessSummaryResponseDto {
   startDate?: string;
   phaseCount?: number;
   subphaseCount?: number;
+  responsible?: ProcessResponsibleDto;
 }
