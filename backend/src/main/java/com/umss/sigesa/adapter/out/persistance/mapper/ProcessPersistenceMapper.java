@@ -28,6 +28,7 @@ public class ProcessPersistenceMapper {
                         .id(pDomain.getId())
                         .name(pDomain.getName())
                         .order(pDomain.getOrder())
+                        .description(pDomain.getDescription())
                         .process(processEntity)
                         .build();
 
@@ -36,6 +37,8 @@ public class ProcessPersistenceMapper {
                             .id(sDomain.getId())
                             .name(sDomain.getName())
                             .order(sDomain.getOrder())
+                            .referenceUrl(sDomain.getReferenceUrl())
+                            .description(sDomain.getDescription())
                             .phase(phaseEntity)
                             .build()).collect(Collectors.toList()));
                 }
@@ -56,10 +59,13 @@ public class ProcessPersistenceMapper {
                         .id(p.getId())
                         .name(p.getName())
                         .order(p.getOrder())
+                        .description(p.getDescription())
                         .subphases(p.getSubphases().stream().map(s -> Subphase.builder()
                                 .id(s.getId())
                                 .name(s.getName())
                                 .order(s.getOrder())
+                                .referenceUrl(s.getReferenceUrl())
+                                .description(s.getDescription())
                                 .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
                 .build();

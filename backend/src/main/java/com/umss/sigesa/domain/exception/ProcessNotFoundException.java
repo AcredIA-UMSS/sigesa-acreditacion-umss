@@ -7,4 +7,8 @@ public class ProcessNotFoundException extends RuntimeException {
     public ProcessNotFoundException(UUID processId) {
         super("Proceso no encontrado con ID: " + processId);
     }
+
+    public ProcessNotFoundException(String message) {
+        super(message);
+    }
 }

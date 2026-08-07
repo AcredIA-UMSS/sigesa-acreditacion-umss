@@ -16,6 +16,7 @@ public record EnrichedProcessDetail(
         String templateType,
         String status,
         LocalDateTime startDate,
-        List<Phase> phases
+        List<Phase> phases,
+        ProcessResponsibleInfo responsible
 ) {
 }

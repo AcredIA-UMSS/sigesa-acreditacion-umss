@@ -16,7 +16,7 @@ ultima_actualizacion: "2026-08-03"
 
 Este feature implementa la capacidad de iniciar un Proceso de Acreditación (`AccreditationProcess`) para una carrera específica a partir de una Plantilla (CEUB o ARCU-SUR). Las plantillas actúan como un molde que contiene un conjunto predefinido de Fases y Subfases.
 
-**Fuera de alcance:** La interfaz de usuario (UI) para la creación/edición dinámica de plantillas por parte de los usuarios finales (las plantillas se inicializan por seeders o endpoints administrativos en esta fase).
+**Fuera de alcance (movido a DD-UC-021):** CRUD de plantillas normativas (nombre, descripción, fases/subfases con enlaces). Ver [`DD-UC-021`](DD-UC-021.md). Este DD-003 cubre **únicamente** la creación de proceso desde plantilla `PUBLISHED`.
 
 ## 2. Modelo de Datos y Arquitectura
 

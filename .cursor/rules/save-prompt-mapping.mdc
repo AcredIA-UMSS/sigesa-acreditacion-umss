@@ -6,7 +6,15 @@ globs: ["src/**", "**/*.java", "**/pom.xml", "**/*.sql", "src/test/**", "docs/pr
 
 Cada ejecución de un **prompt de implementación** (`PR-IMPL-NNN`) o de **cualquier prompt que genere o modifique código** en este repositorio debe cerrarse registrando la trazabilidad correspondiente.
 
-> **Ubicación vigente:** `docs/sprints/sprint_<N>/PROMPT_MAPPING.md` (no existe `docs/PROMPT_MAPPING.md` en raíz). Usar `@save-prompt-mapping sprint=<N>`.
+> **Ubicación vigente:** `docs/sprints/sprint_<N>/PROMPT_MAPPING.md`. Preferir **`fsd=FSD-UC-NNN`** (el agente resuelve `PR-IMPL` desde el FSD).
+
+## Formato de invocación (preferido)
+
+```
+@save-prompt-mapping sprint=<N> fsd=FSD-UC-NNN [estado=completado|en_progreso|bloqueado|fallido] [solicitante="<nombre>"]
+```
+
+Alternativa si ya conoces el contrato: `pr=<PR-IMPL-NNN>` en lugar de `fsd=`.
 
 ## Cuándo aplica
 
@@ -34,12 +42,8 @@ Antes de dar por finalizada la respuesta al usuario:
 
 - **Baseline:** no modificar `docs/baseline/` (ver `baseline-congelado.mdc`).
 - **DTP:** cambios estructurales pueden requerir además `@dtp-sync` (ver `dtp-sync.mdc`).
-- **Gobernanza:** alineado con [`AGENTS.md`](../../agents.md) — todo código generado debe estar respaldado por prompt documentado y registro PM en el sprint activo.
+- **Gobernanza:** alineado con [`AGENTS.md`](../../AGENTS.md) — todo código generado debe estar respaldado por FSD + prompt documentado y registro PM en el sprint activo.
 
-## Formato de invocación
+## Formato de invocación (detalle en skill)
 
-```
-@save-prompt-mapping sprint=<N> pr=<PR-IMPL-NNN> [estado=completado|en_progreso|bloqueado|fallido] [solicitante="<nombre>"]
-```
-
-Si la skill no puede ejecutarse por falta de datos (prompt, diff, PR-IMPL), reportarlo explícitamente y **no** marcar la tarea como completada.
+Ver [`.cursor/skills/save-prompt-mapping/SKILL.md`](../../.cursor/skills/save-prompt-mapping/SKILL.md). Resumen: **`fsd=FSD-UC-NNN`** (recomendado) o `pr=PR-IMPL-NNN`.

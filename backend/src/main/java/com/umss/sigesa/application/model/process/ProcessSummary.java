@@ -14,6 +14,7 @@ public record ProcessSummary(
         String status,
         LocalDateTime startDate,
         int phaseCount,
-        int subphaseCount
+        int subphaseCount,
+        ProcessResponsibleInfo responsible
 ) {
 }

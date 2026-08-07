@@ -44,7 +44,7 @@ export async function customFetch<TData>(
 
 
   // Vacío = rutas relativas (/api/...) vía proxy Vite o nginx en Docker
-  const baseUrl = process.env.VITE_API_URL ?? '';
+  const baseUrl = import.meta.env.VITE_API_URL ?? '';
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
   const shouldAttachAuth = auth && !fullUrl.includes('/auth/login');
 

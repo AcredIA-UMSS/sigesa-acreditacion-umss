@@ -1,4 +1,4 @@
-import { ChevronDown, Layers } from 'lucide-react';
+import { ChevronDown, ExternalLink, Layers } from 'lucide-react';
 import { useState } from 'react';
 import type { PhaseDto } from '../../../api/model';
 
@@ -59,9 +59,25 @@ function PhaseAccordion({ phase }: { phase: PhaseDto }) {
           {subphases.map((sub) => (
             <li
               key={sub.id ?? `${phase.id}-${sub.order}`}
-              className="flex items-center justify-between px-5 py-3 text-body-md text-gray-800"
+              className="flex flex-col gap-1 px-5 py-3 sm:flex-row sm:items-center sm:justify-between"
             >
-              <span>{sub.name}</span>
+              <div>
+                <p className="text-body-md text-gray-800">{sub.name}</p>
+                {sub.description && (
+                  <p className="text-body-md text-gray-500">{sub.description}</p>
+                )}
+                {sub.referenceUrl && (
+                  <a
+                    href={sub.referenceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 text-body-md text-primary-600 hover:text-primary-800"
+                  >
+                    <ExternalLink size={14} />
+                    Referencia normativa
+                  </a>
+                )}
+              </div>
               <span className="text-label-md text-gray-500">Orden {sub.order ?? '—'}</span>
             </li>
           ))}

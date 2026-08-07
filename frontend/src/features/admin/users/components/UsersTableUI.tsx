@@ -1,6 +1,8 @@
 import { UserPlus } from 'lucide-react';
+import { useState } from 'react';
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
+import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
 import type { UserRowViewModel } from '../hooks/useUsersList';
 
 interface UsersTableUIProps {
@@ -36,7 +38,12 @@ export function UsersTableUI({
   onAddUser,
   onDeactivate,
 }: UsersTableUIProps) {
+  const [confirmDeactivateUser, setConfirmDeactivateUser] = useState<UserRowViewModel | null>(
+    null,
+  );
+
   return (
+    <>
     <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -111,14 +118,7 @@ export function UsersTableUI({
                         variant="danger"
                         className="px-3 py-2"
                         isLoading={isDeactivating && deactivatingUserId === user.userId}
-                        onClick={() => {
-                          const confirmed = window.confirm(
-                            `¿Desactivar la cuenta de ${user.fullName} (${user.email})? El historial se conservará.`,
-                          );
-                          if (confirmed) {
-                            onDeactivate(user.userId);
-                          }
-                        }}
+                        onClick={() => setConfirmDeactivateUser(user)}
                       >
                         Desactivar
                       </Button>
@@ -132,5 +132,25 @@ export function UsersTableUI({
         </table>
       </div>
     </section>
+
+      <ConfirmDialog
+        isOpen={confirmDeactivateUser !== null}
+        title="Desactivar usuario"
+        description={
+          confirmDeactivateUser
+            ? `¿Desactivar la cuenta de ${confirmDeactivateUser.fullName} (${confirmDeactivateUser.email})? El historial se conservará.`
+            : ''
+        }
+        confirmLabel="Desactivar"
+        isLoading={isDeactivating}
+        onClose={() => setConfirmDeactivateUser(null)}
+        onConfirm={() => {
+          if (confirmDeactivateUser) {
+            onDeactivate(confirmDeactivateUser.userId);
+            setConfirmDeactivateUser(null);
+          }
+        }}
+      />
+    </>
   );
 }

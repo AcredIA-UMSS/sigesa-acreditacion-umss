@@ -13,11 +13,12 @@ import {
   Users,
   List,
   Plus,
+  Layers,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
 
-type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'reports' | 'history' | 'help';
+type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'templates' | 'reports' | 'history' | 'help';
 
 interface SidebarProps {
   activeNav?: SidebarNavKey;
@@ -139,7 +140,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                   to="/procesos"
                   active={
                     location.pathname === '/procesos' ||
-                    /^\/procesos\/[0-9a-f-]{36}$/i.test(location.pathname)
+                    /^\/procesos\/[0-9a-f-]{36}(\/estructura)?$/i.test(location.pathname)
                   }
                 />
                 {isJd && (
@@ -177,13 +178,22 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         )}
 
         {isJd && (
-          <NavItem
-            icon={<Users size={20} />}
-            label="GESTIÓN USUARIOS"
-            isExpanded={isExpanded}
-            active={activeNav === 'users'}
-            to="/admin/users"
-          />
+          <>
+            <NavItem
+              icon={<Layers size={20} />}
+              label="PLANTILLAS"
+              isExpanded={isExpanded}
+              active={activeNav === 'templates'}
+              to="/admin/plantillas"
+            />
+            <NavItem
+              icon={<Users size={20} />}
+              label="GESTIÓN USUARIOS"
+              isExpanded={isExpanded}
+              active={activeNav === 'users'}
+              to="/admin/users"
+            />
+          </>
         )}
 
         {!isExternalEvaluator && (

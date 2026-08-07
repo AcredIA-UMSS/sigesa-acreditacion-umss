@@ -42,7 +42,7 @@
 Para implementar features de punta a punta, delega en el subagente de proyecto:
 
 - **Archivo:** `.cursor/agents/sigesa-orchestrator.md`
-- **Invocación:** `Use the sigesa-orchestrator agent to implement FSD-UC-NNN` o `@sigesa-orchestrator`
-- **Pipeline:** FSD → DD-UC → PR-IMPL → backend → Orval → frontend → code review → `@dtp-sync` → `@save-prompt-mapping`
+- **Invocación:** `@sigesa-orchestrator FSD-UC-NNN` (parámetro principal; **no** `PR-IMPL` en el prompt del usuario). Ej.: `Use the sigesa-orchestrator agent to implement FSD-UC-022`.
+- **Pipeline:** FSD → (resuelve DD-UC + PR-IMPL) → backend → Orval → frontend → **Paso 3c (Docker/smoke E2E)** → code review → `@dtp-sync` → **`@save-prompt-mapping fsd=FSD-UC-NNN`** (obligatorio, PM-NNN)
 
 El skill `.cursor/skills/sigesa-orchestrator/` está deprecado; el subagente es la fuente de verdad.

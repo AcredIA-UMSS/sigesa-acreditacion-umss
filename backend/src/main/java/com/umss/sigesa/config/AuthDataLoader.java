@@ -65,16 +65,17 @@ public class AuthDataLoader implements ApplicationRunner {
     }
 
     private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
-        AppUserEntity user = userRepository.findByEmail(email).orElse(null);
         LocalDateTime now = LocalDateTime.now();
-
-        AppUserEntity user = new AppUserEntity();
-        user.setId(userId);
+        AppUserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
+            AppUserEntity newUser = new AppUserEntity();
+            newUser.setId(UUID.randomUUID());
+            newUser.setCreatedAt(now);
+            return newUser;
+        });
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);
         user.setStatus(status);
-        user.setCreatedAt(now);
         user.setUpdatedAt(now);
         user.setFirstName("Demo");
         user.setLastName(role.name());

@@ -42,7 +42,11 @@ class AssistantToolExecutorTest {
                         "cc@umss.edu.bo",
                         "CC",
                         "ACTIVE",
-                        List.of(UUID.randomUUID())
+                        List.of(UUID.randomUUID()),
+                        "Demo",
+                        "CC",
+                        "Demo CC",
+                        "71234567"
                 )
         ));
 

@@ -33,6 +33,18 @@ public class TemplateJpaEntity {
     @Column(nullable = false)
     private String type;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(name = "created_at", nullable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private java.time.LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TemplatePhaseJpaEntity> phases = new ArrayList<>();

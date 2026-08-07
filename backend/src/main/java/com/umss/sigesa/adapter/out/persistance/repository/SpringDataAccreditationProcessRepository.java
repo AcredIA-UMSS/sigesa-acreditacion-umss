@@ -42,4 +42,6 @@ public interface SpringDataAccreditationProcessRepository extends JpaRepository<
 
     @Query("SELECT COUNT(s) FROM SubphaseJpaEntity s WHERE s.phase.process.id = :processId")
     long countSubphasesByProcessId(@Param("processId") UUID processId);
+
+    boolean existsByTemplateId(UUID templateId);
 }

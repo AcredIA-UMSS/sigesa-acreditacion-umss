@@ -45,6 +45,10 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
+| 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
+| 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — contrato:** `PR-IMPL-022` aprobado; `DD-UC-022` + API-PROC-05…08 en `api_contracts.md`; puertos planificados `ProcessStructurePort`, `SubphaseWorkflowPort` (stub). | FSD-UC-022 / DD-UC-022 | N/A | PM-008 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
+| 07/08/2026 | **MOD-TEMPLATE (FSD-UC-021):** CRUD plantillas normativas `GET/POST/PUT/DELETE /api/v1/templates` + publish/duplicate/archive; Flyway `V5__template_management.sql`; `TemplateManagementPort` CQRS; validación `PUBLISHED` en `POST /processes`; clonación `referenceUrl` a subfases de proceso. | FSD-UC-021 / DD-UC-021 | N/A | PM-006 / PR-IMPL-021 | Boris Anthony Angulo Urquieta |
 | 03/08/2026 | **MOD-DASH:** Conexión completa a Postgres/H2, eliminación de fallbacks mock/hardcoded en el backend y frontend. Creación de DashboardDataLoader para H2/dev. | FSD-UC-011 / DD-UC-011 | N/A | PR-IMPL-011 | Antigravity Agent |
 | 03/08/2026 | **MOD-REVIEW:** Rol evaluador externo [EE] — login JWT, alta [JD] con carrera, dashboard solo lectura, FSD-BR-19. | FSD-UC-019 / DD-UC-019 | N/A | PM-003 / PR-IMPL-014 | Cursor Agent |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
@@ -93,6 +97,7 @@ artefactos_vivos:
 | 10 | Acreditación (MOD-PROCESS) | Arquitectura por capas implícita | **Arquitectura Hexagonal Estricta** (Puertos In/Out, Dominio Puro, Adaptadores) | Escalabilidad del modelo normativo y desacoplamiento de frameworks (JPA) | N/A (DD-UC-003) |
 | 11 | Asistente / IA | Chatbot FAQ normativo (Could, v2.0 PRD) | **MOD-ASSISTANT MVP:** proxy backend → Open WebUI → Ollama; sin RAG ni persistencia de chats | Piloto self-hosted local; API key Open WebUI solo en servidor | DD-SYS-002 |
 | 12 | RBAC consulta proceso [CC] | 403 Forbidden cross-scope (patrón REST típico) | **404 `PROCESS_NOT_FOUND`** cuando `career_id ∉ programScope` | No revelar existencia de procesos ajenos al coordinador | N/A (DD-UC-019) |
+| 13 | Migraciones dev Docker | Flyway habilitado en perfil `dev` | **`ddl-auto: update`** + **`flyway.enabled: false`** en `application-dev.yaml`; scripts `V5…V6` aplican solo en **prod** | Migraciones incrementales asumen tablas base Hibernate; BD Docker fresca fallaba en `V4` (`app_user` inexistente) | N/A (operacional dev) |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -102,6 +107,9 @@ artefactos_vivos:
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-003V3` | Arquitectura Hexagonal (Backend) + UI React c/ Orval |
 | `FSD-UC-019` | `DD-UC-019` | **hecho (Full-Stack)** | `v1.0` | Unit `ListProcessesService`, `GetProcessDetailService`, `ProcessAccessPolicy`; WebMvc standalone | `PR-IMPL-019` / PM-003 | GET listado + detalle; [CC] 404 cross-carrera |
+| `FSD-UC-021` | `DD-UC-021` | **hecho (backend)** | `v1.0` | Unit validator + services template; WebMvc `TemplateControllerWebMvcTest`; JaCoCo pendiente `mvn verify` | `PR-IMPL-021` / PM-006 | API-TPL-01…08 solo [JD]; FE pendiente `PR-IMPL-021-FE` |
+| `FSD-UC-022` | `DD-UC-022` | **hecho (Full-Stack)** | `v1.0` | Unit `ProcessStructureGuard`, `Add/Delete/Reorder*Service`; WebMvc `ProcessStructureControllerWebMvcTest`; `./mvnw test` | `PR-IMPL-022` / PM-009 | API-PROC-05…08 [JD]; UI `/procesos/{id}/estructura`; `SubphaseWorkflowPort` stub v1.0 |
+| `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `v1.0` | Unit `Assign/RemoveProcessResponsibleService`; WebMvc `ProcessResponsibleControllerWebMvcTest`; `./mvnw test` 157 tests | `PR-IMPL-023` / PM-010 | API-PROC-09…11 [JD]; UI responsable en `/procesos/{id}` + columna listado |
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
 | `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
@@ -128,11 +136,12 @@ artefactos_vivos:
 | §4 Modelo de dominio | no | DTI vFinal §4 |
 | §5 Arquitectura hexagonal del core | **sí** | Confirmada su exigencia estricta en FSD-UC-003. Dominio encapsulado. |
 | **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design docs `DD-UC-001`, `DD-UC-002` |
-| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019` |
+| **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019`, **`DD-UC-022` (§B.2.1)**, **`DD-UC-023` (§B.2.2)** |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
 | **MOD-REVIEW (evaluador externo [EE])** | **sí** | Ver §B.6 abajo; design doc `DD-UC-019` |
+| **MOD-TEMPLATE (plantillas normativas)** | **sí** | Ver §B.7 abajo; design doc `DD-UC-021` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
 | §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**; baseline en `docs/baseline/05_dti/adrs/`) |
@@ -169,6 +178,39 @@ artefactos_vivos:
 | **Frontend** | `/procesos` (listado); `/procesos/{processId}` (detalle árbol fases/subfases); `/procesos/nuevo` ([JD]); sidebar desplegable «Ver procesos» / «Nuevo proceso» |
 | **Hooks Orval** | `useListProcesses`, `useGetProcess`, `useCreateProcess` en `procesos-de-acreditación.ts` |
 | **Modelos de Dominio** | Puros (sin `@Entity`); JPA vía mappers/adapters hexagonales |
+
+#### B.2.1 MOD-PROCESS — estructura en proceso ACTIVE (`DD-UC-022`)
+
+**Implementación:** Sprint 02 PM-009 · **Prompt:** `PR-IMPL-022` · **FSD:** FSD-UC-022 · **Estado:** **hecho (Full-Stack)**
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `POST/PUT/DELETE /api/v1/processes/{processId}/phases[/{phaseId}]`; CRUD subfases bajo fase; `PUT /processes/{processId}/structure/reorder` |
+| **RBAC** | Solo **[JD]** — `@PreAuthorize("hasRole('JD')")` en `ProcessStructureController` |
+| **Puertos aplicación** | IN: `AddProcessPhaseUseCase` … `ReorderProcessStructureUseCase`; OUT: **`ProcessStructurePort`**, **`SubphaseWorkflowPort`** (stub v1.0 → `false`) |
+| **Adaptadores** | `ProcessStructureJpaAdapter` (operaciones granulares; evita orphanRemoval en agregado); `SubphaseWorkflowStubAdapter` |
+| **Guard** | `ProcessStructureGuard` — solo `process.status == ACTIVE` → else `409 PROCESS_NOT_EDITABLE` |
+| **Errores clave** | 400 `SUBPHASE_LINK_REQUIRED`, `PROCESS_STRUCTURE_ORDER_CONFLICT`; 409 `SUBPHASE_HAS_EVIDENCE`, `PROCESS_NOT_EDITABLE` |
+| **Extensión UC-019** | GET detalle incluye `description` + `referenceUrl` en subfases |
+| **Dependencia** | `PR-IMPL-021` (V5 + clonación `referenceUrl` desde plantilla) |
+| **Frontend** | `/procesos/{processId}/estructura` — `ProcessStructurePage`, `useProcessStructureEditor`, Orval `estructura-de-proceso/` |
+| **Anti-patrón JPA** | No persistir agregado `AccreditationProcess` completo con colecciones reemplazadas; no preasignar UUID con `@GeneratedValue` |
+
+#### B.2.2 MOD-PROCESS — responsable [CC] (`DD-UC-023`)
+
+**Implementación:** Sprint 02 PM-010 · **Prompt:** `PR-IMPL-023` · **FSD:** FSD-UC-023 · **Estado:** **hecho (Full-Stack)**
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `PUT/DELETE /api/v1/processes/{processId}/responsible`; `GET …/responsible/candidates` |
+| **RBAC** | Solo **[JD]** mutaciones; lectura responsable en GET list/detail (UC-019) |
+| **Puertos aplicación** | IN: `AssignProcessResponsibleUseCase`, `RemoveProcessResponsibleUseCase`, `ListEligibleResponsiblesUseCase`; OUT: **`ProcessResponsiblePort`** |
+| **Tabla JPA** | `process_responsible_assignment` — soft revoke (`revoked_at`); índices únicos parciales (BR-20) |
+| **Migración Flyway** | `V7__process_responsible.sql` (prod); dev Docker: Hibernate `ddl-auto: update` |
+| **Errores clave** | 409 `CC_ALREADY_ASSIGNED_TO_PROCESS`, `CAREER_SCOPE_MISMATCH`, `PROCESS_NOT_EDITABLE`; 400 `INVALID_RESPONSIBLE_USER` |
+| **Extensión UC-019** | `ProcessSummaryResponseDto` / `ProcessResponseDto` → campo `responsible` (`ProcessResponsibleDto`) |
+| **Frontend** | Sección «Responsable del proceso» en detalle; modal asignación; columna en listado `/procesos` |
+| **Hooks Orval** | `useAssignResponsible`, `useRemoveResponsible`, `useListCandidates` en `procesos-de-acreditación.ts` |
 
 ---
 
@@ -241,6 +283,25 @@ artefactos_vivos:
 | **Lectura** | `GET /api/v1/dashboards/me/summary`, `GET /api/v1/dashboards/coordinator/details` |
 | **Prohibido** | Carga evidencias, export dashboard, admin, reportes PDF (FSD-BR-19) |
 | **Seed dev** | `ee@umss.edu.bo` / `EvalDemo2026!` → carrera INF-SIS |
+
+### B.7 MOD-TEMPLATE — plantillas normativas (`DD-UC-021`)
+
+**Implementación:** Sprint 02 PM-006 · **Prompt:** `PR-IMPL-021` · **FSD:** FSD-UC-021
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `GET/POST /api/v1/templates`; `GET/PUT/DELETE /api/v1/templates/{templateId}`; `POST …/publish`, `…/duplicate`, `…/archive` |
+| **RBAC** | Solo **[JD]** — `@PreAuthorize("hasRole('JD')")` en `TemplateController` |
+| **Puertos aplicación** | IN: `CreateTemplateUseCase` … `DeleteTemplateUseCase`; OUT write: **`TemplateManagementPort`**; OUT read: **`TemplatePort`** (CQRS) |
+| **Validador dominio** | `TemplateStructureValidator` — URL HTTPS obligatoria, órdenes únicos, estructura mínima al publicar |
+| **Ciclo de vida** | `DRAFT` → `PUBLISHED` → `ARCHIVED`; duplicar crea copia `DRAFT` |
+| **Errores clave** | 400 `TEMPLATE_SUBPHASE_LINK_REQUIRED`, `TEMPLATE_STRUCTURE_INCOMPLETE`, `TEMPLATE_ORDER_CONFLICT`; 409 `TEMPLATE_IN_USE`; 400 `TEMPLATE_NOT_PUBLISHED` en `POST /processes` |
+| **Hook UC-003** | `CreateProcessUseCaseImpl` rechaza plantilla no `PUBLISHED`; clona `referenceUrl`/`description` a subfases del proceso |
+| **Migración Flyway** | `V5__template_management.sql` (columnas `description`, `status`, `reference_url`, timestamps) — perfil **prod** |
+| **Dev Docker** | `application-dev.yaml`: Hibernate `ddl-auto: update`; Flyway deshabilitado (delta §A.2 #13) |
+| **Tablas JPA** | `templates`, `template_phases`, `template_subphases` |
+| **Frontend** | Pendiente `PR-IMPL-021-FE` — rutas `/admin/plantillas/**` |
+| **Hooks Orval (post-FE)** | `useListTemplates`, `useGetTemplate`, `useCreateTemplate`, … en `plantillas-normativas.ts` |
 
 ## C. Integraciones
 

@@ -7,8 +7,10 @@ import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
+import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Template;
+import com.umss.sigesa.domain.model.TemplateStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,11 @@ public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
         if (!isAllowedTemplateType(template.getType())) {
             throw new TemplateNotFoundException(
                     "Plantilla no permitida. Solo se admiten procesos CEUB o ARCU-SUR.");
+        }
+
+        if (template.getStatus() != TemplateStatus.PUBLISHED) {
+            throw new TemplateNotPublishedException(
+                    "Solo se pueden crear procesos desde plantillas publicadas (PUBLISHED).");
         }
 
         if (accreditationProcessPort.existsActiveProcessByCareerAndTemplateType(

@@ -52,6 +52,9 @@ export function ProcessListTable({ processes }: ProcessListTableProps) {
                 Inicio
               </th>
               <th className="px-6 py-4 text-left text-label-md font-semibold uppercase tracking-wide text-primary-700">
+                Responsable
+              </th>
+              <th className="px-6 py-4 text-left text-label-md font-semibold uppercase tracking-wide text-primary-700">
                 Estructura
               </th>
               <th className="px-6 py-4 text-right text-label-md font-semibold uppercase tracking-wide text-primary-700">
@@ -77,6 +80,9 @@ export function ProcessListTable({ processes }: ProcessListTableProps) {
                 </td>
                 <td className="px-6 py-4 text-body-md text-gray-700">
                   {formatDate(process.startDate)}
+                </td>
+                <td className="px-6 py-4 text-body-md text-gray-700">
+                  {process.responsible?.fullName ?? '—'}
                 </td>
                 <td className="px-6 py-4 text-body-md text-gray-700">
                   {process.phaseCount ?? 0} fases · {process.subphaseCount ?? 0} subfases
