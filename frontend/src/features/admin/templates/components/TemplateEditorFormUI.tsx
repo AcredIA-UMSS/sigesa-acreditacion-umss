@@ -1,5 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '../../../../components/ui/Button';
+import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
 import { Select } from '../../../../components/ui/Select';
 import { TextInput } from '../../../../components/ui/TextInput';
 import {
@@ -42,6 +44,14 @@ export function TemplateEditorFormUI({
   onDelete,
   onCancel,
 }: TemplateEditorFormUIProps) {
+  const [confirmDeleteTemplate, setConfirmDeleteTemplate] = useState(false);
+  const [confirmRemovePhaseId, setConfirmRemovePhaseId] = useState<string | null>(null);
+  const [confirmRemoveSubphase, setConfirmRemoveSubphase] = useState<{
+    phaseClientId: string;
+    subphaseClientId: string;
+    name: string;
+  } | null>(null);
+
   const updateForm = (partial: Partial<TemplateFormViewModel>) => {
     onFormChange({ ...form, ...partial });
   };
@@ -147,7 +157,7 @@ export function TemplateEditorFormUI({
             Duplicar
           </Button>
           {status === 'DRAFT' && (
-            <Button type="button" variant="danger" onClick={onDelete}>
+            <Button type="button" variant="danger" onClick={() => setConfirmDeleteTemplate(true)}>
               Eliminar
             </Button>
           )}
@@ -209,7 +219,7 @@ export function TemplateEditorFormUI({
                 variant="ghost"
                 className="px-3 py-2"
                 disabled={form.phases.length === 1}
-                onClick={() => removePhase(phase.clientId)}
+                onClick={() => setConfirmRemovePhaseId(phase.clientId)}
               >
                 <Trash2 size={16} />
                 Quitar fase
@@ -270,7 +280,13 @@ export function TemplateEditorFormUI({
                         variant="ghost"
                         className="px-3 py-2"
                         disabled={phase.subphases.length === 1}
-                        onClick={() => removeSubphase(phase.clientId, subphase.clientId)}
+                        onClick={() =>
+                          setConfirmRemoveSubphase({
+                            phaseClientId: phase.clientId,
+                            subphaseClientId: subphase.clientId,
+                            name: subphase.name,
+                          })
+                        }
                       >
                         <Trash2 size={16} />
                         Quitar
@@ -352,6 +368,49 @@ export function TemplateEditorFormUI({
         <Plus size={18} />
         Agregar fase
       </Button>
+
+      <ConfirmDialog
+        isOpen={confirmDeleteTemplate}
+        title="Eliminar plantilla"
+        description="¿Eliminar esta plantilla en borrador? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar plantilla"
+        onClose={() => setConfirmDeleteTemplate(false)}
+        onConfirm={() => {
+          setConfirmDeleteTemplate(false);
+          onDelete();
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmRemovePhaseId !== null}
+        title="Quitar fase"
+        description="¿Quitar esta fase del borrador de la plantilla? También se eliminarán sus subfases en el formulario."
+        confirmLabel="Quitar fase"
+        onClose={() => setConfirmRemovePhaseId(null)}
+        onConfirm={() => {
+          if (confirmRemovePhaseId) {
+            removePhase(confirmRemovePhaseId);
+          }
+          setConfirmRemovePhaseId(null);
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmRemoveSubphase !== null}
+        title="Quitar subfase"
+        description={`¿Quitar la subfase "${confirmRemoveSubphase?.name || 'sin nombre'}" del borrador?`}
+        confirmLabel="Quitar subfase"
+        onClose={() => setConfirmRemoveSubphase(null)}
+        onConfirm={() => {
+          if (confirmRemoveSubphase) {
+            removeSubphase(
+              confirmRemoveSubphase.phaseClientId,
+              confirmRemoveSubphase.subphaseClientId,
+            );
+          }
+          setConfirmRemoveSubphase(null);
+        }}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../components/layout/Sidebar';
 import { Alert } from '../../../../components/ui/Alert';
+import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import { TemplatesListTableUI } from '../components/TemplatesListTableUI';
 import { useTemplateActions } from '../hooks/useTemplateActions';
@@ -12,6 +13,7 @@ export function TemplatesListPage() {
   const navigate = useNavigate();
   const [filters, setFilters] = useState<TemplateListFilters>({ status: '', type: '' });
   const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const list = useTemplatesList(filters);
   const actions = useTemplateActions();
 
@@ -19,10 +21,6 @@ export function TemplatesListPage() {
     action: 'publish' | 'archive' | 'duplicate' | 'delete',
     templateId: string,
   ) => {
-    if (action === 'delete' && !window.confirm('¿Eliminar esta plantilla en borrador?')) {
-      return;
-    }
-
     setActionError(null);
     const result = await actions.runAction(action, templateId);
 
@@ -69,11 +67,25 @@ export function TemplatesListPage() {
               onPublish={(templateId) => void handleAction('publish', templateId)}
               onArchive={(templateId) => void handleAction('archive', templateId)}
               onDuplicate={(templateId) => void handleAction('duplicate', templateId)}
-              onDelete={(templateId) => void handleAction('delete', templateId)}
+              onDelete={(templateId) => setConfirmDeleteId(templateId)}
             />
           </div>
         </main>
       </div>
+
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        title="Eliminar plantilla"
+        description="¿Eliminar esta plantilla en borrador? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar plantilla"
+        isLoading={actions.isBusy}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => {
+          if (confirmDeleteId) {
+            void handleAction('delete', confirmDeleteId).finally(() => setConfirmDeleteId(null));
+          }
+        }}
+      />
     </div>
   );
 }

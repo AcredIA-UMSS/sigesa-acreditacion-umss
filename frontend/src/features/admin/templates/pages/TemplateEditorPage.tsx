@@ -28,10 +28,6 @@ export function TemplateEditorPage() {
       return;
     }
 
-    if (action === 'delete' && !window.confirm('¿Eliminar esta plantilla en borrador?')) {
-      return;
-    }
-
     if (action !== 'duplicate') {
       const saved = await editor.saveTemplate();
       if (!saved) {

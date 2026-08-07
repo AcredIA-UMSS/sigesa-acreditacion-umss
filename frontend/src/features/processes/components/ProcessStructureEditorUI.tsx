@@ -2,6 +2,7 @@ import { ExternalLink, Layers, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { PhaseDto, SubphaseDto } from '../../../api/model';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { TextInput } from '../../../components/ui/TextInput';
 
 export interface NewPhaseDraft {
@@ -220,6 +221,7 @@ function PhaseEditorCard({
   onDeleteSubphase,
 }: PhaseEditorCardProps) {
   const [draft, setDraft] = useState<PhaseDraft>(() => toPhaseDraft(phase));
+  const [confirmDeletePhase, setConfirmDeletePhase] = useState(false);
   const subphases = [...(phase.subphases ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   const savePhase = async () => {
@@ -234,7 +236,7 @@ function PhaseEditorCard({
 
   const removePhase = async () => {
     if (!phase.id) return;
-    if (!window.confirm('¿Eliminar esta fase y sus subfases elegibles?')) return;
+    setConfirmDeletePhase(false);
     await onDeletePhase(phase.id);
   };
 
@@ -251,6 +253,7 @@ function PhaseEditorCard({
   };
 
   return (
+    <>
     <section className="overflow-hidden rounded-2xl border border-gray-200 bg-body shadow-sm">
       <div className="flex items-start gap-3 bg-primary-50 px-5 py-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-600 text-body">
@@ -292,7 +295,7 @@ function PhaseEditorCard({
               <Button
                 className="px-3 py-2"
                 variant="ghost"
-                onClick={() => void removePhase()}
+                onClick={() => setConfirmDeletePhase(true)}
                 isLoading={isBusy}
               >
                 <Trash2 size={14} />
@@ -359,6 +362,16 @@ function PhaseEditorCard({
         )}
       </div>
     </section>
+      <ConfirmDialog
+        isOpen={confirmDeletePhase}
+        title="Eliminar fase"
+        description="¿Eliminar esta fase y sus subfases elegibles? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar fase"
+        isLoading={isBusy}
+        onClose={() => setConfirmDeletePhase(false)}
+        onConfirm={() => void removePhase()}
+      />
+    </>
   );
 }
 
@@ -384,6 +397,7 @@ function SubphaseEditorRow({
   onDeleteSubphase,
 }: SubphaseEditorRowProps) {
   const [draft, setDraft] = useState<SubphaseDraft>(() => toSubphaseDraft(subphase));
+  const [confirmDeleteSubphase, setConfirmDeleteSubphase] = useState(false);
 
   const saveSubphase = async () => {
     if (!subphase.id) return;
@@ -394,11 +408,12 @@ function SubphaseEditorRow({
 
   const removeSubphase = async () => {
     if (!subphase.id) return;
-    if (!window.confirm('¿Eliminar esta subfase?')) return;
+    setConfirmDeleteSubphase(false);
     await onDeleteSubphase(phaseId, subphase.id);
   };
 
   return (
+    <>
     <div className="rounded-xl border border-gray-200 p-4">
       <div className="grid gap-3 md:grid-cols-2">
         <TextInput
@@ -454,7 +469,7 @@ function SubphaseEditorRow({
           <Button
             className="px-3 py-2"
             variant="ghost"
-            onClick={() => void removeSubphase()}
+            onClick={() => setConfirmDeleteSubphase(true)}
             isLoading={isBusy}
           >
             <Trash2 size={14} />
@@ -463,5 +478,15 @@ function SubphaseEditorRow({
         </div>
       )}
     </div>
+      <ConfirmDialog
+        isOpen={confirmDeleteSubphase}
+        title="Eliminar subfase"
+        description={`¿Eliminar la subfase "${draft.name || subphase.name || 'sin nombre'}"? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar subfase"
+        isLoading={isBusy}
+        onClose={() => setConfirmDeleteSubphase(false)}
+        onConfirm={() => void removeSubphase()}
+      />
+    </>
   );
 }
