@@ -1,10 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   LARGE_FILE_THRESHOLD_BYTES,
   useUploadEvidence,
 } from '../../../api/endpoints/evidence-controller/evidence-controller';
 import type { UploadEvidenceResponse } from '../../../api/model';
 import { mapUploadError } from './mapUploadError';
+
+/** UUIDs seed de EvidenceDataLoader (demo local UC-004). */
+export const SEED_INDICATOR_ID = '550e8400-e29b-41d4-a716-446655440003';
+export const SEED_CRITERION_ID = '550e8400-e29b-41d4-a716-446655440002';
 
 export type EvidenceUploadForm = {
   indicatorId: string;
@@ -46,11 +51,25 @@ function validateForm(form: EvidenceUploadForm): EvidenceUploadValidationErrors 
 }
 
 export function useEvidenceUpload() {
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState<EvidenceUploadForm>(defaultForm);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<UploadEvidenceResponse | null>(null);
   const [validationErrors, setValidationErrors] =
     useState<EvidenceUploadValidationErrors>({});
+
+  useEffect(() => {
+    const indicatorId = searchParams.get('indicatorId')?.trim() ?? '';
+    const criterionId = searchParams.get('criterionId')?.trim() ?? '';
+    if (!indicatorId && !criterionId) {
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      indicatorId: indicatorId || prev.indicatorId,
+      criterionId: criterionId || prev.criterionId,
+    }));
+  }, [searchParams]);
 
   const mutation = useUploadEvidence({
     onSuccess: (data) => {

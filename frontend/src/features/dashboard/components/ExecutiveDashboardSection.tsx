@@ -1,10 +1,12 @@
+import { Link } from 'react-router-dom';
 import {
   Award,
   TrendingUp,
   Building2,
   AlertOctagon,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  FileText,
 } from 'lucide-react';
 import type { ExecutiveSection } from '../types';
 
@@ -19,16 +21,25 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
     <div className="space-y-6 animate-fadeIn">
       {/* Header Banner */}
       <div className="rounded-2xl border border-primary-200/40 bg-gradient-to-r from-primary-600 to-primary-500 p-6 text-body shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-body/10">
-            <Award size={26} />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-body/10">
+              <Award size={26} />
+            </div>
+            <div>
+              <h2 className="text-heading-lg font-bold">Panel de Acreditación Ejecutiva</h2>
+              <p className="text-body-md text-primary-100">
+                Jefatura DUEA [JD] · Consolidación y supervisión institucional de calidad académica.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-heading-lg font-bold">Panel de Acreditación Ejecutiva</h2>
-            <p className="text-body-md text-primary-100">
-              Jefatura DUEA [JD] · Consolidación y supervisión institucional de calidad académica.
-            </p>
-          </div>
+          <Link
+            to="/reportes/ejecutivo"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-body px-4 py-2.5 text-label-md font-semibold text-primary-700 transition-colors hover:bg-primary-50"
+          >
+            <FileText size={18} aria-hidden />
+            Generar reporte PDF
+          </Link>
         </div>
       </div>
 

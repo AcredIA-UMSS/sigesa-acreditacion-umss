@@ -1,15 +1,28 @@
 /**
- * Orval-compatible client — regenerar con `pnpm run generate:api` cuando el backend esté activo.
+ * Cliente de carga UC-004 con progreso (US-025).
+ * Usa axios para `onUploadProgress`; el OpenAPI de EvidenceController está anotado
+ * para regenerar Orval (`pnpm generate:api`) — este wrapper se mantiene por la barra de progreso.
  */
 import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 
-import type { UploadEvidenceParams, UploadEvidenceResponse } from '../../model';
+import type { UploadEvidenceResponse } from '../../model';
+import { loadSession } from '../../../lib/auth/tokenStorage';
+
+/** Parámetros del cliente con progreso (US-025); no generado por Orval. */
+export type UploadEvidenceParams = {
+  indicatorId: string;
+  criterionId: string;
+  description: string;
+  file: File;
+};
 
 const authHeaders = (): Record<string, string> => {
-  const token = localStorage.getItem('sigesa_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  const session = loadSession();
+  return session?.accessToken
+    ? { Authorization: `Bearer ${session.accessToken}` }
+    : {};
 };
 
 export const getUploadEvidenceUrl = (indicatorId: string) =>

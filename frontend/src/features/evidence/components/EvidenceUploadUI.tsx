@@ -15,6 +15,10 @@ import type {
   EvidenceUploadForm,
   EvidenceUploadValidationErrors,
 } from '../hooks/useEvidenceUpload';
+import {
+  SEED_CRITERION_ID,
+  SEED_INDICATOR_ID,
+} from '../hooks/useEvidenceUpload';
 
 const ACCEPTED_EXTENSIONS =
   '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg';
@@ -123,13 +127,14 @@ export function EvidenceUploadUI({
                     label="INDICADOR"
                     htmlFor="indicator-id"
                     error={validationErrors.indicatorId}
+                    hint={`Demo local: ${SEED_INDICATOR_ID}`}
                   >
                     <input
                       id="indicator-id"
                       type="text"
                       value={form.indicatorId}
                       disabled={isBlocked}
-                      placeholder="UUID del indicador"
+                      placeholder={SEED_INDICATOR_ID}
                       className={inputClass(!!validationErrors.indicatorId)}
                       onChange={(event) =>
                         onFieldChange('indicatorId', event.target.value)
@@ -141,13 +146,14 @@ export function EvidenceUploadUI({
                     label="CRITERIO"
                     htmlFor="criterion-id"
                     error={validationErrors.criterionId}
+                    hint={`Demo local: ${SEED_CRITERION_ID}`}
                   >
                     <input
                       id="criterion-id"
                       type="text"
                       value={form.criterionId}
                       disabled={isBlocked}
-                      placeholder="UUID del criterio asociado"
+                      placeholder={SEED_CRITERION_ID}
                       className={inputClass(!!validationErrors.criterionId)}
                       onChange={(event) =>
                         onFieldChange('criterionId', event.target.value)
@@ -365,10 +371,11 @@ type FormFieldProps = {
   label: string;
   htmlFor: string;
   error?: string;
+  hint?: string;
   children: ReactNode;
 };
 
-function FormField({ label, htmlFor, error, children }: FormFieldProps) {
+function FormField({ label, htmlFor, error, hint, children }: FormFieldProps) {
   return (
     <div>
       <label
@@ -382,6 +389,9 @@ function FormField({ label, htmlFor, error, children }: FormFieldProps) {
         <p className="mt-1 text-body-md text-danger" role="alert">
           {error}
         </p>
+      )}
+      {!error && hint && (
+        <p className="mt-1 font-mono text-code text-gray-500">{hint}</p>
       )}
     </div>
   );

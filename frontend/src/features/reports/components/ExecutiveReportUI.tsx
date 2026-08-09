@@ -159,6 +159,7 @@ export function ExecutiveReportUI({
                     label="FACULTAD (OPCIONAL)"
                     htmlFor="faculty-id"
                     hint="Deje vacío para incluir todas las facultades"
+                    error={validationErrors.facultyId}
                   >
                     <input
                       id="faculty-id"
@@ -166,7 +167,7 @@ export function ExecutiveReportUI({
                       value={form.facultyId}
                       disabled={isBlocked}
                       placeholder="UUID de facultad"
-                      className={inputClass(false)}
+                      className={inputClass(!!validationErrors.facultyId)}
                       onChange={(event) =>
                         onFieldChange('facultyId', event.target.value)
                       }
@@ -176,15 +177,16 @@ export function ExecutiveReportUI({
                   <FormField
                     label="PROGRAMA (OPCIONAL)"
                     htmlFor="program-id"
-                    hint="Deje vacío para incluir todos los programas"
+                    hint="Demo: 550e8400-e29b-41d4-a716-446655440000 (Inf. Sistemas). Vacío = todos."
+                    error={validationErrors.programId}
                   >
                     <input
                       id="program-id"
                       type="text"
                       value={form.programId}
                       disabled={isBlocked}
-                      placeholder="UUID de programa / carrera"
-                      className={inputClass(false)}
+                      placeholder="550e8400-e29b-41d4-a716-446655440000"
+                      className={inputClass(!!validationErrors.programId)}
                       onChange={(event) =>
                         onFieldChange('programId', event.target.value)
                       }

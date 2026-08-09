@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-004
 nombre: Cargar Evidencia
-estado: Pendiente
+estado: Implementado
 release: v1.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-08-09"
 ---
 
 # FSD-UC-004 — Cargar Evidencia

@@ -23,6 +23,7 @@
 | PM-017 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Code review + @dtp-sync + puente UC-013 |
 | PM-018 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
 | PM-019 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Dashboard compuesto PBAC + exportación async (CSV/XLSX/PDF) |
+| PM-020 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Conexión flujo MOD-REPORT al sistema (nav JD, guard, CTA panel) |
 
 > **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---
@@ -971,3 +972,71 @@ Próximos pasos
 - **Archivos verificados:** 17 archivos/módulos principales generados entre Backend y Frontend.
 
 💡 **Sugerencia post-implementación:** Dado que se definió detalladamente la nueva arquitectura hexagonal en el Backend, te sugiero ejecutar el comando `@dtp-sync` (si cuentas con ese skill en el entorno) para actualizar el Documento Técnico de Proyecto (`docs/product/DTP.md`) reflejando este estándar estructural para los siguientes módulos.
+
+---
+
+## PM-020
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-020 |
+| **Fecha** | 2026-08-09 |
+| **Hora** | 19:24 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Conectar flujo FSD-UC-014 (reporte ejecutivo PDF) con el sistema |
+| **Objetivo** | Exponer MOD-REPORT vía navegación JD, guard de ruta y CTA desde panel ejecutivo |
+| **Contexto** | Backend async + página FE ya existían; faltaba discovery y restricción de rol en UI |
+| **PR-IMPL vinculado** | PR-IMPL-005 |
+| **DD-UC vinculado** | DD-UC-014 |
+| **FSD-UC vinculado** | FSD-UC-014 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Conectar el flujo de su funcionalidad de FSD-UC-014, cReporte ejecutivo PDF (MOD-REPORT) con el sistema
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-014.md`
+- `docs/product/uc/FSD-UC-014.md`
+- `docs/prompts/impl/PR-IMPL-005.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/components/layout/Sidebar.tsx` |
+| modificado | `frontend/src/features/reports/ExecutiveReportPage.tsx` |
+| modificado | `frontend/src/features/reports/components/ExecutiveReportUI.tsx` |
+| modificado | `frontend/src/features/reports/hooks/useExecutiveReport.ts` |
+| modificado | `frontend/src/features/dashboard/components/ExecutiveDashboardSection.tsx` |
+| modificado | `docs/product/uc/FSD-UC-014.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/sprints/sprint_01/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Ruta `/reportes/ejecutivo` protegida con `JdOnlyRoute` (FSD-BR-14).
+- Ítem sidebar REPORTES visible solo para JD y enlazado a `/reportes/ejecutivo`.
+- CTA "Generar reporte PDF" en panel ejecutivo JD (≤2 clics desde contexto).
+- Validación UUID de filtros opcionales + hint seed programa demo.
+- FSD-UC-014 marcado Implementado.
+
+### Validación ejecutada
+
+- [ ] `mvn test` — no ejecutado (cambio solo frontend/docs)
+- [ ] `pnpm run lint` — pendiente
+
+### Resultado obtenido
+
+El flujo UC-014 queda descubrible y restringido a JD desde sidebar y dashboard; generación async existente sin cambios de contrato.
+
+### Próximos pasos
+
+- [ ] Regenerar Orval report-controller con backend en `:8080`
+- [ ] Sustituir stub `ExecutiveDataPort` cuando UC-013 exponga el port

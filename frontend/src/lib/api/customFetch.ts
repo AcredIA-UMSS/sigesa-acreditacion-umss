@@ -45,7 +45,12 @@ export async function customFetch<TData>(
     }
   }
 
-  if (init.body !== undefined && !headers.has('Content-Type')) {
+  // FormData must set its own multipart boundary; never force JSON.
+  if (
+    init.body !== undefined
+    && !(init.body instanceof FormData)
+    && !headers.has('Content-Type')
+  ) {
     headers.set('Content-Type', 'application/json');
   }
 

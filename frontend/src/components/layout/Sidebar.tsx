@@ -10,11 +10,19 @@ import {
   ChevronLeft,
   Menu,
   Users,
+  FileUp,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
 
-type SidebarNavKey = 'dashboard' | 'processes' | 'users' | 'reports' | 'history' | 'help';
+type SidebarNavKey =
+  | 'dashboard'
+  | 'processes'
+  | 'evidence'
+  | 'users'
+  | 'reports'
+  | 'history'
+  | 'help';
 
 interface SidebarProps {
   activeNav?: SidebarNavKey;
@@ -92,13 +100,25 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           />
         )}
 
-        <NavItem
-          icon={<BarChart size={20} />}
-          label="REPORTES"
-          isExpanded={isExpanded}
-          hasDropdown
-          active={activeNav === 'reports'}
-        />
+        {session?.role === 'CC' && (
+          <NavItem
+            icon={<FileUp size={20} />}
+            label="CARGAR EVIDENCIA"
+            isExpanded={isExpanded}
+            active={activeNav === 'evidence'}
+            to="/evidencias/cargar"
+          />
+        )}
+
+        {session?.role === 'JD' && (
+          <NavItem
+            icon={<BarChart size={20} />}
+            label="REPORTES"
+            isExpanded={isExpanded}
+            active={activeNav === 'reports'}
+            to="/reportes/ejecutivo"
+          />
+        )}
         <NavItem
           icon={<History size={20} />}
           label="HISTORIAL"

@@ -37,6 +37,6 @@ export * from './evidenceTypes';
 export * from './sortObject';
 export * from './subphaseDto';
 export * from './technicianKpiSection';
-export * from './uploadEvidenceBody';
-export * from './uploadEvidenceParams';
+export * from './uploadEvidenceMultipartRequest';
+export * from './uploadEvidenceResponse';
 export * from './userAdminSummaryResponse';
