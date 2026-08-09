@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 08/08/2026 | **MOD-EVIDENCE search:** Búsqueda inteligente de evidencias de punta a punta con enrutamiento híbrido de consultas, control de acceso carrera (FSD-BR-09) y toggle frontend (header X-AI-Enabled). | FSD-UC-007 / DD-UC-007 | N/A | PR-IMPL-007 / PM-006 | Antigravity Agent |
 | 03/08/2026 | **MOD-DASH:** Conexión completa a Postgres/H2, eliminación de fallbacks mock/hardcoded en el backend y frontend. Creación de DashboardDataLoader para H2/dev. | FSD-UC-011 / DD-UC-011 | N/A | PR-IMPL-011 | Antigravity Agent |
 | 03/08/2026 | **MOD-REVIEW:** Rol evaluador externo [EE] — login JWT, alta [JD] con carrera, dashboard solo lectura, FSD-BR-19. | FSD-UC-019 / DD-UC-019 | N/A | PM-003 / PR-IMPL-014 | Cursor Agent |
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
@@ -109,6 +110,7 @@ artefactos_vivos:
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 | `FSD-UC-019` | `DD-UC-019` | **hecho** | `release/3.0.0` | `RegisterUserServiceTest` EE; manual E2E dashboard | `PR-IMPL-014` | Rol EE solo lectura; scope carrera; seed `ee@umss.edu.bo` |
+| `FSD-UC-007` | `DD-UC-007` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks; OxLint | `PR-IMPL-007` | Búsqueda inteligente de evidencias con enrutador híbrido y control de acceso |
 
 ### A.4 Trazabilidad código ↔ DTP
 

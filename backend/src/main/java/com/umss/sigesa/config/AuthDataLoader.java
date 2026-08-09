@@ -68,18 +68,20 @@ public class AuthDataLoader implements ApplicationRunner {
         AppUserEntity user = userRepository.findByEmail(email).orElse(null);
         LocalDateTime now = LocalDateTime.now();
 
-        AppUserEntity user = new AppUserEntity();
-        user.setId(userId);
-        user.setEmail(email);
-        user.setPasswordHash(passwordEncoder.encode(password));
-        user.setRole(role);
-        user.setStatus(status);
-        user.setCreatedAt(now);
-        user.setUpdatedAt(now);
-        user.setFirstName("Demo");
-        user.setLastName(role.name());
-        user.setPhoneNumber("71234567");
-        userRepository.save(user);
+        if (user == null) {
+            user = new AppUserEntity();
+            user.setId(UUID.randomUUID());
+            user.setEmail(email);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setRole(role);
+            user.setStatus(status);
+            user.setCreatedAt(now);
+            user.setUpdatedAt(now);
+            user.setFirstName("Demo");
+            user.setLastName(role.name());
+            user.setPhoneNumber("71234567");
+            userRepository.save(user);
+        }
 
         if (programId != null) {
             boolean hasAssignment = assignmentRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(user.getId(), programId);

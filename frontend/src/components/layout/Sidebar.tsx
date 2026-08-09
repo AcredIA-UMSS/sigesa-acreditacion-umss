@@ -13,6 +13,7 @@ import {
   Users,
   List,
   Plus,
+  Search,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -150,6 +151,12 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     active={location.pathname === '/procesos/nuevo'}
                   />
                 )}
+                <SubNavItem
+                  icon={<Search size={16} />}
+                  label="Buscar evidencias"
+                  to="/evidencias/buscar"
+                  active={location.pathname === '/evidencias/buscar'}
+                />
               </ul>
             )}
 
@@ -171,6 +178,13 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     compact
                   />
                 )}
+                <SubNavItem
+                  icon={<Search size={16} />}
+                  label="Buscar evidencias"
+                  to="/evidencias/buscar"
+                  active={location.pathname === '/evidencias/buscar'}
+                  compact
+                />
               </ul>
             )}
           </div>

@@ -12,12 +12,12 @@ export interface PageObservationSummary {
   totalPages?: number;
   totalElements?: number;
   pageable?: PageableObject;
-  numberOfElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: ObservationSummary[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
   empty?: boolean;
 }

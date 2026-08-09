@@ -5,8 +5,6 @@
  * OpenAPI spec version: v0
  */
 
-export interface SortObject {
-  sorted?: boolean;
-  unsorted?: boolean;
-  empty?: boolean;
-}
+export type SearchParams = {
+query: string;
+};

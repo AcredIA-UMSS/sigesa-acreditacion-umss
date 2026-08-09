@@ -15,8 +15,14 @@ export interface RegisterUserRequest {
   firstName: string;
   /** @minLength 1 */
   lastName: string;
-  /** @minLength 1 */
+  /**
+     * @minLength 1
+     * @pattern ^[67]\d{7}$
+     */
   phoneNumber: string;
-  /** @minLength 8 */
+  /**
+     * @minLength 8
+     * @maxLength 2147483647
+     */
   password: string;
 }

@@ -12,6 +12,8 @@
 | PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
 | PM-004 | PR-IMPL-014 | DD-UC-020 | PRD-REQ-029 / FSD-UC-020 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
 | PM-005 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
+| PM-006 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
+| PM-007 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
 
 ---
 
@@ -472,3 +474,119 @@ docs/design/DD-UC-011.md
 3. Diálogo post-alta con credenciales copiables (solo al crear).
 4. Contraseñas existentes no visibles (hash Argon2).
 5. PM-005 registrado en este archivo.
+
+---
+
+## PM-006
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-006 |
+| **Fecha** | 2026-08-08 |
+| **Hora** | 15:40 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Buscar Evidencia Inteligente |
+| **Objetivo** | Implementar búsqueda inteligente de evidencias de punta a punta con enrutamiento híbrido de consultas e integración frontend. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Aislamiento por carrera FSD-BR-09. |
+| **PR-IMPL vinculado** | [PR-IMPL-007](../../prompts/impl/PR-IMPL-007.md) |
+| **DD-UC vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **FSD-UC vinculado** | [FSD-UC-007.md](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Por favor implementa el caso de uso FSD-UC-007 de punta a punta siguiendo rigurosamente el documento de diseño docs/design/DD-UC-007.md.
+Asegúrate de:
+1. Crear el contrato de prompt en docs/prompts/impl/PR-IMPL-007.md.
+2. Implementar el backend (puertos, adaptadores, servicios, y el controlador REST expuesto que reciba el header X-AI-Enabled).
+3. Implementar el control de acceso acotado por carrera (FSD-BR-09).
+4. Ejecutar la regeneración de clientes con Orval en el frontend.
+5. Crear las vistas/componentes del frontend consumiendo los hooks autogenerados.
+6. Correr el code review y registrar la trazabilidad con @dtp-sync y @save-prompt-mapping.
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-007.md`
+- `docs/design/DD-UC-007.md`
+- `docs/prompts/impl/PR-IMPL-007.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/EvidenceSearchDetailDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/SearchEvidenceUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/SearchEvidenceQueryPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/AssistantQueryPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/SearchAssistantAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/EvidenceModuleConfig.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| generado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/components/layout/Sidebar.tsx` |
+
+### Cambios realizados
+
+- **Backend hexagonal:** Implementación completa de la búsqueda de evidencias por título y descripción filtrada por carrera (CC) o acceso global (TD/JD).
+- **Asistente inteligente:** Adaptador OpenWebUI integrado con la herramienta `buscar_evidencias_por_parametros` y system prompt de enrutamiento. Fallback elegante y seguro.
+- **Frontend React:** Creación de la pantalla de búsqueda con soporte de toggle de IA (header `X-AI-Enabled`), visualización de metadatos de enrutamiento y tabla de resultados.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+
+
+## PM-007
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-007 |
+| **Fecha** | 2026-08-09 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Antigravity AI |
+| **Modelo** | Gemini |
+| **Tarea** | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007) |
+| **Objetivo** | Corregir JPQL, mejorar contraste de consola debug, robustecer roles (bypass TD), habilitar carga inicial y paginación. |
+| **PR-IMPL vinculado** | N/A (Hotfix) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | FSD-UC-007 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the system, but not has the same filter as the CC use... same error, this coudl be due to the seed applied pls check it for some reason its not returing those records, in addition pls include a test case to validate this case as well
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| modificado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `db/seed_evidences.sql` |
+
+### Cambios realizados
+
+- **Corección de Base de Datos (seed_evidences.sql):** Se agregaron los programas de CEUB y ARCU-SUR al catálogo de programas de la base de datos de pruebas, permitiendo que la consulta JPQL con INNER JOIN no descarte los registros correspondientes.
+- **Robustez de Extracción de Roles:** Se modificó la extracción del rol del usuario autenticado en el controlador de backend para manejar de manera tolerante tanto los roles con prefijo `ROLE_` como sin él, evitando fallbacks indeseados al rol restrictivo de Coordinador (CC) en el caso del Técnico DUEA (TD).
+- **Carga inicial y Paginación:** Se habilitó el listado completo de evidencias en consultas vacías y se añadió paginación del lado del cliente (5 elementos por página) con controles de navegación.
+- **Tests unitarios e Integración:** Se escribió un nuevo caso de prueba en `SearchEvidenceServiceTest.java` que valida explícitamente el aislamiento de carrera para CC y el bypass para TD.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+
