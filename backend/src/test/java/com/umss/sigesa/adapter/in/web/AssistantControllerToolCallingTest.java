@@ -2,6 +2,8 @@ package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatResult;
+import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.config.AssistantProperties;
@@ -57,8 +59,11 @@ class AssistantControllerToolCallingTest {
                 userId,
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_JD"))));
+        when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn("Respuesta del asistente.");
+        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn(
+                new AssistantChatResult("Respuesta del asistente.", "list_users", List.of("app_user"),
+                        AssistantResolutionPath.KEYWORD, false));
 
         ResponseEntity<?> response = controller.chat(new SendChatMessageRequest("¿Qué usuarios tenemos?", null));
 
@@ -77,8 +82,10 @@ class AssistantControllerToolCallingTest {
                 userId,
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_CC"))));
+        when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn("No puedo listar usuarios.");
+        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn(
+                AssistantChatResult.outOfScope("No puedo listar usuarios."));
 
         controller.chat(new SendChatMessageRequest("Lista usuarios", null));
 

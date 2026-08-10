@@ -1,15 +1,18 @@
 package com.umss.sigesa.application.service.assistant;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatResult;
+import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
+import com.umss.sigesa.application.model.assistant.AssistantToolInvocation;
 import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
 import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
-import com.umss.sigesa.application.model.assistant.ToolCall;
+import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
-import com.umss.sigesa.domain.model.ChatToolCall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,32 +20,43 @@ import java.util.Optional;
 
 public class SendChatMessageService implements SendChatMessageUseCase {
 
-    private static final String MAX_ITERATIONS_FALLBACK =
-            "No pude completar la consulta en el número máximo de pasos. Intente reformular su pregunta.";
+    private static final String TOOL_SELECTION_PROMPT_SUFFIX = """
+
+            MODO SELECCIÓN DE TOOL (obligatorio):
+            - Tu única tarea es elegir la tool correcta o no elegir ninguna.
+            - NUNCA redactes la respuesta final al usuario ni inventes datos.
+            - Si la pregunta puede resolverse con una tool disponible, invoca exactamente UNA tool con argumentos JSON válidos.
+            - Sinónimos permitidos: «etapas» = fases del proceso; «carreras» = programas; «proceso en curso» = proceso activo.
+            - Si la pregunta es sobre presupuesto, finanzas, clima, noticias u otro tema ajeno a acreditación, responde con content vacío y SIN tool_calls.
+            - Si ninguna tool aplica (dato fuera del sistema), responde con content vacío y SIN tool_calls.
+            """;
 
     private final ChatCompletionPort chatCompletionPort;
     private final AssistantToolRegistry toolRegistry;
     private final AssistantToolExecutor toolExecutor;
-    private final AssistantDirectQueryService directQueryService;
+    private final AssistantKeywordRouter keywordRouter;
+    private final ObjectMapper objectMapper;
     private final String systemPrompt;
-    private final int maxToolIterations;
+    private final boolean llmEnabled;
 
     public SendChatMessageService(ChatCompletionPort chatCompletionPort,
                                   AssistantToolRegistry toolRegistry,
                                   AssistantToolExecutor toolExecutor,
-                                  AssistantDirectQueryService directQueryService,
+                                  AssistantKeywordRouter keywordRouter,
+                                  ObjectMapper objectMapper,
                                   String systemPrompt,
-                                  int maxToolIterations) {
+                                  boolean llmEnabled) {
         this.chatCompletionPort = chatCompletionPort;
         this.toolRegistry = toolRegistry;
         this.toolExecutor = toolExecutor;
-        this.directQueryService = directQueryService;
+        this.keywordRouter = keywordRouter;
+        this.objectMapper = objectMapper;
         this.systemPrompt = systemPrompt;
-        this.maxToolIterations = maxToolIterations;
+        this.llmEnabled = llmEnabled;
     }
 
     @Override
-    public String send(String userMessage, List<ChatMessage> history, AssistantAuthContext authContext) {
+    public AssistantChatResult send(String userMessage, List<ChatMessage> history, AssistantAuthContext authContext) {
         if (userMessage == null || userMessage.isBlank()) {
             throw new IllegalArgumentException("El mensaje no puede estar vacío.");
         }
@@ -50,36 +64,67 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             throw new IllegalArgumentException("El contexto de autenticación es obligatorio.");
         }
 
-        List<ChatMessage> conversation = buildConversation(history, userMessage);
+        Optional<AssistantToolInvocation> keywordMatch =
+                keywordRouter.resolve(userMessage, history, authContext);
+        if (keywordMatch.isPresent()) {
+            return executeTool(keywordMatch.get(), AssistantResolutionPath.KEYWORD, false, authContext);
+        }
+
+        if (!llmEnabled) {
+            return AssistantChatResult.outOfScope(
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), true));
+        }
+
+        if (AssistantOutOfScopeDetector.isOutOfScope(userMessage)) {
+            return AssistantChatResult.outOfScope(
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
+        }
+
         List<AssistantToolDefinition> tools = toolRegistry.toolsForRole(authContext.role());
-
-        Optional<String> directReply = directQueryService.tryHandle(userMessage, history, authContext);
-        if (directReply.isPresent()) {
-            return directReply.get();
+        if (tools.isEmpty()) {
+            return AssistantChatResult.outOfScope(
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
         }
 
-        for (int iteration = 0; iteration < maxToolIterations; iteration++) {
-            ChatCompletionResult result = chatCompletionPort.complete(
-                    new ChatCompletionRequest(conversation, tools));
+        List<ChatMessage> conversation = buildToolSelectionConversation(history, userMessage.trim());
+        ChatCompletionResult selection = chatCompletionPort.complete(
+                new ChatCompletionRequest(conversation, tools));
 
-            if (!result.hasToolCalls()) {
-                return requireNonBlankContent(result.content());
-            }
-
-            conversation.add(toAssistantToolCallMessage(result.toolCalls()));
-
-            for (ToolCall call : result.toolCalls()) {
-                String toolJson = toolExecutor.execute(call.name(), call.argumentsJson(), authContext);
-                conversation.add(new ChatMessage(ChatRole.TOOL, toolJson, call.id()));
-            }
+        if (!selection.hasToolCalls()) {
+            return AssistantChatResult.outOfScope(
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
         }
 
-        return MAX_ITERATIONS_FALLBACK;
+        var toolCall = selection.toolCalls().getFirst();
+        return executeTool(
+                new AssistantToolInvocation(toolCall.name(), toolCall.argumentsJson()),
+                AssistantResolutionPath.LLM,
+                true,
+                authContext);
     }
 
-    private List<ChatMessage> buildConversation(List<ChatMessage> history, String userMessage) {
+    private AssistantChatResult executeTool(AssistantToolInvocation invocation,
+                                              AssistantResolutionPath path,
+                                              boolean llmInvoked,
+                                              AssistantAuthContext authContext) {
+        try {
+            String json = toolExecutor.execute(invocation.toolId(), invocation.argumentsJson(), authContext);
+            ToolExecutionResult result = AssistantResponseFormatter.parseToolJson(json, objectMapper);
+            String reply = AssistantResponseFormatter.format(result);
+            return new AssistantChatResult(
+                    reply,
+                    invocation.toolId(),
+                    AssistantToolSourceRegistry.sourceTablesFor(invocation.toolId()),
+                    path,
+                    llmInvoked);
+        } catch (Exception ex) {
+            return AssistantChatResult.outOfScope("No pude completar la consulta: " + ex.getMessage());
+        }
+    }
+
+    private List<ChatMessage> buildToolSelectionConversation(List<ChatMessage> history, String userMessage) {
         List<ChatMessage> conversation = new ArrayList<>();
-        conversation.add(new ChatMessage(ChatRole.SYSTEM, systemPrompt));
+        conversation.add(new ChatMessage(ChatRole.SYSTEM, systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX));
 
         if (history != null) {
             history.stream()
@@ -87,21 +132,7 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                     .forEach(conversation::add);
         }
 
-        conversation.add(new ChatMessage(ChatRole.USER, userMessage.trim()));
+        conversation.add(new ChatMessage(ChatRole.USER, userMessage));
         return conversation;
-    }
-
-    private static ChatMessage toAssistantToolCallMessage(List<ToolCall> toolCalls) {
-        List<ChatToolCall> domainToolCalls = toolCalls.stream()
-                .map(call -> new ChatToolCall(call.id(), call.name(), call.argumentsJson()))
-                .toList();
-        return new ChatMessage(ChatRole.ASSISTANT, null, null, domainToolCalls);
-    }
-
-    private static String requireNonBlankContent(String content) {
-        if (content == null || content.isBlank()) {
-            throw new IllegalStateException("El asistente no devolvió contenido en la respuesta.");
-        }
-        return content;
     }
 }

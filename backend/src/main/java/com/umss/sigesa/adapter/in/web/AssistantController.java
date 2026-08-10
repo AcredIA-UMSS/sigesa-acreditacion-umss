@@ -1,13 +1,17 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.web.dto.AssistantDemoScenarioResponse;
 import com.umss.sigesa.adapter.in.web.dto.AssistantStatusResponse;
 import com.umss.sigesa.adapter.in.web.dto.ChatMessageDto;
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageResponse;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.assistant.AssistantCapabilitiesCatalog;
 import com.umss.sigesa.config.AssistantProperties;
+import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
@@ -30,8 +34,31 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/assistant")
-@Tag(name = "Assistant", description = "Asistente virtual SIGESA (proxy Open WebUI)")
+@Tag(name = "Assistant", description = "Asistente virtual SIGESA (tool calling + motor directo)")
 public class AssistantController {
+
+    private static final List<AssistantDemoScenarioResponse> DEMO_SCENARIOS = List.of(
+            new AssistantDemoScenarioResponse(
+                    1,
+                    "Controlado (catálogo)",
+                    "Lista las fases de Ingeniería de Sistemas CEUB",
+                    "KEYWORD"),
+            new AssistantDemoScenarioResponse(
+                    2,
+                    "Sinónimo (LLM elige tool)",
+                    "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    3,
+                    "Fuera de alcance",
+                    "¿Cuál es el presupuesto de la universidad para 2027?",
+                    "OUT_OF_SCOPE"),
+            new AssistantDemoScenarioResponse(
+                    4,
+                    "Modelo apagado",
+                    "Lista las fases de Ingeniería de Sistemas CEUB (SIGESA_ASSISTANT_LLM_ENABLED=false)",
+                    "KEYWORD")
+    );
 
     private final SendChatMessageUseCase sendChatMessageUseCase;
     private final AssistantProperties assistantProperties;
@@ -46,17 +73,24 @@ public class AssistantController {
     }
 
     @GetMapping("/status")
-    @Operation(summary = "Estado del asistente", description = "Indica si el asistente está habilitado y qué modelo usa.")
+    @Operation(summary = "Estado del asistente", description = "Indica flags, modelo, capacidades y escenarios demo.")
     public AssistantStatusResponse getStatus() {
+        AssistantAuthContext authContext = buildAuthContext();
         return new AssistantStatusResponse(
                 assistantProperties.isEnabled(),
-                assistantProperties.getModel()
-        );
+                assistantProperties.isLlmEnabled(),
+                assistantProperties.getModel(),
+                AssistantCapabilitiesCatalog.capabilitiesForRole(authContext.role()),
+                DEMO_SCENARIOS);
     }
 
     @PostMapping("/chat")
-    @Operation(summary = "Enviar mensaje al asistente", description = "Proxy hacia Open WebUI (API compatible OpenAI).")
+    @Operation(summary = "Enviar mensaje al asistente", description = "Ejecuta tools vía código; LLM solo elige tool si aplica.")
     public ResponseEntity<SendChatMessageResponse> chat(@Valid @RequestBody SendChatMessageRequest request) {
+        if (!assistantProperties.isEnabled()) {
+            throw new AssistantUnavailableException("El asistente está deshabilitado.");
+        }
+
         List<ChatMessage> history = request.history() == null
                 ? Collections.emptyList()
                 : request.history().stream()
@@ -64,8 +98,13 @@ public class AssistantController {
                         .toList();
 
         AssistantAuthContext authContext = buildAuthContext();
-        String reply = sendChatMessageUseCase.send(request.message(), history, authContext);
-        return ResponseEntity.ok(new SendChatMessageResponse(reply));
+        AssistantChatResult result = sendChatMessageUseCase.send(request.message(), history, authContext);
+        return ResponseEntity.ok(new SendChatMessageResponse(
+                result.reply(),
+                result.toolId(),
+                result.sourceTables(),
+                result.path().name(),
+                result.llmInvoked()));
     }
 
     private AssistantAuthContext buildAuthContext() {

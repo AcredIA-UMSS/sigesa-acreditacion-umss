@@ -99,6 +99,7 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | `set_user_status` | write | ✓ | — | — | — |
 | `list_programs` | read | ✓ | ✓ | — | — |
 | `list_process_phases` | read | ✓ | ✓ | — | — |
+| `list_active_processes` | read | ✓ | ✓ | — | — |
 | `manage_process_phase` | write | ✓ | ✓ | — | — |
 
 > **Gestión de usuarios:** exclusiva **JD** (alineada a `GET/PATCH /admin/users`).  
@@ -415,7 +416,20 @@ Si te lo solicitan, indica que solo Jefatura DUEA [JD] puede consultar o modific
 
 ---
 
-## 5. Plan de pruebas (aceptación)
+## 5. Plan de pruebas (aceptación — tarea semana tool calling)
+
+Documento de entrega: [`ENTREGA-TOOL-CALLING-SEMANA.md`](ENTREGA-TOOL-CALLING-SEMANA.md)
+
+| # | Escenario | Pregunta SIGESA (JD/TD) | Camino | Esperado en pantalla |
+|---|-----------|-------------------------|--------|----------------------|
+| **1** | Controlado | «Lista las fases de Ingeniería de Sistemas CEUB» | **KEYWORD** | Tool `list_process_phases`, tablas `phases`, …, sin LLM |
+| **2** | Sinónimo | «¿Qué **etapas** tiene el proceso activo de Ingeniería de Sistemas CEUB?» | **LLM** | Misma tool/datos que esc. 1; LLM invocado solo para elegir tool |
+| **3** | Fuera de alcance | «¿Cuál es el presupuesto de la universidad para 2027?» | **OUT_OF_SCOPE** | «No puedo responder eso» + capacidades; sin tool |
+| **4** | Modelo apagado | Igual esc. 1 con `SIGESA_ASSISTANT_LLM_ENABLED=false` | **KEYWORD** | Idéntico a esc. 1; esc. 2 debe fallar con mensaje claro |
+
+**Regla:** la respuesta con datos la produce **siempre** `AssistantResponseFormatter` (código), nunca el LLM.
+
+### 5.1 RBAC (tests unitarios existentes)
 
 | # | Escenario | Rol | Esperado |
 |---|-----------|-----|----------|

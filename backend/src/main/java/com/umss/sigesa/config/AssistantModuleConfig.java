@@ -14,7 +14,7 @@ import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
-import com.umss.sigesa.application.service.assistant.AssistantDirectQueryService;
+import com.umss.sigesa.application.service.assistant.AssistantKeywordRouter;
 import com.umss.sigesa.application.service.assistant.AssistantToolExecutor;
 import com.umss.sigesa.application.service.assistant.AssistantToolRegistry;
 import com.umss.sigesa.application.service.assistant.SendChatMessageService;
@@ -62,8 +62,8 @@ public class AssistantModuleConfig {
     }
 
     @Bean
-    AssistantDirectQueryService assistantDirectQueryService(AssistantToolExecutor assistantToolExecutor) {
-        return new AssistantDirectQueryService(assistantToolExecutor, new ObjectMapper());
+    AssistantKeywordRouter assistantKeywordRouter() {
+        return new AssistantKeywordRouter();
     }
 
     @Bean
@@ -71,15 +71,16 @@ public class AssistantModuleConfig {
             ChatCompletionPort chatCompletionPort,
             AssistantToolRegistry assistantToolRegistry,
             AssistantToolExecutor assistantToolExecutor,
-            AssistantDirectQueryService assistantDirectQueryService,
+            AssistantKeywordRouter assistantKeywordRouter,
             AssistantProperties assistantProperties) {
         return new SendChatMessageService(
                 chatCompletionPort,
                 assistantToolRegistry,
                 assistantToolExecutor,
-                assistantDirectQueryService,
+                assistantKeywordRouter,
+                new ObjectMapper(),
                 assistantProperties.getSystemPrompt(),
-                assistantProperties.getMaxToolIterations()
+                assistantProperties.isLlmEnabled()
         );
     }
 }
