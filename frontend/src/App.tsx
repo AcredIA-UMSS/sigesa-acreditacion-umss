@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { JdOrTdRoute } from './components/auth/JdOrTdRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
 import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
@@ -95,9 +96,9 @@ function App() {
           path="/procesos/:processId/estructura"
           element={
             <ProtectedRoute>
-              <JdOnlyRoute>
+              <JdOrTdRoute>
                 <ProcessStructurePage />
-              </JdOnlyRoute>
+              </JdOrTdRoute>
             </ProtectedRoute>
           }
         />

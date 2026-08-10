@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class SendChatMessageServiceToolLoopTest {
@@ -29,16 +30,21 @@ class SendChatMessageServiceToolLoopTest {
     @Mock
     private AssistantToolExecutor toolExecutor;
 
+    @Mock
+    private AssistantDirectQueryService directQueryService;
+
     private AssistantToolRegistry toolRegistry;
     private SendChatMessageService service;
 
     @BeforeEach
     void setUp() {
         toolRegistry = new AssistantToolRegistry();
+        when(directQueryService.tryHandle(any(), any(), any())).thenReturn(java.util.Optional.empty());
         service = new SendChatMessageService(
                 chatCompletionPort,
                 toolRegistry,
                 toolExecutor,
+                directQueryService,
                 "system prompt",
                 3
         );
@@ -79,8 +85,36 @@ class SendChatMessageServiceToolLoopTest {
 
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(1);
+        assertThat(captor.getValue().tools()).hasSize(6);
         assertThat(captor.getValue().tools().getFirst().id()).isEqualTo("list_users");
+    }
+
+    @Test
+    void send_tdRequestIncludesPhaseToolsOnly() {
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("Respuesta directa.", List.of()));
+
+        service.send("Lista fases de Sistemas", List.of(), tdContext());
+
+        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
+        verify(chatCompletionPort).complete(captor.capture());
+        assertThat(captor.getValue().tools()).hasSize(4);
+        assertThat(captor.getValue().tools()).extracting(tool -> tool.id()).containsExactly(
+                AssistantToolRegistry.LIST_PROGRAMS_ID,
+                AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID
+        );
+    }
+
+    @Test
+    void send_usesDirectQueryWhenAvailable() {
+        when(directQueryService.tryHandle(any(), any(), any()))
+                .thenReturn(java.util.Optional.of("Respuesta directa del sistema."));
+
+        String reply = service.send("Lista procesos activos", List.of(), jdContext());
+
+        assertThat(reply).isEqualTo("Respuesta directa del sistema.");
+        verify(chatCompletionPort, never()).complete(any());
     }
 
     @Test
@@ -106,6 +140,7 @@ class SendChatMessageServiceToolLoopTest {
                 chatCompletionPort,
                 toolRegistry,
                 toolExecutor,
+                directQueryService,
                 "system prompt",
                 3
         );
@@ -121,5 +156,9 @@ class SendChatMessageServiceToolLoopTest {
 
     private static AssistantAuthContext ccContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of());
+    }
+
+    private static AssistantAuthContext tdContext() {
+        return new AssistantAuthContext(UUID.randomUUID(), "TD", List.of());
     }
 }

@@ -82,6 +82,25 @@ class ProcessStructureControllerWebMvcTest {
     }
 
     @Test
+    @WithMockUser(roles = "TD")
+    void shouldCreatePhaseForTd() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID phaseId = UUID.randomUUID();
+
+        when(addProcessPhaseUseCase.execute(eq(processId), eq("Nueva fase"), eq(2), eq("Desc")))
+                .thenReturn(Phase.builder().id(phaseId).name("Nueva fase").order(2).description("Desc").build());
+
+        mockMvc.perform(post("/api/v1/processes/{processId}/phases", processId)
+                        .with(user("testtd").roles("TD"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Nueva fase","order":2,"description":"Desc"}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Nueva fase"));
+    }
+
+    @Test
     @WithMockUser(roles = "CC")
     void shouldRejectCcMutations() throws Exception {
         UUID processId = UUID.randomUUID();

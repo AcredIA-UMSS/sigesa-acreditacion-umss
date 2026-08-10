@@ -3,11 +3,11 @@ id: FSD-UC-022
 nombre: Gestión de fases y subfases en proceso
 estado: Hecho
 release: v1.0
-actor_principal: "[JD]"
+actor_principal: "[JD], [TD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
 reglas: FSD-BR-07, FSD-BR-21, FSD-BR-22, FSD-BR-23
-ultima_actualizacion: "2026-08-07"
+ultima_actualizacion: "2026-08-09"
 design_doc: DD-UC-022
 pr_impl: PR-IMPL-022
 ---
@@ -21,10 +21,10 @@ pr_impl: PR-IMPL-022
 | **Trazabilidad** | PRD-REQ-002, 004 · PRD-US-023 |
 | **Design Doc** | [`DD-UC-022`](../../design/DD-UC-022.md) |
 | **Relación** | Complementa [FSD-UC-019](FSD-UC-019.md) (consulta) y [FSD-UC-021](FSD-UC-021.md) (plantilla origen). Opera sobre instancias **`Phase` / `Subphase`** de un `AccreditationProcess`. |
-| **Precondiciones** | Proceso en estado `ACTIVE`; [JD] autenticado |
+| **Precondiciones** | Proceso en estado `ACTIVE`; [JD] o [TD] autenticado |
 | **Pantalla** | `/procesos/{processId}/estructura` (modo edición desde detalle UC-019) |
 
-Permite a **[JD]** **crear, modificar y eliminar** fases y subfases **dentro de un proceso ya instanciado**, cuando la operación institucional lo requiera (ajuste puntual de cronograma o estructura no cubierta por la plantilla base).
+Permite a **[JD]** y **[TD]** **crear, modificar y eliminar** fases y subfases **dentro de un proceso ya instanciado**, cuando la operación institucional lo requiera (ajuste puntual de cronograma o estructura no cubierta por la plantilla base). También disponible vía asistente virtual (`manage_process_phase`, `list_process_phases`).
 
 > **No confundir con [FSD-UC-010](FSD-UC-010.md):** UC-010 es **cerrar/avanzar** fase por workflow de indicadores aprobados, no editar la taxonomía.
 
@@ -53,7 +53,7 @@ Permite a **[JD]** **crear, modificar y eliminar** fases y subfases **dentro de 
 | A2 | `order` duplicado | `400 PROCESS_STRUCTURE_ORDER_CONFLICT` |
 | A3 | Subfase sin `referenceUrl` | `400 SUBPHASE_LINK_REQUIRED` |
 | A4 | Proceso no `ACTIVE` | `409 PROCESS_NOT_EDITABLE` |
-| A5 | Rol distinto de [JD] | `403 FORBIDDEN_ROLE` |
+| A5 | Rol distinto de [JD] o [TD] (p. ej. [CC], [EE]) | `403 FORBIDDEN_ROLE` |
 
 ## Postcondiciones
 
@@ -65,7 +65,7 @@ Permite a **[JD]** **crear, modificar y eliminar** fases y subfases **dentro de 
 
 - Creación/eliminación de **indicadores** dentro de subfase.
 - Migración masiva desde otra plantilla.
-- Edición por [TD] o [CC].
+- Edición por [CC].
 
 ## API propuesta (resumen)
 

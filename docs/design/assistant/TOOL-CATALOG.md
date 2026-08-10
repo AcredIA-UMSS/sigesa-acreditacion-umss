@@ -5,12 +5,12 @@ modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 release: v1.1-tools
 status: Implemented
-ultima_actualizacion: "2026-07-31"
+ultima_actualizacion: "2026-08-09"
 ---
 
 # TOOL-CATALOG — Asistente Virtual SIGESA
 
-Catálogo vivo de **tools read-only** expuestas al LLM vía tool calling. Es la fuente de verdad para:
+Catálogo vivo de **tools** expuestas al LLM vía tool calling. Es la fuente de verdad para:
 
 - Descripciones semánticas enviadas al modelo.
 - JSON Schema de parámetros.
@@ -52,7 +52,7 @@ sequenceDiagram
 |-------|-------------|
 | **R1** | Las tools se incluyen en el payload al LLM **solo** si el rol del JWT cumple `allowed_roles`. |
 | **R2** | El `AssistantToolExecutor` **revalida** el rol antes de ejecutar (defensa en profundidad). |
-| **R3** | Si un usuario no-JD pregunta por usuarios del sistema, el asistente responde con texto genérico **sin invocar** la tool (no debe aparecer en `tools[]`). |
+| **R3** | Si un usuario no autorizado pregunta por datos restringidos, el asistente responde con texto genérico **sin invocar** la tool (no debe aparecer en `tools[]`). |
 | **R4** | Ninguna tool expone contraseñas, hashes, tokens ni datos fuera del contrato documentado. |
 
 ### 1.3 Formato estándar de respuesta de tool
@@ -85,15 +85,53 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | Clasificación | Significado |
 |---------------|-------------|
 | `read` | Solo consulta; no modifica estado persistente. |
-| `write` | Reservado para fases futuras (fuera de este catálogo). |
+| `write` | Modifica estado; requiere confirmación explícita en chat (`confirmed=true`). |
 
 ---
 
-## 2. Tools registradas (Fase 1 — read-only)
+## 2. Tools registradas
+
+### 2.0 Matriz RBAC (resumen)
+
+| Tool ID | Side-effect | JD | TD | CC | EE |
+|---------|-------------|:--:|:--:|:--:|:--:|
+| `list_users` | read | ✓ | — | — | — |
+| `set_user_status` | write | ✓ | — | — | — |
+| `list_programs` | read | ✓ | ✓ | — | — |
+| `list_process_phases` | read | ✓ | ✓ | — | — |
+| `manage_process_phase` | write | ✓ | ✓ | — | — |
+
+> **Gestión de usuarios:** exclusiva **JD** (alineada a `GET/PATCH /admin/users`).  
+> **Fases de proceso activo:** **JD** y **TD** (alineada a `ProcessStructureController` y `ProcessAccessPolicy`).
 
 | Tool ID | Side-effect | Roles permitidos | Caso de uso | API REST equivalente |
 |---------|-------------|------------------|-------------|----------------------|
 | `list_users` | `read` | **JD** | `ListUsersUseCase` | `GET /api/v1/admin/users` |
+| `list_programs` | `read` | **JD**, **TD** | `ListProgramsUseCase` | `GET /api/v1/programs` |
+| `list_process_phases` | `read` | **JD**, **TD** | `GetProcessDetailUseCase` + resolución carrera→proceso activo | `GET /api/v1/processes/{id}` |
+| `set_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | *(sin endpoint REST de activación; deactivate vía PATCH)* |
+| `manage_process_phase` | `write` | **JD**, **TD** | `Add/Update/Delete/ReorderProcess*` | `ProcessStructureController` |
+
+### 2.1 Protocolo de confirmación (tools `write`)
+
+1. Primera invocación con `confirmed: false` (o omitido) → respuesta `confirmationRequired: true` + `preview`.
+2. El LLM muestra la vista previa y pide confirmación al usuario.
+3. Segunda invocación con los **mismos parámetros** y `confirmed: true` → ejecuta la acción.
+
+Respuesta de vista previa:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "confirmationRequired": true,
+    "action": "DEACTIVATE",
+    "preview": { "email": "cc@umss.edu.bo", "fullName": "..." },
+    "message": "Confirme que desea desactivar..."
+  },
+  "error": null
+}
+```
 
 ---
 
@@ -327,7 +365,35 @@ return ToolResult.ok(Map.of(
 
 ---
 
-## 4. System prompt — instrucciones complementarias (JD)
+## 4. System prompt — instrucciones complementarias
+
+### 4.1 Fragmento JD
+
+```text
+Tienes acceso a tools de administración de usuarios (list_users, set_user_status) y de estructura
+de procesos (list_programs, list_process_phases, manage_process_phase).
+Para set_user_status y manage_process_phase: primero confirmed=false (vista previa), luego confirmed=true
+solo tras confirmación explícita del usuario en el chat.
+Nunca inventes datos ni reveles contraseñas.
+```
+
+### 4.2 Fragmento TD
+
+```text
+Tienes acceso a tools de estructura de procesos: list_programs, list_process_phases, manage_process_phase.
+NO tienes acceso a gestión de usuarios (list_users, set_user_status).
+Para manage_process_phase: primero confirmed=false (vista previa), luego confirmed=true
+solo tras confirmación explícita del usuario en el chat.
+```
+
+### 4.3 Fragmento CC / EE
+
+```text
+No tienes acceso a tools administrativas ni de edición estructural de procesos por chat.
+Si te lo solicitan, indica que solo Jefatura DUEA [JD] o Técnico DUEA [TD] pueden hacerlo según el caso.
+```
+
+### 4.4 (Legacy) Fragmento JD — solo list_users
 
 Fragmento sugerido para `sigesa.assistant.system-prompt` cuando el caller es JD:
 
@@ -342,8 +408,10 @@ Para callers **CC** y **TD**, añadir:
 
 ```text
 No tienes acceso a información administrativa de usuarios del sistema.
-Si te lo solicitan, indica que solo Jefatura DUEA [JD] puede consultar el listado de usuarios.
+Si te lo solicitan, indica que solo Jefatura DUEA [JD] puede consultar o modificar usuarios.
 ```
+
+> **Nota:** TD sí tiene tools de fases; ver §4.2.
 
 ---
 
@@ -376,8 +444,8 @@ Si te lo solicitan, indica que solo Jefatura DUEA [JD] puede consultar el listad
 
 | Tool ID | Fase | Roles | Descripción |
 |---------|------|-------|-------------|
-| `list_programs` | 1.b | JD, CC, TD | Catálogo de carreras |
-| `get_active_process` | 1.b | JD, CC, TD | Proceso activo por carrera |
-| `create_process` | 2 | JD | Escritura con confirmación explícita en UI |
+| `list_programs` | 1.b | JD, TD | Catálogo de carreras — **implementado** |
+| `get_active_process` | 1.b | JD, TD | Resuelto vía `list_process_phases` / `manage_process_phase` |
+| `create_process` | 2 | JD | Escritura con confirmación explícita en UI — pendiente |
 
 Este documento se versionará incrementando tools en la tabla §2 sin modificar `docs/baseline/`.

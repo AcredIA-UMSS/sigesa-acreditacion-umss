@@ -48,19 +48,24 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
             throw new AssistantUnavailableException("El asistente está deshabilitado.");
         }
         if (properties.getApiKey() == null || properties.getApiKey().isBlank()) {
-            throw new AssistantUnavailableException(
-                    "El asistente no está configurado. Defina SIGESA_ASSISTANT_API_KEY.");
+            if (!isDirectOllamaEndpoint(properties.getBaseUrl())) {
+                throw new AssistantUnavailableException(
+                        "El asistente no está configurado. Defina SIGESA_ASSISTANT_API_KEY.");
+            }
         }
 
         try {
             String requestBody = buildRequestBody(request);
             String endpoint = normalizeBaseUrl(properties.getBaseUrl()) + "/v1/chat/completions";
 
-            HttpRequest httpRequest = HttpRequest.newBuilder()
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(endpoint))
                     .timeout(TIMEOUT)
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + properties.getApiKey())
+                    .header("Content-Type", "application/json");
+            if (properties.getApiKey() != null && !properties.getApiKey().isBlank()) {
+                requestBuilder.header("Authorization", "Bearer " + properties.getApiKey());
+            }
+            HttpRequest httpRequest = requestBuilder
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
@@ -169,6 +174,16 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
         }
 
         return new ChatCompletionResult(content.asText(), List.of());
+    }
+
+    private static boolean isDirectOllamaEndpoint(String baseUrl) {
+        if (baseUrl == null || baseUrl.isBlank()) {
+            return false;
+        }
+        String normalized = baseUrl.toLowerCase();
+        return normalized.contains("ollama")
+                || normalized.endsWith(":11434")
+                || normalized.endsWith(":11434/");
     }
 
     private static String normalizeBaseUrl(String baseUrl) {

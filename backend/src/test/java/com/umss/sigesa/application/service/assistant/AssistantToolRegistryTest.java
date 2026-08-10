@@ -9,30 +9,33 @@ class AssistantToolRegistryTest {
     private final AssistantToolRegistry registry = new AssistantToolRegistry();
 
     @Test
-    void toolsForRole_jdIncludesListUsers() {
+    void toolsForRole_jdIncludesAllTools() {
         var tools = registry.toolsForRole("JD");
 
-        assertThat(tools).hasSize(1);
-        assertThat(tools.getFirst().id()).isEqualTo("list_users");
-        assertThat(tools.getFirst().allowedRoles()).containsExactly("JD");
+        assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.LIST_USERS_ID,
+                AssistantToolRegistry.LIST_PROGRAMS_ID,
+                AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                AssistantToolRegistry.SET_USER_STATUS_ID,
+                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID
+        );
+    }
+
+    @Test
+    void toolsForRole_tdIncludesPhaseToolsOnly() {
+        var tools = registry.toolsForRole("TD");
+
+        assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.LIST_PROGRAMS_ID,
+                AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID
+        );
     }
 
     @Test
     void toolsForRole_ccReturnsEmpty() {
         assertThat(registry.toolsForRole("CC")).isEmpty();
-    }
-
-    @Test
-    void toolsForRole_tdReturnsEmpty() {
-        assertThat(registry.toolsForRole("TD")).isEmpty();
-    }
-
-    @Test
-    void findById_returnsListUsersDefinition() {
-        assertThat(registry.findById("list_users"))
-                .isPresent()
-                .get()
-                .extracting(def -> def.id())
-                .isEqualTo("list_users");
     }
 }

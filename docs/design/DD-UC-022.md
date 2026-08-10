@@ -14,14 +14,14 @@ prompts:
   - "PR-IMPL-022"
 release: "v1.0"
 status: implementado (Full-Stack v1.0)
-ultima_actualizacion: "2026-08-07"
+ultima_actualizacion: "2026-08-09"
 autores:
   - "Design Product Owner & Lead Solutions Architect"
 ---
 
 # Design Doc `DD-UC-022` — Gestión de fases y subfases en proceso
 
-> **Qué es**: Diseño para CRUD de **instancias** `Phase` / `Subphase` dentro de un `AccreditationProcess` **ACTIVE**, incluyendo `referenceUrl` por subfase. Solo **[JD]**. Distinto de cierre de fase ([FSD-UC-010](../product/uc/FSD-UC-010.md)).
+> **Qué es**: Diseño para CRUD de **instancias** `Phase` / `Subphase` dentro de un `AccreditationProcess` **ACTIVE**, incluyendo `referenceUrl` por subfase. Roles **[JD]** y **[TD]**. Distinto de cierre de fase ([FSD-UC-010](../product/uc/FSD-UC-010.md)).
 >
 > **Trazabilidad FSD**: [`FSD-UC-022`](../product/uc/FSD-UC-022.md) · Complementa [`DD-UC-019`](DD-UC-019.md) · Reglas **FSD-BR-07**, **FSD-BR-21**, **FSD-BR-22**, **FSD-BR-23**.
 
@@ -29,7 +29,7 @@ autores:
 
 ## 1. Objetivo y contexto
 
-- **Problema**: Tras crear un proceso (UC-003), la estructura clonada es **inmutable** en código actual. [JD] necesita ajustes puntuales (nueva subfase, reordenar, corregir enlace) sin tocar la plantilla origen.
+- **Problema**: Tras crear un proceso (UC-003), la estructura clonada es **inmutable** en código actual. [JD] y [TD] necesitan ajustes puntuales (nueva subfase, reordenar, corregir enlace) sin tocar la plantilla origen.
 - **Solución**: **`ProcessStructurePort`** + use cases transaccionales con guardas de negocio; extensión de entidades JPA con campos descriptivos y URL.
 - **Gap analysis**:
 
@@ -44,7 +44,7 @@ autores:
 |---|---|
 | CRUD fases/subfases en proceso ACTIVE | CRUD indicadores |
 | Reordenamiento `order` | Migración desde otra plantilla |
-| Validación borrado condicionado | Edición por TD/CC |
+| Validación borrado condicionado | Edición por [CC] |
 | UI `/procesos/{id}/estructura` | Bitácora UC-017 (hook preparado) |
 
 ---
@@ -151,7 +151,9 @@ void ensureReferenceUrl(String url); // https, non-blank
 | DELETE | `/processes/{processId}/phases/{phaseId}/subphases/{subphaseId}` | — | 204 / 409 |
 | PUT | `/processes/{processId}/structure/reorder` | `{ phases?: [uuid], subphases?: { phaseId, ids[] } }` | 200 árbol |
 
-**Seguridad**: `@PreAuthorize("hasRole('JD')")` en todos.
+**Seguridad**: `@PreAuthorize("hasAnyRole('JD','TD')")` en `ProcessStructureController`.
+
+**Asistente virtual**: tools `list_programs`, `list_process_phases`, `manage_process_phase` — mismos roles (JD, TD). Ver [`TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md).
 
 **Errores**:
 
@@ -214,7 +216,7 @@ sequenceDiagram
 | Ruta | UX |
 |---|---|
 | `/procesos/:processId/estructura` | Modo edición: botones Agregar fase/subfase, drag-and-drop reorder (opcional v1.0: inputs numéricos order) |
-| Enlace desde detalle UC-019 | Botón «Editar estructura» solo visible [JD] |
+| Enlace desde detalle UC-019 | Botón «Editar estructura» visible [JD] y [TD] |
 
 Componentes:
 - `ProcessStructureEditor` — contenedor
@@ -253,7 +255,7 @@ Componentes:
 | `DeleteSubphaseServiceTest` | Con/sin blocking evidence (mock port) |
 | `AddSubphaseServiceTest` | URL requerida |
 | `ReorderProcessStructureServiceTest` | Orders 1..N consistentes |
-| `ProcessStructureControllerWebMvcTest` | JD 201; CC 403 |
+| `ProcessStructureControllerWebMvcTest` | JD/TD 201; CC 403 |
 | Integración JPA | Cascade delete fase elimina subfases elegibles |
 
 ---
