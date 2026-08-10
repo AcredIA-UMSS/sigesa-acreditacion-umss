@@ -1,8 +1,7 @@
 package com.umss.sigesa.application.service.assistant;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
-import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
+import com.umss.sigesa.application.model.assistant.AssistantToolInvocation;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
 
@@ -13,16 +12,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Ejecuta consultas frecuentes directamente contra tools (sin depender del tool-calling del LLM).
- * Mitiga alucinaciones de modelos pequeños como llama3.2:3b.
+ * Catálogo de palabras clave (escenario 1 y 4). Si la pregunta coincide, se ejecuta la tool sin LLM.
  */
-public class AssistantDirectQueryService {
+public class AssistantKeywordRouter {
 
     private static final Pattern ACTIVE_PROCESSES_PATTERN = Pattern.compile(
             "(?is).*(procesos?\\s+activos|carreras?\\s+.*proceso\\s+activo|"
                     + "qu[eé]\\s+carreras?\\s+tienen\\s+(un\\s+)?proceso|"
                     + "list(a|ar|ame)?\\s+(las\\s+)?carreras?\\s+.*proceso\\s+activo).*");
 
+    /** Palabra catálogo «fases» — sinónimos como «etapas» NO están aquí (escenario 2 → LLM). */
     private static final Pattern PHASES_PATTERN = Pattern.compile(
             "(?is).*(list(a|ar|ame|arme)?\\s+(todas\\s+)?(las\\s+)?fases|fases\\s+(del\\s+)?proceso).*");
 
@@ -40,15 +39,9 @@ public class AssistantDirectQueryService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "([a-z0-9._%+-]+@umss\\.edu\\.bo)", Pattern.CASE_INSENSITIVE);
 
-    private final AssistantToolExecutor toolExecutor;
-    private final ObjectMapper objectMapper;
-
-    public AssistantDirectQueryService(AssistantToolExecutor toolExecutor, ObjectMapper objectMapper) {
-        this.toolExecutor = toolExecutor;
-        this.objectMapper = objectMapper;
-    }
-
-    public Optional<String> tryHandle(String userMessage, List<ChatMessage> history, AssistantAuthContext auth) {
+    public Optional<AssistantToolInvocation> resolve(String userMessage,
+                                                     List<ChatMessage> history,
+                                                     AssistantAuthContext auth) {
         if (userMessage == null || userMessage.isBlank() || auth == null) {
             return Optional.empty();
         }
@@ -56,31 +49,30 @@ public class AssistantDirectQueryService {
         String message = userMessage.trim();
         String role = auth.role() != null ? auth.role().trim().toUpperCase(Locale.ROOT) : "";
 
-        Optional<String> writeFlow = tryHandleWriteFlow(message, history, auth, role);
+        Optional<AssistantToolInvocation> writeFlow = resolveWriteFlow(message, history, role);
         if (writeFlow.isPresent()) {
             return writeFlow;
         }
 
         if ("JD".equals(role) || "TD".equals(role)) {
             if (ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
-                return Optional.of(handleListActiveProcesses(message, auth));
+                return Optional.of(buildActiveProcessesInvocation(message));
             }
             if (PHASES_PATTERN.matcher(message).matches()) {
-                return Optional.of(handleListPhases(message, auth));
+                return Optional.of(buildPhasesInvocation(message));
             }
         }
 
         if ("JD".equals(role) && USERS_PATTERN.matcher(message).matches()) {
-            return Optional.of(handleListUsers(auth));
+            return Optional.of(new AssistantToolInvocation(AssistantToolRegistry.LIST_USERS_ID, "{}"));
         }
 
         return Optional.empty();
     }
 
-    private Optional<String> tryHandleWriteFlow(String message,
-                                                List<ChatMessage> history,
-                                                AssistantAuthContext auth,
-                                                String role) {
+    private Optional<AssistantToolInvocation> resolveWriteFlow(String message,
+                                                                 List<ChatMessage> history,
+                                                                 String role) {
         if (!"JD".equals(role)) {
             return Optional.empty();
         }
@@ -88,7 +80,7 @@ public class AssistantDirectQueryService {
         if (CONFIRM_PATTERN.matcher(message).matches()) {
             PendingWriteAction pending = findPendingWriteAction(history);
             if (pending != null) {
-                return Optional.of(executeSetUserStatus(pending.identifier(), pending.action(), true, auth));
+                return Optional.of(buildSetUserStatusInvocation(pending.identifier(), pending.action(), true));
             }
         }
 
@@ -96,7 +88,7 @@ public class AssistantDirectQueryService {
         if (deactivate.matches()) {
             String target = cleanTarget(deactivate.group("target"));
             if (!target.isBlank()) {
-                return Optional.of(executeSetUserStatus(target, "DEACTIVATE", false, auth));
+                return Optional.of(buildSetUserStatusInvocation(target, "DEACTIVATE", false));
             }
         }
 
@@ -104,50 +96,39 @@ public class AssistantDirectQueryService {
         if (activate.matches()) {
             String target = cleanTarget(activate.group("target"));
             if (!target.isBlank()) {
-                return Optional.of(executeSetUserStatus(target, "ACTIVATE", false, auth));
+                return Optional.of(buildSetUserStatusInvocation(target, "ACTIVATE", false));
             }
         }
 
         return Optional.empty();
     }
 
-    private String handleListActiveProcesses(String message, AssistantAuthContext auth) {
+    private AssistantToolInvocation buildActiveProcessesInvocation(String message) {
         AssistantProcessQueryParser.ParsedProcessQuery parsed = AssistantProcessQueryParser.parse(message);
-        String args = buildJsonArgs(parsed.careerQuery(), parsed.templateType());
-        return formatTool(AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID, args, auth);
+        return new AssistantToolInvocation(
+                AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
+                buildJsonArgs(parsed.careerQuery(), parsed.templateType()));
     }
 
-    private String handleListPhases(String message, AssistantAuthContext auth) {
+    private AssistantToolInvocation buildPhasesInvocation(String message) {
         String careerQuery = extractCareerFromPhasesQuestion(message);
         if (careerQuery == null || careerQuery.isBlank()) {
-            return "Indique la carrera (por ejemplo: «lista las fases de Ingeniería de Sistemas CEUB»).";
+            careerQuery = "Ingeniería de Sistemas";
         }
         AssistantProcessQueryParser.ParsedProcessQuery parsed = AssistantProcessQueryParser.parse(careerQuery);
         String args = buildJsonArgs(
                 parsed.careerQuery() != null ? parsed.careerQuery() : careerQuery,
                 parsed.templateType());
-        return formatTool(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, args, auth);
+        return new AssistantToolInvocation(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, args);
     }
 
-    private String handleListUsers(AssistantAuthContext auth) {
-        return formatTool(AssistantToolRegistry.LIST_USERS_ID, "{}", auth);
-    }
-
-    private String executeSetUserStatus(String identifier, String action, boolean confirmed, AssistantAuthContext auth) {
+    private static AssistantToolInvocation buildSetUserStatusInvocation(String identifier,
+                                                                          String action,
+                                                                          boolean confirmed) {
         String escapedIdentifier = identifier.replace("\\", "\\\\").replace("\"", "\\\"");
         String args = "{\"identifier\":\"" + escapedIdentifier + "\",\"action\":\"" + action
                 + "\",\"confirmed\":" + confirmed + "}";
-        return formatTool(AssistantToolRegistry.SET_USER_STATUS_ID, args, auth);
-    }
-
-    private String formatTool(String toolId, String args, AssistantAuthContext auth) {
-        try {
-            String json = toolExecutor.execute(toolId, args, auth);
-            ToolExecutionResult result = AssistantResponseFormatter.parseToolJson(json, objectMapper);
-            return AssistantResponseFormatter.format(result);
-        } catch (Exception ex) {
-            return "No pude completar la consulta: " + ex.getMessage();
-        }
+        return new AssistantToolInvocation(AssistantToolRegistry.SET_USER_STATUS_ID, args);
     }
 
     private static String buildJsonArgs(String careerQuery, String templateType) {

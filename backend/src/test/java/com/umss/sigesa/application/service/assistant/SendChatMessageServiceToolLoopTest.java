@@ -1,6 +1,9 @@
 package com.umss.sigesa.application.service.assistant;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatResult;
+import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
 import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
 import com.umss.sigesa.application.model.assistant.ToolCall;
@@ -17,12 +20,17 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class SendChatMessageServiceToolLoopTest {
+
+    private static final String PHASES_TOOL_JSON = """
+            {"ok":true,"data":{"careerName":"Ingeniería de Sistemas","careerCode":"INF-SIS",\
+            "templateType":"CEUB","phases":[{"order":1,"name":"Fase 1","phaseId":"p1","subphaseCount":2}]},"error":null}
+            """;
 
     @Mock
     private ChatCompletionPort chatCompletionPort;
@@ -30,132 +38,140 @@ class SendChatMessageServiceToolLoopTest {
     @Mock
     private AssistantToolExecutor toolExecutor;
 
-    @Mock
-    private AssistantDirectQueryService directQueryService;
-
     private AssistantToolRegistry toolRegistry;
-    private SendChatMessageService service;
+    private AssistantKeywordRouter keywordRouter;
+    private SendChatMessageService serviceWithLlm;
+    private SendChatMessageService serviceWithoutLlm;
 
     @BeforeEach
     void setUp() {
         toolRegistry = new AssistantToolRegistry();
-        when(directQueryService.tryHandle(any(), any(), any())).thenReturn(java.util.Optional.empty());
-        service = new SendChatMessageService(
+        keywordRouter = new AssistantKeywordRouter();
+        serviceWithLlm = new SendChatMessageService(
                 chatCompletionPort,
                 toolRegistry,
                 toolExecutor,
-                directQueryService,
+                keywordRouter,
+                new ObjectMapper(),
                 "system prompt",
-                3
+                true
+        );
+        serviceWithoutLlm = new SendChatMessageService(
+                chatCompletionPort,
+                toolRegistry,
+                toolExecutor,
+                keywordRouter,
+                new ObjectMapper(),
+                "system prompt",
+                false
         );
     }
 
     @Test
-    void send_withoutToolCallsReturnsDirectReply() {
-        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("Hola, ¿en qué puedo ayudar?", List.of()));
-
-        String reply = service.send("Hola", List.of(), jdContext());
-
-        assertThat(reply).isEqualTo("Hola, ¿en qué puedo ayudar?");
-    }
-
-    @Test
-    void send_withSingleToolCallExecutesToolAndReturnsFinalReply() {
-        AssistantAuthContext auth = jdContext();
-        when(chatCompletionPort.complete(any()))
-                .thenReturn(new ChatCompletionResult(null, List.of(
-                        new ToolCall("call_1", "list_users", "{\"role\":\"CC\",\"status\":\"ACTIVE\"}")
-                )))
-                .thenReturn(new ChatCompletionResult("Hay 2 coordinadores activos.", List.of()));
-
-        when(toolExecutor.execute("list_users", "{\"role\":\"CC\",\"status\":\"ACTIVE\"}", auth))
-                .thenReturn("{\"ok\":true,\"data\":{\"users\":[],\"total\":0},\"error\":null}");
-
-        String reply = service.send("¿Qué CC activos hay?", List.of(), auth);
-
-        assertThat(reply).isEqualTo("Hay 2 coordinadores activos.");
-        verify(toolExecutor).execute("list_users", "{\"role\":\"CC\",\"status\":\"ACTIVE\"}", auth);
-    }
-
-    @Test
-    void send_jdRequestIncludesToolsInCompletionRequest() {
-        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("Respuesta directa.", List.of()));
-
-        service.send("Lista usuarios", List.of(), jdContext());
-
-        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
-        verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(6);
-        assertThat(captor.getValue().tools().getFirst().id()).isEqualTo("list_users");
-    }
-
-    @Test
-    void send_tdRequestIncludesPhaseToolsOnly() {
-        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("Respuesta directa.", List.of()));
-
-        service.send("Lista fases de Sistemas", List.of(), tdContext());
-
-        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
-        verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(4);
-        assertThat(captor.getValue().tools()).extracting(tool -> tool.id()).containsExactly(
-                AssistantToolRegistry.LIST_PROGRAMS_ID,
-                AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
+    void scenario1_controlledKeyword_doesNotCallLlm() {
+        AssistantAuthContext auth = tdContext();
+        when(toolExecutor.execute(
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID
-        );
-    }
+                any(),
+                auth)).thenReturn(PHASES_TOOL_JSON);
 
-    @Test
-    void send_usesDirectQueryWhenAvailable() {
-        when(directQueryService.tryHandle(any(), any(), any()))
-                .thenReturn(java.util.Optional.of("Respuesta directa del sistema."));
+        AssistantChatResult result = serviceWithLlm.send(
+                "Lista las fases de Ingeniería de Sistemas CEUB",
+                List.of(),
+                auth);
 
-        String reply = service.send("Lista procesos activos", List.of(), jdContext());
-
-        assertThat(reply).isEqualTo("Respuesta directa del sistema.");
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.sourceTables()).contains("phases");
+        assertThat(result.reply()).contains("Fase 1");
         verify(chatCompletionPort, never()).complete(any());
     }
 
     @Test
-    void send_ccRequestDoesNotIncludeTools() {
-        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("No tengo acceso a esa información.", List.of()));
+    void scenario2_synonym_usesLlmToPickTool_codeFormatsAnswer() {
+        AssistantAuthContext auth = tdContext();
+        when(chatCompletionPort.complete(any()))
+                .thenReturn(new ChatCompletionResult(null, List.of(
+                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                                "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
+                )));
+        when(toolExecutor.execute(
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}",
+                auth)).thenReturn(PHASES_TOOL_JSON);
 
-        service.send("Lista usuarios", List.of(), ccContext());
+        AssistantChatResult result = serviceWithLlm.send(
+                "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
+                List.of(),
+                auth);
 
-        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
-        verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).isEmpty();
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.LLM);
+        assertThat(result.llmInvoked()).isTrue();
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.reply()).contains("Fase 1");
+        verify(chatCompletionPort).complete(any());
     }
 
     @Test
-    void send_exceedingMaxIterationsReturnsFallback() {
-        ToolCall toolCall = new ToolCall("call_1", "list_users", "{}");
-        when(chatCompletionPort.complete(any()))
-                .thenReturn(new ChatCompletionResult(null, List.of(toolCall)));
-        when(toolExecutor.execute(any(), any(), any()))
-                .thenReturn("{\"ok\":true,\"data\":{\"users\":[],\"total\":0},\"error\":null}");
+    void scenario3_outOfScope_noToolNoInventedData() {
+        AssistantChatResult result = serviceWithLlm.send(
+                "¿Cuál es el presupuesto de la universidad para 2027?",
+                List.of(),
+                tdContext());
 
-        SendChatMessageService limitedService = new SendChatMessageService(
-                chatCompletionPort,
-                toolRegistry,
-                toolExecutor,
-                directQueryService,
-                "system prompt",
-                3
-        );
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
+        assertThat(result.toolId()).isNull();
+        assertThat(result.sourceTables()).isEmpty();
+        assertThat(result.reply()).contains("No puedo responder eso");
+        assertThat(result.reply()).contains("Puedo ayudarte con:");
+        verify(toolExecutor, never()).execute(any(), any(), any());
+        verify(chatCompletionPort, never()).complete(any());
+    }
 
-        String reply = limitedService.send("Loop infinito", List.of(), jdContext());
+    @Test
+    void scenario4_llmDisabled_sameKeywordQuestionStillWorks() {
+        AssistantAuthContext auth = tdContext();
+        when(toolExecutor.execute(
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                any(),
+                auth)).thenReturn(PHASES_TOOL_JSON);
 
-        assertThat(reply).contains("número máximo de pasos");
+        AssistantChatResult result = serviceWithoutLlm.send(
+                "Lista las fases de Ingeniería de Sistemas CEUB",
+                List.of(),
+                auth);
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.reply()).contains("Fase 1");
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
+    void scenario4_llmDisabled_synonymFallsToOutOfScope() {
+        AssistantChatResult result = serviceWithoutLlm.send(
+                "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
+                List.of(),
+                tdContext());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
+        assertThat(result.reply()).contains("SIGESA_ASSISTANT_LLM_ENABLED=false");
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
+    void send_jdRequestIncludesToolsInLlmSelection() {
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("", List.of()));
+
+        serviceWithLlm.send("¿Qué etapas tiene Ingeniería de Sistemas?", List.of(), jdContext());
+
+        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
+        verify(chatCompletionPort).complete(captor.capture());
+        assertThat(captor.getValue().tools()).hasSize(6);
     }
 
     private static AssistantAuthContext jdContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "JD", List.of());
-    }
-
-    private static AssistantAuthContext ccContext() {
-        return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of());
     }
 
     private static AssistantAuthContext tdContext() {

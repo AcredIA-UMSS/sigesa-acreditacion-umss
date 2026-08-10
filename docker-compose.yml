@@ -78,6 +78,7 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SIGESA_ASSISTANT_ENABLED=true
+      - SIGESA_ASSISTANT_LLM_ENABLED=true
       - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
       - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY}
       - SIGESA_ASSISTANT_MODEL=qwen2.5:7b

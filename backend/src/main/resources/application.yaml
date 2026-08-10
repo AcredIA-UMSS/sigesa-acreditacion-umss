@@ -43,6 +43,7 @@ sigesa:
     async-threshold-bytes: ${SIGESA_EVIDENCE_ASYNC_THRESHOLD:5242880}
   assistant:
     enabled: ${SIGESA_ASSISTANT_ENABLED:true}
+    llm-enabled: ${SIGESA_ASSISTANT_LLM_ENABLED:true}
     base-url: ${SIGESA_ASSISTANT_BASE_URL:http://localhost:3001/api}
     api-key: ${SIGESA_ASSISTANT_API_KEY:}
     model: ${SIGESA_ASSISTANT_MODEL:llama3.2:3b}
@@ -56,6 +57,6 @@ sigesa:
       Para acciones que modifican datos (activar/desactivar usuarios o cambiar fases), SIEMPRE invoca primero
       la tool con confirmed=false, muestra la vista previa al usuario y pide confirmación explícita; solo
       vuelve a invocar con confirmed=true cuando el usuario confirme claramente (por ejemplo: "confirmo", "sí, procede").
-      Nunca inventes datos del sistema: si no tienes una respuesta de tool o del motor de consultas directas, dilo claramente.
+      Nunca inventes datos del sistema: si no tienes una respuesta de tool ejecutada por el backend, dilo claramente.
       NUNCA afirmes que activaste/desactivaste un usuario o modificaste fases si no recibiste executed:true de una tool.
     max-tool-iterations: ${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:5}

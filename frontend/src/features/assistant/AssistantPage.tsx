@@ -14,7 +14,11 @@ export function AssistantPage() {
         onDraftChange={chat.setDraft}
         onSend={chat.sendMessage}
         onClear={chat.clearConversation}
+        onSampleSelect={chat.setDraft}
         model={chat.model}
+        llmEnabled={chat.llmEnabled}
+        capabilities={chat.capabilities}
+        demoScenarios={chat.demoScenarios}
         isAssistantEnabled={chat.isAssistantEnabled}
         isStatusError={chat.isStatusError}
         isStatusLoading={chat.isStatusLoading}
