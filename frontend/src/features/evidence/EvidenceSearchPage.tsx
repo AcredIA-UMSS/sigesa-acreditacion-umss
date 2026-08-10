@@ -564,6 +564,12 @@ export const EvidenceSearchPage = () => {
                             <p className="text-gray-800 font-semibold mt-0.5">
                               Tablas: <code className="font-mono text-[11px] text-primary-900 bg-primary-100/50 px-1.5 py-0.5 rounded">{dataSource || "Ninguna"}</code>
                             </p>
+                            {data?.data?.sqlQuery && (
+                              <div className="mt-2 bg-black text-emerald-400 p-2.5 rounded-lg border border-neutral-800 font-mono text-[10px] overflow-x-auto whitespace-pre-wrap leading-normal shadow-inner max-w-full">
+                                <span className="text-cyan-400 font-bold block mb-1"># SQL EJECUTADO:</span>
+                                {data.data.sqlQuery}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -601,6 +607,14 @@ export const EvidenceSearchPage = () => {
                                 <pre className="text-[11px] text-cyan-300 mt-1.5 pl-2 border-l-2 border-cyan-800">
                                   {JSON.stringify(llmTrace.toolCall.arguments, null, 2)}
                                 </pre>
+                                {data?.data?.sqlQuery && (
+                                  <div className="mt-3 pt-3 border-t border-neutral-850">
+                                    <span className="text-cyan-400 font-bold block mb-1"># SQL EJECUTADO POR LA HERRAMIENTA:</span>
+                                    <pre className="text-[10.5px] text-emerald-400 whitespace-pre-wrap leading-normal font-sans font-medium mt-1">
+                                      {data.data.sqlQuery}
+                                    </pre>
+                                  </div>
+                                )}
                               </div>
                             )}
 

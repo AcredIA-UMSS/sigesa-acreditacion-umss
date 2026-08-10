@@ -6,5 +6,5 @@
  */
 
 export type SearchParams = {
-query: string;
+query?: string;
 };

@@ -7,10 +7,10 @@
 import type { SortObject } from './sortObject.ts';
 
 export interface PageableObject {
-  paged?: boolean;
-  pageNumber?: number;
-  pageSize?: number;
   unpaged?: boolean;
+  pageNumber?: number;
+  paged?: boolean;
+  pageSize?: number;
   offset?: number;
   sort?: SortObject;
 }

@@ -18,6 +18,39 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
     @PersistenceContext
     private EntityManager entityManager;
 
+    private final ThreadLocal<String> lastSql = new ThreadLocal<>();
+
+    @Override
+    public String getLastExecutedSql() {
+        return lastSql.get();
+    }
+
+    private void saveExecutedSql(String jpql, String termino, String dimension, List<UUID> programScope) {
+        String sql = jpql
+                .replace("EvidenceVersionEntity ev", "evidence_version ev")
+                .replace("EvidenceEntity e", "evidence e")
+                .replace("IndicatorEntity ind", "indicator ind")
+                .replace("ProgramJpaEntity p", "programs p")
+                .replace("ev.evidenceId", "ev.evidence_id")
+                .replace("e.indicatorId", "e.indicator_id")
+                .replace("ind.programId", "ind.program_id")
+                .replace("ev.criterionId", "ev.criterion_id")
+                .replace("ev.storageKey", "ev.storage_key")
+                .replace("ev.createdAt", "ev.created_at")
+                .replace("e.latestVersionId", "e.latest_version_id");
+
+        if (programScope != null) {
+            sql = sql.replace(":programScope", programScope.toString());
+        }
+        if (dimension != null) {
+            sql = sql.replace(":matchingCriteria", getCriteriaForDimension(dimension).toString());
+        }
+        if (termino != null) {
+            sql = sql.replace(":term", "'%" + termino + "%'");
+        }
+        lastSql.set(sql);
+    }
+
     @Override
     public List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, List<UUID> programScope) {
         StringBuilder jpql = new StringBuilder(
@@ -60,6 +93,7 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
             query.setParameter("term", "%" + termino.toLowerCase() + "%");
         }
 
+        saveExecutedSql(jpql.toString(), termino, dimension, programScope);
         List<Object[]> rows = query.getResultList();
         List<EvidenceSearchDetailDto> results = new ArrayList<>();
 

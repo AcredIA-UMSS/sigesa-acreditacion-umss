@@ -8,5 +8,6 @@ public record SearchQueryResponseDto(
         String toolUsed,
         String dataSource,
         String message,
-        List<EvidenceSearchDetailDto> results
+        List<EvidenceSearchDetailDto> results,
+        String sqlQuery
 ) {}

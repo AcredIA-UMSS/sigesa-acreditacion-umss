@@ -13,4 +13,5 @@ export interface SearchQueryResponseDto {
   dataSource?: string;
   message?: string;
   results?: EvidenceSearchDetailDto[];
+  sqlQuery?: string;
 }

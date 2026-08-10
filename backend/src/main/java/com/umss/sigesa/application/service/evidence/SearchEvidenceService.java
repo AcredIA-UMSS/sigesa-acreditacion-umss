@@ -33,7 +33,7 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
         // Control de seguridad: Si es Coordinador (CC) y no tiene carreras asignadas, abortar con resultado vacío.
         if ("CC".equalsIgnoreCase(role)) {
             if (programScope == null || programScope.isEmpty()) {
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "Ninguno", null, Collections.emptyList());
+                return new SearchQueryResponseDto(query, "KEYWORD", null, "Ninguno", null, Collections.emptyList(), null);
             }
         }
 
@@ -43,14 +43,20 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
         // Si la query es vacía, retornamos todos los objetos accesibles
         if (cleanQuery.isEmpty()) {
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(null, null, effectiveScope);
-            return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results);
+            return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
         }
 
-        // Escenario 1: Catálogo local exacto
+        // Escenario 1.1: Catálogo local exacto
         String matchedDimension = matchKeywordCatalog(cleanQuery);
         if (matchedDimension != null) {
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(null, matchedDimension, effectiveScope);
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results);
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
+        }
+
+        // Escenario 1.2: Búsqueda clásica directa (si encuentra datos con ILIKE la primera vez, los retorna y salta el LLM)
+        List<EvidenceSearchDetailDto> directResults = queryPort.executeSearch(cleanQuery, null, effectiveScope);
+        if (!directResults.isEmpty()) {
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
         }
 
         // Evaluar estado de IA (xAiEnabled de la petición y configuración global)
@@ -69,7 +75,8 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                             null,
                             "Ninguno",
                             "Lo siento, la consulta está fuera del alcance de SIGESA. Solo puedo asistirte en búsquedas relacionadas con el proceso de acreditación (ej. evidencias, infraestructura, docentes).",
-                            Collections.emptyList()
+                            Collections.emptyList(),
+                            null
                     );
                 }
 
@@ -77,16 +84,14 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                 String dimension = routingResult.get("dimension");
 
                 List<EvidenceSearchDetailDto> results = queryPort.executeSearch(termino, dimension, effectiveScope);
-                return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results);
+                return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
             } catch (Exception e) {
-                // Fallback elegante en caso de falla de la IA: búsqueda tradicional ILIKE
-                List<EvidenceSearchDetailDto> results = queryPort.executeSearch(cleanQuery, null, effectiveScope);
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results);
+                // Fallback elegante en caso de falla de la IA: reutilizamos la búsqueda tradicional ILIKE directa
+                return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
             }
         } else {
-            // Escenario 4: IA Desactivada (Búsqueda tradicional ILIKE sobre descripción e identificador)
-            List<EvidenceSearchDetailDto> results = queryPort.executeSearch(cleanQuery, null, effectiveScope);
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results);
+            // Escenario 4: IA Desactivada (Reutilizamos la búsqueda tradicional ILIKE directa)
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
         }
     }
 
@@ -107,7 +112,8 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                 null,
                 "Ninguno",
                 "La búsqueda inteligente por sinónimos está desactivada. Intente buscar con palabras clave exactas.",
-                Collections.emptyList()
+                Collections.emptyList(),
+                null
         );
     }
 }
