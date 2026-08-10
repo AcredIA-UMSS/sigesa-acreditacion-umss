@@ -13,6 +13,7 @@ import com.umss.sigesa.domain.model.ChatToolCall;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class SendChatMessageService implements SendChatMessageUseCase {
 
@@ -22,17 +23,20 @@ public class SendChatMessageService implements SendChatMessageUseCase {
     private final ChatCompletionPort chatCompletionPort;
     private final AssistantToolRegistry toolRegistry;
     private final AssistantToolExecutor toolExecutor;
+    private final AssistantDirectQueryService directQueryService;
     private final String systemPrompt;
     private final int maxToolIterations;
 
     public SendChatMessageService(ChatCompletionPort chatCompletionPort,
                                   AssistantToolRegistry toolRegistry,
                                   AssistantToolExecutor toolExecutor,
+                                  AssistantDirectQueryService directQueryService,
                                   String systemPrompt,
                                   int maxToolIterations) {
         this.chatCompletionPort = chatCompletionPort;
         this.toolRegistry = toolRegistry;
         this.toolExecutor = toolExecutor;
+        this.directQueryService = directQueryService;
         this.systemPrompt = systemPrompt;
         this.maxToolIterations = maxToolIterations;
     }
@@ -48,6 +52,11 @@ public class SendChatMessageService implements SendChatMessageUseCase {
 
         List<ChatMessage> conversation = buildConversation(history, userMessage);
         List<AssistantToolDefinition> tools = toolRegistry.toolsForRole(authContext.role());
+
+        Optional<String> directReply = directQueryService.tryHandle(userMessage, history, authContext);
+        if (directReply.isPresent()) {
+            return directReply.get();
+        }
 
         for (int iteration = 0; iteration < maxToolIterations; iteration++) {
             ChatCompletionResult result = chatCompletionPort.complete(

@@ -43,6 +43,7 @@ services:
         condition: service_healthy
     environment:
       OLLAMA_BASE_URL: http://ollama:11434
+      BYPASS_MODEL_ACCESS_CONTROL: "true"
     ports:
       - "3001:8080"
     volumes:
@@ -76,9 +77,10 @@ services:
       - SPRING_DATASOURCE_PASSWORD=sigesa_password
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SIGESA_ASSISTANT_ENABLED=true
       - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
       - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY}
-      - SIGESA_ASSISTANT_MODEL=llama3.2:3b
+      - SIGESA_ASSISTANT_MODEL=qwen2.5:7b
     ports:
       - "8080:8080"
 

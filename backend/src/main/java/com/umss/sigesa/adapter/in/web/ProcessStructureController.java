@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/processes")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('JD')")
+@PreAuthorize("hasAnyRole('JD','TD')")
 @Tag(name = "Estructura de proceso", description = "CRUD de fases/subfases en proceso ACTIVE (FSD-UC-022)")
 public class ProcessStructureController {
 

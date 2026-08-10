@@ -16,6 +16,7 @@ export function AssistantPage() {
         onClear={chat.clearConversation}
         model={chat.model}
         isAssistantEnabled={chat.isAssistantEnabled}
+        isStatusError={chat.isStatusError}
         isStatusLoading={chat.isStatusLoading}
         isSending={chat.isSending}
         errorMessage={chat.errorMessage}

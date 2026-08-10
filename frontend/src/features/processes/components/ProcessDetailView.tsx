@@ -27,7 +27,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const { session } = useAuth();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
-  const canEditStructure = session?.role === 'JD' && process?.status === 'ACTIVE';
+  const canEditStructure =
+    (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
 
   return (
     <div className="space-y-6">

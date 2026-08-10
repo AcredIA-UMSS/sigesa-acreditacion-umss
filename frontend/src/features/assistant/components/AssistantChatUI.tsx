@@ -12,6 +12,7 @@ export type AssistantChatUIProps = {
   onClear: () => void;
   model: string;
   isAssistantEnabled: boolean;
+  isStatusError: boolean;
   isStatusLoading: boolean;
   isSending: boolean;
   errorMessage: string | null;
@@ -26,6 +27,7 @@ export function AssistantChatUI({
   onClear,
   model,
   isAssistantEnabled,
+  isStatusError,
   isStatusLoading,
   isSending,
   errorMessage,
@@ -72,7 +74,16 @@ export function AssistantChatUI({
       </header>
 
       <div className="flex flex-1 flex-col overflow-hidden px-8 py-6">
-        {!isStatusLoading && !isAssistantEnabled && (
+        {!isStatusLoading && isStatusError && (
+          <div className="mb-4">
+            <Alert variant="error">
+              No se pudo consultar el estado del asistente. Verifique que el backend esté activo e
+              inicie sesión nuevamente.
+            </Alert>
+          </div>
+        )}
+
+        {!isStatusLoading && !isStatusError && !isAssistantEnabled && (
           <div className="mb-4">
             <Alert variant="warning">
               El asistente está deshabilitado en el servidor. Active{' '}
