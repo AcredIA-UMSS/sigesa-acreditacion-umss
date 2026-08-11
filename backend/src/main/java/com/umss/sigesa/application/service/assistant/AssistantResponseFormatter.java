@@ -33,7 +33,13 @@ final class AssistantResponseFormatter {
                 sb.append(message).append("\n\n");
             }
             if (preview instanceof java.util.Map<?, ?> previewMap) {
-                sb.append("Vista previa: ").append(previewMap).append("\n\n");
+                if ("CREATE_SUBPHASE".equals(String.valueOf(previewMap.get("requestedAction")))) {
+                    sb.append("Resumen: «").append(previewMap.get("name"))
+                            .append("» → orden ").append(previewMap.get("assignedOrder"))
+                            .append(" en «").append(previewMap.get("phaseName")).append("».\n\n");
+                } else {
+                    sb.append("Vista previa: ").append(previewMap).append("\n\n");
+                }
             }
             sb.append("Responda **confirmo** para ejecutar la acción.");
             return sb.toString().trim();
@@ -109,8 +115,24 @@ final class AssistantResponseFormatter {
                 sb.append(" — ").append(map.get("description"));
             }
             sb.append("\n");
-            sb.append("   - ID: ").append(map.get("phaseId"))
-                    .append(" | Subfases: ").append(map.get("subphaseCount")).append("\n");
+            sb.append("   - ID: ").append(map.get("phaseId"));
+            Object subphasesNode = map.get("subphases");
+            if (subphasesNode instanceof List<?> subphases && !subphases.isEmpty()) {
+                sb.append(" | Subfases: ").append(subphases.size()).append("\n");
+                for (Object subItem : subphases) {
+                    if (!(subItem instanceof java.util.Map<?, ?> subMap)) {
+                        continue;
+                    }
+                    sb.append("     · ").append(subMap.get("order")).append(". ")
+                            .append(subMap.get("name"));
+                    if (subMap.get("referenceUrl") != null) {
+                        sb.append(" → ").append(subMap.get("referenceUrl"));
+                    }
+                    sb.append("\n");
+                }
+            } else {
+                sb.append(" | Subfases: ").append(map.get("subphaseCount")).append("\n");
+            }
         }
         return sb.toString().trim();
     }

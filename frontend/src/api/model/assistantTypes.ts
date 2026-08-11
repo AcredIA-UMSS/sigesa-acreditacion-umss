@@ -7,9 +7,20 @@ export interface ChatMessageDto {
   content: string;
 }
 
+export type AssistantAgentId = 'general' | 'phases';
+
+export interface AssistantChatContextDto {
+  agent: AssistantAgentId;
+  processId: string;
+  careerName?: string;
+  careerCode?: string;
+  templateType?: string;
+}
+
 export interface SendChatMessageRequest {
   message: string;
   history?: ChatMessageDto[];
+  context?: AssistantChatContextDto;
 }
 
 export interface SendChatMessageResponse {
@@ -33,6 +44,7 @@ export interface AssistantStatusResponse {
   model: string;
   capabilities: string[];
   demoScenarios: AssistantDemoScenario[];
+  agent: AssistantAgentId;
 }
 
 export interface AssistantMessageMetadata {

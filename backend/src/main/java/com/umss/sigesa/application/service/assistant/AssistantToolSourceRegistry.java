@@ -13,8 +13,12 @@ public final class AssistantToolSourceRegistry {
                     "accreditation_processes", "programs", "templates", "process_responsible_assignment", "app_user")),
             Map.entry(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, List.of(
                     "phases", "subphases", "accreditation_processes", "programs")),
+            Map.entry(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID, List.of(
+                    "phases", "subphases", "accreditation_processes", "programs")),
             Map.entry(AssistantToolRegistry.SET_USER_STATUS_ID, List.of("app_user")),
             Map.entry(AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID, List.of(
+                    "phases", "subphases", "accreditation_processes", "programs")),
+            Map.entry(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, List.of(
                     "phases", "subphases", "accreditation_processes", "programs"))
     );
 

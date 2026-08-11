@@ -25,6 +25,7 @@ import type {
 
 import type {
   AssistantStatusResponse,
+  GetStatus1Params,
   SendChatMessageRequest,
   SendChatMessageResponse
 } from '../../model';
@@ -72,7 +73,7 @@ export const getChatUrl = () => {
 }
 
 /**
- * Proxy hacia Open WebUI (API compatible OpenAI).
+ * Ejecuta tools vía código; LLM solo elige tool si aplica.
  * @summary Enviar mensaje al asistente
  */
 export const chat = async (sendChatMessageRequest: SendChatMessageRequest, options?: Parameters<typeof customFetch>[1]): Promise<chatResponse> => {
@@ -146,21 +147,28 @@ export type getStatus1ResponseSuccess = (getStatus1Response200) & {
 
 export type getStatus1Response = (getStatus1ResponseSuccess)
 
-export const getGetStatus1Url = () => {
+export const getGetStatus1Url = (params?: GetStatus1Params,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/assistant/status`
+  return stringifiedParams.length > 0 ? `/api/v1/assistant/status?${stringifiedParams}` : `/api/v1/assistant/status`
 }
 
 /**
- * Indica si el asistente está habilitado y qué modelo usa.
+ * Indica flags, modelo, capacidades y escenarios demo.
  * @summary Estado del asistente
  */
-export const getStatus1 = async ( options?: Parameters<typeof customFetch>[1]): Promise<getStatus1Response> => {
+export const getStatus1 = async (params?: GetStatus1Params, options?: Parameters<typeof customFetch>[1]): Promise<getStatus1Response> => {
 
-  return customFetch<getStatus1Response>(getGetStatus1Url(),
+  return customFetch<getStatus1Response>(getGetStatus1Url(params),
   {
     ...options,
     method: 'GET'
@@ -173,23 +181,23 @@ export const getStatus1 = async ( options?: Parameters<typeof customFetch>[1]): 
 
 
 
-export const getGetStatus1QueryKey = () => {
+export const getGetStatus1QueryKey = (params?: GetStatus1Params,) => {
     return [
-    `/api/v1/assistant/status`
+    `/api/v1/assistant/status`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetStatus1QueryOptions = <TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetStatus1QueryOptions = <TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>(params?: GetStatus1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetStatus1QueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetStatus1QueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStatus1>>> = ({ signal }) => getStatus1({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStatus1>>> = ({ signal }) => getStatus1(params, { signal, ...requestOptions });
 
 
 
@@ -203,7 +211,7 @@ export type GetStatus1QueryError = unknown
 
 
 export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>> & Pick<
+ params: undefined |  GetStatus1Params, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStatus1>>,
           TError,
@@ -213,7 +221,7 @@ export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TE
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>> & Pick<
+ params?: GetStatus1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStatus1>>,
           TError,
@@ -223,7 +231,7 @@ export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TE
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params?: GetStatus1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -231,11 +239,11 @@ export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TE
  */
 
 export function useGetStatus1<TData = Awaited<ReturnType<typeof getStatus1>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params?: GetStatus1Params, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetStatus1QueryOptions(options)
+  const queryOptions = getGetStatus1QueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

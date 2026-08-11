@@ -9,12 +9,12 @@ import type { PageableObject } from './pageableObject.ts';
 import type { SortObject } from './sortObject.ts';
 
 export interface PageObservationSummary {
-  totalPages?: number;
   totalElements?: number;
+  totalPages?: number;
   pageable?: PageableObject;
+  numberOfElements?: number;
   first?: boolean;
   last?: boolean;
-  numberOfElements?: number;
   size?: number;
   content?: ObservationSummary[];
   number?: number;

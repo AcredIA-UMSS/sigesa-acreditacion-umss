@@ -7,6 +7,7 @@ import java.util.List;
 
 public record SendChatMessageRequest(
         @NotBlank String message,
-        @Valid List<ChatMessageDto> history
+        @Valid List<ChatMessageDto> history,
+        @Valid AssistantChatContextDto context
 ) {
 }

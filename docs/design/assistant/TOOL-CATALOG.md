@@ -5,7 +5,7 @@ modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 release: v1.1-tools
 status: Implemented
-ultima_actualizacion: "2026-08-09"
+ultima_actualizacion: "2026-08-11"
 ---
 
 # TOOL-CATALOG — Asistente Virtual SIGESA
@@ -98,20 +98,25 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | `list_users` | read | ✓ | — | — | — |
 | `set_user_status` | write | ✓ | — | — | — |
 | `list_programs` | read | ✓ | ✓ | — | — |
-| `list_process_phases` | read | ✓ | ✓ | — | — |
+| `list_process_phases` | read | ✓ | ✓ | ✓ | — |
+| `list_process_structure` | read | ✓ | ✓ | ✓ | — |
 | `list_active_processes` | read | ✓ | ✓ | — | — |
 | `manage_process_phase` | write | ✓ | ✓ | — | — |
+| `manage_process_subphase` | write | ✓ | ✓ | — | — |
 
+> **Agente `phases`:** subset anterior (4 tools). CC solo recibe las 2 de lectura. Ver [DD-AGENT-001](DD-AGENT-001.md).  
 > **Gestión de usuarios:** exclusiva **JD** (alineada a `GET/PATCH /admin/users`).  
-> **Fases de proceso activo:** **JD** y **TD** (alineada a `ProcessStructureController` y `ProcessAccessPolicy`).
+> **Fases/subfases:** **JD** y **TD** escritura; **CC** solo lectura en su carrera asignada.
 
 | Tool ID | Side-effect | Roles permitidos | Caso de uso | API REST equivalente |
 |---------|-------------|------------------|-------------|----------------------|
 | `list_users` | `read` | **JD** | `ListUsersUseCase` | `GET /api/v1/admin/users` |
 | `list_programs` | `read` | **JD**, **TD** | `ListProgramsUseCase` | `GET /api/v1/programs` |
-| `list_process_phases` | `read` | **JD**, **TD** | `GetProcessDetailUseCase` + resolución carrera→proceso activo | `GET /api/v1/processes/{id}` |
+| `list_process_phases` | `read` | **JD**, **TD**, **CC** | `GetProcessDetailUseCase` + resolución carrera→proceso activo | `GET /api/v1/processes/{id}` |
+| `list_process_structure` | `read` | **JD**, **TD**, **CC** | `GetProcessDetailUseCase` (árbol fase→subfase) | `GET /api/v1/processes/{id}` |
 | `set_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | *(sin endpoint REST de activación; deactivate vía PATCH)* |
 | `manage_process_phase` | `write` | **JD**, **TD** | `Add/Update/Delete/ReorderProcess*` | `ProcessStructureController` |
+| `manage_process_subphase` | `write` | **JD**, **TD** | `Add/Update/DeleteProcessSubphase*` | `ProcessStructureController` |
 
 ### 2.1 Protocolo de confirmación (tools `write`)
 
@@ -387,14 +392,15 @@ Para manage_process_phase: primero confirmed=false (vista previa), luego confirm
 solo tras confirmación explícita del usuario en el chat.
 ```
 
-### 4.3 Fragmento CC / EE
+### 4.3 Fragmento CC (agente phases — solo lectura)
 
 ```text
-No tienes acceso a tools administrativas ni de edición estructural de procesos por chat.
-Si te lo solicitan, indica que solo Jefatura DUEA [JD] o Técnico DUEA [TD] pueden hacerlo según el caso.
+En el copiloto de fases tienes acceso de lectura: list_process_phases, list_process_structure
+para tu carrera asignada. NO puedes crear, editar ni eliminar fases ni subfases por chat.
+Si te lo solicitan, indica que solo JD o TD pueden modificar la estructura.
 ```
 
-### 4.4 (Legacy) Fragmento JD — solo list_users
+### 4.4 Fragmento EE
 
 Fragmento sugerido para `sigesa.assistant.system-prompt` cuando el caller es JD:
 

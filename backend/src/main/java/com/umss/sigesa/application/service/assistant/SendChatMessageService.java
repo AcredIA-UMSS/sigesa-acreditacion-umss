@@ -1,7 +1,9 @@
 package com.umss.sigesa.application.service.assistant;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umss.sigesa.application.model.assistant.AssistantAgentProfile;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
@@ -31,6 +33,20 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             - Si ninguna tool aplica (dato fuera del sistema), responde con content vacío y SIN tool_calls.
             """;
 
+    private static final String PHASES_AGENT_PROMPT_SUFFIX = """
+
+            CONTEXTO COPILOTO DE FASES (obligatorio):
+            - El usuario está viendo un proceso de acreditación concreto en pantalla.
+            - Usa SIEMPRE careerQuery=%s y templateType=%s en los argumentos de las tools (no pidas la carrera).
+            - Solo tools de fases: list_process_phases, list_process_structure (lectura) y manage_process_phase / manage_process_subphase (escritura con confirmación, solo JD/TD).
+            - No invoques tools de usuarios, programas ni otros procesos.
+            - Fases del proceso (usa phaseOrder o phaseId REAL; NUNCA inventes UUIDs como UUID_FASE_1):
+            %s
+            - Para crear subfase: action=CREATE, phaseOrder=N (o phaseName), name=..., referenceUrl=https://..., confirmed=false primero; confirmed=true solo tras confirmación del usuario.
+            - No envíes el campo order al crear subfases: el sistema informa el último orden existente y asigna el siguiente disponible en la vista previa.
+            - «Fase N» identifica la fase contenedora (phaseOrder), NO el orden de la subfase.
+            """;
+
     private final ChatCompletionPort chatCompletionPort;
     private final AssistantToolRegistry toolRegistry;
     private final AssistantToolExecutor toolExecutor;
@@ -56,7 +72,10 @@ public class SendChatMessageService implements SendChatMessageUseCase {
     }
 
     @Override
-    public AssistantChatResult send(String userMessage, List<ChatMessage> history, AssistantAuthContext authContext) {
+    public AssistantChatResult send(String userMessage,
+                                    List<ChatMessage> history,
+                                    AssistantAuthContext authContext,
+                                    AssistantChatContext chatContext) {
         if (userMessage == null || userMessage.isBlank()) {
             throw new IllegalArgumentException("El mensaje no puede estar vacío.");
         }
@@ -64,35 +83,46 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             throw new IllegalArgumentException("El contexto de autenticación es obligatorio.");
         }
 
+        AssistantChatContext effectiveContext = chatContext == null
+                ? AssistantChatContext.general()
+                : chatContext;
+        AssistantAgentProfile agentProfile = effectiveContext.agentProfile();
+
         Optional<AssistantToolInvocation> keywordMatch =
-                keywordRouter.resolve(userMessage, history, authContext);
+                keywordRouter.resolve(userMessage, history, authContext, effectiveContext);
         if (keywordMatch.isPresent()) {
             return executeTool(keywordMatch.get(), AssistantResolutionPath.KEYWORD, false, authContext);
         }
 
         if (!llmEnabled) {
             return AssistantChatResult.outOfScope(
-                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), true));
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(
+                            authContext.role(), true, agentProfile));
         }
 
         if (AssistantOutOfScopeDetector.isOutOfScope(userMessage)) {
             return AssistantChatResult.outOfScope(
-                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(
+                            authContext.role(), false, agentProfile));
         }
 
-        List<AssistantToolDefinition> tools = toolRegistry.toolsForRole(authContext.role());
+        List<AssistantToolDefinition> tools = toolRegistry.toolsForRoleAndAgent(
+                authContext.role(), agentProfile);
         if (tools.isEmpty()) {
             return AssistantChatResult.outOfScope(
-                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(
+                            authContext.role(), false, agentProfile));
         }
 
-        List<ChatMessage> conversation = buildToolSelectionConversation(history, userMessage.trim());
+        List<ChatMessage> conversation = buildToolSelectionConversation(
+                history, userMessage.trim(), effectiveContext);
         ChatCompletionResult selection = chatCompletionPort.complete(
                 new ChatCompletionRequest(conversation, tools));
 
         if (!selection.hasToolCalls()) {
             return AssistantChatResult.outOfScope(
-                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(authContext.role(), false));
+                    AssistantCapabilitiesCatalog.formatOutOfScopeMessage(
+                            authContext.role(), false, agentProfile));
         }
 
         var toolCall = selection.toolCalls().getFirst();
@@ -122,9 +152,13 @@ public class SendChatMessageService implements SendChatMessageUseCase {
         }
     }
 
-    private List<ChatMessage> buildToolSelectionConversation(List<ChatMessage> history, String userMessage) {
+    private List<ChatMessage> buildToolSelectionConversation(List<ChatMessage> history,
+                                                             String userMessage,
+                                                             AssistantChatContext chatContext) {
         List<ChatMessage> conversation = new ArrayList<>();
-        conversation.add(new ChatMessage(ChatRole.SYSTEM, systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX));
+        conversation.add(new ChatMessage(
+                ChatRole.SYSTEM,
+                systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX + phasesContextSuffix(chatContext)));
 
         if (history != null) {
             history.stream()
@@ -134,5 +168,17 @@ public class SendChatMessageService implements SendChatMessageUseCase {
 
         conversation.add(new ChatMessage(ChatRole.USER, userMessage));
         return conversation;
+    }
+
+    private static String phasesContextSuffix(AssistantChatContext chatContext) {
+        if (!chatContext.isPhasesAgent()) {
+            return "";
+        }
+        String career = chatContext.careerName() != null ? chatContext.careerName() : chatContext.careerCode();
+        String template = chatContext.templateType() != null ? chatContext.templateType() : "CEUB";
+        String phases = chatContext.phaseCatalogPrompt() != null && !chatContext.phaseCatalogPrompt().isBlank()
+                ? chatContext.phaseCatalogPrompt()
+                : "(consulte list_process_structure antes de escribir)";
+        return PHASES_AGENT_PROMPT_SUFFIX.formatted(career, template, phases);
     }
 }

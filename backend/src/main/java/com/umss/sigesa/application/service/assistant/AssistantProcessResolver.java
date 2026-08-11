@@ -163,6 +163,37 @@ final class AssistantProcessResolver {
                 .toList();
     }
 
+    static List<Map<String, Object>> toStructurePayload(EnrichedProcessDetail detail) {
+        return detail.phases().stream()
+                .sorted(Comparator.comparing(phase -> phase.getOrder() == null ? Integer.MAX_VALUE : phase.getOrder()))
+                .map(phase -> {
+                    Map<String, Object> map = new LinkedHashMap<>();
+                    map.put("phaseId", phase.getId().toString());
+                    map.put("name", phase.getName());
+                    map.put("order", phase.getOrder());
+                    map.put("description", phase.getDescription());
+                    List<Map<String, Object>> subphases = phase.getSubphases() == null
+                            ? List.of()
+                            : phase.getSubphases().stream()
+                                    .sorted(Comparator.comparing(sp ->
+                                            sp.getOrder() == null ? Integer.MAX_VALUE : sp.getOrder()))
+                                    .map(sp -> {
+                                        Map<String, Object> sub = new LinkedHashMap<>();
+                                        sub.put("subphaseId", sp.getId().toString());
+                                        sub.put("name", sp.getName());
+                                        sub.put("order", sp.getOrder());
+                                        sub.put("referenceUrl", sp.getReferenceUrl());
+                                        sub.put("description", sp.getDescription());
+                                        return sub;
+                                    })
+                                    .toList();
+                    map.put("subphases", subphases);
+                    map.put("subphaseCount", subphases.size());
+                    return map;
+                })
+                .toList();
+    }
+
     private static Map<String, Object> toProcessMap(ProcessSummary summary) {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("processId", summary.id().toString());
