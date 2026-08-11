@@ -123,24 +123,39 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
     }
 
     private List<UUID> getCriteriaForDimension(String dimension) {
-        UUID seedCritId = UUID.fromString("550e8400-e29b-41d4-a716-446655440002");
-        if ("Infraestructura".equalsIgnoreCase(dimension)) {
-            return List.of(seedCritId);
+        try {
+            return entityManager.createQuery(
+                    "SELECT c.id FROM EvaluationCriterionEntity c " +
+                    "JOIN EvaluationDimensionEntity d ON c.dimensionId = d.id " +
+                    "WHERE LOWER(d.name) = LOWER(:dimName)", UUID.class)
+                    .setParameter("dimName", dimension)
+                    .getResultList();
+        } catch (Exception e) {
+            return List.of();
         }
-        return List.of();
     }
 
     private String getCriterionCode(UUID critId) {
-        if (UUID.fromString("550e8400-e29b-41d4-a716-446655440002").equals(critId)) {
-            return "CRT-04";
+        try {
+            return entityManager.createQuery(
+                    "SELECT c.code FROM EvaluationCriterionEntity c WHERE c.id = :critId", String.class)
+                    .setParameter("critId", critId)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return "CRT-01";
         }
-        return "CRT-01";
     }
 
     private String getDimensionName(UUID critId) {
-        if (UUID.fromString("550e8400-e29b-41d4-a716-446655440002").equals(critId)) {
+        try {
+            return entityManager.createQuery(
+                    "SELECT d.name FROM EvaluationDimensionEntity d " +
+                    "JOIN EvaluationCriterionEntity c ON c.dimensionId = d.id " +
+                    "WHERE c.id = :critId", String.class)
+                    .setParameter("critId", critId)
+                    .getSingleResult();
+        } catch (Exception e) {
             return "Infraestructura";
         }
-        return "Infraestructura";
     }
 }

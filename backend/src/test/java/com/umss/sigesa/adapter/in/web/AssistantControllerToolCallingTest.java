@@ -70,7 +70,6 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_JD"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 new AssistantChatResult("Respuesta del asistente.", "list_users", List.of("app_user"),
                         AssistantResolutionPath.KEYWORD, false));
@@ -95,7 +94,6 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_CC"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 AssistantChatResult.outOfScope("No puedo listar usuarios."));
 
