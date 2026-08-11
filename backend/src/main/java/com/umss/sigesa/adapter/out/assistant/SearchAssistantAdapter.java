@@ -2,6 +2,8 @@ package com.umss.sigesa.adapter.out.assistant;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umss.sigesa.adapter.out.persistance.EvaluationDimensionJpaRepository;
+import com.umss.sigesa.adapter.out.persistance.entity.EvaluationDimensionEntity;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
 import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
 import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
@@ -20,10 +22,13 @@ import java.util.Map;
 public class SearchAssistantAdapter implements AssistantQueryPort {
 
     private final ChatCompletionPort chatCompletionPort;
+    private final EvaluationDimensionJpaRepository dimensionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public SearchAssistantAdapter(ChatCompletionPort chatCompletionPort) {
+    public SearchAssistantAdapter(ChatCompletionPort chatCompletionPort,
+                                  EvaluationDimensionJpaRepository dimensionRepository) {
         this.chatCompletionPort = chatCompletionPort;
+        this.dimensionRepository = dimensionRepository;
     }
 
     @Override
@@ -33,17 +38,28 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
         String systemPrompt = "Eres un asistente de búsqueda y enrutamiento inteligente para el sistema de acreditación universitaria SIGESA. Tu tarea es enrutar las consultas del usuario utilizando las herramientas provistas para mapear sinónimos a criterios oficiales.\n" +
                 "Si la consulta no está relacionada con la acreditación universitaria, no intentes responder ni uses ninguna herramienta; simplemente responde con la palabra 'OUT_OF_SCOPE'.";
 
+        List<String> dimensions = dimensionRepository.findAll().stream()
+                .map(EvaluationDimensionEntity::getName)
+                .toList();
+        if (dimensions.isEmpty()) {
+            dimensions = List.of("Infraestructura", "Plan de Estudios", "Docentes", "Administracion");
+        }
+
         Map<String, Object> schema = Map.of(
                 "type", "object",
                 "properties", Map.of(
                         "dimension", Map.of(
                                 "type", "string",
-                                "enum", List.of("Infraestructura", "Plan de Estudios", "Docentes", "Administracion"),
+                                "enum", dimensions,
                                 "description", "Dimensión o criterio oficial al que se mapea la búsqueda del usuario."
                         ),
                         "termino", Map.of(
                                 "type", "string",
                                 "description", "Término limpio extraído de la búsqueda para usar en la consulta de texto."
+                        ),
+                        "anio", Map.of(
+                                "type", "integer",
+                                "description", "Año opcional extraído de la búsqueda (ej: 2024, 2025)."
                         )
                 ),
                 "required", List.of("termino")
@@ -76,6 +92,9 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                     result.put("routingPath", "LLM");
                     result.put("termino", args.path("termino").asText());
                     result.put("dimension", args.path("dimension").asText(null));
+                    if (args.has("anio") && !args.path("anio").isNull()) {
+                        result.put("anio", String.valueOf(args.path("anio").asInt()));
+                    }
                     return result;
                 }
             }

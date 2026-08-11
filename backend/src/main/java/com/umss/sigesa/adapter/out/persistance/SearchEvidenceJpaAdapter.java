@@ -25,7 +25,7 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         return lastSql.get();
     }
 
-    private void saveExecutedSql(String jpql, String termino, String dimension, List<UUID> programScope) {
+    private void saveExecutedSql(String jpql, String termino, String dimension, Integer anio, List<UUID> programScope) {
         String sql = jpql
                 .replace("EvidenceVersionEntity ev", "evidence_version ev")
                 .replace("EvidenceEntity e", "evidence e")
@@ -48,11 +48,14 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         if (termino != null) {
             sql = sql.replace(":term", "'%" + termino + "%'");
         }
+        if (anio != null) {
+            sql = sql.replace(":anio", anio.toString());
+        }
         lastSql.set(sql);
     }
 
     @Override
-    public List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, List<UUID> programScope) {
+    public List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, Integer anio, List<UUID> programScope) {
         StringBuilder jpql = new StringBuilder(
                 "SELECT ev.id, ev.storageKey, ev.description, ev.criterionId, p.name, ev.createdAt " +
                 "FROM EvidenceVersionEntity ev " +
@@ -81,6 +84,10 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
             jpql.append(" AND (LOWER(ev.description) LIKE :term OR LOWER(ev.storageKey) LIKE :term)");
         }
 
+        if (anio != null) {
+            jpql.append(" AND YEAR(ev.createdAt) = :anio");
+        }
+
         TypedQuery<Object[]> query = entityManager.createQuery(jpql.toString(), Object[].class);
 
         if (programScope != null && !programScope.isEmpty()) {
@@ -92,8 +99,11 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         if (termino != null && !termino.strip().isEmpty()) {
             query.setParameter("term", "%" + termino.toLowerCase() + "%");
         }
+        if (anio != null) {
+            query.setParameter("anio", anio);
+        }
 
-        saveExecutedSql(jpql.toString(), termino, dimension, programScope);
+        saveExecutedSql(jpql.toString(), termino, dimension, anio, programScope);
         List<Object[]> rows = query.getResultList();
         List<EvidenceSearchDetailDto> results = new ArrayList<>();
 

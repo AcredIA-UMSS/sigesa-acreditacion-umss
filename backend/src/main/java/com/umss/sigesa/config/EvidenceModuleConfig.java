@@ -49,11 +49,13 @@ public class EvidenceModuleConfig {
     SearchEvidenceUseCase searchEvidenceUseCase(
             SearchEvidenceQueryPort queryPort,
             AssistantQueryPort assistantQueryPort,
-            AssistantProperties assistantProperties) {
+            AssistantProperties assistantProperties,
+            com.umss.sigesa.adapter.out.persistance.EvaluationDimensionJpaRepository dimensionRepository) {
         return new SearchEvidenceService(
                 queryPort,
                 assistantQueryPort,
-                assistantProperties
+                assistantProperties,
+                dimensionRepository
         );
     }
 }

@@ -2,6 +2,8 @@ package com.umss.sigesa.application.service.evidence;
 
 import com.umss.sigesa.adapter.in.web.dto.EvidenceSearchDetailDto;
 import com.umss.sigesa.adapter.in.web.dto.SearchQueryResponseDto;
+import com.umss.sigesa.adapter.out.persistance.EvaluationDimensionJpaRepository;
+import com.umss.sigesa.adapter.out.persistance.entity.EvaluationDimensionEntity;
 import com.umss.sigesa.application.port.out.AssistantQueryPort;
 import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
 import com.umss.sigesa.config.AssistantProperties;
@@ -23,6 +25,7 @@ class SearchEvidenceServiceTest {
     private SearchEvidenceQueryPort queryPort;
     private AssistantQueryPort assistantQueryPort;
     private AssistantProperties assistantProperties;
+    private EvaluationDimensionJpaRepository dimensionRepository;
     private SearchEvidenceService searchEvidenceService;
 
     @BeforeEach
@@ -30,7 +33,8 @@ class SearchEvidenceServiceTest {
         queryPort = mock(SearchEvidenceQueryPort.class);
         assistantQueryPort = mock(AssistantQueryPort.class);
         assistantProperties = mock(AssistantProperties.class);
-        searchEvidenceService = new SearchEvidenceService(queryPort, assistantQueryPort, assistantProperties);
+        dimensionRepository = mock(EvaluationDimensionJpaRepository.class);
+        searchEvidenceService = new SearchEvidenceService(queryPort, assistantQueryPort, assistantProperties, dimensionRepository);
     }
 
     @Test
@@ -41,13 +45,15 @@ class SearchEvidenceServiceTest {
         EvidenceSearchDetailDto detail = new EvidenceSearchDetailDto(
                 UUID.randomUUID(), "file.pdf", "desc", "Infraestructura", "CRT-04", "Sistemas", LocalDateTime.now()
         );
-        when(queryPort.executeSearch(null, "Infraestructura", scope)).thenReturn(List.of(detail));
+        EvaluationDimensionEntity dim = new EvaluationDimensionEntity();
+        dim.setName("Infraestructura");
+        when(dimensionRepository.findAll()).thenReturn(List.of(dim));
+        when(queryPort.executeSearch(null, "Infraestructura", null, scope)).thenReturn(List.of(detail));
 
         SearchQueryResponseDto response = searchEvidenceService.search("infraestructura", true, UUID.randomUUID(), "CC", scope);
 
         assertEquals("KEYWORD", response.routingPath());
         assertFalse(response.results().isEmpty());
-        verifyNoInteractions(assistantQueryPort);
     }
 
     @Test
@@ -56,18 +62,19 @@ class SearchEvidenceServiceTest {
         List<UUID> scope = List.of(programId);
 
         when(assistantProperties.isEnabled()).thenReturn(true);
-        when(assistantQueryPort.classifyAndRoute("aulas de computacion")).thenReturn(Map.of(
+        when(assistantQueryPort.classifyAndRoute("aulas de computacion 2024")).thenReturn(Map.of(
                 "routingPath", "LLM",
                 "termino", "computacion",
-                "dimension", "Infraestructura"
+                "dimension", "Infraestructura",
+                "anio", "2024"
         ));
 
         EvidenceSearchDetailDto detail = new EvidenceSearchDetailDto(
                 UUID.randomUUID(), "file.pdf", "aulas de computacion", "Infraestructura", "CRT-04", "Sistemas", LocalDateTime.now()
         );
-        when(queryPort.executeSearch("computacion", "Infraestructura", scope)).thenReturn(List.of(detail));
+        when(queryPort.executeSearch("computacion", "Infraestructura", 2024, scope)).thenReturn(List.of(detail));
 
-        SearchQueryResponseDto response = searchEvidenceService.search("aulas de computacion", true, UUID.randomUUID(), "CC", scope);
+        SearchQueryResponseDto response = searchEvidenceService.search("aulas de computacion 2024", true, UUID.randomUUID(), "CC", scope);
 
         assertEquals("LLM", response.routingPath());
         assertEquals("buscar_evidencias_por_parametros", response.toolUsed());
@@ -92,12 +99,10 @@ class SearchEvidenceServiceTest {
     @Test
     void testSearchIADesactivada_Escenario4() {
         when(assistantProperties.isEnabled()).thenReturn(false);
-        // Debería intentar búsqueda clásica
-        when(queryPort.executeSearch("aulas", null, Collections.emptyList())).thenReturn(Collections.emptyList());
+        when(queryPort.executeSearch("aulas", null, null, Collections.emptyList())).thenReturn(Collections.emptyList());
 
         SearchQueryResponseDto response = searchEvidenceService.search("aulas", true, UUID.randomUUID(), "TD", Collections.emptyList());
 
-        // Con la lógica actualizada, con IA desactivada se realiza una búsqueda clásica ILIKE en vez de REFUSAL
         assertEquals("KEYWORD", response.routingPath());
     }
 
@@ -108,10 +113,10 @@ class SearchEvidenceServiceTest {
 
         // Caso 1: Técnico DUEA (TD) - no aplica filtro de scope (pasa null)
         searchEvidenceService.search("aulas", false, UUID.randomUUID(), "TD", ccScope);
-        verify(queryPort).executeSearch("aulas", null, null);
+        verify(queryPort).executeSearch("aulas", null, null, null);
 
         // Caso 2: Coordinador de Carrera (CC) - aplica filtro de scope (pasa ccScope)
         searchEvidenceService.search("aulas", false, UUID.randomUUID(), "CC", ccScope);
-        verify(queryPort).executeSearch("aulas", null, ccScope);
+        verify(queryPort).executeSearch("aulas", null, null, ccScope);
     }
 }

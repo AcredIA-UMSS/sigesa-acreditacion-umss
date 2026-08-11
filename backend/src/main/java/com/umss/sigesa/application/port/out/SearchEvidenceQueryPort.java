@@ -5,6 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SearchEvidenceQueryPort {
-    List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, List<UUID> programScope);
+    List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, Integer anio, List<UUID> programScope);
     String getLastExecutedSql();
 }
