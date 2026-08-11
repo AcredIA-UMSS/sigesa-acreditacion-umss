@@ -39,6 +39,7 @@ public class AccreditationProcess {
             Phase phase = Phase.builder()
                     .name(tPhase.getName())
                     .order(tPhase.getOrder())
+                    .description(tPhase.getDescription())
                     .subphases(new ArrayList<>())
                     .build();
 
@@ -46,6 +47,8 @@ public class AccreditationProcess {
                 phase.getSubphases().add(Subphase.builder()
                         .name(tSubphase.getName())
                         .order(tSubphase.getOrder())
+                        .referenceUrl(tSubphase.getReferenceUrl())
+                        .description(tSubphase.getDescription())
                         .build());
             });
 

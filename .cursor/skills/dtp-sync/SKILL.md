@@ -11,12 +11,13 @@ Mantiene **viva y coherente** la documentación del producto tras implementar c�
 ## Invocación
 
 ```
-@dtp-sync [diff=<rango git, p.ej. release/2.0.0..HEAD>] [pr=<#id>] [uc=<FSD-UC-NNN>]
+@dtp-sync fsd=FSD-UC-NNN [diff=<rango git>] [sprint=<N>]
 ```
 
+- **`fsd`:** caso de uso ancla (**preferido**, alineado con `@sigesa-orchestrator`). El agente resuelve `DD-UC-NNN` y `PR-IMPL-NNN` desde `docs/product/uc/FSD-UC-NNN.md` o `docs/product/FSD.md`.
 - `diff`: rango git a analizar. Si se omite, usa los cambios no commiteados + el último PR/commit.
-- `pr`: id del PR cuya descripción declara prompts/archivos.
-- `uc`: acota el análisis a un caso de uso.
+- `pr`: opcional; si se omite, derivar del FSD. Solo usar si el usuario lo cita explícitamente.
+- `uc`: alias de `fsd` (legacy).
 
 ## Archivos de referencia
 - Plantilla del DTP: [`m4/plantillas/DTP_TEMPLATE.md`](../../../docs/plantillas/DTP_TEMPLATE.md)

@@ -12,10 +12,14 @@
 | PM-003 | PR-IMPL-019 | DD-UC-019 | FSD-UC-019 | Consulta de procesos de acreditación (GET listado + detalle, RBAC, UI `/procesos`) |
 | PM-004 | PR-IMPL-014 | DD-UC-020 | PRD-REQ-029 / FSD-UC-020 | Rol evaluador externo [EE]: revisión documental solo lectura por carrera asignada |
 | PM-005 | PR-IMPL-015 | DD-UC-002 | PRD-REQ-001 / FSD-UC-002 | Gestión usuarios [JD]: listado nombre completo, modal alta, validaciones y credenciales al crear |
-| PM-006 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
-| PM-007 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
-
----
+| PM-006 | PR-IMPL-021 | DD-UC-021 | FSD-UC-021 | CRUD plantillas normativas (API-TPL-01…08), Flyway V5, hook UC-003 PUBLISHED + clonación referenceUrl |
+| PM-007 | PR-IMPL-021 | DD-UC-021 | FSD-UC-021 | Cierre documental: `@save-prompt-mapping` + `@dtp-sync` (autor Boris Anthony Angulo Urquieta) |
+| PM-008 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Contrato implementación CRUD estructura proceso ACTIVE (API-PROC-05…08); cierre documental orchestrator |
+| PM-009 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Full-Stack UC-022: backend ProcessStructure + frontend `/procesos/{id}/estructura` |
+| PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
+| PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
+| PM-012 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
+| PM-013 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
 
 ## PM-001
 
@@ -480,8 +484,424 @@ docs/design/DD-UC-011.md
 ## PM-006
 
 | Campo | Valor |
-|---|---|
+| --- | --- |
 | **ID** | PM-006 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 15:52 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Implementación backend gestión CRUD plantillas normativas |
+| **Objetivo** | Exponer API-TPL-01…08 bajo `/api/v1/templates` (solo [JD]); migración Flyway V5; puerto `TemplateManagementPort`; validar plantilla PUBLISHED al crear proceso y clonar `referenceUrl` |
+| **Contexto** | FSD-UC-021 / DD-UC-021 / PR-IMPL-021. Arquitectura hexagonal estricta; CQRS read (`TemplatePort`) vs write (`TemplateManagementPort`). |
+| **PR-IMPL vinculado** | [PR-IMPL-021](../../prompts/impl/PR-IMPL-021.md) |
+| **DD-UC vinculado** | [DD-UC-021](../../design/DD-UC-021.md) |
+| **FSD-UC vinculado** | [FSD-UC-021](../../product/uc/FSD-UC-021.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@PR-IMPL-021.md (1-218)
+```
+
+### Archivos generados o modificados
+
+**Backend (nuevos)**
+
+- `resources/db/migration/V5__template_management.sql`
+- `domain/model/TemplateStatus.java`; excepciones `Template*Exception`
+- `application/port/in/*TemplateUseCase.java`; `application/port/out/TemplateManagementPort.java`
+- `application/service/template/*Service.java`, `TemplateStructureValidator.java`
+- `adapter/out/persistance/TemplateManagementJpaAdapter.java`, `mapper/TemplatePersistenceMapper.java`
+- `adapter/in/web/TemplateController.java`; DTOs `Template*`, `UpsertTemplateRequestDto`
+- Tests: `TemplateStructureValidatorTest`, `*TemplateServiceTest`, `TemplateControllerWebMvcTest`
+
+**Backend (modificados)**
+
+- `CreateProcessUseCaseImpl.java` (rechazo DRAFT; clonación `referenceUrl`)
+- `ProcessModuleConfig.java`, `TemplateSeedDataLoader.java`, entidades JPA template/phase/subphase
+- `ProcessExceptionHandler.java`, `SecurityConfig.java` (PathPattern Spring 7)
+- `AuthDataLoader.java` (fix seed idempotente)
+
+**Docs**
+
+- `docs/product/api_contracts.md`, `FSD.md`, `reglas_negocio.md`, `FSD-UC-003.md`, `DD-UC-003.md`
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **OK** (135 tests, 0 failures, 1 skipped)
+
+### Resultado obtenido
+
+Backend UC-021 listo para merge y generación Orval (`PR-IMPL-021-FE` pendiente). API-TPL-01…08 documentada en OpenAPI; [CC] recibe 403 en `/templates`.
+
+### Próximos pasos
+
+- [ ] `PR-IMPL-021-FE` — UI `/admin/plantillas`
+- [ ] `PR-IMPL-022` — estructura en proceso ACTIVE
+- [ ] `PR-IMPL-023` — asignación responsable [CC]
+
+---
+
+## PM-007
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-007 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 16:23 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Cierre trazabilidad documental PR-IMPL-021 |
+| **Objetivo** | Registrar `@save-prompt-mapping` + sincronizar capa viva (`DTP`, `FSD`, `FSD-UC-021`, `DD-UC-021`) tras implementación backend UC-021 |
+| **Contexto** | PM-006 registró la implementación; esta entrada cierra auditoría AI-SDLC solicitada explícitamente por el Tech Lead. Incluye delta dev Docker (Flyway vs Hibernate). |
+| **PR-IMPL vinculado** | [PR-IMPL-021](../../prompts/impl/PR-IMPL-021.md) |
+| **DD-UC vinculado** | [DD-UC-021](../../design/DD-UC-021.md) |
+| **FSD-UC vinculado** | [FSD-UC-021](../../product/uc/FSD-UC-021.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@.agents/skills/dtp-sync/SKILL.md @.agents/skills/save-prompt-mapping/SKILL.md  sprint=2 pr=PR-IMPL-021 autor: Boris Anthony Angulo Urquieta
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-021.md`
+- `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-006 previo)
+- `docs/product/DTP.md`
+
+### Archivos generados o modificados (cierre documental)
+
+| Acción | Ruta |
+| --- | --- |
+| modificado | `docs/product/DTP.md` (§A.1 autor, §A.2 delta #13, §B.7 MOD-TEMPLATE) |
+| modificado | `docs/product/FSD.md` (estado UC-021, changelog) |
+| modificado | `docs/product/uc/FSD-UC-021.md` (estado Hecho backend) |
+| modificado | `docs/design/DD-UC-021.md` (status implementado backend) |
+| modificado | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-007) |
+| modificado | `backend/src/main/resources/application-dev.yaml` (hotfix dev: ddl-auto update, flyway off) |
+
+### Cambios realizados
+
+1. **@save-prompt-mapping:** PM-006 ya existía; se añade PM-007 como registro de cierre documental (append-only).
+2. **@dtp-sync:** DTP §B.7 MOD-TEMPLATE; delta §A.2 #13 (dev Docker Hibernate vs Flyway prod); FSD-UC-021 → Hecho (backend); autor changelog → Boris Anthony Angulo Urquieta.
+3. **Baseline:** `docs/baseline/` intacto (verificado).
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **OK** (135 tests, PM-006)
+- [x] Backend Docker `:8080` — **OK** tras hotfix `application-dev.yaml`
+
+### Resultado obtenido
+
+Trazabilidad `FSD-UC-021 → DD-UC-021 → PR-IMPL-021 → PM-006/PM-007 → DTP` cerrada. Frontend UI pendiente contrato `PR-IMPL-021-FE`.
+
+### Próximos pasos
+
+- [ ] `PR-IMPL-021-FE` — UI `/admin/plantillas` + `@save-prompt-mapping` + `@dtp-sync` Full-Stack
+- [ ] `PR-IMPL-022` / `PR-IMPL-023`
+
+---
+
+## PM-008
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-008 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 16:35 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Composer |
+| **Tarea** | Cierre documental PR-IMPL-022 (contrato UC-022) |
+| **Objetivo** | Registrar trazabilidad del contrato `PR-IMPL-022` y sincronizar capa viva (`DTP`, `FSD`, `DD-UC-022`) vía `@dtp-sync` + `@save-prompt-mapping` |
+| **Contexto** | Pasos 0–2 del pipeline completos (FSD-UC-022, DD-UC-022, PR-IMPL-022 aprobado). **Paso 3a backend NO ejecutado** — sin `ProcessStructurePort`, `ProcessStructureController` ni tests en repo. Depende de PR-IMPL-021 (V5). |
+| **PR-IMPL vinculado** | [PR-IMPL-022](../../prompts/impl/PR-IMPL-022.md) |
+| **DD-UC vinculado** | [DD-UC-022](../../design/DD-UC-022.md) |
+| **FSD-UC vinculado** | [FSD-UC-022](../../product/uc/FSD-UC-022.md) |
+| **Estado** | en_progreso |
+
+### Prompt usado exacto
+
+```text
+@.cursor/agents/sigesa-orchestrator.md sprint=2 pr=PR-IMPL-022 solicitante="Boris Anthony Angulo Urquieta" — cierra con @.agents/rules/dtp-sync.mdc y @.agents/rules/save-prompt-mapping.mdc
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-022.md`
+- `docs/design/DD-UC-022.md`
+- `docs/product/uc/FSD-UC-022.md`
+- `docs/product/api_contracts.md` (API-PROC-05…08)
+- `.cursor/agents/sigesa-orchestrator.md`
+
+### Archivos generados o modificados (alcance contrato / cierre)
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `docs/prompts/impl/PR-IMPL-022.md` |
+| generado | `docs/design/DD-UC-022.md` |
+| generado | `docs/product/uc/FSD-UC-022.md` |
+| modificado | `docs/product/api_contracts.md` (API-PROC-05…08, extensión GET detalle subfases) |
+| modificado | `docs/product/reglas_negocio.md` (BR-21, BR-22, BR-23 trazabilidad UC-022) |
+| modificado | `docs/product/FSD.md` (changelog UC-022) |
+| modificado | `docs/product/DTP.md` (§A.1, §A.3, §B.2.1 planificado) |
+| modificado | `docs/design/DD-UC-022.md` (status contrato aprobado) |
+| modificado | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (PM-008) |
+
+### Cambios realizados (@dtp-sync)
+
+1. DTP §A.1: fila MOD-PROCESS estructura UC-022 (contrato, sin código).
+2. DTP §A.3: `FSD-UC-022` → **contrato aprobado**; implementación pendiente.
+3. DTP §B.2.1: contrato técnico planificado API-PROC-05…08, puertos y guardas.
+4. `DD-UC-022`: status → contrato aprobado (implementación pendiente).
+5. Baseline `docs/baseline/` intacto.
+
+### Validación ejecutada
+
+- [ ] `./mvnw test` — **N/A** (sin implementación backend UC-022)
+- [ ] Paso 3c Docker smoke — **N/A** (sin endpoints PROC-05…08)
+- [x] Verificación repo: **sin** `ProcessStructurePort` / `ProcessStructureController` en `backend/src`
+
+### Resultado obtenido
+
+Trazabilidad documental `FSD-UC-022 → DD-UC-022 → PR-IMPL-022 → PM-008 → DTP` registrada. **Gap:** código backend y frontend (`PR-IMPL-022-FE`) pendientes; PM-008 permanece `en_progreso` hasta Paso 3 completado.
+
+### Próximos pasos
+
+- [ ] Ejecutar Paso 3a: implementar `PR-IMPL-022` (backend) tras merge PR-IMPL-021
+- [ ] `./mvnw test` + Paso 3c Docker
+- [ ] `PR-IMPL-022-FE` — UI `/procesos/{id}/estructura`
+- [ ] Nuevo PM o actualizar estado PM-008 → `completado` post-implementación
+
+---
+
+## PM-009
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-009 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 17:10 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Composer |
+| **Tarea** | Implementación Full-Stack FSD-UC-022 |
+| **Objetivo** | CRUD estructural de fases/subfases en proceso ACTIVE (API-PROC-05…08) + UI `/procesos/{processId}/estructura`; cierre con `@dtp-sync` + `@save-prompt-mapping` |
+| **Contexto** | PM-008 registró contrato documental. Pipeline orchestrator Pasos 3a–3c, 4 y 5. Fix JPA: operaciones granulares en `ProcessStructureJpaAdapter` (orphanRemoval / UUID preasignado). |
+| **PR-IMPL vinculado** | [PR-IMPL-022](../../prompts/impl/PR-IMPL-022.md) |
+| **DD-UC vinculado** | [DD-UC-022](../../design/DD-UC-022.md) |
+| **FSD-UC vinculado** | [FSD-UC-022](../../product/uc/FSD-UC-022.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@sigesa-orchestrator fsd=FSD-UC-022 sprint=2 solicitante="Boris Anthony Angulo Urquieta"
+
+run all steps
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-022.md`
+- `docs/design/DD-UC-022.md`
+- `docs/product/uc/FSD-UC-022.md`
+- `.cursor/agents/sigesa-orchestrator.md`
+
+### Archivos generados o modificados (UC-022)
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/.../ProcessStructureController.java`, services/guard/ports/adapters UC-022 |
+| generado | `backend/src/test/.../ProcessStructureControllerWebMvcTest.java`, `ProcessStructureGuardTest`, `*ServiceTest` |
+| generado | `frontend/src/features/processes/{ProcessStructure*,useProcessStructureEditor}` |
+| generado | `frontend/src/api/endpoints/estructura-de-proceso/` |
+| modificado | `ProcessController.java`, `ProcessResponseDto.java`, `ProcessExceptionHandler.java`, `ProcessModuleConfig.java` |
+| modificado | `frontend/src/App.tsx`, `ProcessDetailView.tsx`, `ProcessPhaseTree.tsx` |
+| modificado | `docs/product/DTP.md`, `FSD.md`, `uc/FSD-UC-022.md`, `design/DD-UC-022.md` |
+
+### Cambios realizados (@dtp-sync)
+
+1. DTP §A.1: fila implementación Full-Stack UC-022 (PM-009).
+2. DTP §A.3: `FSD-UC-022` → **hecho (Full-Stack)**; 148 tests.
+3. DTP §B.2.1: contrato planificado → detalle vigente con adaptadores y anti-patrones JPA.
+4. `FSD-UC-022`: estado → **Hecho**; `DD-UC-022`: status → implementado.
+5. Baseline `docs/baseline/` intacto.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **148 tests OK**
+- [x] `pnpm lint` + `tsc -b` — OK
+- [x] Docker stack up — frontend `:3000` HTTP 200
+- [ ] Paso 3c curl JWT smoke manual — pendiente verificación interactiva (login JD en UI)
+
+### Resultado obtenido
+
+Backend hexagonal UC-022 operativo con guardas BR-21/22/23; frontend editor estructural en ruta dedicada; Orval regenerado. Trazabilidad `FSD-UC-022 → DD-UC-022 → PR-IMPL-022 → PM-009 → DTP` cerrada.
+
+### Próximos pasos
+
+- [ ] Smoke E2E manual: JD en `/procesos/{id}/estructura`; CC → 403 en mutaciones
+
+---
+
+## PM-010
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-010 |
+| **Fecha** | 2026-08-07 |
+| **Hora** | 17:20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Composer |
+| **Tarea** | Implementación Full-Stack FSD-UC-023 |
+| **Objetivo** | Asignación de responsable [CC] a proceso ACTIVE (API-PROC-09…11) + UI sección/modal; extensión UC-019 con campo `responsible` |
+| **Contexto** | Pipeline orchestrator Pasos 3a–5. Flyway `V7__process_responsible.sql` (V6 ocupado por rol EE). Seed CC: `cc@umss.edu.bo`, `cc2@umss.edu.bo`. |
+| **PR-IMPL vinculado** | [PR-IMPL-023](../../prompts/impl/PR-IMPL-023.md) |
+| **DD-UC vinculado** | [DD-UC-023](../../design/DD-UC-023.md) |
+| **FSD-UC vinculado** | [FSD-UC-023](../../product/uc/FSD-UC-023.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+@sigesa-orchestrator fsd=FSD-UC-023 sprint=2 solicitante="Boris Anthony Angulo Urquieta"
+```
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — **157 tests OK**
+- [x] `pnpm lint` + `tsc -b` — OK
+- [x] `docker compose up -d --build backend frontend`
+- [x] `pnpm run generate:api` — Orval OK
+
+### Resultado obtenido
+
+UC-023 operativo: [JD] asigna [CC] único por proceso ACTIVE con validación carrera (BR-09) y unicidad global (BR-20). Trazabilidad `FSD-UC-023 → DD-UC-023 → PR-IMPL-023 → PM-010 → DTP` cerrada.
+
+---
+
+## PM-011
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-011 |
+| **Fecha** | 2026-08-11 |
+| **Hora** | 16:05 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Copiloto de fases embebido (MOD-ASSISTANT `agent=phases`) |
+| **Objetivo** | Agente especializado en detalle/estructura de proceso: CC solo lectura; JD/TD lectura+escritura vía chat; tools de subfases; UI responsive; sync Orval; diseño `DD-AGENT-001` |
+| **Contexto** | Extensión de PR-IMPL-013 (tool calling) + FSD-UC-022 (estructura proceso). Iteración 2 incluyó hotfixes en sesión: UUID placeholder del LLM, orden subfase duplicado, preview legible de orden. PR #28 mergeado en `main`. |
+| **PR-IMPL vinculado** | [PR-IMPL-024](../../prompts/impl/PR-IMPL-024.md) |
+| **DD vinculado** | [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md) |
+| **FSD / PRD vinculado** | [FSD-UC-022](../../product/uc/FSD-UC-022.md), PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Siguiente iteración (cuando quieras)
+Copiloto solo lectura para CC en su carrera asignada
+Tools de subfases en el agente
+Sincronizar OpenAPI/Orval (pnpm run generate:api) cuando el backend esté levantado
+¿Quieres que documente esto en un DD-AGENT-001 o que afinemos el layout mobile del panel?
+
+Prosigamos con esto
+```
+
+```text
+Agrega la subfase «Evidencia docente» en la Fase 1 con enlace https://umss.edu.bo/ejemplo
+(confirmo → error: Orden de subfase duplicado en la misma fase)
+```
+
+```text
+no seria muy moroso hacer eso?, que pasaria si existen 3 subfases, haria todo eso 3 veces,
+no seria mejor implementar primero una respuesta que diga el ultimo orden que hay y luego
+aplicar el siguiente disponible?
+```
+
+```text
+ya esta funcional, agrega cosas para hacer en un futuro en DD-AGENT-001.md para ir mejorando
+```
+
+```text
+realiza el commit y pr al main
+```
+
+```text
+puedes guardar todo esto en el prompt mapping de sprint 2
+```
+
+### Entradas auxiliares
+
+- [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md)
+- [TOOL-CATALOG.md](../../design/assistant/TOOL-CATALOG.md)
+- [DD-SYS-002 §11](../../design/DD-SYS-002.md)
+- [PR-IMPL-013](../../prompts/impl/PR-IMPL-013.md) (tool calling base)
+- [PR-IMPL-022](../../prompts/impl/PR-IMPL-022.md) (estructura proceso)
+- PR GitHub: https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/pull/28
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/.../AssistantChatContext.java`, `AssistantAgentProfile.java`, `AssistantChatContextFactory.java`, `AssistantStructureLookup.java` |
+| generado | `backend/.../dto/AssistantChatContextDto.java` |
+| generado | `backend/src/test/.../AssistantStructureLookupTest.java` |
+| generado | `frontend/.../PhasesCopilotPanel.tsx`, `usePhasesCopilot.ts` |
+| generado | `frontend/src/api/model/assistantChatContextDto.ts`, `assistantDemoScenarioResponse.ts`, `getStatus1Params.ts` |
+| generado | `docs/design/assistant/DD-AGENT-001.md` |
+| generado | `docs/prompts/impl/PR-IMPL-024.md` |
+| modificado | `AssistantController.java`, `SendChatMessageService.java`, `AssistantToolRegistry.java`, `AssistantToolExecutor.java`, `AssistantKeywordRouter.java`, `AssistantResponseFormatter.java`, `AssistantProcessResolver.java`, `AssistantCapabilitiesCatalog.java`, `AssistantModuleConfig.java` |
+| modificado | `ProcessDetailView.tsx`, `ProcessStructureView.tsx` |
+| modificado | `frontend/src/api/endpoints/assistant-controller/assistant-controller.ts`, `assistantTypes.ts`, Orval models |
+| modificado | `docs/design/assistant/TOOL-CATALOG.md` |
+| modificado | Tests: `AssistantToolRegistryTest`, `SendChatMessageServiceToolLoopTest`, `AssistantToolExecutorTest`, `AssistantControllerToolCallingTest` |
+
+### Cambios realizados
+
+1. **Agente `phases`:** `context.processId` + catálogo de fases en prompt; subset de 4 tools filtradas por rol.
+2. **RBAC CC:** solo `list_process_phases` y `list_process_structure` en copiloto; UI `readOnly`.
+3. **Tools nuevas:** `list_process_structure`, `manage_process_subphase` (CREATE/UPDATE/DELETE con confirmación).
+4. **`AssistantStructureLookup`:** resuelve `UUID_FASE_1`, `phaseOrder`, nombres naturales.
+5. **`SubphaseOrderPlan`:** preview con último orden existente + siguiente disponible (sin reintentos en bucle).
+6. **Frontend:** panel colapsable mobile + sidebar sticky `xl+`; samples filtrados para CC.
+7. **`DD-AGENT-001`:** diseño + backlog P1–P3 (UX confirmación, refresh árbol, KEYWORD CREATE, etc.).
+
+### Validación ejecutada
+
+- [x] `AssistantStructureLookupTest`, `SendChatMessageServiceToolLoopTest`, `AssistantToolRegistryTest` — OK (Maven Docker)
+- [x] `pnpm run lint` + `pnpm run build` — OK
+- [x] `pnpm run generate:api` con backend `:8080` — OK
+- [x] `docker compose build backend` + smoke manual copiloto (CREATE subfase con confirmación) — OK (reportado por solicitante)
+- [x] PR #28 → merge `60cb091` en `main`
+
+### Resultado obtenido
+
+Copiloto de fases operativo en `/procesos/{id}` y `/procesos/{id}/estructura`. CC consulta estructura en su carrera; JD/TD crean subfases vía chat con preview de orden y confirmación. Trazabilidad `FSD-UC-022 + PR-IMPL-013 → DD-AGENT-001 → PR-IMPL-024 → PM-011 → PR #28`.
+
+### Próximos pasos
+
+- [ ] `@dtp-sync` — registrar agente `phases` en DTP §MOD-ASSISTANT
+- [ ] AGENT-UX-01 (P1): botones Confirmar/Cancelar en panel
+- [ ] AGENT-BE-01 (P1): catálogo subfases en prompt
+- [ ] AGENT-QA-01 (P1): E2E CC lectura + JD CREATE subfase
+
+---
+
+## PM-012
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-012 |
 | **Fecha** | 2026-08-08 |
 | **Hora** | 15:40 |
 | **Solicitante** | Tech Lead / User |
@@ -544,12 +964,13 @@ Asegúrate de:
 - [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
 - [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
 
+---
 
-## PM-007
+## PM-013
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-007 |
+| **ID** | PM-013 |
 | **Fecha** | 2026-08-09 |
 | **Solicitante** | Tech Lead / User |
 | **Agente/Entorno** | Antigravity AI |

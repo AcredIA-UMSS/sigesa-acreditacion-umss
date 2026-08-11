@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
+import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessPhaseTree } from './ProcessPhaseTree';
+import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessDetailViewProps {
@@ -22,8 +25,14 @@ function formatDate(iso?: string): string {
 }
 
 export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
+  const { session } = useAuth();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const canEditStructure =
+    (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
+  const canUseCopilot =
+    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
+  const copilotReadOnly = session?.role === 'CC';
 
   return (
     <div className="space-y-6">
@@ -67,7 +76,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
       )}
 
       {!isLoading && !isError && process && (
-        <>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+          <div className="space-y-6">
           <section className="rounded-2xl border border-primary-200/40 bg-gradient-to-r from-primary-600 to-primary-500 p-6 text-body shadow-md">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
@@ -86,16 +96,47 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             </p>
           </section>
 
+          <ProcessResponsibleContainer
+            processId={processId}
+            process={process}
+            onUpdated={refetch}
+          />
+
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
-            <h2 className="text-heading-lg font-semibold text-primary-800">
-              Estructura del proceso
-            </h2>
-            <p className="mt-1 mb-6 text-body-md text-gray-600">
-              Fases y subfases clonadas desde la plantilla, ordenadas por secuencia normativa.
-            </p>
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-heading-lg font-semibold text-primary-800">
+                  Estructura del proceso
+                </h2>
+                <p className="mt-1 text-body-md text-gray-600">
+                  Fases y subfases clonadas desde la plantilla, ordenadas por secuencia normativa.
+                </p>
+              </div>
+              {canEditStructure && (
+                <Link to={`/procesos/${processId}/estructura`}>
+                  <Button variant="secondary">
+                    <Pencil size={16} />
+                    Editar estructura
+                  </Button>
+                </Link>
+              )}
+            </div>
             <ProcessPhaseTree phases={process.phases ?? []} />
           </section>
-        </>
+          </div>
+
+          {canUseCopilot && (
+            <PhasesCopilotPanel
+              readOnly={copilotReadOnly}
+              process={{
+                processId,
+                careerName: process.careerName ?? 'Carrera',
+                careerCode: process.careerCode ?? '—',
+                templateType: process.templateType ?? 'CEUB',
+              }}
+            />
+          )}
+        </div>
       )}
     </div>
   );

@@ -115,7 +115,7 @@ security:
 | **401** | `UNAUTHORIZED` — sin JWT o token inválido |
 | **403** | Rol distinto de JD |
 | **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
-| **Tool asistente** | `list_users` — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
+| **Tool asistente** | `list_users`, `set_user_status` (solo JD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
 
 ### API-CAT-01 — `GET /programs`
 
@@ -171,8 +171,149 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-019 |
 | **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
-| **200** | `ProcessResponseDto` enriquecido con árbol Fase → Subfase ordenado por `order` |
+| **200** | `ProcessResponseDto` enriquecido con árbol Fase → Subfase ordenado por `order` (incluye `referenceUrl` por subfase) y `responsibleUser` opcional (UC-023) |
 | **404** | `PROCESS_NOT_FOUND` — ID inexistente o [CC] fuera de `programScope` |
+
+### API-PROC-05 — `POST /processes/{processId}/phases`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-022 |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
+| **Body** | `{ "name", "order", "description?" }` |
+| **201** | Fase creada en proceso ACTIVE |
+| **409** | `PROCESS_NOT_EDITABLE` |
+| **Tool asistente** | `manage_process_phase` (JD, TD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
+
+### API-PROC-06 — `PUT /processes/{processId}/phases/{phaseId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-022 |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
+| **Body** | `{ "name?", "order?", "description?" }` |
+| **200** | Fase actualizada |
+
+### API-PROC-07 — `DELETE /processes/{processId}/phases/{phaseId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-022 |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
+| **204** | Fase eliminada si subfases elegibles |
+| **409** | `SUBPHASE_HAS_EVIDENCE` |
+
+### API-PROC-08 — CRUD subfases bajo fase
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-022 |
+| **Rutas** | `POST/PUT/DELETE /processes/{processId}/phases/{phaseId}/subphases[/{subphaseId}]` |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
+| **Body subfase** | `{ "name", "order", "referenceUrl", "description?" }` |
+| **400** | `SUBPHASE_LINK_REQUIRED` |
+| **409** | `SUBPHASE_HAS_EVIDENCE` / `PROCESS_NOT_EDITABLE` |
+
+### API-PROC-09 — `PUT /processes/{processId}/responsible`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-023 |
+| **x-allowed-roles** | `[JD]` |
+| **Body** | `{ "userId": "uuid" }` — [CC] activo, misma carrera, sin otro proceso ACTIVE |
+| **200** | Responsable asignado |
+| **409** | `CC_ALREADY_ASSIGNED_TO_PROCESS` / `CAREER_SCOPE_MISMATCH` |
+
+### API-PROC-10 — `DELETE /processes/{processId}/responsible`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-023 |
+| **x-allowed-roles** | `[JD]` |
+| **204** | Responsable removido; [CC] disponible para otro proceso |
+
+### API-PROC-11 — `GET /processes/{processId}/responsible/candidates`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-023 |
+| **x-allowed-roles** | `[JD]` |
+| **200** | `[{ userId, fullName, email }]` — [CC] activos de la carrera del proceso sin otro proceso ACTIVE como responsable |
+| **404** | `PROCESS_NOT_FOUND` |
+
+---
+
+## 4.1 MOD-TEMPLATE (plantillas normativas)
+
+### API-TPL-01 — `GET /templates`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **Query** | `status?`, `type?` (`CEUB` \| `ARCU-SUR`) |
+| **200** | `[{ id, name, description, type, status, phaseCount, subphaseCount }]` |
+
+### API-TPL-02 — `POST /templates`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **Body** | `{ "name", "description?", "type", "phases": [{ "name", "order", "description?", "subphases": [{ "name", "order", "referenceUrl", "description?" }] }] }` |
+| **201** | Plantilla `DRAFT` creada |
+| **400** | `TEMPLATE_SUBPHASE_LINK_REQUIRED` / `TEMPLATE_STRUCTURE_INCOMPLETE` |
+
+### API-TPL-03 — `GET /templates/{templateId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **200** | Plantilla con árbol completo fases/subfases y enlaces |
+
+### API-TPL-04 — `PUT /templates/{templateId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **Body** | Metadatos y/o árbol (misma forma que POST) |
+| **200** | Plantilla actualizada (FSD-BR-21) |
+
+### API-TPL-05 — `DELETE /templates/{templateId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **204** | Eliminación lógica o archivado |
+| **409** | `TEMPLATE_IN_USE` — usar archivar |
+
+### API-TPL-06 — `POST /templates/{templateId}/publish`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **200** | `status = PUBLISHED`; disponible en UC-003 |
+
+### API-TPL-07 — `POST /templates/{templateId}/duplicate`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **x-allowed-roles** | `[JD]` |
+| **201** | Copia `DRAFT` con misma estructura |
+
+### API-TPL-08 — CRUD fases/subfases en plantilla `DRAFT`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-021 |
+| **Rutas** | `POST/PUT/DELETE /templates/{templateId}/phases[/{phaseId}/subphases[/{subphaseId}]]` |
+| **x-allowed-roles** | `[JD]` |
+| **400** | `TEMPLATE_ORDER_CONFLICT` / `TEMPLATE_SUBPHASE_LINK_REQUIRED` |
 
 ---
 

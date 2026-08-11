@@ -5,6 +5,7 @@
  * OpenAPI spec version: v0
  */
 import type { PhaseDto } from './phaseDto.ts';
+import type { ProcessResponsibleDto } from './processResponsibleDto.ts';
 
 export interface ProcessResponseDto {
   id?: string;
@@ -17,4 +18,5 @@ export interface ProcessResponseDto {
   status?: string;
   startDate?: string;
   phases?: PhaseDto[];
+  responsible?: ProcessResponsibleDto;
 }

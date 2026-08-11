@@ -7,7 +7,7 @@ actor_principal: "[JD], [TD], [CC]"
 trazabilidad_prd: PRD-US-023, PRD-US-012
 modulo: MOD-PROCESS
 reglas: FSD-BR-09, FSD-BR-17
-ultima_actualizacion: "2026-08-03"
+ultima_actualizacion: "2026-08-07"
 ---
 
 # FSD-UC-019 — Consulta de procesos de acreditación
@@ -102,9 +102,11 @@ Alineado al DTO existente `ProcessResponseDto` (POST create) extendido con datos
 
 ## Fuera de alcance (v1.0)
 
-- Edición de fases/subfases desde esta pantalla (ver FSD-UC-010).
+- Edición de fases/subfases → [FSD-UC-022](FSD-UC-022.md).
+- Gestión de plantillas normativas → [FSD-UC-021](FSD-UC-021.md).
+- Asignación de responsable [CC] → [FSD-UC-023](FSD-UC-023.md).
+- Cierre/avance de fase por workflow → [FSD-UC-010](FSD-UC-010.md).
 - Indicadores y evidencias por subfase (UC-004 en adelante).
-- Acciones de cierre/aprobación de fase.
 - Paginación/filtros avanzados en listado (v1.1).
 
 ## Diagramas

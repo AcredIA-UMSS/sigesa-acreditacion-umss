@@ -65,7 +65,7 @@ class ProcessControllerQueryTest {
         when(userProgramAssignmentRepositoryPort.findActiveByUserId(any())).thenReturn(List.of());
         when(listProcessesUseCase.list(any())).thenReturn(List.of(
                 new ProcessSummary(processId, careerId, "INF-SIS", "Ingeniería de Sistemas",
-                        templateId, "CEUB 2026", "CEUB", "ACTIVE", LocalDateTime.now(), 2, 5)
+                        templateId, "CEUB 2026", "CEUB", "ACTIVE", LocalDateTime.now(), 2, 5, null)
         ));
 
         mockMvc.perform(get("/api/v1/processes"))
@@ -113,7 +113,8 @@ class ProcessControllerQueryTest {
                                         .name("Diagnóstico")
                                         .order(1)
                                         .build()))
-                                .build())
+                                .build()),
+                        null
                 )
         );
 

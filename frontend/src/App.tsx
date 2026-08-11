@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { JdOrTdRoute } from './components/auth/JdOrTdRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
 import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
+import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { CreateProcessPage } from './features/accreditation-process';
-import { ProcessListPage, ProcessDetailPage } from './features/processes';
+import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
@@ -23,6 +25,39 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplatesListPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas/nueva"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplateEditorPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas/:templateId"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplateEditorPage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -54,6 +89,17 @@ function App() {
           element={
             <ProtectedRoute>
               <ProcessListPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId/estructura"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <ProcessStructurePage />
+              </JdOrTdRoute>
             </ProtectedRoute>
           }
         />

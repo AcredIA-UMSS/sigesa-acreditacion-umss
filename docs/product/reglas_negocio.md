@@ -22,10 +22,11 @@
 | Autorización | BR-04, BR-09, BR-12, BR-19 |
 | Trazabilidad | BR-06, BR-15 |
 | Estado | BR-07 |
-| Negocio | BR-08, BR-17 |
+| Negocio | BR-08, BR-17, BR-20, BR-21 |
 | SLA | BR-13 |
 | Ética | BR-11 |
 | Alcance | BR-16 |
+| Estructura | BR-22, BR-23 |
 
 ---
 
@@ -269,6 +270,58 @@
 
 ---
 
+### FSD-BR-20 — Un [CC] responsable por proceso activo
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Negocio |
+| **Origen BRD** | BRD-REQ-002 |
+| **UC** | UC-023 |
+| **Enunciado** | Un Coordinador [CC] solo puede ser **responsable** de **un** `AccreditationProcess` en estado `ACTIVE` a la vez. Un proceso `ACTIVE` tiene como máximo un responsable [CC]. |
+| **Violación** | `409 CC_ALREADY_ASSIGNED_TO_PROCESS` |
+| **Verificación** | Tests de asignación doble; UI filtra candidatos no disponibles. |
+
+---
+
+### FSD-BR-21 — Plantilla editada no migra procesos en curso
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Negocio |
+| **Origen BRD** | BRD-REQ-004 |
+| **UC** | UC-003, UC-021, UC-022 |
+| **Enunciado** | Cambios en plantilla normativa o estructura editorial no alteran retroactivamente procesos ya instanciados; solo afectan **nuevos** procesos o instancias editadas explícitamente vía UC-022. |
+| **Violación** | N/A (regla preventiva de diseño) |
+| **Verificación** | Test: editar plantilla PUBLISHED no cambia árbol de proceso ACTIVE existente. |
+
+---
+
+### FSD-BR-22 — Borrado estructural condicionado
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Estructura |
+| **Origen BRD** | BRD-REQ-004 |
+| **UC** | UC-022 |
+| **Enunciado** | No se puede eliminar una **subfase** de proceso si tiene indicadores con evidencia en workflow iniciado (estado ≠ vacío/`PENDIENTE` sin carga). No se elimina **fase** si alguna subfase bloquea. |
+| **Violación** | `409 SUBPHASE_HAS_EVIDENCE` |
+| **Verificación** | Tests delete subfase con evidencia SUBIDA/OBSERVADA/APROBADA. |
+
+---
+
+### FSD-BR-23 — Gestión normativa solo [JD]
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Autorización |
+| **Origen BRD** | BRD-REQ-004 |
+| **UC** | UC-021, UC-022, UC-023 |
+| **Enunciado** | Crear/editar/eliminar plantillas, estructura de proceso instanciado y asignación de responsable [CC] es exclusivo de Jefatura DUEA [JD]. |
+| **Violación** | `403 FORBIDDEN_ROLE` |
+| **Verificación** | Tests security TD/CC en endpoints TPL y PROC estructura. |
+
+---
+
 ## Matriz regla → UC
 
 | Regla | UC aplicables |
@@ -281,13 +334,18 @@
 | BR-06 | 006 |
 | BR-07 | 010 |
 | BR-08 | 003 |
-| BR-09 | 007, 011, 019 |
+| BR-09 | 007, 011, 019, 023 |
 | BR-10 | 016 |
 | BR-12 | 001, 002 |
 | BR-13 | 015 |
 | BR-14 | 014 |
+| BR-17 | 003 |
 | BR-18 | 004 |
-| BR-19 | 019 |
+| BR-19 | 019, 020 |
+| BR-20 | 023 |
+| BR-21 | 003, 021, 022 |
+| BR-22 | 022 |
+| BR-23 | 021, 022, 023 |
 
 ---
 
@@ -296,3 +354,4 @@
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
 | Dorada v1.0 | 2026-05-16 | Extracción y detalle de 18 reglas desde FSD.md |
+| v1.1 | 2026-08-07 | BR-20…23 para plantillas, estructura de proceso y responsable [CC] (UC-021…023) |

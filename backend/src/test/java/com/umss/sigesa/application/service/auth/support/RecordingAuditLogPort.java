@@ -27,6 +27,11 @@ public class RecordingAuditLogPort implements AuditLogPort {
     }
 
     @Override
+    public void logUserActivated(UUID userId, Email email) {
+        events.add("ACTIVATE:" + userId);
+    }
+
+    @Override
     public void logReportRequested(UUID requesterId, UUID jobId) {
         events.add("REPORT:" + requesterId + ":" + jobId);
     }

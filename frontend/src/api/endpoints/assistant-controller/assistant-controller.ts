@@ -10,6 +10,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AssistantAgentId,
   AssistantStatusResponse,
   SendChatMessageRequest,
   SendChatMessageResponse,
@@ -18,12 +19,15 @@ import { customFetch } from '../../../lib/api/customFetch';
 
 type FetchEnvelope<T> = { data: T };
 
-export const getAssistantStatusUrl = () => '/api/v1/assistant/status';
+export const getAssistantStatusUrl = (agent?: AssistantAgentId) =>
+  agent ? `/api/v1/assistant/status?agent=${agent}` : '/api/v1/assistant/status';
 export const getAssistantChatUrl = () => '/api/v1/assistant/chat';
 
-export const fetchAssistantStatus = async (): Promise<AssistantStatusResponse> => {
+export const fetchAssistantStatus = async (
+  agent?: AssistantAgentId,
+): Promise<AssistantStatusResponse> => {
   const response = await customFetch<FetchEnvelope<AssistantStatusResponse>>(
-    getAssistantStatusUrl(),
+    getAssistantStatusUrl(agent),
     { method: 'GET' },
   );
   return response.data;
@@ -43,11 +47,12 @@ export const sendChatMessage = async (
 };
 
 export const useAssistantStatus = (
+  agent?: AssistantAgentId,
   options?: Omit<UseQueryOptions<AssistantStatusResponse, Error>, 'queryKey' | 'queryFn'>,
 ): UseQueryResult<AssistantStatusResponse, Error> =>
   useQuery({
-    queryKey: ['assistantStatus'],
-    queryFn: fetchAssistantStatus,
+    queryKey: ['assistantStatus', agent ?? 'general'],
+    queryFn: () => fetchAssistantStatus(agent),
     staleTime: 60_000,
     ...options,
   });
