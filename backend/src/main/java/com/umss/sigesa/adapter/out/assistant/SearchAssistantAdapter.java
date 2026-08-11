@@ -57,9 +57,17 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                                 "type", "string",
                                 "description", "Término limpio extraído de la búsqueda para usar en la consulta de texto."
                         ),
-                        "anio", Map.of(
-                                "type", "integer",
-                                "description", "Año opcional extraído de la búsqueda (ej: 2024, 2025)."
+                        "criterioCodigo", Map.of(
+                                "type", "string",
+                                "description", "Código oficial de criterio si se menciona (ej: CRT-04, CRT-01)."
+                        ),
+                        "fechaInicio", Map.of(
+                                "type", "string",
+                                "description", "Fecha de inicio opcional en formato ISO-8601 (YYYY-MM-DD)."
+                        ),
+                        "fechaFin", Map.of(
+                                "type", "string",
+                                "description", "Fecha de fin opcional en formato ISO-8601 (YYYY-MM-DD)."
                         )
                 ),
                 "required", List.of("termino")
@@ -92,9 +100,9 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                     result.put("routingPath", "LLM");
                     result.put("termino", args.path("termino").asText());
                     result.put("dimension", args.path("dimension").asText(null));
-                    if (args.has("anio") && !args.path("anio").isNull()) {
-                        result.put("anio", String.valueOf(args.path("anio").asInt()));
-                    }
+                    result.put("criterioCodigo", args.path("criterioCodigo").asText(null));
+                    result.put("fechaInicio", args.path("fechaInicio").asText(null));
+                    result.put("fechaFin", args.path("fechaFin").asText(null));
                     return result;
                 }
             }

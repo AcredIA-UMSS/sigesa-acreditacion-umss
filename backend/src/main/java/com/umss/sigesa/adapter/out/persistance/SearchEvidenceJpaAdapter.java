@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.umss.sigesa.application.model.evidence.SearchFilters;
+
 @Component
 public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
 
@@ -25,7 +27,7 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         return lastSql.get();
     }
 
-    private void saveExecutedSql(String jpql, String termino, String dimension, Integer anio, List<UUID> programScope) {
+    private void saveExecutedSql(String jpql, SearchFilters filters, List<UUID> programScope) {
         String sql = jpql
                 .replace("EvidenceVersionEntity ev", "evidence_version ev")
                 .replace("EvidenceEntity e", "evidence e")
@@ -42,20 +44,28 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         if (programScope != null) {
             sql = sql.replace(":programScope", programScope.toString());
         }
-        if (dimension != null) {
-            sql = sql.replace(":matchingCriteria", getCriteriaForDimension(dimension).toString());
-        }
-        if (termino != null) {
-            sql = sql.replace(":term", "'%" + termino + "%'");
-        }
-        if (anio != null) {
-            sql = sql.replace(":anio", anio.toString());
+        if (filters != null) {
+            if (filters.getDimension() != null) {
+                sql = sql.replace(":matchingCriteria", getCriteriaForDimension(filters.getDimension()).toString());
+            }
+            if (filters.getTermino() != null) {
+                sql = sql.replace(":term", "'%" + filters.getTermino() + "%'");
+            }
+            if (filters.getCriterioCodigo() != null) {
+                sql = sql.replace(":critCode", "'" + filters.getCriterioCodigo() + "'");
+            }
+            if (filters.getFechaInicio() != null) {
+                sql = sql.replace(":fechaInicio", "'" + filters.getFechaInicio() + "'");
+            }
+            if (filters.getFechaFin() != null) {
+                sql = sql.replace(":fechaFin", "'" + filters.getFechaFin() + "'");
+            }
         }
         lastSql.set(sql);
     }
 
     @Override
-    public List<EvidenceSearchDetailDto> executeSearch(String termino, String dimension, Integer anio, List<UUID> programScope) {
+    public List<EvidenceSearchDetailDto> executeSearch(SearchFilters filters, List<UUID> programScope) {
         StringBuilder jpql = new StringBuilder(
                 "SELECT ev.id, ev.storageKey, ev.description, ev.criterionId, p.name, ev.createdAt " +
                 "FROM EvidenceVersionEntity ev " +
@@ -72,20 +82,30 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
             jpql.append(" AND ind.programId IN :programScope");
         }
 
-        if (dimension != null && !dimension.strip().isEmpty()) {
-            List<UUID> matchingCriteria = getCriteriaForDimension(dimension);
-            if (matchingCriteria.isEmpty()) {
-                return List.of();
+        if (filters != null) {
+            if (filters.getDimension() != null && !filters.getDimension().strip().isEmpty()) {
+                List<UUID> matchingCriteria = getCriteriaForDimension(filters.getDimension());
+                if (matchingCriteria.isEmpty()) {
+                    return List.of();
+                }
+                jpql.append(" AND ev.criterionId IN :matchingCriteria");
             }
-            jpql.append(" AND ev.criterionId IN :matchingCriteria");
-        }
 
-        if (termino != null && !termino.strip().isEmpty()) {
-            jpql.append(" AND (LOWER(ev.description) LIKE :term OR LOWER(ev.storageKey) LIKE :term)");
-        }
+            if (filters.getTermino() != null && !filters.getTermino().strip().isEmpty()) {
+                jpql.append(" AND (LOWER(ev.description) LIKE :term OR LOWER(ev.storageKey) LIKE :term)");
+            }
 
-        if (anio != null) {
-            jpql.append(" AND YEAR(ev.createdAt) = :anio");
+            if (filters.getCriterioCodigo() != null && !filters.getCriterioCodigo().strip().isEmpty()) {
+                jpql.append(" AND ev.criterionId IN (SELECT c.id FROM EvaluationCriterionEntity c WHERE LOWER(c.code) = LOWER(:critCode))");
+            }
+
+            if (filters.getFechaInicio() != null) {
+                jpql.append(" AND ev.createdAt >= :fechaInicio");
+            }
+
+            if (filters.getFechaFin() != null) {
+                jpql.append(" AND ev.createdAt <= :fechaFin");
+            }
         }
 
         TypedQuery<Object[]> query = entityManager.createQuery(jpql.toString(), Object[].class);
@@ -93,17 +113,25 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         if (programScope != null && !programScope.isEmpty()) {
             query.setParameter("programScope", programScope);
         }
-        if (dimension != null && !dimension.strip().isEmpty()) {
-            query.setParameter("matchingCriteria", getCriteriaForDimension(dimension));
-        }
-        if (termino != null && !termino.strip().isEmpty()) {
-            query.setParameter("term", "%" + termino.toLowerCase() + "%");
-        }
-        if (anio != null) {
-            query.setParameter("anio", anio);
+        if (filters != null) {
+            if (filters.getDimension() != null && !filters.getDimension().strip().isEmpty()) {
+                query.setParameter("matchingCriteria", getCriteriaForDimension(filters.getDimension()));
+            }
+            if (filters.getTermino() != null && !filters.getTermino().strip().isEmpty()) {
+                query.setParameter("term", "%" + filters.getTermino().toLowerCase() + "%");
+            }
+            if (filters.getCriterioCodigo() != null && !filters.getCriterioCodigo().strip().isEmpty()) {
+                query.setParameter("critCode", filters.getCriterioCodigo().toLowerCase());
+            }
+            if (filters.getFechaInicio() != null) {
+                query.setParameter("fechaInicio", filters.getFechaInicio().atStartOfDay());
+            }
+            if (filters.getFechaFin() != null) {
+                query.setParameter("fechaFin", filters.getFechaFin().atTime(23, 59, 59));
+            }
         }
 
-        saveExecutedSql(jpql.toString(), termino, dimension, anio, programScope);
+        saveExecutedSql(jpql.toString(), filters, programScope);
         List<Object[]> rows = query.getResultList();
         List<EvidenceSearchDetailDto> results = new ArrayList<>();
 

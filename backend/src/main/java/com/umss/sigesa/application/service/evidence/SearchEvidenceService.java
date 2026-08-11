@@ -9,9 +9,11 @@ import com.umss.sigesa.application.port.out.AssistantQueryPort;
 import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
 import com.umss.sigesa.config.AssistantProperties;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import com.umss.sigesa.application.model.evidence.SearchFilters;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,21 +59,38 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
             cleanQuery = cleanQuery.replace(yearMatcher.group(), "").replaceAll("\\s+", " ").trim();
         }
 
+        LocalDate start = (detectedYear != null) ? LocalDate.of(detectedYear, 1, 1) : null;
+        LocalDate end = (detectedYear != null) ? LocalDate.of(detectedYear, 12, 31) : null;
+
         // Si la query es vacía, retornamos todos los objetos accesibles
         if (cleanQuery.isEmpty()) {
-            List<EvidenceSearchDetailDto> results = queryPort.executeSearch(null, null, detectedYear, effectiveScope);
+            SearchFilters filters = SearchFilters.builder()
+                    .fechaInicio(start)
+                    .fechaFin(end)
+                    .build();
+            List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
             return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
         }
 
         // Escenario 1.1: Catálogo dinámico de dimensiones de acreditación
         String matchedDimension = matchKeywordCatalog(cleanQuery);
         if (matchedDimension != null) {
-            List<EvidenceSearchDetailDto> results = queryPort.executeSearch(null, matchedDimension, detectedYear, effectiveScope);
+            SearchFilters filters = SearchFilters.builder()
+                    .dimension(matchedDimension)
+                    .fechaInicio(start)
+                    .fechaFin(end)
+                    .build();
+            List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
             return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
         }
 
         // Escenario 1.2: Búsqueda clásica directa (si encuentra datos con ILIKE la primera vez, los retorna y salta el LLM)
-        List<EvidenceSearchDetailDto> directResults = queryPort.executeSearch(cleanQuery, null, detectedYear, effectiveScope);
+        SearchFilters directFilters = SearchFilters.builder()
+                .termino(cleanQuery)
+                .fechaInicio(start)
+                .fechaFin(end)
+                .build();
+        List<EvidenceSearchDetailDto> directResults = queryPort.executeSearch(directFilters, effectiveScope);
         if (!directResults.isEmpty()) {
             return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
         }
@@ -99,14 +118,30 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
 
                 String termino = routingResult.get("termino");
                 String dimension = routingResult.get("dimension");
-                Integer anioVal = null;
-                if (routingResult.containsKey("anio") && routingResult.get("anio") != null) {
-                    try {
-                        anioVal = Integer.parseInt(routingResult.get("anio"));
-                    } catch (NumberFormatException ignored) {}
-                }
+                String criterioCodigo = routingResult.get("criterioCodigo");
+                String fechaInicioStr = routingResult.get("fechaInicio");
+                String fechaFinStr = routingResult.get("fechaFin");
 
-                List<EvidenceSearchDetailDto> results = queryPort.executeSearch(termino, dimension, anioVal, effectiveScope);
+                LocalDate fInicio = null;
+                LocalDate fFin = null;
+                try {
+                    if (fechaInicioStr != null && !fechaInicioStr.strip().isEmpty()) {
+                        fInicio = LocalDate.parse(fechaInicioStr.strip());
+                    }
+                    if (fechaFinStr != null && !fechaFinStr.strip().isEmpty()) {
+                        fFin = LocalDate.parse(fechaFinStr.strip());
+                    }
+                } catch (Exception ignored) {}
+
+                SearchFilters llmFilters = SearchFilters.builder()
+                        .termino(termino)
+                        .dimension(dimension)
+                        .criterioCodigo(criterioCodigo)
+                        .fechaInicio(fInicio)
+                        .fechaFin(fFin)
+                        .build();
+
+                List<EvidenceSearchDetailDto> results = queryPort.executeSearch(llmFilters, effectiveScope);
                 return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
             } catch (Exception e) {
                 // Fallback elegante en caso de falla de la IA: reutilizamos la búsqueda tradicional ILIKE directa
