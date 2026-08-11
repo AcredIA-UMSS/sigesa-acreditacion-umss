@@ -7,6 +7,7 @@ public record AssistantStatusResponse(
         boolean llmEnabled,
         String model,
         List<String> capabilities,
-        List<AssistantDemoScenarioResponse> demoScenarios
+        List<AssistantDemoScenarioResponse> demoScenarios,
+        String agent
 ) {
 }

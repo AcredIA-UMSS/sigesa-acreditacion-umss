@@ -6,6 +6,8 @@
  */
 
 export * from './assignResponsibleRequestDto.ts';
+export * from './assistantChatContextDto.ts';
+export * from './assistantDemoScenarioResponse.ts';
 export * from './assistantStatusResponse.ts';
 export * from './bottleneckSummary.ts';
 export * from './chatMessageDto.ts';
@@ -20,6 +22,7 @@ export * from './exportJobRequest.ts';
 export * from './exportJobResponse.ts';
 export * from './generateExecutiveReportRequest.ts';
 export * from './getCoordinatorDetailsParams.ts';
+export * from './getStatus1Params.ts';
 export * from './jobStatusResponse.ts';
 export * from './list1Params.ts';
 export * from './listParams.ts';

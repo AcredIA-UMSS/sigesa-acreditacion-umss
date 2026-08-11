@@ -3,8 +3,10 @@ package com.umss.sigesa.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
+import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
@@ -12,8 +14,10 @@ import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
+import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantKeywordRouter;
 import com.umss.sigesa.application.service.assistant.AssistantToolExecutor;
 import com.umss.sigesa.application.service.assistant.AssistantToolRegistry;
@@ -43,6 +47,9 @@ public class AssistantModuleConfig {
                                                 AddProcessPhaseUseCase addProcessPhaseUseCase,
                                                 UpdateProcessPhaseUseCase updateProcessPhaseUseCase,
                                                 DeleteProcessPhaseUseCase deleteProcessPhaseUseCase,
+                                                AddProcessSubphaseUseCase addProcessSubphaseUseCase,
+                                                UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
+                                                DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
                                                 ReorderProcessStructureUseCase reorderProcessStructureUseCase) {
         return new AssistantToolExecutor(
                 assistantToolRegistry,
@@ -56,9 +63,17 @@ public class AssistantModuleConfig {
                 addProcessPhaseUseCase,
                 updateProcessPhaseUseCase,
                 deleteProcessPhaseUseCase,
+                addProcessSubphaseUseCase,
+                updateProcessSubphaseUseCase,
+                deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
                 new ObjectMapper()
         );
+    }
+
+    @Bean
+    AssistantChatContextFactory assistantChatContextFactory(GetProcessDetailUseCase getProcessDetailUseCase) {
+        return new AssistantChatContextFactory(getProcessDetailUseCase);
     }
 
     @Bean

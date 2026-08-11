@@ -56,6 +56,12 @@ class AssistantToolExecutorTest {
     @Mock
     private DeleteProcessPhaseUseCase deleteProcessPhaseUseCase;
     @Mock
+    private com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase addProcessSubphaseUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase;
+    @Mock
     private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
 
     private AssistantToolExecutor executor;
@@ -75,6 +81,9 @@ class AssistantToolExecutorTest {
                 addProcessPhaseUseCase,
                 updateProcessPhaseUseCase,
                 deleteProcessPhaseUseCase,
+                addProcessSubphaseUseCase,
+                updateProcessSubphaseUseCase,
+                deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
                 objectMapper
         );

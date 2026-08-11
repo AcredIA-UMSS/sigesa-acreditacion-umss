@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.service.assistant;
 
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantToolInvocation;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
@@ -39,9 +40,27 @@ public class AssistantKeywordRouter {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "([a-z0-9._%+-]+@umss\\.edu\\.bo)", Pattern.CASE_INSENSITIVE);
 
+    /** Preguntas contextuales en copiloto de fases (sin nombrar carrera). */
+    private static final Pattern CONTEXTUAL_PHASES_PATTERN = Pattern.compile(
+            "(?is).*(list(a|ar|ame|arme)?\\s+(todas\\s+)?(las\\s+)?fases|"
+                    + "fases\\s+(del\\s+)?proceso|cu[aá]ntas\\s+fases|"
+                    + "etapas\\s+(del\\s+)?proceso|list(a|ar|ame)?\\s+(las\\s+)?etapas).*");
+
+    private static final Pattern CONTEXTUAL_STRUCTURE_PATTERN = Pattern.compile(
+            "(?is).*(estructura\\s+(completa|del\\s+proceso)|"
+                    + "list(a|ar|ame)?\\s+(las\\s+)?subfases|subfases\\s+(del\\s+)?proceso|"
+                    + "enlaces?\\s+(de\\s+)?(las\\s+)?subfases|árbol\\s+de\\s+fases).*");
+
     public Optional<AssistantToolInvocation> resolve(String userMessage,
                                                      List<ChatMessage> history,
                                                      AssistantAuthContext auth) {
+        return resolve(userMessage, history, auth, AssistantChatContext.general());
+    }
+
+    public Optional<AssistantToolInvocation> resolve(String userMessage,
+                                                     List<ChatMessage> history,
+                                                     AssistantAuthContext auth,
+                                                     AssistantChatContext chatContext) {
         if (userMessage == null || userMessage.isBlank() || auth == null) {
             return Optional.empty();
         }
@@ -55,11 +74,26 @@ public class AssistantKeywordRouter {
         }
 
         if ("JD".equals(role) || "TD".equals(role)) {
-            if (ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
+            if (!chatContext.isPhasesAgent() && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildActiveProcessesInvocation(message));
             }
             if (PHASES_PATTERN.matcher(message).matches()) {
-                return Optional.of(buildPhasesInvocation(message));
+                return Optional.of(buildPhasesInvocation(message, chatContext));
+            }
+        }
+
+        if ("JD".equals(role) || "TD".equals(role) || "CC".equals(role)) {
+            if (chatContext.isPhasesAgent()
+                    && chatContext.careerName() != null
+                    && !chatContext.careerName().isBlank()
+                    && CONTEXTUAL_STRUCTURE_PATTERN.matcher(message).matches()) {
+                return Optional.of(buildStructureInvocationFromContext(chatContext));
+            }
+            if (chatContext.isPhasesAgent()
+                    && chatContext.careerName() != null
+                    && !chatContext.careerName().isBlank()
+                    && CONTEXTUAL_PHASES_PATTERN.matcher(message).matches()) {
+                return Optional.of(buildPhasesInvocationFromContext(chatContext));
             }
         }
 
@@ -110,7 +144,12 @@ public class AssistantKeywordRouter {
                 buildJsonArgs(parsed.careerQuery(), parsed.templateType()));
     }
 
-    private AssistantToolInvocation buildPhasesInvocation(String message) {
+    private AssistantToolInvocation buildPhasesInvocation(String message, AssistantChatContext chatContext) {
+        if (chatContext.isPhasesAgent()
+                && chatContext.careerName() != null
+                && !chatContext.careerName().isBlank()) {
+            return buildPhasesInvocationFromContext(chatContext);
+        }
         String careerQuery = extractCareerFromPhasesQuestion(message);
         if (careerQuery == null || careerQuery.isBlank()) {
             careerQuery = "Ingeniería de Sistemas";
@@ -120,6 +159,28 @@ public class AssistantKeywordRouter {
                 parsed.careerQuery() != null ? parsed.careerQuery() : careerQuery,
                 parsed.templateType());
         return new AssistantToolInvocation(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, args);
+    }
+
+    private AssistantToolInvocation buildPhasesInvocationFromContext(AssistantChatContext chatContext) {
+        String templateType = chatContext.templateType();
+        String careerQuery = chatContext.careerName();
+        if (careerQuery == null || careerQuery.isBlank()) {
+            careerQuery = chatContext.careerCode();
+        }
+        return new AssistantToolInvocation(
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                buildJsonArgs(careerQuery, templateType));
+    }
+
+    private AssistantToolInvocation buildStructureInvocationFromContext(AssistantChatContext chatContext) {
+        String templateType = chatContext.templateType();
+        String careerQuery = chatContext.careerName();
+        if (careerQuery == null || careerQuery.isBlank()) {
+            careerQuery = chatContext.careerCode();
+        }
+        return new AssistantToolInvocation(
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
+                buildJsonArgs(careerQuery, templateType));
     }
 
     private static AssistantToolInvocation buildSetUserStatusInvocation(String identifier,

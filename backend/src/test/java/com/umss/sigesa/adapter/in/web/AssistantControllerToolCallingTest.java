@@ -2,10 +2,12 @@ package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.config.AssistantProperties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,11 +42,18 @@ class AssistantControllerToolCallingTest {
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
 
+    @Mock
+    private AssistantChatContextFactory chatContextFactory;
+
     private AssistantController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new AssistantController(sendChatMessageUseCase, assistantProperties, assignmentRepository);
+        controller = new AssistantController(
+                sendChatMessageUseCase,
+                assistantProperties,
+                assignmentRepository,
+                chatContextFactory);
     }
 
     @AfterEach
@@ -61,16 +70,18 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_JD"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn(
+        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
+        when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 new AssistantChatResult("Respuesta del asistente.", "list_users", List.of("app_user"),
                         AssistantResolutionPath.KEYWORD, false));
 
-        ResponseEntity<?> response = controller.chat(new SendChatMessageRequest("¿Qué usuarios tenemos?", null));
+        ResponseEntity<?> response = controller.chat(new SendChatMessageRequest("¿Qué usuarios tenemos?", null, null));
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
 
         ArgumentCaptor<AssistantAuthContext> authCaptor = ArgumentCaptor.forClass(AssistantAuthContext.class);
-        verify(sendChatMessageUseCase).send(eq("¿Qué usuarios tenemos?"), any(), authCaptor.capture());
+        verify(sendChatMessageUseCase).send(
+                eq("¿Qué usuarios tenemos?"), any(), authCaptor.capture(), any());
         assertThat(authCaptor.getValue().role()).isEqualTo("JD");
         assertThat(authCaptor.getValue().userId()).isEqualTo(userId);
     }
@@ -84,13 +95,14 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_CC"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(sendChatMessageUseCase.send(any(), any(), any())).thenReturn(
+        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
+        when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 AssistantChatResult.outOfScope("No puedo listar usuarios."));
 
-        controller.chat(new SendChatMessageRequest("Lista usuarios", null));
+        controller.chat(new SendChatMessageRequest("Lista usuarios", null, null));
 
         ArgumentCaptor<AssistantAuthContext> authCaptor = ArgumentCaptor.forClass(AssistantAuthContext.class);
-        verify(sendChatMessageUseCase).send(any(), any(), authCaptor.capture());
+        verify(sendChatMessageUseCase).send(any(), any(), authCaptor.capture(), any());
         assertThat(authCaptor.getValue().role()).isEqualTo("CC");
     }
 }

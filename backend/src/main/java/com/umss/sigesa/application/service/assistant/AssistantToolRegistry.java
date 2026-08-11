@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.assistant;
 
+import com.umss.sigesa.application.model.assistant.AssistantAgentProfile;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
 
 import java.util.LinkedHashMap;
@@ -13,12 +14,15 @@ public class AssistantToolRegistry {
     static final String LIST_USERS_ID = "list_users";
     static final String LIST_PROGRAMS_ID = "list_programs";
     static final String LIST_PROCESS_PHASES_ID = "list_process_phases";
+    static final String LIST_PROCESS_STRUCTURE_ID = "list_process_structure";
     static final String SET_USER_STATUS_ID = "set_user_status";
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
     static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
+    static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
 
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
+    private static final Set<String> JD_TD_AND_CC = Set.of("JD", "TD", "CC");
 
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
@@ -40,8 +44,19 @@ public class AssistantToolRegistry {
     private static final AssistantToolDefinition LIST_PROCESS_PHASES = new AssistantToolDefinition(
             LIST_PROCESS_PHASES_ID,
             "Lista las fases del proceso de acreditación ACTIVO de una carrera, ordenadas por campo order. "
-                    + "JD y TD. Indica careerQuery (nombre o código). Opcional templateType: CEUB o ARCU-SUR.",
-            JD_AND_TD,
+                    + "JD, TD y CC (solo lectura). Indica careerQuery (nombre o código). "
+                    + "Opcional templateType: CEUB o ARCU-SUR.",
+            JD_TD_AND_CC,
+            "read",
+            listProcessPhasesParameterSchema()
+    );
+
+    private static final AssistantToolDefinition LIST_PROCESS_STRUCTURE = new AssistantToolDefinition(
+            LIST_PROCESS_STRUCTURE_ID,
+            "Lista el árbol completo Fase → Subfase del proceso ACTIVO, incluyendo referenceUrl. "
+                    + "JD, TD y CC (solo lectura). Indica careerQuery (nombre o código). "
+                    + "Opcional templateType: CEUB o ARCU-SUR.",
+            JD_TD_AND_CC,
             "read",
             listProcessPhasesParameterSchema()
     );
@@ -77,13 +92,26 @@ public class AssistantToolRegistry {
             manageProcessPhaseParameterSchema()
     );
 
+    private static final AssistantToolDefinition MANAGE_PROCESS_SUBPHASE = new AssistantToolDefinition(
+            MANAGE_PROCESS_SUBPHASE_ID,
+            "Crea, edita o elimina subfases de una fase en el proceso ACTIVO. JD y TD. "
+                    + "Acciones: CREATE, UPDATE, DELETE. Requiere referenceUrl HTTPS en CREATE/UPDATE. "
+                    + "Indique la fase con phaseOrder (preferido), phaseName o phaseId UUID real (nunca placeholders). "
+                    + "Primero invoca con confirmed=false; solo ejecuta con confirmed=true tras confirmación.",
+            JD_AND_TD,
+            "write",
+            manageProcessSubphaseParameterSchema()
+    );
+
     private final List<AssistantToolDefinition> allTools = List.of(
             LIST_USERS,
             LIST_PROGRAMS,
             LIST_ACTIVE_PROCESSES,
             LIST_PROCESS_PHASES,
+            LIST_PROCESS_STRUCTURE,
             SET_USER_STATUS,
-            MANAGE_PROCESS_PHASE
+            MANAGE_PROCESS_PHASE,
+            MANAGE_PROCESS_SUBPHASE
     );
 
     public List<AssistantToolDefinition> toolsForRole(String role) {
@@ -95,6 +123,23 @@ public class AssistantToolRegistry {
                 .filter(tool -> tool.allowedRoles().contains(normalizedRole))
                 .toList();
     }
+
+    public List<AssistantToolDefinition> toolsForRoleAndAgent(String role, AssistantAgentProfile agentProfile) {
+        List<AssistantToolDefinition> roleTools = toolsForRole(role);
+        if (agentProfile != AssistantAgentProfile.PHASES) {
+            return roleTools;
+        }
+        return roleTools.stream()
+                .filter(tool -> PHASES_AGENT_TOOL_IDS.contains(tool.id()))
+                .toList();
+    }
+
+    private static final Set<String> PHASES_AGENT_TOOL_IDS = Set.of(
+            LIST_PROCESS_PHASES_ID,
+            LIST_PROCESS_STRUCTURE_ID,
+            MANAGE_PROCESS_PHASE_ID,
+            MANAGE_PROCESS_SUBPHASE_ID
+    );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
         if (toolId == null || toolId.isBlank()) {
@@ -155,12 +200,33 @@ public class AssistantToolRegistry {
                 List.of("CREATE", "UPDATE", "DELETE", "REORDER"),
                 "Operación sobre fases."));
         properties.put("careerQuery", stringProperty("Nombre o código de la carrera."));
-        properties.put("phaseId", stringProperty("UUID de la fase (UPDATE/DELETE)."));
-        properties.put("phaseName", stringProperty("Nombre de la fase (alternativa a phaseId)."));
+        properties.put("phaseId", stringProperty("UUID real de la fase (obtener de list_process_structure)."));
+        properties.put("phaseOrder", integerProperty("Orden numérico de la fase (1, 2, …). Preferido frente a phaseId."));
+        properties.put("phaseName", stringProperty("Nombre exacto de la fase (alternativa a phaseOrder/phaseId)."));
         properties.put("name", stringProperty("Nombre de la fase (CREATE/UPDATE)."));
         properties.put("order", integerProperty("Orden de la fase (CREATE/UPDATE)."));
         properties.put("description", stringProperty("Descripción opcional (CREATE/UPDATE)."));
         properties.put("phaseIds", arrayProperty("Lista ordenada de UUID de fases (REORDER)."));
+        properties.put("confirmed", booleanProperty(
+                "false para vista previa; true solo tras confirmación explícita del usuario."));
+        return requiredObjectSchema(properties, List.of("action", "careerQuery"));
+    }
+
+    private static Map<String, Object> manageProcessSubphaseParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("action", enumProperty(
+                List.of("CREATE", "UPDATE", "DELETE"),
+                "Operación sobre subfases."));
+        properties.put("careerQuery", stringProperty("Nombre o código de la carrera."));
+        properties.put("phaseId", stringProperty("UUID real de la fase contenedora."));
+        properties.put("phaseOrder", integerProperty("Orden numérico de la fase (1, 2, …). Preferido frente a phaseId."));
+        properties.put("phaseName", stringProperty("Nombre exacto de la fase (alternativa a phaseOrder/phaseId)."));
+        properties.put("subphaseId", stringProperty("UUID de la subfase (UPDATE/DELETE)."));
+        properties.put("subphaseName", stringProperty("Nombre de la subfase (alternativa a subphaseId)."));
+        properties.put("name", stringProperty("Nombre de la subfase (CREATE/UPDATE)."));
+        properties.put("order", integerProperty("Orden de la subfase (CREATE/UPDATE)."));
+        properties.put("referenceUrl", stringProperty("Enlace HTTPS normativo (CREATE/UPDATE)."));
+        properties.put("description", stringProperty("Descripción opcional (CREATE/UPDATE)."));
         properties.put("confirmed", booleanProperty(
                 "false para vista previa; true solo tras confirmación explícita del usuario."));
         return requiredObjectSchema(properties, List.of("action", "careerQuery"));

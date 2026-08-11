@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.assistant;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,14 +73,15 @@ class SendChatMessageServiceToolLoopTest {
     void scenario1_controlledKeyword_doesNotCallLlm() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 any(),
-                auth)).thenReturn(PHASES_TOOL_JSON);
+                eq(auth))).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithLlm.send(
                 "Lista las fases de Ingeniería de Sistemas CEUB",
                 List.of(),
-                auth);
+                auth,
+                AssistantChatContext.general());
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
         assertThat(result.llmInvoked()).isFalse();
@@ -97,14 +100,15 @@ class SendChatMessageServiceToolLoopTest {
                                 "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
                 )));
         when(toolExecutor.execute(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
-                "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}",
-                auth)).thenReturn(PHASES_TOOL_JSON);
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq("{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}"),
+                eq(auth))).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithLlm.send(
                 "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
                 List.of(),
-                auth);
+                auth,
+                AssistantChatContext.general());
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.LLM);
         assertThat(result.llmInvoked()).isTrue();
@@ -118,7 +122,8 @@ class SendChatMessageServiceToolLoopTest {
         AssistantChatResult result = serviceWithLlm.send(
                 "¿Cuál es el presupuesto de la universidad para 2027?",
                 List.of(),
-                tdContext());
+                tdContext(),
+                AssistantChatContext.general());
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
         assertThat(result.toolId()).isNull();
@@ -133,14 +138,15 @@ class SendChatMessageServiceToolLoopTest {
     void scenario4_llmDisabled_sameKeywordQuestionStillWorks() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 any(),
-                auth)).thenReturn(PHASES_TOOL_JSON);
+                eq(auth))).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithoutLlm.send(
                 "Lista las fases de Ingeniería de Sistemas CEUB",
                 List.of(),
-                auth);
+                auth,
+                AssistantChatContext.general());
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
         assertThat(result.reply()).contains("Fase 1");
@@ -148,11 +154,54 @@ class SendChatMessageServiceToolLoopTest {
     }
 
     @Test
+    void phasesAgent_contextualListPhases_doesNotCallLlm() {
+        AssistantAuthContext auth = tdContext();
+        UUID processId = UUID.fromString("950e8400-e29b-41d4-a716-446655440020");
+        AssistantChatContext context = AssistantChatContext.phases(
+                processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                any(),
+                eq(auth))).thenReturn(PHASES_TOOL_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Lista las fases de este proceso",
+                List.of(),
+                auth,
+                context);
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
+    void phasesAgent_llmSelection_onlyPhaseTools() {
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("", List.of()));
+
+        serviceWithLlm.send(
+                "Renombra la Fase 2",
+                List.of(),
+                tdContext(),
+                AssistantChatContext.phases(
+                        UUID.randomUUID(), "Ingeniería de Sistemas", "INF-SIS", "CEUB"));
+
+        ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
+        verify(chatCompletionPort).complete(captor.capture());
+        assertThat(captor.getValue().tools()).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
+                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
+                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID);
+    }
+
+    @Test
     void scenario4_llmDisabled_synonymFallsToOutOfScope() {
         AssistantChatResult result = serviceWithoutLlm.send(
                 "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
                 List.of(),
-                tdContext());
+                tdContext(),
+                AssistantChatContext.general());
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
         assertThat(result.reply()).contains("SIGESA_ASSISTANT_LLM_ENABLED=false");
@@ -163,11 +212,15 @@ class SendChatMessageServiceToolLoopTest {
     void send_jdRequestIncludesToolsInLlmSelection() {
         when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult("", List.of()));
 
-        serviceWithLlm.send("¿Qué etapas tiene Ingeniería de Sistemas?", List.of(), jdContext());
+        serviceWithLlm.send(
+                "¿Qué etapas tiene Ingeniería de Sistemas?",
+                List.of(),
+                jdContext(),
+                AssistantChatContext.general());
 
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(6);
+        assertThat(captor.getValue().tools()).hasSize(8);
     }
 
     private static AssistantAuthContext jdContext() {
