@@ -50,7 +50,8 @@ public class AssistantModuleConfig {
                                                 AddProcessSubphaseUseCase addProcessSubphaseUseCase,
                                                 UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
                                                 DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
-                                                ReorderProcessStructureUseCase reorderProcessStructureUseCase) {
+                                                ReorderProcessStructureUseCase reorderProcessStructureUseCase,
+                                                com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase) {
         return new AssistantToolExecutor(
                 assistantToolRegistry,
                 listUsersUseCase,
@@ -67,6 +68,7 @@ public class AssistantModuleConfig {
                 updateProcessSubphaseUseCase,
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
+                searchEvidenceUseCase,
                 new ObjectMapper()
         );
     }

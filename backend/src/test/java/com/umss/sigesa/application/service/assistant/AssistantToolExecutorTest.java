@@ -63,6 +63,8 @@ class AssistantToolExecutorTest {
     private com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase;
     @Mock
     private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase;
 
     private AssistantToolExecutor executor;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -85,6 +87,7 @@ class AssistantToolExecutorTest {
                 updateProcessSubphaseUseCase,
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
+                searchEvidenceUseCase,
                 objectMapper
         );
     }

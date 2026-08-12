@@ -19,10 +19,19 @@ public class AssistantToolRegistry {
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
     static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
     static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
+    static final String BUSCAR_EVIDENCIAS_ID = "buscar_evidencias";
 
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
     private static final Set<String> JD_TD_AND_CC = Set.of("JD", "TD", "CC");
+
+    private static final AssistantToolDefinition BUSCAR_EVIDENCIAS = new AssistantToolDefinition(
+            BUSCAR_EVIDENCIAS_ID,
+            "Busca evidencias en el sistema utilizando filtros dinámicos basados en la consulta del usuario.",
+            JD_TD_AND_CC,
+            "read",
+            buscarEvidenciasParameterSchema()
+    );
 
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
@@ -104,6 +113,7 @@ public class AssistantToolRegistry {
     );
 
     private final List<AssistantToolDefinition> allTools = List.of(
+            BUSCAR_EVIDENCIAS,
             LIST_USERS,
             LIST_PROGRAMS,
             LIST_ACTIVE_PROCESSES,
@@ -244,6 +254,12 @@ public class AssistantToolRegistry {
         Map<String, Object> schema = objectSchema(properties);
         schema.put("required", required);
         return schema;
+    }
+
+    private static Map<String, Object> buscarEvidenciasParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("query", stringProperty("Texto de búsqueda para encontrar evidencias."));
+        return requiredObjectSchema(properties, List.of("query"));
     }
 
     private static Map<String, Object> stringProperty(String description) {

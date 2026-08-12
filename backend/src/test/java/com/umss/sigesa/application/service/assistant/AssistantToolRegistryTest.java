@@ -14,6 +14,7 @@ class AssistantToolRegistryTest {
         var tools = registry.toolsForRole("JD");
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID,
                 AssistantToolRegistry.LIST_USERS_ID,
                 AssistantToolRegistry.LIST_PROGRAMS_ID,
                 AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
@@ -30,6 +31,7 @@ class AssistantToolRegistryTest {
         var tools = registry.toolsForRole("TD");
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID,
                 AssistantToolRegistry.LIST_PROGRAMS_ID,
                 AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
@@ -54,6 +56,7 @@ class AssistantToolRegistryTest {
     @Test
     void toolsForRole_ccReturnsReadOnlyPhaseTools() {
         assertThat(registry.toolsForRole("CC")).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID,
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID
         );

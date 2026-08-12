@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { Bot, Loader2, MessageSquare, Send, Trash2, User } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bot, Loader2, MessageSquare, Send, Trash2, User, FileText, ChevronRight, X, Calendar, Award, BookOpen } from 'lucide-react';
 import type {
   AssistantDemoScenario,
   ChatMessage,
@@ -44,6 +44,7 @@ export function AssistantChatUI({
   errorMessage,
   messagesEndRef,
 }: AssistantChatUIProps) {
+  const [selectedEvidence, setSelectedEvidence] = useState<any | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -140,7 +141,13 @@ export function AssistantChatUI({
               {messages.length === 0 ? (
                 <EmptyState demoScenarios={demoScenarios} onSampleSelect={onSampleSelect} />
               ) : (
-                messages.map((message) => <MessageBubble key={message.id} message={message} />)
+                messages.map((message) => (
+                  <MessageBubble 
+                    key={message.id} 
+                    message={message} 
+                    onSelectEvidence={setSelectedEvidence} 
+                  />
+                ))
               )}
               {isSending && <TypingIndicator />}
               <div ref={messagesEndRef} />
@@ -172,6 +179,76 @@ export function AssistantChatUI({
           </section>
         </div>
       </div>
+
+      {selectedEvidence && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-100 flex flex-col max-h-[85vh]">
+            <header className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <div className="flex items-center gap-2">
+                <FileText className="text-primary-600" size={20} />
+                <h3 className="font-bold text-gray-900 text-base">Detalle de la Evidencia</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedEvidence(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Título de Archivo</span>
+                <span className="text-gray-900 font-semibold text-sm break-all">{selectedEvidence.title}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Descripción</span>
+                <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 whitespace-pre-wrap">
+                  {selectedEvidence.description || 'Sin descripción o notas adicionales.'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <Award size={12} className="text-secondary" /> Dimensión Académica
+                  </span>
+                  <span className="text-gray-800 font-medium text-xs block mt-1">{selectedEvidence.dimensionName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <BookOpen size={12} className="text-primary-600" /> Criterio
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-primary-50 border border-primary-100 text-[10px] font-mono font-bold text-primary-800 inline-block mt-1">
+                    {selectedEvidence.criterionCode}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Carrera / Programa</span>
+                  <span className="text-gray-800 text-xs block mt-1">{selectedEvidence.carreraName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <Calendar size={12} className="text-gray-500" /> Fecha de Carga
+                  </span>
+                  <span className="text-gray-800 text-xs block mt-1">
+                    {selectedEvidence.uploadedAt ? new Date(selectedEvidence.uploadedAt).toLocaleString() : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <footer className="border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
+              <Button 
+                onClick={() => setSelectedEvidence(null)}
+                variant="primary"
+                className="px-4 py-2 text-sm font-semibold"
+              >
+                Cerrar
+              </Button>
+            </footer>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -256,8 +333,24 @@ function EmptyState({
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ 
+  message,
+  onSelectEvidence,
+}: { 
+  message: ChatMessage;
+  onSelectEvidence: (ev: any) => void;
+}) {
   const isUser = message.role === 'user';
+  const isEvidenceSearch = !isUser && message.metadata?.toolId === 'buscar_evidencias';
+
+  let evidences: any[] = [];
+  if (isEvidenceSearch) {
+    try {
+      evidences = JSON.parse(message.content);
+    } catch {
+      evidences = [];
+    }
+  }
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -269,13 +362,62 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {isUser ? <User size={18} /> : <Bot size={18} />}
       </div>
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 text-body-md leading-relaxed ${
+        className={`max-w-[85%] rounded-2xl px-4 py-3 text-body-md leading-relaxed ${
           isUser
             ? 'bg-primary-600 text-body'
-            : 'border border-gray-200 bg-gray-50 text-gray-900'
+            : 'border border-gray-200 bg-gray-50 text-gray-900 shadow-sm'
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        {isEvidenceSearch ? (
+          <div className="space-y-3 min-w-[280px]">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+              <span className="font-bold text-primary-955">🔍 Resultados de búsqueda</span>
+              <span className="bg-primary-100 text-primary-850 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                {evidences.length} {evidences.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </div>
+            {evidences.length === 0 ? (
+              <p className="text-gray-500 text-sm italic">No se encontraron evidencias que coincidan con la búsqueda.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-1">
+                {evidences.map((ev: any) => (
+                  <div key={ev.evidenceId} className="bg-white rounded-xl border border-gray-150 p-3 hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start gap-2">
+                        <FileText size={16} className="text-primary-600 shrink-0 mt-0.5" />
+                        <span className="font-semibold text-gray-900 text-xs line-clamp-2" title={ev.title}>
+                          {ev.title}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{ev.description || 'Sin descripción'}</p>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        <span className="px-1.5 py-0.5 rounded bg-secondary-50 text-secondary-700 text-[10px] font-medium">
+                          {ev.dimensionName}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-mono">
+                          {ev.criterionCode}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-[10px] text-gray-400">
+                        {ev.uploadedAt ? new Date(ev.uploadedAt).toLocaleDateString() : 'N/A'}
+                      </span>
+                      <button
+                        onClick={() => onSelectEvidence(ev)}
+                        className="text-xs font-bold text-primary-600 hover:text-primary-800 flex items-center gap-0.5 transition-colors"
+                      >
+                        Ver Detalle <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        )}
         {!isUser && message.metadata && (
           <div className="mt-3 border-t border-gray-200 pt-3 text-label-md text-gray-600">
             <p>

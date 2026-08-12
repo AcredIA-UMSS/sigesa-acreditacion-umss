@@ -73,6 +73,11 @@ public class AssistantKeywordRouter {
             return writeFlow;
         }
 
+        if (message.startsWith("/buscar ") || message.startsWith("/search ")) {
+            String query = message.substring(message.indexOf(" ") + 1).trim();
+            return Optional.of(new AssistantToolInvocation("buscar_evidencias", "{\"query\":\"" + query + "\"}"));
+        }
+
         if ("JD".equals(role) || "TD".equals(role)) {
             if (!chatContext.isPhasesAgent() && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildActiveProcessesInvocation(message));
