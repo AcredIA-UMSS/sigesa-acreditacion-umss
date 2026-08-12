@@ -35,3 +35,6 @@ build/
 
 ### Local env ###
 .env
+
+### pnpm local store ###
+.pnpm-store/
