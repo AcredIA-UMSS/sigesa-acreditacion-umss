@@ -8,8 +8,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * Persistencia JPA fuera de {@code SigesaApplication} para que los slices
  * {@code @WebMvcTest} no activen repositorios sin {@code entityManagerFactory}.
  */
-@Configuration
-@EntityScan(basePackages = "com.umss.sigesa.adapter.out.persistance.entity")
-@EnableJpaRepositories(basePackages = "com.umss.sigesa.adapter.out.persistance")
-public class PersistenceConfig {
-}
+
