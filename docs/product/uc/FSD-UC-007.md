@@ -58,19 +58,23 @@ Este caso de uso implementa un **Enrutador de Consultas Híbrido (Hybrid Query R
    * Descripción o notas de la evidencia.
    * Criterio o dimensión académica asociada (ej. Infraestructura, Plan de Estudios).
    * Etiquetas (Tags) y palabras clave asociadas explícitamente durante la carga.
+3. **Filtros Dinámicos Multi-Parámetro**:
+   * Soporta búsqueda filtrando por fechas (`fechaInicio` y `fechaFin`), códigos de criterio (`criterioCodigo`), y dimensiones de acreditación obtenidas dinámicamente de base de datos.
+   * En el Escenario 1 (Código tradicional), se detectan años (ej: 2024) por expresión regular y se traducen en rangos de fechas (ej: 2024-01-01 a 2024-12-31).
 
 ---
 
 ## Flujo Principal
 
-1. El usuario envía una consulta de búsqueda mediante la interfaz web.
+1. El usuario envía una consulta de búsqueda en texto plano mediante la interfaz web.
 2. El backend intercepta la petición y valida el rol del usuario (CC vs TD).
-3. Evalúa si el query coincide con palabras clave exactas del catálogo.
-4. Si hay coincidencia exacta: Ejecuta la consulta SQL tradicional y retorna la respuesta.
-5. Si no hay coincidencia exacta y `IA_HABILITADA == true`: Llama al LLM para expandir/enrutar la consulta.
-   * Si el LLM decide que está dentro del alcance: Retorna la herramienta seleccionada y los parámetros de búsqueda. El backend ejecuta la búsqueda de base de datos correspondiente.
+3. Evalúa si el query coincide con alguna dimensión de acreditación cargada en base de datos.
+4. Si hay coincidencia de dimensión, o si la búsqueda tradicional por texto (`ILIKE`) devuelve resultados directa o parcialmente: los retorna inmediatamente sin recurrir a la IA (Escenario 1).
+5. Si no hay coincidencia y `IA_HABILITADA == true`: Invoca al LLM enviando la consulta natural.
+   * El LLM realiza Tool Calling/Function Calling estructurando la query en un DTO `SearchFilters` (dimension, termino, criterioCodigo, fechaInicio, fechaFin).
+   * El backend traduce el DTO a consultas JPQL con parámetros dinámicos aplicando aislamiento de carrera y devolviendo los registros.
    * Si el LLM decide que está fuera de alcance: Retorna el mensaje de rechazo estándar de SIGESA.
-6. Si `IA_HABILITADA == false`: Ejecuta búsqueda clásica por aproximación de texto (ILIKE) o retorna mensaje de fallback.
+6. Si `IA_HABILITADA == false`: Ejecuta búsqueda clásica por aproximación de texto (ILIKE) aplicando los filtros de fecha detectados.
 7. Presenta resultados paginados en el frontend detallando la trazabilidad de la ruta de búsqueda.
 
 ---

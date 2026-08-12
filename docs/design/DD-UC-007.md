@@ -87,12 +87,23 @@ Cuando se invoca al LLM para traducción de sinónimos, se provee el siguiente c
     "properties": {
       "dimension": {
         "type": "string",
-        "enum": ["Infraestructura", "Plan de Estudios", "Docentes", "Administracion"],
-        "description": "Dimensión o criterio oficial al que se mapea la búsqueda del usuario."
+        "description": "Dimensión o criterio oficial al que se mapea la búsqueda del usuario (cargado dinámicamente desde BD)."
       },
       "termino": {
         "type": "string",
         "description": "Término limpio extraído de la búsqueda para usar en la consulta de texto."
+      },
+      "criterioCodigo": {
+        "type": "string",
+        "description": "Código de criterio oficial si se menciona explícita o implícitamente (ej: CRT-04)."
+      },
+      "fechaInicio": {
+        "type": "string",
+        "description": "Fecha de inicio opcional en formato ISO-8601 (YYYY-MM-DD)."
+      },
+      "fechaFin": {
+        "type": "string",
+        "description": "Fecha de fin opcional en formato ISO-8601 (YYYY-MM-DD)."
       }
     },
     "required": ["termino"]
