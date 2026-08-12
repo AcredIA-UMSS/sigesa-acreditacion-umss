@@ -47,6 +47,17 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             - «Fase N» identifica la fase contenedora (phaseOrder), NO el orden de la subfase.
             """;
 
+    private static final String USERS_AGENT_PROMPT_SUFFIX = """
+
+            CONTEXTO COPILOTO DE USUARIOS (obligatorio):
+            - El usuario es Jefatura DUEA [JD] en /admin/users.
+            - Solo tools de usuarios: list_users, get_user_detail, create_user, manage_user_status, manage_user_assignment.
+            - No invoques tools de fases ni procesos.
+            - create_user / manage_*: confirmed=false primero; confirmed=true solo tras confirmación explícita.
+            - Correos solo @umss.edu.bo. CC/EE requieren programId (o programQuery).
+            - Alta deja la cuenta INACTIVE hasta el primer acceso.
+            """;
+
     private final ChatCompletionPort chatCompletionPort;
     private final AssistantToolRegistry toolRegistry;
     private final AssistantToolExecutor toolExecutor;
@@ -158,7 +169,9 @@ public class SendChatMessageService implements SendChatMessageUseCase {
         List<ChatMessage> conversation = new ArrayList<>();
         conversation.add(new ChatMessage(
                 ChatRole.SYSTEM,
-                systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX + phasesContextSuffix(chatContext)));
+                systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX
+                        + phasesContextSuffix(chatContext)
+                        + usersContextSuffix(chatContext)));
 
         if (history != null) {
             history.stream()
@@ -180,5 +193,19 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                 ? chatContext.phaseCatalogPrompt()
                 : "(consulte list_process_structure antes de escribir)";
         return PHASES_AGENT_PROMPT_SUFFIX.formatted(career, template, phases);
+    }
+
+    private static String usersContextSuffix(AssistantChatContext chatContext) {
+        if (!chatContext.isUsersAgent()) {
+            return "";
+        }
+        StringBuilder extra = new StringBuilder(USERS_AGENT_PROMPT_SUFFIX);
+        if (chatContext.focusUserId() != null) {
+            extra.append("\n- Usuario en foco (userId): ").append(chatContext.focusUserId());
+        }
+        if (chatContext.programId() != null) {
+            extra.append("\n- Programa en contexto (programId): ").append(chatContext.programId());
+        }
+        return extra.toString();
     }
 }

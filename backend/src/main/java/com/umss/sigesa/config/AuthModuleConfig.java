@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.in.AuthenticateUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
+import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.AuthPort;
@@ -16,6 +17,7 @@ import com.umss.sigesa.application.service.auth.ActivateUserService;
 import com.umss.sigesa.application.service.auth.AuthenticateService;
 import com.umss.sigesa.application.service.auth.DeactivateUserService;
 import com.umss.sigesa.application.service.auth.ListUsersService;
+import com.umss.sigesa.application.service.auth.ManageUserProgramAssignmentService;
 import com.umss.sigesa.application.service.auth.RegisterUserService;
 import com.umss.sigesa.application.service.catalog.ListProgramsService;
 import org.springframework.context.annotation.Bean;
@@ -60,5 +62,14 @@ public class AuthModuleConfig {
     @Bean
     ListProgramsUseCase listProgramsUseCase(ProgramCatalogPort programCatalogPort) {
         return new ListProgramsService(programCatalogPort);
+    }
+
+    @Bean
+    ManageUserProgramAssignmentUseCase manageUserProgramAssignmentUseCase(
+            UserRepositoryPort userRepository,
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            ProgramCatalogPort programCatalogPort) {
+        return new ManageUserProgramAssignmentService(
+                userRepository, assignmentRepository, programCatalogPort);
     }
 }

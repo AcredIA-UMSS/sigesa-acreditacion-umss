@@ -33,7 +33,10 @@ final class AssistantResponseFormatter {
                 sb.append(message).append("\n\n");
             }
             if (preview instanceof java.util.Map<?, ?> previewMap) {
-                if ("CREATE_SUBPHASE".equals(String.valueOf(previewMap.get("requestedAction")))) {
+                Object planSummary = previewMap.get("planSummary");
+                if (planSummary != null && !planSummary.toString().isBlank()) {
+                    sb.append("Resumen: ").append(planSummary).append("\n\n");
+                } else if ("CREATE_SUBPHASE".equals(String.valueOf(previewMap.get("requestedAction")))) {
                     sb.append("Resumen: «").append(previewMap.get("name"))
                             .append("» → orden ").append(previewMap.get("assignedOrder"))
                             .append(" en «").append(previewMap.get("phaseName")).append("».\n\n");
@@ -58,6 +61,10 @@ final class AssistantResponseFormatter {
         }
         if (data.containsKey("users")) {
             return formatUsers(data);
+        }
+        if (data.containsKey("email") && data.containsKey("role") && data.containsKey("status")
+                && data.containsKey("userId")) {
+            return formatUserDetail(data);
         }
 
         return "Consulta completada.";
@@ -152,6 +159,32 @@ final class AssistantResponseFormatter {
             sb.append("- **").append(map.get("fullName")).append("** (")
                     .append(map.get("email")).append(") — ")
                     .append(map.get("role")).append(" / ").append(map.get("status")).append("\n");
+        }
+        return sb.toString().trim();
+    }
+
+    private static String formatUserDetail(java.util.Map<String, Object> data) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("**").append(data.get("fullName")).append("**\n");
+        sb.append("- Correo: ").append(data.get("email")).append("\n");
+        sb.append("- Rol: ").append(data.get("role")).append("\n");
+        sb.append("- Estado: ").append(data.get("status")).append("\n");
+        if (data.get("createdAt") != null) {
+            sb.append("- Creado: ").append(data.get("createdAt")).append("\n");
+        }
+        if (data.get("updatedAt") != null) {
+            sb.append("- Último cambio: ").append(data.get("updatedAt")).append("\n");
+        }
+        Object programs = data.get("programs");
+        if (programs instanceof List<?> list && !list.isEmpty()) {
+            sb.append("- Carreras:\n");
+            for (Object item : list) {
+                if (item instanceof java.util.Map<?, ?> map) {
+                    sb.append("  · ").append(map.get("code")).append(" — ").append(map.get("name")).append("\n");
+                }
+            }
+        } else {
+            sb.append("- Carreras: (sin asignación activa)\n");
         }
         return sb.toString().trim();
     }

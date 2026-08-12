@@ -7,14 +7,16 @@ export interface ChatMessageDto {
   content: string;
 }
 
-export type AssistantAgentId = 'general' | 'phases';
+export type AssistantAgentId = 'general' | 'phases' | 'users';
 
 export interface AssistantChatContextDto {
   agent: AssistantAgentId;
-  processId: string;
+  processId?: string;
   careerName?: string;
   careerCode?: string;
   templateType?: string;
+  userId?: string;
+  programId?: string;
 }
 
 export interface SendChatMessageRequest {

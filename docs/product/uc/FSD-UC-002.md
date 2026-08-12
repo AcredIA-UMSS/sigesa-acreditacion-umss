@@ -22,7 +22,7 @@ pr_impl: PR-IMPL-002
 | **Prompt impl** | [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md) |
 | **Trazabilidad** | PRD-REQ-001 · PRD-US-002 |
 | **Precondiciones** | [JD] autenticado |
-| **Pantalla** | `/admin/users` |
+| **Pantalla** | `/admin/users` (+ copiloto conversacional `agent=users`, ver [DD-AGENT-002](../../design/assistant/DD-AGENT-002.md)) |
 
 ## Flujo principal
 

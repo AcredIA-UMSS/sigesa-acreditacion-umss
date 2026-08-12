@@ -15,11 +15,15 @@ class AssistantToolRegistryTest {
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
                 AssistantToolRegistry.LIST_USERS_ID,
+                AssistantToolRegistry.GET_USER_DETAIL_ID,
+                AssistantToolRegistry.CREATE_USER_ID,
                 AssistantToolRegistry.LIST_PROGRAMS_ID,
                 AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.SET_USER_STATUS_ID,
+                AssistantToolRegistry.MANAGE_USER_STATUS_ID,
+                AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID
         );
@@ -48,6 +52,19 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID
+        );
+    }
+
+    @Test
+    void toolsForRoleAndAgent_usersProfile_filtersToUserTools() {
+        var tools = registry.toolsForRoleAndAgent("JD", AssistantAgentProfile.USERS);
+
+        assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.LIST_USERS_ID,
+                AssistantToolRegistry.GET_USER_DETAIL_ID,
+                AssistantToolRegistry.CREATE_USER_ID,
+                AssistantToolRegistry.MANAGE_USER_STATUS_ID,
+                AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID
         );
     }
 

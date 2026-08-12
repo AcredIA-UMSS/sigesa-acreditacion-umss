@@ -1,19 +1,25 @@
 import { useState } from 'react';
 import { Bell, Settings } from 'lucide-react';
 import { Sidebar } from '../../../../components/layout/Sidebar';
+import { useAuth } from '../../../../lib/auth/useAuth';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import { AddUserModalUI } from '../components/AddUserModalUI';
 import { UserSaveSuccessDialog } from '../components/UserSaveSuccessDialog';
+import { UsersCopilotPanel } from '../components/UsersCopilotPanel';
 import { UsersTableUI } from '../components/UsersTableUI';
 import { useDeactivateUserAction } from '../hooks/useDeactivateUserAction';
 import { useRegisterUserForm } from '../hooks/useRegisterUserForm';
 import { useUsersList } from '../hooks/useUsersList';
 
 export function UsersAdminPage() {
+  const { session } = useAuth();
   const registerForm = useRegisterUserForm();
   const usersList = useUsersList();
   const deactivateAction = useDeactivateUserAction();
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Solo montar copiloto para JD (defensa en profundidad; ruta ya es JdOnlyRoute).
+  const showUsersCopilot = session?.role === 'JD';
 
   const handleDeactivate = async (userId: string) => {
     setActionError(null);
@@ -43,7 +49,7 @@ export function UsersAdminPage() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-8">
-          <div className="mx-auto max-w-6xl space-y-6">
+          <div className="mx-auto max-w-7xl space-y-6">
             <div>
               <div className="mb-4 h-1 w-12 bg-secondary" />
               <h1 className="text-heading-xl text-primary-800">Gestión de usuarios</h1>
@@ -58,16 +64,22 @@ export function UsersAdminPage() {
               </div>
             )}
 
-            <UsersTableUI
-              users={usersList.users}
-              isLoading={usersList.isLoading}
-              isError={usersList.isError}
-              errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
-              isDeactivating={deactivateAction.isDeactivating}
-              deactivatingUserId={deactivateAction.deactivatingUserId}
-              onAddUser={registerForm.openModal}
-              onDeactivate={handleDeactivate}
-            />
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+              <div className="space-y-6">
+                <UsersTableUI
+                  users={usersList.users}
+                  isLoading={usersList.isLoading}
+                  isError={usersList.isError}
+                  errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
+                  isDeactivating={deactivateAction.isDeactivating}
+                  deactivatingUserId={deactivateAction.deactivatingUserId}
+                  onAddUser={registerForm.openModal}
+                  onDeactivate={handleDeactivate}
+                />
+              </div>
+
+              {showUsersCopilot ? <UsersCopilotPanel /> : null}
+            </div>
           </div>
         </main>
       </div>

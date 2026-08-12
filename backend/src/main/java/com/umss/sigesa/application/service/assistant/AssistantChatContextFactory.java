@@ -16,9 +16,23 @@ public class AssistantChatContextFactory {
         this.getProcessDetailUseCase = getProcessDetailUseCase;
     }
 
-    public AssistantChatContext resolve(String agent, UUID processId, AssistantAuthContext auth) {
+    public AssistantChatContext resolve(String agent,
+                                        UUID processId,
+                                        AssistantAuthContext auth) {
+        return resolve(agent, processId, null, null, auth);
+    }
+
+    public AssistantChatContext resolve(String agent,
+                                        UUID processId,
+                                        UUID focusUserId,
+                                        UUID programId,
+                                        AssistantAuthContext auth) {
         if (agent == null || agent.isBlank() || "general".equalsIgnoreCase(agent)) {
             return AssistantChatContext.general();
+        }
+
+        if ("users".equalsIgnoreCase(agent)) {
+            return AssistantChatContext.users(focusUserId, programId);
         }
 
         if (!"phases".equalsIgnoreCase(agent)) {
