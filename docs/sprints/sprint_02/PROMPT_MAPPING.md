@@ -20,6 +20,7 @@
 | PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
 | PM-012 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
 | PM-013 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
+| PM-014 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
 
 ## PM-001
 
@@ -1010,4 +1011,49 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 - [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
 - [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+
+---
+
+## PM-014
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-014 |
+| **Fecha** | 2026-08-11 |
+| **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Antigravity AI Coding Assistant |
+| **Modelo** | Gemini 2.0 |
+| **Tarea** | Refinamiento de Búsqueda de Evidencias en Chatbot |
+| **Objetivo** | Integrar búsqueda interactiva de evidencias dentro del asistente de ayuda. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Implementación de comando `/buscar <query>` y `/search <query>` para evitar enrutamientos LLM ambiguos. Mapeo de tarjetas de evidencias y modal interactivo de detalles. |
+| **PR-IMPL vinculado** | N/A (Refinamiento y alineación interactiva) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | [FSD-UC-007](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Archivos modificados/creados
+
+- **Creado:** N/A
+- **Modificado:**
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolRegistry.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutor.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantKeywordRouter.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantResponseFormatter.java`
+  - `backend/src/main/java/com/umss/sigesa/config/AssistantModuleConfig.java`
+  - `frontend/src/features/assistant/components/AssistantChatUI.tsx`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantToolRegistryTest.java`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutorTest.java`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java`
+
+### Cambios realizados
+
+- **Backend Tool & Routing:** Se creó la tool `buscar_evidencias` que invoca dinámicamente al caso de uso de búsqueda híbrida. Se implementó enrutamiento directo por palabras clave cuando el usuario usa el comando `/buscar <query>` o `/search <query>`.
+- **Formateador de Respuestas:** El backend serializa la lista de evidencias en formato JSON cuando la tool es ejecutada.
+- **Frontend Interactivo:** Se actualizó `AssistantChatUI.tsx` para interceptar la tool `buscar_evidencias`, parsear el JSON de la respuesta y renderizar tarjetas de evidencias inline con botones para ver el detalle en un modal premium interactivo.
+- **Calidad de Código (Oxlint):** Se solucionó la advertencia de catch param no utilizado para garantizar compatibilidad con oxlint.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `pnpm run build` — resultado: OK (cero warnings, cero errores de TypeScript o OxLint)
 
