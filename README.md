@@ -9,8 +9,9 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 | **JD** | Jefe de Departamento | `jd@umss.edu.bo` | `JefeDemo2026!` |
 | **TD** | Técnico DUEA | `td@umss.edu.bo` | `TecnicoDemo2026!` |
 | **CC** | Coordinador — Ing. Sistemas | `cc@umss.edu.bo` | `CoordDemo2026!` |
-| **CC** | Coordinador — CEUB | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
+| **CC** | Coordinador — Ing. Civil | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
 | **CC** | Usuario inactivo (pruebas admin) | `pendiente@umss.edu.bo` | `PendienteDemo2026!` |
+| **EE** | Evaluador externo — Ing. Sistemas | `ee@umss.edu.bo` | `EvalDemo2026!` |
 
 > Solo cuentas con estado **ACTIVE** pueden autenticarse. `pendiente@umss.edu.bo` sirve para probar activación desde el panel de administración.
 
@@ -18,15 +19,18 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 
 Además de los usuarios, el backend inserta registros de demostración para todos los modelos persistidos:
 
-**Programas** (catálogo estático):
+**Carreras** (tabla `programs`, seed dev — 25 carreras UMSS):
 
-| ID | Código | Nombre |
+| ID (ejemplo) | Código | Nombre |
 | --- | ------ | ------ |
-| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas (demo UMSS) |
-| `660e8400-e29b-41d4-a716-446655440001` | CEUB | Coordinación CEUB (demo) |
-| `770e8400-e29b-41d4-a716-446655440002` | ARCU-SUR | Coordinación ARCU-SUR (demo) |
+| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas |
+| `550e8400-e29b-41d4-a716-446655440001` | ING-CIV | Ingeniería Civil |
+| `550e8400-e29b-41d4-a716-44665544000b` | MED | Medicina |
+| … | … | Ver `ProgramSeedDataLoader.java` |
 
-**Plantillas** (`template`):
+API: `GET /api/v1/programs?q=ingen` — autocompletado por nombre o código.
+
+**Plantillas** (`templates` — solo CEUB y ARCU-SUR operativas):
 
 | ID | Validada | Taxonomía |
 | --- | -------- | --------- |
@@ -44,11 +48,11 @@ Además de los usuarios, el backend inserta registros de demostración para todo
 
 **Asignaciones usuario–programa** (`user_program_assignment`):
 
-| Usuario | Programa asignado |
-| ------- | ----------------- |
-| `cc@umss.edu.bo` | INF-SIS |
-| `cc2@umss.edu.bo` | CEUB |
-| `pendiente@umss.edu.bo` | ARCU-SUR |
+| Usuario | Carrera asignada |
+| ------- | ---------------- |
+| `cc@umss.edu.bo` | Ingeniería de Sistemas |
+| `cc2@umss.edu.bo` | Ingeniería Civil |
+| `pendiente@umss.edu.bo` | Medicina |
 
 Los identificadores y contraseñas están definidos en `backend/src/main/java/com/umss/sigesa/config/AuthDataLoader.java` y `DevSeedData.java`.
 
@@ -111,6 +115,73 @@ corepack prepare pnpm@latest --activate
 ## Arranque en desarrollo local
 
 El flujo recomendado es levantar **primero el backend** y luego el frontend. El servidor de desarrollo de Vite redirige las peticiones `/api` hacia `http://localhost:8080`.
+
+### 🐳 Despliegue Local con Docker
+
+El proyecto está completamente dockerizado utilizando construcciones multi-etapa (multi-stage builds) para generar entornos ligeros y reproducibles. 
+
+#### 📋 Prerrequisitos
+
+- [Docker Engine](https://docs.docker.com/engine/install/) ejecutándose.
+- [Docker Compose](https://docs.docker.com/compose/install/) (V2 recomendado).
+
+#### 🚀 Arranque Rápido
+
+1. Posiciónate en la raíz del proyecto (donde se encuentra el `docker-compose.yml`).
+2. Construye las imágenes y levanta los contenedores en segundo plano ejecutando:
+
+   ```bash
+   docker-compose up -d --build
+   ```
+
+> Nota: Dependiendo de tu versión, el comando podría ser docker compose up -d --build).
+
+#### 🌐 Accesos y Puertos
+
+Una vez que los contenedores estén corriendo (Started), los servicios estarán disponibles en las siguientes direcciones:
+
+💻 Frontend (UI - React/Vite): `http://localhost:3000`
+
+⚙️ Backend (API): `http://localhost:8080`
+
+📚 Swagger Docs (OpenAPI): `http://localhost:8080/swagger-ui/index.html`
+
+🗄️ PostgreSQL: localhost:5432
+
+Base de datos: sigesa
+
+Usuario: sigesa_user
+Contraseña: sigesa_password
+
+🛠️ Comandos Útiles de Mantenimiento
+Ver los logs en tiempo real (todos los servicios):
+
+```Bash
+docker-compose logs -f
+Ver los logs de un servicio específico (ej. backend):
+```
+
+```Bash
+docker-compose logs -f backend
+Detener los contenedores (sin borrar la base de datos):
+```
+
+```Bash
+docker-compose down
+Reiniciar todo desde cero (⚠️ ESTO BORRARÁ LA BASE DE DATOS LOCAL):
+```
+
+```Bash
+docker-compose down -v
+```
+
+#### ⚠️ Solución de Problemas Frecuentes (Troubleshooting)
+
+`Error: connect: permission denied (Linux)`: Tu usuario no tiene permisos sobre el socket de Docker. Ejecuta `sudo usermod -aG docker $USER`, luego reinicia tu terminal o ejecuta `newgrp docker`.
+
+`Warning: attribute "version" is obsolete`: Es una advertencia inofensiva de Docker Compose V2. Para quitarla, elimina la línea version: '3.8' al inicio del archivo docker-compose.yml.
+
+El Backend falla al conectar a la BD al iniciar: A veces el backend levanta milisegundos antes que PostgreSQL acepte conexiones. El contenedor del backend se reiniciará automáticamente (restart: always) e intentará reconectar exitosamente.
 
 ### 1. Backend
 

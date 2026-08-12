@@ -1,16 +1,24 @@
 import { GraduationCap } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { LoginFormUI } from '../components/LoginFormUI';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { getPostLoginPath } from '../../../lib/auth/getPostLoginPath';
 import { useAuth } from '../../../lib/auth/useAuth';
 
+interface LoginLocationState {
+  from?: string;
+}
+
 export function LoginPage() {
   const { isAuthenticated, session } = useAuth();
+  const location = useLocation();
   const loginForm = useLoginForm();
 
   if (isAuthenticated && session) {
-    return <Navigate to={getPostLoginPath(session.role)} replace />;
+    const from = (location.state as LoginLocationState | null)?.from;
+    const destination =
+      from && from !== '/login' ? from : getPostLoginPath(session.role);
+    return <Navigate to={destination} replace />;
   }
 
   return (

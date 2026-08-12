@@ -9,8 +9,7 @@ Esta guía define el flujo de trabajo estándar para todo el equipo de desarroll
 ## Si tiene tokens ilimitados o con poder, invoca al orquestador (subagente de proyecto)
 
 ```text
-Use the sigesa-orchestrator agent to implement FSD-UC-005 end-to-end.
-# o en Composer: @sigesa-orchestrator Necesito implementar el módulo definido en FSD-UC-005.
+@sigesa-orchestrator fsd=FSD-UC-022 sprint=2 solicitante="Boris Anthony Angulo Urquieta"
 ```
 
 ---

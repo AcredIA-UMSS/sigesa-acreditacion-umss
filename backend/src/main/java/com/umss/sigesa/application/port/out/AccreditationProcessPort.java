@@ -5,6 +5,6 @@ import com.umss.sigesa.domain.model.AccreditationProcess;
 import java.util.UUID;
 
 public interface AccreditationProcessPort {
-    boolean existsActiveProcessByCareer(UUID careerId);
+    boolean existsActiveProcessByCareerAndTemplateType(UUID careerId, String templateType);
     AccreditationProcess save(AccreditationProcess process);
 }

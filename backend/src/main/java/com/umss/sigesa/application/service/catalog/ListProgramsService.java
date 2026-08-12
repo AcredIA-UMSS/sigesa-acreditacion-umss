@@ -14,8 +14,8 @@ public class ListProgramsService implements ListProgramsUseCase {
     }
 
     @Override
-    public List<ProgramSummary> list() {
-        return programCatalogPort.findAll().stream()
+    public List<ProgramSummary> list(String query) {
+        return programCatalogPort.search(query).stream()
                 .map(entry -> new ProgramSummary(entry.id(), entry.code(), entry.name()))
                 .toList();
     }

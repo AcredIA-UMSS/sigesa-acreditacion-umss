@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import type { LoginResponse } from '../../api/model';
+import { registerAuthBridge } from './authBridge';
 import { AuthContext, type AuthContextValue } from './auth-context';
 import { isBackendRoleCode } from './roleLabels';
 import { clearSession, loadSession, saveSession } from './tokenStorage';
@@ -23,8 +24,27 @@ function toSession(response: LoginResponse): AuthSession | null {
   };
 }
 
+function isSessionActive(session: AuthSession | null): session is AuthSession {
+  return session !== null && session.expiresAt > Date.now();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<AuthSession | null>(() => loadSession());
+  const [session, setSession] = useState<AuthSession | null>(() => {
+    const stored = loadSession();
+    return isSessionActive(stored) ? stored : null;
+  });
+
+  const logout = useCallback(() => {
+    clearSession();
+    setSession(null);
+  }, []);
+
+  useLayoutEffect(() => {
+    return registerAuthBridge(
+      () => (isSessionActive(session) ? session.accessToken : null),
+      logout,
+    );
+  }, [session, logout]);
 
   const login = useCallback((response: LoginResponse) => {
     const nextSession = toSession(response);
@@ -35,15 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(nextSession);
   }, []);
 
-  const logout = useCallback(() => {
-    clearSession();
-    setSession(null);
-  }, []);
-
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
-      isAuthenticated: session !== null,
+      isAuthenticated: isSessionActive(session),
       login,
       logout,
     }),

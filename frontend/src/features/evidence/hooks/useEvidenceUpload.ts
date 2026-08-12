@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  LARGE_FILE_THRESHOLD_BYTES,
-  useUploadEvidence,
-} from '../../../api/endpoints/evidence-controller/evidence-controller';
+import { useUpload } from '../../../api/endpoints/evidence-controller/evidence-controller';
 import type { UploadEvidenceResponse } from '../../../api/model';
 import { mapUploadError } from './mapUploadError';
+
+/** 10 MiB — aviso de archivo grande en UI */
+export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024;
 
 /** UUIDs seed de EvidenceDataLoader (demo local UC-004). */
 export const SEED_INDICATOR_ID = '550e8400-e29b-41d4-a716-446655440003';
@@ -71,11 +71,15 @@ export function useEvidenceUpload() {
     }));
   }, [searchParams]);
 
-  const mutation = useUploadEvidence({
-    onSuccess: (data) => {
-      setResult(data);
-      setProgress(100);
-      setValidationErrors({});
+  const mutation = useUpload({
+    mutation: {
+      onSuccess: (response) => {
+        if (response.status === 200) {
+          setResult(response.data);
+        }
+        setProgress(100);
+        setValidationErrors({});
+      },
     },
   });
 
@@ -106,13 +110,12 @@ export function useEvidenceUpload() {
     setResult(null);
     setValidationErrors({});
     mutation.mutate({
-      data: {
-        indicatorId: form.indicatorId.trim(),
+      indicatorId: form.indicatorId.trim(),
+      params: {
         criterionId: form.criterionId.trim(),
         description: form.description.trim(),
-        file: form.file,
       },
-      onProgress: setProgress,
+      data: { file: form.file },
     });
   }, [form, mutation]);
 
@@ -138,7 +141,9 @@ export function useEvidenceUpload() {
     isBlocked,
     result,
     validationErrors,
-    errorMessage: mapUploadError(mutation.error),
+    errorMessage: mapUploadError(
+      mutation.error instanceof Error ? mutation.error : null,
+    ),
     isSubmitting: mutation.isPending,
   };
 }

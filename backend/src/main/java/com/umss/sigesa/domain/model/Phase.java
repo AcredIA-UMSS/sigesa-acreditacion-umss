@@ -19,6 +19,7 @@ public class Phase {
     private UUID id;
     private String name;
     private Integer order;
+    private String description;
     @Builder.Default
     private List<Subphase> subphases = new ArrayList<>();
 }

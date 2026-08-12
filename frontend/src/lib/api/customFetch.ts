@@ -1,4 +1,4 @@
-import { loadSession } from '../auth/tokenStorage';
+import { resolveAccessToken } from '../auth/authBridge';
 import { ApiError } from './apiError';
 
 export interface CustomFetchOptions extends RequestInit {
@@ -28,6 +28,10 @@ function resolveHttpErrorMessage(status: number, rawBody: string | null): string
     return 'El endpoint solicitado no existe. Verifique que el backend esté actualizado.';
   }
 
+  if (status === 401) {
+    return 'Sesión expirada o no autenticada. Inicie sesión nuevamente.';
+  }
+
   return 'Error inesperado';
 }
 
@@ -38,10 +42,18 @@ export async function customFetch<TData>(
   const { auth = true, headers: initHeaders, ...init } = options;
   const headers = new Headers(initHeaders);
 
-  if (auth) {
-    const session = loadSession();
-    if (session?.accessToken) {
-      headers.set('Authorization', `Bearer ${session.accessToken}`);
+
+  // Vacío = rutas relativas (/api/...) vía proxy Vite o nginx en Docker
+  const baseUrl = import.meta.env.VITE_API_URL ?? '';
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const shouldAttachAuth = auth && !fullUrl.includes('/auth/login');
+
+  let authorizationAttached = false;
+  if (shouldAttachAuth) {
+    const accessToken = resolveAccessToken();
+    if (accessToken) {
+      headers.set('Authorization', `Bearer ${accessToken}`);
+      authorizationAttached = true;
     }
   }
 
@@ -57,7 +69,7 @@ export async function customFetch<TData>(
   let response: Response;
 
   try {
-    response = await fetch(url, { ...init, headers });
+    response = await fetch(fullUrl, { ...init, headers });
   } catch {
     throw new ApiError(
       0,
@@ -79,6 +91,11 @@ export async function customFetch<TData>(
       } catch {
         /* keep UNKNOWN_ERROR */
       }
+    }
+
+    if (response.status === 401 && authorizationAttached && code === 'UNAUTHORIZED') {
+      // No cerrar sesión automáticamente: evita redirección al login en errores transitorios.
+      // La UI muestra el error; el usuario puede reintentar o cerrar sesión manualmente.
     }
 
     throw new ApiError(response.status, code, resolveHttpErrorMessage(response.status, rawBody));

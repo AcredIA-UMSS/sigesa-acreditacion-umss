@@ -7,22 +7,28 @@ import { ExecutiveDashboardSection } from '../components/ExecutiveDashboardSecti
 import {
   ShieldCheck,
   XCircle,
-  Users,
   AlertTriangle,
 } from 'lucide-react';
 
+import { useAuth } from '../../../lib/auth/useAuth';
+
 export function DashboardPage() {
-  const { summary, isLoading, error, refetch, mockPersona, changeMockPersona } = useDashboardSummary();
+  const { session } = useAuth();
+  const { summary, isLoading, error, refetch } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
 
-  const hasCc = ((summary?.grantedPermissions as string[])?.includes('READ_CC_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_CC') || (summary?.grantedPermissions as string[])?.includes('CC')) && summary?.coordinatorSection !== null && summary?.coordinatorSection !== undefined;
-  const hasTd = ((summary?.grantedPermissions as string[])?.includes('READ_TD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_TD') || (summary?.grantedPermissions as string[])?.includes('TD')) && summary?.technicianSection !== null && summary?.technicianSection !== undefined;
-  const hasJd = ((summary?.grantedPermissions as string[])?.includes('READ_JD_DASHBOARD') || (summary?.grantedPermissions as string[])?.includes('ROLE_JD') || (summary?.grantedPermissions as string[])?.includes('JD')) && summary?.executiveSection !== null && summary?.executiveSection !== undefined;
+  const permissions = (summary?.grantedPermissions as string[]) ?? [];
+  const hasCc = (permissions.includes('READ_CC_DASHBOARD') || permissions.includes('ROLE_CC') || permissions.includes('CC')) && summary?.coordinatorSection != null;
+  const hasEe = (permissions.includes('READ_EE_DASHBOARD') || permissions.includes('ROLE_EE') || permissions.includes('EE')) && summary?.coordinatorSection != null;
+  const hasTd = (permissions.includes('READ_TD_DASHBOARD') || permissions.includes('ROLE_TD') || permissions.includes('TD')) && summary?.technicianSection != null;
+  const hasJd = (permissions.includes('READ_JD_DASHBOARD') || permissions.includes('ROLE_JD') || permissions.includes('JD')) && summary?.executiveSection != null;
+  const isExternalEvaluator = session?.role === 'EE';
+  const showCoordinatorSection = (hasCc || hasEe) && summary?.coordinatorSection != null;
 
   // Sync activeTab when summary loads or changes (like after switching mock personas)
   useEffect(() => {
     if (summary) {
-      if (hasCc) {
+      if (hasCc || hasEe) {
         setActiveTab('cc');
       } else if (hasTd) {
         setActiveTab('td');
@@ -32,14 +38,14 @@ export function DashboardPage() {
         setActiveTab(null);
       }
     }
-  }, [summary, hasCc, hasTd, hasJd]);
+  }, [summary, hasCc, hasEe, hasTd, hasJd]);
 
   const handleReload = () => {
     refetch();
   };
 
   // Determine if user has no assigned sections
-  const hasNoData = summary && !hasCc && !hasTd && !hasJd;
+  const hasNoData = summary && !hasCc && !hasEe && !hasTd && !hasJd;
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-primary-900/10">
@@ -50,37 +56,17 @@ export function DashboardPage() {
         <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="text-heading-xl font-bold tracking-tight text-primary-800">
-              Panel de Control Acreditación
+              {isExternalEvaluator ? 'Revisión Documental de Acreditación' : 'Panel de Control Acreditación'}
             </h1>
             <p className="mt-1 text-body-lg text-gray-700">
-              SIGESA · Gestión Integrada de Acreditación de Calidad Académica
+              {isExternalEvaluator
+                ? 'SIGESA · Consulta de evidencias e indicadores de la carrera asignada (solo lectura)'
+                : 'SIGESA · Gestión Integrada de Acreditación de Calidad Académica'}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Mock Persona Switcher (Local Testing Option) */}
-            {import.meta.env.DEV && (
-              <div className="border-l pl-4 ml-4 border-amber-500">
-                <div className="flex items-center gap-2 rounded-xl border border-primary-200/40 bg-body px-3 py-2 shadow-sm text-xs font-semibold text-primary-750">
-                  <Users size={16} className="text-primary-500" />
-                  <span className="text-[11px] text-gray-600 font-medium">Simular Rol:</span>
-                  <select
-                    value={mockPersona || 'real'}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      changeMockPersona(val === 'real' ? null : val);
-                    }}
-                    className="bg-transparent focus:outline-none cursor-pointer text-label-md font-bold text-primary-800 border-l pl-2 border-gray-200/70 ml-1"
-                  >
-                    <option value="real">API Real (Sin Mock)</option>
-                    <option value="CC">Coordinador de Carrera [CC]</option>
-                    <option value="TD">Técnico DUEA [TD]</option>
-                    <option value="JD">Jefatura DUEA [JD]</option>
-                    <option value="MULTI">Multi-Rol [CC + TD]</option>
-                  </select>
-                </div>
-              </div>
-            )}
+
 
             {summary && (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary-200/40 bg-primary-100/35 px-4 py-2.5 text-primary-600 shadow-sm backdrop-blur-sm">
@@ -132,9 +118,9 @@ export function DashboardPage() {
         {!isLoading && !error && summary && !hasNoData && (
           <div className="space-y-8 animate-fadeIn">
             {/* Multi-Role Tabs Selector (if user has multiple roles) */}
-            {((hasCc ? 1 : 0) + (hasTd ? 1 : 0) + (hasJd ? 1 : 0)) > 1 && (
+            {((hasCc ? 1 : 0) + (hasEe ? 1 : 0) + (hasTd ? 1 : 0) + (hasJd ? 1 : 0)) > 1 && (
               <div className="flex border-b border-primary-200/50 pb-px mb-6">
-                {hasCc && (
+                {(hasCc || hasEe) && (
                   <button
                     type="button"
                     onClick={() => setActiveTab('cc')}
@@ -144,7 +130,7 @@ export function DashboardPage() {
                         : 'border-transparent text-gray-600 hover:text-primary-800'
                     }`}
                   >
-                    Coordinador de Carrera [CC]
+                    {hasEe && !hasCc ? 'Evaluador externo [EE]' : 'Coordinador de Carrera [CC]'}
                   </button>
                 )}
                 {hasTd && (
@@ -177,8 +163,11 @@ export function DashboardPage() {
             )}
 
             {/* Render Selected Role Dashboard */}
-            {activeTab === 'cc' && summary.coordinatorSection && (
-              <CoordinatorDashboardSection section={summary.coordinatorSection} />
+            {activeTab === 'cc' && showCoordinatorSection && summary.coordinatorSection && (
+              <CoordinatorDashboardSection
+                section={summary.coordinatorSection}
+                readOnly={isExternalEvaluator || (hasEe && !hasCc)}
+              />
             )}
 
             {activeTab === 'td' && summary.technicianSection && (

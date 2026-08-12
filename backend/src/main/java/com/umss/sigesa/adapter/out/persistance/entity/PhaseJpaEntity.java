@@ -39,6 +39,9 @@ public class PhaseJpaEntity {
     @Column(name = "phase_order", nullable = false)
     private Integer order;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "process_id", nullable = false)
     private AccreditationProcessJpaEntity process;

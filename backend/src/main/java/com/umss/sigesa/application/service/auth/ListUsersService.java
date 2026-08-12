@@ -44,7 +44,11 @@ public class ListUsersService implements ListUsersUseCase {
                 user.getEmail().value(),
                 user.getRole().name(),
                 user.getStatus().name(),
-                programIds
+                programIds,
+                user.getFirstName(),
+                user.getLastName(),
+                user.getFullName(),
+                user.getPhoneNumber()
         );
     }
 

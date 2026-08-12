@@ -73,6 +73,9 @@ public class UserJpaAdapter implements UserRepositoryPort {
         entity.setStatus(user.getStatus());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
+        entity.setFirstName(user.getFirstName());
+        entity.setLastName(user.getLastName());
+        entity.setPhoneNumber(user.getPhoneNumber());
         return entity;
     }
 
@@ -83,7 +86,10 @@ public class UserJpaAdapter implements UserRepositoryPort {
                 entity.getRole(),
                 entity.getStatus(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getFirstName(),
+                entity.getLastName(),
+                entity.getPhoneNumber()
         );
     }
 }

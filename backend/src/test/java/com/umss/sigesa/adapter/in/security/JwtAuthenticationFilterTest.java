@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.in.security;
 
+import com.umss.sigesa.adapter.in.web.ProcessController;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class JwtAuthenticationFilterTest {
         mockMvc.perform(post("/api/v1/processes")
                         .contentType("application/json")
                         .content("""
-                                {"template_id":"550e8400-e29b-41d4-a716-446655440000","career_id":"550e8400-e29b-41d4-a716-446655440001"}
+                                {"templateId":"550e8400-e29b-41d4-a716-446655440000","careerId":"550e8400-e29b-41d4-a716-446655440001","period":"2026-1","type":"CEUB"}
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error").value("UNAUTHORIZED"));

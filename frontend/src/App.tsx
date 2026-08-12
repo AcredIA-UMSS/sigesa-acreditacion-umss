@@ -1,13 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
+import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
+import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
-import { CreateProcessView } from './features/accreditation-process';
+import { CreateProcessPage } from './features/accreditation-process';
+import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
+import { AssistantPage } from './features/assistant/AssistantPage';
 
 function App() {
   return (
@@ -20,6 +23,39 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplatesListPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas/nueva"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplateEditorPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/plantillas/:templateId"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <TemplateEditorPage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -39,7 +75,38 @@ function App() {
           path="/procesos/nuevo"
           element={
             <ProtectedRoute>
-              <CreateProcessView />
+              <JdOnlyRoute>
+                <CreateProcessPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos"
+          element={
+            <ProtectedRoute>
+              <ProcessListPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId/estructura"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <ProcessStructurePage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId"
+          element={
+            <ProtectedRoute>
+              <ProcessDetailPage />
             </ProtectedRoute>
           }
         />
@@ -62,6 +129,15 @@ function App() {
               <JdOnlyRoute>
                 <ExecutiveReportPage />
               </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ayuda"
+          element={
+            <ProtectedRoute>
+              <AssistantPage />
             </ProtectedRoute>
           }
         />

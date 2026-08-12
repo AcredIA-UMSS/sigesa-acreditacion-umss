@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Bell, Settings } from 'lucide-react';
 import { Sidebar } from '../../../../components/layout/Sidebar';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
-import { RegisterUserFormUI } from '../components/RegisterUserFormUI';
+import { AddUserModalUI } from '../components/AddUserModalUI';
+import { UserSaveSuccessDialog } from '../components/UserSaveSuccessDialog';
 import { UsersTableUI } from '../components/UsersTableUI';
 import { useDeactivateUserAction } from '../hooks/useDeactivateUserAction';
 import { useRegisterUserForm } from '../hooks/useRegisterUserForm';
@@ -47,7 +48,7 @@ export function UsersAdminPage() {
               <div className="mb-4 h-1 w-12 bg-secondary" />
               <h1 className="text-heading-xl text-primary-800">Gestión de usuarios</h1>
               <p className="mt-2 text-body-lg text-gray-600">
-                Alta de cuentas internas y revocación soft para el rol Jefe (JD).
+                Administre cuentas internas, asigne roles y comparta credenciales al momento del alta.
               </p>
             </div>
 
@@ -57,25 +58,6 @@ export function UsersAdminPage() {
               </div>
             )}
 
-            <RegisterUserFormUI
-              email={registerForm.form.email}
-              role={registerForm.form.role}
-              programId={registerForm.form.programId}
-              roleOptions={registerForm.roleOptions}
-              programOptions={registerForm.programOptions}
-              requiresProgram={registerForm.requiresProgram}
-              isProgramsLoading={registerForm.isProgramsLoading}
-              emailError={registerForm.fieldErrors.email}
-              programError={registerForm.fieldErrors.programId}
-              submitError={registerForm.submitError}
-              successMessage={registerForm.successMessage}
-              isSubmitting={registerForm.isPending}
-              onEmailChange={registerForm.setEmail}
-              onRoleChange={registerForm.setRole}
-              onProgramChange={registerForm.setProgramId}
-              onSubmit={registerForm.handleSubmit}
-            />
-
             <UsersTableUI
               users={usersList.users}
               isLoading={usersList.isLoading}
@@ -83,11 +65,42 @@ export function UsersAdminPage() {
               errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
               isDeactivating={deactivateAction.isDeactivating}
               deactivatingUserId={deactivateAction.deactivatingUserId}
+              onAddUser={registerForm.openModal}
               onDeactivate={handleDeactivate}
             />
           </div>
         </main>
       </div>
+
+      <AddUserModalUI
+        isOpen={registerForm.isModalOpen}
+        form={registerForm.form}
+        fieldErrors={registerForm.fieldErrors}
+        submitError={registerForm.submitError}
+        roleOptions={registerForm.roleOptions}
+        programOptions={registerForm.programOptions}
+        requiresProgram={registerForm.requiresProgram}
+        isProgramsLoading={registerForm.isProgramsLoading}
+        isSubmitting={registerForm.isPending}
+        onClose={registerForm.closeModal}
+        onSubmit={registerForm.handleSubmit}
+        onFirstNameChange={registerForm.setFirstName}
+        onLastNameChange={registerForm.setLastName}
+        onEmailChange={registerForm.setEmail}
+        onPhoneChange={registerForm.setPhoneNumber}
+        onRoleChange={registerForm.setRole}
+        onProgramChange={registerForm.setProgramId}
+        onPasswordChange={registerForm.setPassword}
+        onConfirmPasswordChange={registerForm.setConfirmPassword}
+      />
+
+      <UserSaveSuccessDialog
+        isOpen={registerForm.saveSuccess !== null}
+        fullName={registerForm.saveSuccess?.fullName ?? ''}
+        email={registerForm.saveSuccess?.email ?? ''}
+        password={registerForm.saveSuccess?.password ?? ''}
+        onClose={registerForm.closeSuccessDialog}
+      />
     </div>
   );
 }

@@ -7,5 +7,5 @@ public interface ListProgramsUseCase {
 
     record ProgramSummary(UUID id, String code, String name) {}
 
-    List<ProgramSummary> list();
+    List<ProgramSummary> list(String query);
 }

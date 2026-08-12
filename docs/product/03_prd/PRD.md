@@ -129,6 +129,7 @@ Resumen ejecutivo:
 - **[TD]:** bandeja revisión, rechazo con causa, búsqueda global.
 - **[CC]:** carga, subsanación, observaciones, dashboard (incl. móvil Should).
 - **[P]:** consulta estado y certificados publicados (v1.1+).
+- **[EE]:** revisión documental solo lectura de la carrera asignada (v1.1+).
 
 ### 4.2 User journeys (Mermaid)
 
@@ -507,12 +508,29 @@ Escenario: Alerta de plazo próximo
   Entonces el [CC] recibe correo institucional con enlace directo al Indicador
 ```
 
-### 5.6 Épica E6 — Portal [P]
+### 5.6 Épica E6 — Portal [P] y evaluador externo [EE]
 
-| ID | Historia | Pri. | BRD / MRD |
-|----|----------|------|-----------|
-| PRD-US-016 | Como [P], quiero consultar estado de acreditación sin login | Should | BRD-REQ-016 / MRD-N-18 |
-| PRD-US-020 | Como [P], quiero descargar certificado publicado por [JD] | Could | BRD-REQ-023 |
+| ID | Historia | Pri. | BRD / MRD | Estado |
+|----|----------|------|-----------|--------|
+| PRD-US-016 | Como [P], quiero consultar estado de acreditación sin login | Should | BRD-REQ-016 / MRD-N-18 | Pendiente |
+| PRD-US-020 | Como [P], quiero descargar certificado publicado por [JD] | Could | BRD-REQ-023 | Pendiente |
+| PRD-US-026 | Como [EE], quiero revisar la documentación de acreditación de la carrera asignada en modo solo lectura | Should | BRD-REQ-001 / MRD-N-09 | **En curso** (`FSD-UC-019`, `DD-UC-019`, `PR-IMPL-014`) |
+
+#### PRD-US-026 — Revisión documental [EE]
+
+```gherkin
+@PRD-US-026 @FSD-UC-019
+Escenario: Panel de revisión de carrera asignada
+  Dado un [EE] autenticado con carrera asignada
+  Cuando abre el panel de control
+  Entonces ve KPIs, fases y observaciones de esa carrera
+  Y no puede cargar ni modificar Evidencias
+
+Escenario: Bloqueo de acciones de mutación
+  Dado un [EE] autenticado
+  Cuando intenta cargar Evidencia o exportar reportes
+  Entonces el sistema responde con acceso denegado
+```
 
 ```gherkin
 Escenario: Portal sin borradores
@@ -619,6 +637,7 @@ Escenario: Progreso en carga de Evidencia grande
 | PRD-REQ-026 | Certificados publicados | US-020 | Could | BRD-REQ-023 | MRD-N-21 |
 | PRD-REQ-027 | IA explicable (sugerencias) | — | Could | BRD-REQ-018 | MRD-N-22 |
 | PRD-REQ-028 | Chatbot FAQ normativo | — | Could | BRD-REQ-024 | MRD-N-22 |
+| PRD-REQ-029 | Acceso [EE] solo lectura por carrera asignada | US-026 | Should | BRD-REQ-001 | MRD-N-09 |
 
 ---
 

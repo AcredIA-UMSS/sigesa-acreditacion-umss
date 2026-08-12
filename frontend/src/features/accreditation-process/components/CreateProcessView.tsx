@@ -1,76 +1,51 @@
-// frontend/src/features/accreditation-process/components/CreateProcessView.tsx
-import React, { useState, useEffect } from 'react';
-import { CreateProcessForm, type CareerOption, type TemplateOption } from './CreateProcessForm';
+import React from 'react';
+import { CreateProcessForm } from './CreateProcessForm';
 import { useCreateAccreditationProcess } from '../hooks/useCreateAccreditationProcess';
 import type { CreateProcessRequestDto } from '../../../api/model';
+import { Link } from 'react-router-dom';
 
 export const CreateProcessView: React.FC = () => {
   const { submitProcess, isPending, errorMessage, successData } = useCreateAccreditationProcess();
 
-  // ⚠️ TODO: Reemplazar por hooks de Orval (ej. useGetCareers) cuando el backend los exponga
-  const [careers, setCareers] = useState<CareerOption[]>([]);
-  const [templates, setTemplates] = useState<TemplateOption[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-
-  // Simulamos la carga de catálogos desde una API
-  useEffect(() => {
-    const fetchMocks = async () => {
-      // Simulamos un retraso de red de 1 segundo
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      setCareers([
-        { id: '123e4567-e89b-12d3-a456-426614174000', name: 'Ingeniería de Sistemas' },
-        { id: '123e4567-e89b-12d3-a456-426614174001', name: 'Medicina' }
-      ]);
-      
-      setTemplates([
-        { id: '987e6543-e21b-34d3-b456-426614174111', name: 'CEUB 2026', type: 'CEUB' },
-        { id: '987e6543-e21b-34d3-b456-426614174222', name: 'ARCU-SUR v2', type: 'ARCU-SUR' }
-      ]);
-      
-      setIsLoadingData(false);
-    };
-
-    fetchMocks();
-  }, []);
-
   const handleFormSubmit = (payload: CreateProcessRequestDto) => {
-    // Al enviar, usamos un UUID ficticio si seleccionaron los mocks,
-    // o enviamos directamente los datos seleccionados
     submitProcess(payload);
   };
 
-  if (isLoadingData) {
-    return <div className="p-8 text-center text-gray-500 font-medium">Cargando catálogos...</div>;
-  }
-
   if (successData) {
     return (
-      <div className="max-w-2xl mx-auto py-8">
-        <div className="p-6 bg-green-50 border border-green-200 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold text-green-800 mb-2">¡Proceso Creado con Éxito!</h2>
-          <p className="text-sm text-green-700">
-            El proceso para la carrera se ha inicializado correctamente.
+      <div className="mx-auto max-w-2xl py-8">
+        <div className="rounded-lg border border-success/30 bg-success/10 p-6 shadow-sm">
+          <h2 className="text-heading-md text-success">Proceso creado con éxito</h2>
+          <p className="mt-2 text-body-md text-gray-700">
+            El proceso de acreditación para la carrera seleccionada se inicializó correctamente.
           </p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
-          >
-            Volver al panel
-          </button>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {successData.id && (
+              <Link
+                to={`/procesos/${successData.id}`}
+                className="inline-flex items-center justify-center rounded-lg bg-primary-600 px-4 py-3 text-label-md font-medium text-body transition-colors hover:bg-primary-500"
+              >
+                Ver detalle del proceso
+              </Link>
+            )}
+            <Link
+              to="/procesos"
+              className="inline-flex items-center justify-center rounded-lg border border-primary-300 bg-transparent px-4 py-3 text-label-md font-medium text-primary-700 transition-colors hover:bg-primary-50"
+            >
+              Ir al listado
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="mx-auto max-w-2xl py-8">
       <CreateProcessForm
-        careers={careers}
-        templates={templates}
+        onSubmit={handleFormSubmit}
         isLoading={isPending}
         errorMessage={errorMessage}
-        onSubmit={handleFormSubmit}
       />
     </div>
   );

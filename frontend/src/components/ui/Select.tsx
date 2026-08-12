@@ -10,6 +10,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: SelectOption[];
   error?: string;
   helperText?: string;
+  requiredMark?: boolean;
 }
 
 export function Select({
@@ -17,6 +18,7 @@ export function Select({
   options,
   error,
   helperText,
+  requiredMark = false,
   id,
   className = '',
   ...props
@@ -27,6 +29,7 @@ export function Select({
     <div className="space-y-1">
       <label htmlFor={selectId} className="block text-label-md text-gray-700">
         {label}
+        {requiredMark && <span className="ml-0.5 text-secondary">*</span>}
       </label>
       <select
         id={selectId}

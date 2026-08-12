@@ -19,6 +19,7 @@ public class TemplatePhase {
     private UUID id;
     private String name;
     private Integer order;
+    private String description;
     @Builder.Default
     private List<TemplateSubphase> subphases = new ArrayList<>();
 }

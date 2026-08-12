@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.service.auth;
 
 import com.umss.sigesa.application.port.in.AuthenticateUseCase;
+import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.IssuedToken;
 import com.umss.sigesa.application.port.out.TokenPort;
 import com.umss.sigesa.application.service.auth.support.InMemoryAuthPort;
@@ -57,7 +58,7 @@ class ModAuthServiceIntegrationTest {
     void fsdUc001_loginExitosoConRol_creaSesionJwt() {
         UUID programId = UUID.randomUUID();
         var registered = registerUserService.register(
-                "cc@umss.edu.bo", "CC", programId, "ChangeMe123!".toCharArray());
+                ccCommand("cc@umss.edu.bo", programId, "ChangeMe123!"));
 
         AuthenticateUseCase.LoginResult result = authenticateService.authenticate("cc@umss.edu.bo", "ChangeMe123!");
 
@@ -72,7 +73,7 @@ class ModAuthServiceIntegrationTest {
     @Test
     @DisplayName("FSD-UC-001: Credenciales inválidas — mensaje genérico (A1)")
     void fsdUc001_credencialesInvalidas_mismo401UsuarioInexistenteYPasswordIncorrecto() {
-        registerUserService.register("cc@umss.edu.bo", "CC", UUID.randomUUID(), "ChangeMe123!".toCharArray());
+        registerUserService.register(ccCommand("cc@umss.edu.bo", UUID.randomUUID(), "ChangeMe123!"));
 
         InvalidCredentialsException ghost = assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("ghost@umss.edu.bo", "bad"));
@@ -97,7 +98,7 @@ class ModAuthServiceIntegrationTest {
         UUID programId = UUID.randomUUID();
 
         var result = registerUserService.register(
-                "nuevo.cc@umss.edu.bo", "CC", programId, "TempPass123!".toCharArray());
+                ccCommand("nuevo.cc@umss.edu.bo", programId, "TempPass123!"));
 
         assertEquals(UserStatus.INACTIVE, result.status());
         List<UserProgramAssignment> assignments = assignmentRepository.allAssignments();
@@ -110,10 +111,10 @@ class ModAuthServiceIntegrationTest {
     @Test
     @DisplayName("FSD-UC-002: Email duplicado rechazado")
     void fsdUc002_emailDuplicado_rechazado() {
-        registerUserService.register("nuevo.cc@umss.edu.bo", "CC", UUID.randomUUID(), "TempPass123!".toCharArray());
+        registerUserService.register(ccCommand("nuevo.cc@umss.edu.bo", UUID.randomUUID(), "TempPass123!"));
 
         assertThrows(DuplicateEmailException.class,
-                () -> registerUserService.register("nuevo.cc@umss.edu.bo", "CC", UUID.randomUUID(), "TempPass123!".toCharArray()));
+                () -> registerUserService.register(ccCommand("nuevo.cc@umss.edu.bo", UUID.randomUUID(), "TempPass123!")));
     }
 
     @Test
@@ -121,7 +122,7 @@ class ModAuthServiceIntegrationTest {
     void fsdUc002_revocacion_loginBloqueadoHistorialIntacto() {
         UUID programId = UUID.randomUUID();
         var registered = registerUserService.register(
-                "cc@umss.edu.bo", "CC", programId, "ChangeMe123!".toCharArray());
+                ccCommand("cc@umss.edu.bo", programId, "ChangeMe123!"));
 
         authenticateService.authenticate("cc@umss.edu.bo", "ChangeMe123!");
 
@@ -136,5 +137,10 @@ class ModAuthServiceIntegrationTest {
         assertEquals(1, assignmentRepository.allAssignments().size());
         assertTrue(assignmentRepository.allAssignments().getFirst().getRevokedAt() != null);
         assertTrue(auditLogPort.events().contains("DEACTIVATE:" + registered.userId()));
+    }
+
+    private static RegisterUserUseCase.RegisterUserCommand ccCommand(String email, UUID programId, String password) {
+        return new RegisterUserUseCase.RegisterUserCommand(
+                email, "CC", programId, "Juan", "Coordinador", "71234567", password.toCharArray());
     }
 }

@@ -64,7 +64,7 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
           <div>
             <span className="text-label-md font-semibold text-gray-700 uppercase">Avance Institucional</span>
             <h4 className="text-display-lg font-bold leading-none text-primary-800 mt-2">
-              {section.porcentajeAvanceInstitucional ?? 0}%
+              {(section.porcentajeAvanceInstitucional ?? 0).toFixed(2)}%
             </h4>
             <p className="mt-2 text-xs text-gray-600">Progreso agregado a nivel institucional</p>
           </div>

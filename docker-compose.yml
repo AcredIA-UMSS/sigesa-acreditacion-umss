@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
 
   ollama:
     image: ollama/ollama:latest
@@ -21,8 +22,8 @@ services:
     environment:
       OLLAMA_MODELS: /root/.ollama
     volumes:
-      - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
-      - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
+      # - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
+      # - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
       - ollama_state:/root/.ollama
     ports:
       - "11434:11434"
@@ -47,7 +48,7 @@ services:
     volumes:
       - open-webui:/app/backend/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -63,7 +64,7 @@ services:
       db:
         condition: service_started
       open-webui:
-        condition: service_healthy
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - DB_URL=jdbc:postgresql://db:5432/sigesa

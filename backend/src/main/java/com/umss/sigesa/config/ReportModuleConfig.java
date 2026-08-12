@@ -5,17 +5,23 @@ import com.umss.sigesa.application.port.in.GenerateExecutiveReportUseCase;
 import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ProcessReportJobUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
+import com.umss.sigesa.application.port.out.DashboardQueryPort;
 import com.umss.sigesa.application.port.out.ExecutiveDataPort;
 import com.umss.sigesa.application.port.out.PdfRendererPort;
 import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
+import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
+import com.umss.sigesa.application.port.out.ReportGeneratorPort;
 import com.umss.sigesa.application.port.out.ReportJobRepositoryPort;
 import com.umss.sigesa.application.service.report.DownloadReportArtifactService;
 import com.umss.sigesa.application.service.report.GenerateExecutiveReportService;
 import com.umss.sigesa.application.service.report.GetReportJobStatusService;
 import com.umss.sigesa.application.service.report.ProcessReportJobService;
+import com.umss.sigesa.application.service.report.ReportExportJobService;
 import com.umss.sigesa.application.service.report.ReportJobProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class ReportModuleConfig {
@@ -48,5 +54,13 @@ public class ReportModuleConfig {
             ReportJobRepositoryPort reportJobRepository,
             ReportArtifactStoragePort artifactStorage) {
         return new DownloadReportArtifactService(reportJobRepository, artifactStorage);
+    }
+
+    @Bean
+    ReportExportJobService reportExportJobService(
+            ReportExportJobRepositoryPort repositoryPort,
+            DashboardQueryPort queryPort,
+            List<ReportGeneratorPort> reportGenerators) {
+        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators);
     }
 }

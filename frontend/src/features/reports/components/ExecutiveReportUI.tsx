@@ -61,8 +61,9 @@ export function ExecutiveReportUI({
   isBlocked,
 }: ExecutiveReportUIProps) {
   const progressPercent = getJobProgressPercent(jobStatus?.status);
-  const statusLabel = jobStatus
-    ? (JOB_STATUS_LABELS[jobStatus.status] ?? jobStatus.status)
+  const statusKey = jobStatus?.status;
+  const statusLabel = statusKey
+    ? (JOB_STATUS_LABELS[statusKey] ?? statusKey)
     : null;
   const jobErrorMessage = mapJobErrorCode(jobStatus?.errorCode);
   const showJobPanel = activeJobId !== null || jobStatus !== undefined;
@@ -251,7 +252,10 @@ export function ExecutiveReportUI({
                     <>
                       <div className="mb-4 flex items-center gap-2">
                         <span className="text-body-md text-gray-600">Estado:</span>
-                        <StatusBadge status={jobStatus.status} label={statusLabel ?? jobStatus.status} />
+                        <StatusBadge
+                          status={jobStatus.status ?? 'PENDING'}
+                          label={statusLabel ?? jobStatus.status ?? 'Pendiente'}
+                        />
                       </div>
 
                       <div className="mb-1 flex items-center justify-between text-label-md text-gray-600">

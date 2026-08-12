@@ -79,14 +79,22 @@ class UserAdminControllerTest {
     @WithMockUser(roles = "JD")
     void register_withJdRoleReturns201Inactive() throws Exception {
         UUID userId = UUID.randomUUID();
-        when(registerUserUseCase.register(anyString(), anyString(), any(), any(char[].class)))
+        when(registerUserUseCase.register(any()))
                 .thenReturn(new RegisterUserUseCase.RegisterResult(userId, UserStatus.INACTIVE));
 
         mockMvc.perform(post("/api/v1/admin/users")
                         .with(user("testjd").roles("JD"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"nuevo.cc@umss.edu.bo","role":"CC","programId":"550e8400-e29b-41d4-a716-446655440000"}
+                                {
+                                  "email":"nuevo.cc@umss.edu.bo",
+                                  "role":"CC",
+                                  "programId":"550e8400-e29b-41d4-a716-446655440000",
+                                  "firstName":"Juan",
+                                  "lastName":"Coordinador",
+                                  "phoneNumber":"71234567",
+                                  "password":"Segura2026!"
+                                }
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.userId").value(userId.toString()))
@@ -123,7 +131,9 @@ class UserAdminControllerTest {
     void list_withJdRoleReturns200() throws Exception {
         UUID userId = UUID.randomUUID();
         when(listUsersUseCase.list(null, null)).thenReturn(List.of(
-                new ListUsersUseCase.UserSummary(userId, "cc@umss.edu.bo", "CC", "ACTIVE", List.of())
+                new ListUsersUseCase.UserSummary(
+                        userId, "cc@umss.edu.bo", "CC", "ACTIVE", List.of(),
+                        "Juan", "Coordinador", "Juan Coordinador", "71234567")
         ));
 
         mockMvc.perform(get("/api/v1/admin/users")
@@ -138,14 +148,22 @@ class UserAdminControllerTest {
     @Test
     @WithMockUser(roles = "JD")
     void register_duplicateEmailReturns409() throws Exception {
-        when(registerUserUseCase.register(anyString(), anyString(), any(), any(char[].class)))
+        when(registerUserUseCase.register(any()))
                 .thenThrow(new com.umss.sigesa.domain.exception.DuplicateEmailException());
 
         mockMvc.perform(post("/api/v1/admin/users")
                         .with(user("testjd").roles("JD"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"cc@umss.edu.bo","role":"CC","programId":"550e8400-e29b-41d4-a716-446655440000"}
+                                {
+                                  "email":"cc@umss.edu.bo",
+                                  "role":"CC",
+                                  "programId":"550e8400-e29b-41d4-a716-446655440000",
+                                  "firstName":"Juan",
+                                  "lastName":"Dup",
+                                  "phoneNumber":"71234567",
+                                  "password":"Segura2026!"
+                                }
                                 """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("EMAIL_ALREADY_REGISTERED"));

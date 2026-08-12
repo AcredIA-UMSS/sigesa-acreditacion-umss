@@ -29,12 +29,14 @@ public class AuthDataLoader implements ApplicationRunner {
     public static final String SEED_CC_EMAIL = "cc@umss.edu.bo";
     public static final String SEED_CC2_EMAIL = "cc2@umss.edu.bo";
     public static final String SEED_PENDING_EMAIL = "pendiente@umss.edu.bo";
+    public static final String SEED_EE_EMAIL = "ee@umss.edu.bo";
 
     public static final String SEED_JD_PASSWORD = "JefeDemo2026!";
     public static final String SEED_TD_PASSWORD = "TecnicoDemo2026!";
     public static final String SEED_CC_PASSWORD = "CoordDemo2026!";
     public static final String SEED_CC2_PASSWORD = "Coord2Demo2026!";
     public static final String SEED_PENDING_PASSWORD = "PendienteDemo2026!";
+    public static final String SEED_EE_PASSWORD = "EvalDemo2026!";
 
     /** @deprecated Usar {@link DevSeedData#PROGRAM_INF_SIS}. */
     @Deprecated
@@ -57,35 +59,39 @@ public class AuthDataLoader implements ApplicationRunner {
         seedUser(SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, UserStatus.ACTIVE, null);
         seedUser(SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, null);
         seedUser(SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
-        seedUser(SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_CEUB);
-        seedUser(SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_ARCUSUR);
+        seedUser(SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_ING_CIVIL);
+        seedUser(SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_MEDICINA);
+        seedUser(SEED_EE_EMAIL, SEED_EE_PASSWORD, Role.EE, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
     }
 
     private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            return;
-        }
-
         LocalDateTime now = LocalDateTime.now();
-        UUID userId = UUID.randomUUID();
-
-        AppUserEntity user = new AppUserEntity();
-        user.setId(userId);
+        AppUserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
+            AppUserEntity newUser = new AppUserEntity();
+            newUser.setId(UUID.randomUUID());
+            newUser.setCreatedAt(now);
+            return newUser;
+        });
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);
         user.setStatus(status);
-        user.setCreatedAt(now);
         user.setUpdatedAt(now);
+        user.setFirstName("Demo");
+        user.setLastName(role.name());
+        user.setPhoneNumber("71234567");
         userRepository.save(user);
 
         if (programId != null) {
-            UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
-            assignment.setId(UUID.randomUUID());
-            assignment.setUserId(userId);
-            assignment.setProgramId(programId);
-            assignment.setAssignedAt(now);
-            assignmentRepository.save(assignment);
+            boolean hasAssignment = assignmentRepository.existsByUserIdAndProgramIdAndRevokedAtIsNull(user.getId(), programId);
+            if (!hasAssignment) {
+                UserProgramAssignmentEntity assignment = new UserProgramAssignmentEntity();
+                assignment.setId(UUID.randomUUID());
+                assignment.setUserId(user.getId());
+                assignment.setProgramId(programId);
+                assignment.setAssignedAt(now);
+                assignmentRepository.save(assignment);
+            }
         }
     }
 }

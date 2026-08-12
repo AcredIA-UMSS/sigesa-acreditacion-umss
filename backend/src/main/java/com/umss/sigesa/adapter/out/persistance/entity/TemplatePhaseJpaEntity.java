@@ -39,6 +39,9 @@ public class TemplatePhaseJpaEntity {
     @Column(name = "phase_order", nullable = false)
     private Integer order;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", nullable = false)
     private TemplateJpaEntity template;
