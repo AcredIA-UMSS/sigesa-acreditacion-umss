@@ -5,11 +5,13 @@ import jakarta.validation.constraints.Pattern;
 import java.util.UUID;
 
 public record AssistantChatContextDto(
-        @Pattern(regexp = "phases|general", message = "agent debe ser 'phases' o 'general'")
+        @Pattern(regexp = "phases|users|general", message = "agent debe ser 'phases', 'users' o 'general'")
         String agent,
         UUID processId,
         String careerName,
         String careerCode,
-        String templateType
+        String templateType,
+        UUID userId,
+        UUID programId
 ) {
 }

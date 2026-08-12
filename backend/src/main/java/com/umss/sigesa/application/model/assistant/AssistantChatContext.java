@@ -8,11 +8,14 @@ public record AssistantChatContext(
         String careerName,
         String careerCode,
         String templateType,
-        String phaseCatalogPrompt
+        String phaseCatalogPrompt,
+        UUID focusUserId,
+        UUID programId
 ) {
 
     public static AssistantChatContext general() {
-        return new AssistantChatContext(AssistantAgentProfile.GENERAL, null, null, null, null, null);
+        return new AssistantChatContext(
+                AssistantAgentProfile.GENERAL, null, null, null, null, null, null, null);
     }
 
     public static AssistantChatContext phases(UUID processId,
@@ -33,11 +36,29 @@ public record AssistantChatContext(
                 careerName,
                 careerCode,
                 templateType,
-                phaseCatalogPrompt);
+                phaseCatalogPrompt,
+                null,
+                null);
+    }
+
+    public static AssistantChatContext users(UUID focusUserId, UUID programId) {
+        return new AssistantChatContext(
+                AssistantAgentProfile.USERS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                focusUserId,
+                programId);
     }
 
     public boolean isPhasesAgent() {
         return agentProfile == AssistantAgentProfile.PHASES;
+    }
+
+    public boolean isUsersAgent() {
+        return agentProfile == AssistantAgentProfile.USERS;
     }
 
     public boolean hasProcessBinding() {

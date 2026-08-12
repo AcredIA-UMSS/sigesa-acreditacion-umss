@@ -68,21 +68,22 @@ public class AssistantKeywordRouter {
         String message = userMessage.trim();
         String role = auth.role() != null ? auth.role().trim().toUpperCase(Locale.ROOT) : "";
 
-        Optional<AssistantToolInvocation> writeFlow = resolveWriteFlow(message, history, role);
+        Optional<AssistantToolInvocation> writeFlow = resolveWriteFlow(message, history, role, chatContext);
         if (writeFlow.isPresent()) {
             return writeFlow;
         }
 
         if ("JD".equals(role) || "TD".equals(role)) {
-            if (!chatContext.isPhasesAgent() && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
+            if (!chatContext.isPhasesAgent() && !chatContext.isUsersAgent()
+                    && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildActiveProcessesInvocation(message));
             }
-            if (PHASES_PATTERN.matcher(message).matches()) {
+            if (!chatContext.isUsersAgent() && PHASES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildPhasesInvocation(message, chatContext));
             }
         }
 
-        if ("JD".equals(role) || "TD".equals(role) || "CC".equals(role)) {
+        if (("JD".equals(role) || "TD".equals(role) || "CC".equals(role)) && !chatContext.isUsersAgent()) {
             if (chatContext.isPhasesAgent()
                     && chatContext.careerName() != null
                     && !chatContext.careerName().isBlank()
@@ -106,15 +107,22 @@ public class AssistantKeywordRouter {
 
     private Optional<AssistantToolInvocation> resolveWriteFlow(String message,
                                                                  List<ChatMessage> history,
-                                                                 String role) {
+                                                                 String role,
+                                                                 AssistantChatContext chatContext) {
         if (!"JD".equals(role)) {
             return Optional.empty();
         }
 
+        boolean usersAgent = chatContext != null && chatContext.isUsersAgent();
+        String statusToolId = usersAgent
+                ? AssistantToolRegistry.MANAGE_USER_STATUS_ID
+                : AssistantToolRegistry.SET_USER_STATUS_ID;
+
         if (CONFIRM_PATTERN.matcher(message).matches()) {
             PendingWriteAction pending = findPendingWriteAction(history);
             if (pending != null) {
-                return Optional.of(buildSetUserStatusInvocation(pending.identifier(), pending.action(), true));
+                return Optional.of(buildUserStatusInvocation(
+                        statusToolId, pending.identifier(), pending.action(), true));
             }
         }
 
@@ -122,7 +130,7 @@ public class AssistantKeywordRouter {
         if (deactivate.matches()) {
             String target = cleanTarget(deactivate.group("target"));
             if (!target.isBlank()) {
-                return Optional.of(buildSetUserStatusInvocation(target, "DEACTIVATE", false));
+                return Optional.of(buildUserStatusInvocation(statusToolId, target, "DEACTIVATE", false));
             }
         }
 
@@ -130,7 +138,7 @@ public class AssistantKeywordRouter {
         if (activate.matches()) {
             String target = cleanTarget(activate.group("target"));
             if (!target.isBlank()) {
-                return Optional.of(buildSetUserStatusInvocation(target, "ACTIVATE", false));
+                return Optional.of(buildUserStatusInvocation(statusToolId, target, "ACTIVATE", false));
             }
         }
 
@@ -183,13 +191,14 @@ public class AssistantKeywordRouter {
                 buildJsonArgs(careerQuery, templateType));
     }
 
-    private static AssistantToolInvocation buildSetUserStatusInvocation(String identifier,
-                                                                          String action,
-                                                                          boolean confirmed) {
+    private static AssistantToolInvocation buildUserStatusInvocation(String toolId,
+                                                                       String identifier,
+                                                                       String action,
+                                                                       boolean confirmed) {
         String escapedIdentifier = identifier.replace("\\", "\\\\").replace("\"", "\\\"");
         String args = "{\"identifier\":\"" + escapedIdentifier + "\",\"action\":\"" + action
                 + "\",\"confirmed\":" + confirmed + "}";
-        return new AssistantToolInvocation(AssistantToolRegistry.SET_USER_STATUS_ID, args);
+        return new AssistantToolInvocation(toolId, args);
     }
 
     private static String buildJsonArgs(String careerQuery, String templateType) {

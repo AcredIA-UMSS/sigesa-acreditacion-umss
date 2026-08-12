@@ -6,10 +6,12 @@
  */
 
 export interface AssistantChatContextDto {
-  /** @pattern phases|general */
+  /** @pattern phases|users|general */
   agent?: string;
   processId?: string;
   careerName?: string;
   careerCode?: string;
   templateType?: string;
+  userId?: string;
+  programId?: string;
 }

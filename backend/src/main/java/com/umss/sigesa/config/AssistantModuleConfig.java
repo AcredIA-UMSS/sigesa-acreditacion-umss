@@ -11,6 +11,8 @@ import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
+import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
+import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
@@ -40,6 +42,8 @@ public class AssistantModuleConfig {
                                                 ListUsersUseCase listUsersUseCase,
                                                 ActivateUserUseCase activateUserUseCase,
                                                 DeactivateUserUseCase deactivateUserUseCase,
+                                                RegisterUserUseCase registerUserUseCase,
+                                                ManageUserProgramAssignmentUseCase manageUserProgramAssignmentUseCase,
                                                 UserRepositoryPort userRepositoryPort,
                                                 ListProgramsUseCase listProgramsUseCase,
                                                 ListProcessesUseCase listProcessesUseCase,
@@ -56,6 +60,8 @@ public class AssistantModuleConfig {
                 listUsersUseCase,
                 activateUserUseCase,
                 deactivateUserUseCase,
+                registerUserUseCase,
+                manageUserProgramAssignmentUseCase,
                 userRepositoryPort,
                 listProgramsUseCase,
                 listProcessesUseCase,
