@@ -6,8 +6,8 @@ export function EvidenceUploadPage() {
   const upload = useEvidenceUpload();
 
   return (
-    <div className="flex h-screen bg-body">
-      <Sidebar />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar activeNav="evidence" />
       <EvidenceUploadUI
         form={upload.form}
         onFieldChange={upload.updateField}

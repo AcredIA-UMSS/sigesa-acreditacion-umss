@@ -1,11 +1,7 @@
-export interface UploadEvidenceResponse {
-  evidenceId: string;
-  version: number;
-  contentHash: string;
-  event: string;
-  currentState: string;
-}
-
+/**
+ * Tipos auxiliares de carga de evidencia (UI / cliente).
+ * Contrato Orval: uploadParams.ts, uploadBody.ts, uploadEvidenceResponse.ts.
+ */
 export interface EvidenceUploadParams {
   indicatorId: string;
   criterionId: string;

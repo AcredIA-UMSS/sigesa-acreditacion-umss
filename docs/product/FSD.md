@@ -39,7 +39,7 @@ ultima_actualizacion: "2026-08-07"
 | `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) | [`DD-UC-001`](../design/DD-UC-001.md) | [`PR-IMPL-001`](../prompts/impl/PR-IMPL-001.md) |
 | `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) | [`DD-UC-002`](../design/DD-UC-002.md) | [`PR-IMPL-002`](../prompts/impl/PR-IMPL-002.md) |
 | `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-003.md) | [`DD-UC-003`](../design/DD-UC-003.md) | [`PR-IMPL-003`](../prompts/impl/PR-IMPL-003.md) |
-| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-004.md) | [`DD-UC-004`](../design/DD-UC-004.md) | [`PR-IMPL-006`](../prompts/impl/PR-IMPL-006.md) |
+| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-004.md) | [`DD-UC-004`](../design/DD-UC-004.md) | [`PR-IMPL-006`](../prompts/impl/PR-IMPL-006.md) |
 | `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) | — | — |
 | `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-006.md) | — | — |
 | `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-007.md) | — | — |
@@ -49,7 +49,7 @@ ultima_actualizacion: "2026-08-07"
 | `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | En Curso | [Ver detalle](uc/FSD-UC-011.md) | [`DD-UC-011`](../design/DD-UC-011.md) | [`PR-IMPL-011`](../prompts/impl/PR-IMPL-011.md) |
 | `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) | — | — |
 | `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-013.md) | — | — |
-| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-014.md) | [`DD-UC-014`](../design/DD-UC-014.md) | [`PR-IMPL-005`](../prompts/impl/PR-IMPL-005.md) |
+| `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-014.md) | [`DD-UC-014`](../design/DD-UC-014.md) | [`PR-IMPL-005`](../prompts/impl/PR-IMPL-005.md) |
 | `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) | — | — |
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
 | `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |

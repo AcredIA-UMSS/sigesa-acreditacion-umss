@@ -5,10 +5,18 @@
  * OpenAPI spec version: v0
  */
 
+/**
+ * Respuesta de carga de evidencia v1 (FSD-UC-004)
+ */
 export interface UploadEvidenceResponse {
-  evidenceId?: string;
-  version?: number;
-  contentHash?: string;
+  /** Identificador de la evidencia */
+  evidenceId: string;
+  /** Versión creada (v1) */
+  version: number;
+  /** SHA-256 del contenido */
+  contentHash: string;
+  /** Evento de dominio publicado */
   event?: string;
-  currentState?: string;
+  /** Estado vigente del indicador */
+  currentState: string;
 }
