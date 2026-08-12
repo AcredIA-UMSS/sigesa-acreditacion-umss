@@ -115,7 +115,7 @@ security:
 | **401** | `UNAUTHORIZED` — sin JWT o token inválido |
 | **403** | Rol distinto de JD |
 | **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
-| **Tool asistente** | `list_users` — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
+| **Tool asistente** | `list_users`, `set_user_status` (solo JD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
 
 ### API-CAT-01 — `GET /programs`
 
@@ -179,17 +179,18 @@ security:
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]` |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
 | **Body** | `{ "name", "order", "description?" }` |
 | **201** | Fase creada en proceso ACTIVE |
 | **409** | `PROCESS_NOT_EDITABLE` |
+| **Tool asistente** | `manage_process_phase` (JD, TD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
 
 ### API-PROC-06 — `PUT /processes/{processId}/phases/{phaseId}`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]` |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
 | **Body** | `{ "name?", "order?", "description?" }` |
 | **200** | Fase actualizada |
 
@@ -198,7 +199,7 @@ security:
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]` |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
 | **204** | Fase eliminada si subfases elegibles |
 | **409** | `SUBPHASE_HAS_EVIDENCE` |
 
@@ -208,7 +209,7 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-022 |
 | **Rutas** | `POST/PUT/DELETE /processes/{processId}/phases/{phaseId}/subphases[/{subphaseId}]` |
-| **x-allowed-roles** | `[JD]` |
+| **x-allowed-roles** | `[JD]`, `[TD]` |
 | **Body subfase** | `{ "name", "order", "referenceUrl", "description?" }` |
 | **400** | `SUBPHASE_LINK_REQUIRED` |
 | **409** | `SUBPHASE_HAS_EVIDENCE` / `PROCESS_NOT_EDITABLE` |

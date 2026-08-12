@@ -429,7 +429,7 @@ Esta sección define la **evolución arquitectónica** del asistente hacia **too
 | **Use cases como única puerta** | Cada tool delega en un puerto de aplicación existente (`ListUsersUseCase`, etc.). Prohibido acceder a JPA o REST interno desde el executor. |
 | **Registro dinámico por rol** | Las tools se incluyen en el payload al LLM **solo** si el JWT cumple `allowed_roles`. |
 | **Defensa en profundidad** | `AssistantToolExecutor` revalida rol y parámetros antes de ejecutar. |
-| **Sin side-effects en Fase 1** | Solo tools `read`. Escritura (ej. `create_process`) queda para fase posterior con confirmación explícita en UI. |
+| **Sin side-effects en Fase 1** | Solo tools `read` iniciales. Fase 1.2+: tools `write` con confirmación explícita en chat (`confirmed=true`). |
 
 ### 11.2 Arquitectura del loop
 
@@ -466,19 +466,32 @@ sequenceDiagram
 | **Puerto out** | `ChatCompletionPort` (extendido) | Soporte `tools[]` y respuestas `tool_calls` |
 | **Adaptador out** | `OpenWebUiChatAdapter` | Serializar/deserializar formato OpenAI function calling |
 
-### 11.4 Tools registradas — Fase 1
+### 11.4 Tools registradas
 
-Ver detalle completo (schemas, ejemplos, tests) en [`TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md).
+Ver detalle completo (schemas, ejemplos, tests, matriz RBAC) en [`TOOL-CATALOG.md`](assistant/TOOL-CATALOG.md).
 
 | Tool ID | Side-effect | Roles | Use case | Contrato API |
 |---------|-------------|-------|----------|--------------|
 | `list_users` | `read` | **JD** | `ListUsersUseCase` | [API-USER-03](../product/api/API-USER-03.md) |
+| `set_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | Admin users |
+| `list_programs` | `read` | **JD**, **TD** | `ListProgramsUseCase` | `GET /programs` |
+| `list_process_phases` | `read` | **JD**, **TD** | `GetProcessDetailUseCase` | `GET /processes/{id}` |
+| `manage_process_phase` | `write` | **JD**, **TD** | CRUD/reorder fases | `ProcessStructureController` |
 
-### 11.5 Autorización — tool `list_users`
+### 11.5 Autorización por dominio
 
-- **Quién puede invocar:** exclusivamente usuarios con rol `JD` en el JWT.
-- **CC / TD:** la tool **no se registra** en `tools[]`; el LLM responde con texto genérico sin datos de usuarios.
-- **Alineación REST:** mismo perímetro que `GET /api/v1/admin/users` (`SecurityConfig.hasRole("JD")`).
+#### Usuarios (`list_users`, `set_user_status`)
+
+- **Quién puede invocar:** exclusivamente **JD**.
+- **CC / TD / EE:** tools **no** registradas; respuesta genérica sin datos administrativos.
+- **Alineación REST:** `GET/PATCH /api/v1/admin/users` (`hasRole("JD")`).
+
+#### Fases de proceso (`list_programs`, `list_process_phases`, `manage_process_phase`)
+
+- **Quién puede invocar:** **JD** y **TD**.
+- **CC / EE:** tools **no** registradas.
+- **Confirmación:** tools `write` requieren doble paso (`confirmed=false` → preview → `confirmed=true`).
+- **Alineación REST:** `ProcessStructureController` (`hasAnyRole('JD','TD')`); lectura proceso alineada a `ProcessAccessPolicy`.
 
 ### 11.6 Formato de respuesta de tools
 
@@ -506,15 +519,15 @@ En fallo:
 
 | Parámetro | Valor propuesto |
 |-----------|-----------------|
-| Max iteraciones tool-call por mensaje | 3 |
+| Max iteraciones tool-call por mensaje | 5 (default `sigesa.assistant.max-tool-iterations`) |
 | Timeout por tool | Hereda timeout LLM (120 s) |
-| Tools con escritura | Fuera de Fase 1 |
+| Tools con escritura | `set_user_status` (JD); `manage_process_phase` (JD, TD) — confirmación en chat |
 
 ### 11.8 Estado e implementación
 
 | Aspecto | Estado |
 |---------|--------|
-| Catálogo `TOOL-CATALOG.md` | **Implementado** (Fase 1 — `list_users`) |
+| Catálogo `TOOL-CATALOG.md` | **Implementado** (Fase 1.1 read + Fase 1.2 write con RBAC JD/TD) |
 | Contrato `API-USER-03.md` | **Documentado** |
 | Loop backend + executor | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
 | Extensión `ChatCompletionPort` | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |

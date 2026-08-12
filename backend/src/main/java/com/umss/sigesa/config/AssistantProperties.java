@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AssistantProperties {
 
     private boolean enabled = true;
+    private boolean llmEnabled = true;
     private String baseUrl = "http://localhost:3000/api";
     private String apiKey = "";
     private String model = "llama3.2:3b";
@@ -21,6 +22,14 @@ public class AssistantProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isLlmEnabled() {
+        return llmEnabled;
+    }
+
+    public void setLlmEnabled(boolean llmEnabled) {
+        this.llmEnabled = llmEnabled;
     }
 
     public String getBaseUrl() {

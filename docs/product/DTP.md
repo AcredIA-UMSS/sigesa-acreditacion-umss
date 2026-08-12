@@ -54,6 +54,7 @@ artefactos_vivos:
 | 27/07/2026 | **MOD-ASSISTANT:** Asistente virtual en `/ayuda`; backend proxy Open WebUI/Ollama; Docker Compose `ollama` + `open-webui`; API `GET/POST /api/v1/assistant/*`. | PRD-REQ-028 / DD-SYS-002 | N/A | PM-001 / PR-IMPL-012 | Cursor Agent |
 | 03/08/2026 | **MOD-PROCESS consulta (FSD-UC-019):** `GET /processes` + `GET /processes/{id}`; `ProcessQueryPort` CQRS read; RBAC JD/TD/CC + `programScope`; frontend `/procesos`, `/procesos/{id}`; sidebar desplegable. | FSD-UC-019 / DD-UC-019 | N/A | PR-IMPL-019 / PM-003 | Cursor Agent |
 | 03/08/2026 | **MOD-PROCESS catálogo carreras:** tabla `programs` persistida; `GET /programs?q=`; autocomplete frontend; validación `career_id` y plantillas CEUB/ARCU-SUR únicamente. | FSD-UC-003 / DD-UC-003 | N/A | docs sync | Cursor Agent |
+| 09/08/2026 | **MOD-ASSISTANT tools Fase 1.2:** `set_user_status` (solo JD), `list_programs` / `list_process_phases` / `manage_process_phase` (JD+TD); confirmación en chat; `ActivateUserUseCase`. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | — | Cursor Agent |
 | 31/07/2026 | **MOD-ASSISTANT tool calling Fase 1.1:** loop backend read-only; tool `list_users` (solo JD) vía `ListUsersUseCase`; max 3 iteraciones. | PRD-REQ-028 / DD-SYS-002 §11 | N/A | PM-002 / PR-IMPL-013 | Cursor Agent |
 | 26/07/2026 | **PostgreSQL:** Configuración del motor transaccional, Flyway y propiedades de persistencia. | FSD-SYS-001 / DD-SYS-001 | ADR-0002 | Pendiente | AI Agent |
 | 23/07/2026 | **Full-Stack MOD-PROCESS:** Arquitectura Hexagonal estricta Backend y UI Frontend (React/Orval) para clonación de Plantillas (`PROCESS_ALREADY_ACTIVE`). | FSD-UC-003 / DD-UC-003 | N/A | PM-001 | AI Agent |
@@ -256,13 +257,14 @@ artefactos_vivos:
 | --- | --- |
 | **Endpoints** | `GET /api/v1/assistant/status`; `POST /api/v1/assistant/chat` |
 | **RBAC chat** | Todo usuario autenticado con JWT válido |
-| **RBAC tools** | Registro dinámico por rol JWT; Fase 1.1: `list_users` **solo JD** |
+| **RBAC tools** | Registro dinámico por rol JWT — matriz [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) §2.0 |
+| **RBAC tools (resumen)** | Usuarios → **solo JD**; fases de proceso → **JD + TD**; CC/EE sin tools |
 | **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1) |
-| **Tool calling** | Loop en `SendChatMessageService` (max 3 iter.); `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
-| **Tools Fase 1.1** | `list_users` → `ListUsersUseCase` (read-only); catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) |
+| **Tool calling** | Loop en `SendChatMessageService` (max 5 iter. default); `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
+| **Tools vigentes** | Catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) — read + write con confirmación en chat |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
-| **Config YAML** | `sigesa.assistant.*` — incluye `max-tool-iterations` (default 3) |
+| **Config YAML** | `sigesa.assistant.*` — incluye `max-tool-iterations` (default 5) |
 | **Variables entorno** | `SIGESA_ASSISTANT_ENABLED`, `SIGESA_ASSISTANT_BASE_URL`, `SIGESA_ASSISTANT_API_KEY`, `SIGESA_ASSISTANT_MODEL`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` |
 | **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
 | **Frontend** | Ruta `/ayuda`; feature `frontend/src/features/assistant/`; contrato REST sin cambios (`{ reply }`) |

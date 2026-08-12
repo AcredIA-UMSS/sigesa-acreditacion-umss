@@ -3,15 +3,23 @@ import {
   useAssistantStatus,
   useSendChatMessage,
 } from '../../../api/endpoints/assistant-controller/assistant-controller';
-import type { ChatMessage } from '../../../api/model/assistantTypes';
+import type {
+  AssistantMessageMetadata,
+  ChatMessage,
+} from '../../../api/model/assistantTypes';
 import { mapAssistantError } from './mapAssistantError';
 
-function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
+function createMessage(
+  role: ChatMessage['role'],
+  content: string,
+  metadata?: AssistantMessageMetadata,
+): ChatMessage {
   return {
     id: crypto.randomUUID(),
     role,
     content,
     createdAt: new Date().toISOString(),
+    metadata,
   };
 }
 
@@ -45,12 +53,21 @@ export function useAssistantChat() {
         message: trimmed,
         history,
       });
-      setMessages((prev) => [...prev, createMessage('assistant', response.reply)]);
+      setMessages((prev) => [
+        ...prev,
+        createMessage('assistant', response.reply, {
+          toolId: response.toolId,
+          sourceTables: response.sourceTables,
+          path: response.path,
+          llmInvoked: response.llmInvoked,
+        }),
+      ]);
     } catch {
       setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
       setDraft(trimmed);
     }
   }, [chatMutation, draft, messages]);
+
 
   const clearConversation = useCallback(() => {
     setMessages([]);
@@ -66,7 +83,11 @@ export function useAssistantChat() {
     clearConversation,
     messagesEndRef,
     model: statusQuery.data?.model ?? '—',
-    isAssistantEnabled: statusQuery.data?.enabled ?? false,
+    llmEnabled: statusQuery.data?.llmEnabled ?? false,
+    capabilities: statusQuery.data?.capabilities ?? [],
+    demoScenarios: statusQuery.data?.demoScenarios ?? [],
+    isAssistantEnabled: statusQuery.data?.enabled === true,
+    isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
     isSending: chatMutation.isPending,
     errorMessage: mapAssistantError(chatMutation.error),

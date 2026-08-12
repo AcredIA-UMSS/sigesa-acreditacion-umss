@@ -17,6 +17,7 @@
 | PM-008 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Contrato implementación CRUD estructura proceso ACTIVE (API-PROC-05…08); cierre documental orchestrator |
 | PM-009 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Full-Stack UC-022: backend ProcessStructure + frontend `/procesos/{id}/estructura` |
 | PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
+| PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
 
 ## PM-001
 
@@ -781,5 +782,115 @@ Backend hexagonal UC-022 operativo con guardas BR-21/22/23; frontend editor estr
 ### Resultado obtenido
 
 UC-023 operativo: [JD] asigna [CC] único por proceso ACTIVE con validación carrera (BR-09) y unicidad global (BR-20). Trazabilidad `FSD-UC-023 → DD-UC-023 → PR-IMPL-023 → PM-010 → DTP` cerrada.
+
+---
+
+## PM-011
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-011 |
+| **Fecha** | 2026-08-11 |
+| **Hora** | 16:05 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Copiloto de fases embebido (MOD-ASSISTANT `agent=phases`) |
+| **Objetivo** | Agente especializado en detalle/estructura de proceso: CC solo lectura; JD/TD lectura+escritura vía chat; tools de subfases; UI responsive; sync Orval; diseño `DD-AGENT-001` |
+| **Contexto** | Extensión de PR-IMPL-013 (tool calling) + FSD-UC-022 (estructura proceso). Iteración 2 incluyó hotfixes en sesión: UUID placeholder del LLM, orden subfase duplicado, preview legible de orden. PR #28 mergeado en `main`. |
+| **PR-IMPL vinculado** | [PR-IMPL-024](../../prompts/impl/PR-IMPL-024.md) |
+| **DD vinculado** | [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md) |
+| **FSD / PRD vinculado** | [FSD-UC-022](../../product/uc/FSD-UC-022.md), PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Siguiente iteración (cuando quieras)
+Copiloto solo lectura para CC en su carrera asignada
+Tools de subfases en el agente
+Sincronizar OpenAPI/Orval (pnpm run generate:api) cuando el backend esté levantado
+¿Quieres que documente esto en un DD-AGENT-001 o que afinemos el layout mobile del panel?
+
+Prosigamos con esto
+```
+
+```text
+Agrega la subfase «Evidencia docente» en la Fase 1 con enlace https://umss.edu.bo/ejemplo
+(confirmo → error: Orden de subfase duplicado en la misma fase)
+```
+
+```text
+no seria muy moroso hacer eso?, que pasaria si existen 3 subfases, haria todo eso 3 veces,
+no seria mejor implementar primero una respuesta que diga el ultimo orden que hay y luego
+aplicar el siguiente disponible?
+```
+
+```text
+ya esta funcional, agrega cosas para hacer en un futuro en DD-AGENT-001.md para ir mejorando
+```
+
+```text
+realiza el commit y pr al main
+```
+
+```text
+puedes guardar todo esto en el prompt mapping de sprint 2
+```
+
+### Entradas auxiliares
+
+- [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md)
+- [TOOL-CATALOG.md](../../design/assistant/TOOL-CATALOG.md)
+- [DD-SYS-002 §11](../../design/DD-SYS-002.md)
+- [PR-IMPL-013](../../prompts/impl/PR-IMPL-013.md) (tool calling base)
+- [PR-IMPL-022](../../prompts/impl/PR-IMPL-022.md) (estructura proceso)
+- PR GitHub: https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/pull/28
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/.../AssistantChatContext.java`, `AssistantAgentProfile.java`, `AssistantChatContextFactory.java`, `AssistantStructureLookup.java` |
+| generado | `backend/.../dto/AssistantChatContextDto.java` |
+| generado | `backend/src/test/.../AssistantStructureLookupTest.java` |
+| generado | `frontend/.../PhasesCopilotPanel.tsx`, `usePhasesCopilot.ts` |
+| generado | `frontend/src/api/model/assistantChatContextDto.ts`, `assistantDemoScenarioResponse.ts`, `getStatus1Params.ts` |
+| generado | `docs/design/assistant/DD-AGENT-001.md` |
+| generado | `docs/prompts/impl/PR-IMPL-024.md` |
+| modificado | `AssistantController.java`, `SendChatMessageService.java`, `AssistantToolRegistry.java`, `AssistantToolExecutor.java`, `AssistantKeywordRouter.java`, `AssistantResponseFormatter.java`, `AssistantProcessResolver.java`, `AssistantCapabilitiesCatalog.java`, `AssistantModuleConfig.java` |
+| modificado | `ProcessDetailView.tsx`, `ProcessStructureView.tsx` |
+| modificado | `frontend/src/api/endpoints/assistant-controller/assistant-controller.ts`, `assistantTypes.ts`, Orval models |
+| modificado | `docs/design/assistant/TOOL-CATALOG.md` |
+| modificado | Tests: `AssistantToolRegistryTest`, `SendChatMessageServiceToolLoopTest`, `AssistantToolExecutorTest`, `AssistantControllerToolCallingTest` |
+
+### Cambios realizados
+
+1. **Agente `phases`:** `context.processId` + catálogo de fases en prompt; subset de 4 tools filtradas por rol.
+2. **RBAC CC:** solo `list_process_phases` y `list_process_structure` en copiloto; UI `readOnly`.
+3. **Tools nuevas:** `list_process_structure`, `manage_process_subphase` (CREATE/UPDATE/DELETE con confirmación).
+4. **`AssistantStructureLookup`:** resuelve `UUID_FASE_1`, `phaseOrder`, nombres naturales.
+5. **`SubphaseOrderPlan`:** preview con último orden existente + siguiente disponible (sin reintentos en bucle).
+6. **Frontend:** panel colapsable mobile + sidebar sticky `xl+`; samples filtrados para CC.
+7. **`DD-AGENT-001`:** diseño + backlog P1–P3 (UX confirmación, refresh árbol, KEYWORD CREATE, etc.).
+
+### Validación ejecutada
+
+- [x] `AssistantStructureLookupTest`, `SendChatMessageServiceToolLoopTest`, `AssistantToolRegistryTest` — OK (Maven Docker)
+- [x] `pnpm run lint` + `pnpm run build` — OK
+- [x] `pnpm run generate:api` con backend `:8080` — OK
+- [x] `docker compose build backend` + smoke manual copiloto (CREATE subfase con confirmación) — OK (reportado por solicitante)
+- [x] PR #28 → merge `60cb091` en `main`
+
+### Resultado obtenido
+
+Copiloto de fases operativo en `/procesos/{id}` y `/procesos/{id}/estructura`. CC consulta estructura en su carrera; JD/TD crean subfases vía chat con preview de orden y confirmación. Trazabilidad `FSD-UC-022 + PR-IMPL-013 → DD-AGENT-001 → PR-IMPL-024 → PM-011 → PR #28`.
+
+### Próximos pasos
+
+- [ ] `@dtp-sync` — registrar agente `phases` en DTP §MOD-ASSISTANT
+- [ ] AGENT-UX-01 (P1): botones Confirmar/Cancelar en panel
+- [ ] AGENT-BE-01 (P1): catálogo subfases en prompt
+- [ ] AGENT-QA-01 (P1): E2E CC lectura + JD CREATE subfase
 
 ---

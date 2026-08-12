@@ -4,8 +4,13 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { AssistantDemoScenarioResponse } from './assistantDemoScenarioResponse.ts';
 
 export interface AssistantStatusResponse {
   enabled?: boolean;
+  llmEnabled?: boolean;
   model?: string;
+  capabilities?: string[];
+  demoScenarios?: AssistantDemoScenarioResponse[];
+  agent?: string;
 }

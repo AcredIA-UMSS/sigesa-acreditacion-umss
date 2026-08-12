@@ -20,7 +20,11 @@ function resolveHttpErrorMessage(status: number, rawBody: string | null): string
     }
   }
 
-  if (status === 502 || status === 503 || status === 504) {
+  if (status === 504) {
+    return 'La operación tardó demasiado (timeout del proxy). El asistente puede seguir procesando; espere e intente de nuevo.';
+  }
+
+  if (status === 502 || status === 503) {
     return 'No se pudo conectar con el servidor. Verifique que el backend esté ejecutándose en http://localhost:8080.';
   }
 

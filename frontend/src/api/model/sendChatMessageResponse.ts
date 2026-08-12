@@ -7,4 +7,8 @@
 
 export interface SendChatMessageResponse {
   reply?: string;
+  toolId?: string;
+  sourceTables?: string[];
+  path?: string;
+  llmInvoked?: boolean;
 }

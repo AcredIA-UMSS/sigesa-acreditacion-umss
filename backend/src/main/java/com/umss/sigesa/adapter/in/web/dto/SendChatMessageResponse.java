@@ -1,4 +1,12 @@
 package com.umss.sigesa.adapter.in.web.dto;
 
-public record SendChatMessageResponse(String reply) {
+import java.util.List;
+
+public record SendChatMessageResponse(
+        String reply,
+        String toolId,
+        List<String> sourceTables,
+        String path,
+        boolean llmInvoked
+) {
 }
