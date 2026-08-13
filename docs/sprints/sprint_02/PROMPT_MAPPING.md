@@ -21,6 +21,7 @@
 | PM-012 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
 | PM-013 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
 | PM-014 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
+| PM-015 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
 
 ## PM-001
 
@@ -1057,3 +1058,66 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 - [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
 - [x] `pnpm run build` — resultado: OK (cero warnings, cero errores de TypeScript o OxLint)
 
+---
+
+## PM-015
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-015 |
+| **Fecha** | 2026-08-12 |
+| **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Antigravity AI Coding Assistant |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Refinamiento de Consola de Depuración, Fallback Inteligente y Descarga de Evidencias en Chatbot |
+| **Objetivo** | Implementar la entrega dinámica de la traza de LLM del backend al frontend, solucionar simulación estática, agregar comandos de prefijo al chatbot y habilitar la descarga segura/autenticada de evidencias en los popups. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Reporte de fallas, descarga segura de archivos con aislamiento por carrera y comandos de prefijo chatbot. |
+| **PR-IMPL vinculado** | N/A (Refinamiento e integración funcional) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | [FSD-UC-007](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Archivos modificados/creados
+
+- **Creado:**
+  - `backend/src/main/java/com/umss/sigesa/application/port/in/DownloadEvidenceUseCase.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/evidence/DownloadEvidenceService.java`
+  - `backend/src/main/java/com/umss/sigesa/domain/exception/EvidenceNotFoundException.java`
+- **Modificado:**
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/SearchAssistantAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java`
+  - `backend/src/main/java/com/umss/sigesa/application/port/out/SearchEvidenceQueryPort.java`
+  - `backend/src/main/java/com/umss/sigesa/application/port/out/EvidenceBlobStoragePort.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/LocalFileEvidenceBlobStorageAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/config/EvidenceModuleConfig.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/EvidenceExceptionHandler.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantKeywordRouter.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/TemplateJpaEntity.java`
+  - `backend/src/main/java/com/umss/sigesa/config/AssistantModuleConfig.java`
+  - `frontend/src/api/model/searchQueryResponseDto.ts`
+  - `frontend/src/features/evidence/EvidenceSearchPage.tsx`
+  - `frontend/src/features/assistant/components/AssistantChatUI.tsx`
+  - `frontend/src/features/assistant/hooks/useAssistantChat.ts`
+
+### Cambios realizados
+
+- **Backend (Trazabilidad y Fallback):** Campo `llmThought` añadido a `SearchQueryResponseDto` y rellenado dinámicamente con logs de error o razonamientos reales en el servicio y adaptador.
+- **Frontend (Trazabilidad Real):** Corrección de falsas simulaciones en la interfaz de depuración al detectar el Escenario 4 (Fallback) ante errores de conexión a la IA.
+- **Chatbot Prefijos:** Añadido soporte para los prefijos `/search-evidence`, `/search-evidences`, `/buscar-evidencia` y `/buscar-evidencias` en el router de comandos directos del chatbot (`AssistantKeywordRouter.java`).
+- **Descarga Segura:** Definido el caso de uso `DownloadEvidenceUseCase` y su servicio de descarga que lee bytes de storage con `EvidenceBlobStoragePort` aplicando reglas de aislamiento por carrera mediante `SearchEvidenceQueryPort.findVersionById`.
+- **Controlador REST:** Exposición del endpoint `GET /api/v1/evidences/{versionId}/download` con extracción automática de rol y scopes de carrera.
+- **Frontend (Popup Descarga):** Agregada la función `handleDownloadEvidence` y el botón premium "Descargar Archivo" en el modal de detalles de la evidencia que se abre desde el chatbot de ayuda.
+- **Corrección de Contenedor Dev (Error SQL):** Se añadieron los atributos `columnDefinition` en `@Column` para los nuevos campos de `TemplateJpaEntity.java` asignándoles valores por defecto (`DEFAULT 'PUBLISHED'` y `DEFAULT now()`). Esto soluciona la excepción `PSQLException` en desarrollo cuando Hibernate (`ddl-auto: update`) intenta alterar la tabla `templates` pre-existente violando la restricción de nulos.
+- **Resaltado de Comandos en Chat (Badges):** Se añadió soporte interactivo de chips/badges en el input del chatbot. Si el usuario escribe un comando válido (como `/search-evidences `) al inicio del texto, este se aísla visualmente como un bloque bloqueado e inalterable. Para eliminarlo, el usuario puede presionar `Backspace` sobre la caja vacía o hacer clic en el botón 'X' del chip. Al enviar el mensaje, el backend recibe de forma transparente el comando concatenado al texto.
+- **Corrección de Serialización (Jackson `JavaTimeModule`):** Se registraron instancias de `JavaTimeModule` en los `ObjectMapper` configurados en `AssistantModuleConfig.java`. Esto corrige el fallo `"No se pudo serializar el resultado de la tool."` que ocurría al procesar registros de tipo `LocalDateTime` devueltos por la herramienta `buscar_evidencias`.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (181 pruebas pasadas exitosamente con 0 fallos)
+- [x] `./mvnw compile` — resultado: BUILD SUCCESS (código compilado con éxito)
+- [x] `npx tsc --noEmit` — resultado: OK (frontend compila con cero errores de tipos)
+- [x] `docker compose logs backend` — resultado: Container sigesa-backend se levanta establemente escuchando en 8080 sin crasheos.
+- [x] `docker compose build backend && docker compose up -d backend` — resultado: Contenedor backend reconstruido y reiniciado exitosamente aplicando el módulo de Jackson.

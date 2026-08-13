@@ -9,5 +9,6 @@ public record SearchQueryResponseDto(
         String dataSource,
         String message,
         List<EvidenceSearchDetailDto> results,
-        String sqlQuery
+        String sqlQuery,
+        String llmThought
 ) {}

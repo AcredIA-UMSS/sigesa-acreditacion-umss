@@ -79,4 +79,10 @@ public class EvidenceExceptionHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .body(Map.of("error", "PAYLOAD_TOO_LARGE", "message", ex.getMessage()));
     }
+
+    @ExceptionHandler(com.umss.sigesa.domain.exception.EvidenceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEvidenceNotFound(com.umss.sigesa.domain.exception.EvidenceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "EVIDENCE_NOT_FOUND", "message", ex.getMessage()));
+    }
 }

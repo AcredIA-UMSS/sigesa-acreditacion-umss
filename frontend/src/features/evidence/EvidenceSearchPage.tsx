@@ -81,13 +81,16 @@ export const EvidenceSearchPage = () => {
       };
     }
     
-    if (!xAiEnabled) {
+    if (!xAiEnabled || routingPath === 'KEYWORD') {
+      const hasRealResults = results.length > 0;
       return {
         number: 4,
-        title: "Escenario 4: Modelo Apagado (IA_HABILITADA = false)",
-        description: "Al estar la IA desactivada por cabecera, la consulta por sinónimos falla controlado y retorna un REFUSAL seguro.",
+        title: "Escenario 4: Búsqueda Tradicional / Fallback (IA Inactiva o Fallida)",
+        description: hasRealResults
+          ? "Se encontraron registros directamente en base de datos sin interacción con el LLM."
+          : "No se encontraron coincidencias exactas en base de datos. El asistente de IA está inactivo o no se pudo conectar.",
         color: "border-danger/30 bg-danger/5 text-danger",
-        badge: "IA DESACTIVADA"
+        badge: "FALLBACK CLÁSICO"
       };
     }
 
@@ -112,15 +115,16 @@ export const EvidenceSearchPage = () => {
 
   const scenarioInfo = getDemoScenarioInfo();
 
-  // Simular la traza de razonamiento del LLM basada en la query
+  // Obtener la traza de razonamiento del LLM basada en la query y la respuesta real del backend
   const getLLMThoughtProcess = () => {
     if (!activeQuery) return null;
     const cleanQuery = activeQuery.trim().toLowerCase();
+    const realLlmThought = data?.data?.llmThought;
 
     if (scenarioInfo?.number === 1) {
       return {
         systemPrompt: "Eres un asistente de búsqueda e inteligente para SIGESA...",
-        thought: "No se requiere interacción con el LLM. La palabra clave coincide exactamente con el catálogo estático del backend.",
+        thought: realLlmThought || "No se requiere interacción con el LLM. La palabra clave coincide exactamente con el catálogo estático del backend.",
         toolCall: null,
         outOfScope: false
       };
@@ -128,8 +132,8 @@ export const EvidenceSearchPage = () => {
 
     if (scenarioInfo?.number === 4) {
       return {
-        systemPrompt: "Asistente de IA inactivo (Header X-AI-Enabled es false).",
-        thought: "Llamada al LLM cancelada por el middleware de seguridad del backend. Fallback inmediato a bloqueo seguro.",
+        systemPrompt: "Asistente de IA inactivo u offline (Fallback clásico).",
+        thought: realLlmThought || "Llamada al LLM cancelada por el middleware de seguridad del backend o falló la conexión con el servidor LLM.",
         toolCall: null,
         outOfScope: false
       };
@@ -138,7 +142,7 @@ export const EvidenceSearchPage = () => {
     if (scenarioInfo?.number === 3) {
       return {
         systemPrompt: "Eres un asistente de búsqueda y enrutamiento inteligente para el sistema de acreditación universitaria SIGESA. Tu tarea es enrutar las consultas del usuario utilizando las herramientas provistas...\nSi la consulta no está relacionada con la acreditación universitaria, responde con la palabra 'OUT_OF_SCOPE'.",
-        thought: `Analizando consulta: "${activeQuery}". La solicitud no contiene términos relativos a infraestructura, docentes, plan de estudios, administración, acreditación o evidencias de carrera. Excede el dominio académico universitario.`,
+        thought: realLlmThought || `Analizando consulta: "${activeQuery}". La solicitud no contiene términos relativos a acreditación. Excede el dominio académico universitario.`,
         toolCall: null,
         outOfScope: true
       };
@@ -147,36 +151,38 @@ export const EvidenceSearchPage = () => {
     // Escenario 2: Sinonimos
     let mappedDimension = "Infraestructura";
     let extractedTerm = cleanQuery;
-    let chainOfThought = "";
+    let chainOfThought = realLlmThought || "";
 
-    if (cleanQuery.includes("aula") || cleanQuery.includes("laboratorio") || cleanQuery.includes("edificio") || cleanQuery.includes("computación")) {
-      mappedDimension = "Infraestructura";
-      extractedTerm = "aulas";
-      chainOfThought = `El usuario busca "${activeQuery}". "aulas" y "laboratorio" son sinónimos semánticos de la dimensión física de la universidad. Mapeando a dimensión: "Infraestructura". Término normalizado para base de datos: "aulas".`;
-    } else if (cleanQuery.includes("profesor") || cleanQuery.includes("docente") || cleanQuery.includes("catedrático")) {
-      mappedDimension = "Docentes";
-      extractedTerm = "docente";
-      chainOfThought = `El usuario busca "${activeQuery}". El término "profesor" hace referencia al plantel académico. Mapeando a dimensión: "Docentes". Término normalizado para base de datos: "docente".`;
-    } else if (cleanQuery.includes("materia") || cleanQuery.includes("curriculo") || cleanQuery.includes("programa") || cleanQuery.includes("clase")) {
-      mappedDimension = "Plan de Estudios";
-      extractedTerm = "plan de estudios";
-      chainOfThought = `El usuario busca "${activeQuery}". "currículo" o "materia" se refiere a la organización curricular. Mapeando a dimensión: "Plan de Estudios". Término normalizado para base de datos: "plan de estudios".`;
-    } else {
-      mappedDimension = "Administracion";
-      extractedTerm = cleanQuery;
-      chainOfThought = `La consulta "${activeQuery}" hace referencia al soporte administrativo o finanzas. Mapeando a la dimensión: "Administracion". Extraigo término base: "${cleanQuery}".`;
+    if (!realLlmThought) {
+      if (cleanQuery.includes("aula") || cleanQuery.includes("laboratorio") || cleanQuery.includes("edificio") || cleanQuery.includes("computación")) {
+        mappedDimension = "Infraestructura";
+        extractedTerm = "aulas";
+        chainOfThought = `El usuario busca "${activeQuery}". "aulas" y "laboratorio" son sinónimos semánticos de la dimensión física de la universidad. Mapeando a dimensión: "Infraestructura". Término normalizado para base de datos: "aulas".`;
+      } else if (cleanQuery.includes("profesor") || cleanQuery.includes("docente") || cleanQuery.includes("catedrático")) {
+        mappedDimension = "Docentes";
+        extractedTerm = "docente";
+        chainOfThought = `El usuario busca "${activeQuery}". El término "profesor" hace referencia al plantel académico. Mapeando a dimensión: "Docentes". Término normalizado para base de datos: "docente".`;
+      } else if (cleanQuery.includes("materia") || cleanQuery.includes("curriculo") || cleanQuery.includes("programa") || cleanQuery.includes("clase")) {
+        mappedDimension = "Plan de Estudios";
+        extractedTerm = "plan de estudios";
+        chainOfThought = `El usuario busca "${activeQuery}". "currículo" o "materia" se refiere a la organización curricular. Mapeando a dimensión: "Plan de Estudios". Término normalizado para base de datos: "plan de estudios".`;
+      } else {
+        mappedDimension = "Administracion";
+        extractedTerm = cleanQuery;
+        chainOfThought = `La consulta "${activeQuery}" hace referencia al soporte administrativo. Mapeando a la dimensión: "Administracion". Extraigo término base: "${cleanQuery}".`;
+      }
     }
 
     return {
       systemPrompt: "Eres un asistente de búsqueda y enrutamiento inteligente para el sistema de acreditación universitaria SIGESA. Tu tarea es enrutar las consultas del usuario utilizando las herramientas provistas...",
       thought: chainOfThought,
-      toolCall: {
-        name: "buscar_evidencias_por_parametros",
+      toolCall: toolUsed ? {
+        name: toolUsed,
         arguments: {
           dimension: mappedDimension,
           termino: extractedTerm
         }
-      },
+      } : null,
       outOfScope: false
     };
   };

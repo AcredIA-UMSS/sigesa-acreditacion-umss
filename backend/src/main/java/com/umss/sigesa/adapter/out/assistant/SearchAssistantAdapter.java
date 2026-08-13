@@ -103,6 +103,12 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                     result.put("criterioCodigo", args.path("criterioCodigo").asText(null));
                     result.put("fechaInicio", args.path("fechaInicio").asText(null));
                     result.put("fechaFin", args.path("fechaFin").asText(null));
+                    
+                    String term = args.path("termino").asText();
+                    String dim = args.path("dimension").asText(null);
+                    String thought = "El usuario busca \"" + query + "\". Traduciendo a término oficial: \"" + term + "\"" 
+                            + (dim != null ? " y dimensión: \"" + dim + "\"" : "") + ".";
+                    result.put("llmThought", thought);
                     return result;
                 }
             }
@@ -110,14 +116,17 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
             if (completion.content() != null && completion.content().contains("OUT_OF_SCOPE")) {
                 result.put("routingPath", "REFUSAL");
                 result.put("status", "OUT_OF_SCOPE");
+                result.put("llmThought", "Consulta clasificada por el LLM como fuera del alcance del proceso de acreditación de SIGESA.");
                 return result;
             }
 
         } catch (Exception e) {
             result.put("routingPath", "REFUSAL");
+            result.put("llmThought", "Error de conexión o timeout al interactuar con el LLM: " + e.getMessage());
         }
 
         result.put("routingPath", "REFUSAL");
+        result.put("llmThought", "El LLM no invocó la herramienta de búsqueda esperada ni clasificó la consulta.");
         return result;
     }
 }

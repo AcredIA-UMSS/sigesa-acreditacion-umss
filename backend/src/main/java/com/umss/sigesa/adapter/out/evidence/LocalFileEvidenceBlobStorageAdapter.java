@@ -44,4 +44,14 @@ public class LocalFileEvidenceBlobStorageAdapter implements EvidenceBlobStorageP
             throw new IllegalStateException("Unable to delete evidence blob: " + storageKey, ex);
         }
     }
+
+    @Override
+    public byte[] retrieve(String storageKey) {
+        Path path = storageRoot.resolve(storageKey);
+        try {
+            return Files.readAllBytes(path);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to retrieve evidence blob: " + storageKey, ex);
+        }
+    }
 }

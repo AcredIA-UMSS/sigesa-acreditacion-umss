@@ -42,7 +42,7 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
         // Control de seguridad: Si es Coordinador (CC) y no tiene carreras asignadas, abortar con resultado vacío.
         if ("CC".equalsIgnoreCase(role)) {
             if (programScope == null || programScope.isEmpty()) {
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "Ninguno", null, Collections.emptyList(), null);
+                return new SearchQueryResponseDto(query, "KEYWORD", null, "Ninguno", null, Collections.emptyList(), null, "El Coordinador de Carrera no tiene programas asignados en su perfil de seguridad.");
             }
         }
 
@@ -69,7 +69,7 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                     .fechaFin(end)
                     .build();
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
-            return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
+            return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), "Consulta de texto vacía. Retornando todas las evidencias accesibles.");
         }
 
         // Escenario 1.1: Catálogo dinámico de dimensiones de acreditación
@@ -81,7 +81,7 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                     .fechaFin(end)
                     .build();
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), "Coincidencia exacta de dimensión encontrada en el catálogo dinámico de acreditación. Salto de llamada al LLM.");
         }
 
         // Escenario 1.2: Búsqueda clásica directa (si encuentra datos con ILIKE la primera vez, los retorna y salta el LLM)
@@ -92,7 +92,7 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                 .build();
         List<EvidenceSearchDetailDto> directResults = queryPort.executeSearch(directFilters, effectiveScope);
         if (!directResults.isEmpty()) {
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), "Resultados localizados directamente mediante búsqueda clásica de texto por coincidencia exacta (ILIKE). Salto de llamada al LLM.");
         }
 
         // Evaluar estado de IA (xAiEnabled de la petición y configuración global)
@@ -112,7 +112,8 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                             "Ninguno",
                             "Lo siento, la consulta está fuera del alcance de SIGESA. Solo puedo asistirte en búsquedas relacionadas con el proceso de acreditación (ej. evidencias, infraestructura, docentes).",
                             Collections.emptyList(),
-                            null
+                            null,
+                            routingResult.getOrDefault("llmThought", "Consulta clasificada como fuera de alcance por el LLM.")
                     );
                 }
 
@@ -142,14 +143,16 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                         .build();
 
                 List<EvidenceSearchDetailDto> results = queryPort.executeSearch(llmFilters, effectiveScope);
-                return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql());
+                return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), routingResult.get("llmThought"));
             } catch (Exception e) {
                 // Fallback elegante en caso de falla de la IA: reutilizamos la búsqueda tradicional ILIKE directa
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
+                String fallbackThought = "Error al conectar con el asistente de IA (Ollama/Open WebUI): " + e.getMessage() 
+                        + ". Fallback automático aplicado a la búsqueda clásica por coincidencia exacta (ILIKE).";
+                return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), fallbackThought);
             }
         } else {
             // Escenario 4: IA Desactivada (Reutilizamos la búsqueda tradicional ILIKE directa)
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql());
+            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), "Búsqueda inteligente desactivada por cabecera (X-AI-Enabled=false) o propiedades globales. Búsqueda clásica directa ejecutada.");
         }
     }
 
@@ -173,7 +176,8 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                 "Ninguno",
                 "La búsqueda inteligente por sinónimos está desactivada. Intente buscar con palabras clave exactas.",
                 Collections.emptyList(),
-                null
+                null,
+                "Búsqueda por sinónimos deshabilitada por configuración del sistema."
         );
     }
 }

@@ -69,7 +69,7 @@ public class AssistantModuleConfig {
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
                 searchEvidenceUseCase,
-                new ObjectMapper()
+                new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
         );
     }
 
@@ -95,7 +95,7 @@ public class AssistantModuleConfig {
                 assistantToolRegistry,
                 assistantToolExecutor,
                 assistantKeywordRouter,
-                new ObjectMapper(),
+                new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()),
                 assistantProperties.getSystemPrompt(),
                 assistantProperties.isLlmEnabled()
         );

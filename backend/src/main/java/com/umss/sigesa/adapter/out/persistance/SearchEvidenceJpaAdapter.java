@@ -160,6 +160,55 @@ public class SearchEvidenceJpaAdapter implements SearchEvidenceQueryPort {
         return results;
     }
 
+    @Override
+    public java.util.Optional<EvidenceSearchDetailDto> findVersionById(UUID versionId, List<UUID> programScope) {
+        StringBuilder jpql = new StringBuilder(
+                "SELECT ev.id, ev.storageKey, ev.description, ev.criterionId, p.name, ev.createdAt " +
+                "FROM EvidenceVersionEntity ev " +
+                "JOIN EvidenceEntity e ON ev.evidenceId = e.id " +
+                "JOIN IndicatorEntity ind ON e.indicatorId = ind.id " +
+                "JOIN ProgramJpaEntity p ON ind.programId = p.id " +
+                "WHERE ev.id = :versionId"
+        );
+        if (programScope != null) {
+            if (programScope.isEmpty()) {
+                return java.util.Optional.empty();
+            }
+            jpql.append(" AND ind.programId IN :programScope");
+        }
+
+        try {
+            TypedQuery<Object[]> query = entityManager.createQuery(jpql.toString(), Object[].class)
+                    .setParameter("versionId", versionId);
+            if (programScope != null) {
+                query.setParameter("programScope", programScope);
+            }
+
+            Object[] row = query.getSingleResult();
+            UUID evId = (UUID) row[0];
+            String storageKey = (String) row[1];
+            String desc = (String) row[2];
+            UUID critId = (UUID) row[3];
+            String progName = (String) row[4];
+            java.time.LocalDateTime created = (java.time.LocalDateTime) row[5];
+
+            String criterionCode = getCriterionCode(critId);
+            String dimensionName = getDimensionName(critId);
+
+            return java.util.Optional.of(new EvidenceSearchDetailDto(
+                    evId,
+                    storageKey,
+                    desc,
+                    dimensionName,
+                    criterionCode,
+                    progName,
+                    created
+            ));
+        } catch (jakarta.persistence.NoResultException e) {
+            return java.util.Optional.empty();
+        }
+    }
+
     private List<UUID> getCriteriaForDimension(String dimension) {
         try {
             return entityManager.createQuery(

@@ -39,18 +39,18 @@ export function useAssistantChat() {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  const sendMessage = useCallback(async () => {
-    const trimmed = draft.trim();
-    if (!trimmed || chatMutation.isPending) return;
+  const sendMessage = useCallback(async (customMessage?: string) => {
+    const messageToSend = (customMessage !== undefined ? customMessage : draft).trim();
+    if (!messageToSend || chatMutation.isPending) return;
 
-    const userMessage = createMessage('user', trimmed);
+    const userMessage = createMessage('user', messageToSend);
     setMessages((prev) => [...prev, userMessage]);
     setDraft('');
 
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
-        message: trimmed,
+        message: messageToSend,
         history,
       });
       setMessages((prev) => [
@@ -64,7 +64,7 @@ export function useAssistantChat() {
       ]);
     } catch {
       setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
-      setDraft(trimmed);
+      setDraft(messageToSend);
     }
   }, [chatMutation, draft, messages]);
 

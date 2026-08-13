@@ -2,6 +2,7 @@ package com.umss.sigesa.config;
 
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
 import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
+import com.umss.sigesa.application.port.in.DownloadEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AssistantQueryPort;
 import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.AuditLogPort;
@@ -15,6 +16,7 @@ import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evidence.UploadEvidenceService;
 import com.umss.sigesa.application.service.evidence.SearchEvidenceService;
+import com.umss.sigesa.application.service.evidence.DownloadEvidenceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -57,5 +59,12 @@ public class EvidenceModuleConfig {
                 assistantProperties,
                 dimensionRepository
         );
+    }
+
+    @Bean
+    DownloadEvidenceUseCase downloadEvidenceUseCase(
+            SearchEvidenceQueryPort queryPort,
+            EvidenceBlobStoragePort blobStorage) {
+        return new DownloadEvidenceService(queryPort, blobStorage);
     }
 }

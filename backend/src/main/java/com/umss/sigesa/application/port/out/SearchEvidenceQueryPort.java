@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface SearchEvidenceQueryPort {
     List<EvidenceSearchDetailDto> executeSearch(SearchFilters filters, List<UUID> programScope);
+    java.util.Optional<EvidenceSearchDetailDto> findVersionById(UUID versionId, List<UUID> programScope);
     String getLastExecutedSql();
 }

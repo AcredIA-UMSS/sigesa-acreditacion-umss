@@ -73,7 +73,9 @@ public class AssistantKeywordRouter {
             return writeFlow;
         }
 
-        if (message.startsWith("/buscar ") || message.startsWith("/search ")) {
+        if (message.startsWith("/buscar ") || message.startsWith("/search ")
+                || message.startsWith("/search-evidence ") || message.startsWith("/search-evidences ")
+                || message.startsWith("/buscar-evidencia ") || message.startsWith("/buscar-evidencias ")) {
             String query = message.substring(message.indexOf(" ") + 1).trim();
             return Optional.of(new AssistantToolInvocation("buscar_evidencias", "{\"query\":\"" + query + "\"}"));
         }

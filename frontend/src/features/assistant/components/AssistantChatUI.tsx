@@ -6,12 +6,13 @@ import type {
 } from '../../../api/model/assistantTypes';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { customFetch } from '../../../lib/api/customFetch';
 
 export type AssistantChatUIProps = {
   messages: ChatMessage[];
   draft: string;
   onDraftChange: (value: string) => void;
-  onSend: () => void;
+  onSend: (customMessage?: string) => void;
   onClear: () => void;
   onSampleSelect: (question: string) => void;
   model: string;
@@ -45,6 +46,75 @@ export function AssistantChatUI({
   messagesEndRef,
 }: AssistantChatUIProps) {
   const [selectedEvidence, setSelectedEvidence] = useState<any | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadEvidence = async (evidence: any) => {
+    if (!evidence?.evidenceId) return;
+    setDownloadingId(evidence.evidenceId);
+    try {
+      const response = await customFetch<any>(`/api/v1/evidences/${evidence.evidenceId}/download`);
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', evidence.title || 'evidencia.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error("Falla al descargar evidencia:", err);
+      alert(err.message || "No se pudo descargar el archivo de evidencia.");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const COMMANDS = ['/search-evidence', '/search-evidences', '/buscar-evidencia', '/buscar-evidencias', '/search', '/buscar'];
+  const [activeCommand, setActiveCommand] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (draft) {
+      const matchedCommand = COMMANDS.find(cmd => draft.startsWith(cmd + ' '));
+      if (matchedCommand) {
+        setActiveCommand(matchedCommand);
+        onDraftChange(draft.substring(matchedCommand.length).trimStart());
+      }
+    }
+  }, [draft, onDraftChange]);
+
+  const handleInputChange = (value: string) => {
+    if (!activeCommand) {
+      const matchedCommand = COMMANDS.find(cmd => value.startsWith(cmd + ' ') || value === cmd + ' ');
+      if (matchedCommand) {
+        setActiveCommand(matchedCommand);
+        const rest = value.substring(matchedCommand.length).trimStart();
+        onDraftChange(rest);
+        return;
+      }
+    }
+    onDraftChange(value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Backspace' && draft === '' && activeCommand) {
+      event.preventDefault();
+      setActiveCommand(null);
+      return;
+    }
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSend = () => {
+    const finalMessage = activeCommand ? `${activeCommand} ${draft}` : draft;
+    if (!finalMessage.trim()) return;
+    onSend(finalMessage);
+    setActiveCommand(null);
+  };
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -52,13 +122,6 @@ export function AssistantChatUI({
       textareaRef.current?.focus();
     }
   }, [isSending]);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      onSend();
-    }
-  };
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
@@ -155,20 +218,36 @@ export function AssistantChatUI({
 
             <div className="border-t border-gray-200 px-5 py-4">
               <div className="flex gap-3">
-                <textarea
-                  ref={textareaRef}
-                  value={draft}
-                  onChange={(event) => onDraftChange(event.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)"
-                  rows={3}
-                  disabled={isSending}
-                  className="min-h-[88px] flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-body-md text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-100"
-                />
+                <div className="flex flex-col gap-2 rounded-lg border border-gray-300 px-4 py-3 bg-white focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 min-h-[88px] flex-1 transition-colors">
+                  {activeCommand && (
+                    <div className="flex items-center gap-1.5 self-start px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs font-bold border border-primary-200 select-none animate-in fade-in slide-in-from-left-1 duration-150">
+                      <span>{activeCommand}</span>
+                      <button 
+                        onClick={() => {
+                          setActiveCommand(null);
+                          textareaRef.current?.focus();
+                        }}
+                        className="hover:bg-primary-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                  <textarea
+                    ref={textareaRef}
+                    value={draft}
+                    onChange={(event) => handleInputChange(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={activeCommand ? "Escriba los términos de búsqueda..." : "Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)"}
+                    rows={activeCommand ? 2 : 3}
+                    disabled={isSending}
+                    className="w-full resize-none bg-transparent text-body-md text-gray-900 outline-none placeholder:text-gray-400 disabled:bg-transparent"
+                  />
+                </div>
                 <Button
-                  onClick={onSend}
+                  onClick={handleSend}
                   isLoading={isSending}
-                  disabled={!draft.trim() || isSending}
+                  disabled={(!draft.trim() && !activeCommand) || isSending}
                   className="self-end"
                 >
                   <Send size={16} />
@@ -237,7 +316,25 @@ export function AssistantChatUI({
                 </div>
               </div>
             </div>
-            <footer className="border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
+            <footer className="border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-between items-center">
+              <Button
+                onClick={() => handleDownloadEvidence(selectedEvidence)}
+                disabled={downloadingId === selectedEvidence.evidenceId}
+                variant="secondary"
+                className="px-4 py-2 text-sm font-semibold flex items-center gap-1.5"
+              >
+                {downloadingId === selectedEvidence.evidenceId ? (
+                  <>
+                    <Loader2 className="animate-spin" size={16} />
+                    Descargando...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={16} />
+                    Descargar Archivo
+                  </>
+                )}
+              </Button>
               <Button 
                 onClick={() => setSelectedEvidence(null)}
                 variant="primary"
