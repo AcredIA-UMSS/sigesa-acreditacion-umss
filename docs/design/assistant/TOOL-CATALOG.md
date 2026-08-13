@@ -6,6 +6,9 @@ design_parent: DD-SYS-002
 release: v1.1-tools
 status: Implemented
 ultima_actualizacion: "2026-08-11"
+agents:
+  - phases (DD-AGENT-001)
+  - users (DD-AGENT-002)
 ---
 
 # TOOL-CATALOG — Asistente Virtual SIGESA
@@ -96,7 +99,11 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | Tool ID | Side-effect | JD | TD | CC | EE |
 |---------|-------------|:--:|:--:|:--:|:--:|
 | `list_users` | read | ✓ | — | — | — |
+| `get_user_detail` | read | ✓ | — | — | — |
+| `create_user` | write | ✓ | — | — | — |
 | `set_user_status` | write | ✓ | — | — | — |
+| `manage_user_status` | write | ✓ | — | — | — |
+| `manage_user_assignment` | write | ✓ | — | — | — |
 | `list_programs` | read | ✓ | ✓ | — | — |
 | `list_process_phases` | read | ✓ | ✓ | ✓ | — |
 | `list_process_structure` | read | ✓ | ✓ | ✓ | — |
@@ -104,17 +111,22 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | `manage_process_phase` | write | ✓ | ✓ | — | — |
 | `manage_process_subphase` | write | ✓ | ✓ | — | — |
 
-> **Agente `phases`:** subset anterior (4 tools). CC solo recibe las 2 de lectura. Ver [DD-AGENT-001](DD-AGENT-001.md).  
+> **Agente `phases`:** subset (4 tools). CC solo lectura. Ver [DD-AGENT-001](DD-AGENT-001.md).  
+> **Agente `users`:** subset (5 tools JD-only). Ver [DD-AGENT-002](DD-AGENT-002.md). HTTP 403 si rol ≠ JD.  
 > **Gestión de usuarios:** exclusiva **JD** (alineada a `GET/PATCH /admin/users`).  
 > **Fases/subfases:** **JD** y **TD** escritura; **CC** solo lectura en su carrera asignada.
 
 | Tool ID | Side-effect | Roles permitidos | Caso de uso | API REST equivalente |
 |---------|-------------|------------------|-------------|----------------------|
 | `list_users` | `read` | **JD** | `ListUsersUseCase` | `GET /api/v1/admin/users` |
+| `get_user_detail` | `read` | **JD** | `ListUsersUseCase` + `UserRepositoryPort` | `GET /api/v1/admin/users` |
+| `create_user` | `write` | **JD** | `RegisterUserUseCase` | `POST /api/v1/admin/users` |
 | `list_programs` | `read` | **JD**, **TD** | `ListProgramsUseCase` | `GET /api/v1/programs` |
 | `list_process_phases` | `read` | **JD**, **TD**, **CC** | `GetProcessDetailUseCase` + resolución carrera→proceso activo | `GET /api/v1/processes/{id}` |
 | `list_process_structure` | `read` | **JD**, **TD**, **CC** | `GetProcessDetailUseCase` (árbol fase→subfase) | `GET /api/v1/processes/{id}` |
-| `set_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | *(sin endpoint REST de activación; deactivate vía PATCH)* |
+| `set_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | *(asistente general; deactivate vía PATCH)* |
+| `manage_user_status` | `write` | **JD** | `ActivateUserUseCase` / `DeactivateUserUseCase` | *(agente users; ACTIVATE/DEACTIVATE/REACTIVATE)* |
+| `manage_user_assignment` | `write` | **JD** | `ManageUserProgramAssignmentUseCase` | *(user_program_assignment)* |
 | `manage_process_phase` | `write` | **JD**, **TD** | `Add/Update/Delete/ReorderProcess*` | `ProcessStructureController` |
 | `manage_process_subphase` | `write` | **JD**, **TD** | `Add/Update/DeleteProcessSubphase*` | `ProcessStructureController` |
 
@@ -469,3 +481,19 @@ Documento de entrega: [`ENTREGA-TOOL-CALLING-SEMANA.md`](ENTREGA-TOOL-CALLING-SE
 | `create_process` | 2 | JD | Escritura con confirmación explícita en UI — pendiente |
 
 Este documento se versionará incrementando tools en la tabla §2 sin modificar `docs/baseline/`.
+
+---
+
+## 8. Agente `users` (DD-AGENT-002)
+
+Subset JD-only embebido en `/admin/users`. Contrato: `context.agent=users` (+ `userId` / `programId` opcionales).
+
+| Tool | Confirmación | Resumen |
+|------|--------------|---------|
+| `list_users` | — | + filtro opcional `programId` |
+| `get_user_detail` | — | Detalle + `createdAt` / `updatedAt` |
+| `create_user` | sí (`UserActionPlan`) | Alta INACTIVE + assignment CC/EE |
+| `manage_user_status` | sí | ACTIVATE / DEACTIVATE / REACTIVATE |
+| `manage_user_assignment` | sí | CREATE / UPDATE assignment |
+
+Ver [DD-AGENT-002](DD-AGENT-002.md) y [PR-IMPL-025](../../prompts/impl/PR-IMPL-025.md).

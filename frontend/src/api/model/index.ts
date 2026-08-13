@@ -18,7 +18,9 @@ export * from './createProcessRequestDto.ts';
 export * from './evidenceSearchDetailDto.ts';
 export * from './createSubphaseRequestDto.ts';
 export * from './eligibleResponsibleDto.ts';
+export * from './evidenceTypes.ts';
 export * from './executiveKpiSection.ts';
+
 export * from './exportJobRequest.ts';
 export * from './exportJobResponse.ts';
 export * from './generateExecutiveReportRequest.ts';

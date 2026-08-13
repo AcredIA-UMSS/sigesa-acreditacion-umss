@@ -18,10 +18,11 @@
 | PM-009 | PR-IMPL-022 | DD-UC-022 | FSD-UC-022 | Full-Stack UC-022: backend ProcessStructure + frontend `/procesos/{id}/estructura` |
 | PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
 | PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
-| PM-012 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
-| PM-013 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
-| PM-014 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
-| PM-015 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
+| PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
+| PM-013 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
+| PM-014 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
+| PM-015 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
+| PM-016 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
 
 ## PM-001
 
@@ -904,6 +905,84 @@ Copiloto de fases operativo en `/procesos/{id}` y `/procesos/{id}/estructura`. C
 | Campo | Valor |
 |---|---|
 | **ID** | PM-012 |
+## PM-012
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-012 |
+| **Fecha** | 2026-08-11 |
+| **Hora** | 22:45 |
+| **Solicitante** | Cursor Agent |
+| **Agente/Entorno** | sigesa-orchestrator (Cursor) |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Copiloto de usuarios embebido (MOD-ASSISTANT `agent=users`) |
+| **Objetivo** | Extender FSD-UC-002 con agente conversacional JD-only en `/admin/users`, análogo a phases |
+| **Contexto** | CRUD UC-002 ya Hecho; patrón DD-AGENT-001 / PR-IMPL-024 |
+| **PR-IMPL vinculado** | [PR-IMPL-025](../../prompts/impl/PR-IMPL-025.md) |
+| **DD vinculado** | [DD-AGENT-002](../../design/assistant/DD-AGENT-002.md) (+ DD-UC-002 CRUD) |
+| **FSD-UC vinculado** | [FSD-UC-002](../../product/uc/FSD-UC-002.md) |
+| **Estado** | completado (código listo; tests/Docker smoke pendientes por entorno local) |
+
+### Prompt usado exacto
+
+```text
+Implementa el agente embebido `users` para SIGESA siguiendo el pipeline AI-SDLC.
+
+## Entrada funcional
+**FSD-UC-002** — Gestión de usuarios [JD]
+Trazabilidad resuelta esperada: FSD-UC-002 → DD-UC-002 → PR-IMPL-002
+
+NOTA IMPORTANTE: FSD-UC-002 ya está marcado como "Hecho" (gestión de usuarios CRUD tradicional). Este trabajo es una **extensión**: agente embebido conversacional `users` análogo al agente `phases` (DD-AGENT-001). …
+(objetivo completo: UsersCopilotPanel, RBAC JD 403, tools list/get/create/manage_status/manage_assignment, DD-AGENT-002, TOOL-CATALOG, Orval, Paso 3c, code review, @dtp-sync, @save-prompt-mapping)
+```
+
+### Archivos generados / modificados (git status)
+
+| Tipo | Ruta |
+|------|------|
+| generado | `docs/design/assistant/DD-AGENT-002.md` |
+| generado | `docs/prompts/impl/PR-IMPL-025.md` |
+| generado | `frontend/.../UsersCopilotPanel.tsx`, `useUsersCopilot.ts` |
+| generado | `ManageUserProgramAssignmentUseCase/Service` + test |
+| generado | `AssistantUserActionPlan`, `AssistantAgentAccessDeniedException` |
+| modificado | Assistant* (registry, executor, controller, keyword, formatter, context, capabilities) |
+| modificado | `TOOL-CATALOG.md`, `DTP.md`, `assistantTypes` / `assistantChatContextDto` |
+| modificado | `UsersAdminPage.tsx` |
+
+### Criterios cubiertos
+
+1. **UI:** panel colapsable mobile + sidebar sticky desktop; solo JD (JdOnlyRoute + `session.role === 'JD'`).
+2. **RBAC:** 403 en chat/status `agent=users` si rol ≠ JD.
+3. **Tools:** `list_users`, `get_user_detail`, `create_user`, `manage_user_status`, `manage_user_assignment` + `UserActionPlan`.
+4. **Docs:** DD-AGENT-002 + TOOL-CATALOG §8 + PR-IMPL-025.
+5. **DTP:** changelog A.1 + §B.5 agentes embebidos.
+
+### Validación ejecutada
+
+- [ ] `./mvnw test` — **bloqueado** (PKIX / parent POM Spring Boot 4.1.0 no resoluble en host)
+- [ ] Docker smoke Paso 3c — **bloqueado** (Docker Desktop no disponible)
+- [ ] `pnpm run generate:api` — pendiente backend `:8080`; DTO Orval actualizado a mano
+- [x] Code review arquitectónico ligero (hexagonal, DTO, JD-only) — OK
+- [x] `@dtp-sync` + este `@save-prompt-mapping` — OK
+
+### Resultado obtenido
+
+Copiloto `agent=users` implementado de punta a punta (docs + backend + frontend). Validación runtime pendiente de entorno Maven/Docker del solicitante.
+
+### Próximos pasos
+
+- [ ] Arrancar Docker Desktop + `docker compose up -d --build` y smoke JD en `/admin/users`
+- [ ] `./mvnw test` en host con m2 sano
+- [ ] `pnpm run generate:api` contra `:8080`
+- [ ] USERS-UX-01: botones Confirmar/Cancelar
+
+---
+
+## PM-013
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-013 |
 | **Fecha** | 2026-08-08 |
 | **Hora** | 15:40 |
 | **Solicitante** | Tech Lead / User |
@@ -968,11 +1047,11 @@ Asegúrate de:
 
 ---
 
-## PM-013
+## PM-014
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-013 |
+| **ID** | PM-014 |
 | **Fecha** | 2026-08-09 |
 | **Solicitante** | Tech Lead / User |
 | **Agente/Entorno** | Antigravity AI |
@@ -1015,11 +1094,11 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 ---
 
-## PM-014
+## PM-015
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-014 |
+| **ID** | PM-015 |
 | **Fecha** | 2026-08-11 |
 | **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
 | **Agente/Entorno** | Antigravity AI Coding Assistant |
@@ -1060,11 +1139,11 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 ---
 
-## PM-015
+## PM-016
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-015 |
+| **ID** | PM-016 |
 | **Fecha** | 2026-08-12 |
 | **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
 | **Agente/Entorno** | Antigravity AI Coding Assistant |

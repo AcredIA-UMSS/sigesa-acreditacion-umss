@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-014
 nombre: Reporte ejecutivo PDF
-estado: Pendiente
+estado: Implementado
 release: v1.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-021
 modulo: MOD-REPORT
 reglas: FSD-BR-14
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-08-09"
 ---
 
 # FSD-UC-014 — Reporte ejecutivo PDF

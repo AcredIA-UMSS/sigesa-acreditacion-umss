@@ -7,7 +7,7 @@ export function ExecutiveReportPage() {
 
   return (
     <div className="flex h-screen bg-body">
-      <Sidebar />
+      <Sidebar activeNav="reports" />
       <ExecutiveReportUI
         form={report.form}
         onFieldChange={report.updateField}

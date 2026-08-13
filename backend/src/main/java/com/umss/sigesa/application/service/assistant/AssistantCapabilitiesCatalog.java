@@ -23,6 +23,9 @@ public final class AssistantCapabilitiesCatalog {
         if (agentProfile == AssistantAgentProfile.PHASES) {
             return capabilitiesForPhasesAgent(role);
         }
+        if (agentProfile == AssistantAgentProfile.USERS) {
+            return capabilitiesForUsersAgent(role);
+        }
 
         List<String> items = new ArrayList<>();
         String normalized = role.trim().toUpperCase(Locale.ROOT);
@@ -36,6 +39,7 @@ public final class AssistantCapabilitiesCatalog {
         if ("JD".equals(normalized)) {
             items.add("Listar usuarios registrados (palabra clave: «usuarios»).");
             items.add("Activar o desactivar usuarios (con confirmación en chat).");
+            items.add("Registrar usuarios institucionales (agente users /admin/users).");
         }
         if (items.isEmpty()) {
             items.add("Consultas operativas sobre acreditación sin tools administrativas para su rol.");
@@ -59,6 +63,20 @@ public final class AssistantCapabilitiesCatalog {
         return items;
     }
 
+    public static List<String> capabilitiesForUsersAgent(String role) {
+        String normalized = role == null ? "" : role.trim().toUpperCase(Locale.ROOT);
+        if (!"JD".equals(normalized)) {
+            return List.of("Este copiloto de usuarios solo está disponible para Jefatura DUEA [JD].");
+        }
+        return List.of(
+                "Listar usuarios (filtros por rol, estado o carrera).",
+                "Consultar detalle de un usuario (rol, alcance, estado, fechas).",
+                "Registrar usuarios @umss.edu.bo (cuenta INACTIVE hasta primer acceso).",
+                "Activar, desactivar o reactivar cuentas (con confirmación; bitácora UC-017).",
+                "Crear o actualizar asignación de carrera (mínimo privilegio)."
+        );
+    }
+
     public static String formatOutOfScopeMessage(String role, boolean llmDisabledWithoutKeyword) {
         return formatOutOfScopeMessage(role, llmDisabledWithoutKeyword, AssistantAgentProfile.GENERAL);
     }
@@ -75,6 +93,9 @@ public final class AssistantCapabilitiesCatalog {
         }
         if (agentProfile == AssistantAgentProfile.PHASES) {
             sb.append("Este copiloto solo cubre fases del proceso actual.\n\n");
+        }
+        if (agentProfile == AssistantAgentProfile.USERS) {
+            sb.append("Este copiloto solo cubre gestión de usuarios (JD).\n\n");
         }
         sb.append("Puedo ayudarte con:\n");
         for (String capability : capabilitiesForRoleAndAgent(role, agentProfile)) {

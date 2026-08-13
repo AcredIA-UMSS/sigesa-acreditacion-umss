@@ -11,6 +11,8 @@ import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
+import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
+import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
@@ -41,6 +43,10 @@ class AssistantToolExecutorTest {
     private ActivateUserUseCase activateUserUseCase;
     @Mock
     private DeactivateUserUseCase deactivateUserUseCase;
+    @Mock
+    private RegisterUserUseCase registerUserUseCase;
+    @Mock
+    private ManageUserProgramAssignmentUseCase manageUserProgramAssignmentUseCase;
     @Mock
     private UserRepositoryPort userRepositoryPort;
     @Mock
@@ -76,6 +82,8 @@ class AssistantToolExecutorTest {
                 listUsersUseCase,
                 activateUserUseCase,
                 deactivateUserUseCase,
+                registerUserUseCase,
+                manageUserProgramAssignmentUseCase,
                 userRepositoryPort,
                 listProgramsUseCase,
                 listProcessesUseCase,

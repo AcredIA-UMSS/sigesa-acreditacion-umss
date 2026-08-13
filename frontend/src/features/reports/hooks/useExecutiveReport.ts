@@ -28,6 +28,9 @@ const defaultForm: ExecutiveReportFormState = {
   managementYear: new Date().getFullYear(),
 };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function validateForm(
   form: ExecutiveReportFormState,
 ): ExecutiveReportValidationErrors {
@@ -35,6 +38,16 @@ function validateForm(
 
   if (!Number.isInteger(form.managementYear) || form.managementYear < 2000) {
     errors.managementYear = 'Indique un año de gestión válido.';
+  }
+
+  const facultyId = form.facultyId.trim();
+  if (facultyId && !UUID_PATTERN.test(facultyId)) {
+    errors.facultyId = 'Indique un UUID de facultad válido.';
+  }
+
+  const programId = form.programId.trim();
+  if (programId && !UUID_PATTERN.test(programId)) {
+    errors.programId = 'Indique un UUID de programa válido.';
   }
 
   return errors;

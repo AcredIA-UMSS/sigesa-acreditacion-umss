@@ -17,23 +17,31 @@ import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
+import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
+import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.exception.DuplicateEmailException;
+import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
 import com.umss.sigesa.domain.exception.InvalidFilterException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
+import com.umss.sigesa.domain.exception.InvalidScopeException;
+import com.umss.sigesa.domain.exception.InvalidUserProfileException;
 import com.umss.sigesa.domain.exception.InvalidUserStatusTransitionException;
 import com.umss.sigesa.domain.exception.ProcessNotEditableException;
 import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
 import com.umss.sigesa.domain.exception.SubphaseHasEvidenceException;
 import com.umss.sigesa.domain.exception.UserNotFoundException;
+import com.umss.sigesa.domain.exception.WeakPasswordException;
+import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.Phase;
 import com.umss.sigesa.domain.model.Subphase;
 import com.umss.sigesa.domain.model.UserStatus;
 
 import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
-
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -48,6 +56,8 @@ public class AssistantToolExecutor {
     private final ListUsersUseCase listUsersUseCase;
     private final ActivateUserUseCase activateUserUseCase;
     private final DeactivateUserUseCase deactivateUserUseCase;
+    private final RegisterUserUseCase registerUserUseCase;
+    private final ManageUserProgramAssignmentUseCase manageUserProgramAssignmentUseCase;
     private final UserRepositoryPort userRepositoryPort;
     private final ListProgramsUseCase listProgramsUseCase;
     private final ListProcessesUseCase listProcessesUseCase;
@@ -61,11 +71,14 @@ public class AssistantToolExecutor {
     private final ReorderProcessStructureUseCase reorderProcessStructureUseCase;
     private final SearchEvidenceUseCase searchEvidenceUseCase;
     private final ObjectMapper objectMapper;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public AssistantToolExecutor(AssistantToolRegistry toolRegistry,
                                  ListUsersUseCase listUsersUseCase,
                                  ActivateUserUseCase activateUserUseCase,
                                  DeactivateUserUseCase deactivateUserUseCase,
+                                 RegisterUserUseCase registerUserUseCase,
+                                 ManageUserProgramAssignmentUseCase manageUserProgramAssignmentUseCase,
                                  UserRepositoryPort userRepositoryPort,
                                  ListProgramsUseCase listProgramsUseCase,
                                  ListProcessesUseCase listProcessesUseCase,
@@ -83,6 +96,8 @@ public class AssistantToolExecutor {
         this.listUsersUseCase = listUsersUseCase;
         this.activateUserUseCase = activateUserUseCase;
         this.deactivateUserUseCase = deactivateUserUseCase;
+        this.registerUserUseCase = registerUserUseCase;
+        this.manageUserProgramAssignmentUseCase = manageUserProgramAssignmentUseCase;
         this.userRepositoryPort = userRepositoryPort;
         this.listProgramsUseCase = listProgramsUseCase;
         this.listProcessesUseCase = listProcessesUseCase;
@@ -112,11 +127,15 @@ public class AssistantToolExecutor {
 
         ToolExecutionResult result = switch (toolId) {
             case AssistantToolRegistry.LIST_USERS_ID -> executeListUsers(argumentsJson);
+            case AssistantToolRegistry.GET_USER_DETAIL_ID -> executeGetUserDetail(argumentsJson);
+            case AssistantToolRegistry.CREATE_USER_ID -> executeCreateUser(argumentsJson);
             case AssistantToolRegistry.LIST_PROGRAMS_ID -> executeListPrograms(argumentsJson);
             case AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID -> executeListActiveProcesses(argumentsJson, auth);
             case AssistantToolRegistry.LIST_PROCESS_PHASES_ID -> executeListProcessPhases(argumentsJson, auth);
             case AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID -> executeListProcessStructure(argumentsJson, auth);
             case AssistantToolRegistry.SET_USER_STATUS_ID -> executeSetUserStatus(argumentsJson, auth);
+            case AssistantToolRegistry.MANAGE_USER_STATUS_ID -> executeManageUserStatus(argumentsJson, auth);
+            case AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID -> executeManageUserAssignment(argumentsJson);
             case AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID -> executeManageProcessPhase(argumentsJson, auth);
             case AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID -> executeManageProcessSubphase(argumentsJson, auth);
             case AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID -> executeBuscarEvidencias(argumentsJson, auth);
@@ -157,6 +176,7 @@ public class AssistantToolExecutor {
         try {
             String roleFilter = null;
             String statusFilter = null;
+            UUID programFilter = null;
 
             if (argumentsJson != null && !argumentsJson.isBlank()) {
                 JsonNode args = objectMapper.readTree(argumentsJson);
@@ -166,15 +186,26 @@ public class AssistantToolExecutor {
                 if (args.hasNonNull("status")) {
                     statusFilter = args.get("status").asText();
                 }
+                if (args.hasNonNull("programId") && !args.get("programId").asText().isBlank()) {
+                    programFilter = UUID.fromString(args.get("programId").asText().trim());
+                }
             }
 
             List<ListUsersUseCase.UserSummary> users = listUsersUseCase.list(roleFilter, statusFilter);
+            if (programFilter != null) {
+                UUID programId = programFilter;
+                users = users.stream()
+                        .filter(user -> user.programIds() != null && user.programIds().contains(programId))
+                        .toList();
+            }
             List<Map<String, Object>> userPayload = users.stream().map(this::toUserMap).toList();
 
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("users", userPayload);
             data.put("total", userPayload.size());
             return ToolExecutionResult.success(data);
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_FILTER", "programId inválido.");
         } catch (InvalidRoleException ex) {
             return ToolExecutionResult.failure("INVALID_ROLE", ex.getMessage());
         } catch (InvalidFilterException ex) {
@@ -182,6 +213,290 @@ public class AssistantToolExecutor {
         } catch (JsonProcessingException ex) {
             return ToolExecutionResult.failure("INVALID_ARGUMENTS", "No se pudieron interpretar los argumentos de la tool.");
         }
+    }
+
+    private ToolExecutionResult executeGetUserDetail(String argumentsJson) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String identifier = requiredText(args, "identifier");
+            AssistantUserLookup.LookupResult lookup = AssistantUserLookup.resolve(
+                    identifier, listUsersUseCase, userRepositoryPort);
+            if (!lookup.isOk()) {
+                return ToolExecutionResult.failure(lookup.errorCode(), lookup.errorMessage());
+            }
+
+            ListUsersUseCase.UserSummary summary = lookup.user().summary();
+            AppUser domainUser = userRepositoryPort.findById(summary.userId()).orElse(null);
+
+            Map<String, Object> data = toUserMap(summary);
+            if (domainUser != null) {
+                data.put("createdAt", domainUser.getCreatedAt() != null ? domainUser.getCreatedAt().toString() : null);
+                data.put("updatedAt", domainUser.getUpdatedAt() != null ? domainUser.getUpdatedAt().toString() : null);
+                data.put("lastAccess", null);
+                data.put("lastAccessNote", "No se registra lastAccess en v1; updatedAt refleja el último cambio de estado.");
+            }
+
+            List<Map<String, Object>> programs = new ArrayList<>();
+            if (summary.programIds() != null) {
+                for (UUID programId : summary.programIds()) {
+                    listProgramsUseCase.list(null).stream()
+                            .filter(p -> p.id().equals(programId))
+                            .findFirst()
+                            .ifPresent(p -> {
+                                Map<String, Object> program = new LinkedHashMap<>();
+                                program.put("programId", p.id().toString());
+                                program.put("code", p.code());
+                                program.put("name", p.name());
+                                programs.add(program);
+                            });
+                }
+            }
+            data.put("programs", programs);
+            return ToolExecutionResult.success(data);
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", ex.getMessage());
+        } catch (JsonProcessingException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", "No se pudieron interpretar los argumentos de la tool.");
+        }
+    }
+
+    private ToolExecutionResult executeCreateUser(String argumentsJson) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String email = requiredText(args, "email");
+            String firstName = requiredText(args, "firstName");
+            String lastName = requiredText(args, "lastName");
+            String phoneNumber = requiredText(args, "phoneNumber");
+            String role = requiredText(args, "role").toUpperCase(Locale.ROOT);
+            boolean confirmed = AssistantConfirmationSupport.isConfirmed(args);
+
+            UUID programId = resolveProgramId(args);
+            boolean requiresProgram = "CC".equals(role) || "EE".equals(role);
+            if (requiresProgram && programId == null) {
+                return ToolExecutionResult.failure(
+                        "INVALID_SCOPE",
+                        "El rol " + role + " requiere programId o programQuery.");
+            }
+            if (!requiresProgram) {
+                programId = null;
+            }
+
+            String tempPassword = generateTemporaryPassword();
+            Map<String, Object> preview = new LinkedHashMap<>();
+            preview.put("email", email.trim().toLowerCase(Locale.ROOT));
+            preview.put("firstName", firstName);
+            preview.put("lastName", lastName);
+            preview.put("phoneNumber", phoneNumber);
+            preview.put("role", role);
+            preview.put("programId", programId != null ? programId.toString() : null);
+            preview.put("initialStatus", UserStatus.INACTIVE.name());
+
+            AssistantUserActionPlan plan = AssistantUserActionPlan.of(
+                    "CREATE_USER",
+                    "Alta de " + firstName + " " + lastName + " (" + email + ") como " + role
+                            + " — cuenta INACTIVE hasta primer acceso.",
+                    preview);
+
+            if (!confirmed) {
+                return AssistantConfirmationSupport.confirmationRequired(
+                        "CREATE",
+                        plan.preview(),
+                        plan.summary() + " Responda «confirmo» para crear la cuenta.");
+            }
+
+            RegisterUserUseCase.RegisterResult registered = registerUserUseCase.register(
+                    new RegisterUserUseCase.RegisterUserCommand(
+                            email,
+                            role,
+                            programId,
+                            firstName,
+                            lastName,
+                            phoneNumber,
+                            tempPassword.toCharArray()
+                    ));
+
+            Map<String, Object> result = new LinkedHashMap<>(plan.preview());
+            result.put("userId", registered.userId().toString());
+            result.put("status", registered.status().name());
+            result.put("temporaryPassword", tempPassword);
+            result.put("deliveryNote", "Entregue la contraseña temporal al usuario por canal offline.");
+
+            return AssistantConfirmationSupport.executed(
+                    "CREATE",
+                    result,
+                    "Usuario creado en estado INACTIVE. Contraseña temporal: " + tempPassword);
+        } catch (InvalidEmailDomainException ex) {
+            return ToolExecutionResult.failure("INVALID_EMAIL_DOMAIN", ex.getMessage());
+        } catch (DuplicateEmailException ex) {
+            return ToolExecutionResult.failure("EMAIL_ALREADY_REGISTERED", DuplicateEmailException.MESSAGE);
+        } catch (InvalidScopeException | InvalidRoleException | InvalidUserProfileException | WeakPasswordException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", ex.getMessage());
+        } catch (JsonProcessingException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", "No se pudieron interpretar los argumentos de la tool.");
+        } catch (RuntimeException ex) {
+            return ToolExecutionResult.failure("ASSISTANT_TOOL_FAILED", ex.getMessage());
+        }
+    }
+
+    private ToolExecutionResult executeManageUserStatus(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String identifier = requiredText(args, "identifier");
+            String action = requiredText(args, "action").toUpperCase(Locale.ROOT);
+            boolean confirmed = AssistantConfirmationSupport.isConfirmed(args);
+
+            if ("REACTIVATE".equals(action)) {
+                action = "ACTIVATE";
+            }
+            if (!"ACTIVATE".equals(action) && !"DEACTIVATE".equals(action)) {
+                return ToolExecutionResult.failure(
+                        "INVALID_ACTION",
+                        "La acción debe ser ACTIVATE, DEACTIVATE o REACTIVATE.");
+            }
+
+            // Reuse set_user_status semantics with UserActionPlan summary.
+            String argsForStatus = "{\"identifier\":\"" + escapeJson(identifier)
+                    + "\",\"action\":\"" + action + "\",\"confirmed\":" + confirmed + "}";
+            ToolExecutionResult raw = executeSetUserStatus(argsForStatus, auth);
+            if (!raw.ok() || !(raw.data() instanceof Map<?, ?> dataMap)) {
+                return raw;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) dataMap;
+            if (Boolean.TRUE.equals(data.get("confirmationRequired"))
+                    && data.get("preview") instanceof Map<?, ?> previewRaw) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> preview = new LinkedHashMap<>((Map<String, Object>) previewRaw);
+                String verb = "DEACTIVATE".equals(action) ? "desactivar" : "activar/reactivar";
+                AssistantUserActionPlan plan = AssistantUserActionPlan.of(
+                        action,
+                        "Se va a " + verb + " a " + preview.get("fullName")
+                                + " (" + preview.get("email") + "). Estado actual: "
+                                + preview.get("currentStatus") + ".",
+                        preview);
+                return AssistantConfirmationSupport.confirmationRequired(
+                        action,
+                        plan.preview(),
+                        plan.summary() + " Responda «confirmo» para proceder.");
+            }
+            return raw;
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", ex.getMessage());
+        } catch (JsonProcessingException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", "No se pudieron interpretar los argumentos de la tool.");
+        }
+    }
+
+    private ToolExecutionResult executeManageUserAssignment(String argumentsJson) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String identifier = requiredText(args, "identifier");
+            String action = requiredText(args, "action").toUpperCase(Locale.ROOT);
+            boolean confirmed = AssistantConfirmationSupport.isConfirmed(args);
+
+            if (!"CREATE".equals(action) && !"UPDATE".equals(action)) {
+                return ToolExecutionResult.failure("INVALID_ACTION", "La acción debe ser CREATE o UPDATE.");
+            }
+
+            UUID programId = resolveProgramId(args);
+            if (programId == null) {
+                return ToolExecutionResult.failure(
+                        "INVALID_ARGUMENTS",
+                        "Debe indicar programId o programQuery.");
+            }
+
+            AssistantUserLookup.LookupResult lookup = AssistantUserLookup.resolve(
+                    identifier, listUsersUseCase, userRepositoryPort);
+            if (!lookup.isOk()) {
+                return ToolExecutionResult.failure(lookup.errorCode(), lookup.errorMessage());
+            }
+
+            ListUsersUseCase.UserSummary user = lookup.user().summary();
+            String programLabel = listProgramsUseCase.list(null).stream()
+                    .filter(p -> p.id().equals(programId))
+                    .findFirst()
+                    .map(p -> p.code() + " — " + p.name())
+                    .orElse(programId.toString());
+
+            Map<String, Object> preview = new LinkedHashMap<>();
+            preview.put("userId", user.userId().toString());
+            preview.put("email", user.email());
+            preview.put("fullName", user.fullName());
+            preview.put("role", user.role());
+            preview.put("programId", programId.toString());
+            preview.put("programLabel", programLabel);
+            preview.put("currentProgramIds", user.programIds().stream().map(Object::toString).toList());
+
+            AssistantUserActionPlan plan = AssistantUserActionPlan.of(
+                    action + "_ASSIGNMENT",
+                    action + " asignación de " + user.fullName() + " → " + programLabel
+                            + " (mínimo privilegio: una carrera activa).",
+                    preview);
+
+            if (!confirmed) {
+                return AssistantConfirmationSupport.confirmationRequired(
+                        action,
+                        plan.preview(),
+                        plan.summary() + " Responda «confirmo» para aplicar.");
+            }
+
+            ManageUserProgramAssignmentUseCase.AssignmentResult assigned =
+                    manageUserProgramAssignmentUseCase.assign(
+                            new ManageUserProgramAssignmentUseCase.AssignCommand(
+                                    user.userId(), programId, action));
+
+            Map<String, Object> result = new LinkedHashMap<>(plan.preview());
+            result.put("revokedCount", assigned.revokedCount());
+            return AssistantConfirmationSupport.executed(
+                    action,
+                    result,
+                    "Asignación actualizada. Carreras previas revocadas: " + assigned.revokedCount() + ".");
+        } catch (InvalidScopeException ex) {
+            return ToolExecutionResult.failure("INVALID_SCOPE", ex.getMessage());
+        } catch (UserNotFoundException ex) {
+            return ToolExecutionResult.failure("USER_NOT_FOUND", ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", ex.getMessage());
+        } catch (JsonProcessingException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENTS", "No se pudieron interpretar los argumentos de la tool.");
+        } catch (RuntimeException ex) {
+            return ToolExecutionResult.failure("ASSISTANT_TOOL_FAILED", ex.getMessage());
+        }
+    }
+
+    private UUID resolveProgramId(JsonNode args) {
+        if (args.hasNonNull("programId") && !args.get("programId").asText().isBlank()) {
+            return UUID.fromString(args.get("programId").asText().trim());
+        }
+        if (args.hasNonNull("programQuery") && !args.get("programQuery").asText().isBlank()) {
+            String query = args.get("programQuery").asText().trim();
+            List<ListProgramsUseCase.ProgramSummary> matches = listProgramsUseCase.list(query);
+            if (matches.isEmpty()) {
+                throw new IllegalArgumentException("No se encontró carrera con: " + query);
+            }
+            if (matches.size() > 1) {
+                throw new IllegalArgumentException(
+                        "Hay varias carreras que coinciden. Indique programId UUID.");
+            }
+            return matches.getFirst().id();
+        }
+        return null;
+    }
+
+    private String generateTemporaryPassword() {
+        final String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+        StringBuilder sb = new StringBuilder(12);
+        for (int i = 0; i < 10; i++) {
+            sb.append(alphabet.charAt(secureRandom.nextInt(alphabet.length())));
+        }
+        sb.append('A').append('1');
+        return sb.toString();
+    }
+
+    private static String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private ToolExecutionResult executeListPrograms(String argumentsJson) {

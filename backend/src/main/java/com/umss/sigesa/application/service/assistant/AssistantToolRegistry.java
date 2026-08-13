@@ -12,10 +12,14 @@ import java.util.Set;
 public class AssistantToolRegistry {
 
     static final String LIST_USERS_ID = "list_users";
+    static final String GET_USER_DETAIL_ID = "get_user_detail";
+    static final String CREATE_USER_ID = "create_user";
     static final String LIST_PROGRAMS_ID = "list_programs";
     static final String LIST_PROCESS_PHASES_ID = "list_process_phases";
     static final String LIST_PROCESS_STRUCTURE_ID = "list_process_structure";
     static final String SET_USER_STATUS_ID = "set_user_status";
+    static final String MANAGE_USER_STATUS_ID = "manage_user_status";
+    static final String MANAGE_USER_ASSIGNMENT_ID = "manage_user_assignment";
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
     static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
     static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
@@ -35,10 +39,31 @@ public class AssistantToolRegistry {
 
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
-            "Lista usuarios SIGESA (correo, nombre, rol, estado). Solo JD. Filtros opcionales role/status.",
+            "Lista usuarios SIGESA (correo, nombre, rol, estado). Solo JD. "
+                    + "Filtros opcionales role, status y programId (UUID de carrera).",
             JD_ONLY,
             "read",
             listUsersParameterSchema()
+    );
+
+    private static final AssistantToolDefinition GET_USER_DETAIL = new AssistantToolDefinition(
+            GET_USER_DETAIL_ID,
+            "Obtiene el detalle de un usuario por correo o nombre. Solo JD. "
+                    + "Incluye rol, estado, programas asignados, createdAt y updatedAt.",
+            JD_ONLY,
+            "read",
+            getUserDetailParameterSchema()
+    );
+
+    private static final AssistantToolDefinition CREATE_USER = new AssistantToolDefinition(
+            CREATE_USER_ID,
+            "Registra un usuario institucional. Solo JD. Requiere email @umss.edu.bo, firstName, lastName, "
+                    + "phoneNumber, role (JD/CC/TD/EE). programId obligatorio para CC/EE. "
+                    + "La cuenta queda INACTIVE hasta el primer acceso. "
+                    + "Primero confirmed=false (vista previa); confirmed=true tras confirmación explícita.",
+            JD_ONLY,
+            "write",
+            createUserParameterSchema()
     );
 
     private static final AssistantToolDefinition LIST_PROGRAMS = new AssistantToolDefinition(
@@ -90,6 +115,28 @@ public class AssistantToolRegistry {
             setUserStatusParameterSchema()
     );
 
+    private static final AssistantToolDefinition MANAGE_USER_STATUS = new AssistantToolDefinition(
+            MANAGE_USER_STATUS_ID,
+            "Activa, desactiva o reactiva un usuario (agente users). Solo JD. "
+                    + "Acciones: ACTIVATE, DEACTIVATE, REACTIVATE. "
+                    + "Primero confirmed=false para vista previa; confirmed=true tras confirmación. "
+                    + "Desactivación: el usuario no puede iniciar sesión; historial de auditoría se conserva.",
+            JD_ONLY,
+            "write",
+            manageUserStatusParameterSchema()
+    );
+
+    private static final AssistantToolDefinition MANAGE_USER_ASSIGNMENT = new AssistantToolDefinition(
+            MANAGE_USER_ASSIGNMENT_ID,
+            "Crea o actualiza la asignación user_program_assignment de un usuario CC/EE. Solo JD. "
+                    + "Acciones: CREATE, UPDATE. Requiere identifier (correo/nombre) y programId. "
+                    + "Aplica mínimo privilegio (una carrera activa). "
+                    + "Primero confirmed=false; confirmed=true tras confirmación.",
+            JD_ONLY,
+            "write",
+            manageUserAssignmentParameterSchema()
+    );
+
     private static final AssistantToolDefinition MANAGE_PROCESS_PHASE = new AssistantToolDefinition(
             MANAGE_PROCESS_PHASE_ID,
             "Crea, edita, elimina u ordena fases del proceso ACTIVO de una carrera. JD y TD. "
@@ -115,11 +162,15 @@ public class AssistantToolRegistry {
     private final List<AssistantToolDefinition> allTools = List.of(
             BUSCAR_EVIDENCIAS,
             LIST_USERS,
+            GET_USER_DETAIL,
+            CREATE_USER,
             LIST_PROGRAMS,
             LIST_ACTIVE_PROCESSES,
             LIST_PROCESS_PHASES,
             LIST_PROCESS_STRUCTURE,
             SET_USER_STATUS,
+            MANAGE_USER_STATUS,
+            MANAGE_USER_ASSIGNMENT,
             MANAGE_PROCESS_PHASE,
             MANAGE_PROCESS_SUBPHASE
     );
@@ -136,12 +187,17 @@ public class AssistantToolRegistry {
 
     public List<AssistantToolDefinition> toolsForRoleAndAgent(String role, AssistantAgentProfile agentProfile) {
         List<AssistantToolDefinition> roleTools = toolsForRole(role);
-        if (agentProfile != AssistantAgentProfile.PHASES) {
-            return roleTools;
+        if (agentProfile == AssistantAgentProfile.PHASES) {
+            return roleTools.stream()
+                    .filter(tool -> PHASES_AGENT_TOOL_IDS.contains(tool.id()))
+                    .toList();
         }
-        return roleTools.stream()
-                .filter(tool -> PHASES_AGENT_TOOL_IDS.contains(tool.id()))
-                .toList();
+        if (agentProfile == AssistantAgentProfile.USERS) {
+            return roleTools.stream()
+                    .filter(tool -> USERS_AGENT_TOOL_IDS.contains(tool.id()))
+                    .toList();
+        }
+        return roleTools;
     }
 
     private static final Set<String> PHASES_AGENT_TOOL_IDS = Set.of(
@@ -149,6 +205,14 @@ public class AssistantToolRegistry {
             LIST_PROCESS_STRUCTURE_ID,
             MANAGE_PROCESS_PHASE_ID,
             MANAGE_PROCESS_SUBPHASE_ID
+    );
+
+    private static final Set<String> USERS_AGENT_TOOL_IDS = Set.of(
+            LIST_USERS_ID,
+            GET_USER_DETAIL_ID,
+            CREATE_USER_ID,
+            MANAGE_USER_STATUS_ID,
+            MANAGE_USER_ASSIGNMENT_ID
     );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
@@ -166,7 +230,50 @@ public class AssistantToolRegistry {
         properties.put("status", enumProperty(
                 List.of("INACTIVE", "ACTIVE", "DEACTIVATED"),
                 "Filtro opcional por estado de cuenta."));
+        properties.put("programId", stringProperty("Filtro opcional por UUID de carrera/programa."));
         return objectSchema(properties);
+    }
+
+    private static Map<String, Object> getUserDetailParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("identifier", stringProperty("Correo @umss.edu.bo o nombre del usuario."));
+        return requiredObjectSchema(properties, List.of("identifier"));
+    }
+
+    private static Map<String, Object> createUserParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("email", stringProperty("Correo institucional @umss.edu.bo."));
+        properties.put("firstName", stringProperty("Nombre(s)."));
+        properties.put("lastName", stringProperty("Apellido(s)."));
+        properties.put("phoneNumber", stringProperty("Celular boliviano 8 dígitos (6xxxxxxx/7xxxxxxx)."));
+        properties.put("role", enumProperty(List.of("JD", "CC", "TD", "EE"), "Rol a asignar."));
+        properties.put("programId", stringProperty("UUID de carrera (obligatorio para CC/EE)."));
+        properties.put("programQuery", stringProperty("Nombre o código de carrera (alternativa a programId)."));
+        properties.put("confirmed", booleanProperty(
+                "false para vista previa; true solo tras confirmación explícita del usuario."));
+        return requiredObjectSchema(properties, List.of("email", "firstName", "lastName", "phoneNumber", "role"));
+    }
+
+    private static Map<String, Object> manageUserStatusParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("identifier", stringProperty("Correo @umss.edu.bo o nombre del usuario."));
+        properties.put("action", enumProperty(
+                List.of("ACTIVATE", "DEACTIVATE", "REACTIVATE"),
+                "Acción a realizar."));
+        properties.put("confirmed", booleanProperty(
+                "false para vista previa; true solo tras confirmación explícita del usuario."));
+        return requiredObjectSchema(properties, List.of("identifier", "action"));
+    }
+
+    private static Map<String, Object> manageUserAssignmentParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("identifier", stringProperty("Correo @umss.edu.bo o nombre del usuario CC/EE."));
+        properties.put("action", enumProperty(List.of("CREATE", "UPDATE"), "Operación sobre la asignación."));
+        properties.put("programId", stringProperty("UUID de la carrera a asignar."));
+        properties.put("programQuery", stringProperty("Nombre o código de carrera (alternativa a programId)."));
+        properties.put("confirmed", booleanProperty(
+                "false para vista previa; true solo tras confirmación explícita del usuario."));
+        return requiredObjectSchema(properties, List.of("identifier", "action"));
     }
 
     private static Map<String, Object> listProgramsParameterSchema() {

@@ -14,6 +14,7 @@ import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantCapabilitiesCatalog;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.config.AssistantProperties;
+import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
@@ -87,6 +88,29 @@ public class AssistantController {
                     "LLM")
     );
 
+    private static final List<AssistantDemoScenarioResponse> USERS_COPILOT_SAMPLES = List.of(
+            new AssistantDemoScenarioResponse(
+                    1,
+                    "Listar usuarios",
+                    "Lista los usuarios registrados",
+                    "KEYWORD"),
+            new AssistantDemoScenarioResponse(
+                    2,
+                    "Filtrar por rol",
+                    "¿Qué usuarios CC están activos?",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    3,
+                    "Detalle",
+                    "Muéstrame el detalle de cc@umss.edu.bo",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    4,
+                    "Desactivar (confirmación)",
+                    "Desactiva al usuario cc@umss.edu.bo",
+                    "KEYWORD")
+    );
+
     private final SendChatMessageUseCase sendChatMessageUseCase;
     private final AssistantProperties assistantProperties;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
@@ -108,9 +132,17 @@ public class AssistantController {
             @RequestParam(name = "agent", required = false) String agent) {
         AssistantAuthContext authContext = buildAuthContext();
         AssistantAgentProfile agentProfile = AssistantAgentProfile.fromAgentId(agent);
-        List<AssistantDemoScenarioResponse> scenarios = agentProfile == AssistantAgentProfile.PHASES
-                ? PHASES_COPILOT_SAMPLES
-                : DEMO_SCENARIOS;
+        assertUsersAgentAccess(agentProfile, authContext.role());
+        List<AssistantDemoScenarioResponse> scenarios = switch (agentProfile) {
+            case PHASES -> PHASES_COPILOT_SAMPLES;
+            case USERS -> USERS_COPILOT_SAMPLES;
+            default -> DEMO_SCENARIOS;
+        };
+        String agentId = switch (agentProfile) {
+            case PHASES -> "phases";
+            case USERS -> "users";
+            default -> "general";
+        };
         return new AssistantStatusResponse(
                 assistantProperties.isEnabled(),
                 assistantProperties.isLlmEnabled(),
@@ -118,7 +150,7 @@ public class AssistantController {
                 AssistantCapabilitiesCatalog.capabilitiesForRoleAndAgent(
                         authContext.role(), agentProfile),
                 scenarios,
-                agentProfile == AssistantAgentProfile.PHASES ? "phases" : "general");
+                agentId);
     }
 
     @PostMapping("/chat")
@@ -151,10 +183,21 @@ public class AssistantController {
         if (request.context() == null) {
             return AssistantChatContext.general();
         }
+        AssistantAgentProfile profile = AssistantAgentProfile.fromAgentId(request.context().agent());
+        assertUsersAgentAccess(profile, authContext.role());
         return chatContextFactory.resolve(
                 request.context().agent(),
                 request.context().processId(),
+                request.context().userId(),
+                request.context().programId(),
                 authContext);
+    }
+
+    private static void assertUsersAgentAccess(AssistantAgentProfile profile, String role) {
+        if (profile == AssistantAgentProfile.USERS
+                && (role == null || !"JD".equalsIgnoreCase(role.trim()))) {
+            throw new AssistantAgentAccessDeniedException("users");
+        }
     }
 
     private AssistantAuthContext buildAuthContext() {
