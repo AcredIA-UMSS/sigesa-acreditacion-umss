@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.port.out;
 
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
+import com.umss.sigesa.application.model.evidence.UploadableIndicator;
 import com.umss.sigesa.domain.model.IndicatorState;
 
 import java.util.List;
@@ -17,4 +18,9 @@ public interface EvidenceControlQueryPort {
     List<EvidenceControlItem> listByProgramIdsAndStates(List<UUID> programIds, Set<IndicatorState> states);
 
     Optional<EvidenceControlItem> findByIndicatorId(UUID indicatorId);
+
+    /**
+     * Indicadores cargables (UC-004) con etiquetas de presentación, filtrados por carrera y estado.
+     */
+    List<UploadableIndicator> listUploadableByProgramIds(List<UUID> programIds, Set<IndicatorState> states);
 }

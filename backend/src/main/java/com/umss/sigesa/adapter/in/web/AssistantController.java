@@ -115,17 +115,17 @@ public class AssistantController {
             new AssistantDemoScenarioResponse(
                     1,
                     "Pendientes de revisión",
-                    "Lista las evidencias pendientes de revisión",
+                    "¿Qué evidencias de mi carrera están pendientes de revisión?",
                     "KEYWORD"),
             new AssistantDemoScenarioResponse(
                     2,
                     "Detalle de evidencia",
-                    "Muéstrame el detalle de la evidencia del indicador <indicatorId>",
+                    "Muéstrame el detalle de la evidencia del indicador Plan de estudios vigente",
                     "LLM"),
             new AssistantDemoScenarioResponse(
                     3,
                     "Completitud",
-                    "¿Está completa la evidencia del indicador <indicatorId>?",
+                    "¿La evidencia del indicador Plan de estudios vigente está completa?",
                     "LLM")
     );
 

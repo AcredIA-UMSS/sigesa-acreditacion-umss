@@ -20,6 +20,7 @@
 | PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
 | PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
 | PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
+| PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 
 ## PM-001
 
@@ -1024,3 +1025,54 @@ implementar el plan para crear agente +MCP de la documentacion FSD-UC-024 + DD-A
 ### Resultado obtenido
 
 Agente `evidence` operativo en backend/FE; MCP stdio en `mcp/sigesa-evidence/README.md`.
+
+
+---
+
+## PM-014
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-014 |
+| **Fecha** | 2026-08-13 |
+| **Hora** | 12:26 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Selectores Indicador / Criterio en Cargar Evidencia |
+| **Objetivo** | Reemplazar inputs UUID por selects legibles; GET uploadable filtra PENDIENTE/OBSERVADO por carrera del [CC]; criterio 1:1 al elegir indicador |
+| **Contexto** | Plan selectores_indicador_criterio; FSD-UC-004 / DD-UC-004 |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD vinculado** | DD-UC-004 |
+| **FSD / PRD vinculado** | FSD-UC-004 / PRD-US-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escribir en indicador y creterio
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/.../entity/IndicatorEntity.java` |
+| modificado | `backend/.../config/EvidenceDataLoader.java` |
+| modificado | `backend/.../EvidenceControlQueryPort.java` |
+| modificado | `backend/.../EvidenceControlJpaAdapter.java` |
+| modificado | `backend/.../EvidenceModuleConfig.java` |
+| modificado | `backend/.../security/SecurityConfig.java` |
+| generado | `UploadableIndicator.java`, `ListUploadableIndicatorsUseCase.java`, `ListUploadableIndicatorsService.java` |
+| generado | `UploadableIndicatorController.java`, `UploadableIndicatorResponse.java` |
+| generado | `ListUploadableIndicatorsServiceTest.java` |
+| generado | `frontend/.../api/fetchUploadableIndicators.ts` |
+| generado | `frontend/.../hooks/useUploadableIndicators.ts` |
+| modificado | `frontend/.../hooks/useEvidenceUpload.ts` |
+| modificado | `frontend/.../components/EvidenceUploadUI.tsx` |
+| modificado | `frontend/.../EvidenceUploadPage.tsx` |
+| modificado | `docs/product/uc/FSD-UC-004.md`, `docs/design/DD-UC-004.md` |
+
+### Resultado obtenido
+
+[CC] elige indicador por etiqueta (`code — title`); criterio se fija automáticamente; API `GET /api/v1/indicators/uploadable` + seeds IND-01…03 PENDIENTE.

@@ -28,4 +28,17 @@ public class IndicatorEntity {
 
     @Column(name = "phase_id")
     private UUID phaseId;
+
+    /** Código corto de presentación (UC-004 selects). Nullable por seeds legacy. */
+    @Column(name = "code", length = 40)
+    private String code;
+
+    @Column(name = "title", length = 255)
+    private String title;
+
+    @Column(name = "criterion_code", length = 40)
+    private String criterionCode;
+
+    @Column(name = "criterion_title", length = 255)
+    private String criterionTitle;
 }

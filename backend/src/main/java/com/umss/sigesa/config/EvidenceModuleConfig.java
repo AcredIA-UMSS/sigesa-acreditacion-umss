@@ -3,6 +3,7 @@ package com.umss.sigesa.config;
 import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
+import com.umss.sigesa.application.port.in.ListUploadableIndicatorsUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
@@ -17,6 +18,7 @@ import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evidence.CheckEvidenceCompletenessService;
 import com.umss.sigesa.application.service.evidence.GetEvidenceDetailService;
 import com.umss.sigesa.application.service.evidence.ListPendingEvidencesService;
+import com.umss.sigesa.application.service.evidence.ListUploadableIndicatorsService;
 import com.umss.sigesa.application.service.evidence.UploadEvidenceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,5 +64,11 @@ public class EvidenceModuleConfig {
     CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase(
             EvidenceControlQueryPort evidenceControlQueryPort) {
         return new CheckEvidenceCompletenessService(evidenceControlQueryPort);
+    }
+
+    @Bean
+    ListUploadableIndicatorsUseCase listUploadableIndicatorsUseCase(
+            EvidenceControlQueryPort evidenceControlQueryPort) {
+        return new ListUploadableIndicatorsService(evidenceControlQueryPort);
     }
 }

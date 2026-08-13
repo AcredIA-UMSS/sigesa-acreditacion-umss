@@ -10,14 +10,12 @@ import {
   Upload,
 } from 'lucide-react';
 import type { UploadEvidenceResponse } from '../../../api/model';
+import { Select } from '../../../components/ui/Select';
+import type { UploadableIndicatorDto } from '../api/fetchUploadableIndicators';
 import type {
   EvidenceUploadField,
   EvidenceUploadForm,
   EvidenceUploadValidationErrors,
-} from '../hooks/useEvidenceUpload';
-import {
-  SEED_CRITERION_ID,
-  SEED_INDICATOR_ID,
 } from '../hooks/useEvidenceUpload';
 
 const ACCEPTED_EXTENSIONS =
@@ -30,6 +28,12 @@ export type EvidenceUploadUIProps = {
     key: K,
     value: EvidenceUploadForm[K],
   ) => void;
+  onSelectIndicator: (indicatorId: string, criterionId: string) => void;
+  uploadableIndicators: UploadableIndicatorDto[];
+  indicatorsLoading: boolean;
+  indicatorsError: string | null;
+  indicatorsEmpty: boolean;
+  onReloadIndicators: () => void;
   onSubmit: () => void;
   onReset: () => void;
   progress: number;
@@ -44,6 +48,12 @@ export type EvidenceUploadUIProps = {
 export function EvidenceUploadUI({
   form,
   onFieldChange,
+  onSelectIndicator,
+  uploadableIndicators,
+  indicatorsLoading,
+  indicatorsError,
+  indicatorsEmpty,
+  onReloadIndicators,
   onSubmit,
   onReset,
   progress,
@@ -55,6 +65,26 @@ export function EvidenceUploadUI({
   validationErrors,
 }: EvidenceUploadUIProps) {
   const showProgress = isSubmitting || progress > 0;
+  const selected = uploadableIndicators.find(
+    (item) => item.indicatorId === form.indicatorId,
+  );
+  const indicatorOptions = [
+    {
+      value: '',
+      label: indicatorsLoading
+        ? 'Cargando indicadores…'
+        : 'Seleccione un indicador',
+    },
+    ...uploadableIndicators.map((item) => ({
+      value: item.indicatorId,
+      label: `${item.code} — ${item.title} (${item.currentState})`,
+    })),
+  ];
+  const criterionLabel = selected
+    ? `${selected.criterionCode} — ${selected.criterionTitle}`
+    : form.criterionId
+      ? 'Criterio asociado'
+      : 'Se completa al elegir el indicador';
 
   return (
     <div className="flex flex-1 flex-col h-screen overflow-hidden bg-gray-50">
@@ -91,7 +121,7 @@ export function EvidenceUploadUI({
               Cargar Evidencia
             </h1>
             <p className="text-body-lg text-gray-600">
-              FSD-UC-004 — El coordinador de carrera adjunta el archivo con los
+              El coordinador de carrera adjunta el archivo con los
               metadatos obligatorios. El indicador pasará a estado{' '}
               <strong className="font-semibold text-primary-700">SUBIDO</strong>{' '}
               tras una carga exitosa.
@@ -123,43 +153,75 @@ export function EvidenceUploadUI({
                 </div>
 
                 <div className="space-y-5">
-                  <FormField
-                    label="INDICADOR"
-                    htmlFor="indicator-id"
-                    error={validationErrors.indicatorId}
-                    hint={`Demo local: ${SEED_INDICATOR_ID}`}
-                  >
-                    <input
-                      id="indicator-id"
-                      type="text"
-                      value={form.indicatorId}
-                      disabled={isBlocked}
-                      placeholder={SEED_INDICATOR_ID}
-                      className={inputClass(!!validationErrors.indicatorId)}
-                      onChange={(event) =>
-                        onFieldChange('indicatorId', event.target.value)
-                      }
-                    />
-                  </FormField>
+                  {indicatorsError && (
+                    <div className="space-y-2">
+                      <Alert message={indicatorsError} />
+                      <button
+                        type="button"
+                        onClick={onReloadIndicators}
+                        className="text-label-md font-medium text-primary-700 underline-offset-2 hover:underline"
+                      >
+                        Reintentar carga de indicadores
+                      </button>
+                    </div>
+                  )}
+                  {indicatorsEmpty && (
+                    <div
+                      className="space-y-2 rounded-lg border border-warning/40 bg-warning/10 p-4 text-body-md text-gray-800"
+                      role="status"
+                    >
+                      <p>
+                        No hay indicadores PENDIENTE u OBSERVADO en su carrera.
+                        Si reinició el backend, recargue el listado o vuelva a
+                        iniciar sesión.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={onReloadIndicators}
+                        className="rounded-lg bg-primary-600 px-3 py-2 text-label-md font-medium text-body hover:bg-primary-700"
+                      >
+                        Recargar indicadores
+                      </button>
+                    </div>
+                  )}
 
-                  <FormField
-                    label="CRITERIO"
-                    htmlFor="criterion-id"
-                    error={validationErrors.criterionId}
-                    hint={`Demo local: ${SEED_CRITERION_ID}`}
-                  >
-                    <input
-                      id="criterion-id"
-                      type="text"
-                      value={form.criterionId}
-                      disabled={isBlocked}
-                      placeholder={SEED_CRITERION_ID}
-                      className={inputClass(!!validationErrors.criterionId)}
-                      onChange={(event) =>
-                        onFieldChange('criterionId', event.target.value)
+                  <Select
+                    id="indicator-id"
+                    label="Indicador"
+                    requiredMark
+                    options={indicatorOptions}
+                    value={form.indicatorId}
+                    disabled={isBlocked || indicatorsLoading}
+                    error={validationErrors.indicatorId}
+                    helperText="Solo indicadores PENDIENTE/OBSERVADO de su carrera"
+                    onChange={(event) => {
+                      const indicatorId = event.target.value;
+                      if (!indicatorId) {
+                        onSelectIndicator('', '');
+                        return;
                       }
-                    />
-                  </FormField>
+                      const match = uploadableIndicators.find(
+                        (item) => item.indicatorId === indicatorId,
+                      );
+                      onSelectIndicator(indicatorId, match?.criterionId ?? '');
+                    }}
+                  />
+
+                  <Select
+                    id="criterion-id"
+                    label="Criterio"
+                    requiredMark
+                    options={[
+                      {
+                        value: form.criterionId || '',
+                        label: criterionLabel,
+                      },
+                    ]}
+                    value={form.criterionId}
+                    disabled
+                    error={validationErrors.criterionId}
+                    helperText="Asociado automáticamente al indicador (1:1)"
+                  />
 
                   <FormField
                     label="DESCRIPCIÓN"
@@ -333,11 +395,11 @@ export function EvidenceUploadUI({
                 <ol className="space-y-4">
                   <GuideStep
                     step="01"
-                    text="Navegue al indicador en estado PENDIENTE u OBSERVADO dentro de su carrera."
+                    text="Elija el indicador en el listado (PENDIENTE u OBSERVADO de su carrera)."
                   />
                   <GuideStep
                     step="02"
-                    text="Complete indicador, criterio y una descripción clara del documento."
+                    text="El criterio se completa solo; agregue descripción y el archivo."
                   />
                   <GuideStep
                     step="03"
@@ -416,7 +478,6 @@ function Alert({ message }: { message: string }) {
     </div>
   );
 }
-
 function GuideStep({ step, text }: { step: string; text: string }) {
   return (
     <li className="flex gap-3">
@@ -425,3 +486,4 @@ function GuideStep({ step, text }: { step: string; text: string }) {
     </li>
   );
 }
+

@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
+import com.umss.sigesa.application.model.evidence.UploadableIndicator;
 import com.umss.sigesa.application.port.out.EvidenceControlQueryPort;
 import com.umss.sigesa.domain.model.IndicatorState;
 import org.springframework.stereotype.Repository;
@@ -57,6 +58,55 @@ public class EvidenceControlJpaAdapter implements EvidenceControlQueryPort {
         }
         return indicatorRepository.findById(indicatorId)
                 .map(indicator -> toItem(indicator, getCurrentState(indicator.getId())));
+    }
+
+    @Override
+    public List<UploadableIndicator> listUploadableByProgramIds(List<UUID> programIds, Set<IndicatorState> states) {
+        if (programIds == null || programIds.isEmpty()) {
+            return List.of();
+        }
+        List<IndicatorEntity> indicators = indicatorRepository.findByProgramIdIn(programIds);
+        List<UploadableIndicator> items = new ArrayList<>();
+        for (IndicatorEntity indicator : indicators) {
+            IndicatorState currentState = getCurrentState(indicator.getId());
+            if (states != null && !states.isEmpty() && !states.contains(currentState)) {
+                continue;
+            }
+            items.add(toUploadable(indicator, currentState));
+        }
+        return items;
+    }
+
+    private UploadableIndicator toUploadable(IndicatorEntity indicator, IndicatorState currentState) {
+        String code = blankToFallback(indicator.getCode(), "IND");
+        String title = blankToFallback(indicator.getTitle(), shortId(indicator.getId()));
+        String criterionCode = blankToFallback(indicator.getCriterionCode(), "CRIT");
+        String criterionTitle = blankToFallback(
+                indicator.getCriterionTitle(),
+                shortId(indicator.getCriterionId()));
+        return new UploadableIndicator(
+                indicator.getId(),
+                code,
+                title,
+                indicator.getCriterionId(),
+                criterionCode,
+                criterionTitle,
+                currentState);
+    }
+
+    private static String blankToFallback(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        return value.trim();
+    }
+
+    private static String shortId(UUID id) {
+        if (id == null) {
+            return "—";
+        }
+        String s = id.toString();
+        return s.length() >= 8 ? s.substring(0, 8) : s;
     }
 
     private IndicatorState getCurrentState(UUID indicatorId) {

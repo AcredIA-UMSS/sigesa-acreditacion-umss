@@ -93,7 +93,7 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
               value={copilot.draft}
               onChange={(event) => copilot.setDraft(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ej.: Lista las evidencias pendientes de revisión"
+              placeholder="Ej.: ¿Qué evidencias de mi carrera están pendientes de revisión?"
               rows={2}
               disabled={copilot.isSending}
               className="resize-none rounded-lg border border-gray-300 px-3 py-2 text-body-md text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-100"
@@ -140,7 +140,7 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
             Copiloto documental
           </p>
           <h2 className="mt-1 text-heading-sm font-semibold text-gray-900">
-            Control FSD-UC-024
+            AGENTE DE EVIDENCIAS
           </h2>
           <p className="mt-1 text-body-md text-gray-600">
             Listar pendientes, detalle y completitud vía chat
@@ -159,6 +159,11 @@ function EmptyState({
   sampleQuestions: AssistantDemoScenario[];
   onSampleSelect: (question: string) => void;
 }) {
+  const sanitized = sampleQuestions.map((scenario) => ({
+    ...scenario,
+    sampleQuestion: sanitizeSampleQuestion(scenario.sampleQuestion),
+  }));
+
   return (
     <div className="py-4 text-center">
       <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary-50 text-primary-600">
@@ -168,7 +173,7 @@ function EmptyState({
         Consulte la documentación subida por el coordinador. Solo lectura en esta fase.
       </p>
       <ul className="mt-4 space-y-2 text-left">
-        {sampleQuestions.map((scenario) => (
+        {sanitized.map((scenario) => (
           <li key={scenario.number}>
             <button
               type="button"
@@ -182,6 +187,18 @@ function EmptyState({
       </ul>
     </div>
   );
+}
+
+/** Quita placeholders técnicos residuales (<indicatorId>, UUIDs) en chips demo. */
+function sanitizeSampleQuestion(question: string): string {
+  return question
+    .replaceAll('<indicatorId>', 'seleccionado')
+    .replaceAll(
+      /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+      'seleccionado',
+    )
+    .replaceAll(/\s{2,}/g, ' ')
+    .trim();
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {
