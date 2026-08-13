@@ -12,6 +12,11 @@ import {
 } from 'lucide-react';
 import type { ReportJobStatusResponse } from '../../../api/model';
 import {
+  SEMAPHORE_LABELS,
+  type ReportPreviewModel,
+  type SemaphoreTone,
+} from '../lib/reportPreview';
+import {
   getJobProgressPercent,
   JOB_STATUS_LABELS,
   mapJobErrorCode,
@@ -33,6 +38,7 @@ export type ExecutiveReportUIProps = {
   onReset: () => void;
   activeJobId: string | null;
   jobStatus: ReportJobStatusResponse | undefined;
+  preview: ReportPreviewModel;
   validationErrors: ExecutiveReportValidationErrors;
   submitErrorMessage: string | null;
   statusErrorMessage: string | null;
@@ -51,6 +57,7 @@ export function ExecutiveReportUI({
   onReset,
   activeJobId,
   jobStatus,
+  preview,
   validationErrors,
   submitErrorMessage,
   statusErrorMessage,
@@ -67,6 +74,7 @@ export function ExecutiveReportUI({
     : null;
   const jobErrorMessage = mapJobErrorCode(jobStatus?.errorCode);
   const showJobPanel = activeJobId !== null || jobStatus !== undefined;
+  const isCompleted = jobStatus?.status === 'COMPLETED';
 
   return (
     <div className="flex h-screen flex-1 flex-col overflow-hidden bg-gray-50">
@@ -74,7 +82,9 @@ export function ExecutiveReportUI({
         <nav className="text-body-md text-gray-600" aria-label="Ruta de navegación">
           <span className="text-primary-600">Inicio</span>
           <span className="mx-2 text-gray-400">/</span>
-          <span className="text-gray-700">Reporte ejecutivo PDF</span>
+          <span className="text-gray-700">Reportes</span>
+          <span className="mx-2 text-gray-400">/</span>
+          <span className="text-gray-700">Ejecutivo PDF</span>
         </nav>
         <div className="flex items-center gap-4 text-gray-600">
           <button
@@ -95,24 +105,23 @@ export function ExecutiveReportUI({
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-8">
-        <div className="mx-auto max-w-6xl">
+      <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        <div className="mx-auto max-w-7xl">
           <header className="mb-8">
             <div className="mb-4 h-1 w-12 bg-secondary" />
             <h1 className="mb-2 text-heading-xl text-primary-800">
               Reporte Ejecutivo PDF
             </h1>
-            <p className="text-body-lg text-gray-600">
-              FSD-UC-014 — El jefe DUEA aplica filtros institucionales y genera
-              un PDF con marca temporal, contexto de filtros y semáforo ejecutivo.
-              La generación es asíncrona (P95 ≤ 5 min).
+            <p className="max-w-3xl text-body-lg text-gray-600">
+              Genere el PDF institucional con filtros, semáforo ejecutivo y avance
+              por programa. La vista previa refleja el contenido del documento.
             </p>
           </header>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <section className="space-y-6 lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+            <section className="space-y-6 xl:col-span-5">
               <form
-                className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm"
+                className="rounded-2xl border border-gray-100 bg-body p-6 shadow-sm md:p-8"
                 onSubmit={(event) => {
                   event.preventDefault();
                   onSubmit();
@@ -128,7 +137,7 @@ export function ExecutiveReportUI({
                       Filtros del reporte
                     </h2>
                     <p className="text-body-md text-gray-500">
-                      Año de gestión obligatorio; facultad y programa opcionales
+                      Año obligatorio; facultad y programa opcionales
                     </p>
                   </div>
                 </div>
@@ -159,7 +168,7 @@ export function ExecutiveReportUI({
                   <FormField
                     label="FACULTAD (OPCIONAL)"
                     htmlFor="faculty-id"
-                    hint="Deje vacío para incluir todas las facultades"
+                    hint="Vacío = Todas las facultades"
                     error={validationErrors.facultyId}
                   >
                     <input
@@ -178,7 +187,7 @@ export function ExecutiveReportUI({
                   <FormField
                     label="PROGRAMA (OPCIONAL)"
                     htmlFor="program-id"
-                    hint="Demo: 550e8400-e29b-41d4-a716-446655440000 (Inf. Sistemas). Vacío = todos."
+                    hint="Demo: 550e8400-e29b-41d4-a716-446655440000. Vacío = Todos."
                     error={validationErrors.programId}
                   >
                     <input
@@ -186,7 +195,7 @@ export function ExecutiveReportUI({
                       type="text"
                       value={form.programId}
                       disabled={isBlocked}
-                      placeholder="550e8400-e29b-41d4-a716-446655440000"
+                      placeholder="UUID de programa"
                       className={inputClass(!!validationErrors.programId)}
                       onChange={(event) =>
                         onFieldChange('programId', event.target.value)
@@ -229,7 +238,7 @@ export function ExecutiveReportUI({
 
               {showJobPanel && (
                 <section
-                  className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm"
+                  className="rounded-2xl border border-gray-100 bg-body p-6 shadow-sm md:p-8"
                   aria-live="polite"
                 >
                   <div className="mb-4 flex items-center gap-4">
@@ -286,11 +295,9 @@ export function ExecutiveReportUI({
                         </p>
                       )}
 
-                      {jobErrorMessage && (
-                        <Alert message={jobErrorMessage} />
-                      )}
+                      {jobErrorMessage && <Alert message={jobErrorMessage} />}
 
-                      {jobStatus.status === 'COMPLETED' && (
+                      {isCompleted && (
                         <div className="rounded-xl border border-success/30 bg-success/5 p-4">
                           <div className="mb-3 flex items-center gap-2 text-heading-sm text-success">
                             <CheckCircle2 size={20} aria-hidden />
@@ -332,49 +339,196 @@ export function ExecutiveReportUI({
                   )}
                 </section>
               )}
-            </section>
 
-            <aside className="space-y-6">
               <section className="rounded-2xl border border-gray-200 bg-gray-100 p-6">
                 <div className="mb-4 flex items-center gap-2 text-primary-800">
                   <Info size={20} aria-hidden />
                   <h3 className="text-heading-sm">Guía rápida</h3>
                 </div>
-                <ol className="space-y-4">
+                <ol className="space-y-3">
                   <GuideStep
                     step="01"
-                    text="Defina el año de gestión y, si aplica, acote por facultad o programa."
+                    text="Defina el año y, si aplica, facultad o programa."
                   />
                   <GuideStep
                     step="02"
-                    text='Pulse "Generar reporte PDF". El sistema encola un trabajo asíncrono.'
+                    text="Revise la vista previa del documento a la derecha."
                   />
                   <GuideStep
                     step="03"
-                    text="Cuando el estado sea Completado, descargue el PDF con timestamp institucional."
+                    text="Genere el PDF y descárguelo cuando esté Completado."
                   />
                 </ol>
               </section>
+            </section>
 
-              <section className="rounded-2xl border border-primary-100 bg-primary-50 p-6">
-                <h3 className="mb-3 text-heading-sm text-primary-800">
-                  Flujo asíncrono
-                </h3>
-                <ul className="space-y-2 text-body-md text-primary-700">
-                  <li>Pendiente → En progreso → Completado</li>
-                  <li>Polling automático cada 2 s</li>
-                  <li>Solo rol JD autorizado (FSD-BR-14)</li>
-                </ul>
-                <p className="mt-4 text-label-md text-primary-600">
-                  Tiempo objetivo P95: 5 minutos
-                </p>
-              </section>
-            </aside>
+            <section className="xl:col-span-7">
+              <ReportPreviewCard
+                preview={preview}
+                isCompleted={isCompleted}
+                onDownload={onDownload}
+                isDownloading={isDownloading}
+              />
+            </section>
           </div>
         </div>
       </main>
     </div>
   );
+}
+
+function ReportPreviewCard({
+  preview,
+  isCompleted,
+  onDownload,
+  isDownloading,
+}: {
+  preview: ReportPreviewModel;
+  isCompleted: boolean;
+  onDownload: () => void;
+  isDownloading: boolean;
+}) {
+  return (
+    <article className="overflow-hidden rounded-2xl border border-primary-100 bg-body shadow-sm">
+      <div className="border-b border-primary-100 bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-5 text-body md:px-8">
+        <p className="text-label-md font-medium uppercase tracking-wide text-primary-100">
+          Vista previa del documento
+        </p>
+        <h2 className="mt-1 text-heading-lg font-semibold">{preview.title}</h2>
+        <p className="mt-1 text-body-md text-primary-100">
+          {isCompleted
+            ? 'Contenido generado — disponible para descarga en PDF'
+            : 'Se actualiza al cambiar los filtros; el PDF oficial se genera al solicitarlo'}
+        </p>
+      </div>
+
+      <div className="space-y-6 p-6 md:p-8">
+        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <MetaItem
+            label="Generado"
+            value={preview.generatedAtLabel ?? 'Pendiente de generación'}
+          />
+          <MetaItem label="Gestión" value={String(preview.managementYear)} />
+          <MetaItem label="Facultad" value={preview.facultyLabel} />
+          <MetaItem label="Programa" value={preview.programLabel} />
+        </dl>
+
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <table className="min-w-full text-left">
+            <thead className="bg-primary-50">
+              <tr className="text-label-md uppercase tracking-wide text-primary-800">
+                <th className="px-4 py-3 font-semibold">Programa</th>
+                <th className="px-4 py-3 font-semibold">Semáforo</th>
+                <th className="px-4 py-3 font-semibold">Indicadores</th>
+                <th className="px-4 py-3 font-semibold">Aprobados</th>
+                <th className="px-4 py-3 font-semibold">Avance %</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 bg-body">
+              {preview.rows.map((row) => (
+                <tr key={row.programName} className="text-body-md text-gray-800">
+                  <td className="px-4 py-4 font-medium text-primary-900">
+                    {row.programName}
+                  </td>
+                  <td className="px-4 py-4">
+                    <SemaphoreBadge tone={row.semaphore} />
+                  </td>
+                  <td className="px-4 py-4 tabular-nums">{row.totalIndicators}</td>
+                  <td className="px-4 py-4 tabular-nums">{row.approvedIndicators}</td>
+                  <td className="min-w-40 px-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200"
+                        role="progressbar"
+                        aria-valuenow={row.progressPercent}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={`Avance ${row.progressPercent}%`}
+                      >
+                        <div
+                          className={`h-full rounded-full ${semaphoreBarClass(row.semaphore)}`}
+                          style={{ width: `${row.progressPercent}%` }}
+                        />
+                      </div>
+                      <span className="w-10 shrink-0 text-right tabular-nums font-medium text-gray-700">
+                        {row.progressPercent}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {isCompleted && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-success/20 bg-success/5 px-4 py-3">
+            <p className="text-body-md text-success">
+              El PDF oficial incluye esta misma estructura con marca temporal.
+            </p>
+            <button
+              type="button"
+              disabled={isDownloading}
+              onClick={() => void onDownload()}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-label-md font-semibold text-body transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" aria-hidden />
+                  Descargando…
+                </>
+              ) : (
+                <>
+                  <Download size={16} aria-hidden />
+                  Descargar PDF
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function MetaItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+      <dt className="text-label-md font-medium uppercase tracking-wide text-gray-500">
+        {label}
+      </dt>
+      <dd className="mt-1 text-body-lg font-medium text-primary-900">{value}</dd>
+    </div>
+  );
+}
+
+function SemaphoreBadge({ tone }: { tone: SemaphoreTone }) {
+  const classes: Record<SemaphoreTone, string> = {
+    GREEN: 'border-success/30 bg-success/10 text-success',
+    YELLOW: 'border-warning/40 bg-warning/15 text-gray-800',
+    RED: 'border-danger/30 bg-danger/10 text-danger',
+  };
+  const dot: Record<SemaphoreTone, string> = {
+    GREEN: 'bg-success',
+    YELLOW: 'bg-warning',
+    RED: 'bg-danger',
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-label-md font-semibold ${classes[tone]}`}
+    >
+      <span className={`h-2.5 w-2.5 rounded-full ${dot[tone]}`} aria-hidden />
+      {SEMAPHORE_LABELS[tone]}
+      <span className="sr-only">({tone})</span>
+    </span>
+  );
+}
+
+function semaphoreBarClass(tone: SemaphoreTone): string {
+  if (tone === 'GREEN') return 'bg-success';
+  if (tone === 'RED') return 'bg-danger';
+  return 'bg-warning';
 }
 
 type FormFieldProps = {

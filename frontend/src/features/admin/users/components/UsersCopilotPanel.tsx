@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bot, ChevronDown, ChevronUp, Loader2, MessageSquare, Send, Trash2, User } from 'lucide-react';
-import type { AssistantDemoScenario, ChatMessage } from '../../../api/model/assistantTypes';
-import { Alert } from '../../../components/ui/Alert';
-import { Button } from '../../../components/ui/Button';
+import type { AssistantDemoScenario, ChatMessage } from '../../../../api/model/assistantTypes';
+import { Alert } from '../../../../components/ui/Alert';
+import { Button } from '../../../../components/ui/Button';
 import { useUsersCopilot } from '../hooks/useUsersCopilot';
 
 export function UsersCopilotPanel() {

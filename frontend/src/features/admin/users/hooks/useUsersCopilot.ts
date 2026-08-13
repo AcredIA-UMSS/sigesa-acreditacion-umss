@@ -3,14 +3,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   useAssistantStatus,
   useSendChatMessage,
-} from '../../../api/endpoints/assistant-controller/assistant-controller';
-import { getListQueryKey } from '../../../api/endpoints/user-admin-controller/user-admin-controller';
+} from '../../../../api/endpoints/assistant-controller/assistant-controller';
+import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import type {
   AssistantChatContextDto,
   AssistantMessageMetadata,
   ChatMessage,
-} from '../../../api/model/assistantTypes';
-import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
+} from '../../../../api/model/assistantTypes';
+import { mapAssistantError } from '../../../assistant/hooks/mapAssistantError';
 
 function createMessage(
   role: ChatMessage['role'],
