@@ -1,14 +1,15 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.web.dto.AssistantChatContextDto;
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
-import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.config.AssistantProperties;
+import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -70,7 +72,6 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_JD"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 new AssistantChatResult("Respuesta del asistente.", "list_users", List.of("app_user"),
                         AssistantResolutionPath.KEYWORD, false));
@@ -95,7 +96,6 @@ class AssistantControllerToolCallingTest {
                 List.of(new SimpleGrantedAuthority("ROLE_CC"))));
         when(assistantProperties.isEnabled()).thenReturn(true);
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
-        when(chatContextFactory.resolve(any(), any(), any())).thenReturn(AssistantChatContext.general());
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 AssistantChatResult.outOfScope("No puedo listar usuarios."));
 
@@ -104,5 +104,37 @@ class AssistantControllerToolCallingTest {
         ArgumentCaptor<AssistantAuthContext> authCaptor = ArgumentCaptor.forClass(AssistantAuthContext.class);
         verify(sendChatMessageUseCase).send(any(), any(), authCaptor.capture(), any());
         assertThat(authCaptor.getValue().role()).isEqualTo("CC");
+    }
+
+    @Test
+    void status_withEvidenceAgentAndEe_throwsAccessDenied() {
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440002");
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                userId,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_EE"))));
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> controller.getStatus("evidence"))
+                .isInstanceOf(AssistantAgentAccessDeniedException.class)
+                .hasMessageContaining("evidence");
+    }
+
+    @Test
+    void chat_withEvidenceAgentAndEe_throwsAccessDenied() {
+        UUID userId = UUID.fromString("550e8400-e29b-41d4-a716-446655440003");
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                userId,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_EE"))));
+        when(assistantProperties.isEnabled()).thenReturn(true);
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
+
+        assertThatThrownBy(() -> controller.chat(new SendChatMessageRequest(
+                "Lista evidencias pendientes",
+                null,
+                new AssistantChatContextDto("evidence", null, null, null, null, null, null))))
+                .isInstanceOf(AssistantAgentAccessDeniedException.class)
+                .hasMessageContaining("evidence");
     }
 }

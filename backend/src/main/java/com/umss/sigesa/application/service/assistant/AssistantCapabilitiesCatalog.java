@@ -26,6 +26,9 @@ public final class AssistantCapabilitiesCatalog {
         if (agentProfile == AssistantAgentProfile.USERS) {
             return capabilitiesForUsersAgent(role);
         }
+        if (agentProfile == AssistantAgentProfile.EVIDENCE) {
+            return capabilitiesForEvidenceAgent(role);
+        }
 
         List<String> items = new ArrayList<>();
         String normalized = role.trim().toUpperCase(Locale.ROOT);
@@ -35,11 +38,16 @@ public final class AssistantCapabilitiesCatalog {
             items.add("Listar carreras con proceso de acreditación activo.");
             items.add("Listar carreras/programas académicos.");
             items.add("Gestionar fases del proceso activo (con confirmación en chat).");
+            items.add("Listar evidencias pendientes de control (palabra clave: «evidencias pendientes»).");
         }
         if ("JD".equals(normalized)) {
             items.add("Listar usuarios registrados (palabra clave: «usuarios»).");
             items.add("Activar o desactivar usuarios (con confirmación en chat).");
             items.add("Registrar usuarios institucionales (agente users /admin/users).");
+        }
+        if ("CC".equals(normalized)) {
+            items.add("Consultar evidencias pendientes de su carrera (agente evidence).");
+            items.add("Ver detalle y completitud de evidencias de su alcance.");
         }
         if (items.isEmpty()) {
             items.add("Consultas operativas sobre acreditación sin tools administrativas para su rol.");
@@ -77,6 +85,24 @@ public final class AssistantCapabilitiesCatalog {
         );
     }
 
+    public static List<String> capabilitiesForEvidenceAgent(String role) {
+        String normalized = role == null ? "" : role.trim().toUpperCase(Locale.ROOT);
+        if (!"JD".equals(normalized) && !"TD".equals(normalized) && !"CC".equals(normalized)) {
+            return List.of("Este copiloto de evidencias solo está disponible para JD, TD y CC.");
+        }
+        List<String> items = new ArrayList<>();
+        items.add("Listar evidencias pendientes de revisión (estado SUBIDO).");
+        items.add("Consultar detalle/metadatos de una evidencia por indicatorId.");
+        items.add("Verificar checklist de completitud (archivo, descripción, criterio, hash).");
+        if ("CC".equals(normalized)) {
+            items.add("Alcance limitado a las carreras asignadas en su JWT (programScope).");
+        } else {
+            items.add("Alcance institucional; puede acotar por programId.");
+        }
+        items.add("Solo lectura: no aprueba ni rechaza indicadores en esta fase.");
+        return items;
+    }
+
     public static String formatOutOfScopeMessage(String role, boolean llmDisabledWithoutKeyword) {
         return formatOutOfScopeMessage(role, llmDisabledWithoutKeyword, AssistantAgentProfile.GENERAL);
     }
@@ -96,6 +122,9 @@ public final class AssistantCapabilitiesCatalog {
         }
         if (agentProfile == AssistantAgentProfile.USERS) {
             sb.append("Este copiloto solo cubre gestión de usuarios (JD).\n\n");
+        }
+        if (agentProfile == AssistantAgentProfile.EVIDENCE) {
+            sb.append("Este copiloto solo cubre control documental de evidencias (lectura).\n\n");
         }
         sb.append("Puedo ayudarte con:\n");
         for (String capability : capabilitiesForRoleAndAgent(role, agentProfile)) {

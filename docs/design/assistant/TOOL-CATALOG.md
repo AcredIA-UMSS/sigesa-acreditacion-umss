@@ -9,6 +9,7 @@ ultima_actualizacion: "2026-08-11"
 agents:
   - phases (DD-AGENT-001)
   - users (DD-AGENT-002)
+  - evidence (DD-AGENT-003)
 ---
 
 # TOOL-CATALOG — Asistente Virtual SIGESA
@@ -497,3 +498,20 @@ Subset JD-only embebido en `/admin/users`. Contrato: `context.agent=users` (+ `u
 | `manage_user_assignment` | sí | CREATE / UPDATE assignment |
 
 Ver [DD-AGENT-002](DD-AGENT-002.md) y [PR-IMPL-025](../../prompts/impl/PR-IMPL-025.md).
+
+---
+
+## 9. Agente `evidence` (DD-AGENT-003)
+
+Subset de **control documental** embebido en `/evidencias/cargar`. Contrato: `context.agent=evidence` (+ `programId` opcional). Roles: **JD, TD, CC** (EE → 403). Solo lectura (Fase 1 / FSD-UC-024).
+
+| Tool | Confirmación | Resumen |
+|------|--------------|---------|
+| `list_pending_evidences` | — | Indicadores en `SUBIDO` (docs listas para control TD); CC acotado a su carrera |
+| `get_evidence_detail` | — | Metadatos evidencia/versión (hash, descripción, criterio, estado) |
+| `check_evidence_completeness` | — | Checklist archivo/descripción/criterio/hash + flag `complete` |
+
+**MCP espejo:** `mcp/sigesa-evidence` (mismas tools vía HTTP + JWT).
+
+Ver [DD-AGENT-003](DD-AGENT-003.md), [FSD-UC-024](../../product/uc/FSD-UC-024.md) y [PR-IMPL-026](../../prompts/impl/PR-IMPL-026.md).
+

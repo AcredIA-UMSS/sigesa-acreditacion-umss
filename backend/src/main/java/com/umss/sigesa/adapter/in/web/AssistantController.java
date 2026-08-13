@@ -111,6 +111,24 @@ public class AssistantController {
                     "KEYWORD")
     );
 
+    private static final List<AssistantDemoScenarioResponse> EVIDENCE_COPILOT_SAMPLES = List.of(
+            new AssistantDemoScenarioResponse(
+                    1,
+                    "Pendientes de revisión",
+                    "Lista las evidencias pendientes de revisión",
+                    "KEYWORD"),
+            new AssistantDemoScenarioResponse(
+                    2,
+                    "Detalle de evidencia",
+                    "Muéstrame el detalle de la evidencia del indicador <indicatorId>",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    3,
+                    "Completitud",
+                    "¿Está completa la evidencia del indicador <indicatorId>?",
+                    "LLM")
+    );
+
     private final SendChatMessageUseCase sendChatMessageUseCase;
     private final AssistantProperties assistantProperties;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
@@ -133,14 +151,17 @@ public class AssistantController {
         AssistantAuthContext authContext = buildAuthContext();
         AssistantAgentProfile agentProfile = AssistantAgentProfile.fromAgentId(agent);
         assertUsersAgentAccess(agentProfile, authContext.role());
+        assertEvidenceAgentAccess(agentProfile, authContext.role());
         List<AssistantDemoScenarioResponse> scenarios = switch (agentProfile) {
             case PHASES -> PHASES_COPILOT_SAMPLES;
             case USERS -> USERS_COPILOT_SAMPLES;
+            case EVIDENCE -> EVIDENCE_COPILOT_SAMPLES;
             default -> DEMO_SCENARIOS;
         };
         String agentId = switch (agentProfile) {
             case PHASES -> "phases";
             case USERS -> "users";
+            case EVIDENCE -> "evidence";
             default -> "general";
         };
         return new AssistantStatusResponse(
@@ -185,6 +206,7 @@ public class AssistantController {
         }
         AssistantAgentProfile profile = AssistantAgentProfile.fromAgentId(request.context().agent());
         assertUsersAgentAccess(profile, authContext.role());
+        assertEvidenceAgentAccess(profile, authContext.role());
         return chatContextFactory.resolve(
                 request.context().agent(),
                 request.context().processId(),
@@ -197,6 +219,19 @@ public class AssistantController {
         if (profile == AssistantAgentProfile.USERS
                 && (role == null || !"JD".equalsIgnoreCase(role.trim()))) {
             throw new AssistantAgentAccessDeniedException("users");
+        }
+    }
+
+    private static void assertEvidenceAgentAccess(AssistantAgentProfile profile, String role) {
+        if (profile != AssistantAgentProfile.EVIDENCE) {
+            return;
+        }
+        if (role == null) {
+            throw new AssistantAgentAccessDeniedException("evidence", "JD, TD o CC");
+        }
+        String normalized = role.trim().toUpperCase();
+        if (!"JD".equals(normalized) && !"TD".equals(normalized) && !"CC".equals(normalized)) {
+            throw new AssistantAgentAccessDeniedException("evidence", "JD, TD o CC");
         }
     }
 

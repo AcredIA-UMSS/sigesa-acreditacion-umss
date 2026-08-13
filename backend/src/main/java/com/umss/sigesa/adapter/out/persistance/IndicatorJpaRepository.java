@@ -14,6 +14,8 @@ public interface IndicatorJpaRepository extends JpaRepository<IndicatorEntity, U
 
     List<IndicatorEntity> findByProgramId(UUID programId);
 
+    List<IndicatorEntity> findByProgramIdIn(List<UUID> programIds);
+
     @Query("SELECT i FROM IndicatorEntity i JOIN PhaseJpaEntity p ON i.phaseId = p.id WHERE i.programId = :programId AND p.order = :phaseOrder")
     List<IndicatorEntity> findByProgramIdAndPhaseOrder(UUID programId, Integer phaseOrder);
 }

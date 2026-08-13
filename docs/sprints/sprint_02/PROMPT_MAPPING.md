@@ -19,6 +19,7 @@
 | PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
 | PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
 | PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
+| PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
 
 ## PM-001
 
@@ -968,3 +969,58 @@ Copiloto `agent=users` implementado de punta a punta (docs + backend + frontend)
 - [ ] USERS-UX-01: botones Confirmar/Cancelar
 
 ---
+
+## PM-013
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-013 |
+| **Fecha** | 2026-08-12 |
+| **Hora** | 23:45 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Implementar agente + MCP de control documental FSD-UC-024 / DD-AGENT-003 |
+| **Objetivo** | Perfil `agent=evidence`, tools de lectura, UI EvidenceCopilotPanel, servidor MCP espejo |
+| **Contexto** | Plan fase 1 solo lectura; patrón DD-AGENT-001/002; UC-008/009 fuera de alcance |
+| **PR-IMPL vinculado** | PR-IMPL-026 |
+| **DD vinculado** | DD-AGENT-003 |
+| **FSD / PRD vinculado** | FSD-UC-024 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+implementar el plan para crear agente +MCP de la documentacion FSD-UC-024 + DD-AGENT-003
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-024.md`
+- `docs/design/assistant/DD-AGENT-003.md`
+- `docs/prompts/impl/PR-IMPL-026.md`
+- `docs/design/assistant/TOOL-CATALOG.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/product/uc/FSD-UC-024.md` |
+| generado | `docs/design/assistant/DD-AGENT-003.md` |
+| generado | `docs/prompts/impl/PR-IMPL-026.md` |
+| generado | `mcp/sigesa-evidence/**` |
+| generado | `frontend/src/features/evidence/components/EvidenceCopilotPanel.tsx` |
+| generado | `frontend/src/features/evidence/hooks/useEvidenceCopilot.ts` |
+| generado | backend evidence control query/use cases/adapter |
+| modificado | Assistant profile/registry/executor/keyword/controller |
+| modificado | `EvidenceUploadPage.tsx`, `assistantTypes.ts`, `TOOL-CATALOG.md`, `DTP.md`, `FSD.md` |
+
+### Validación ejecutada
+
+- [x] Backend compile + tests assistant
+- [x] `pnpm install` en `mcp/sigesa-evidence`
+- [ ] Smoke E2E chat `agent=evidence` — pendiente entorno local
+
+### Resultado obtenido
+
+Agente `evidence` operativo en backend/FE; MCP stdio en `mcp/sigesa-evidence/README.md`.

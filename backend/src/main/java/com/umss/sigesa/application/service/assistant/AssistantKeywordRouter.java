@@ -51,6 +51,21 @@ public class AssistantKeywordRouter {
                     + "list(a|ar|ame)?\\s+(las\\s+)?subfases|subfases\\s+(del\\s+)?proceso|"
                     + "enlaces?\\s+(de\\s+)?(las\\s+)?subfases|árbol\\s+de\\s+fases).*");
 
+    private static final Pattern PENDING_EVIDENCES_PATTERN = Pattern.compile(
+            "(?is).*(evidencias?\\s+pendientes|pendientes\\s+de\\s+revisi[oó]n|"
+                    + "documentaci[oó]n\\s+subida|list(a|ar|ame)?\\s+(las\\s+)?evidencias?\\s+pendientes).*");
+
+    private static final Pattern EVIDENCE_DETAIL_PATTERN = Pattern.compile(
+            "(?is).*(detalle\\s+(de\\s+)?(la\\s+)?evidencia|evidencia\\s+detalle|"
+                    + "metadatos\\s+(de\\s+)?(la\\s+)?evidencia).*");
+
+    private static final Pattern EVIDENCE_COMPLETENESS_PATTERN = Pattern.compile(
+            "(?is).*(completeness|completitud|(est[aá]\\s+)?completa\\s+(la\\s+)?evidencia|"
+                    + "evidencia\\s+(est[aá]\\s+)?completa|checklist\\s+(de\\s+)?evidencia).*");
+
+    private static final Pattern UUID_PATTERN = Pattern.compile(
+            "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})");
+
     public Optional<AssistantToolInvocation> resolve(String userMessage,
                                                      List<ChatMessage> history,
                                                      AssistantAuthContext auth) {
@@ -73,17 +88,25 @@ public class AssistantKeywordRouter {
             return writeFlow;
         }
 
+        Optional<AssistantToolInvocation> evidenceFlow = resolveEvidenceFlow(message, role, chatContext);
+        if (evidenceFlow.isPresent()) {
+            return evidenceFlow;
+        }
+
         if ("JD".equals(role) || "TD".equals(role)) {
-            if (!chatContext.isPhasesAgent() && !chatContext.isUsersAgent()
+            if (!chatContext.isPhasesAgent() && !chatContext.isUsersAgent() && !chatContext.isEvidenceAgent()
                     && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildActiveProcessesInvocation(message));
             }
-            if (!chatContext.isUsersAgent() && PHASES_PATTERN.matcher(message).matches()) {
+            if (!chatContext.isUsersAgent() && !chatContext.isEvidenceAgent()
+                    && PHASES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildPhasesInvocation(message, chatContext));
             }
         }
 
-        if (("JD".equals(role) || "TD".equals(role) || "CC".equals(role)) && !chatContext.isUsersAgent()) {
+        if (("JD".equals(role) || "TD".equals(role) || "CC".equals(role))
+                && !chatContext.isUsersAgent()
+                && !chatContext.isEvidenceAgent()) {
             if (chatContext.isPhasesAgent()
                     && chatContext.careerName() != null
                     && !chatContext.careerName().isBlank()
@@ -98,11 +121,76 @@ public class AssistantKeywordRouter {
             }
         }
 
-        if ("JD".equals(role) && USERS_PATTERN.matcher(message).matches()) {
+        if ("JD".equals(role) && !chatContext.isEvidenceAgent()
+                && USERS_PATTERN.matcher(message).matches()) {
             return Optional.of(new AssistantToolInvocation(AssistantToolRegistry.LIST_USERS_ID, "{}"));
         }
 
         return Optional.empty();
+    }
+
+    private Optional<AssistantToolInvocation> resolveEvidenceFlow(String message,
+                                                                    String role,
+                                                                    AssistantChatContext chatContext) {
+        boolean allowedRole = "JD".equals(role) || "TD".equals(role) || "CC".equals(role);
+        if (!allowedRole) {
+            return Optional.empty();
+        }
+
+        boolean pendingMatch = PENDING_EVIDENCES_PATTERN.matcher(message).matches();
+        boolean detailMatch = EVIDENCE_DETAIL_PATTERN.matcher(message).matches();
+        boolean completenessMatch = EVIDENCE_COMPLETENESS_PATTERN.matcher(message).matches();
+        boolean preferEvidence = chatContext.isEvidenceAgent()
+                || pendingMatch
+                || detailMatch
+                || completenessMatch;
+        if (!preferEvidence) {
+            return Optional.empty();
+        }
+
+        if (completenessMatch) {
+            String indicatorId = extractUuid(message);
+            if (indicatorId != null) {
+                return Optional.of(new AssistantToolInvocation(
+                        AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                        "{\"indicatorId\":\"" + indicatorId + "\"}"));
+            }
+        }
+
+        if (detailMatch) {
+            String indicatorId = extractUuid(message);
+            if (indicatorId != null) {
+                return Optional.of(new AssistantToolInvocation(
+                        AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                        "{\"indicatorId\":\"" + indicatorId + "\"}"));
+            }
+        }
+
+        if (pendingMatch) {
+            return Optional.of(buildListPendingEvidencesInvocation(chatContext));
+        }
+
+        return Optional.empty();
+    }
+
+    private static AssistantToolInvocation buildListPendingEvidencesInvocation(AssistantChatContext chatContext) {
+        if (chatContext != null && chatContext.programId() != null) {
+            return new AssistantToolInvocation(
+                    AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                    "{\"programId\":\"" + chatContext.programId() + "\"}");
+        }
+        return new AssistantToolInvocation(AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, "{}");
+    }
+
+    private static String extractUuid(String message) {
+        if (message == null) {
+            return null;
+        }
+        Matcher matcher = UUID_PATTERN.matcher(message);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
     private Optional<AssistantToolInvocation> resolveWriteFlow(String message,
