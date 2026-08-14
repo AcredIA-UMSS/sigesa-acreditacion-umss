@@ -23,6 +23,9 @@ public class AssistantToolRegistry {
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
     static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
     static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
+    static final String LIST_PENDING_EVIDENCES_ID = "list_pending_evidences";
+    static final String GET_EVIDENCE_DETAIL_ID = "get_evidence_detail";
+    static final String CHECK_EVIDENCE_COMPLETENESS_ID = "check_evidence_completeness";
 
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
@@ -150,6 +153,33 @@ public class AssistantToolRegistry {
             manageProcessSubphaseParameterSchema()
     );
 
+    private static final AssistantToolDefinition LIST_PENDING_EVIDENCES = new AssistantToolDefinition(
+            LIST_PENDING_EVIDENCES_ID,
+            "Lista indicadores con documentación en estado SUBIDO (pendientes de control). "
+                    + "JD, TD y CC (CC solo su programScope). programId opcional para acotar por carrera.",
+            JD_TD_AND_CC,
+            "read",
+            listPendingEvidencesParameterSchema()
+    );
+
+    private static final AssistantToolDefinition GET_EVIDENCE_DETAIL = new AssistantToolDefinition(
+            GET_EVIDENCE_DETAIL_ID,
+            "Obtiene metadatos de la evidencia/versión de un indicador (hash, descripción, criterio, estado). "
+                    + "JD, TD y CC (CC solo su programScope). Requiere indicatorId.",
+            JD_TD_AND_CC,
+            "read",
+            evidenceIndicatorParameterSchema()
+    );
+
+    private static final AssistantToolDefinition CHECK_EVIDENCE_COMPLETENESS = new AssistantToolDefinition(
+            CHECK_EVIDENCE_COMPLETENESS_ID,
+            "Evalúa checklist de completitud de evidencia (archivo, descripción, criterio, hash, estado). "
+                    + "JD, TD y CC (CC solo su programScope). Requiere indicatorId.",
+            JD_TD_AND_CC,
+            "read",
+            evidenceIndicatorParameterSchema()
+    );
+
     private final List<AssistantToolDefinition> allTools = List.of(
             LIST_USERS,
             GET_USER_DETAIL,
@@ -162,7 +192,10 @@ public class AssistantToolRegistry {
             MANAGE_USER_STATUS,
             MANAGE_USER_ASSIGNMENT,
             MANAGE_PROCESS_PHASE,
-            MANAGE_PROCESS_SUBPHASE
+            MANAGE_PROCESS_SUBPHASE,
+            LIST_PENDING_EVIDENCES,
+            GET_EVIDENCE_DETAIL,
+            CHECK_EVIDENCE_COMPLETENESS
     );
 
     public List<AssistantToolDefinition> toolsForRole(String role) {
@@ -187,6 +220,11 @@ public class AssistantToolRegistry {
                     .filter(tool -> USERS_AGENT_TOOL_IDS.contains(tool.id()))
                     .toList();
         }
+        if (agentProfile == AssistantAgentProfile.EVIDENCE) {
+            return roleTools.stream()
+                    .filter(tool -> EVIDENCE_AGENT_TOOL_IDS.contains(tool.id()))
+                    .toList();
+        }
         return roleTools;
     }
 
@@ -203,6 +241,12 @@ public class AssistantToolRegistry {
             CREATE_USER_ID,
             MANAGE_USER_STATUS_ID,
             MANAGE_USER_ASSIGNMENT_ID
+    );
+
+    private static final Set<String> EVIDENCE_AGENT_TOOL_IDS = Set.of(
+            LIST_PENDING_EVIDENCES_ID,
+            GET_EVIDENCE_DETAIL_ID,
+            CHECK_EVIDENCE_COMPLETENESS_ID
     );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
@@ -337,6 +381,18 @@ public class AssistantToolRegistry {
         properties.put("confirmed", booleanProperty(
                 "false para vista previa; true solo tras confirmación explícita del usuario."));
         return requiredObjectSchema(properties, List.of("action", "careerQuery"));
+    }
+
+    private static Map<String, Object> listPendingEvidencesParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("programId", stringProperty("UUID opcional de carrera/programa para acotar la consulta."));
+        return objectSchema(properties);
+    }
+
+    private static Map<String, Object> evidenceIndicatorParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("indicatorId", stringProperty("UUID del indicador a consultar."));
+        return requiredObjectSchema(properties, List.of("indicatorId"));
     }
 
     private static Map<String, Object> objectSchema(Map<String, Object> properties) {

@@ -3,7 +3,8 @@ package com.umss.sigesa.application.model.assistant;
 public enum AssistantAgentProfile {
     GENERAL,
     PHASES,
-    USERS;
+    USERS,
+    EVIDENCE;
 
     public static AssistantAgentProfile fromAgentId(String agentId) {
         if (agentId == null || agentId.isBlank()) {
@@ -12,6 +13,7 @@ public enum AssistantAgentProfile {
         return switch (agentId.trim().toLowerCase()) {
             case "phases" -> PHASES;
             case "users" -> USERS;
+            case "evidence" -> EVIDENCE;
             default -> GENERAL;
         };
     }

@@ -38,3 +38,7 @@ build/
 
 ### pnpm local store ###
 .pnpm-store/
+
+### MCP local deps ###
+mcp/**/node_modules/
+mcp/**/pnpm-lock.yaml

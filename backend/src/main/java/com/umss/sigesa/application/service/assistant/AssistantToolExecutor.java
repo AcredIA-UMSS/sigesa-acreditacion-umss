@@ -7,13 +7,17 @@ import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
 import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
+import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
@@ -24,6 +28,7 @@ import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
+import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidEmailDomainException;
 import com.umss.sigesa.domain.exception.InvalidFilterException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
@@ -32,6 +37,7 @@ import com.umss.sigesa.domain.exception.InvalidUserProfileException;
 import com.umss.sigesa.domain.exception.InvalidUserStatusTransitionException;
 import com.umss.sigesa.domain.exception.ProcessNotEditableException;
 import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
+import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.SubphaseHasEvidenceException;
 import com.umss.sigesa.domain.exception.UserNotFoundException;
 import com.umss.sigesa.domain.exception.WeakPasswordException;
@@ -68,6 +74,9 @@ public class AssistantToolExecutor {
     private final UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase;
     private final DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase;
     private final ReorderProcessStructureUseCase reorderProcessStructureUseCase;
+    private final ListPendingEvidencesUseCase listPendingEvidencesUseCase;
+    private final GetEvidenceDetailUseCase getEvidenceDetailUseCase;
+    private final CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
     private final ObjectMapper objectMapper;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -88,6 +97,9 @@ public class AssistantToolExecutor {
                                  UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
                                  DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
                                  ReorderProcessStructureUseCase reorderProcessStructureUseCase,
+                                 ListPendingEvidencesUseCase listPendingEvidencesUseCase,
+                                 GetEvidenceDetailUseCase getEvidenceDetailUseCase,
+                                 CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
                                  ObjectMapper objectMapper) {
         this.toolRegistry = toolRegistry;
         this.listUsersUseCase = listUsersUseCase;
@@ -106,6 +118,9 @@ public class AssistantToolExecutor {
         this.updateProcessSubphaseUseCase = updateProcessSubphaseUseCase;
         this.deleteProcessSubphaseUseCase = deleteProcessSubphaseUseCase;
         this.reorderProcessStructureUseCase = reorderProcessStructureUseCase;
+        this.listPendingEvidencesUseCase = listPendingEvidencesUseCase;
+        this.getEvidenceDetailUseCase = getEvidenceDetailUseCase;
+        this.checkEvidenceCompletenessUseCase = checkEvidenceCompletenessUseCase;
         this.objectMapper = objectMapper;
     }
 
@@ -134,6 +149,10 @@ public class AssistantToolExecutor {
             case AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID -> executeManageUserAssignment(argumentsJson);
             case AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID -> executeManageProcessPhase(argumentsJson, auth);
             case AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID -> executeManageProcessSubphase(argumentsJson, auth);
+            case AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID -> executeListPendingEvidences(argumentsJson, auth);
+            case AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID -> executeGetEvidenceDetail(argumentsJson, auth);
+            case AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID ->
+                    executeCheckEvidenceCompleteness(argumentsJson, auth);
             default -> ToolExecutionResult.failure("TOOL_NOT_FOUND", "Tool desconocida: " + toolId);
         };
 
@@ -991,6 +1010,88 @@ public class AssistantToolExecutor {
 
         deleteProcessSubphaseUseCase.execute(processId, phase.getId(), existing.getId());
         return AssistantConfirmationSupport.executed("DELETE", preview, "Subfase eliminada correctamente.");
+    }
+
+    private ToolExecutionResult executeListPendingEvidences(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            UUID programId = null;
+            if (argumentsJson != null && !argumentsJson.isBlank()) {
+                JsonNode args = objectMapper.readTree(argumentsJson);
+                if (args.hasNonNull("programId") && !args.get("programId").asText().isBlank()) {
+                    programId = UUID.fromString(args.get("programId").asText().trim());
+                }
+            }
+            List<EvidenceControlItem> items = listPendingEvidencesUseCase.list(auth, programId);
+            List<Map<String, Object>> payload = items.stream().map(this::toEvidenceControlMap).toList();
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("evidences", payload);
+            data.put("total", payload.size());
+            data.put("stateFilter", "SUBIDO");
+            return ToolExecutionResult.success(data);
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENT", "programId inválido.");
+        } catch (ProgramScopeDeniedException ex) {
+            return ToolExecutionResult.failure("ACCESS_DENIED", "No tiene acceso a la carrera solicitada.");
+        }
+    }
+
+    private ToolExecutionResult executeGetEvidenceDetail(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            UUID indicatorId = UUID.fromString(requiredText(args, "indicatorId"));
+            var itemOpt = getEvidenceDetailUseCase.get(auth, indicatorId);
+            if (itemOpt.isEmpty() || itemOpt.get().evidenceId() == null) {
+                return ToolExecutionResult.failure(
+                        "EVIDENCE_NOT_FOUND",
+                        "No se encontró el indicador o su evidencia.");
+            }
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("evidence", toEvidenceControlMap(itemOpt.get()));
+            return ToolExecutionResult.success(data);
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENT", ex.getMessage());
+        } catch (ProgramScopeDeniedException ex) {
+            return ToolExecutionResult.failure("ACCESS_DENIED", "No tiene acceso a la evidencia solicitada.");
+        }
+    }
+
+    private ToolExecutionResult executeCheckEvidenceCompleteness(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            UUID indicatorId = UUID.fromString(requiredText(args, "indicatorId"));
+            CheckEvidenceCompletenessUseCase.CompletenessChecklist checklist =
+                    checkEvidenceCompletenessUseCase.check(auth, indicatorId);
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("indicatorId", checklist.indicatorId().toString());
+            data.put("hasEvidence", checklist.hasEvidence());
+            data.put("hasDescription", checklist.hasDescription());
+            data.put("hasCriterion", checklist.hasCriterion());
+            data.put("hasContentHash", checklist.hasContentHash());
+            data.put("currentState", checklist.currentState() == null ? null : checklist.currentState().name());
+            data.put("complete", checklist.complete());
+            return ToolExecutionResult.success(data);
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENT", ex.getMessage());
+        } catch (IndicatorNotFoundException ex) {
+            return ToolExecutionResult.failure("EVIDENCE_NOT_FOUND", ex.getMessage());
+        } catch (ProgramScopeDeniedException ex) {
+            return ToolExecutionResult.failure("ACCESS_DENIED", "No tiene acceso a la evidencia solicitada.");
+        }
+    }
+
+    private Map<String, Object> toEvidenceControlMap(EvidenceControlItem item) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("indicatorId", item.indicatorId() == null ? null : item.indicatorId().toString());
+        map.put("programId", item.programId() == null ? null : item.programId().toString());
+        map.put("criterionId", item.criterionId() == null ? null : item.criterionId().toString());
+        map.put("phaseId", item.phaseId() == null ? null : item.phaseId().toString());
+        map.put("currentState", item.currentState() == null ? null : item.currentState().name());
+        map.put("evidenceId", item.evidenceId() == null ? null : item.evidenceId().toString());
+        map.put("versionNumber", item.versionNumber());
+        map.put("contentHash", item.contentHash());
+        map.put("description", item.description());
+        map.put("createdAt", item.createdAt() == null ? null : item.createdAt().toString());
+        return map;
     }
 
     private static Map<String, Object> basePhasePreview(AssistantProcessResolver.ResolveResult resolved, String action) {

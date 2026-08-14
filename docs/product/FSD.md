@@ -59,6 +59,7 @@ ultima_actualizacion: "2026-08-07"
 | `FSD-UC-021` | Gestión de plantillas normativas | [JD] | v1.0 | **Hecho (backend)** | [Ver detalle](uc/FSD-UC-021.md) | [`DD-UC-021`](../design/DD-UC-021.md) | [`PR-IMPL-021`](../prompts/impl/PR-IMPL-021.md) |
 | `FSD-UC-022` | Gestión de fases/subfases en proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
 | `FSD-UC-023` | Asignación de responsable [CC] a proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-023.md) | [`DD-UC-023`](../design/DD-UC-023.md) | [`PR-IMPL-023`](../prompts/impl/PR-IMPL-023.md) |
+| `FSD-UC-024` | Copiloto de control documental | [TD]/[CC]/[JD] | v1.0 | **Hecho (Full-Stack + MCP)** | [Ver detalle](uc/FSD-UC-024.md) | [`DD-AGENT-003`](../design/assistant/DD-AGENT-003.md) | [`PR-IMPL-026`](../prompts/impl/PR-IMPL-026.md) |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Verificado` · `Obsoleto`
 

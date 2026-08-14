@@ -35,11 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtTokenAdapter.isValid(token)) {
                 UUID userId = jwtTokenAdapter.parseUserId(token);
                 String role = jwtTokenAdapter.parseRole(token);
+                List<UUID> programScope = jwtTokenAdapter.parseProgramScope(token);
                 var authentication = new UsernamePasswordAuthenticationToken(
                         userId,
                         null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role))
                 );
+                // Detalle: alcance de carrera del JWT (sobrevive reinicios H2 si el claim es estable).
+                authentication.setDetails(programScope);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

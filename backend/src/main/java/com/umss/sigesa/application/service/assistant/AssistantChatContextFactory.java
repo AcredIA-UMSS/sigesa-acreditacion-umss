@@ -35,6 +35,10 @@ public class AssistantChatContextFactory {
             return AssistantChatContext.users(focusUserId, programId);
         }
 
+        if ("evidence".equalsIgnoreCase(agent)) {
+            return AssistantChatContext.evidence(programId);
+        }
+
         if (!"phases".equalsIgnoreCase(agent)) {
             throw new IllegalArgumentException("Agente no soportado: " + agent);
         }

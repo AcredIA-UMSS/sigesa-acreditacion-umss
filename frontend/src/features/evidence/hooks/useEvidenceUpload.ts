@@ -7,10 +7,6 @@ import { mapUploadError } from './mapUploadError';
 /** 10 MiB — aviso de archivo grande en UI */
 export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024;
 
-/** UUIDs seed de EvidenceDataLoader (demo local UC-004). */
-export const SEED_INDICATOR_ID = '550e8400-e29b-41d4-a716-446655440003';
-export const SEED_CRITERION_ID = '550e8400-e29b-41d4-a716-446655440002';
-
 export type EvidenceUploadForm = {
   indicatorId: string;
   criterionId: string;
@@ -31,15 +27,31 @@ const defaultForm: EvidenceUploadForm = {
   file: null,
 };
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isUuid(value: string): boolean {
+  return UUID_RE.test(value.trim());
+}
+
 function validateForm(form: EvidenceUploadForm): EvidenceUploadValidationErrors {
   const errors: EvidenceUploadValidationErrors = {};
 
-  if (!form.indicatorId.trim()) {
-    errors.indicatorId = 'Indique el identificador del indicador.';
+  const indicatorId = form.indicatorId.trim();
+  const criterionId = form.criterionId.trim();
+
+  if (!indicatorId) {
+    errors.indicatorId = 'Seleccione un indicador.';
+  } else if (!isUuid(indicatorId)) {
+    errors.indicatorId = 'El indicador seleccionado no es válido.';
   }
-  if (!form.criterionId.trim()) {
-    errors.criterionId = 'Indique el identificador del criterio.';
+
+  if (!criterionId) {
+    errors.criterionId = 'Seleccione un indicador para fijar el criterio.';
+  } else if (!isUuid(criterionId)) {
+    errors.criterionId = 'El criterio asociado no es válido.';
   }
+
   if (!form.description.trim()) {
     errors.description = 'La descripción es obligatoria.';
   }
@@ -96,6 +108,25 @@ export function useEvidenceUpload() {
     [],
   );
 
+  /** Al elegir indicador en el select, fija indicatorId + criterionId (1:1). */
+  const selectIndicator = useCallback(
+    (indicatorId: string, criterionId: string) => {
+      setForm((prev) => ({
+        ...prev,
+        indicatorId,
+        criterionId,
+      }));
+      setValidationErrors((prev) => {
+        if (!prev.indicatorId && !prev.criterionId) return prev;
+        const next = { ...prev };
+        delete next.indicatorId;
+        delete next.criterionId;
+        return next;
+      });
+    },
+    [],
+  );
+
   const submit = useCallback(() => {
     const errors = validateForm(form);
     if (Object.keys(errors).length > 0) {
@@ -134,6 +165,7 @@ export function useEvidenceUpload() {
   return {
     form,
     updateField,
+    selectIndicator,
     submit,
     reset,
     progress,

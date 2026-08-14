@@ -24,7 +24,13 @@ public final class AssistantToolSourceRegistry {
             Map.entry(AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID, List.of(
                     "phases", "subphases", "accreditation_processes", "programs")),
             Map.entry(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, List.of(
-                    "phases", "subphases", "accreditation_processes", "programs"))
+                    "phases", "subphases", "accreditation_processes", "programs")),
+            Map.entry(AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, List.of(
+                    "evidence", "evidence_version", "indicator", "indicator_state_history")),
+            Map.entry(AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID, List.of(
+                    "evidence", "evidence_version", "indicator", "indicator_state_history")),
+            Map.entry(AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID, List.of(
+                    "evidence", "evidence_version", "indicator", "indicator_state_history"))
     );
 
     private AssistantToolSourceRegistry() {

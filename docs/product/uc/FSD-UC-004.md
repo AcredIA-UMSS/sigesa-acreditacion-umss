@@ -7,7 +7,7 @@ actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
-ultima_actualizacion: "2026-08-09"
+ultima_actualizacion: "2026-08-13"
 ---
 
 # FSD-UC-004 — Cargar Evidencia
@@ -21,13 +21,14 @@ ultima_actualizacion: "2026-08-09"
 
 ## Flujo principal
 
-1. [CC] navega Proceso → Fase → Indicador.
-2. Adjunta Evidence y metadatos obligatorios (`indicatorId`, `criterionId`, `description`).
-3. Sistema valida tipo/tamaño; calcula SHA-256.
-4. Evidence Service persiste `Evidence` v1 y publica `EvidenceUploaded`.
-5. Audit Service inserta transición `PENDIENTE → SUBIDO` en `indicator_state_history`.
-6. Notification Service notifica al [TD] (UC-015).
-7. Si Evidence > 5 MB: barra de progreso y carga asíncrona (US-025).
+1. [CC] abre Cargar Evidencia; el sistema lista indicadores cargables (`GET /api/v1/indicators/uploadable`) de su carrera en `PENDIENTE`/`OBSERVADO`.
+2. [CC] elige **Indicador** en un select (etiqueta `código — título`); el **Criterio** se fija automáticamente (1:1).
+3. Adjunta Evidence y descripción; envía multipart con `indicatorId`, `criterionId`, `description`.
+4. Sistema valida tipo/tamaño; calcula SHA-256.
+5. Evidence Service persiste `Evidence` v1 y publica `EvidenceUploaded`.
+6. Audit Service inserta transición `PENDIENTE → SUBIDO` en `indicator_state_history`.
+7. Notification Service notifica al [TD] (UC-015).
+8. Si Evidence > 5 MB: barra de progreso y carga asíncrona (US-025).
 
 ## Excepciones y flujos alternos
 
@@ -45,6 +46,8 @@ ultima_actualizacion: "2026-08-09"
 | Entrada | Salida |
 |---------|--------|
 | `indicatorId`, `evidenceBlob`, `description`, `criterionId` | `evidenceId`, `version`, `contentHash`, `currentState` |
+
+**Selectores (UI):** `GET /api/v1/indicators/uploadable` → `{ indicatorId, code, title, criterionId, criterionCode, criterionTitle, currentState }[]`.
 
 ## Diagramas
 

@@ -58,6 +58,17 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             - Alta deja la cuenta INACTIVE hasta el primer acceso.
             """;
 
+    private static final String EVIDENCE_AGENT_PROMPT_SUFFIX = """
+
+            CONTEXTO COPILOTO DE CONTROL DOCUMENTAL (obligatorio):
+            - Solo lectura: list_pending_evidences, get_evidence_detail, check_evidence_completeness.
+            - No apruebes ni rechaces indicadores (fuera de MVP).
+            - list_pending_evidences: indicadores en estado SUBIDO; programId opcional.
+            - get_evidence_detail / check_evidence_completeness: requieren indicatorId UUID real.
+            - PBAC: JD/TD alcance institucional; CC solo su programScope JWT.
+            - No invoques tools de usuarios ni de fases.
+            """;
+
     private final ChatCompletionPort chatCompletionPort;
     private final AssistantToolRegistry toolRegistry;
     private final AssistantToolExecutor toolExecutor;
@@ -171,7 +182,8 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                 ChatRole.SYSTEM,
                 systemPrompt + TOOL_SELECTION_PROMPT_SUFFIX
                         + phasesContextSuffix(chatContext)
-                        + usersContextSuffix(chatContext)));
+                        + usersContextSuffix(chatContext)
+                        + evidenceContextSuffix(chatContext)));
 
         if (history != null) {
             history.stream()
@@ -205,6 +217,18 @@ public class SendChatMessageService implements SendChatMessageUseCase {
         }
         if (chatContext.programId() != null) {
             extra.append("\n- Programa en contexto (programId): ").append(chatContext.programId());
+        }
+        return extra.toString();
+    }
+
+    private static String evidenceContextSuffix(AssistantChatContext chatContext) {
+        if (!chatContext.isEvidenceAgent()) {
+            return "";
+        }
+        StringBuilder extra = new StringBuilder(EVIDENCE_AGENT_PROMPT_SUFFIX);
+        if (chatContext.programId() != null) {
+            extra.append("\n- Programa en contexto (programId): ").append(chatContext.programId());
+            extra.append("\n- Prefiere pasar programId en list_pending_evidences cuando aplique.");
         }
         return extra.toString();
     }

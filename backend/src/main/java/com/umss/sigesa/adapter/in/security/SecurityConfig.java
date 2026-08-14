@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/indicators/uploadable").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/indicators/{indicatorId}/evidences").hasRole("CC")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/dashboards/export-jobs",

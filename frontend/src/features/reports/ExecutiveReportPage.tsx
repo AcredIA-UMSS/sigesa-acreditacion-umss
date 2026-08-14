@@ -16,6 +16,7 @@ export function ExecutiveReportPage() {
         onReset={report.reset}
         activeJobId={report.activeJobId}
         jobStatus={report.jobStatus}
+        preview={report.preview}
         validationErrors={report.validationErrors}
         submitErrorMessage={report.submitErrorMessage}
         statusErrorMessage={report.statusErrorMessage}
