@@ -23,6 +23,7 @@
 | PM-014 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
 | PM-015 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
 | PM-016 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
+| PM-017 | PR-IMPL-007-MCP | DD-UC-007-MCP | FSD-UC-007 | Implementación de Búsqueda Inteligente Multi-Token y Contextualizada con servidor MCP embebido en Java. |
 
 ## PM-001
 
@@ -1200,3 +1201,79 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 - [x] `npx tsc --noEmit` — resultado: OK (frontend compila con cero errores de tipos)
 - [x] `docker compose logs backend` — resultado: Container sigesa-backend se levanta establemente escuchando en 8080 sin crasheos.
 - [x] `docker compose build backend && docker compose up -d backend` — resultado: Contenedor backend reconstruido y reiniciado exitosamente aplicando el módulo de Jackson.
+
+---
+
+## PM-017
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-017 |
+| **Fecha** | 2026-08-13 |
+| **Hora** | 17:58 |
+| **Solicitante** | Tech Lead / Alex |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Pro |
+| **Tarea** | Implementación Búsqueda Inteligente Multi-Token (MCP) |
+| **Objetivo** | Implementar la descomposición de frases complejas de búsqueda (Multi-Token) mediante servidor MCP embebido en Java (Spring AI) y búsqueda por trigramas (`pg_trgm`) en Postgres con visualización agrupada por subsets en el frontend. |
+| **Contexto** | FSD-UC-007 / DD-UC-007-MCP. Contrato de prompt `PR-IMPL-007-MCP`. Aislamiento por carrera FSD-BR-09. |
+| **PR-IMPL vinculado** | [PR-IMPL-007-MCP](../../prompts/impl/PR-IMPL-007-MCP.md) |
+| **DD-UC vinculado** | [DD-UC-007-MCP](../../design/DD-UC-007-MCP.md) |
+| **FSD-UC vinculado** | [FSD-UC-007.md](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pls execute the propm contract PR-IMPL-007-MCP, let me know if you have any question
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-007.md`
+- `docs/design/DD-UC-007-MCP.md`
+- `docs/prompts/impl/PR-IMPL-007-MCP.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V8__mcp_trgm_search.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/mcp/AcademicContextMcpServer.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/mcp/dto/UserContextDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchSubsetDto.java` |
+| generado | `frontend/src/api/model/searchSubsetDto.ts` |
+| modificado | `db/seed.sql` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutor.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java` |
+| modificado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `frontend/src/features/evidence/hooks/useEvidenceUpload.ts` |
+| modificado | `frontend/src/features/assistant/hooks/useAssistantChat.ts` |
+| modificado | `frontend/src/features/processes/hooks/usePhasesCopilot.ts` |
+| modificado | `frontend/src/features/admin/users/hooks/useUsersCopilot.ts` |
+| modificado | `frontend/src/features/admin/users/components/UsersCopilotPanel.tsx` |
+| modificado | `frontend/src/features/accreditation-process/hooks/useProgramSearch.ts` |
+| modificado | `frontend/src/features/admin/users/hooks/useRegisterUserForm.ts` |
+| modificado | `frontend/src/features/processes/components/PhasesCopilotPanel.tsx` |
+| eliminado | `frontend/src/api/endpoints/evidence-controller` |
+| eliminado | `frontend/src/api/endpoints/assistant-controller` |
+| eliminado | `frontend/src/api/endpoints/program-catalog-controller` |
+
+- **Persistencia (Flyway V8 & Postgres Init Seed):** Migración SQL V8 para activar `pg_trgm` y crear índices GIN. Adicionalmente, se actualizaron el script de base de datos de PostgreSQL `db/seed.sql` para habilitar la extensión `pg_trgm`, crear índices trigram y poblar las tablas de programas, dimensiones y evidencias automáticamente al arrancar el contenedor PostgreSQL.
+- **Servidor MCP embebido:** Implementado `AcademicContextMcpServer` usando Spring AI para ofrecer herramientas al motor LLM, extrayendo dinámicamente y agrupando evidencias en subconjuntos (`subsets`).
+- **Aislamiento y Seguridad:** Validación del rol y de la carrera autorizada (`programScope`) en el servidor MCP para rechazar consultas de otras carreras si es Coordinador.
+- **Frontend React:** Adaptación de `EvidenceSearchPage` para iterar y mostrar resultados agrupados en bloques/pestañas de subconjuntos. Actualización de hooks Orval y saneamiento de importaciones obsoletas en copilotos del frontend para compilación libre de warnings.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (184 pruebas exitosas en host local)
+- [x] `pnpm tsc -b` — resultado: exit code 0 (cero errores en compilación frontend)
+- [x] `pnpm run lint` — resultado: exit code 0 (cero warnings de oxlint introducidos)
+
+### Resultado obtenido
+
+Búsqueda inteligente multi-token mediante servidor MCP embebido y trigram search en Postgres integrada y validada con cero errores en backend y frontend.
+

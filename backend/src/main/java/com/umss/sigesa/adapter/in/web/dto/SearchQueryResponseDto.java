@@ -5,10 +5,7 @@ import java.util.List;
 public record SearchQueryResponseDto(
         String query,
         String routingPath,
-        String toolUsed,
-        String dataSource,
+        List<SearchSubsetDto> subsets,
         String message,
-        List<EvidenceSearchDetailDto> results,
-        String sqlQuery,
         String llmThought
 ) {}

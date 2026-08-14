@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useRegister } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
-import { useList1 } from '../../../../api/endpoints/program-catalog-controller/program-catalog-controller';
+import { useList1 } from '../../../../api/endpoints/programas/programas';
 import type { RegisterUserResponse, ProgramSummaryResponse } from '../../../../api/model';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import {

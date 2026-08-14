@@ -81,7 +81,7 @@ services:
       - SIGESA_ASSISTANT_LLM_ENABLED=true
       - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
       - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-}
-      - SIGESA_ASSISTANT_MODEL=qwen2.5:7b
+      - SIGESA_ASSISTANT_MODEL=${SIGESA_ASSISTANT_MODEL:-llama3.2:3b}
     ports:
       - "8080:8080"
 

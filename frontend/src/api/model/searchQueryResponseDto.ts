@@ -4,15 +4,12 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { EvidenceSearchDetailDto } from './evidenceSearchDetailDto.ts';
+import type { SearchSubsetDto } from './searchSubsetDto.ts';
 
 export interface SearchQueryResponseDto {
   query?: string;
   routingPath?: string;
-  toolUsed?: string;
-  dataSource?: string;
+  subsets?: SearchSubsetDto[];
   message?: string;
-  results?: EvidenceSearchDetailDto[];
-  sqlQuery?: string;
   llmThought?: string;
 }

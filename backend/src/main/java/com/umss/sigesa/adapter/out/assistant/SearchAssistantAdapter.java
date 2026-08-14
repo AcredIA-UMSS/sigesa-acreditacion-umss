@@ -35,15 +35,24 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
     public Map<String, String> classifyAndRoute(String query) {
         Map<String, String> result = new HashMap<>();
 
-        String systemPrompt = "Eres un asistente de búsqueda y enrutamiento inteligente para el sistema de acreditación universitaria SIGESA. Tu tarea es enrutar las consultas del usuario utilizando las herramientas provistas para mapear sinónimos a criterios oficiales.\n" +
-                "Si la consulta no está relacionada con la acreditación universitaria, no intentes responder ni uses ninguna herramienta; simplemente responde con la palabra 'OUT_OF_SCOPE'.";
-
         List<String> dimensions = dimensionRepository.findAll().stream()
                 .map(EvaluationDimensionEntity::getName)
                 .toList();
         if (dimensions.isEmpty()) {
             dimensions = List.of("Infraestructura", "Plan de Estudios", "Docentes", "Administracion");
         }
+
+        String systemPrompt = "Eres un enrutador de búsquedas inteligente para el sistema de acreditación SIGESA.\n" +
+                "Tu única tarea es analizar la consulta del usuario y clasificarla.\n\n" +
+                "Si la consulta está relacionada directa o indirectamente con el ámbito universitario (infraestructura, docencia, materias, estudiantes, administración, etc.), debes responder EXCLUSIVAMENTE con un bloque JSON en texto plano formateado así, sin textos aclaratorios ni explicaciones:\n" +
+                "{\n" +
+                "  \"termino\": \"termino de búsqueda limpio y simplificado\",\n" +
+                "  \"dimension\": \"Nombre de la dimensión oficial\"\n" +
+                "}\n\n" +
+                "Dimensiones oficiales del catálogo que debes utilizar (mapea el sinónimo a la más cercana):\n" +
+                String.join("\n", dimensions.stream().map(d -> "- " + d).toList()) + "\n\n" +
+                "Si la consulta es completamente ajena al ámbito universitario (recetas de cocina, chistes, deportes, espectáculos, etc.), responde únicamente con la palabra: OUT_OF_SCOPE\n" +
+                "PROHIBIDO escribir explicaciones, introducciones o textos adicionales. Responde únicamente con el bloque JSON o con 'OUT_OF_SCOPE'.";
 
         Map<String, Object> schema = Map.of(
                 "type", "object",
@@ -90,8 +99,11 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                 List.of(tool)
         );
 
+        ChatCompletionResult completion = null;
+        String parserError = null;
+
         try {
-            ChatCompletionResult completion = chatCompletionPort.complete(request);
+            completion = chatCompletionPort.complete(request);
 
             if (completion.toolCalls() != null && !completion.toolCalls().isEmpty()) {
                 ToolCall call = completion.toolCalls().get(0);
@@ -113,6 +125,32 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
                 }
             }
 
+            // Fallback: Si el LLM no llamó formalmente a la tool, pero devolvió un bloque JSON en texto plano
+            if (completion.content() != null && completion.content().contains("{") && completion.content().contains("}")) {
+                try {
+                    String jsonText = completion.content().substring(
+                            completion.content().indexOf("{"),
+                            completion.content().lastIndexOf("}") + 1
+                    );
+                    JsonNode args = objectMapper.readTree(jsonText);
+                    result.put("routingPath", "LLM");
+                    result.put("termino", args.path("termino").asText(query));
+                    result.put("dimension", args.path("dimension").asText(null));
+                    result.put("criterioCodigo", args.path("criterioCodigo").asText(null));
+                    result.put("fechaInicio", args.path("fechaInicio").asText(null));
+                    result.put("fechaFin", args.path("fechaFin").asText(null));
+                    
+                    String term = args.path("termino").asText(query);
+                    String dim = args.path("dimension").asText(null);
+                    String thought = "El usuario busca \"" + query + "\". Traduciendo a término oficial: \"" + term + "\"" 
+                            + (dim != null ? " y dimensión: \"" + dim + "\"" : "") + " (JSON fallback).";
+                    result.put("llmThought", thought);
+                    return result;
+                } catch (Exception e) {
+                    parserError = "Fallo al deserializar bloque JSON detectado: " + e.getMessage();
+                }
+            }
+
             if (completion.content() != null && completion.content().contains("OUT_OF_SCOPE")) {
                 result.put("routingPath", "REFUSAL");
                 result.put("status", "OUT_OF_SCOPE");
@@ -123,10 +161,13 @@ public class SearchAssistantAdapter implements AssistantQueryPort {
         } catch (Exception e) {
             result.put("routingPath", "REFUSAL");
             result.put("llmThought", "Error de conexión o timeout al interactuar con el LLM: " + e.getMessage());
+            return result;
         }
 
         result.put("routingPath", "REFUSAL");
-        result.put("llmThought", "El LLM no invocó la herramienta de búsqueda esperada ni clasificó la consulta.");
+        String rawContent = (completion != null) ? completion.content() : "null";
+        result.put("llmThought", "El LLM no invocó la herramienta ni retornó un JSON estructurado. Respuesta cruda del LLM: \"" + rawContent + "\"" 
+                + (parserError != null ? " | Detalle: " + parserError : ""));
         return result;
     }
 }

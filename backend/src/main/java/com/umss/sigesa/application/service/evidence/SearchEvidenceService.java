@@ -4,6 +4,7 @@ import com.umss.sigesa.adapter.out.persistance.EvaluationDimensionJpaRepository;
 import com.umss.sigesa.adapter.out.persistance.entity.EvaluationDimensionEntity;
 import com.umss.sigesa.adapter.in.web.dto.EvidenceSearchDetailDto;
 import com.umss.sigesa.adapter.in.web.dto.SearchQueryResponseDto;
+import com.umss.sigesa.adapter.in.web.dto.SearchSubsetDto;
 import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AssistantQueryPort;
 import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
@@ -39,40 +40,36 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
     public SearchQueryResponseDto search(String query, boolean xAiEnabled, UUID userId, String role, List<UUID> programScope) {
         String cleanQuery = (query == null) ? "" : query.trim().toLowerCase();
 
-        // Control de seguridad: Si es Coordinador (CC) y no tiene carreras asignadas, abortar con resultado vacío.
         if ("CC".equalsIgnoreCase(role)) {
             if (programScope == null || programScope.isEmpty()) {
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "Ninguno", null, Collections.emptyList(), null, "El Coordinador de Carrera no tiene programas asignados en su perfil de seguridad.");
+                return new SearchQueryResponseDto(query, "KEYWORD", Collections.emptyList(), 
+                    "El Coordinador de Carrera no tiene programas asignados en su perfil de seguridad.", null);
             }
         }
 
-        // Determinar el ámbito de la consulta: CC se restringe a su scope; TD y otros roles tienen acceso global (null).
         List<UUID> effectiveScope = "CC".equalsIgnoreCase(role) ? programScope : null;
 
-        // Extraer año de la query si existe un número de 4 dígitos (ej. 2024)
         Pattern yearPattern = Pattern.compile("\\b(19|20)\\d{2}\\b");
         Matcher yearMatcher = yearPattern.matcher(cleanQuery);
         Integer detectedYear = null;
         if (yearMatcher.find()) {
             detectedYear = Integer.parseInt(yearMatcher.group());
-            // Limpiamos el año de la query para la búsqueda literal por texto
             cleanQuery = cleanQuery.replace(yearMatcher.group(), "").replaceAll("\\s+", " ").trim();
         }
 
         LocalDate start = (detectedYear != null) ? LocalDate.of(detectedYear, 1, 1) : null;
         LocalDate end = (detectedYear != null) ? LocalDate.of(detectedYear, 12, 31) : null;
 
-        // Si la query es vacía, retornamos todos los objetos accesibles
         if (cleanQuery.isEmpty()) {
             SearchFilters filters = SearchFilters.builder()
                     .fechaInicio(start)
                     .fechaFin(end)
                     .build();
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
-            return new SearchQueryResponseDto("", "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), "Consulta de texto vacía. Retornando todas las evidencias accesibles.");
+            return new SearchQueryResponseDto("", "KEYWORD", List.of(new SearchSubsetDto("Todas las evidencias", results)), 
+                "Consulta de texto vacía. Retornando todas las evidencias accesibles.", null);
         }
 
-        // Escenario 1.1: Catálogo dinámico de dimensiones de acreditación
         String matchedDimension = matchKeywordCatalog(cleanQuery);
         if (matchedDimension != null) {
             SearchFilters filters = SearchFilters.builder()
@@ -81,10 +78,10 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                     .fechaFin(end)
                     .build();
             List<EvidenceSearchDetailDto> results = queryPort.executeSearch(filters, effectiveScope);
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), "Coincidencia exacta de dimensión encontrada en el catálogo dinámico de acreditación. Salto de llamada al LLM.");
+            return new SearchQueryResponseDto(query, "KEYWORD", List.of(new SearchSubsetDto("Resultados Exactos", results)), 
+                "Coincidencia exacta de dimensión encontrada.", null);
         }
 
-        // Escenario 1.2: Búsqueda clásica directa (si encuentra datos con ILIKE la primera vez, los retorna y salta el LLM)
         SearchFilters directFilters = SearchFilters.builder()
                 .termino(cleanQuery)
                 .fechaInicio(start)
@@ -92,67 +89,44 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
                 .build();
         List<EvidenceSearchDetailDto> directResults = queryPort.executeSearch(directFilters, effectiveScope);
         if (!directResults.isEmpty()) {
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), "Resultados localizados directamente mediante búsqueda clásica de texto por coincidencia exacta (ILIKE). Salto de llamada al LLM.");
+            return new SearchQueryResponseDto(query, "KEYWORD", List.of(new SearchSubsetDto("Búsqueda Clásica", directResults)), 
+                "Resultados localizados directamente (ILIKE).", null);
         }
 
-        // Evaluar estado de IA (xAiEnabled de la petición y configuración global)
         boolean iaEnabled = xAiEnabled && assistantProperties.isEnabled();
 
         if (iaEnabled) {
             try {
-                // Escenario 2 & 3: Resolución vía LLM
                 Map<String, String> routingResult = assistantQueryPort.classifyAndRoute(query);
                 String path = routingResult.getOrDefault("routingPath", "REFUSAL");
 
-                if ("REFUSAL".equalsIgnoreCase(path) || "OUT_OF_SCOPE".equalsIgnoreCase(routingResult.get("status"))) {
-                    return new SearchQueryResponseDto(
-                            query,
-                            "REFUSAL",
-                            null,
-                            "Ninguno",
-                            "Lo siento, la consulta está fuera del alcance de SIGESA. Solo puedo asistirte en búsquedas relacionadas con el proceso de acreditación (ej. evidencias, infraestructura, docentes).",
-                            Collections.emptyList(),
-                            null,
-                            routingResult.getOrDefault("llmThought", "Consulta clasificada como fuera de alcance por el LLM.")
-                    );
+                if ("OUT_OF_SCOPE".equalsIgnoreCase(routingResult.get("status"))) {
+                    return new SearchQueryResponseDto(query, "REFUSAL", Collections.emptyList(),
+                            "Lo siento, la consulta está fuera del alcance de SIGESA.", routingResult.getOrDefault("llmThought", "Fuera de alcance."));
                 }
 
-                String termino = routingResult.get("termino");
-                String dimension = routingResult.get("dimension");
-                String criterioCodigo = routingResult.get("criterioCodigo");
-                String fechaInicioStr = routingResult.get("fechaInicio");
-                String fechaFinStr = routingResult.get("fechaFin");
-
-                LocalDate fInicio = null;
-                LocalDate fFin = null;
-                try {
-                    if (fechaInicioStr != null && !fechaInicioStr.strip().isEmpty()) {
-                        fInicio = LocalDate.parse(fechaInicioStr.strip());
-                    }
-                    if (fechaFinStr != null && !fechaFinStr.strip().isEmpty()) {
-                        fFin = LocalDate.parse(fechaFinStr.strip());
-                    }
-                } catch (Exception ignored) {}
+                if ("REFUSAL".equalsIgnoreCase(path)) {
+                    // Si hubo un error técnico o falta de invocación de herramienta, hacer fallback a búsqueda clásica en lugar de rechazar
+                    return new SearchQueryResponseDto(query, "KEYWORD", List.of(new SearchSubsetDto("Fallback Clásico (IA no disponible)", directResults)),
+                            "La IA no pudo estructurar la consulta. Mostrando resultados clásicos.", routingResult.getOrDefault("llmThought", "Fallback técnico."));
+                }
 
                 SearchFilters llmFilters = SearchFilters.builder()
-                        .termino(termino)
-                        .dimension(dimension)
-                        .criterioCodigo(criterioCodigo)
-                        .fechaInicio(fInicio)
-                        .fechaFin(fFin)
+                        .termino(routingResult.get("termino"))
+                        .dimension(routingResult.get("dimension"))
+                        .criterioCodigo(routingResult.get("criterioCodigo"))
                         .build();
 
                 List<EvidenceSearchDetailDto> results = queryPort.executeSearch(llmFilters, effectiveScope);
-                return new SearchQueryResponseDto(query, "LLM", "buscar_evidencias_por_parametros", "evidence, evidence_version, indicator, programs", null, results, queryPort.getLastExecutedSql(), routingResult.get("llmThought"));
+                return new SearchQueryResponseDto(query, "LLM_MULTIPATH", List.of(new SearchSubsetDto("Resultados Multi-Token MCP", results)), 
+                    "Búsqueda estructurada por MCP", routingResult.get("llmThought"));
             } catch (Exception e) {
-                // Fallback elegante en caso de falla de la IA: reutilizamos la búsqueda tradicional ILIKE directa
-                String fallbackThought = "Error al conectar con el asistente de IA (Ollama/Open WebUI): " + e.getMessage() 
-                        + ". Fallback automático aplicado a la búsqueda clásica por coincidencia exacta (ILIKE).";
-                return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), fallbackThought);
+                return new SearchQueryResponseDto(query, "KEYWORD", List.of(new SearchSubsetDto("Fallback Clásico", directResults)), 
+                    "Error al conectar con IA. Fallback automático.", null);
             }
         } else {
-            // Escenario 4: IA Desactivada (Reutilizamos la búsqueda tradicional ILIKE directa)
-            return new SearchQueryResponseDto(query, "KEYWORD", null, "evidence, evidence_version, indicator, programs", null, directResults, queryPort.getLastExecutedSql(), "Búsqueda inteligente desactivada por cabecera (X-AI-Enabled=false) o propiedades globales. Búsqueda clásica directa ejecutada.");
+            return new SearchQueryResponseDto(query, "KEYWORD", List.of(new SearchSubsetDto("Búsqueda Directa", directResults)), 
+                "Búsqueda inteligente desactivada.", null);
         }
     }
 
@@ -166,18 +140,5 @@ public class SearchEvidenceService implements SearchEvidenceUseCase {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private SearchQueryResponseDto executeFallbackRefusal(String query) {
-        return new SearchQueryResponseDto(
-                query,
-                "REFUSAL",
-                null,
-                "Ninguno",
-                "La búsqueda inteligente por sinónimos está desactivada. Intente buscar con palabras clave exactas.",
-                Collections.emptyList(),
-                null,
-                "Búsqueda por sinónimos deshabilitada por configuración del sistema."
-        );
     }
 }

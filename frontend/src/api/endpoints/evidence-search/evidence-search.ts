@@ -46,6 +46,119 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export type download1Response200 = {
+  data: Blob
+  status: 200
+}
+
+export type download1ResponseSuccess = (download1Response200) & {
+  headers: Headers;
+};
+;
+
+export type download1Response = (download1ResponseSuccess)
+
+export const getDownload1Url = (versionId: string,) => {
+
+
+
+
+  return `/api/v1/evidences/${versionId}/download`
+}
+
+/**
+ * Valida el acceso por rol y carrera antes de retornar los bytes del archivo.
+ * @summary Descargar un archivo de evidencia
+ */
+export const download1 = async (versionId: string, options?: Parameters<typeof customFetch>[1]): Promise<download1Response> => {
+
+  return customFetch<download1Response>(getDownload1Url(versionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownload1QueryKey = (versionId: string,) => {
+    return [
+    `/api/v1/evidences/${versionId}/download`
+    ] as const;
+    }
+
+
+export const getDownload1QueryOptions = <TData = Awaited<ReturnType<typeof download1>>, TError = unknown>(versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownload1QueryKey(versionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof download1>>> = ({ signal }) => download1(versionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: versionId !== null && versionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type Download1QueryResult = NonNullable<Awaited<ReturnType<typeof download1>>>
+export type Download1QueryError = unknown
+
+
+export function useDownload1<TData = Awaited<ReturnType<typeof download1>>, TError = unknown>(
+ versionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof download1>>,
+          TError,
+          Awaited<ReturnType<typeof download1>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownload1<TData = Awaited<ReturnType<typeof download1>>, TError = unknown>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof download1>>,
+          TError,
+          Awaited<ReturnType<typeof download1>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useDownload1<TData = Awaited<ReturnType<typeof download1>>, TError = unknown>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Descargar un archivo de evidencia
+ */
+
+export function useDownload1<TData = Awaited<ReturnType<typeof download1>>, TError = unknown>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof download1>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getDownload1QueryOptions(versionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export type searchResponse200 = {
   data: SearchQueryResponseDto
   status: 200

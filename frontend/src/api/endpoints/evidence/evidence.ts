@@ -19,8 +19,10 @@ import type {
   UploadEvidenceResponse
 } from '../../model';
 
-import { customFetch } from '../../../lib/api/customFetch';
+import { customFetch } from '../../../lib/api/customFetch.ts';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -81,7 +83,7 @@ export const getUploadUrl = (indicatorId: string,) => {
  * @summary Cargar evidencia v1
  */
 export const upload = async (indicatorId: string,
-    uploadEvidenceMultipartRequest: UploadEvidenceMultipartRequest, options?: RequestInit): Promise<uploadResponse> => {
+    uploadEvidenceMultipartRequest: UploadEvidenceMultipartRequest, options?: Parameters<typeof customFetch>[1]): Promise<uploadResponse> => {
     const formData = new FormData();
 formData.append(`file`, uploadEvidenceMultipartRequest.file);
 formData.append(`criterionId`, uploadEvidenceMultipartRequest.criterionId);
@@ -101,15 +103,15 @@ formData.append(`description`, uploadEvidenceMultipartRequest.description);
 
 
 export const getUploadMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext> => {
 
 const mutationKey = ['upload'];
-const {mutation: mutationOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -117,7 +119,7 @@ const {mutation: mutationOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof upload>>, {indicatorId: string;data: UploadEvidenceMultipartRequest}> = (props) => {
           const {indicatorId,data} = props ?? {};
 
-          return  upload(indicatorId,data,)
+          return  upload(indicatorId,data,requestOptions)
         }
 
 
@@ -135,7 +137,7 @@ const {mutation: mutationOptions} = options ?
  * @summary Cargar evidencia v1
  */
 export const useUpload = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof upload>>,
         TError,

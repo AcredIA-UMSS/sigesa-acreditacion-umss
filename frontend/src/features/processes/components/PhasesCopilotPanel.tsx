@@ -33,7 +33,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
 
   const sampleQuestions = readOnly
     ? copilot.sampleQuestions.filter(
-        (scenario) => !scenario.title.toLowerCase().includes('edición'),
+        (scenario: AssistantDemoScenario) => !scenario.title.toLowerCase().includes('edición'),
       )
     : copilot.sampleQuestions;
 

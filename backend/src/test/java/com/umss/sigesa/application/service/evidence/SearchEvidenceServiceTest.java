@@ -11,9 +11,7 @@ import com.umss.sigesa.config.AssistantProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +54,8 @@ class SearchEvidenceServiceTest {
         SearchQueryResponseDto response = searchEvidenceService.search("infraestructura", true, UUID.randomUUID(), "CC", scope);
 
         assertEquals("KEYWORD", response.routingPath());
-        assertFalse(response.results().isEmpty());
+        assertFalse(response.subsets().isEmpty());
+        assertFalse(response.subsets().get(0).results().isEmpty());
     }
 
     @Test
@@ -83,9 +82,9 @@ class SearchEvidenceServiceTest {
 
         SearchQueryResponseDto response = searchEvidenceService.search("aulas de computacion 2024", true, UUID.randomUUID(), "CC", scope);
 
-        assertEquals("LLM", response.routingPath());
-        assertEquals("buscar_evidencias_por_parametros", response.toolUsed());
-        assertFalse(response.results().isEmpty());
+        assertEquals("LLM_MULTIPATH", response.routingPath());
+        assertFalse(response.subsets().isEmpty());
+        assertFalse(response.subsets().get(0).results().isEmpty());
     }
 
     @Test
@@ -99,7 +98,7 @@ class SearchEvidenceServiceTest {
         SearchQueryResponseDto response = searchEvidenceService.search("clima en paris", true, UUID.randomUUID(), "TD", Collections.emptyList());
 
         assertEquals("REFUSAL", response.routingPath());
-        assertTrue(response.results().isEmpty());
+        assertTrue(response.subsets().isEmpty());
         assertNotNull(response.message());
     }
 

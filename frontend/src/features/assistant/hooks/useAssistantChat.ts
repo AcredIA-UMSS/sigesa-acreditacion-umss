@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  useAssistantStatus,
-  useSendChatMessage,
-} from '../../../api/endpoints/assistant-controller/assistant-controller';
+  useGetStatus1,
+  useChat,
+} from '../../../api/endpoints/assistant/assistant';
 import type {
+  AssistantDemoScenario,
   AssistantMessageMetadata,
+  AssistantResolutionPath,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
 import { mapAssistantError } from './mapAssistantError';
@@ -28,8 +30,8 @@ export function useAssistantChat() {
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const statusQuery = useAssistantStatus();
-  const chatMutation = useSendChatMessage();
+  const statusQuery = useGetStatus1();
+  const chatMutation = useChat();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,16 +52,18 @@ export function useAssistantChat() {
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
-        message: messageToSend,
-        history,
+        data: {
+          message: messageToSend,
+          history,
+        }
       });
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
+        createMessage('assistant', response.data.reply ?? '', {
+          toolId: response.data.toolId ?? null,
+          sourceTables: response.data.sourceTables ?? [],
+          path: (response.data.path ?? 'LLM') as AssistantResolutionPath,
+          llmInvoked: response.data.llmInvoked ?? false,
         }),
       ]);
     } catch {
@@ -82,14 +86,14 @@ export function useAssistantChat() {
     sendMessage,
     clearConversation,
     messagesEndRef,
-    model: statusQuery.data?.model ?? '—',
-    llmEnabled: statusQuery.data?.llmEnabled ?? false,
-    capabilities: statusQuery.data?.capabilities ?? [],
-    demoScenarios: statusQuery.data?.demoScenarios ?? [],
-    isAssistantEnabled: statusQuery.data?.enabled === true,
+    model: statusQuery.data?.data?.model ?? '—',
+    llmEnabled: statusQuery.data?.data?.llmEnabled ?? false,
+    capabilities: statusQuery.data?.data?.capabilities ?? [],
+    demoScenarios: (statusQuery.data?.data?.demoScenarios ?? []) as AssistantDemoScenario[],
+    isAssistantEnabled: statusQuery.data?.data?.enabled === true,
     isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
     isSending: chatMutation.isPending,
-    errorMessage: mapAssistantError(chatMutation.error),
+    errorMessage: mapAssistantError(chatMutation.error as Error | null),
   };
 }

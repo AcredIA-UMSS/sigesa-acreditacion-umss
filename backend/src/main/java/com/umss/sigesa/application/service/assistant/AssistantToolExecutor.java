@@ -162,10 +162,13 @@ public class AssistantToolExecutor {
                     auth.role(),
                     auth.programScope()
             );
+            List<com.umss.sigesa.adapter.in.web.dto.EvidenceSearchDetailDto> allResults = searchResult.subsets().stream()
+                    .flatMap(s -> s.results().stream())
+                    .toList();
 
             Map<String, Object> data = new LinkedHashMap<>();
-            data.put("evidences", searchResult.results());
-            data.put("total", searchResult.results().size());
+            data.put("evidences", allResults);
+            data.put("total", allResults.size());
             return ToolExecutionResult.success(data);
         } catch (Exception ex) {
             return ToolExecutionResult.failure("SEARCH_FAILED", "Falla al ejecutar búsqueda: " + ex.getMessage());

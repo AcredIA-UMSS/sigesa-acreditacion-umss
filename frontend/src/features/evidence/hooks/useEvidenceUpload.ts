@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useUpload } from '../../../api/endpoints/evidence-controller/evidence-controller';
+import { useUpload } from '../../../api/endpoints/evidence/evidence';
 import type { UploadEvidenceResponse } from '../../../api/model';
 import { mapUploadError } from './mapUploadError';
 
@@ -74,7 +74,7 @@ export function useEvidenceUpload() {
   const mutation = useUpload({
     mutation: {
       onSuccess: (response) => {
-        if (response.status === 200) {
+        if (response.status === 201) {
           setResult(response.data);
         }
         setProgress(100);
@@ -111,11 +111,11 @@ export function useEvidenceUpload() {
     setValidationErrors({});
     mutation.mutate({
       indicatorId: form.indicatorId.trim(),
-      params: {
+      data: {
+        file: form.file,
         criterionId: form.criterionId.trim(),
         description: form.description.trim(),
       },
-      data: { file: form.file },
     });
   }, [form, mutation]);
 
@@ -142,7 +142,7 @@ export function useEvidenceUpload() {
     result,
     validationErrors,
     errorMessage: mapUploadError(
-      mutation.error instanceof Error ? mutation.error : null,
+      (mutation.error as any) instanceof Error ? (mutation.error as any) : null,
     ),
     isSubmitting: mutation.isPending,
   };
