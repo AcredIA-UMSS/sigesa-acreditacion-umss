@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
+import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
+import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
@@ -71,6 +74,12 @@ class AssistantToolExecutorTest {
     private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
     @Mock
     private com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase;
+    @Mock
+    private ListPendingEvidencesUseCase listPendingEvidencesUseCase;
+    @Mock
+    private GetEvidenceDetailUseCase getEvidenceDetailUseCase;
+    @Mock
+    private CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
 
     private AssistantToolExecutor executor;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -96,6 +105,9 @@ class AssistantToolExecutorTest {
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
                 searchEvidenceUseCase,
+                listPendingEvidencesUseCase,
+                getEvidenceDetailUseCase,
+                checkEvidenceCompletenessUseCase,
                 objectMapper
         );
     }

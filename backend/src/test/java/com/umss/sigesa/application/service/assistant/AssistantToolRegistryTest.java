@@ -26,12 +26,15 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.MANAGE_USER_STATUS_ID,
                 AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID
+                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
         );
     }
 
     @Test
-    void toolsForRole_tdIncludesPhaseToolsOnly() {
+    void toolsForRole_tdIncludesPhaseAndEvidenceTools() {
         var tools = registry.toolsForRole("TD");
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
@@ -41,7 +44,10 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID
+                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
         );
     }
 
@@ -71,11 +77,25 @@ class AssistantToolRegistryTest {
     }
 
     @Test
-    void toolsForRole_ccReturnsReadOnlyPhaseTools() {
+    void toolsForRoleAndAgent_evidenceProfile_filtersToEvidenceTools() {
+        var tools = registry.toolsForRoleAndAgent("TD", AssistantAgentProfile.EVIDENCE);
+
+        assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+        );
+    }
+
+    @Test
+    void toolsForRole_ccReturnsReadOnlyPhaseAndEvidenceTools() {
         assertThat(registry.toolsForRole("CC")).extracting(def -> def.id()).containsExactly(
                 AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID,
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
-                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
         );
     }
 }

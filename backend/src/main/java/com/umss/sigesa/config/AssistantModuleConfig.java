@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
@@ -55,7 +58,10 @@ public class AssistantModuleConfig {
                                                 UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
                                                 DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
                                                 ReorderProcessStructureUseCase reorderProcessStructureUseCase,
-                                                com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase) {
+                                                com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase,
+                                                ListPendingEvidencesUseCase listPendingEvidencesUseCase,
+                                                GetEvidenceDetailUseCase getEvidenceDetailUseCase,
+                                                CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase) {
         return new AssistantToolExecutor(
                 assistantToolRegistry,
                 listUsersUseCase,
@@ -75,6 +81,9 @@ public class AssistantModuleConfig {
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
                 searchEvidenceUseCase,
+                listPendingEvidencesUseCase,
+                getEvidenceDetailUseCase,
+                checkEvidenceCompletenessUseCase,
                 new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
         );
     }

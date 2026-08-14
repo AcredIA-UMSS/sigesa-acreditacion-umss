@@ -54,6 +54,7 @@ Permitir al **[CC]** cargar la **Evidencia v1** de un Indicador en estado `PENDI
 ### Inbound
 
 * `UploadEvidenceUseCase`
+* `ListUploadableIndicatorsUseCase` — indicadores `PENDIENTE`/`OBSERVADO` en `programScope` del [CC]
 
 ### Outbound
 
@@ -65,6 +66,7 @@ Permitir al **[CC]** cargar la **Evidencia v1** de un Indicador en estado `PENDI
 * `NotificationOutboxPort` — `EvidenceUploaded` (stub UC-015)
 * `AuditLogPort` — log carga
 * `UserProgramAssignmentRepositoryPort` — alcance [CC]
+* `EvidenceControlQueryPort` — `listUploadableByProgramIds` (etiquetas + estado vigente)
 
 ---
 
@@ -72,7 +74,12 @@ Permitir al **[CC]** cargar la **Evidencia v1** de un Indicador en estado `PENDI
 
 | Método | Ruta | Rol | Respuesta |
 |--------|------|-----|-----------|
+| GET | `/api/v1/indicators/uploadable` | CC | **200** JSON array |
 | POST | `/api/v1/indicators/{indicatorId}/evidences` | CC | **201** JSON |
+
+**GET uploadable body item:** `{ indicatorId, code, title, criterionId, criterionCode, criterionTitle, currentState }`
+
+**UI:** select de Indicador (`code — title (estado)`); Criterio solo lectura al elegir indicador (1:1).
 
 **Content-Type:** `multipart/form-data`
 
@@ -103,16 +110,19 @@ Permitir al **[CC]** cargar la **Evidencia v1** de un Indicador en estado `PENDI
 
 | Tabla | Notas |
 |-------|-------|
-| `indicator` | `id`, `program_id`, `criterion_id`, `phase_id` |
+| `indicator` | `id`, `program_id`, `criterion_id`, `phase_id`, `code`, `title`, `criterion_code`, `criterion_title` |
 | `indicator_state_history` | append-only |
 | `evidence` | cabecera |
 | `evidence_version` | v1, SHA-256, storage_key |
 
 Blobs: `sigesa.evidence.storage-path` (default `./data/evidences`).
 
+Seed demo (`EvidenceDataLoader`): 3 indicadores `PENDIENTE` de Inf. Sistemas con etiquetas IND-01…03 / CRIT-01…03.
+
 ---
 
 ## 7. Plan de pruebas
 
 * Unit: `UploadEvidenceService` (mock ports)
+* Unit: `ListUploadableIndicatorsService` (scope vacío / filtra PENDIENTE\|OBSERVADO)
 * Gherkin FSD-UC-004: carga OK, sin clasificación, scope denegado

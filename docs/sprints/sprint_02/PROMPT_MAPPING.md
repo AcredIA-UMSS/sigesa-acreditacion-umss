@@ -19,12 +19,13 @@
 | PM-010 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Full-Stack UC-023: asignación responsable [CC] + UI detalle/listado |
 | PM-011 | PR-IMPL-024 | DD-AGENT-001 | FSD-UC-022 / PRD-REQ-028 | Copiloto fases embebido (`agent=phases`): CC lectura, tools subfases, UI responsive, PR #28 |
 | PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
-| PM-013 | PR-IMPL-007 | DD-UC-007 | FSD-UC-007 | Buscar Evidencia Inteligente (MOD-EVIDENCE): enrutador híbrido de consultas (4 escenarios), aislamiento por carrera (FSD-BR-09), y vista frontend con toggle de IA. |
-| PM-014 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
-| PM-015 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
-| PM-016 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
-| PM-017 | PR-IMPL-007-MCP | DD-UC-007-MCP | FSD-UC-007 | Implementación de Búsqueda Inteligente Multi-Token y Contextualizada con servidor MCP embebido en Java. |
+| PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
+| PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 
+| PM-016 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
+| PM-017 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
+| PM-018 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
+| PM-019 | PR-IMPL-007-MCP | DD-UC-007-MCP | FSD-UC-007 | Implementación de Búsqueda Inteligente Multi-Token y Contextualizada con servidor MCP embebido en Java. |
 ## PM-001
 
 | Campo | Valor |
@@ -906,11 +907,6 @@ Copiloto de fases operativo en `/procesos/{id}` y `/procesos/{id}/estructura`. C
 | Campo | Valor |
 |---|---|
 | **ID** | PM-012 |
-## PM-012
-
-| Campo | Valor |
-|---|---|
-| **ID** | PM-012 |
 | **Fecha** | 2026-08-11 |
 | **Hora** | 22:45 |
 | **Solicitante** | Cursor Agent |
@@ -984,6 +980,113 @@ Copiloto `agent=users` implementado de punta a punta (docs + backend + frontend)
 | Campo | Valor |
 |---|---|
 | **ID** | PM-013 |
+| **Fecha** | 2026-08-12 |
+| **Hora** | 23:45 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Implementar agente + MCP de control documental FSD-UC-024 / DD-AGENT-003 |
+| **Objetivo** | Perfil `agent=evidence`, tools de lectura, UI EvidenceCopilotPanel, servidor MCP espejo |
+| **Contexto** | Plan fase 1 solo lectura; patrón DD-AGENT-001/002; UC-008/009 fuera de alcance |
+| **PR-IMPL vinculado** | PR-IMPL-026 |
+| **DD vinculado** | DD-AGENT-003 |
+| **FSD / PRD vinculado** | FSD-UC-024 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+implementar el plan para crear agente +MCP de la documentacion FSD-UC-024 + DD-AGENT-003
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-024.md`
+- `docs/design/assistant/DD-AGENT-003.md`
+- `docs/prompts/impl/PR-IMPL-026.md`
+- `docs/design/assistant/TOOL-CATALOG.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/product/uc/FSD-UC-024.md` |
+| generado | `docs/design/assistant/DD-AGENT-003.md` |
+| generado | `docs/prompts/impl/PR-IMPL-026.md` |
+| generado | `mcp/sigesa-evidence/**` |
+| generado | `frontend/src/features/evidence/components/EvidenceCopilotPanel.tsx` |
+| generado | `frontend/src/features/evidence/hooks/useEvidenceCopilot.ts` |
+| generado | backend evidence control query/use cases/adapter |
+| modificado | Assistant profile/registry/executor/keyword/controller |
+| modificado | `EvidenceUploadPage.tsx`, `assistantTypes.ts`, `TOOL-CATALOG.md`, `DTP.md`, `FSD.md` |
+
+### Validación ejecutada
+
+- [x] Backend compile + tests assistant
+- [x] `pnpm install` en `mcp/sigesa-evidence`
+- [ ] Smoke E2E chat `agent=evidence` — pendiente entorno local
+
+### Resultado obtenido
+
+Agente `evidence` operativo en backend/FE; MCP stdio en `mcp/sigesa-evidence/README.md`.
+
+
+---
+
+## PM-014
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-014 |
+| **Fecha** | 2026-08-13 |
+| **Hora** | 12:26 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Selectores Indicador / Criterio en Cargar Evidencia |
+| **Objetivo** | Reemplazar inputs UUID por selects legibles; GET uploadable filtra PENDIENTE/OBSERVADO por carrera del [CC]; criterio 1:1 al elegir indicador |
+| **Contexto** | Plan selectores_indicador_criterio; FSD-UC-004 / DD-UC-004 |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD vinculado** | DD-UC-004 |
+| **FSD / PRD vinculado** | FSD-UC-004 / PRD-US-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escribir en indicador y creterio
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/.../entity/IndicatorEntity.java` |
+| modificado | `backend/.../config/EvidenceDataLoader.java` |
+| modificado | `backend/.../EvidenceControlQueryPort.java` |
+| modificado | `backend/.../EvidenceControlJpaAdapter.java` |
+| modificado | `backend/.../EvidenceModuleConfig.java` |
+| modificado | `backend/.../security/SecurityConfig.java` |
+| generado | `UploadableIndicator.java`, `ListUploadableIndicatorsUseCase.java`, `ListUploadableIndicatorsService.java` |
+| generado | `UploadableIndicatorController.java`, `UploadableIndicatorResponse.java` |
+| generado | `ListUploadableIndicatorsServiceTest.java` |
+| generado | `frontend/.../api/fetchUploadableIndicators.ts` |
+| generado | `frontend/.../hooks/useUploadableIndicators.ts` |
+| modificado | `frontend/.../hooks/useEvidenceUpload.ts` |
+| modificado | `frontend/.../components/EvidenceUploadUI.tsx` |
+| modificado | `frontend/.../EvidenceUploadPage.tsx` |
+| modificado | `docs/product/uc/FSD-UC-004.md`, `docs/design/DD-UC-004.md` |
+
+### Resultado obtenido
+
+[CC] elige indicador por etiqueta (`code — title`); criterio se fija automáticamente; API `GET /api/v1/indicators/uploadable` + seeds IND-01…03 PENDIENTE.
+
+
+## PM-015
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-015 |
 | **Fecha** | 2026-08-08 |
 | **Hora** | 15:40 |
 | **Solicitante** | Tech Lead / User |
@@ -1048,11 +1151,11 @@ Asegúrate de:
 
 ---
 
-## PM-014
+## PM-016
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-014 |
+| **ID** | PM-016 |
 | **Fecha** | 2026-08-09 |
 | **Solicitante** | Tech Lead / User |
 | **Agente/Entorno** | Antigravity AI |
@@ -1095,11 +1198,11 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 ---
 
-## PM-015
+## PM-017
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-015 |
+| **ID** | PM-017 |
 | **Fecha** | 2026-08-11 |
 | **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
 | **Agente/Entorno** | Antigravity AI Coding Assistant |
@@ -1140,11 +1243,11 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 ---
 
-## PM-016
+## PM-018
 
 | Campo | Valor |
 | --- | --- |
-| **ID** | PM-016 |
+| **ID** | PM-018 |
 | **Fecha** | 2026-08-12 |
 | **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
 | **Agente/Entorno** | Antigravity AI Coding Assistant |
@@ -1204,11 +1307,11 @@ the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the syst
 
 ---
 
-## PM-017
+## PM-019
 
 | Campo | Valor |
 |---|---|
-| **ID** | PM-017 |
+| **ID** | PM-019 |
 | **Fecha** | 2026-08-13 |
 | **Hora** | 17:58 |
 | **Solicitante** | Tech Lead / Alex |

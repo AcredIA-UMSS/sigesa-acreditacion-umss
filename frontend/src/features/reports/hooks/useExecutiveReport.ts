@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   download,
   useGenerate,
@@ -8,7 +8,9 @@ import type {
   GenerateExecutiveReportRequest,
   ReportJobStatusResponse,
 } from '../../../api/model';
+import { buildReportPreview } from '../lib/reportPreview';
 import { mapReportError } from './mapReportError';
+
 
 export type ExecutiveReportFormState = {
   facultyId: string;
@@ -85,6 +87,7 @@ export function useExecutiveReport() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [completedAt, setCompletedAt] = useState<Date | null>(null);
   const [validationErrors, setValidationErrors] =
     useState<ExecutiveReportValidationErrors>({});
 
@@ -92,6 +95,7 @@ export function useExecutiveReport() {
     mutation: {
       onSuccess: (response) => {
         setActiveJobId(response.data.jobId ?? null);
+        setCompletedAt(null);
         setValidationErrors({});
         setDownloadError(null);
       },
@@ -113,6 +117,12 @@ export function useExecutiveReport() {
 
   const jobStatus: ReportJobStatusResponse | undefined =
     statusQuery.data?.status === 200 ? statusQuery.data.data : undefined;
+
+  useEffect(() => {
+    if (jobStatus?.status === 'COMPLETED' && completedAt === null) {
+      setCompletedAt(new Date());
+    }
+  }, [jobStatus?.status, completedAt]);
 
   const updateField = useCallback(
     <K extends ExecutiveReportField>(
@@ -162,6 +172,7 @@ export function useExecutiveReport() {
     setForm(defaultForm);
     setActiveJobId(null);
     setDownloadError(null);
+    setCompletedAt(null);
     setValidationErrors({});
     generateMutation.reset();
   }, [generateMutation]);
@@ -178,6 +189,15 @@ export function useExecutiveReport() {
     statusQuery.error instanceof Error ? statusQuery.error.message : null,
   );
 
+  const preview = useMemo(
+    () =>
+      buildReportPreview(form, {
+        generatedAt:
+          jobStatus?.status === 'COMPLETED' ? (completedAt ?? new Date()) : null,
+      }),
+    [form, jobStatus?.status, completedAt],
+  );
+
   return {
     form,
     updateField,
@@ -190,6 +210,7 @@ export function useExecutiveReport() {
     downloadErrorMessage: downloadError,
     jobStatus,
     activeJobId,
+    preview,
     isSubmitting: generateMutation.isPending,
     isDownloading,
     isPolling,

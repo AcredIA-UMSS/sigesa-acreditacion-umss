@@ -53,12 +53,28 @@ public record AssistantChatContext(
                 programId);
     }
 
+    public static AssistantChatContext evidence(UUID programId) {
+        return new AssistantChatContext(
+                AssistantAgentProfile.EVIDENCE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                programId);
+    }
+
     public boolean isPhasesAgent() {
         return agentProfile == AssistantAgentProfile.PHASES;
     }
 
     public boolean isUsersAgent() {
         return agentProfile == AssistantAgentProfile.USERS;
+    }
+
+    public boolean isEvidenceAgent() {
+        return agentProfile == AssistantAgentProfile.EVIDENCE;
     }
 
     public boolean hasProcessBinding() {

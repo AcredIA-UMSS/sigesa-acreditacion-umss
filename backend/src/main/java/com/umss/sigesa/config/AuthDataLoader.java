@@ -38,6 +38,14 @@ public class AuthDataLoader implements ApplicationRunner {
     public static final String SEED_PENDING_PASSWORD = "PendienteDemo2026!";
     public static final String SEED_EE_PASSWORD = "EvalDemo2026!";
 
+    /** IDs estables: evitan JWT huérfanos tras reinicio DevTools/H2 create-drop. */
+    public static final UUID SEED_JD_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000001");
+    public static final UUID SEED_TD_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000002");
+    public static final UUID SEED_CC_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000003");
+    public static final UUID SEED_CC2_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000004");
+    public static final UUID SEED_PENDING_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000005");
+    public static final UUID SEED_EE_USER_ID = UUID.fromString("a0000000-0000-4000-8000-000000000006");
+
     /** @deprecated Usar {@link DevSeedData#PROGRAM_INF_SIS}. */
     @Deprecated
     public static final UUID SEED_PROGRAM_ID = DevSeedData.PROGRAM_INF_SIS;
@@ -56,22 +64,26 @@ public class AuthDataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        seedUser(SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, UserStatus.ACTIVE, null);
-        seedUser(SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, null);
-        seedUser(SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
-        seedUser(SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_ING_CIVIL);
-        seedUser(SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_MEDICINA);
-        seedUser(SEED_EE_EMAIL, SEED_EE_PASSWORD, Role.EE, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
+        seedUser(SEED_JD_USER_ID, SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, UserStatus.ACTIVE, null);
+        seedUser(SEED_TD_USER_ID, SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, null);
+        seedUser(SEED_CC_USER_ID, SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
+        seedUser(SEED_CC2_USER_ID, SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_ING_CIVIL);
+        seedUser(SEED_PENDING_USER_ID, SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_MEDICINA);
+        seedUser(SEED_EE_USER_ID, SEED_EE_EMAIL, SEED_EE_PASSWORD, Role.EE, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
     }
 
-    private void seedUser(String email, String password, Role role, UserStatus status, UUID programId) {
+    private void seedUser(UUID stableUserId, String email, String password, Role role, UserStatus status, UUID programId) {
         LocalDateTime now = LocalDateTime.now();
         AppUserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             AppUserEntity newUser = new AppUserEntity();
-            newUser.setId(UUID.randomUUID());
+            newUser.setId(stableUserId);
             newUser.setCreatedAt(now);
             return newUser;
         });
+        // Mantener id estable aunque el registro exista con otro UUID de un seed previo.
+        if (user.getId() == null) {
+            user.setId(stableUserId);
+        }
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setRole(role);

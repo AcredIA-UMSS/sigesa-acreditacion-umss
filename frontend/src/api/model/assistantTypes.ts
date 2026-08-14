@@ -7,7 +7,7 @@ export interface ChatMessageDto {
   content: string;
 }
 
-export type AssistantAgentId = 'general' | 'phases' | 'users';
+export type AssistantAgentId = 'general' | 'phases' | 'users' | 'evidence';
 
 export interface AssistantChatContextDto {
   agent: AssistantAgentId;

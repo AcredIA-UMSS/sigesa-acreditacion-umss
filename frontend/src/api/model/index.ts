@@ -64,6 +64,7 @@ export * from './templateSubphaseResponseDto.ts';
 export * from './templateSummaryResponseDto.ts';
 export * from './updatePhaseRequestDto.ts';
 export * from './updateSubphaseRequestDto.ts';
+export * from './uploadBody.ts';
 export * from './uploadEvidenceMultipartRequest.ts';
 export * from './uploadEvidenceResponse.ts';
 export * from './upsertTemplateRequestDto.ts';
