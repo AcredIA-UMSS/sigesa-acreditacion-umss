@@ -1,12 +1,16 @@
 package com.umss.sigesa.application.service.assistant;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
 final class AssistantResponseFormatter {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     private AssistantResponseFormatter() {
     }
@@ -61,6 +65,13 @@ final class AssistantResponseFormatter {
         }
         if (data.containsKey("users")) {
             return formatUsers(data);
+        }
+        if (data.containsKey("evidences")) {
+            try {
+                return OBJECT_MAPPER.writeValueAsString(data.get("evidences"));
+            } catch (Exception ex) {
+                return "[]";
+            }
         }
         if (data.containsKey("email") && data.containsKey("role") && data.containsKey("status")
                 && data.containsKey("userId")) {

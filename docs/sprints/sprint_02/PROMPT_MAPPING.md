@@ -22,6 +22,10 @@
 | PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 
+| PM-016 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
+| PM-017 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
+| PM-018 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
+| PM-019 | PR-IMPL-007-MCP | DD-UC-007-MCP | FSD-UC-007 | Implementación de Búsqueda Inteligente Multi-Token y Contextualizada con servidor MCP embebido en Java. |
 ## PM-001
 
 | Campo | Valor |
@@ -1076,3 +1080,303 @@ Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escri
 ### Resultado obtenido
 
 [CC] elige indicador por etiqueta (`code — title`); criterio se fija automáticamente; API `GET /api/v1/indicators/uploadable` + seeds IND-01…03 PENDIENTE.
+
+
+## PM-015
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-015 |
+| **Fecha** | 2026-08-08 |
+| **Hora** | 15:40 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Buscar Evidencia Inteligente |
+| **Objetivo** | Implementar búsqueda inteligente de evidencias de punta a punta con enrutamiento híbrido de consultas e integración frontend. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Aislamiento por carrera FSD-BR-09. |
+| **PR-IMPL vinculado** | [PR-IMPL-007](../../prompts/impl/PR-IMPL-007.md) |
+| **DD-UC vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **FSD-UC vinculado** | [FSD-UC-007.md](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Por favor implementa el caso de uso FSD-UC-007 de punta a punta siguiendo rigurosamente el documento de diseño docs/design/DD-UC-007.md.
+Asegúrate de:
+1. Crear el contrato de prompt en docs/prompts/impl/PR-IMPL-007.md.
+2. Implementar el backend (puertos, adaptadores, servicios, y el controlador REST expuesto que reciba el header X-AI-Enabled).
+3. Implementar el control de acceso acotado por carrera (FSD-BR-09).
+4. Ejecutar la regeneración de clientes con Orval en el frontend.
+5. Crear las vistas/componentes del frontend consumiendo los hooks autogenerados.
+6. Correr el code review y registrar la trazabilidad con @dtp-sync y @save-prompt-mapping.
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-007.md`
+- `docs/design/DD-UC-007.md`
+- `docs/prompts/impl/PR-IMPL-007.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/EvidenceSearchDetailDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/SearchEvidenceUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/SearchEvidenceQueryPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/AssistantQueryPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/SearchAssistantAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/EvidenceModuleConfig.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| generado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/components/layout/Sidebar.tsx` |
+
+### Cambios realizados
+
+- **Backend hexagonal:** Implementación completa de la búsqueda de evidencias por título y descripción filtrada por carrera (CC) o acceso global (TD/JD).
+- **Asistente inteligente:** Adaptador OpenWebUI integrado con la herramienta `buscar_evidencias_por_parametros` y system prompt de enrutamiento. Fallback elegante y seguro.
+- **Frontend React:** Creación de la pantalla de búsqueda con soporte de toggle de IA (header `X-AI-Enabled`), visualización de metadatos de enrutamiento y tabla de resultados.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+
+---
+
+## PM-016
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-016 |
+| **Fecha** | 2026-08-09 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Antigravity AI |
+| **Modelo** | Gemini |
+| **Tarea** | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007) |
+| **Objetivo** | Corregir JPQL, mejorar contraste de consola debug, robustecer roles (bypass TD), habilitar carga inicial y paginación. |
+| **PR-IMPL vinculado** | N/A (Hotfix) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | FSD-UC-007 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the system, but not has the same filter as the CC use... same error, this coudl be due to the seed applied pls check it for some reason its not returing those records, in addition pls include a test case to validate this case as well
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| modificado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `db/seed_evidences.sql` |
+
+### Cambios realizados
+
+- **Corección de Base de Datos (seed_evidences.sql):** Se agregaron los programas de CEUB y ARCU-SUR al catálogo de programas de la base de datos de pruebas, permitiendo que la consulta JPQL con INNER JOIN no descarte los registros correspondientes.
+- **Robustez de Extracción de Roles:** Se modificó la extracción del rol del usuario autenticado en el controlador de backend para manejar de manera tolerante tanto los roles con prefijo `ROLE_` como sin él, evitando fallbacks indeseados al rol restrictivo de Coordinador (CC) en el caso del Técnico DUEA (TD).
+- **Carga inicial y Paginación:** Se habilitó el listado completo de evidencias en consultas vacías y se añadió paginación del lado del cliente (5 elementos por página) con controles de navegación.
+- **Tests unitarios e Integración:** Se escribió un nuevo caso de prueba en `SearchEvidenceServiceTest.java` que valida explícitamente el aislamiento de carrera para CC y el bypass para TD.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+
+---
+
+## PM-017
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-017 |
+| **Fecha** | 2026-08-11 |
+| **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Antigravity AI Coding Assistant |
+| **Modelo** | Gemini 2.0 |
+| **Tarea** | Refinamiento de Búsqueda de Evidencias en Chatbot |
+| **Objetivo** | Integrar búsqueda interactiva de evidencias dentro del asistente de ayuda. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Implementación de comando `/buscar <query>` y `/search <query>` para evitar enrutamientos LLM ambiguos. Mapeo de tarjetas de evidencias y modal interactivo de detalles. |
+| **PR-IMPL vinculado** | N/A (Refinamiento y alineación interactiva) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | [FSD-UC-007](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Archivos modificados/creados
+
+- **Creado:** N/A
+- **Modificado:**
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolRegistry.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutor.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantKeywordRouter.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantResponseFormatter.java`
+  - `backend/src/main/java/com/umss/sigesa/config/AssistantModuleConfig.java`
+  - `frontend/src/features/assistant/components/AssistantChatUI.tsx`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantToolRegistryTest.java`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutorTest.java`
+  - `backend/src/test/java/com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java`
+
+### Cambios realizados
+
+- **Backend Tool & Routing:** Se creó la tool `buscar_evidencias` que invoca dinámicamente al caso de uso de búsqueda híbrida. Se implementó enrutamiento directo por palabras clave cuando el usuario usa el comando `/buscar <query>` o `/search <query>`.
+- **Formateador de Respuestas:** El backend serializa la lista de evidencias en formato JSON cuando la tool es ejecutada.
+- **Frontend Interactivo:** Se actualizó `AssistantChatUI.tsx` para interceptar la tool `buscar_evidencias`, parsear el JSON de la respuesta y renderizar tarjetas de evidencias inline con botones para ver el detalle en un modal premium interactivo.
+- **Calidad de Código (Oxlint):** Se solucionó la advertencia de catch param no utilizado para garantizar compatibilidad con oxlint.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
+- [x] `pnpm run build` — resultado: OK (cero warnings, cero errores de TypeScript o OxLint)
+
+---
+
+## PM-018
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-018 |
+| **Fecha** | 2026-08-12 |
+| **Solicitante** | Tech Lead / Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Antigravity AI Coding Assistant |
+| **Modelo** | Gemini 3.5 Flash |
+| **Tarea** | Refinamiento de Consola de Depuración, Fallback Inteligente y Descarga de Evidencias en Chatbot |
+| **Objetivo** | Implementar la entrega dinámica de la traza de LLM del backend al frontend, solucionar simulación estática, agregar comandos de prefijo al chatbot y habilitar la descarga segura/autenticada de evidencias en los popups. |
+| **Contexto** | FSD-UC-007 / DD-UC-007. Reporte de fallas, descarga segura de archivos con aislamiento por carrera y comandos de prefijo chatbot. |
+| **PR-IMPL vinculado** | N/A (Refinamiento e integración funcional) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **PRD / FSD vinculado** | [FSD-UC-007](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Archivos modificados/creados
+
+- **Creado:**
+  - `backend/src/main/java/com/umss/sigesa/application/port/in/DownloadEvidenceUseCase.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/evidence/DownloadEvidenceService.java`
+  - `backend/src/main/java/com/umss/sigesa/domain/exception/EvidenceNotFoundException.java`
+- **Modificado:**
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/SearchAssistantAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java`
+  - `backend/src/main/java/com/umss/sigesa/application/port/out/SearchEvidenceQueryPort.java`
+  - `backend/src/main/java/com/umss/sigesa/application/port/out/EvidenceBlobStoragePort.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/LocalFileEvidenceBlobStorageAdapter.java`
+  - `backend/src/main/java/com/umss/sigesa/config/EvidenceModuleConfig.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/EvidenceExceptionHandler.java`
+  - `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantKeywordRouter.java`
+  - `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/TemplateJpaEntity.java`
+  - `backend/src/main/java/com/umss/sigesa/config/AssistantModuleConfig.java`
+  - `frontend/src/api/model/searchQueryResponseDto.ts`
+  - `frontend/src/features/evidence/EvidenceSearchPage.tsx`
+  - `frontend/src/features/assistant/components/AssistantChatUI.tsx`
+  - `frontend/src/features/assistant/hooks/useAssistantChat.ts`
+
+### Cambios realizados
+
+- **Backend (Trazabilidad y Fallback):** Campo `llmThought` añadido a `SearchQueryResponseDto` y rellenado dinámicamente con logs de error o razonamientos reales en el servicio y adaptador.
+- **Frontend (Trazabilidad Real):** Corrección de falsas simulaciones en la interfaz de depuración al detectar el Escenario 4 (Fallback) ante errores de conexión a la IA.
+- **Chatbot Prefijos:** Añadido soporte para los prefijos `/search-evidence`, `/search-evidences`, `/buscar-evidencia` y `/buscar-evidencias` en el router de comandos directos del chatbot (`AssistantKeywordRouter.java`).
+- **Descarga Segura:** Definido el caso de uso `DownloadEvidenceUseCase` y su servicio de descarga que lee bytes de storage con `EvidenceBlobStoragePort` aplicando reglas de aislamiento por carrera mediante `SearchEvidenceQueryPort.findVersionById`.
+- **Controlador REST:** Exposición del endpoint `GET /api/v1/evidences/{versionId}/download` con extracción automática de rol y scopes de carrera.
+- **Frontend (Popup Descarga):** Agregada la función `handleDownloadEvidence` y el botón premium "Descargar Archivo" en el modal de detalles de la evidencia que se abre desde el chatbot de ayuda.
+- **Corrección de Contenedor Dev (Error SQL):** Se añadieron los atributos `columnDefinition` en `@Column` para los nuevos campos de `TemplateJpaEntity.java` asignándoles valores por defecto (`DEFAULT 'PUBLISHED'` y `DEFAULT now()`). Esto soluciona la excepción `PSQLException` en desarrollo cuando Hibernate (`ddl-auto: update`) intenta alterar la tabla `templates` pre-existente violando la restricción de nulos.
+- **Resaltado de Comandos en Chat (Badges):** Se añadió soporte interactivo de chips/badges en el input del chatbot. Si el usuario escribe un comando válido (como `/search-evidences `) al inicio del texto, este se aísla visualmente como un bloque bloqueado e inalterable. Para eliminarlo, el usuario puede presionar `Backspace` sobre la caja vacía o hacer clic en el botón 'X' del chip. Al enviar el mensaje, el backend recibe de forma transparente el comando concatenado al texto.
+- **Corrección de Serialización (Jackson `JavaTimeModule`):** Se registraron instancias de `JavaTimeModule` en los `ObjectMapper` configurados en `AssistantModuleConfig.java`. Esto corrige el fallo `"No se pudo serializar el resultado de la tool."` que ocurría al procesar registros de tipo `LocalDateTime` devueltos por la herramienta `buscar_evidencias`.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (181 pruebas pasadas exitosamente con 0 fallos)
+- [x] `./mvnw compile` — resultado: BUILD SUCCESS (código compilado con éxito)
+- [x] `npx tsc --noEmit` — resultado: OK (frontend compila con cero errores de tipos)
+- [x] `docker compose logs backend` — resultado: Container sigesa-backend se levanta establemente escuchando en 8080 sin crasheos.
+- [x] `docker compose build backend && docker compose up -d backend` — resultado: Contenedor backend reconstruido y reiniciado exitosamente aplicando el módulo de Jackson.
+
+---
+
+## PM-019
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-019 |
+| **Fecha** | 2026-08-13 |
+| **Hora** | 17:58 |
+| **Solicitante** | Tech Lead / Alex |
+| **Agente/Entorno** | Google Deepmind Antigravity Agent |
+| **Modelo** | Gemini 3.5 Pro |
+| **Tarea** | Implementación Búsqueda Inteligente Multi-Token (MCP) |
+| **Objetivo** | Implementar la descomposición de frases complejas de búsqueda (Multi-Token) mediante servidor MCP embebido en Java (Spring AI) y búsqueda por trigramas (`pg_trgm`) en Postgres con visualización agrupada por subsets en el frontend. |
+| **Contexto** | FSD-UC-007 / DD-UC-007-MCP. Contrato de prompt `PR-IMPL-007-MCP`. Aislamiento por carrera FSD-BR-09. |
+| **PR-IMPL vinculado** | [PR-IMPL-007-MCP](../../prompts/impl/PR-IMPL-007-MCP.md) |
+| **DD-UC vinculado** | [DD-UC-007-MCP](../../design/DD-UC-007-MCP.md) |
+| **FSD-UC vinculado** | [FSD-UC-007.md](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pls execute the propm contract PR-IMPL-007-MCP, let me know if you have any question
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-007.md`
+- `docs/design/DD-UC-007-MCP.md`
+- `docs/prompts/impl/PR-IMPL-007-MCP.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V8__mcp_trgm_search.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/mcp/AcademicContextMcpServer.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/mcp/dto/UserContextDto.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchSubsetDto.java` |
+| generado | `frontend/src/api/model/searchSubsetDto.ts` |
+| modificado | `db/seed.sql` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantToolExecutor.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidenceServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java` |
+| modificado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+| modificado | `frontend/src/features/evidence/hooks/useEvidenceUpload.ts` |
+| modificado | `frontend/src/features/assistant/hooks/useAssistantChat.ts` |
+| modificado | `frontend/src/features/processes/hooks/usePhasesCopilot.ts` |
+| modificado | `frontend/src/features/admin/users/hooks/useUsersCopilot.ts` |
+| modificado | `frontend/src/features/admin/users/components/UsersCopilotPanel.tsx` |
+| modificado | `frontend/src/features/accreditation-process/hooks/useProgramSearch.ts` |
+| modificado | `frontend/src/features/admin/users/hooks/useRegisterUserForm.ts` |
+| modificado | `frontend/src/features/processes/components/PhasesCopilotPanel.tsx` |
+| eliminado | `frontend/src/api/endpoints/evidence-controller` |
+| eliminado | `frontend/src/api/endpoints/assistant-controller` |
+| eliminado | `frontend/src/api/endpoints/program-catalog-controller` |
+
+- **Persistencia (Flyway V8 & Postgres Init Seed):** Migración SQL V8 para activar `pg_trgm` y crear índices GIN. Adicionalmente, se actualizaron el script de base de datos de PostgreSQL `db/seed.sql` para habilitar la extensión `pg_trgm`, crear índices trigram y poblar las tablas de programas, dimensiones y evidencias automáticamente al arrancar el contenedor PostgreSQL.
+- **Servidor MCP embebido:** Implementado `AcademicContextMcpServer` usando Spring AI para ofrecer herramientas al motor LLM, extrayendo dinámicamente y agrupando evidencias en subconjuntos (`subsets`).
+- **Aislamiento y Seguridad:** Validación del rol y de la carrera autorizada (`programScope`) en el servidor MCP para rechazar consultas de otras carreras si es Coordinador.
+- **Frontend React:** Adaptación de `EvidenceSearchPage` para iterar y mostrar resultados agrupados en bloques/pestañas de subconjuntos. Actualización de hooks Orval y saneamiento de importaciones obsoletas en copilotos del frontend para compilación libre de warnings.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — resultado: BUILD SUCCESS (184 pruebas exitosas en host local)
+- [x] `pnpm tsc -b` — resultado: exit code 0 (cero errores en compilación frontend)
+- [x] `pnpm run lint` — resultado: exit code 0 (cero warnings de oxlint introducidos)
+
+### Resultado obtenido
+
+Búsqueda inteligente multi-token mediante servidor MCP embebido y trigram search en Postgres integrada y validada con cero errores en backend y frontend.
+

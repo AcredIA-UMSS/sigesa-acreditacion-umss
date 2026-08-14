@@ -58,6 +58,7 @@ public class AssistantModuleConfig {
                                                 UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
                                                 DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
                                                 ReorderProcessStructureUseCase reorderProcessStructureUseCase,
+                                                com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase,
                                                 ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                                 GetEvidenceDetailUseCase getEvidenceDetailUseCase,
                                                 CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase) {
@@ -79,10 +80,11 @@ public class AssistantModuleConfig {
                 updateProcessSubphaseUseCase,
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
+                searchEvidenceUseCase,
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,
-                new ObjectMapper()
+                new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
         );
     }
 
@@ -108,7 +110,7 @@ public class AssistantModuleConfig {
                 assistantToolRegistry,
                 assistantToolExecutor,
                 assistantKeywordRouter,
-                new ObjectMapper(),
+                new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()),
                 assistantProperties.getSystemPrompt(),
                 assistantProperties.isLlmEnabled()
         );

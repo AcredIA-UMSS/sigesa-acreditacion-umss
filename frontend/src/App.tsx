@@ -10,6 +10,7 @@ import { CreateProcessPage } from './features/accreditation-process';
 import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
+import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
 
@@ -119,6 +120,15 @@ function App() {
               <CcOnlyRoute>
                 <EvidenceUploadPage />
               </CcOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/evidencias/buscar"
+          element={
+            <ProtectedRoute>
+              <EvidenceSearchPage />
             </ProtectedRoute>
           }
         />

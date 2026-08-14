@@ -73,6 +73,8 @@ class AssistantToolExecutorTest {
     @Mock
     private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
     @Mock
+    private com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase;
+    @Mock
     private ListPendingEvidencesUseCase listPendingEvidencesUseCase;
     @Mock
     private GetEvidenceDetailUseCase getEvidenceDetailUseCase;
@@ -102,6 +104,7 @@ class AssistantToolExecutorTest {
                 updateProcessSubphaseUseCase,
                 deleteProcessSubphaseUseCase,
                 reorderProcessStructureUseCase,
+                searchEvidenceUseCase,
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,

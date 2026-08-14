@@ -45,6 +45,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 13/08/2026 | **MOD-EVIDENCE MCP Multi-Token:** Búsqueda de evidencias multi-token mediante servidor MCP embebido en Java con Spring AI y `pg_trgm` en Postgres. Agrupación de resultados en subsets y refinamiento de interfaces frontend. | FSD-UC-007 / DD-UC-007-MCP | N/A | PR-IMPL-007-MCP / PM-017 | Antigravity Agent |
+| 08/08/2026 | **MOD-EVIDENCE search:** Búsqueda inteligente de evidencias de punta a punta con enrutamiento híbrido de consultas, control de acceso carrera (FSD-BR-09) y toggle frontend (header X-AI-Enabled). | FSD-UC-007 / DD-UC-007 | N/A | PR-IMPL-007 / PM-006 | Antigravity Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
 | 12/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** copiloto control documental (`agent=evidence`); tools `list_pending_evidences`, `get_evidence_detail`, `check_evidence_completeness`; PBAC JD/TD/CC (403 EE); UI `EvidenceCopilotPanel`; MCP `mcp/sigesa-evidence`. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-013 / PR-IMPL-026 | Cursor Agent |
@@ -120,6 +122,7 @@ artefactos_vivos:
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 | `FSD-UC-019` | `DD-UC-019` | **hecho** | `release/3.0.0` | `RegisterUserServiceTest` EE; manual E2E dashboard | `PR-IMPL-014` | Rol EE solo lectura; scope carrera; seed `ee@umss.edu.bo` |
+| `FSD-UC-007` | `DD-UC-007-MCP` | **hecho (MCP Multi-Token)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks; OxLint | `PR-IMPL-007-MCP` | Búsqueda inteligente de evidencias con servidor MCP y búsqueda multi-token agrupada |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -250,6 +253,20 @@ artefactos_vivos:
 | **Lock upload** | `InMemoryEvidenceUploadLockAdapter` (FSD-BR-18 anti-doble-envío) |
 | **Notificaciones** | `NoOpNotificationOutboxAdapter` → `EvidenceUploaded` (UC-015 stub) |
 | **Seed dev** | `cc@umss.edu.bo` / indicador `550e8400-…-440003` PENDIENTE |
+
+### B.4.1 Búsqueda Inteligente de Evidencias (FSD-UC-007)
+
+**Implementación:** Sprint 02 PM-013 + PM-017 · **Prompts:** `PR-IMPL-007`, `PR-IMPL-007-MCP` · **FSD:** FSD-UC-007 · **Diseño:** `DD-UC-007-MCP`
+
+| Área | Detalle vigente |
+|---|---|
+| **Endpoints** | `GET /api/v1/evidences/search` (consulta de evidencias); `GET /api/v1/evidences/{versionId}/download` (descarga autenticada) |
+| **Cabecera IA** | `X-AI-Enabled` (booleano en header) para activar enrutador híbrido de consultas |
+| **Enrutamiento** | `KEYWORD` (coincidencia directa/fallback) o `LLM_MULTIPATH` (MCP Multi-Token) |
+| **MCP Server** | `AcademicContextMcpServer` embebido en Java usando Spring AI y anotaciones `@Tool` |
+| **Búsqueda Trigram** | PostgreSQL `pg_trgm` con índices GIST en tablas de programas y dimensiones para resolver subconjuntos de frases complejas |
+| **RBAC** | `[CC]` limitado a su carrera (`user_program_assignment`); `[TD]` y `[JD]` con acceso global |
+| **Frontend** | Pantalla de búsqueda inteligente con toggle IA, consola JSON, y agrupador de subconjuntos por pestañas/bloques (`subsets`) |
 
 ### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
 

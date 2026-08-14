@@ -41,9 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers(HttpMethod.GET, "/api/v1/indicators/uploadable").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/indicators/{indicatorId}/evidences").hasRole("CC")
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/v1/dashboards/export-jobs",
-                                "/api/v1/dashboards/coordinator/export-jobs").hasAnyRole("CC", "TD", "JD")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/dashboards/export-jobs", "/api/v1/dashboards/coordinator/export-jobs").hasAnyRole("CC", "TD", "JD")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Perímetro JWT v1.0: todo /api/v1/** (excepto login) exige Bearer token.
                         .anyRequest().authenticated())

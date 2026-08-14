@@ -5,6 +5,10 @@ import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListUploadableIndicatorsUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
+import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
+import com.umss.sigesa.application.port.in.DownloadEvidenceUseCase;
+import com.umss.sigesa.application.port.out.AssistantQueryPort;
+import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
@@ -20,6 +24,8 @@ import com.umss.sigesa.application.service.evidence.GetEvidenceDetailService;
 import com.umss.sigesa.application.service.evidence.ListPendingEvidencesService;
 import com.umss.sigesa.application.service.evidence.ListUploadableIndicatorsService;
 import com.umss.sigesa.application.service.evidence.UploadEvidenceService;
+import com.umss.sigesa.application.service.evidence.SearchEvidenceService;
+import com.umss.sigesa.application.service.evidence.DownloadEvidenceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,6 +54,27 @@ public class EvidenceModuleConfig {
                 auditLogPort,
                 assignmentRepository
         );
+    }
+
+    @Bean
+    SearchEvidenceUseCase searchEvidenceUseCase(
+            SearchEvidenceQueryPort queryPort,
+            AssistantQueryPort assistantQueryPort,
+            AssistantProperties assistantProperties,
+            com.umss.sigesa.adapter.out.persistance.EvaluationDimensionJpaRepository dimensionRepository) {
+        return new SearchEvidenceService(
+                queryPort,
+                assistantQueryPort,
+                assistantProperties,
+                dimensionRepository
+        );
+    }
+
+    @Bean
+    DownloadEvidenceUseCase downloadEvidenceUseCase(
+            SearchEvidenceQueryPort queryPort,
+            EvidenceBlobStoragePort blobStorage) {
+        return new DownloadEvidenceService(queryPort, blobStorage);
     }
 
     @Bean

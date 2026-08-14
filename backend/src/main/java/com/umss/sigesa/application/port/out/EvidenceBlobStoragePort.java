@@ -7,4 +7,6 @@ public interface EvidenceBlobStoragePort {
     String store(UUID evidenceId, int version, byte[] content, String originalFilename);
 
     void delete(String storageKey);
+
+    byte[] retrieve(String storageKey);
 }

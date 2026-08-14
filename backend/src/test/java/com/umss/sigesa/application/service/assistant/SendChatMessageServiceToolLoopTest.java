@@ -220,7 +220,7 @@ class SendChatMessageServiceToolLoopTest {
 
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(8);
+        assertThat(captor.getValue().tools()).hasSize(13);
     }
 
     private static AssistantAuthContext jdContext() {

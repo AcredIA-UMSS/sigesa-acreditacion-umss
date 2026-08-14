@@ -3,6 +3,52 @@
 -- Genera datos maestros (5 registros por tabla) y tablas transaccionales (≥ 20 registros con FKs válidas).
 
 -- 1. ESTRUCTURA DE TABLAS (CREATE TABLE IF NOT EXISTS)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE TABLE IF NOT EXISTS programs (
+    id UUID PRIMARY KEY,
+    code VARCHAR(32) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    faculty VARCHAR(128),
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS evaluation_dimension (
+    id UUID PRIMARY KEY,
+    template_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS evaluation_criterion (
+    id UUID PRIMARY KEY,
+    dimension_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL,
+    description TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS evidence (
+    id UUID PRIMARY KEY,
+    indicator_id UUID NOT NULL UNIQUE,
+    latest_version_id UUID,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS evidence_version (
+    id UUID PRIMARY KEY,
+    evidence_id UUID NOT NULL,
+    version_number INTEGER NOT NULL,
+    content_hash VARCHAR(64) NOT NULL,
+    criterion_id UUID NOT NULL,
+    description VARCHAR(2000) NOT NULL,
+    storage_key VARCHAR(500) NOT NULL,
+    created_by UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_programs_name_trgm ON programs USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_evaluation_dimension_name_trgm ON evaluation_dimension USING gin (name gin_trgm_ops);
+
 CREATE TABLE IF NOT EXISTS accreditation_processes (
     id UUID PRIMARY KEY,
     career_id UUID NOT NULL,
@@ -187,6 +233,257 @@ INSERT INTO tb_observation (observation_id, program_id, indicator_id, indicator_
 ('OBS-2026-017', '770e8400-e29b-41d4-a716-446655440002', 'c10e8400-e29b-41d4-a716-446655440016', 'IND-ARC-04', 'Acreditación Previa', 'Documentación histórica completa.', NOW() - INTERVAL '35 days', NOW() - INTERVAL '15 days', 1, 'APROBADO', '/coordinator/evidences/IND-304/subsanar'),
 
 ('OBS-2026-018', '880e8400-e29b-41d4-a716-446655440003', 'a10e8400-e29b-41d4-a716-446655440001', 'IND-IND-01', 'Planes de Seguridad Industrial', 'Validado por comisión técnica.', NOW() - INTERVAL '40 days', NOW() - INTERVAL '20 days', 1, 'APROBADO', '/coordinator/evidences/IND-401/subsanar'),
-('OBS-2026-019', '990e8400-e29b-41d4-a716-446655440004', 'a10e8400-e29b-41d4-a716-446655440002', 'IND-INF-01', 'Licencias de Software', 'Falta listar licencias académicas.', NOW() - INTERVAL '11 days', NOW() + INTERVAL '5 days', 1, 'PENDIENTE_SUBSANACION', '/coordinator/evidences/IND-501/subsanar'),
 ('OBS-2026-020', '990e8400-e29b-41d4-a716-446655440004', 'a10e8400-e29b-41d4-a716-446655440003', 'IND-INF-02', 'Servidores de Prácticas', 'Acceso SSH verificado correctamente.', NOW() - INTERVAL '20 days', NOW() - INTERVAL '5 days', 1, 'APROBADO', '/coordinator/evidences/IND-502/subsanar')
 ON CONFLICT (observation_id) DO NOTHING;
+
+-- 4. DATOS DE PROGRAMAS, DIMENSIONES Y EVIDENCIAS
+-- Asegurar que existan los programas académicos utilizados
+INSERT INTO programs (id, code, name, faculty, active) VALUES
+('550e8400-e29b-41d4-a716-446655440000', 'INF-SIS', 'Ingeniería de Sistemas', 'FCT', TRUE),
+('660e8400-e29b-41d4-a716-446655440001', 'CEUB-DEMO', 'Coordinación CEUB (demo)', 'Tecnología', TRUE),
+('770e8400-e29b-41d4-a716-446655440002', 'ARCUSUR-DEMO', 'Coordinación ARCU-SUR (demo)', 'Tecnología', TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+-- Asegurar que existan las dimensiones de evaluación y sus criterios
+INSERT INTO evaluation_dimension (id, template_id, code, name) VALUES
+('550e8400-e29b-41d4-a716-446655440001', '850e8400-e29b-41d4-a716-446655440010', 'DIM-INFRA', 'Infraestructura'),
+('550e8400-e29b-41d4-a716-446655440005', '850e8400-e29b-41d4-a716-446655440010', 'DIM-CURR', 'Plan de Estudios'),
+('550e8400-e29b-41d4-a716-446655440006', '850e8400-e29b-41d4-a716-446655440010', 'DIM-DOC', 'Docentes'),
+('550e8400-e29b-41d4-a716-446655440007', '850e8400-e29b-41d4-a716-446655440010', 'DIM-ADM', 'Administración')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evaluation_criterion (id, dimension_id, code, description) VALUES
+('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', 'CRT-04', 'Criterio de Infraestructura física'),
+('550e8400-e29b-41d4-a716-446655440052', '550e8400-e29b-41d4-a716-446655440005', 'CRT-05', 'Criterio de Plan de Estudios y Currículo'),
+('550e8400-e29b-41d4-a716-446655440062', '550e8400-e29b-41d4-a716-446655440006', 'CRT-06', 'Criterio de Planta Docente y Desarrollo'),
+('550e8400-e29b-41d4-a716-446655440072', '550e8400-e29b-41d4-a716-446655440007', 'CRT-07', 'Criterio de Gestión y Administración')
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencias e Historial de Versiones (para MCP Multi-Token Búsqueda)
+-- Evidencia 1 (Indicador: a10e8400-e29b-41d4-a716-446655440001)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440001', 'a10e8400-e29b-41d4-a716-446655440001', 'f11e8400-e29b-41d4-a716-446655440001', NOW() - INTERVAL '15 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440001', 
+    'e11e8400-e29b-41d4-a716-446655440001', 
+    1, 
+    'a6f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Planos aprobados y distribución de laboratorios de computación y aulas para Ingeniería de Sistemas.', 
+    'planos_distribucion_aulas.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '15 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 2 (Indicador: a10e8400-e29b-41d4-a716-446655440002)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440002', 'a10e8400-e29b-41d4-a716-446655440002', 'f11e8400-e29b-41d4-a716-446655440002', NOW() - INTERVAL '10 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440002', 
+    'e11e8400-e29b-41d4-a716-446655440002', 
+    1, 
+    'b7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e9', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Inventario valorado de activos fijos tecnológicos y equipamiento de aulas interactivas de Sistemas.', 
+    'inventario_equipos_aulas.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '10 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 3 (Indicador: a10e8400-e29b-41d4-a716-446655440003)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440003', 'a10e8400-e29b-41d4-a716-446655440003', 'f11e8400-e29b-41d4-a716-446655440003', NOW() - INTERVAL '8 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440003', 
+    'e11e8400-e29b-41d4-a716-446655440003', 
+    1, 
+    'c7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e2', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Carga horaria docente de Sistemas y actas de distribución académica semestral.', 
+    'distribucion_horaria_docentes.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '8 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 4 (Indicador: b10e8400-e29b-41d4-a716-446655440011)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440004', 'b10e8400-e29b-41d4-a716-446655440011', 'f11e8400-e29b-41d4-a716-446655440004', NOW() - INTERVAL '20 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440004', 
+    'e11e8400-e29b-41d4-a716-446655440004', 
+    1, 
+    'c7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e0', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Acta de verificación y aprobación de infraestructura física general de acuerdo al marco del CEUB.', 
+    'verificacion_infraestructura_ceub.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '20 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 5 (Indicador: b10e8400-e29b-41d4-a716-446655440012)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440005', 'b10e8400-e29b-41d4-a716-446655440012', 'f11e8400-e29b-41d4-a716-446655440005', NOW() - INTERVAL '18 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440005', 
+    'e11e8400-e29b-41d4-a716-446655440005', 
+    1, 
+    'd7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e5', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Reporte de auditoría externa y planos de áreas comunes de estudio autorizados por el CEUB.', 
+    'auditoria_areas_comunes_ceub.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '18 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 6 (Indicador: b10e8400-e29b-41d4-a716-446655440013)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440006', 'b10e8400-e29b-41d4-a716-446655440013', 'f11e8400-e29b-41d4-a716-446655440006', NOW() - INTERVAL '12 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440006', 
+    'e11e8400-e29b-41d4-a716-446655440006', 
+    1, 
+    'e7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e6', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Certificaciones y licencias del software de laboratorio aprobado para la acreditación CEUB.', 
+    'certificados_licencias_software.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '12 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 7 (Indicador: c10e8400-e29b-41d4-a716-446655440016)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440007', 'c10e8400-e29b-41d4-a716-446655440016', 'f11e8400-e29b-41d4-a716-446655440007', NOW() - INTERVAL '5 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440007', 
+    'e11e8400-e29b-41d4-a716-446655440007', 
+    1, 
+    'd7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e1', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Informe técnico final y planos del auditorio e instalaciones comunes bajo criterios ARCU-SUR.', 
+    'informe_infraestructura_arcusur.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '5 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 8 (Indicador: c10e8400-e29b-41d4-a716-446655440017)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440008', 'c10e8400-e29b-41d4-a716-446655440017', 'f11e8400-e29b-41d4-a716-446655440008', NOW() - INTERVAL '4 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440008', 
+    'e11e8400-e29b-41d4-a716-446655440008', 
+    1, 
+    'f7f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Plan de mantenimiento correctivo y preventivo de laboratorios certificado por la comisión ARCU-SUR.', 
+    'plan_mantenimiento_laboratorios.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '4 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 9 (Indicador: c10e8400-e29b-41d4-a716-446655440018)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440009', 'c10e8400-e29b-41d4-a716-446655440018', 'f11e8400-e29b-41d4-a716-446655440009', NOW() - INTERVAL '2 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440009', 
+    'e11e8400-e29b-41d4-a716-446655440009', 
+    1, 
+    '07f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e9', 
+    '550e8400-e29b-41d4-a716-446655440002', 
+    'Manual de higiene, bioseguridad y señalética de aulas universitarias de la Facultad de Tecnología.', 
+    'manual_bioseguridad_arcusur.pdf', 
+    '10dbe819-a094-4bf0-a852-a06ce3fa6c08', 
+    NOW() - INTERVAL '2 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 10 (Indicador: a10e8400-e29b-41d4-a716-446655440004, Dimensión: Plan de Estudios)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440010', 'a10e8400-e29b-41d4-a716-446655440004', 'f11e8400-e29b-41d4-a716-446655440010', NOW() - INTERVAL '3 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440010', 
+    'e11e8400-e29b-41d4-a716-446655440010', 
+    1, 
+    'e6f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e9', 
+    '550e8400-e29b-41d4-a716-446655440052', 
+    'Plan de estudios oficial y malla curricular de la carrera de Ingeniería de Sistemas aprobada por el CEUB.', 
+    'plan_estudios_sistemas.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '3 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 11 (Indicador: a10e8400-e29b-41d4-a716-446655440005, Dimensión: Docentes)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440011', 'a10e8400-e29b-41d4-a716-446655440005', 'f11e8400-e29b-41d4-a716-446655440011', NOW() - INTERVAL '2 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440011', 
+    'e11e8400-e29b-41d4-a716-446655440011', 
+    1, 
+    'f6f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e0', 
+    '550e8400-e29b-41d4-a716-446655440062', 
+    'Planillas de sueldos y hoja de vida de los docentes de la carrera de Ingeniería de Sistemas.', 
+    'hojas_vida_docentes.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '2 days'
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Evidencia 12 (Indicador: a10e8400-e29b-41d4-a716-446655440006, Dimensión: Administración)
+INSERT INTO evidence (id, indicator_id, latest_version_id, created_at)
+VALUES ('e11e8400-e29b-41d4-a716-446655440012', 'a10e8400-e29b-41d4-a716-446655440006', 'f11e8400-e29b-41d4-a716-446655440012', NOW() - INTERVAL '1 days')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO evidence_version (id, evidence_id, version_number, content_hash, criterion_id, description, storage_key, created_by, created_at)
+VALUES (
+    'f11e8400-e29b-41d4-a716-446655440012', 
+    'e11e8400-e29b-41d4-a716-446655440012', 
+    1, 
+    '06f9828e67a4d538e9a1b6c7d2f8e1a0b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e1', 
+    '550e8400-e29b-41d4-a716-446655440072', 
+    'Plan Estratégico Institucional (PEI) y presupuesto anual aprobado para la Facultad de Tecnología.', 
+    'pei_presupuesto_facultad.pdf', 
+    '17228eb7-02f3-4542-a754-a86edfb9299a', 
+    NOW() - INTERVAL '1 days'
+)
+ON CONFLICT (id) DO NOTHING;

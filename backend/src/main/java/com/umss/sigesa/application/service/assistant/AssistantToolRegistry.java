@@ -23,6 +23,7 @@ public class AssistantToolRegistry {
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
     static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
     static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
+    static final String BUSCAR_EVIDENCIAS_ID = "buscar_evidencias";
     static final String LIST_PENDING_EVIDENCES_ID = "list_pending_evidences";
     static final String GET_EVIDENCE_DETAIL_ID = "get_evidence_detail";
     static final String CHECK_EVIDENCE_COMPLETENESS_ID = "check_evidence_completeness";
@@ -30,6 +31,14 @@ public class AssistantToolRegistry {
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
     private static final Set<String> JD_TD_AND_CC = Set.of("JD", "TD", "CC");
+
+    private static final AssistantToolDefinition BUSCAR_EVIDENCIAS = new AssistantToolDefinition(
+            BUSCAR_EVIDENCIAS_ID,
+            "Busca evidencias en el sistema utilizando filtros dinámicos basados en la consulta del usuario.",
+            JD_TD_AND_CC,
+            "read",
+            buscarEvidenciasParameterSchema()
+    );
 
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
@@ -181,6 +190,7 @@ public class AssistantToolRegistry {
     );
 
     private final List<AssistantToolDefinition> allTools = List.of(
+            BUSCAR_EVIDENCIAS,
             LIST_USERS,
             GET_USER_DETAIL,
             CREATE_USER,
@@ -246,7 +256,8 @@ public class AssistantToolRegistry {
     private static final Set<String> EVIDENCE_AGENT_TOOL_IDS = Set.of(
             LIST_PENDING_EVIDENCES_ID,
             GET_EVIDENCE_DETAIL_ID,
-            CHECK_EVIDENCE_COMPLETENESS_ID
+            CHECK_EVIDENCE_COMPLETENESS_ID,
+            BUSCAR_EVIDENCIAS_ID
     );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
@@ -407,6 +418,12 @@ public class AssistantToolRegistry {
         Map<String, Object> schema = objectSchema(properties);
         schema.put("required", required);
         return schema;
+    }
+
+    private static Map<String, Object> buscarEvidenciasParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("query", stringProperty("Texto de búsqueda para encontrar evidencias."));
+        return requiredObjectSchema(properties, List.of("query"));
     }
 
     private static Map<String, Object> stringProperty(String description) {

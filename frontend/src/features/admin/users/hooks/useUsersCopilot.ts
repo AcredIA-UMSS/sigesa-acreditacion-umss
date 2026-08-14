@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  useAssistantStatus,
-  useSendChatMessage,
-} from '../../../../api/endpoints/assistant-controller/assistant-controller';
+  useGetStatus1,
+  useChat,
+} from '../../../../api/endpoints/assistant/assistant';
 import { getListQueryKey } from '../../../../api/endpoints/user-admin-controller/user-admin-controller';
 import type {
   AssistantChatContextDto,
+  AssistantDemoScenario,
   AssistantMessageMetadata,
+  AssistantResolutionPath,
   ChatMessage,
 } from '../../../../api/model/assistantTypes';
 import { mapAssistantError } from '../../../assistant/hooks/mapAssistantError';
@@ -32,8 +34,8 @@ export function useUsersCopilot() {
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const statusQuery = useAssistantStatus('users');
-  const chatMutation = useSendChatMessage();
+  const statusQuery = useGetStatus1({ agent: 'users' });
+  const chatMutation = useChat();
 
   const chatContext: AssistantChatContextDto = useMemo(
     () => ({
@@ -61,17 +63,19 @@ export function useUsersCopilot() {
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
-        message: trimmed,
-        history,
-        context: chatContext,
+        data: {
+          message: trimmed,
+          history,
+          context: chatContext,
+        }
       });
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
+        createMessage('assistant', response.data.reply ?? '', {
+          toolId: response.data.toolId ?? null,
+          sourceTables: response.data.sourceTables ?? [],
+          path: (response.data.path ?? 'LLM') as AssistantResolutionPath,
+          llmInvoked: response.data.llmInvoked ?? false,
         }),
       ]);
 
@@ -81,7 +85,7 @@ export function useUsersCopilot() {
         'manage_user_assignment',
         'set_user_status',
       ]);
-      if (response.toolId && writeTools.has(response.toolId) && !response.reply.includes('confirmo')) {
+      if (response.data.toolId && writeTools.has(response.data.toolId) && !(response.data.reply ?? '').includes('confirmo')) {
         await queryClient.invalidateQueries({ queryKey: getListQueryKey(undefined) });
       }
     } catch {
@@ -103,13 +107,13 @@ export function useUsersCopilot() {
     sendMessage,
     clearConversation,
     messagesEndRef,
-    sampleQuestions: statusQuery.data?.demoScenarios ?? [],
-    capabilities: statusQuery.data?.capabilities ?? [],
-    isAssistantEnabled: statusQuery.data?.enabled === true,
+    sampleQuestions: (statusQuery.data?.data?.demoScenarios ?? []) as AssistantDemoScenario[],
+    capabilities: statusQuery.data?.data?.capabilities ?? [],
+    isAssistantEnabled: statusQuery.data?.data?.enabled === true,
     isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
     isForbidden: statusQuery.isError && (statusQuery.error as { status?: number } | null)?.status === 403,
     isSending: chatMutation.isPending,
-    errorMessage: mapAssistantError(chatMutation.error),
+    errorMessage: mapAssistantError(chatMutation.error as Error | null),
   };
 }

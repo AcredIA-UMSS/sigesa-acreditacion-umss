@@ -1,17 +1,18 @@
-import { useEffect, useRef } from 'react';
-import { Bot, Loader2, MessageSquare, Send, Trash2, User } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bot, Loader2, MessageSquare, Send, Trash2, User, FileText, ChevronRight, X, Calendar, Award, BookOpen } from 'lucide-react';
 import type {
   AssistantDemoScenario,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { customFetch } from '../../../lib/api/customFetch';
 
 export type AssistantChatUIProps = {
   messages: ChatMessage[];
   draft: string;
   onDraftChange: (value: string) => void;
-  onSend: () => void;
+  onSend: (customMessage?: string) => void;
   onClear: () => void;
   onSampleSelect: (question: string) => void;
   model: string;
@@ -44,6 +45,76 @@ export function AssistantChatUI({
   errorMessage,
   messagesEndRef,
 }: AssistantChatUIProps) {
+  const [selectedEvidence, setSelectedEvidence] = useState<any | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const handleDownloadEvidence = async (evidence: any) => {
+    if (!evidence?.evidenceId) return;
+    setDownloadingId(evidence.evidenceId);
+    try {
+      const response = await customFetch<any>(`/api/v1/evidences/${evidence.evidenceId}/download`);
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', evidence.title || 'evidencia.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error("Falla al descargar evidencia:", err);
+      alert(err.message || "No se pudo descargar el archivo de evidencia.");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const COMMANDS = ['/search-evidence', '/search-evidences', '/buscar-evidencia', '/buscar-evidencias', '/search', '/buscar'];
+  const [activeCommand, setActiveCommand] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (draft) {
+      const matchedCommand = COMMANDS.find(cmd => draft.startsWith(cmd + ' '));
+      if (matchedCommand) {
+        setActiveCommand(matchedCommand);
+        onDraftChange(draft.substring(matchedCommand.length).trimStart());
+      }
+    }
+  }, [draft, onDraftChange]);
+
+  const handleInputChange = (value: string) => {
+    if (!activeCommand) {
+      const matchedCommand = COMMANDS.find(cmd => value.startsWith(cmd + ' ') || value === cmd + ' ');
+      if (matchedCommand) {
+        setActiveCommand(matchedCommand);
+        const rest = value.substring(matchedCommand.length).trimStart();
+        onDraftChange(rest);
+        return;
+      }
+    }
+    onDraftChange(value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Backspace' && draft === '' && activeCommand) {
+      event.preventDefault();
+      setActiveCommand(null);
+      return;
+    }
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSend = () => {
+    const finalMessage = activeCommand ? `${activeCommand} ${draft}` : draft;
+    if (!finalMessage.trim()) return;
+    onSend(finalMessage);
+    setActiveCommand(null);
+  };
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -51,13 +122,6 @@ export function AssistantChatUI({
       textareaRef.current?.focus();
     }
   }, [isSending]);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      onSend();
-    }
-  };
 
   return (
     <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
@@ -140,7 +204,13 @@ export function AssistantChatUI({
               {messages.length === 0 ? (
                 <EmptyState demoScenarios={demoScenarios} onSampleSelect={onSampleSelect} />
               ) : (
-                messages.map((message) => <MessageBubble key={message.id} message={message} />)
+                messages.map((message) => (
+                  <MessageBubble 
+                    key={message.id} 
+                    message={message} 
+                    onSelectEvidence={setSelectedEvidence} 
+                  />
+                ))
               )}
               {isSending && <TypingIndicator />}
               <div ref={messagesEndRef} />
@@ -148,20 +218,36 @@ export function AssistantChatUI({
 
             <div className="border-t border-gray-200 px-5 py-4">
               <div className="flex gap-3">
-                <textarea
-                  ref={textareaRef}
-                  value={draft}
-                  onChange={(event) => onDraftChange(event.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)"
-                  rows={3}
-                  disabled={isSending}
-                  className="min-h-[88px] flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-body-md text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-100"
-                />
+                <div className="flex flex-col gap-2 rounded-lg border border-gray-300 px-4 py-3 bg-white focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 min-h-[88px] flex-1 transition-colors">
+                  {activeCommand && (
+                    <div className="flex items-center gap-1.5 self-start px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs font-bold border border-primary-200 select-none animate-in fade-in slide-in-from-left-1 duration-150">
+                      <span>{activeCommand}</span>
+                      <button 
+                        onClick={() => {
+                          setActiveCommand(null);
+                          textareaRef.current?.focus();
+                        }}
+                        className="hover:bg-primary-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                  <textarea
+                    ref={textareaRef}
+                    value={draft}
+                    onChange={(event) => handleInputChange(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={activeCommand ? "Escriba los términos de búsqueda..." : "Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)"}
+                    rows={activeCommand ? 2 : 3}
+                    disabled={isSending}
+                    className="w-full resize-none bg-transparent text-body-md text-gray-900 outline-none placeholder:text-gray-400 disabled:bg-transparent"
+                  />
+                </div>
                 <Button
-                  onClick={onSend}
+                  onClick={handleSend}
                   isLoading={isSending}
-                  disabled={!draft.trim() || isSending}
+                  disabled={(!draft.trim() && !activeCommand) || isSending}
                   className="self-end"
                 >
                   <Send size={16} />
@@ -172,6 +258,94 @@ export function AssistantChatUI({
           </section>
         </div>
       </div>
+
+      {selectedEvidence && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-gray-100 flex flex-col max-h-[85vh]">
+            <header className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+              <div className="flex items-center gap-2">
+                <FileText className="text-primary-600" size={20} />
+                <h3 className="font-bold text-gray-900 text-base">Detalle de la Evidencia</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedEvidence(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Título de Archivo</span>
+                <span className="text-gray-900 font-semibold text-sm break-all">{selectedEvidence.title}</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Descripción</span>
+                <p className="text-gray-700 text-sm bg-gray-50 p-3 rounded-lg border border-gray-100 mt-1 whitespace-pre-wrap">
+                  {selectedEvidence.description || 'Sin descripción o notas adicionales.'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <Award size={12} className="text-secondary" /> Dimensión Académica
+                  </span>
+                  <span className="text-gray-800 font-medium text-xs block mt-1">{selectedEvidence.dimensionName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <BookOpen size={12} className="text-primary-600" /> Criterio
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-primary-50 border border-primary-100 text-[10px] font-mono font-bold text-primary-800 inline-block mt-1">
+                    {selectedEvidence.criterionCode}
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Carrera / Programa</span>
+                  <span className="text-gray-800 text-xs block mt-1">{selectedEvidence.carreraName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider flex items-center gap-1">
+                    <Calendar size={12} className="text-gray-500" /> Fecha de Carga
+                  </span>
+                  <span className="text-gray-800 text-xs block mt-1">
+                    {selectedEvidence.uploadedAt ? new Date(selectedEvidence.uploadedAt).toLocaleString() : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <footer className="border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-between items-center">
+              <Button
+                onClick={() => handleDownloadEvidence(selectedEvidence)}
+                disabled={downloadingId === selectedEvidence.evidenceId}
+                variant="secondary"
+                className="px-4 py-2 text-sm font-semibold flex items-center gap-1.5"
+              >
+                {downloadingId === selectedEvidence.evidenceId ? (
+                  <>
+                    <Loader2 className="animate-spin" size={16} />
+                    Descargando...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={16} />
+                    Descargar Archivo
+                  </>
+                )}
+              </Button>
+              <Button 
+                onClick={() => setSelectedEvidence(null)}
+                variant="primary"
+                className="px-4 py-2 text-sm font-semibold"
+              >
+                Cerrar
+              </Button>
+            </footer>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
@@ -256,8 +430,24 @@ function EmptyState({
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ 
+  message,
+  onSelectEvidence,
+}: { 
+  message: ChatMessage;
+  onSelectEvidence: (ev: any) => void;
+}) {
   const isUser = message.role === 'user';
+  const isEvidenceSearch = !isUser && message.metadata?.toolId === 'buscar_evidencias';
+
+  let evidences: any[] = [];
+  if (isEvidenceSearch) {
+    try {
+      evidences = JSON.parse(message.content);
+    } catch {
+      evidences = [];
+    }
+  }
 
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -269,13 +459,62 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {isUser ? <User size={18} /> : <Bot size={18} />}
       </div>
       <div
-        className={`max-w-[75%] rounded-2xl px-4 py-3 text-body-md leading-relaxed ${
+        className={`max-w-[85%] rounded-2xl px-4 py-3 text-body-md leading-relaxed ${
           isUser
             ? 'bg-primary-600 text-body'
-            : 'border border-gray-200 bg-gray-50 text-gray-900'
+            : 'border border-gray-200 bg-gray-50 text-gray-900 shadow-sm'
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        {isEvidenceSearch ? (
+          <div className="space-y-3 min-w-[280px]">
+            <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+              <span className="font-bold text-primary-955">🔍 Resultados de búsqueda</span>
+              <span className="bg-primary-100 text-primary-850 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                {evidences.length} {evidences.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </div>
+            {evidences.length === 0 ? (
+              <p className="text-gray-500 text-sm italic">No se encontraron evidencias que coincidan con la búsqueda.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-1">
+                {evidences.map((ev: any) => (
+                  <div key={ev.evidenceId} className="bg-white rounded-xl border border-gray-150 p-3 hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start gap-2">
+                        <FileText size={16} className="text-primary-600 shrink-0 mt-0.5" />
+                        <span className="font-semibold text-gray-900 text-xs line-clamp-2" title={ev.title}>
+                          {ev.title}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 mt-1 line-clamp-2">{ev.description || 'Sin descripción'}</p>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        <span className="px-1.5 py-0.5 rounded bg-secondary-50 text-secondary-700 text-[10px] font-medium">
+                          {ev.dimensionName}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-mono">
+                          {ev.criterionCode}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-[10px] text-gray-400">
+                        {ev.uploadedAt ? new Date(ev.uploadedAt).toLocaleDateString() : 'N/A'}
+                      </span>
+                      <button
+                        onClick={() => onSelectEvidence(ev)}
+                        className="text-xs font-bold text-primary-600 hover:text-primary-800 flex items-center gap-0.5 transition-colors"
+                      >
+                        Ver Detalle <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        )}
         {!isUser && message.metadata && (
           <div className="mt-3 border-t border-gray-200 pt-3 text-label-md text-gray-600">
             <p>

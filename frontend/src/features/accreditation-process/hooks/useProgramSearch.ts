@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useList1 } from '../../../api/endpoints/program-catalog-controller/program-catalog-controller';
+import { useList1 } from '../../../api/endpoints/programas/programas';
 import type { ProgramSummaryResponse } from '../../../api/model';
 
 const DEBOUNCE_MS = 300;

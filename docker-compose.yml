@@ -6,9 +6,9 @@ services:
     container_name: sigesa-postgres
     restart: always
     environment:
-      POSTGRES_USER: sigesa_user
-      POSTGRES_PASSWORD: sigesa_password
-      POSTGRES_DB: sigesa
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -68,21 +68,20 @@ services:
         condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - DB_URL=jdbc:postgresql://db:5432/sigesa
-      - DB_USERNAME=sigesa_user
-      - DB_PASSWORD=sigesa_password
-      - SIGESA_JWT_SECRET=xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
-      - SPRING_DATASOURCE_USERNAME=sigesa_user
-      - SPRING_DATASOURCE_PASSWORD=sigesa_password
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - SIGESA_JWT_SECRET=${SIGESA_JWT_SECRET}
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SIGESA_ASSISTANT_ENABLED=true
       - SIGESA_ASSISTANT_LLM_ENABLED=true
       - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
       - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-}
-      - SIGESA_ASSISTANT_MODEL=qwen2.5:7b
-
+      - SIGESA_ASSISTANT_MODEL=${SIGESA_ASSISTANT_MODEL:-llama3.2:3b}
     ports:
       - "8080:8080"
 
@@ -91,7 +90,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ""
+        VITE_API_URL: ${VITE_API_URL}
     container_name: sigesa-frontend
     restart: always
     depends_on:

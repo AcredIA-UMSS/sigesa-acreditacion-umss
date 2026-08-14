@@ -23,6 +23,7 @@ import java.util.UUID;
 public class EvidenceDataLoader implements ApplicationRunner {
 
     public static final UUID SEED_PROGRAM_ID = DevSeedData.PROGRAM_INF_SIS;
+    public static final UUID SEED_DIMENSION_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
     public static final UUID SEED_PHASE_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440004");
 
     public static final UUID SEED_CRITERION_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440002");

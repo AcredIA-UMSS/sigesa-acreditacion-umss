@@ -46,6 +46,7 @@ import com.umss.sigesa.domain.model.Phase;
 import com.umss.sigesa.domain.model.Subphase;
 import com.umss.sigesa.domain.model.UserStatus;
 
+import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -74,6 +75,7 @@ public class AssistantToolExecutor {
     private final UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase;
     private final DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase;
     private final ReorderProcessStructureUseCase reorderProcessStructureUseCase;
+    private final SearchEvidenceUseCase searchEvidenceUseCase;
     private final ListPendingEvidencesUseCase listPendingEvidencesUseCase;
     private final GetEvidenceDetailUseCase getEvidenceDetailUseCase;
     private final CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
@@ -97,6 +99,7 @@ public class AssistantToolExecutor {
                                  UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase,
                                  DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase,
                                  ReorderProcessStructureUseCase reorderProcessStructureUseCase,
+                                 SearchEvidenceUseCase searchEvidenceUseCase,
                                  ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                  GetEvidenceDetailUseCase getEvidenceDetailUseCase,
                                  CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
@@ -118,6 +121,7 @@ public class AssistantToolExecutor {
         this.updateProcessSubphaseUseCase = updateProcessSubphaseUseCase;
         this.deleteProcessSubphaseUseCase = deleteProcessSubphaseUseCase;
         this.reorderProcessStructureUseCase = reorderProcessStructureUseCase;
+        this.searchEvidenceUseCase = searchEvidenceUseCase;
         this.listPendingEvidencesUseCase = listPendingEvidencesUseCase;
         this.getEvidenceDetailUseCase = getEvidenceDetailUseCase;
         this.checkEvidenceCompletenessUseCase = checkEvidenceCompletenessUseCase;
@@ -149,6 +153,7 @@ public class AssistantToolExecutor {
             case AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID -> executeManageUserAssignment(argumentsJson);
             case AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID -> executeManageProcessPhase(argumentsJson, auth);
             case AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID -> executeManageProcessSubphase(argumentsJson, auth);
+            case AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID -> executeBuscarEvidencias(argumentsJson, auth);
             case AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID -> executeListPendingEvidences(argumentsJson, auth);
             case AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID -> executeGetEvidenceDetail(argumentsJson, auth);
             case AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID ->
@@ -157,6 +162,36 @@ public class AssistantToolExecutor {
         };
 
         return serialize(result);
+    }
+
+    private ToolExecutionResult executeBuscarEvidencias(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            String query = "";
+            if (argumentsJson != null && !argumentsJson.isBlank()) {
+                JsonNode args = objectMapper.readTree(argumentsJson);
+                if (args.hasNonNull("query")) {
+                    query = args.get("query").asText();
+                }
+            }
+
+            var searchResult = searchEvidenceUseCase.search(
+                    query,
+                    true,
+                    auth.userId(),
+                    auth.role(),
+                    auth.programScope()
+            );
+            List<com.umss.sigesa.adapter.in.web.dto.EvidenceSearchDetailDto> allResults = searchResult.subsets().stream()
+                    .flatMap(s -> s.results().stream())
+                    .toList();
+
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("evidences", allResults);
+            data.put("total", allResults.size());
+            return ToolExecutionResult.success(data);
+        } catch (Exception ex) {
+            return ToolExecutionResult.failure("SEARCH_FAILED", "Falla al ejecutar búsqueda: " + ex.getMessage());
+        }
     }
 
     private ToolExecutionResult executeListUsers(String argumentsJson) {

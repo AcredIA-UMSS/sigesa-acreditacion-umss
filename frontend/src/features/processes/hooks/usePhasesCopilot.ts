@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  useAssistantStatus,
-  useSendChatMessage,
-} from '../../../api/endpoints/assistant-controller/assistant-controller';
+  useGetStatus1,
+  useChat,
+} from '../../../api/endpoints/assistant/assistant';
 import type {
   AssistantChatContextDto,
+  AssistantDemoScenario,
   AssistantMessageMetadata,
+  AssistantResolutionPath,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
 import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
@@ -36,8 +38,8 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const statusQuery = useAssistantStatus('phases');
-  const chatMutation = useSendChatMessage();
+  const statusQuery = useGetStatus1({ agent: 'phases' });
+  const chatMutation = useChat();
 
   const chatContext: AssistantChatContextDto = useMemo(
     () => ({
@@ -69,17 +71,19 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
-        message: trimmed,
-        history,
-        context: chatContext,
+        data: {
+          message: trimmed,
+          history,
+          context: chatContext,
+        }
       });
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
+        createMessage('assistant', response.data.reply ?? '', {
+          toolId: response.data.toolId ?? null,
+          sourceTables: response.data.sourceTables ?? [],
+          path: (response.data.path ?? 'LLM') as AssistantResolutionPath,
+          llmInvoked: response.data.llmInvoked ?? false,
         }),
       ]);
     } catch {
@@ -101,12 +105,12 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
     sendMessage,
     clearConversation,
     messagesEndRef,
-    sampleQuestions: statusQuery.data?.demoScenarios ?? [],
-    capabilities: statusQuery.data?.capabilities ?? [],
-    isAssistantEnabled: statusQuery.data?.enabled === true,
+    sampleQuestions: (statusQuery.data?.data?.demoScenarios ?? []) as AssistantDemoScenario[],
+    capabilities: statusQuery.data?.data?.capabilities ?? [],
+    isAssistantEnabled: statusQuery.data?.data?.enabled === true,
     isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
     isSending: chatMutation.isPending,
-    errorMessage: mapAssistantError(chatMutation.error),
+    errorMessage: mapAssistantError(chatMutation.error as Error | null),
   };
 }
