@@ -21,6 +21,7 @@
 | PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
 | PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
+| PM-015 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / FSD-UC-004 | Historial de acciones del agente de evidencias |
 
 ## PM-001
 
@@ -1076,3 +1077,43 @@ Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escri
 ### Resultado obtenido
 
 [CC] elige indicador por etiqueta (`code — title`); criterio se fija automáticamente; API `GET /api/v1/indicators/uploadable` + seeds IND-01…03 PENDIENTE.
+
+
+---
+
+## PM-015
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-015 |
+| **Fecha** | 2026-08-18 |
+| **Hora** | 11:36 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Historial de acciones del agente en Cargar Evidencia (FSD-UC-004 / UC-024) |
+| **Objetivo** | Cada respuesta del copiloto registra tool, camino, fuentes y resumen en un historial de sesión |
+| **Contexto** | Superficie `/evidencias/cargar` + agent=evidence |
+| **PR-IMPL vinculado** | PR-IMPL-026 |
+| **DD vinculado** | DD-AGENT-003 |
+| **FSD / PRD vinculado** | FSD-UC-024 / FSD-UC-004 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Para FSD-UC-004 — Cargar Evidencia, el agente Cuando cargue sus respuestas debe generar un historial de todo lo que hace.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `frontend/.../hooks/useEvidenceCopilot.ts` |
+| modificado | `frontend/.../components/EvidenceCopilotPanel.tsx` |
+| modificado | `backend/.../AssistantResponseFormatter.java` |
+| modificado | `docs/product/uc/FSD-UC-024.md`, `docs/product/uc/FSD-UC-004.md` |
+
+### Resultado obtenido
+
+Panel «Historial de acciones» en el copiloto; respuestas de tools de evidencia formateadas (no solo «Consulta completada»).

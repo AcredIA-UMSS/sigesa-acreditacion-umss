@@ -49,6 +49,8 @@ ultima_actualizacion: "2026-08-13"
 
 **Selectores (UI):** `GET /api/v1/indicators/uploadable` → `{ indicatorId, code, title, criterionId, criterionCode, criterionTitle, currentState }[]`.
 
+**Copiloto embebido (UC-024):** en Cargar Evidencia el agente registra un **historial de acciones** de la sesión (tool, camino, fuentes) por cada respuesta.
+
 ## Diagramas
 
 - [Carga evidencia versionada](../diagramas/MAR-SEQ-002-carga-evidencia-versionada.mmd)

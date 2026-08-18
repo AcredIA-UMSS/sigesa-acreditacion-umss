@@ -1,14 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, ChevronDown, ChevronUp, Loader2, MessageSquare, Send, Trash2, User } from 'lucide-react';
+import {
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  ClipboardList,
+  Loader2,
+  MessageSquare,
+  Send,
+  Trash2,
+  User,
+} from 'lucide-react';
 import type { AssistantDemoScenario, ChatMessage } from '../../../api/model/assistantTypes';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
-import { useEvidenceCopilot } from '../hooks/useEvidenceCopilot';
+import {
+  useEvidenceCopilot,
+  type EvidenceAgentAction,
+} from '../hooks/useEvidenceCopilot';
 
 export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
   const copilot = useEvidenceCopilot(programId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(true);
 
   useEffect(() => {
     if (!copilot.isSending && mobileOpen) {
@@ -55,6 +69,12 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
         </div>
       )}
 
+      <ActionHistoryPanel
+        actions={copilot.actionHistory}
+        open={historyOpen}
+        onToggle={() => setHistoryOpen((value) => !value)}
+      />
+
       <div className="flex min-h-56 flex-1 flex-col overflow-hidden lg:min-h-[280px]">
         <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2">
           <div className="flex items-center gap-2 text-label-md font-medium text-gray-700">
@@ -64,7 +84,11 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
           <Button
             variant="ghost"
             onClick={copilot.clearConversation}
-            disabled={copilot.messages.length === 0 || copilot.isSending}
+            disabled={
+              (copilot.messages.length === 0 &&
+                copilot.actionHistory.length === 0) ||
+              copilot.isSending
+            }
             className="px-2! py-1!"
           >
             <Trash2 size={14} />
@@ -143,12 +167,94 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
             AGENTE DE EVIDENCIAS
           </h2>
           <p className="mt-1 text-body-md text-gray-600">
-            Listar pendientes, detalle y completitud vía chat
+            Listar pendientes, detalle y completitud vía chat · historial de
+            acciones
           </p>
         </header>
         {panelBody}
       </aside>
     </>
+  );
+}
+
+function ActionHistoryPanel({
+  actions,
+  open,
+  onToggle,
+}: {
+  actions: EvidenceAgentAction[];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <section className="border-b border-gray-100 px-4 py-3" aria-label="Historial del agente">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <div className="flex items-center gap-2 text-label-md font-medium text-gray-800">
+          <ClipboardList size={14} className="text-primary-600" aria-hidden />
+          Historial de acciones
+          <span className="rounded-full bg-primary-50 px-2 py-0.5 text-label-md text-primary-700">
+            {actions.length}
+          </span>
+        </div>
+        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+
+      {open && (
+        <div className="mt-3 max-h-40 space-y-2 overflow-y-auto">
+          {actions.length === 0 ? (
+            <p className="text-body-md text-gray-500">
+              Aún no hay acciones. Cada respuesta del agente se registrará aquí
+              (tool, camino y fuentes).
+            </p>
+          ) : (
+            [...actions].reverse().map((action) => (
+              <article
+                key={action.id}
+                className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-body-md text-gray-800"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-medium text-gray-900">{action.summary}</p>
+                  <StatusBadge status={action.status} />
+                </div>
+                <p className="mt-1 text-label-md text-gray-600">
+                  {formatTime(action.at)} · Pregunta: «
+                  {truncate(action.userPrompt, 60)}»
+                </p>
+                <p className="mt-1 text-label-md text-gray-600">
+                  Tool: {action.toolId ?? '—'} · Camino: {action.path}
+                  {action.llmInvoked ? ' · LLM' : ''}
+                </p>
+                {action.sourceTables.length > 0 && (
+                  <p className="mt-0.5 text-label-md text-gray-500">
+                    Fuentes: {action.sourceTables.join(', ')}
+                  </p>
+                )}
+              </article>
+            ))
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function StatusBadge({ status }: { status: EvidenceAgentAction['status'] }) {
+  const styles =
+    status === 'ok'
+      ? 'bg-success/10 text-success'
+      : status === 'error'
+        ? 'bg-danger/10 text-danger'
+        : 'bg-warning/20 text-gray-800';
+  const label =
+    status === 'ok' ? 'OK' : status === 'error' ? 'Error' : 'Fuera de alcance';
+  return (
+    <span className={`shrink-0 rounded-full px-2 py-0.5 text-label-md font-medium ${styles}`}>
+      {label}
+    </span>
   );
 }
 
@@ -170,7 +276,8 @@ function EmptyState({
         <Bot size={20} />
       </div>
       <p className="text-body-md text-gray-700">
-        Consulte la documentación subida por el coordinador. Solo lectura en esta fase.
+        Consulte la documentación subida por el coordinador. Solo lectura en
+        esta fase.
       </p>
       <ul className="mt-4 space-y-2 text-left">
         {sanitized.map((scenario) => (
@@ -224,10 +331,19 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         {!isUser && message.metadata && (
           <div className="mt-2 border-t border-gray-200 pt-2 text-label-md text-gray-600">
             <p>
-              <span className="font-medium">Tool:</span> {message.metadata.toolId ?? '—'}
+              <span className="font-medium">Tool:</span>{' '}
+              {message.metadata.toolId ?? '—'}
             </p>
             <p className="mt-0.5">
-              <span className="font-medium">Camino:</span> {message.metadata.path}
+              <span className="font-medium">Fuentes:</span>{' '}
+              {message.metadata.sourceTables.length > 0
+                ? message.metadata.sourceTables.join(', ')
+                : '—'}
+            </p>
+            <p className="mt-0.5">
+              <span className="font-medium">Camino:</span>{' '}
+              {message.metadata.path}
+              {message.metadata.llmInvoked ? ' · LLM invocado' : ''}
             </p>
           </div>
         )}
@@ -243,4 +359,21 @@ function TypingIndicator() {
       Consultando evidencias…
     </div>
   );
+}
+
+function formatTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleTimeString('es-BO', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function truncate(value: string, max: number): string {
+  if (value.length <= max) return value;
+  return `${value.slice(0, max).trim()}…`;
 }
