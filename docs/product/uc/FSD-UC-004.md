@@ -51,6 +51,8 @@ ultima_actualizacion: "2026-08-13"
 
 **Copiloto embebido (UC-024):** en Cargar Evidencia el agente registra un **historial de acciones** de la sesión (tool, camino, fuentes) por cada respuesta.
 
+**Estructura del proceso:** cada subfase muestra un espacio de carga (PDF/Word/Excel/imagen). La persistencia sigue UC-004 (indicador + criterio); la subfase se anota en la descripción.
+
 ## Diagramas
 
 - [Carga evidencia versionada](../diagramas/MAR-SEQ-002-carga-evidencia-versionada.mmd)

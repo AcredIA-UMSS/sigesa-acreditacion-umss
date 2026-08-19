@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios';
+import { isApiError } from '../../../lib/api/apiError';
 
 const ERROR_LABELS: Record<string, string> = {
   EVIDENCE_UNCLASSIFIED: 'Complete el indicador y el criterio antes de cargar.',
@@ -12,6 +13,11 @@ const ERROR_LABELS: Record<string, string> = {
 
 export function mapUploadError(error: Error | null): string | null {
   if (!error) return null;
+
+  if (isApiError(error)) {
+    if (ERROR_LABELS[error.code]) return ERROR_LABELS[error.code];
+    return error.message || 'Error al cargar la evidencia.';
+  }
 
   if (isAxiosError<{ error?: string; message?: string }>(error)) {
     const code = error.response?.data?.error;

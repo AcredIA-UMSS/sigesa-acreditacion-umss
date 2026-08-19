@@ -22,6 +22,7 @@
 | PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 | PM-015 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / FSD-UC-004 | Historial de acciones del agente de evidencias |
+| PM-016 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 / FSD-UC-019 | Espacio de carga de evidencias por subfase en estructura |
 
 ## PM-001
 
@@ -1117,3 +1118,43 @@ Para FSD-UC-004 — Cargar Evidencia, el agente Cuando cargue sus respuestas deb
 ### Resultado obtenido
 
 Panel «Historial de acciones» en el copiloto; respuestas de tools de evidencia formateadas (no solo «Consulta completada»).
+
+
+---
+
+## PM-016
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-016 |
+| **Fecha** | 2026-08-18 |
+| **Hora** | 11:48 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Espacio de carga de evidencias por subfase en Estructura del proceso |
+| **Objetivo** | En cada subfase permitir adjuntar PDF/Word/Excel/imagen vía UC-004 (indicador + archivo) |
+| **Contexto** | UI detalle proceso; evidencia sigue ligada a indicador (sin FK subfase) |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD vinculado** | DD-UC-004 |
+| **FSD / PRD vinculado** | FSD-UC-004 / FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+en esta estructura del proceso, crear un espacio para que permita subir evidencias de diferentes tipos de archivos en cada subfase
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/.../SubphaseEvidenceUploadSlot.tsx` |
+| generado | `frontend/.../api/uploadEvidence.ts` |
+| modificado | `ProcessPhaseTree.tsx`, `ProcessDetailView.tsx` |
+| modificado | `useUploadableIndicators.ts`, `mapUploadError.ts` |
+
+### Resultado obtenido
+
+Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia.
