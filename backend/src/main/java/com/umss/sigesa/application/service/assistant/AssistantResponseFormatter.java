@@ -66,8 +66,110 @@ final class AssistantResponseFormatter {
                 && data.containsKey("userId")) {
             return formatUserDetail(data);
         }
+        if (data.containsKey("evidences")) {
+            return formatPendingEvidences(data);
+        }
+        if (data.containsKey("evidence") && data.get("evidence") instanceof java.util.Map<?, ?>) {
+            return formatEvidenceDetail(data);
+        }
+        if (data.containsKey("complete") && data.containsKey("hasEvidence")) {
+            return formatEvidenceCompleteness(data);
+        }
 
         return "Consulta completada.";
+    }
+
+    private static String formatPendingEvidences(java.util.Map<String, Object> data) {
+        Object evidencesNode = data.get("evidences");
+        if (!(evidencesNode instanceof List<?> evidences) || evidences.isEmpty()) {
+            return "No hay evidencias pendientes de revisión (estado SUBIDO) en su alcance.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Evidencias pendientes de revisión (**")
+                .append(data.getOrDefault("stateFilter", "SUBIDO"))
+                .append("**) — ")
+                .append(data.getOrDefault("total", evidences.size()))
+                .append(":\n\n");
+        int index = 1;
+        for (Object item : evidences) {
+            if (!(item instanceof java.util.Map<?, ?> map)) {
+                continue;
+            }
+            sb.append(index++).append(". Indicador `").append(shortId(map.get("indicatorId"))).append("`");
+            if (map.get("currentState") != null) {
+                sb.append(" — estado **").append(map.get("currentState")).append("**");
+            }
+            sb.append("\n");
+            if (map.get("programId") != null) {
+                sb.append("   - Programa: `").append(shortId(map.get("programId"))).append("`\n");
+            }
+            if (map.get("description") != null && !map.get("description").toString().isBlank()) {
+                sb.append("   - Descripción: ").append(map.get("description")).append("\n");
+            }
+            if (map.get("versionNumber") != null) {
+                sb.append("   - Versión: ").append(map.get("versionNumber")).append("\n");
+            }
+            sb.append("\n");
+        }
+        return sb.toString().trim();
+    }
+
+    private static String formatEvidenceDetail(java.util.Map<String, Object> data) {
+        Object evidenceNode = data.get("evidence");
+        if (!(evidenceNode instanceof java.util.Map<?, ?> map)) {
+            return "No se encontró detalle de la evidencia.";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Detalle de evidencia\n\n");
+        sb.append("- Indicador: `").append(shortId(map.get("indicatorId"))).append("`\n");
+        sb.append("- Estado: **").append(map.get("currentState")).append("**\n");
+        if (map.get("evidenceId") != null) {
+            sb.append("- Evidencia: `").append(shortId(map.get("evidenceId"))).append("`\n");
+        }
+        if (map.get("versionNumber") != null) {
+            sb.append("- Versión: ").append(map.get("versionNumber")).append("\n");
+        }
+        if (map.get("criterionId") != null) {
+            sb.append("- Criterio: `").append(shortId(map.get("criterionId"))).append("`\n");
+        }
+        if (map.get("description") != null) {
+            sb.append("- Descripción: ").append(map.get("description")).append("\n");
+        }
+        if (map.get("contentHash") != null) {
+            sb.append("- SHA-256: `").append(map.get("contentHash")).append("`\n");
+        }
+        if (map.get("createdAt") != null) {
+            sb.append("- Cargada: ").append(map.get("createdAt")).append("\n");
+        }
+        return sb.toString().trim();
+    }
+
+    private static String formatEvidenceCompleteness(java.util.Map<String, Object> data) {
+        boolean complete = Boolean.TRUE.equals(data.get("complete"));
+        StringBuilder sb = new StringBuilder();
+        sb.append(complete
+                ? "La evidencia del indicador está **completa**.\n\n"
+                : "La evidencia del indicador está **incompleta**.\n\n");
+        sb.append("- Indicador: `").append(shortId(data.get("indicatorId"))).append("`\n");
+        sb.append("- Estado: ").append(data.get("currentState")).append("\n");
+        sb.append("- Tiene archivo/evidencia: ").append(yesNo(data.get("hasEvidence"))).append("\n");
+        sb.append("- Tiene descripción: ").append(yesNo(data.get("hasDescription"))).append("\n");
+        sb.append("- Tiene criterio: ").append(yesNo(data.get("hasCriterion"))).append("\n");
+        sb.append("- Tiene hash de contenido: ").append(yesNo(data.get("hasContentHash"))).append("\n");
+        return sb.toString().trim();
+    }
+
+    private static String yesNo(Object value) {
+        return Boolean.TRUE.equals(value) ? "sí" : "no";
+    }
+
+    private static String shortId(Object value) {
+        if (value == null) {
+            return "—";
+        }
+        String s = value.toString();
+        return s.length() > 8 ? s.substring(0, 8) : s;
     }
 
     private static String formatActiveProcesses(java.util.Map<String, Object> data) {

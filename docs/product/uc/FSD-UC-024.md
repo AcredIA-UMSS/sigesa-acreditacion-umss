@@ -62,6 +62,7 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 
 - Sin mutación de estados de indicador en Fase 1.
 - Trazabilidad tool en metadata de respuesta (`toolId`, `path`, `sourceTables`).
+- Historial de acciones de la sesión en la UI del copiloto (cada respuesta registra tool, camino, fuentes y resumen).
 
 ## Fuera de alcance (Fase 1)
 

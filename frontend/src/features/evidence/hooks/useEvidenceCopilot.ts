@@ -6,6 +6,7 @@ import {
 import type {
   AssistantChatContextDto,
   AssistantMessageMetadata,
+  AssistantResolutionPath,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
 import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
@@ -24,8 +25,53 @@ function createMessage(
   };
 }
 
+export type EvidenceAgentActionStatus = 'ok' | 'error' | 'out_of_scope';
+
+/** Entrada del historial de acciones del agente (sesión actual). */
+export type EvidenceAgentAction = {
+  id: string;
+  at: string;
+  userPrompt: string;
+  summary: string;
+  toolId: string | null;
+  path: AssistantResolutionPath | 'ERROR';
+  sourceTables: string[];
+  llmInvoked: boolean;
+  status: EvidenceAgentActionStatus;
+};
+
+function summarizeAction(input: {
+  toolId: string | null;
+  path: AssistantResolutionPath | 'ERROR';
+  status: EvidenceAgentActionStatus;
+  reply?: string;
+}): string {
+  if (input.status === 'error') {
+    return 'Falló la consulta al asistente.';
+  }
+  if (input.path === 'OUT_OF_SCOPE') {
+    return 'Consulta fuera de alcance del agente de evidencias.';
+  }
+  switch (input.toolId) {
+    case 'list_pending_evidences':
+      return 'Listó evidencias pendientes de revisión (SUBIDO).';
+    case 'get_evidence_detail':
+      return 'Consultó el detalle de una evidencia.';
+    case 'check_evidence_completeness':
+      return 'Verificó la completitud de una evidencia.';
+    default:
+      if (input.reply && input.reply.length > 0) {
+        return input.reply.length > 90
+          ? `${input.reply.slice(0, 90).trim()}…`
+          : input.reply;
+      }
+      return 'Respondió sin tool específica.';
+  }
+}
+
 export function useEvidenceCopilot(programId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [actionHistory, setActionHistory] = useState<EvidenceAgentAction[]>([]);
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -48,6 +94,17 @@ export function useEvidenceCopilot(programId?: string) {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
+  const appendAction = useCallback((entry: Omit<EvidenceAgentAction, 'id' | 'at'>) => {
+    setActionHistory((prev) => [
+      ...prev,
+      {
+        ...entry,
+        id: crypto.randomUUID(),
+        at: new Date().toISOString(),
+      },
+    ]);
+  }, []);
+
   const sendMessage = useCallback(async () => {
     const trimmed = draft.trim();
     if (!trimmed || chatMutation.isPending) return;
@@ -63,29 +120,55 @@ export function useEvidenceCopilot(programId?: string) {
         history,
         context: chatContext,
       });
+      const metadata: AssistantMessageMetadata = {
+        toolId: response.toolId,
+        sourceTables: response.sourceTables ?? [],
+        path: response.path,
+        llmInvoked: response.llmInvoked,
+      };
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
-        }),
+        createMessage('assistant', response.reply, metadata),
       ]);
+      appendAction({
+        userPrompt: trimmed,
+        summary: summarizeAction({
+          toolId: response.toolId,
+          path: response.path,
+          status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
+          reply: response.reply,
+        }),
+        toolId: response.toolId,
+        path: response.path,
+        sourceTables: response.sourceTables ?? [],
+        llmInvoked: response.llmInvoked,
+        status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
+      });
     } catch {
       setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
       setDraft(trimmed);
+      appendAction({
+        userPrompt: trimmed,
+        summary: 'Falló la consulta al asistente.',
+        toolId: null,
+        path: 'ERROR',
+        sourceTables: [],
+        llmInvoked: false,
+        status: 'error',
+      });
     }
-  }, [chatContext, chatMutation, draft, messages]);
+  }, [appendAction, chatContext, chatMutation, draft, messages]);
 
   const clearConversation = useCallback(() => {
     setMessages([]);
+    setActionHistory([]);
     setDraft('');
     chatMutation.reset();
   }, [chatMutation]);
 
   return {
     messages,
+    actionHistory,
     draft,
     setDraft,
     sendMessage,
