@@ -90,6 +90,26 @@ class SendChatMessageServiceToolLoopTest {
     }
 
     @Test
+    void scenario1_controlledKeyword_ccRole_doesNotCallLlm() {
+        AssistantAuthContext auth = ccContext();
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Lista las fases de Ingeniería de Sistemas CEUB",
+                List.of(),
+                auth,
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
     void scenario1_controlledKeyword_doesNotCallLlm() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
@@ -329,5 +349,9 @@ class SendChatMessageServiceToolLoopTest {
 
     private static AssistantAuthContext tdContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "TD", List.of());
+    }
+
+    private static AssistantAuthContext ccContext() {
+        return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of(UUID.randomUUID()));
     }
 }

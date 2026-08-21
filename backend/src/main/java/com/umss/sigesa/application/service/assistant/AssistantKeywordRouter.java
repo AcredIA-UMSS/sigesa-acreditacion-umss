@@ -104,10 +104,12 @@ public class AssistantKeywordRouter {
             return evidenceFlow;
         }
 
-        if ("JD".equals(role) || "TD".equals(role)) {
+        if (isProcessReaderRole(role)) {
             if (!chatContext.isPhasesAgent() && !chatContext.isUsersAgent() && !chatContext.isEvidenceAgent()
                     && ACTIVE_PROCESSES_PATTERN.matcher(message).matches()) {
-                return Optional.of(buildActiveProcessesInvocation(message));
+                if ("JD".equals(role) || "TD".equals(role)) {
+                    return Optional.of(buildActiveProcessesInvocation(message));
+                }
             }
             if (!chatContext.isUsersAgent() && !chatContext.isEvidenceAgent()
                     && PHASES_PATTERN.matcher(message).matches()) {
@@ -115,7 +117,7 @@ public class AssistantKeywordRouter {
             }
         }
 
-        if (("JD".equals(role) || "TD".equals(role) || "CC".equals(role))
+        if (isProcessReaderRole(role)
                 && !chatContext.isUsersAgent()
                 && !chatContext.isEvidenceAgent()) {
             if (chatContext.isPhasesAgent()
@@ -144,6 +146,10 @@ public class AssistantKeywordRouter {
         }
 
         return Optional.empty();
+    }
+
+    private static boolean isProcessReaderRole(String role) {
+        return "JD".equals(role) || "TD".equals(role) || "CC".equals(role);
     }
 
     private static boolean isAssistantRole(String role) {
