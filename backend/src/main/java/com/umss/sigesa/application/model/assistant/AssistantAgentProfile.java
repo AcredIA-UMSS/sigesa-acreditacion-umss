@@ -17,4 +17,13 @@ public enum AssistantAgentProfile {
             default -> GENERAL;
         };
     }
+
+    public String agentId() {
+        return switch (this) {
+            case PHASES -> "phases";
+            case USERS -> "users";
+            case EVIDENCE -> "evidence";
+            case GENERAL -> "general";
+        };
+    }
 }

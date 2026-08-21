@@ -6,6 +6,7 @@ import type {
 } from '../../../api/model/assistantTypes';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { CopilotAssistantMetadata } from './CopilotAssistantMetadata';
 
 export type AssistantChatUIProps = {
   messages: ChatMessage[];
@@ -14,6 +15,8 @@ export type AssistantChatUIProps = {
   onSend: () => void;
   onClear: () => void;
   onSampleSelect: (question: string) => void;
+  onOpenActionHistory: () => void;
+  actionHistoryCount: number;
   model: string;
   llmEnabled: boolean;
   capabilities: string[];
@@ -23,6 +26,7 @@ export type AssistantChatUIProps = {
   isStatusLoading: boolean;
   isSending: boolean;
   errorMessage: string | null;
+  messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
 };
 
@@ -33,6 +37,8 @@ export function AssistantChatUI({
   onSend,
   onClear,
   onSampleSelect,
+  onOpenActionHistory,
+  actionHistoryCount,
   model,
   llmEnabled,
   capabilities,
@@ -42,6 +48,7 @@ export function AssistantChatUI({
   isStatusLoading,
   isSending,
   errorMessage,
+  messagesContainerRef,
   messagesEndRef,
 }: AssistantChatUIProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -73,6 +80,7 @@ export function AssistantChatUI({
             <p className="mt-2 max-w-2xl text-body-md text-gray-600">
               Tool calling SIGESA: la respuesta la produce el código. El LLM solo elige la
               herramienta cuando la pregunta no coincide con el catálogo de palabras clave.
+              Las entradas se validan en el servidor (SQLi, XSS y límites de longitud).
             </p>
           </div>
           <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-right">
@@ -121,9 +129,19 @@ export function AssistantChatUI({
 
           <section className="flex min-h-0 flex-1 flex-col rounded-xl border border-gray-200 bg-body shadow-sm">
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-              <div className="flex items-center gap-2 text-body-md font-medium text-gray-800">
-                <MessageSquare size={18} className="text-primary-600" />
-                Conversación
+              <div>
+                <div className="flex items-center gap-2 text-body-md font-medium text-gray-800">
+                  <MessageSquare size={18} className="text-primary-600" />
+                  Conversación
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenActionHistory}
+                  className="mt-1 text-body-md font-medium text-primary-600 underline decoration-primary-400 underline-offset-2 transition-colors hover:text-primary-800"
+                >
+                  Historial de acciones
+                  {actionHistoryCount > 0 ? ` (${actionHistoryCount})` : ''}
+                </button>
               </div>
               <Button
                 variant="ghost"
@@ -136,7 +154,10 @@ export function AssistantChatUI({
               </Button>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-6">
+            <div
+              ref={messagesContainerRef}
+              className="flex-1 space-y-4 overflow-y-auto px-5 py-6"
+            >
               {messages.length === 0 ? (
                 <EmptyState demoScenarios={demoScenarios} onSampleSelect={onSampleSelect} />
               ) : (
@@ -237,8 +258,8 @@ function EmptyState({
         Demostración tool calling
       </h2>
       <p className="mt-2 max-w-md text-body-md text-gray-600">
-        Pruebe los cuatro escenarios de la tarea. Cada respuesta muestra herramienta, tablas fuente
-        y camino (KEYWORD / LLM / OUT_OF_SCOPE).
+        Pruebe los escenarios demo (incluido Nivel 4 multi-tool). Use el historial de acciones
+        para ver cada paso ejecutado (tool, camino, fuentes).
       </p>
       <div className="mt-6 grid w-full max-w-xl gap-2 text-left">
         {demoScenarios.slice(0, 2).map((scenario) => (
@@ -276,23 +297,8 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }`}
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
-        {!isUser && message.metadata && (
-          <div className="mt-3 border-t border-gray-200 pt-3 text-label-md text-gray-600">
-            <p>
-              <span className="font-medium text-gray-800">Herramienta:</span>{' '}
-              {message.metadata.toolId ?? '—'}
-            </p>
-            <p className="mt-1">
-              <span className="font-medium text-gray-800">Fuente:</span>{' '}
-              {message.metadata.sourceTables.length > 0
-                ? message.metadata.sourceTables.join(', ')
-                : '—'}
-            </p>
-            <p className="mt-1">
-              <span className="font-medium text-gray-800">Camino:</span> {message.metadata.path}
-              {message.metadata.llmInvoked ? ' · LLM invocado' : ''}
-            </p>
-          </div>
+        {!isUser && message.metadata && message.metadata.steps && message.metadata.steps.length <= 1 && (
+          <CopilotAssistantMetadata metadata={message.metadata} />
         )}
       </div>
     </div>

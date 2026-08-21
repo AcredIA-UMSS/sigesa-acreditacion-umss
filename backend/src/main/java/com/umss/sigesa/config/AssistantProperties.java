@@ -15,6 +15,8 @@ public class AssistantProperties {
                     + "Ayudas a coordinadores, jefes de departamento y técnicos con procesos de acreditación, "
                     + "evidencias, indicadores y uso del sistema. Responde en español, de forma clara y concisa.";
     private int maxToolIterations = 3;
+    private boolean ragEnabled = true;
+    private int ragMaxChunks = 3;
 
     public boolean isEnabled() {
         return enabled;
@@ -70,5 +72,21 @@ public class AssistantProperties {
 
     public void setMaxToolIterations(int maxToolIterations) {
         this.maxToolIterations = maxToolIterations;
+    }
+
+    public boolean isRagEnabled() {
+        return ragEnabled;
+    }
+
+    public void setRagEnabled(boolean ragEnabled) {
+        this.ragEnabled = ragEnabled;
+    }
+
+    public int getRagMaxChunks() {
+        return ragMaxChunks;
+    }
+
+    public void setRagMaxChunks(int ragMaxChunks) {
+        this.ragMaxChunks = ragMaxChunks;
     }
 }

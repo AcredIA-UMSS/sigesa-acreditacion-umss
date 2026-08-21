@@ -5,6 +5,7 @@ modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
 ultima_actualizacion: "2026-08-21"
+pr_impl: PR-IMPL-024, PR-IMPL-033
 backlog_version: "2026-08-21"
 ---
 
@@ -56,8 +57,17 @@ GET  /api/v1/assistant/status?agent=phases
 | `list_process_structure` | read | ✓ | ✓ | ✓ |
 | `manage_process_phase` | write | ✓ | ✓ | — |
 | `manage_process_subphase` | write | ✓ | ✓ | — |
+| `search_normative_docs` | read | ✓ | ✓ | ✓ |
 
 Fuera del agente phases el asistente general conserva el catálogo completo por rol.
+
+### 4.1 Encadenamiento multi-tool (Nivel 4)
+
+| # demo | Pregunta | Tools esperadas |
+|--------|----------|-----------------|
+| 5 | Muestra la estructura completa y busca normativa de la subfase Matriz de evidencias | `list_process_structure` → `search_normative_docs` |
+
+La UI (`PhasesCopilotPanel`) muestra la traza cuando `metadata.steps.length > 1`. El modal de desarrollo registra cada paso vía `recordToolTraceInAction`.
 
 ## 5. Flujo
 
@@ -75,12 +85,15 @@ sequenceDiagram
     KR-->>BE: tool invocation
     BE->>EX: execute
   else LLM enabled
-    BE->>LLM: tool pick (subset phases)
-    LLM-->>BE: tool_call
-    BE->>EX: execute
+    loop max-tool-iterations
+      BE->>LLM: tool pick (subset phases)
+      LLM-->>BE: tool_call
+      BE->>EX: execute
+      EX-->>BE: JSON → conversación interna
+    end
   end
   EX-->>BE: JSON
-  BE-->>UI: reply (AssistantResponseFormatter)
+  BE-->>UI: reply + steps[] (AssistantResponseFormatter)
 ```
 
 ## 6. Palabras clave contextuales (sin nombrar carrera)
@@ -98,7 +111,7 @@ sequenceDiagram
 | Router | `AssistantKeywordRouter` |
 | Tools | `AssistantToolRegistry`, `AssistantToolExecutor`, `AssistantStructureLookup` |
 | Resolución orden | `AssistantStructureLookup.SubphaseOrderPlan` (CREATE subfase) |
-| UI | `PhasesCopilotPanel`, `usePhasesCopilot` |
+| UI | `PhasesCopilotPanel`, `usePhasesCopilot`, `CopilotAssistantMetadata` |
 
 ### 7.1 Lecciones aprendidas (iteración 2026-08-11)
 
@@ -186,6 +199,12 @@ Toda petición a `POST /api/v1/assistant/chat` pasa por validación **antes** de
 **Ubicación:** `AssistantChatInputValidator` (capa aplicación), invocado desde `AssistantController`.
 
 > Las tools siguen ejecutándose vía casos de uso tipados (JPA); la validación es defensa en profundidad sobre el texto libre del usuario.
+
+### 10.1.1 RBAC en executor (capa agente)
+
+Además del filtrado de tools enviadas al LLM, `AssistantToolExecutor` revalida rol JWT **y subset del agente** (`AssistantToolRbacGuard`). Un JD en copiloto `phases` no puede ejecutar `list_users` aunque el LLM lo pida. Ver [`TOOL-CATALOG.md`](TOOL-CATALOG.md) §1.2.1.
+
+Toda invocación genera log estructurado `AUDIT_ASSISTANT_TOOL` (`AssistantToolAuditPort`).
 
 ### 10.2 Modal de acciones del agente (solo desarrollo)
 

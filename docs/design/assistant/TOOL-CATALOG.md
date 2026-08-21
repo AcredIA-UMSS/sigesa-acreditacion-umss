@@ -5,7 +5,7 @@ modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 release: v1.1-tools
 status: Implemented
-ultima_actualizacion: "2026-08-11"
+ultima_actualizacion: "2026-08-21"
 agents:
   - phases (DD-AGENT-001)
   - users (DD-AGENT-002)
@@ -39,15 +39,18 @@ sequenceDiagram
 
   U->>BE: POST /assistant/chat
   BE->>LLM: messages + tools[] (filtradas por rol)
-  LLM-->>BE: tool_call { name, arguments }
-  BE->>EX: execute(tool, args, authContext)
-  EX->>EX: Validar rol + parámetros
-  EX->>UC: invocar puerto de aplicación
-  UC-->>EX: resultado dominio
-  EX-->>BE: JSON serializable
-  BE->>LLM: role=tool, content=resultado
-  LLM-->>BE: respuesta natural language
-  BE-->>U: { reply }
+  loop Por cada iteración (max N)
+    LLM-->>BE: tool_call { name, arguments }
+    BE->>EX: execute(tool, args, authContext)
+    EX->>EX: Validar rol + parámetros
+    EX->>UC: invocar puerto de aplicación
+    UC-->>EX: resultado dominio
+    EX-->>BE: JSON serializable
+    BE->>LLM: role=tool, content=resultado
+  end
+  LLM-->>BE: sin tool_calls (fin encadenamiento)
+  BE->>BE: AssistantResponseFormatter (1 o N pasos)
+  BE-->>U: { reply, toolId, steps[] }
 ```
 
 ### 1.2 Registro dinámico por rol
@@ -58,6 +61,19 @@ sequenceDiagram
 | **R2** | El `AssistantToolExecutor` **revalida** el rol antes de ejecutar (defensa en profundidad). |
 | **R3** | Si un usuario no autorizado pregunta por datos restringidos, el asistente responde con texto genérico **sin invocar** la tool (no debe aparecer en `tools[]`). |
 | **R4** | Ninguna tool expone contraseñas, hashes, tokens ni datos fuera del contrato documentado. |
+| **R5** | El `AssistantToolExecutor` revalida el **subset del agente** (`phases`/`users`/`evidence`) aunque el LLM alucine un `tool_call` fuera del panel. |
+| **R6** | Toda invocación (éxito o denegación) se registra vía `AssistantToolAuditPort` → log `AUDIT_ASSISTANT_TOOL` (sin argumentos sensibles). |
+
+### 1.2.1 Capas RBAC (defensa en profundidad)
+
+| Capa | Componente | Qué valida |
+|------|------------|------------|
+| **L1 HTTP** | `AssistantController` | Agente permitido por rol (`users`→JD; `evidence`→JD/TD/CC) → 403 |
+| **L2 Registro LLM** | `AssistantToolRegistry.toolsForRoleAndAgent` | Tools visibles al modelo según rol + agente |
+| **L3 Executor rol** | `AssistantToolRbacGuard` | Rol JWT ∈ `allowedRoles` de la tool |
+| **L4 Executor agente** | `AssistantToolRbacGuard` + `isToolAllowedForAgent` | Tool ∈ subset del agente embebido |
+| **L5 Dominio** | Use cases (`ProcessAccessPolicy`, `programScope`) | PBAC carrera / permisos REST equivalentes |
+| **L6 Auditoría** | `Slf4jAssistantToolAuditAdapter` | Trazabilidad: userId, role, agent, tool, sideEffect, outcome |
 
 ### 1.3 Formato estándar de respuesta de tool
 
@@ -111,9 +127,13 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | `list_active_processes` | read | ✓ | ✓ | — | — |
 | `manage_process_phase` | write | ✓ | ✓ | — | — |
 | `manage_process_subphase` | write | ✓ | ✓ | — | — |
+| `list_pending_evidences` | read | ✓ | ✓ | ✓ | — |
+| `get_evidence_detail` | read | ✓ | ✓ | ✓ | — |
+| `check_evidence_completeness` | read | ✓ | ✓ | ✓ | — |
+| `search_normative_docs` | read | ✓ | ✓ | ✓ | ✓ |
 
-> **Agente `phases`:** subset (4 tools). CC solo lectura. Ver [DD-AGENT-001](DD-AGENT-001.md).  
-> **Agente `users`:** subset (5 tools JD-only). Ver [DD-AGENT-002](DD-AGENT-002.md). HTTP 403 si rol ≠ JD.  
+> **Agente `phases`:** subset (5 tools, incluye RAG). CC solo lectura. Ver [DD-AGENT-001](DD-AGENT-001.md).  
+> **Agente `users`:** subset (6 tools JD-only + RAG). Ver [DD-AGENT-002](DD-AGENT-002.md). HTTP 403 si rol ≠ JD.  
 > **Gestión de usuarios:** exclusiva **JD** (alineada a `GET/PATCH /admin/users`).  
 > **Fases/subfases:** **JD** y **TD** escritura; **CC** solo lectura en su carrera asignada.
 
@@ -130,6 +150,19 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 | `manage_user_assignment` | `write` | **JD** | `ManageUserProgramAssignmentUseCase` | *(user_program_assignment)* |
 | `manage_process_phase` | `write` | **JD**, **TD** | `Add/Update/Delete/ReorderProcess*` | `ProcessStructureController` |
 | `manage_process_subphase` | `write` | **JD**, **TD** | `Add/Update/DeleteProcessSubphase*` | `ProcessStructureController` |
+| `search_normative_docs` | `read` | **JD**, **TD**, **CC**, **EE** | `SearchNormativeDocumentsUseCase` | *(índice `normative_document` — RAG FTS)* |
+
+### 2.0.1 RAG normativo (PR-IMPL-032)
+
+| Componente | Descripción |
+|------------|-------------|
+| **Corpus** | Tabla `normative_document` (título, template_type, body_text, source_url) |
+| **Retrieval** | PostgreSQL FTS (`tsvector` + GIN) en prod; fallback LIKE en dev/Hibernate |
+| **Tool** | `search_normative_docs` — todos los agentes y roles del asistente |
+| **Enriquecimiento** | `AssistantNormativeRagService` inyecta fragmentos en system prompt del LLM |
+| **Fallback** | Si el LLM no elige tool, respuesta directa vía path `RAG` cuando hay hits |
+| **Config** | `sigesa.assistant.rag-enabled` (default true), `rag-max-chunks` (default 3) |
+
 
 ### 2.1 Protocolo de confirmación (tools `write`)
 
@@ -445,8 +478,17 @@ Documento de entrega: [`ENTREGA-TOOL-CALLING-SEMANA.md`](ENTREGA-TOOL-CALLING-SE
 | **2** | Sinónimo | «¿Qué **etapas** tiene el proceso activo de Ingeniería de Sistemas CEUB?» | **LLM** | Misma tool/datos que esc. 1; LLM invocado solo para elegir tool |
 | **3** | Fuera de alcance | «¿Cuál es el presupuesto de la universidad para 2027?» | **OUT_OF_SCOPE** | «No puedo responder eso» + capacidades; sin tool |
 | **4** | Modelo apagado | Igual esc. 1 con `SIGESA_ASSISTANT_LLM_ENABLED=false` | **KEYWORD** | Idéntico a esc. 1; esc. 2 debe fallar con mensaje claro |
+| **5** | Multi-tool (Nivel 4) | «Muestra la estructura de Ingeniería de Sistemas CEUB y busca normativa de Matriz de evidencias» | **LLM** | ≥2 tools; traza `steps[]` visible; `reply` con **Paso 1** / **Paso 2** |
 
 **Regla:** la respuesta con datos la produce **siempre** `AssistantResponseFormatter` (código), nunca el LLM.
+
+### 5.0 Escenarios Nivel 4 por agente embebido
+
+| Agente | # | Pregunta demo | Encadenamiento esperado |
+|--------|---|---------------|-------------------------|
+| `phases` | 5 | Estructura completa + normativa Matriz de evidencias | `list_process_structure` → `search_normative_docs` |
+| `users` | 5 | Lista CC activos + detalle de cc@umss.edu.bo | `list_users` → `get_user_detail` |
+| `evidence` | 4 | Pendientes + normativa matriz CEUB | `list_pending_evidences` → `search_normative_docs` |
 
 ### 5.1 RBAC (tests unitarios existentes)
 
@@ -466,8 +508,10 @@ Documento de entrega: [`ENTREGA-TOOL-CALLING-SEMANA.md`](ENTREGA-TOOL-CALLING-SE
 | Artefacto | Acción pendiente |
 |-----------|------------------|
 | [DD-SYS-002](../DD-SYS-002.md) §11 | Referencia a este catálogo — **hecho** |
-| [DTP.md](../../product/DTP.md) §B.5 | Registrar tool calling y dependencia de `ListUsersUseCase` |
-| `PR-IMPL-013` | Contrato implementación loop tool calling — **hecho** |
+| [DTP.md](../../product/DTP.md) §B.5 | Tool calling, RAG, Nivel 4 multi-tool |
+| `PR-IMPL-013` | Contrato loop tool calling — **hecho** |
+| `PR-IMPL-033` | Encadenamiento multi-tool + traza `steps[]` — **hecho** |
+| `PR-IMPL-032` | RAG normativo — **hecho** |
 | [API-USER-03](../../product/api/API-USER-03.md) | Contrato formal GET `/admin/users` |
 | [api_contracts.md](../../product/api_contracts.md) | Índice resumido MOD-AUTH |
 
@@ -510,8 +554,17 @@ Subset de **control documental** embebido en `/evidencias/cargar`. Contrato: `co
 | `list_pending_evidences` | — | Indicadores en `SUBIDO` (docs listas para control TD); CC acotado a su carrera |
 | `get_evidence_detail` | — | Metadatos evidencia/versión (hash, descripción, criterio, estado) |
 | `check_evidence_completeness` | — | Checklist archivo/descripción/criterio/hash + flag `complete` |
+| `search_normative_docs` | — | Fragmentos normativos CEUB/ARCU-SUR indexados (RAG) |
 
 **MCP espejo:** `mcp/sigesa-evidence` (mismas tools vía HTTP + JWT).
 
 Ver [DD-AGENT-003](DD-AGENT-003.md), [FSD-UC-024](../../product/uc/FSD-UC-024.md) y [PR-IMPL-026](../../prompts/impl/PR-IMPL-026.md).
+
+---
+
+## 10. RAG en todos los agentes
+
+La tool `search_normative_docs` está disponible en **general**, **phases**, **users** y **evidence**. El servicio `AssistantNormativeRagService` enriquece el prompt del LLM antes de la selección de tool.
+
+Ver [PR-IMPL-032](../../prompts/impl/PR-IMPL-032.md).
 

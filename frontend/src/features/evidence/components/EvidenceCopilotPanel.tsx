@@ -4,6 +4,7 @@ import type { AssistantDemoScenario, ChatMessage } from '../../../api/model/assi
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { useEvidenceCopilot } from '../hooks/useEvidenceCopilot';
+import { CopilotAssistantMetadata } from '../../assistant/components/CopilotAssistantMetadata';
 import { EvidenceCopilotActionDebugModal } from './EvidenceCopilotActionDebugModal';
 
 export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
@@ -233,6 +234,9 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }`}
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
+        {!isUser && message.metadata && (
+          <CopilotAssistantMetadata metadata={message.metadata} compact />
+        )}
       </div>
     </div>
   );

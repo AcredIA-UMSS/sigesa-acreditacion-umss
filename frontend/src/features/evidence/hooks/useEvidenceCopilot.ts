@@ -5,6 +5,7 @@ import {
 } from '../../../api/endpoints/assistant-controller/assistant-controller';
 import type {
   AssistantChatContextDto,
+  AssistantMessageMetadata,
   AssistantResolutionPath,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
@@ -15,13 +16,20 @@ import type {
 } from '../../assistant/types/copilotAgentAction';
 import { EVIDENCE_COPILOT_DEBUG_ACTIONS_ENABLED } from '../../../lib/config/evidenceCopilotDebug';
 import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
+import { mapAssistantResponseMetadata } from '../../assistant/lib/mapAssistantResponseMetadata';
+import { recordToolTraceInAction } from '../../assistant/lib/recordToolTraceInAction';
 
-function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
+function createMessage(
+  role: ChatMessage['role'],
+  content: string,
+  metadata?: AssistantMessageMetadata,
+): ChatMessage {
   return {
     id: crypto.randomUUID(),
     role,
     content,
     createdAt: new Date().toISOString(),
+    metadata,
   };
 }
 
@@ -33,12 +41,16 @@ function summarizeEvidenceAction(input: {
   path: AssistantResolutionPath | 'ERROR';
   status: CopilotAgentActionStatus;
   reply?: string;
+  stepCount?: number;
 }): string {
   if (input.status === 'error') {
     return 'Falló la consulta al asistente.';
   }
   if (input.path === 'OUT_OF_SCOPE') {
     return 'Consulta fuera de alcance del agente de evidencias.';
+  }
+  if ((input.stepCount ?? 0) > 1) {
+    return `Encadenó ${input.stepCount} tools (${input.toolId ?? 'multi-tool'}).`;
   }
   switch (input.toolId) {
     case 'list_pending_evidences':
@@ -47,6 +59,8 @@ function summarizeEvidenceAction(input: {
       return 'Consultó el detalle de una evidencia.';
     case 'check_evidence_completeness':
       return 'Verificó la completitud de una evidencia.';
+    case 'search_normative_docs':
+      return 'Consultó fragmentos normativos indexados.';
     default:
       if (input.reply && input.reply.length > 0) {
         return input.reply.length > 90
@@ -169,22 +183,7 @@ export function useEvidenceCopilot(programId?: string) {
         context: chatContext,
       });
 
-      appendActionStep(actionId, {
-        label: `Tool ejecutada: ${response.toolId ?? 'ninguna'} (${response.path})`,
-        kind: 'success',
-      });
-      if (response.llmInvoked) {
-        appendActionStep(actionId, {
-          label: 'LLM invocado para selección de tool',
-          kind: 'info',
-        });
-      }
-      if (response.sourceTables.length > 0) {
-        appendActionStep(actionId, {
-          label: `Fuentes consultadas: ${response.sourceTables.join(', ')}`,
-          kind: 'info',
-        });
-      }
+      recordToolTraceInAction(appendActionStep, actionId, response);
       appendActionStep(actionId, {
         label: 'Respuesta entregada al chat',
         kind: 'success',
@@ -195,6 +194,7 @@ export function useEvidenceCopilot(programId?: string) {
           path: response.path,
           status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
           reply: response.reply,
+          stepCount: response.steps?.length ?? 0,
         }),
         toolId: response.toolId,
         path: response.path,
@@ -203,7 +203,10 @@ export function useEvidenceCopilot(programId?: string) {
         status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
       });
 
-      setMessages((prev) => [...prev, createMessage('assistant', response.reply)]);
+      setMessages((prev) => [
+        ...prev,
+        createMessage('assistant', response.reply, mapAssistantResponseMetadata(response)),
+      ]);
     } catch {
       appendActionStep(actionId, {
         label: 'Error al contactar al asistente o entrada rechazada',

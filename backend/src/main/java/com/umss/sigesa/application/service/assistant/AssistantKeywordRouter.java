@@ -66,6 +66,17 @@ public class AssistantKeywordRouter {
     private static final Pattern UUID_PATTERN = Pattern.compile(
             "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})");
 
+    private static final Pattern NORMATIVE_PATTERN = Pattern.compile(
+            "(?is).*(normativa|qu[eé]\\s+dice\\s+la\\s+normativa|documentaci[oó]n\\s+normativa|"
+                    + "buscar\\s+en\\s+normativa|referencia\\s+normativa|enlace\\s+normativo|"
+                    + "requisitos?\\s+normativos?|est[aá]ndares?\\s+de\\s+acreditaci[oó]n|"
+                    + "diagn[oó]stico\\s+institucional|matriz\\s+de\\s+evidencias|"
+                    + "informe\\s+(preliminar|final)|validaci[oó]n\\s+de\\s+criterios).*");
+
+    private static final Pattern OPERATIONAL_QUERY_PATTERN = Pattern.compile(
+            "(?is).*(list(a|ar|ame|arme)?|fases?|etapas?|usuarios?|procesos?\\s+activos?|"
+                    + "evidencias?\\s+pendientes|activa(r)?|desactiva(r)?|crea(r)?|elimina(r)?).*");
+
     public Optional<AssistantToolInvocation> resolve(String userMessage,
                                                      List<ChatMessage> history,
                                                      AssistantAuthContext auth) {
@@ -126,7 +137,29 @@ public class AssistantKeywordRouter {
             return Optional.of(new AssistantToolInvocation(AssistantToolRegistry.LIST_USERS_ID, "{}"));
         }
 
+        if (isAssistantRole(role)
+                && NORMATIVE_PATTERN.matcher(message).matches()
+                && !OPERATIONAL_QUERY_PATTERN.matcher(message).matches()) {
+            return Optional.of(buildNormativeSearchInvocation(message, chatContext));
+        }
+
         return Optional.empty();
+    }
+
+    private static boolean isAssistantRole(String role) {
+        return "JD".equals(role) || "TD".equals(role) || "CC".equals(role) || "EE".equals(role);
+    }
+
+    private static AssistantToolInvocation buildNormativeSearchInvocation(String message,
+                                                                            AssistantChatContext chatContext) {
+        String escaped = message.replace("\\", "\\\\").replace("\"", "\\\"");
+        StringBuilder json = new StringBuilder("{\"query\":\"");
+        json.append(escaped).append('"');
+        if (chatContext != null && chatContext.templateType() != null && !chatContext.templateType().isBlank()) {
+            json.append(",\"templateType\":\"").append(chatContext.templateType()).append('"');
+        }
+        json.append('}');
+        return new AssistantToolInvocation(AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID, json.toString());
     }
 
     private Optional<AssistantToolInvocation> resolveEvidenceFlow(String message,

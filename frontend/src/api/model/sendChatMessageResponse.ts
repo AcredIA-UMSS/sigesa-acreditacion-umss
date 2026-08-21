@@ -5,10 +5,18 @@
  * OpenAPI spec version: v0
  */
 
+export interface AssistantToolStepResponse {
+  step?: number;
+  toolId?: string;
+  sourceTables?: string[];
+  success?: boolean;
+}
+
 export interface SendChatMessageResponse {
   reply?: string;
   toolId?: string;
   sourceTables?: string[];
   path?: string;
   llmInvoked?: boolean;
+  steps?: AssistantToolStepResponse[];
 }

@@ -49,6 +49,7 @@ public final class AssistantCapabilitiesCatalog {
             items.add("Consultar evidencias pendientes de su carrera (agente evidence).");
             items.add("Ver detalle y completitud de evidencias de su alcance.");
         }
+        items.add("Consultar documentación normativa indexada (CEUB, ARCU-SUR, RAG).");
         if (items.isEmpty()) {
             items.add("Consultas operativas sobre acreditación sin tools administrativas para su rol.");
         }
@@ -68,6 +69,7 @@ public final class AssistantCapabilitiesCatalog {
             items.add("Modo solo lectura: no puede modificar la estructura del proceso.");
         }
         items.add("Preguntas sobre el proceso que está viendo en pantalla.");
+        items.add("Buscar fragmentos normativos CEUB/ARCU-SUR (RAG).");
         return items;
     }
 
@@ -81,7 +83,8 @@ public final class AssistantCapabilitiesCatalog {
                 "Consultar detalle de un usuario (rol, alcance, estado, fechas).",
                 "Registrar usuarios @umss.edu.bo (cuenta INACTIVE hasta primer acceso).",
                 "Activar, desactivar o reactivar cuentas (con confirmación; bitácora UC-017).",
-                "Crear o actualizar asignación de carrera (mínimo privilegio)."
+                "Crear o actualizar asignación de carrera (mínimo privilegio).",
+                "Consultar documentación normativa indexada (RAG)."
         );
     }
 
@@ -100,6 +103,7 @@ public final class AssistantCapabilitiesCatalog {
             items.add("Alcance institucional; puede acotar por programId.");
         }
         items.add("Solo lectura: no aprueba ni rechaza indicadores en esta fase.");
+        items.add("Consultar normativa de acreditación indexada (RAG).");
         return items;
     }
 

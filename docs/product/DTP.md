@@ -45,6 +45,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 21/08/2026 | **MOD-ASSISTANT Nivel 4 (multi-tool):** loop encadenado en `SendChatMessageService`; API `steps[]`; traza UI en `/ayuda` + copilotos phases/users/evidence; escenarios demo #5 por agente. | DD-SYS-002 §11.10 / TOOL-CATALOG §5 | N/A | PM-023 / PR-IMPL-033 | Cursor Agent |
+| 21/08/2026 | **MOD-ASSISTANT RAG normativo:** tabla `normative_document` (V8 FTS); tool `search_normative_docs`; `AssistantNormativeRagService`; config `rag-enabled`, `rag-max-chunks`. | DD-SYS-002 / PR-IMPL-032 | N/A | PM-022 / PR-IMPL-032 | Cursor Agent |
 | 21/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** UI copiloto alineada con fases/usuarios; modal dev `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`; seguridad chat documentada. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-020 / PR-IMPL-030 | Cursor Agent |
 | 21/08/2026 | **MOD-EVIDENCE / MOD-PROCESS:** carga de evidencia en subfases vía enlace subrayado + modal (`SubphaseEvidenceUploadModal`); [CC] upload inline; [JD/TD] redirect UC-004. | FSD-UC-004 / FSD-UC-019 / DD-UC-004 | N/A | PM-019 / PR-IMPL-029 | Cursor Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
@@ -255,24 +257,28 @@ artefactos_vivos:
 
 ### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
 
-**Implementación:** Sprint 02 PM-001 + PM-002 · **Prompts:** `PR-IMPL-012`, `PR-IMPL-013` · **PRD:** PRD-REQ-028
+**Implementación:** Sprint 02 PM-001…PM-023 · **Prompts:** `PR-IMPL-012`, `PR-IMPL-013`, `PR-IMPL-033`, `PR-IMPL-032` · **PRD:** PRD-REQ-028
 
 | Área | Detalle vigente |
 | --- | --- |
 | **Endpoints** | `GET /api/v1/assistant/status`; `POST /api/v1/assistant/chat` |
 | **RBAC chat** | Todo usuario autenticado con JWT válido |
-| **RBAC tools** | Registro dinámico por rol JWT — matriz [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) §2.0 |
-| **RBAC tools (resumen)** | Usuarios → **solo JD**; fases de proceso → **JD + TD**; CC/EE sin tools |
+| **RBAC tools** | Registro dinámico por rol JWT + subset agente en executor — matriz [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) §1.2.1 |
+| **Auditoría tools** | `AssistantToolAuditPort` → SLF4J `AUDIT_ASSISTANT_TOOL` (userId, role, agent, tool, outcome) |
+| **RBAC tools (resumen)** | Usuarios → **solo JD**; fases de proceso → **JD + TD**; CC/EE sin tools administrativas |
 | **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1) |
-| **Tool calling** | Loop en `SendChatMessageService` (max 5 iter. default); `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
+| **Tool calling** | Loop multi-tool en `SendChatMessageService` (max **5** iter. default); una tool/iteración; `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
+| **Nivel 4 (multi-tool)** | LLM encadena tools secuenciales; respuesta combinada por `AssistantResponseFormatter`; traza `steps[]` en API y UI |
+| **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; config `rag-enabled`, `rag-max-chunks` |
 | **Tools vigentes** | Catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) — read + write con confirmación en chat |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
-| **Config YAML** | `sigesa.assistant.*` — incluye `max-tool-iterations` (default 5) |
-| **Variables entorno** | `SIGESA_ASSISTANT_ENABLED`, `SIGESA_ASSISTANT_BASE_URL`, `SIGESA_ASSISTANT_API_KEY`, `SIGESA_ASSISTANT_MODEL`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` |
+| **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks` |
+| **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS` |
 | **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
-| **Frontend** | Ruta `/ayuda`; copiloto fases (`PhasesCopilotPanel`); copiloto users (`UsersCopilotPanel` en `/admin/users`, solo JD); feature `frontend/src/features/assistant/` |
+| **Frontend** | `/ayuda` (`AssistantChatUI`); copilotos `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; metadata + traza vía `CopilotAssistantMetadata` |
 | **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence` |
+| **Respuesta chat** | `{ reply, toolId, sourceTables, path, llmInvoked, steps[] }` |
 | **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED`; 403 `ACCESS_DENIED` (agente users sin rol JD) |
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |
 | **Streaming** | No (`stream: false`) |

@@ -26,10 +26,12 @@ public class AssistantToolRegistry {
     static final String LIST_PENDING_EVIDENCES_ID = "list_pending_evidences";
     static final String GET_EVIDENCE_DETAIL_ID = "get_evidence_detail";
     static final String CHECK_EVIDENCE_COMPLETENESS_ID = "check_evidence_completeness";
+    static final String SEARCH_NORMATIVE_DOCS_ID = "search_normative_docs";
 
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
     private static final Set<String> JD_TD_AND_CC = Set.of("JD", "TD", "CC");
+    private static final Set<String> ALL_ASSISTANT_ROLES = Set.of("JD", "TD", "CC", "EE");
 
     private static final AssistantToolDefinition LIST_USERS = new AssistantToolDefinition(
             LIST_USERS_ID,
@@ -180,6 +182,16 @@ public class AssistantToolRegistry {
             evidenceIndicatorParameterSchema()
     );
 
+    private static final AssistantToolDefinition SEARCH_NORMATIVE_DOCS = new AssistantToolDefinition(
+            SEARCH_NORMATIVE_DOCS_ID,
+            "Busca fragmentos de documentación normativa de acreditación (CEUB, ARCU-SUR, DUEA). "
+                    + "Todos los roles del asistente. Indica query con la pregunta del usuario. "
+                    + "Opcional templateType: CEUB o ARCU-SUR para acotar resultados.",
+            ALL_ASSISTANT_ROLES,
+            "read",
+            searchNormativeDocsParameterSchema()
+    );
+
     private final List<AssistantToolDefinition> allTools = List.of(
             LIST_USERS,
             GET_USER_DETAIL,
@@ -195,7 +207,8 @@ public class AssistantToolRegistry {
             MANAGE_PROCESS_SUBPHASE,
             LIST_PENDING_EVIDENCES,
             GET_EVIDENCE_DETAIL,
-            CHECK_EVIDENCE_COMPLETENESS
+            CHECK_EVIDENCE_COMPLETENESS,
+            SEARCH_NORMATIVE_DOCS
     );
 
     public List<AssistantToolDefinition> toolsForRole(String role) {
@@ -232,7 +245,8 @@ public class AssistantToolRegistry {
             LIST_PROCESS_PHASES_ID,
             LIST_PROCESS_STRUCTURE_ID,
             MANAGE_PROCESS_PHASE_ID,
-            MANAGE_PROCESS_SUBPHASE_ID
+            MANAGE_PROCESS_SUBPHASE_ID,
+            SEARCH_NORMATIVE_DOCS_ID
     );
 
     private static final Set<String> USERS_AGENT_TOOL_IDS = Set.of(
@@ -240,13 +254,15 @@ public class AssistantToolRegistry {
             GET_USER_DETAIL_ID,
             CREATE_USER_ID,
             MANAGE_USER_STATUS_ID,
-            MANAGE_USER_ASSIGNMENT_ID
+            MANAGE_USER_ASSIGNMENT_ID,
+            SEARCH_NORMATIVE_DOCS_ID
     );
 
     private static final Set<String> EVIDENCE_AGENT_TOOL_IDS = Set.of(
             LIST_PENDING_EVIDENCES_ID,
             GET_EVIDENCE_DETAIL_ID,
-            CHECK_EVIDENCE_COMPLETENESS_ID
+            CHECK_EVIDENCE_COMPLETENESS_ID,
+            SEARCH_NORMATIVE_DOCS_ID
     );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
@@ -256,6 +272,18 @@ public class AssistantToolRegistry {
         return allTools.stream()
                 .filter(tool -> tool.id().equals(toolId))
                 .findFirst();
+    }
+
+    public boolean isToolAllowedForAgent(String toolId, AssistantAgentProfile agentProfile) {
+        if (toolId == null || toolId.isBlank() || agentProfile == null || agentProfile == AssistantAgentProfile.GENERAL) {
+            return true;
+        }
+        return switch (agentProfile) {
+            case PHASES -> PHASES_AGENT_TOOL_IDS.contains(toolId);
+            case USERS -> USERS_AGENT_TOOL_IDS.contains(toolId);
+            case EVIDENCE -> EVIDENCE_AGENT_TOOL_IDS.contains(toolId);
+            case GENERAL -> true;
+        };
     }
 
     private static Map<String, Object> listUsersParameterSchema() {
@@ -393,6 +421,18 @@ public class AssistantToolRegistry {
         Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("indicatorId", stringProperty("UUID del indicador a consultar."));
         return requiredObjectSchema(properties, List.of("indicatorId"));
+    }
+
+    private static Map<String, Object> searchNormativeDocsParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        Map<String, Object> query = stringProperty("Pregunta o términos de búsqueda normativa.");
+        query.put("minLength", 2);
+        properties.put("query", query);
+        properties.put("templateType", enumProperty(
+                List.of("CEUB", "ARCU-SUR"),
+                "Opcional. Acota a plantilla CEUB o ARCU-SUR."));
+        properties.put("limit", integerProperty("Máximo de fragmentos a devolver (1-5). Opcional."));
+        return requiredObjectSchema(properties, List.of("query"));
     }
 
     private static Map<String, Object> objectSchema(Map<String, Object> properties) {

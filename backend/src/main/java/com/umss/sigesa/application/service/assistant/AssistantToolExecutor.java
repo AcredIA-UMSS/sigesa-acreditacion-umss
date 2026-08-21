@@ -3,11 +3,14 @@ package com.umss.sigesa.application.service.assistant;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umss.sigesa.application.model.assistant.AssistantAgentProfile;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.assistant.AssistantToolAuditRecord;
 import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
 import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
-import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
+import com.umss.sigesa.application.model.normative.NormativeDocumentHit;
+import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
@@ -26,6 +29,8 @@ import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
+import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
+import com.umss.sigesa.application.port.out.AssistantToolAuditPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.DuplicateEmailException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
@@ -53,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class AssistantToolExecutor {
@@ -77,7 +83,9 @@ public class AssistantToolExecutor {
     private final ListPendingEvidencesUseCase listPendingEvidencesUseCase;
     private final GetEvidenceDetailUseCase getEvidenceDetailUseCase;
     private final CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
+    private final SearchNormativeDocumentsUseCase searchNormativeDocumentsUseCase;
     private final ObjectMapper objectMapper;
+    private final AssistantToolAuditPort toolAuditPort;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public AssistantToolExecutor(AssistantToolRegistry toolRegistry,
@@ -100,7 +108,9 @@ public class AssistantToolExecutor {
                                  ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                  GetEvidenceDetailUseCase getEvidenceDetailUseCase,
                                  CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
-                                 ObjectMapper objectMapper) {
+                                 SearchNormativeDocumentsUseCase searchNormativeDocumentsUseCase,
+                                 ObjectMapper objectMapper,
+                                 AssistantToolAuditPort toolAuditPort) {
         this.toolRegistry = toolRegistry;
         this.listUsersUseCase = listUsersUseCase;
         this.activateUserUseCase = activateUserUseCase;
@@ -121,19 +131,29 @@ public class AssistantToolExecutor {
         this.listPendingEvidencesUseCase = listPendingEvidencesUseCase;
         this.getEvidenceDetailUseCase = getEvidenceDetailUseCase;
         this.checkEvidenceCompletenessUseCase = checkEvidenceCompletenessUseCase;
+        this.searchNormativeDocumentsUseCase = searchNormativeDocumentsUseCase;
         this.objectMapper = objectMapper;
+        this.toolAuditPort = toolAuditPort;
     }
 
     public String execute(String toolId, String argumentsJson, AssistantAuthContext auth) {
-        AssistantToolDefinition definition = toolRegistry.findById(toolId).orElse(null);
-        if (definition == null) {
-            return serialize(ToolExecutionResult.failure("TOOL_NOT_FOUND", "Tool desconocida: " + toolId));
-        }
+        return execute(toolId, argumentsJson, auth, AssistantAgentProfile.GENERAL);
+    }
 
-        if (auth == null || auth.role() == null || !definition.allowedRoles().contains(auth.role().trim().toUpperCase())) {
-            return serialize(ToolExecutionResult.failure(
-                    "ACCESS_DENIED",
-                    "No tiene permisos para ejecutar la tool '" + toolId + "'."));
+    public String execute(String toolId,
+                          String argumentsJson,
+                          AssistantAuthContext auth,
+                          AssistantAgentProfile agentProfile) {
+        AssistantToolDefinition definition = toolRegistry.findById(toolId).orElse(null);
+        String sideEffect = definition != null ? definition.sideEffect() : "unknown";
+        String agentId = agentProfile != null ? agentProfile.agentId() : "general";
+
+        Optional<ToolExecutionResult> denied = AssistantToolRbacGuard.denyIfUnauthorized(
+                definition, auth, agentProfile, toolRegistry, toolId);
+        if (denied.isPresent()) {
+            ToolExecutionResult failure = denied.get();
+            auditInvocation(auth, agentId, toolId, sideEffect, failure);
+            return serialize(failure);
         }
 
         ToolExecutionResult result = switch (toolId) {
@@ -153,10 +173,35 @@ public class AssistantToolExecutor {
             case AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID -> executeGetEvidenceDetail(argumentsJson, auth);
             case AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID ->
                     executeCheckEvidenceCompleteness(argumentsJson, auth);
+            case AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID ->
+                    executeSearchNormativeDocs(argumentsJson);
             default -> ToolExecutionResult.failure("TOOL_NOT_FOUND", "Tool desconocida: " + toolId);
         };
 
+        auditInvocation(auth, agentId, toolId, sideEffect, result);
         return serialize(result);
+    }
+
+    private void auditInvocation(AssistantAuthContext auth,
+                                 String agentId,
+                                 String toolId,
+                                 String sideEffect,
+                                 ToolExecutionResult result) {
+        if (toolAuditPort == null || auth == null || auth.userId() == null) {
+            return;
+        }
+        boolean success = result != null && result.ok();
+        String outcomeCode = success ? "OK" : result != null && result.error() != null
+                ? result.error().code()
+                : "UNKNOWN";
+        toolAuditPort.logToolInvocation(new AssistantToolAuditRecord(
+                auth.userId(),
+                auth.role(),
+                agentId,
+                toolId,
+                sideEffect,
+                success,
+                outcomeCode));
     }
 
     private ToolExecutionResult executeListUsers(String argumentsJson) {
@@ -1077,6 +1122,39 @@ public class AssistantToolExecutor {
         } catch (ProgramScopeDeniedException ex) {
             return ToolExecutionResult.failure("ACCESS_DENIED", "No tiene acceso a la evidencia solicitada.");
         }
+    }
+
+    private ToolExecutionResult executeSearchNormativeDocs(String argumentsJson) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String query = requiredText(args, "query");
+            String templateType = args.hasNonNull("templateType") ? args.get("templateType").asText(null) : null;
+            int limit = args.hasNonNull("limit") ? Math.clamp(args.get("limit").asInt(), 1, 5) : 3;
+            List<NormativeDocumentHit> hits = searchNormativeDocumentsUseCase.search(query, templateType, limit);
+            List<Map<String, Object>> documents = hits.stream().map(this::toNormativeDocumentMap).toList();
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("query", query);
+            data.put("documents", documents);
+            data.put("total", documents.size());
+            if (templateType != null && !templateType.isBlank()) {
+                data.put("templateType", templateType);
+            }
+            return ToolExecutionResult.success(data);
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_ARGUMENT", ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> toNormativeDocumentMap(NormativeDocumentHit hit) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("title", hit.title());
+        map.put("templateType", hit.templateType());
+        map.put("phaseName", hit.phaseName());
+        map.put("subphaseName", hit.subphaseName());
+        map.put("sourceUrl", hit.sourceUrl());
+        map.put("snippet", hit.snippet());
+        map.put("score", hit.score());
+        return map;
     }
 
     private Map<String, Object> toEvidenceControlMap(EvidenceControlItem item) {

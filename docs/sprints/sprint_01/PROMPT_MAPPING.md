@@ -25,6 +25,7 @@
 | PM-019 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Implementación MOD-EVIDENCE — carga Evidencia v1 |
 | PM-020 | PR-IMPL-011 | DD-UC-011 | FSD-UC-011 | Dashboard compuesto PBAC + exportación async (CSV/XLSX/PDF) |
 | PM-021 | PR-IMPL-005 | DD-UC-014 | FSD-UC-014 | Conexión flujo MOD-REPORT al sistema (nav JD, guard, CTA panel) |
+| PM-022 | PR-IMPL-032 | DD-SYS-002 | FSD-SYS-002 | RAG normativo en asistente (FTS + tool search_normative_docs) |
 
 > **Trazabilidad vigente (2026-06-23):** FSD-UC-001 → `DD-UC-001` → [`PR-IMPL-001`](../../prompts/impl/PR-IMPL-001.md) · FSD-UC-002 → `DD-UC-002` → [`PR-IMPL-002`](../../prompts/impl/PR-IMPL-002.md). Las filas PM-002…PM-007 conservan **`PR-IMPL-004`** como histórico de ejecución; ver [`archive/PR-IMPL-004`](../../prompts/impl/archive/PR-IMPL-004.md) (redirect: [`impl/PR-IMPL-004.md`](../../prompts/impl/PR-IMPL-004.md)).
 ---

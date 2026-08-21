@@ -199,7 +199,37 @@ Para evaluar el desempeño y precisión de las respuestas dentro del dominio de 
 
 ---
 
-## 7. Instrucciones para Convertir este Documento a PDF / Google Docs
+## 7. Evolución posterior (tool calling + Nivel 4)
+
+> **Nota:** Este reporte documenta el MVP proxy LLM inicial. La arquitectura vigente evolucionó hacia **tool calling** con respuesta formateada por Java (no el LLM).
+
+| Fecha | Capacidad | Referencia |
+|-------|-----------|------------|
+| 2026-07-31 | Loop tool calling read-only | [PR-IMPL-013](prompts/impl/PR-IMPL-013.md) |
+| 2026-08-21 | RAG normativo (`search_normative_docs`) | [PR-IMPL-032](prompts/impl/PR-IMPL-032.md) |
+| 2026-08-21 | **Nivel 4:** encadenamiento multi-tool + traza `steps[]` | [PR-IMPL-033](prompts/impl/PR-IMPL-033.md) |
+
+Contrato API actual de `POST /api/v1/assistant/chat`:
+
+```json
+{
+  "reply": "…",
+  "toolId": "search_normative_docs",
+  "sourceTables": ["phases", "normative_document"],
+  "path": "LLM",
+  "llmInvoked": true,
+  "steps": [
+    { "step": 1, "toolId": "list_process_structure", "sourceTables": ["phases"], "success": true },
+    { "step": 2, "toolId": "search_normative_docs", "sourceTables": ["normative_document"], "success": true }
+  ]
+}
+```
+
+Documentación viva: [DTP.md](product/DTP.md) §B.5 · [DD-SYS-002.md](design/DD-SYS-002.md) §11.10 · [TOOL-CATALOG.md](design/assistant/TOOL-CATALOG.md).
+
+---
+
+## 8. Instrucciones para Convertir este Documento a PDF / Google Docs
 
 1. Copie el contenido de este archivo Markdown.
 2. Ingrese a [Google Docs](https://docs.google.com).

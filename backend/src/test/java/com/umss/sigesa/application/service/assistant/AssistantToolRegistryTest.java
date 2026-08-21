@@ -28,7 +28,8 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
 
@@ -45,7 +46,8 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
 
@@ -57,7 +59,8 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID
+                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
 
@@ -70,7 +73,8 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.GET_USER_DETAIL_ID,
                 AssistantToolRegistry.CREATE_USER_ID,
                 AssistantToolRegistry.MANAGE_USER_STATUS_ID,
-                AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID
+                AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
 
@@ -81,7 +85,8 @@ class AssistantToolRegistryTest {
         assertThat(tools).extracting(def -> def.id()).containsExactly(
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
 
@@ -92,7 +97,43 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
+    }
+
+    @Test
+    void toolsForRole_eeHasNormativeSearchOnly() {
+        assertThat(registry.toolsForRole("EE")).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
+        );
+    }
+
+    @Test
+    void toolsForRoleAndAgent_ccUsersProfile_isEmpty() {
+        assertThat(registry.toolsForRoleAndAgent("CC", AssistantAgentProfile.USERS)).isEmpty();
+    }
+
+    @Test
+    void toolsForRoleAndAgent_tdUsersProfile_isEmpty() {
+        assertThat(registry.toolsForRoleAndAgent("TD", AssistantAgentProfile.USERS)).isEmpty();
+    }
+
+    @Test
+    void isToolAllowedForAgent_rejectsCrossAgentTools() {
+        assertThat(registry.isToolAllowedForAgent(AssistantToolRegistry.LIST_USERS_ID, AssistantAgentProfile.PHASES))
+                .isFalse();
+        assertThat(registry.isToolAllowedForAgent(
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, AssistantAgentProfile.USERS))
+                .isFalse();
+        assertThat(registry.isToolAllowedForAgent(
+                AssistantToolRegistry.LIST_PROCESS_PHASES_ID, AssistantAgentProfile.EVIDENCE))
+                .isFalse();
+    }
+
+    @Test
+    void isToolAllowedForAgent_generalAllowsAllRegisteredTools() {
+        assertThat(registry.isToolAllowedForAgent(AssistantToolRegistry.LIST_USERS_ID, AssistantAgentProfile.GENERAL))
+                .isTrue();
     }
 }

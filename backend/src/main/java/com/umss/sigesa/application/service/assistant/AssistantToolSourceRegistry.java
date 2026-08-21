@@ -30,7 +30,8 @@ public final class AssistantToolSourceRegistry {
             Map.entry(AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID, List.of(
                     "evidence", "evidence_version", "indicator", "indicator_state_history")),
             Map.entry(AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID, List.of(
-                    "evidence", "evidence_version", "indicator", "indicator_state_history"))
+                    "evidence", "evidence_version", "indicator", "indicator_state_history")),
+            Map.entry(AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID, List.of("normative_document"))
     );
 
     private AssistantToolSourceRegistry() {

@@ -16,6 +16,8 @@ import type {
 } from '../../assistant/types/copilotAgentAction';
 import { PHASES_COPILOT_DEBUG_ACTIONS_ENABLED } from '../../../lib/config/phasesCopilotDebug';
 import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
+import { mapAssistantResponseMetadata } from '../../assistant/lib/mapAssistantResponseMetadata';
+import { recordToolTraceInAction } from '../../assistant/lib/recordToolTraceInAction';
 
 function createMessage(
   role: ChatMessage['role'],
@@ -40,12 +42,16 @@ function summarizePhasesAction(input: {
   path: AssistantResolutionPath | 'ERROR';
   status: CopilotAgentActionStatus;
   reply?: string;
+  stepCount?: number;
 }): string {
   if (input.status === 'error') {
     return 'Falló la consulta al asistente.';
   }
   if (input.path === 'OUT_OF_SCOPE') {
     return 'Consulta fuera de alcance del copiloto de fases.';
+  }
+  if ((input.stepCount ?? 0) > 1) {
+    return `Encadenó ${input.stepCount} tools (${input.toolId ?? 'multi-tool'}).`;
   }
   switch (input.toolId) {
     case 'list_process_phases':
@@ -56,6 +62,8 @@ function summarizePhasesAction(input: {
       return 'Operación sobre fase del proceso (preview o confirmación).';
     case 'manage_process_subphase':
       return 'Operación sobre subfase (preview o confirmación).';
+    case 'search_normative_docs':
+      return 'Consultó fragmentos normativos indexados.';
     default:
       if (input.reply && input.reply.length > 0) {
         return input.reply.length > 90
@@ -193,22 +201,7 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
       });
 
       if (debugEnabled) {
-        appendActionStep(actionId, {
-          label: `Tool ejecutada: ${response.toolId ?? 'ninguna'} (${response.path})`,
-          kind: 'success',
-        });
-        if (response.llmInvoked) {
-          appendActionStep(actionId, {
-            label: 'LLM invocado para selección de tool',
-            kind: 'info',
-          });
-        }
-        if (response.sourceTables.length > 0) {
-          appendActionStep(actionId, {
-            label: `Fuentes consultadas: ${response.sourceTables.join(', ')}`,
-            kind: 'info',
-          });
-        }
+        recordToolTraceInAction(appendActionStep, actionId, response);
         appendActionStep(actionId, {
           label: 'Respuesta formateada entregada al panel',
           kind: 'success',
@@ -219,6 +212,7 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
             path: response.path,
             status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
             reply: response.reply,
+            stepCount: response.steps?.length ?? 0,
           }),
           toolId: response.toolId,
           path: response.path,
@@ -230,12 +224,7 @@ export function usePhasesCopilot(process: PhasesCopilotProcessContext) {
 
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
-        }),
+        createMessage('assistant', response.reply, mapAssistantResponseMetadata(response)),
       ]);
     } catch {
       if (debugEnabled) {
