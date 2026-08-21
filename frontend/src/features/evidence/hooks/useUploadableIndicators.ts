@@ -13,15 +13,18 @@ export type UploadableIndicatorsState = {
   reload: () => void;
 };
 
-export function useUploadableIndicators(): UploadableIndicatorsState {
+export function useUploadableIndicators(
+  options: { enabled?: boolean } = {},
+): UploadableIndicatorsState {
+  const enabled = options.enabled !== false;
   const { isAuthenticated, session } = useAuth();
   const [indicators, setIndicators] = useState<UploadableIndicatorDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
-    if (!isAuthenticated || !session?.accessToken) {
+    if (!enabled || !isAuthenticated || !session?.accessToken) {
       setIndicators([]);
       setIsLoading(false);
       setErrorMessage(null);
@@ -57,7 +60,7 @@ export function useUploadableIndicators(): UploadableIndicatorsState {
     return () => {
       cancelled = true;
     };
-  }, [reloadToken, isAuthenticated, session?.accessToken]);
+  }, [reloadToken, isAuthenticated, session?.accessToken, enabled]);
 
   return {
     indicators,

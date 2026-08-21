@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
+import { useUploadableIndicators } from '../../evidence/hooks/useUploadableIndicators';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessPhaseTree } from './ProcessPhaseTree';
 import { PhasesCopilotPanel } from './PhasesCopilotPanel';
@@ -33,6 +34,11 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const canUseCopilot =
     session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
   const copilotReadOnly = session?.role === 'CC';
+  const canUploadEvidence = session?.role === 'CC';
+  const uploadable = useUploadableIndicators({ enabled: canUploadEvidence });
+  const indicatorsForTree = canUploadEvidence ? uploadable.indicators : [];
+  const indicatorsLoading = canUploadEvidence ? uploadable.isLoading : false;
+  const indicatorsError = canUploadEvidence ? uploadable.errorMessage : null;
 
   return (
     <div className="space-y-6">
@@ -109,7 +115,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  Fases y subfases clonadas desde la plantilla, ordenadas por secuencia normativa.
+                  Fases y subfases clonadas desde la plantilla. En cada subfase
+                  puede adjuntar evidencias (PDF, Word, Excel o imagen) vía UC-004.
                 </p>
               </div>
               {canEditStructure && (
@@ -121,7 +128,14 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 </Link>
               )}
             </div>
-            <ProcessPhaseTree phases={process.phases ?? []} />
+            <ProcessPhaseTree
+              phases={process.phases ?? []}
+              processId={processId}
+              canUploadEvidence={canUploadEvidence}
+              uploadableIndicators={indicatorsForTree}
+              indicatorsLoading={indicatorsLoading}
+              indicatorsError={indicatorsError}
+            />
           </section>
           </div>
 

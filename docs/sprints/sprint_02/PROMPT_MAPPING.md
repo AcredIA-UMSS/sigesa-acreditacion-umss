@@ -21,6 +21,8 @@
 | PM-012 | PR-IMPL-025 | DD-AGENT-002 | FSD-UC-002 / PRD-REQ-028 | Copiloto usuarios embebido (`agent=users`): tools alta/estado/asignación JD-only, UsersCopilotPanel |
 | PM-013 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / PRD-REQ-028 | Copiloto control documental (`agent=evidence`) + MCP sigesa-evidence |
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
+| PM-015 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / FSD-UC-004 | Historial de acciones del agente de evidencias |
+| PM-016 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 / FSD-UC-019 | Espacio de carga de evidencias por subfase en estructura |
 
 | PM-016 | N/A (Hotfix) | DD-UC-007 | FSD-UC-007 | Refinamiento y Hotfixes de Búsqueda Inteligente (FSD-UC-007): corrección JPQL, robustez de roles bypass TD, carga inicial y paginación. |
 | PM-017 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
@@ -1082,11 +1084,17 @@ Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escri
 [CC] elige indicador por etiqueta (`code — title`); criterio se fija automáticamente; API `GET /api/v1/indicators/uploadable` + seeds IND-01…03 PENDIENTE.
 
 
+<<<<<<< HEAD
+=======
+---
+
+>>>>>>> origin/main
 ## PM-015
 
 | Campo | Valor |
 |---|---|
 | **ID** | PM-015 |
+<<<<<<< HEAD
 | **Fecha** | 2026-08-08 |
 | **Hora** | 15:40 |
 | **Solicitante** | Tech Lead / User |
@@ -1098,11 +1106,25 @@ Mejorar esta frontend, mostrando opciones al usuario de los datos que debe escri
 | **PR-IMPL vinculado** | [PR-IMPL-007](../../prompts/impl/PR-IMPL-007.md) |
 | **DD-UC vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
 | **FSD-UC vinculado** | [FSD-UC-007.md](../../product/uc/FSD-UC-007.md) |
+=======
+| **Fecha** | 2026-08-18 |
+| **Hora** | 11:36 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Historial de acciones del agente en Cargar Evidencia (FSD-UC-004 / UC-024) |
+| **Objetivo** | Cada respuesta del copiloto registra tool, camino, fuentes y resumen en un historial de sesión |
+| **Contexto** | Superficie `/evidencias/cargar` + agent=evidence |
+| **PR-IMPL vinculado** | PR-IMPL-026 |
+| **DD vinculado** | DD-AGENT-003 |
+| **FSD / PRD vinculado** | FSD-UC-024 / FSD-UC-004 / PRD-REQ-028 |
+>>>>>>> origin/main
 | **Estado** | completado |
 
 ### Prompt usado exacto
 
 ```text
+<<<<<<< HEAD
 Por favor implementa el caso de uso FSD-UC-007 de punta a punta siguiendo rigurosamente el documento de diseño docs/design/DD-UC-007.md.
 Asegúrate de:
 1. Crear el contrato de prompt en docs/prompts/impl/PR-IMPL-007.md.
@@ -1119,10 +1141,16 @@ Asegúrate de:
 - `docs/design/DD-UC-007.md`
 - `docs/prompts/impl/PR-IMPL-007.md`
 
+=======
+Para FSD-UC-004 — Cargar Evidencia, el agente Cuando cargue sus respuestas debe generar un historial de todo lo que hace.
+```
+
+>>>>>>> origin/main
 ### Archivos generados o modificados
 
 | Acción | Ruta |
 |---|---|
+<<<<<<< HEAD
 | generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/EvidenceSearchDetailDto.java` |
 | generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/SearchQueryResponseDto.java` |
 | generado | `backend/src/main/java/com/umss/sigesa/application/port/in/SearchEvidenceUseCase.java` |
@@ -1148,12 +1176,24 @@ Asegúrate de:
 
 - [x] `./mvnw test` — resultado: BUILD SUCCESS (todas las pruebas pasan con éxito)
 - [x] `oxlint` y `tsc` — resultado: OK (sin errores ni warnings)
+=======
+| modificado | `frontend/.../hooks/useEvidenceCopilot.ts` |
+| modificado | `frontend/.../components/EvidenceCopilotPanel.tsx` |
+| modificado | `backend/.../AssistantResponseFormatter.java` |
+| modificado | `docs/product/uc/FSD-UC-024.md`, `docs/product/uc/FSD-UC-004.md` |
+
+### Resultado obtenido
+
+Panel «Historial de acciones» en el copiloto; respuestas de tools de evidencia formateadas (no solo «Consulta completada»).
+
+>>>>>>> origin/main
 
 ---
 
 ## PM-016
 
 | Campo | Valor |
+<<<<<<< HEAD
 | --- | --- |
 | **ID** | PM-016 |
 | **Fecha** | 2026-08-09 |
@@ -1165,18 +1205,38 @@ Asegúrate de:
 | **PR-IMPL vinculado** | N/A (Hotfix) |
 | **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
 | **PRD / FSD vinculado** | FSD-UC-007 |
+=======
+|---|---|
+| **ID** | PM-016 |
+| **Fecha** | 2026-08-18 |
+| **Hora** | 11:48 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Cursor Grok 4.5 |
+| **Tarea** | Espacio de carga de evidencias por subfase en Estructura del proceso |
+| **Objetivo** | En cada subfase permitir adjuntar PDF/Word/Excel/imagen vía UC-004 (indicador + archivo) |
+| **Contexto** | UI detalle proceso; evidencia sigue ligada a indicador (sin FK subfase) |
+| **PR-IMPL vinculado** | PR-IMPL-006 |
+| **DD vinculado** | DD-UC-004 |
+| **FSD / PRD vinculado** | FSD-UC-004 / FSD-UC-019 |
+>>>>>>> origin/main
 | **Estado** | completado |
 
 ### Prompt usado exacto
 
 ```text
+<<<<<<< HEAD
 the user "Tecnico DUEA" shoudl be able to see all evidences uploaded in the system, but not has the same filter as the CC use... same error, this coudl be due to the seed applied pls check it for some reason its not returing those records, in addition pls include a test case to validate this case as well
+=======
+en esta estructura del proceso, crear un espacio para que permita subir evidencias de diferentes tipos de archivos en cada subfase
+>>>>>>> origin/main
 ```
 
 ### Archivos generados o modificados
 
 | Acción | Ruta |
 |---|---|
+<<<<<<< HEAD
 | modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SearchEvidenceJpaAdapter.java` |
 | modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/SearchEvidenceService.java` |
 | modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/SearchEvidenceController.java` |
@@ -1364,6 +1424,8 @@ pls execute the propm contract PR-IMPL-007-MCP, let me know if you have any ques
 | eliminado | `frontend/src/api/endpoints/evidence-controller` |
 | eliminado | `frontend/src/api/endpoints/assistant-controller` |
 | eliminado | `frontend/src/api/endpoints/program-catalog-controller` |
+| generado | `frontend/src/features/processes/components/SubphaseEvidenceUploadSlot.tsx` |
+| generado | `frontend/src/features/evidence/api/uploadEvidence.ts` |
 
 - **Persistencia (Flyway V8 & Postgres Init Seed):** Migración SQL V8 para activar `pg_trgm` y crear índices GIN. Adicionalmente, se actualizaron el script de base de datos de PostgreSQL `db/seed.sql` para habilitar la extensión `pg_trgm`, crear índices trigram y poblar las tablas de programas, dimensiones y evidencias automáticamente al arrancar el contenedor PostgreSQL.
 - **Servidor MCP embebido:** Implementado `AcademicContextMcpServer` usando Spring AI para ofrecer herramientas al motor LLM, extrayendo dinámicamente y agrupando evidencias en subconjuntos (`subsets`).
@@ -1379,4 +1441,5 @@ pls execute the propm contract PR-IMPL-007-MCP, let me know if you have any ques
 ### Resultado obtenido
 
 Búsqueda inteligente multi-token mediante servidor MCP embebido y trigram search en Postgres integrada y validada con cero errores en backend y frontend.
+Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia.
 
