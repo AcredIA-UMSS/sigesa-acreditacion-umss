@@ -39,4 +39,6 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
 
     @Query("SELECT o FROM ObservationEntity o WHERE o.status IN ('APROBADO', 'RECHAZADO') ORDER BY o.issueDate DESC")
     List<ObservationEntity> findRecentEvaluations(Pageable pageable);
+
+    List<ObservationEntity> findByIndicatorId(String indicatorId);
 }

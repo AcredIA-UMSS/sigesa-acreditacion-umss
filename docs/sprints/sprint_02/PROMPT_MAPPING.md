@@ -28,6 +28,8 @@
 | PM-017 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Integración de búsqueda interactiva (slash command /buscar) y tarjetas de resultados con modal de detalles en el Asistente Virtual. |
 | PM-018 | N/A (Refinement) | DD-UC-007 | FSD-UC-007 | Refinamiento de Consola de Depuración y Fallback Inteligente ante Fallas del LLM |
 | PM-019 | PR-IMPL-007-MCP | DD-UC-007-MCP | FSD-UC-007 | Implementación de Búsqueda Inteligente Multi-Token y Contextualizada con servidor MCP embebido en Java. |
+| PM-020 | PR-IMPL-008 | DD-UC-008 | FSD-UC-008 | Rechazar Indicador (API POST + UI bandeja evaluación TD) |
+| PM-021 | PR-IMPL-009 | DD-UC-009 | FSD-UC-009 | Aprobar Indicador (API POST + UI bandeja evaluación TD) |
 ## PM-001
 
 | Campo | Valor |
@@ -1442,4 +1444,98 @@ pls execute the propm contract PR-IMPL-007-MCP, let me know if you have any ques
 
 Búsqueda inteligente multi-token mediante servidor MCP embebido y trigram search en Postgres integrada y validada con cero errores en backend y frontend.
 Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia.
+
+---
+
+## PM-020
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-020 |
+| **Fecha** | 2026-08-19 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Gemini |
+| **Tarea** | Implementación de Rechazar Indicador (FSD-UC-008) |
+| **Objetivo** | Permitir a Directores Técnicos [TD] rechazar un indicador en estado SUBIDO o SUBSANADO con justificación de al menos 20 caracteres. |
+| **PR-IMPL vinculado** | [PR-IMPL-008](../../prompts/impl/PR-IMPL-008.md) |
+| **DD vinculado** | [DD-UC-008](../../design/DD-UC-008.md) |
+| **PRD / FSD vinculado** | FSD-UC-008 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+```text
+Implement FSD-UC-008 (Rechazar Indicador) following the approved flowchart in uc_008_009_flowchart.md. Establish validation logic, justification length check, indicator state transitions, and save observations.
+```
+
+### Archivos generados o modificados
+- `backend/.../RejectIndicatorUseCase.java`
+- `backend/.../RejectIndicatorService.java`
+- `backend/.../JustificationRequiredException.java`
+- `backend/.../IndicatorWorkflowController.java`
+- `backend/.../RejectIndicatorServiceTest.java`
+- `frontend/.../ProcessEvaluationPage.tsx`
+- `frontend/.../indicator-workflow.ts`
+
+---
+
+## PM-021
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-021 |
+| **Fecha** | 2026-08-19 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Cursor IDE — Agent (sigesa-orchestrator) |
+| **Modelo** | Gemini |
+| **Tarea** | Implementación de Aprobar Indicador (FSD-UC-009) |
+| **Objetivo** | Permitir a Directores Técnicos [TD] aprobar un indicador en estado SUBIDO o SUBSANADO resolviendo observaciones previas. |
+| **PR-IMPL vinculado** | [PR-IMPL-009](../../prompts/impl/PR-IMPL-009.md) |
+| **DD vinculado** | [DD-UC-009](../../design/DD-UC-009.md) |
+| **PRD / FSD vinculado** | FSD-UC-009 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+```text
+Implement FSD-UC-009 (Aprobar Indicador) following the approved flowchart in uc_008_009_flowchart.md. Validate latest version, resolve previous observations, and transition state to APROBADO.
+```
+
+### Archivos generados o modificados
+- `backend/.../ApproveIndicatorUseCase.java`
+- `backend/.../ApproveIndicatorService.java`
+- `backend/.../ApproveIndicatorServiceTest.java`
+- `frontend/.../ProcessEvaluationPage.tsx`
+- `frontend/.../indicator-workflow.ts`
+
+---
+
+## PM-022
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-022 |
+| **Fecha** | 2026-08-21 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Antigravity CLI — Agent |
+| **Modelo** | Gemini 3.6 Flash |
+| **Tarea** | Integración MCP y Funciones PostgreSQL para Aprobación y Rechazo de Indicadores (FSD-UC-008, FSD-UC-009) |
+| **Objetivo** | Habilitar las herramientas `approve_indicator` y `reject_indicator` en el servidor MCP `sigesa-evidence` e incorporar los stored functions PL/pgSQL (`fn_indicator_transition`, `fn_approve_indicator`, `fn_reject_indicator`) en la base de datos PostgreSQL. |
+| **PR-IMPL vinculado** | [PR-IMPL-008](../../prompts/impl/PR-IMPL-008.md), [PR-IMPL-009](../../prompts/impl/PR-IMPL-009.md) |
+| **DD vinculado** | [DD-UC-008](../../design/DD-UC-008.md), [DD-UC-009](../../design/DD-UC-009.md) |
+| **PRD / FSD vinculado** | FSD-UC-008, FSD-UC-009 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+```text
+pls check the MCP for the FSD-UC-008 and FSD-UC-009 is not able to approve or reject indicators, but it shoudl be able to do it using the functions availble pls check it, the update shoudl be made in the postgres database
+```
+
+### Archivos generados o modificados
+- `mcp/sigesa-evidence/src/index.ts`
+- `mcp/sigesa-evidence/README.md`
+- `backend/src/main/resources/db/migration/V9__indicator_workflow_functions.sql`
+- `db/seed.sql`
+- `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantToolRegistryTest.java`
+- `backend/src/test/java/com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java`
+
 

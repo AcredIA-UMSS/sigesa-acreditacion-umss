@@ -51,13 +51,13 @@ export function CoordinatorDashboardSection({ section, readOnly = false }: Coord
           icon={<TrendingUp className="text-primary-500" size={24} />}
         />
         <KpiCard
-          title="Evidencias Aprobadas"
+          title="Indicadores Aprobados"
           value={section.evidenciasAprobadas}
-          subtitle="Revisadas y validadas"
+          subtitle="Revisados y validados"
           icon={<CheckCircle2 className="text-success" size={24} />}
         />
         <KpiCard
-          title="Evidencias Rechazadas"
+          title="Indicadores Observados"
           value={section.evidenciasRechazadas}
           subtitle="Requieren acción"
           icon={<XCircle className="text-secondary" size={24} />}

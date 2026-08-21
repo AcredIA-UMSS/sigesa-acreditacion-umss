@@ -27,6 +27,8 @@ public class AssistantToolRegistry {
     static final String LIST_PENDING_EVIDENCES_ID = "list_pending_evidences";
     static final String GET_EVIDENCE_DETAIL_ID = "get_evidence_detail";
     static final String CHECK_EVIDENCE_COMPLETENESS_ID = "check_evidence_completeness";
+    static final String APPROVE_INDICATOR_ID = "approve_indicator";
+    static final String REJECT_INDICATOR_ID = "reject_indicator";
 
     private static final Set<String> JD_ONLY = Set.of("JD");
     private static final Set<String> JD_AND_TD = Set.of("JD", "TD");
@@ -189,6 +191,26 @@ public class AssistantToolRegistry {
             evidenceIndicatorParameterSchema()
     );
 
+    private static final AssistantToolDefinition APPROVE_INDICATOR = new AssistantToolDefinition(
+            APPROVE_INDICATOR_ID,
+            "Aprueba un indicador que se encuentra en estado SUBIDO o SUBSANADO (solo TD y JD). "
+                    + "Primero invoca con confirmed=false para vista previa; "
+                    + "ejecuta con confirmed=true tras confirmación del usuario.",
+            JD_AND_TD,
+            "write",
+            approveIndicatorParameterSchema()
+    );
+
+    private static final AssistantToolDefinition REJECT_INDICATOR = new AssistantToolDefinition(
+            REJECT_INDICATOR_ID,
+            "Rechaza u observa un indicador en estado SUBIDO o SUBSANADO registrando la justificación obligatoria (mínimo 15-20 caracteres). Solo TD y JD. "
+                    + "Primero invoca con confirmed=false para vista previa; "
+                    + "ejecuta con confirmed=true tras confirmación.",
+            JD_AND_TD,
+            "write",
+            rejectIndicatorParameterSchema()
+    );
+
     private final List<AssistantToolDefinition> allTools = List.of(
             BUSCAR_EVIDENCIAS,
             LIST_USERS,
@@ -205,7 +227,9 @@ public class AssistantToolRegistry {
             MANAGE_PROCESS_SUBPHASE,
             LIST_PENDING_EVIDENCES,
             GET_EVIDENCE_DETAIL,
-            CHECK_EVIDENCE_COMPLETENESS
+            CHECK_EVIDENCE_COMPLETENESS,
+            APPROVE_INDICATOR,
+            REJECT_INDICATOR
     );
 
     public List<AssistantToolDefinition> toolsForRole(String role) {
@@ -257,7 +281,9 @@ public class AssistantToolRegistry {
             LIST_PENDING_EVIDENCES_ID,
             GET_EVIDENCE_DETAIL_ID,
             CHECK_EVIDENCE_COMPLETENESS_ID,
-            BUSCAR_EVIDENCIAS_ID
+            BUSCAR_EVIDENCIAS_ID,
+            APPROVE_INDICATOR_ID,
+            REJECT_INDICATOR_ID
     );
 
     public Optional<AssistantToolDefinition> findById(String toolId) {
@@ -404,6 +430,21 @@ public class AssistantToolRegistry {
         Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("indicatorId", stringProperty("UUID del indicador a consultar."));
         return requiredObjectSchema(properties, List.of("indicatorId"));
+    }
+
+    private static Map<String, Object> approveIndicatorParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("indicatorId", stringProperty("UUID del indicador a aprobar."));
+        properties.put("confirmed", booleanProperty("false para vista previa de confirmación; true para ejecutar."));
+        return requiredObjectSchema(properties, List.of("indicatorId"));
+    }
+
+    private static Map<String, Object> rejectIndicatorParameterSchema() {
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("indicatorId", stringProperty("UUID del indicador a rechazar u observar."));
+        properties.put("justification", stringProperty("Motivo formal del rechazo (mínimo 15-20 caracteres)."));
+        properties.put("confirmed", booleanProperty("false para vista previa de confirmación; true para ejecutar."));
+        return requiredObjectSchema(properties, List.of("indicatorId", "justification"));
     }
 
     private static Map<String, Object> objectSchema(Map<String, Object> properties) {

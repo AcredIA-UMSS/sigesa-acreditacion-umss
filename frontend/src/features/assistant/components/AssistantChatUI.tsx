@@ -27,6 +27,8 @@ export type AssistantChatUIProps = {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
 };
 
+const COMMANDS = ['/search-evidence', '/search-evidences', '/buscar-evidencia', '/buscar-evidencias', '/search', '/buscar'];
+
 export function AssistantChatUI({
   messages,
   draft,
@@ -70,7 +72,6 @@ export function AssistantChatUI({
     }
   };
 
-  const COMMANDS = ['/search-evidence', '/search-evidences', '/buscar-evidencia', '/buscar-evidencias', '/search', '/buscar'];
   const [activeCommand, setActiveCommand] = useState<string | null>(null);
 
   useEffect(() => {

@@ -42,3 +42,8 @@ build/
 ### MCP local deps ###
 mcp/**/node_modules/
 mcp/**/pnpm-lock.yaml
+mcp/**/dist/
+
+### Runtime uploads & data ###
+backend/data/evidences/
+backend/uploads/

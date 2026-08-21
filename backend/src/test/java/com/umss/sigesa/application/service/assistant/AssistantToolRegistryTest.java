@@ -29,7 +29,9 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.APPROVE_INDICATOR_ID,
+                AssistantToolRegistry.REJECT_INDICATOR_ID
         );
     }
 
@@ -47,7 +49,9 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.APPROVE_INDICATOR_ID,
+                AssistantToolRegistry.REJECT_INDICATOR_ID
         );
     }
 
@@ -81,9 +85,12 @@ class AssistantToolRegistryTest {
         var tools = registry.toolsForRoleAndAgent("TD", AssistantAgentProfile.EVIDENCE);
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
+                AssistantToolRegistry.BUSCAR_EVIDENCIAS_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
-                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                AssistantToolRegistry.APPROVE_INDICATOR_ID,
+                AssistantToolRegistry.REJECT_INDICATOR_ID
         );
     }
 

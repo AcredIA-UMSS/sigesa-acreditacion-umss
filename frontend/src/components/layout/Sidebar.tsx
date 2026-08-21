@@ -16,6 +16,7 @@ import {
   Search,
   Layers,
   FileUp,
+  CheckSquare,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -55,6 +56,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
   const panelSubtitle = isExternalEvaluator ? 'REVISIÓN DOCUMENTAL' : 'PANEL ADMINISTRATIVO';
   const isJd = session?.role === 'JD';
+  const isJdOrTd = session?.role === 'JD' || session?.role === 'TD';
 
   const handleLogout = () => {
     logout();
@@ -162,6 +164,14 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     active={location.pathname === '/procesos/nuevo'}
                   />
                 )}
+                {isJdOrTd && (
+                  <SubNavItem
+                    icon={<CheckSquare size={16} />}
+                    label="Revisión Técnica (TD)"
+                    to="/procesos/evaluacion"
+                    active={location.pathname === '/procesos/evaluacion'}
+                  />
+                )}
                 <SubNavItem
                   icon={<Search size={16} />}
                   label="Buscar evidencias"
@@ -186,6 +196,15 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     label="Nuevo"
                     to="/procesos/nuevo"
                     active={location.pathname === '/procesos/nuevo'}
+                    compact
+                  />
+                )}
+                {isJdOrTd && (
+                  <SubNavItem
+                    icon={<CheckSquare size={16} />}
+                    label="Revisión (TD)"
+                    to="/procesos/evaluacion"
+                    active={location.pathname === '/procesos/evaluacion'}
                     compact
                   />
                 )}

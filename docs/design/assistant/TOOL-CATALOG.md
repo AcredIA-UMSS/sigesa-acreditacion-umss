@@ -507,11 +507,37 @@ Subset de **control documental** embebido en `/evidencias/cargar`. Contrato: `co
 
 | Tool | Confirmación | Resumen |
 |------|--------------|---------|
-| `list_pending_evidences` | — | Indicadores en `SUBIDO` (docs listas para control TD); CC acotado a su carrera |
+| `list_pending_evidences` | — | Indicadores en `SUBIDO` / `SUBSANADO` (docs listas para control TD); CC acotado a su carrera |
 | `get_evidence_detail` | — | Metadatos evidencia/versión (hash, descripción, criterio, estado) |
 | `check_evidence_completeness` | — | Checklist archivo/descripción/criterio/hash + flag `complete` |
+| `filter_indicators` | — | Filtrado dinámico de indicadores por programa, estado y criterio con enrutador híbrido SQL/LLM |
 
 **MCP espejo:** `mcp/sigesa-evidence` (mismas tools vía HTTP + JWT).
 
-Ver [DD-AGENT-003](DD-AGENT-003.md), [FSD-UC-024](../../product/uc/FSD-UC-024.md) y [PR-IMPL-026](../../prompts/impl/PR-IMPL-026.md).
+### 9.1 Estrategia de Enrutamiento Híbrido para `filter_indicators` (Minimización de llamadas a IA)
 
+Para optimizar el uso de recursos y reducir llamadas innecesarias al modelo de lenguaje (LLM), la búsqueda y filtrado de indicadores sigue una arquitectura de 4 escenarios:
+
+```mermaid
+flowchart TD
+    A[Consulta de usuario en Chat/Buscador] --> B{¿Coincidencia directa SQL?}
+    B -->|Sí - Escenario 1| C[Ejecutar consulta SQL directa en PostgreSQL\nSin llamada a LLM]
+    B -->|No| D{¿Toggle IA activado?}
+    D -->|Sí| E{¿Consulta en alcance?}
+    D -->|No - Escenario 4| F[Retornar resultado nulo / vacío por defecto]
+    E -->|Sí - Escenario 2| G[LLM decodifica intención e invoca tool filter_indicators]
+    E -->|No - Escenario 3| H[Retornar respuesta inmediata Fuera de Alcance]
+```
+
+#### Definición de Escenarios:
+
+1. **Escenario 1 (Coincidencia Directa SQL - No-AI Router):**
+   Si la consulta del usuario contiene identificadores explícitos (código de indicador, UUID de programa, nombres de estado como `SUBIDO`, `OBSERVADO`), la plataforma enruta la petición directamente a consultas SQL indexadas en PostgreSQL, sin consumir tokens de IA.
+2. **Escenario 2 (Decodificación Semántica con IA - AI Toggle ON):**
+   Cuando el **Toggle de IA** está **ACTIVADO** y la consulta requiere entender lenguaje natural (ej. *"indicadores de la fase de verificación con observaciones de infraestructura"*), el modelo LLM interpreta la consulta e invoca la tool `filter_indicators` con los parámetros estructurados.
+3. **Escenario 3 (Fuera de Alcance - Immediate Out-of-Scope):**
+   Consultas ajenas al dominio de acreditación o evaluación (ej. presupuestos, clima) se detectan en la capa de enrutamiento y retornan un mensaje directo de "Fuera de alcance" sin ejecutar SQL ni invocaciones complejas.
+4. **Escenario 4 (AI Toggle OFF - Fallback Nulo):**
+   Si el **Toggle de IA** está **DESACTIVADO** y la consulta no coincide con el Escenario 1 (búsqueda directa por SQL), el sistema retorna un resultado nulo (`null`) / lista vacía por defecto.
+
+Ver [DD-AGENT-003](DD-AGENT-003.md), [FSD-UC-024](../../product/uc/FSD-UC-024.md) y [PR-IMPL-026](../../prompts/impl/PR-IMPL-026.md).

@@ -5,6 +5,7 @@
  * OpenAPI spec version: v0
  */
 
+export * from './approveResponseDto.ts';
 export * from './assignResponsibleRequestDto.ts';
 export * from './assistantChatContextDto.ts';
 export * from './assistantDemoScenarioResponse.ts';
@@ -34,6 +35,7 @@ export * from './observationSummary.ts';
 export * from './pageable.ts';
 export * from './pageableObject.ts';
 export * from './pageObservationSummary.ts';
+export * from './pendingIndicatorResponseDto.ts';
 export * from './phaseDto.ts';
 export * from './phaseProgressSummary.ts';
 export * from './processResponseDto.ts';
@@ -44,6 +46,8 @@ export * from './programTrafficLight.ts';
 export * from './recentEvaluation.ts';
 export * from './registerUserRequest.ts';
 export * from './registerUserResponse.ts';
+export * from './rejectRequestDto.ts';
+export * from './rejectResponseDto.ts';
 export * from './reorderStructureRequestDto.ts';
 export * from './reorderStructureRequestDtoSubphasesByPhase.ts';
 export * from './reportJobAcceptedResponse.ts';
@@ -64,7 +68,7 @@ export * from './templateSubphaseResponseDto.ts';
 export * from './templateSummaryResponseDto.ts';
 export * from './updatePhaseRequestDto.ts';
 export * from './updateSubphaseRequestDto.ts';
-export * from './uploadBody.ts';
+export * from './uploadableIndicatorResponse.ts';
 export * from './uploadEvidenceMultipartRequest.ts';
 export * from './uploadEvidenceResponse.ts';
 export * from './upsertTemplateRequestDto.ts';

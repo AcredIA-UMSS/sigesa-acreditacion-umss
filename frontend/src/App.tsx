@@ -13,6 +13,7 @@ import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
+import { ProcessEvaluationPage } from './features/processes/pages/ProcessEvaluationPage';
 
 function App() {
   return (
@@ -89,6 +90,17 @@ function App() {
           element={
             <ProtectedRoute>
               <ProcessListPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/evaluacion"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <ProcessEvaluationPage />
+              </JdOrTdRoute>
             </ProtectedRoute>
           }
         />

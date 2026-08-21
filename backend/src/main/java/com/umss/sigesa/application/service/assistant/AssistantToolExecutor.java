@@ -79,6 +79,8 @@ public class AssistantToolExecutor {
     private final ListPendingEvidencesUseCase listPendingEvidencesUseCase;
     private final GetEvidenceDetailUseCase getEvidenceDetailUseCase;
     private final CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
+    private final com.umss.sigesa.application.port.in.ApproveIndicatorUseCase approveIndicatorUseCase;
+    private final com.umss.sigesa.application.port.in.RejectIndicatorUseCase rejectIndicatorUseCase;
     private final ObjectMapper objectMapper;
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -103,6 +105,8 @@ public class AssistantToolExecutor {
                                  ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                  GetEvidenceDetailUseCase getEvidenceDetailUseCase,
                                  CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
+                                 com.umss.sigesa.application.port.in.ApproveIndicatorUseCase approveIndicatorUseCase,
+                                 com.umss.sigesa.application.port.in.RejectIndicatorUseCase rejectIndicatorUseCase,
                                  ObjectMapper objectMapper) {
         this.toolRegistry = toolRegistry;
         this.listUsersUseCase = listUsersUseCase;
@@ -125,6 +129,8 @@ public class AssistantToolExecutor {
         this.listPendingEvidencesUseCase = listPendingEvidencesUseCase;
         this.getEvidenceDetailUseCase = getEvidenceDetailUseCase;
         this.checkEvidenceCompletenessUseCase = checkEvidenceCompletenessUseCase;
+        this.approveIndicatorUseCase = approveIndicatorUseCase;
+        this.rejectIndicatorUseCase = rejectIndicatorUseCase;
         this.objectMapper = objectMapper;
     }
 
@@ -158,6 +164,8 @@ public class AssistantToolExecutor {
             case AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID -> executeGetEvidenceDetail(argumentsJson, auth);
             case AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID ->
                     executeCheckEvidenceCompleteness(argumentsJson, auth);
+            case AssistantToolRegistry.APPROVE_INDICATOR_ID -> executeApproveIndicator(argumentsJson, auth);
+            case AssistantToolRegistry.REJECT_INDICATOR_ID -> executeRejectIndicator(argumentsJson, auth);
             default -> ToolExecutionResult.failure("TOOL_NOT_FOUND", "Tool desconocida: " + toolId);
         };
 
@@ -1170,6 +1178,72 @@ public class AssistantToolExecutor {
         map.put("fullName", user.fullName());
         map.put("phoneNumber", user.phoneNumber());
         return map;
+    }
+
+    private ToolExecutionResult executeApproveIndicator(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String indicatorIdStr = requiredText(args, "indicatorId");
+            UUID indicatorId = UUID.fromString(indicatorIdStr);
+            boolean confirmed = args.hasNonNull("confirmed") && args.get("confirmed").asBoolean();
+
+            if (!confirmed) {
+                Map<String, Object> previewData = new LinkedHashMap<>();
+                previewData.put("indicatorId", indicatorIdStr);
+                previewData.put("action", "APPROVE");
+                previewData.put("confirmed", false);
+                previewData.put("message", "Confirmar aprobación del indicador " + indicatorIdStr + ". Responder 'sí' para ejecutar.");
+                return ToolExecutionResult.success(previewData);
+            }
+
+            var roleEnum = com.umss.sigesa.domain.model.Role.valueOf(auth.role().trim().toUpperCase());
+            var result = approveIndicatorUseCase.approve(indicatorId, auth.userId(), roleEnum);
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("indicatorId", indicatorIdStr);
+            data.put("newState", result.newState().name());
+            data.put("stateHistoryId", result.stateHistoryId().toString());
+            return ToolExecutionResult.success(data);
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_INPUT", ex.getMessage());
+        } catch (IndicatorNotFoundException ex) {
+            return ToolExecutionResult.failure("INDICATOR_NOT_FOUND", ex.getMessage());
+        } catch (Exception ex) {
+            return ToolExecutionResult.failure("EXECUTION_ERROR", "Error al aprobar indicador: " + ex.getMessage());
+        }
+    }
+
+    private ToolExecutionResult executeRejectIndicator(String argumentsJson, AssistantAuthContext auth) {
+        try {
+            JsonNode args = parseArgs(argumentsJson);
+            String indicatorIdStr = requiredText(args, "indicatorId");
+            String justification = requiredText(args, "justification");
+            UUID indicatorId = UUID.fromString(indicatorIdStr);
+            boolean confirmed = args.hasNonNull("confirmed") && args.get("confirmed").asBoolean();
+
+            if (!confirmed) {
+                Map<String, Object> previewData = new LinkedHashMap<>();
+                previewData.put("indicatorId", indicatorIdStr);
+                previewData.put("justification", justification);
+                previewData.put("action", "REJECT");
+                previewData.put("confirmed", false);
+                previewData.put("message", "Confirmar rechazo/observación del indicador " + indicatorIdStr + " con motivo: '" + justification + "'. Responder 'sí' para ejecutar.");
+                return ToolExecutionResult.success(previewData);
+            }
+
+            var roleEnum = com.umss.sigesa.domain.model.Role.valueOf(auth.role().trim().toUpperCase());
+            var result = rejectIndicatorUseCase.reject(indicatorId, justification, auth.userId(), roleEnum);
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("indicatorId", indicatorIdStr);
+            data.put("observationId", result.observationId());
+            data.put("newState", result.newState().name());
+            return ToolExecutionResult.success(data);
+        } catch (IllegalArgumentException ex) {
+            return ToolExecutionResult.failure("INVALID_INPUT", ex.getMessage());
+        } catch (IndicatorNotFoundException ex) {
+            return ToolExecutionResult.failure("INDICATOR_NOT_FOUND", ex.getMessage());
+        } catch (Exception ex) {
+            return ToolExecutionResult.failure("EXECUTION_ERROR", "Error al rechazar indicador: " + ex.getMessage());
+        }
     }
 
     private String serialize(ToolExecutionResult result) {

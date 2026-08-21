@@ -17,8 +17,14 @@ import {
   useEvidenceCopilot,
   type EvidenceAgentAction,
 } from '../hooks/useEvidenceCopilot';
+import { AiExecutionTracker } from './AiExecutionTracker';
 
-export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
+export interface EvidenceCopilotPanelProps {
+  programId?: string;
+  onFilterChange?: (query: string, status?: string) => void;
+}
+
+export function EvidenceCopilotPanel({ programId, onFilterChange }: EvidenceCopilotPanelProps) {
   const copilot = useEvidenceCopilot(programId);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -123,7 +129,15 @@ export function EvidenceCopilotPanel({ programId }: { programId?: string }) {
               className="resize-none rounded-lg border border-gray-300 px-3 py-2 text-body-md text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 disabled:bg-gray-100"
             />
             <Button
-              onClick={() => void copilot.sendMessage()}
+              onClick={() => {
+                const text = copilot.draft;
+                if (onFilterChange && text) {
+                  const upper = text.toUpperCase();
+                  const statusMatch = ['SUBIDO', 'OBSERVADO', 'SUBSANADO', 'APROBADO'].find((s) => upper.includes(s));
+                  onFilterChange(text, statusMatch);
+                }
+                void copilot.sendMessage();
+              }}
               isLoading={copilot.isSending}
               disabled={!copilot.draft.trim() || copilot.isSending}
               className="w-full"
@@ -328,24 +342,15 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         }`}
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
+
+        {/* Business-friendly answer display + Technical Execution Tracker for Demo Mode */}
         {!isUser && message.metadata && (
-          <div className="mt-2 border-t border-gray-200 pt-2 text-label-md text-gray-600">
-            <p>
-              <span className="font-medium">Tool:</span>{' '}
-              {message.metadata.toolId ?? '—'}
-            </p>
-            <p className="mt-0.5">
-              <span className="font-medium">Fuentes:</span>{' '}
-              {message.metadata.sourceTables.length > 0
-                ? message.metadata.sourceTables.join(', ')
-                : '—'}
-            </p>
-            <p className="mt-0.5">
-              <span className="font-medium">Camino:</span>{' '}
-              {message.metadata.path}
-              {message.metadata.llmInvoked ? ' · LLM invocado' : ''}
-            </p>
-          </div>
+          <AiExecutionTracker
+            path={message.metadata.path}
+            toolId={message.metadata.toolId}
+            sourceTables={message.metadata.sourceTables}
+            llmInvoked={message.metadata.llmInvoked}
+          />
         )}
       </div>
     </div>
@@ -354,9 +359,22 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 text-body-md text-gray-600">
-      <Loader2 size={14} className="animate-spin" />
-      Consultando evidencias…
+    <div className="rounded-lg border border-primary-300 bg-gray-950 p-3 text-xs font-mono text-gray-200 shadow-md space-y-2">
+      <div className="flex items-center gap-2 text-secondary-400 font-bold">
+        <Loader2 size={14} className="animate-spin text-secondary" />
+        <span>PROCESANDO EN TIEMPO REAL (BACKEND & MCP LOGIC)...</span>
+      </div>
+      <div className="space-y-1 text-[11px] text-gray-400 border-t border-gray-800 pt-2">
+        <p className="flex items-center gap-1 text-primary-300">
+          <span>⚡ Paso 1:</span> Clasificando intención en Decision Tree (Filtro SQL vs MCP vs RAG)...
+        </p>
+        <p className="flex items-center gap-1 text-warning-300">
+          <span>⚙️ Paso 2:</span> Invocando función MCP `sigesa-indicator` & consultando PostgreSQL...
+        </p>
+        <p className="flex items-center gap-1 text-info-300">
+          <span>🛡️ Paso 3:</span> Verificando vigencia de normas de acreditación (RAG Engine Check)...
+        </p>
+      </div>
     </div>
   );
 }

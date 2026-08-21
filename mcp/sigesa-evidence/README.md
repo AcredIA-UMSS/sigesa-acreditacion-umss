@@ -9,6 +9,8 @@ Servidor [Model Context Protocol](https://modelcontextprotocol.io) que expone la
 | `list_pending_evidences` | `list_pending_evidences` |
 | `get_evidence_detail` | `get_evidence_detail` |
 | `check_evidence_completeness` | `check_evidence_completeness` |
+| `approve_indicator` | `approve_indicator` (FSD-UC-009) |
+| `reject_indicator` | `reject_indicator` (FSD-UC-008) |
 
 Cada tool invoca `POST /api/v1/assistant/chat` con `context.agent=evidence` y un mensaje que dispara el keyword router / tool calling del backend (mismas reglas PBAC).
 
@@ -51,4 +53,4 @@ pnpm start
 
 - No bypasea auth: sin JWT válido el backend responde 401/403.
 - EE recibe 403 en `agent=evidence`.
-- Fase 1: solo lectura (sin aprobar/rechazar).
+- Soporta flujo de consulta, completitud, aprobación (FSD-UC-009) y rechazo u observación (FSD-UC-008) con persistencia en PostgreSQL.

@@ -7,7 +7,12 @@ import com.umss.sigesa.application.port.in.ListUploadableIndicatorsUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
 import com.umss.sigesa.application.port.in.SearchEvidenceUseCase;
 import com.umss.sigesa.application.port.in.DownloadEvidenceUseCase;
+import com.umss.sigesa.application.port.in.ApproveIndicatorUseCase;
+import com.umss.sigesa.application.port.in.RejectIndicatorUseCase;
 import com.umss.sigesa.application.port.out.AssistantQueryPort;
+import com.umss.sigesa.application.port.out.ObservationRepositoryPort;
+import com.umss.sigesa.application.service.evidence.ApproveIndicatorService;
+import com.umss.sigesa.application.service.evidence.RejectIndicatorService;
 import com.umss.sigesa.application.port.out.SearchEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
@@ -97,5 +102,33 @@ public class EvidenceModuleConfig {
     ListUploadableIndicatorsUseCase listUploadableIndicatorsUseCase(
             EvidenceControlQueryPort evidenceControlQueryPort) {
         return new ListUploadableIndicatorsService(evidenceControlQueryPort);
+    }
+
+    @Bean
+    ApproveIndicatorUseCase approveIndicatorUseCase(
+            IndicatorRepositoryPort indicatorRepository,
+            EvidenceControlQueryPort evidenceControlQueryPort,
+            ObservationRepositoryPort observationRepositoryPort,
+            NotificationOutboxPort notificationOutbox) {
+        return new ApproveIndicatorService(
+                indicatorRepository,
+                evidenceControlQueryPort,
+                observationRepositoryPort,
+                notificationOutbox
+        );
+    }
+
+    @Bean
+    RejectIndicatorUseCase rejectIndicatorUseCase(
+            IndicatorRepositoryPort indicatorRepository,
+            EvidenceControlQueryPort evidenceControlQueryPort,
+            ObservationRepositoryPort observationRepositoryPort,
+            NotificationOutboxPort notificationOutbox) {
+        return new RejectIndicatorService(
+                indicatorRepository,
+                evidenceControlQueryPort,
+                observationRepositoryPort,
+                notificationOutbox
+        );
     }
 }

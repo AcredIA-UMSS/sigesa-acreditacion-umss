@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 19/08/2026 | **MOD-WORKFLOW aprobación y rechazo:** Implementación de aprobación (UC-009) y rechazo (UC-008) de indicadores para el rol TD. Resuelve observaciones al aprobar, y genera una observación nueva en estado PENDIENTE_SUBSANACION al rechazar. | FSD-UC-008, FSD-UC-009 / DD-UC-008, DD-UC-009 | N/A | PR-IMPL-008, PR-IMPL-009 / PM-020, PM-021 | Tech Lead |
 | 13/08/2026 | **MOD-EVIDENCE MCP Multi-Token:** Búsqueda de evidencias multi-token mediante servidor MCP embebido en Java con Spring AI y `pg_trgm` en Postgres. Agrupación de resultados en subsets y refinamiento de interfaces frontend. | FSD-UC-007 / DD-UC-007-MCP | N/A | PR-IMPL-007-MCP / PM-017 | Antigravity Agent |
 | 08/08/2026 | **MOD-EVIDENCE search:** Búsqueda inteligente de evidencias de punta a punta con enrutamiento híbrido de consultas, control de acceso carrera (FSD-BR-09) y toggle frontend (header X-AI-Enabled). | FSD-UC-007 / DD-UC-007 | N/A | PR-IMPL-007 / PM-006 | Antigravity Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
@@ -123,6 +124,8 @@ artefactos_vivos:
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 | `FSD-UC-019` | `DD-UC-019` | **hecho** | `release/3.0.0` | `RegisterUserServiceTest` EE; manual E2E dashboard | `PR-IMPL-014` | Rol EE solo lectura; scope carrera; seed `ee@umss.edu.bo` |
 | `FSD-UC-007` | `DD-UC-007-MCP` | **hecho (MCP Multi-Token)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks; OxLint | `PR-IMPL-007-MCP` | Búsqueda inteligente de evidencias con servidor MCP y búsqueda multi-token agrupada |
+| `FSD-UC-008` | `DD-UC-008` | **hecho (Full-Stack)** | `v1.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-008` | Rechazo TD; justificación mínima 20 chars; estado OBSERVADO |
+| `FSD-UC-009` | `DD-UC-009` | **hecho (Full-Stack)** | `v1.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-009` | Aprobación TD; resuelve observaciones previas; estado APROBADO |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -323,7 +326,18 @@ artefactos_vivos:
 | **Dev Docker** | `application-dev.yaml`: Hibernate `ddl-auto: update`; Flyway deshabilitado (delta §A.2 #13) |
 | **Tablas JPA** | `templates`, `template_phases`, `template_subphases` |
 | **Frontend** | Pendiente `PR-IMPL-021-FE` — rutas `/admin/plantillas/**` |
-| **Hooks Orval (post-FE)** | `useListTemplates`, `useGetTemplate`, `useCreateTemplate`, … en `plantillas-normativas.ts` |
+### B.8 MOD-WORKFLOW — aprobación y rechazo de indicadores (`DD-UC-008` + `DD-UC-009`)
+
+**Implementación:** Sprint 02 PM-020/PM-021 · **Prompts:** `PR-IMPL-008`, `PR-IMPL-009` · **FSD:** FSD-UC-008, FSD-UC-009
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `POST /api/v1/indicators/{indicatorId}/approve` y `POST /api/v1/indicators/{indicatorId}/reject` |
+| **RBAC** | Solo **[TD]** — `@PreAuthorize("hasRole('TD')")` en `IndicatorWorkflowController` |
+| **Bandeja** | `GET /api/v1/indicators/pending` para listar indicadores `SUBIDO`/`SUBSANADO` |
+| **Lógica de Aprobación** | Resuelve todas las observaciones del indicador (las marca como `RESOLVED`), crea transición a `APROBADO` y encola evento `IndicatorApproved` |
+| **Lógica de Rechazo** | Requiere justificación >= 20 chars, crea `ObservationEntity` en estado `PENDIENTE_SUBSANACION`, crea transición a `OBSERVADO` y encola evento `IndicatorRejected` |
+| **Frontend** | `/procesos/evaluacion` — `ProcessEvaluationPage` con acciones rápidas de aprobación y rechazo directo |
 
 ## C. Integraciones
 

@@ -72,8 +72,22 @@ GET  /api/v1/assistant/status?agent=evidence
 | `list_pending_evidences` | read | ✓ | ✓ | ✓* |
 | `get_evidence_detail` | read | ✓ | ✓ | ✓* |
 | `check_evidence_completeness` | read | ✓ | ✓ | ✓* |
+| `filter_indicators` | read | ✓ | ✓ | ✓* |
 
 \*CC solo sobre `programScope` del JWT.
+
+### 5.1 Arquitectura Híbrida de Enrutamiento (Minimización de Consultas IA)
+
+El filtrado dinámico de indicadores optimiza los recursos de cómputo clasificando la consulta en 4 escenarios:
+
+1. **Escenario 1 — Coincidencia Directa SQL (Sin IA):**
+   Si la consulta del usuario contiene patrones o códigos exactos (UUID de programa, código de indicador, o nombres de estado explícitos como `SUBIDO`, `OBSERVADO`), se resuelve mediante una consulta SQL directa a la base de datos sin invocar al modelo LLM.
+2. **Escenario 2 — Decodificación Semántica con Tool Calling (AI Toggle = ON):**
+   Si el Toggle de IA está habilitado y la consulta requiere procesamiento de lenguaje natural para inferir criterios o estados, el modelo de lenguaje decodifica la intención e invoca la tool `filter_indicators` pasando los filtros estructurados (`programId`, `state`, `criterionId`).
+3. **Escenario 3 — Fuera de Alcance (Out-of-Scope):**
+   Consultas no relacionadas con la evaluación o acreditación son detectadas inmediatamente y devuelven una respuesta de rechazo sin ejecutar llamadas SQL ni de IA adicionales.
+4. **Escenario 4 — Fallback con Toggle Desactivado (AI Toggle = OFF):**
+   Si el Toggle de IA está apagado y la consulta no coincide con el Escenario 1 (búsqueda directa SQL), el sistema retorna un resultado nulo (`null`) o lista vacía de forma predeterminada.
 
 ## 6. Flujo
 

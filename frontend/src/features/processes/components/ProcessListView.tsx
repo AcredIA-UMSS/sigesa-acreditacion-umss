@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, CheckSquare } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessList } from '../hooks/useProcessList';
@@ -9,6 +9,7 @@ export function ProcessListView() {
   const { session } = useAuth();
   const { processes, isLoading, isError, errorMessage, refetch } = useProcessList();
   const isJd = session?.role === 'JD';
+  const isJdOrTd = session?.role === 'JD' || session?.role === 'TD';
 
   return (
     <div className="space-y-6">
@@ -24,6 +25,15 @@ export function ProcessListView() {
             <RefreshCw size={16} />
             Actualizar
           </Button>
+          {isJdOrTd && (
+            <Link
+              to="/procesos/evaluacion"
+              className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-3 text-label-md font-medium text-body transition-colors hover:bg-secondary-600"
+            >
+              <CheckSquare size={16} />
+              Revisión técnica (TD)
+            </Link>
+          )}
           {isJd && (
             <Link
               to="/procesos/nuevo"

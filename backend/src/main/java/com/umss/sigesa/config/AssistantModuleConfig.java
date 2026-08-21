@@ -61,7 +61,9 @@ public class AssistantModuleConfig {
                                                 com.umss.sigesa.application.port.in.SearchEvidenceUseCase searchEvidenceUseCase,
                                                 ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                                 GetEvidenceDetailUseCase getEvidenceDetailUseCase,
-                                                CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase) {
+                                                CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
+                                                com.umss.sigesa.application.port.in.ApproveIndicatorUseCase approveIndicatorUseCase,
+                                                com.umss.sigesa.application.port.in.RejectIndicatorUseCase rejectIndicatorUseCase) {
         return new AssistantToolExecutor(
                 assistantToolRegistry,
                 listUsersUseCase,
@@ -84,6 +86,8 @@ public class AssistantModuleConfig {
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,
+                approveIndicatorUseCase,
+                rejectIndicatorUseCase,
                 new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
         );
     }

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  useAssistantStatus,
-  useSendChatMessage,
-} from '../../../api/endpoints/assistant-controller/assistant-controller';
+  useGetStatus1,
+  useChat,
+} from '../../../api/endpoints/assistant/assistant';
 import type {
   AssistantChatContextDto,
   AssistantMessageMetadata,
@@ -75,8 +75,8 @@ export function useEvidenceCopilot(programId?: string) {
   const [draft, setDraft] = useState('');
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const statusQuery = useAssistantStatus('evidence');
-  const chatMutation = useSendChatMessage();
+  const statusQuery = useGetStatus1({ agent: 'evidence' });
+  const chatMutation = useChat();
 
   const chatContext: AssistantChatContextDto = useMemo(
     () => ({
@@ -116,33 +116,36 @@ export function useEvidenceCopilot(programId?: string) {
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
-        message: trimmed,
-        history,
-        context: chatContext,
+        data: {
+          message: trimmed,
+          history,
+          context: chatContext,
+        }
       });
+      const payload = response.data;
       const metadata: AssistantMessageMetadata = {
-        toolId: response.toolId,
-        sourceTables: response.sourceTables ?? [],
-        path: response.path,
-        llmInvoked: response.llmInvoked,
+        toolId: payload.toolId ?? null,
+        sourceTables: payload.sourceTables ?? [],
+        path: (payload.path ?? 'LLM') as AssistantResolutionPath,
+        llmInvoked: payload.llmInvoked ?? false,
       };
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, metadata),
+        createMessage('assistant', payload.reply ?? '', metadata),
       ]);
       appendAction({
         userPrompt: trimmed,
         summary: summarizeAction({
-          toolId: response.toolId,
-          path: response.path,
-          status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
-          reply: response.reply,
+          toolId: payload.toolId ?? null,
+          path: (payload.path ?? 'LLM') as AssistantResolutionPath,
+          status: payload.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
+          reply: payload.reply ?? '',
         }),
-        toolId: response.toolId,
-        path: response.path,
-        sourceTables: response.sourceTables ?? [],
-        llmInvoked: response.llmInvoked,
-        status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
+        toolId: payload.toolId ?? null,
+        path: (payload.path ?? 'LLM') as AssistantResolutionPath,
+        sourceTables: payload.sourceTables ?? [],
+        llmInvoked: payload.llmInvoked ?? false,
+        status: payload.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
       });
     } catch {
       setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
@@ -174,15 +177,20 @@ export function useEvidenceCopilot(programId?: string) {
     sendMessage,
     clearConversation,
     messagesEndRef,
-    sampleQuestions: statusQuery.data?.demoScenarios ?? [],
-    capabilities: statusQuery.data?.capabilities ?? [],
-    isAssistantEnabled: statusQuery.data?.enabled === true,
+    sampleQuestions: (statusQuery.data?.data?.demoScenarios ?? []).map((scenario) => ({
+      number: scenario.number ?? 0,
+      title: scenario.title ?? '',
+      sampleQuestion: scenario.sampleQuestion ?? '',
+      expectedPath: (scenario.expectedPath ?? 'LLM') as AssistantResolutionPath,
+    })),
+    capabilities: statusQuery.data?.data?.capabilities ?? [],
+    isAssistantEnabled: statusQuery.data?.data?.enabled === true,
     isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
     isForbidden:
       statusQuery.isError &&
       (statusQuery.error as { status?: number } | null)?.status === 403,
     isSending: chatMutation.isPending,
-    errorMessage: mapAssistantError(chatMutation.error),
+    errorMessage: mapAssistantError(chatMutation.error as Error | null),
   };
 }

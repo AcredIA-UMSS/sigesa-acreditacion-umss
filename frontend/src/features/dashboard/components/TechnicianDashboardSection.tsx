@@ -36,14 +36,14 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
 
       {/* KPI Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Card 1: Evidencias Pendientes */}
+        {/* Card 1: Indicadores Pendientes */}
         <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
-            <span className="text-label-md font-semibold text-gray-700 uppercase">Evidencias Pendientes</span>
+            <span className="text-label-md font-semibold text-gray-700 uppercase">Indicadores Pendientes</span>
             <h4 className="text-display-lg font-bold leading-none text-primary-800 mt-2">
               {section.evidenciasPendientesRevision}
             </h4>
-            <p className="mt-2 text-xs text-gray-600">Por revisar y calificar en el ciclo activo</p>
+            <p className="mt-2 text-xs text-gray-600">Por revisar y dictaminar en el ciclo activo</p>
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-warning/10 text-warning">
             <FileCheck size={32} />
@@ -85,7 +85,7 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
             <h4 className="text-display-lg font-bold leading-none text-indigo-700 mt-2">
               {section.available ?? 0}
             </h4>
-            <p className="mt-2 text-xs text-gray-600">Evidencias listas para validación</p>
+            <p className="mt-2 text-xs text-gray-600">Indicadores listos para validación</p>
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
             <CheckCircle2 size={32} />
@@ -136,7 +136,7 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
               <table className="w-full text-left text-body-md">
                 <thead>
                   <tr className="border-b border-gray-100 text-label-sm uppercase font-semibold text-gray-600">
-                    <th className="pb-3">Evidencia ID</th>
+                    <th className="pb-3">Indicador ID</th>
                     <th className="pb-3">Programa</th>
                     <th className="pb-3">Fecha Revisión</th>
                     <th className="pb-3 text-right">Resultado</th>

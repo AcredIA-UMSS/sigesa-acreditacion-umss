@@ -43,8 +43,8 @@ ultima_actualizacion: "2026-08-07"
 | `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-005.md) | — | — |
 | `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-006.md) | — | — |
 | `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | En Curso | [Ver detalle](uc/FSD-UC-007.md) | [`DD-UC-007`](../design/DD-UC-007.md) | — |
-| `FSD-UC-008` | Rechazar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-008.md) | — | — |
-| `FSD-UC-009` | Aprobar Indicador | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-009.md) | — | — |
+| `FSD-UC-008` | Rechazar Indicador | [TD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-008.md) | [`DD-UC-008`](../design/DD-UC-008.md) | [`PR-IMPL-008`](../prompts/impl/PR-IMPL-008.md) |
+| `FSD-UC-009` | Aprobar Indicador | [TD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-009.md) | [`DD-UC-009`](../design/DD-UC-009.md) | [`PR-IMPL-009`](../prompts/impl/PR-IMPL-009.md) |
 | `FSD-UC-010` | Avanzar/cerrar Fase | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-010.md) | — | — |
 | `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | En Curso | [Ver detalle](uc/FSD-UC-011.md) | [`DD-UC-011`](../design/DD-UC-011.md) | [`PR-IMPL-011`](../prompts/impl/PR-IMPL-011.md) |
 | `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-012.md) | — | — |

@@ -80,6 +80,10 @@ class AssistantToolExecutorTest {
     private GetEvidenceDetailUseCase getEvidenceDetailUseCase;
     @Mock
     private CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.ApproveIndicatorUseCase approveIndicatorUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.RejectIndicatorUseCase rejectIndicatorUseCase;
 
     private AssistantToolExecutor executor;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -108,6 +112,8 @@ class AssistantToolExecutorTest {
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,
+                approveIndicatorUseCase,
+                rejectIndicatorUseCase,
                 objectMapper
         );
     }

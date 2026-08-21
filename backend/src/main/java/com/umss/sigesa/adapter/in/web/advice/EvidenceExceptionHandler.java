@@ -10,6 +10,9 @@ import com.umss.sigesa.domain.exception.InvalidFileFormatException;
 import com.umss.sigesa.domain.exception.MaxFileSizeExceededException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.UploadInProgressException;
+import com.umss.sigesa.domain.exception.ForbiddenRoleException;
+import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
+import com.umss.sigesa.domain.exception.JustificationRequiredException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -84,5 +87,23 @@ public class EvidenceExceptionHandler {
     public ResponseEntity<Map<String, String>> handleEvidenceNotFound(com.umss.sigesa.domain.exception.EvidenceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "EVIDENCE_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidIndicatorStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidState(InvalidIndicatorStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "INVALID_STATE", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ForbiddenRoleException.class)
+    public ResponseEntity<Map<String, String>> handleForbiddenRole(ForbiddenRoleException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "FORBIDDEN_ROLE", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(JustificationRequiredException.class)
+    public ResponseEntity<Map<String, String>> handleJustificationRequired(JustificationRequiredException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", "JUSTIFICATION_REQUIRED", "message", ex.getMessage()));
     }
 }
