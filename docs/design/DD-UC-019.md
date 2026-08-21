@@ -210,7 +210,7 @@ flowchart TD
 | `/procesos/:processId` | `ProcessDetailView` | `useProcessDetail` → Orval `GET /processes/{id}` |
 
 - **Presentación**: tabla/cards con tokens Tailwind institucionales; badge de estado (`ACTIVE` → primary, etc.).
-- **Detalle**: `ProcessPhaseTree` — acordeón Fase → Subfase ordenado.
+- **Detalle**: `ProcessPhaseTree` — acordeón Fase → Subfase ordenado; enlace subrayado «Subir evidencia» / «Cargar evidencia» → `SubphaseEvidenceUploadModal`.
 - **Navegación**: enlace en `Sidebar` para JD/TD/CC; post-creación en `CreateProcessView` → redirect opcional a detalle.
 - **Hooks Orval exclusivos** — prohibido `fetch` manual.
 

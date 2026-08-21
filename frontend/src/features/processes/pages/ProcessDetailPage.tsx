@@ -12,7 +12,7 @@ export function ProcessDetailPage() {
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar activeNav="processes" />
-      <main className="flex-1 overflow-y-auto px-8 py-8">
+      <main data-app-scroll className="flex-1 overflow-y-auto px-8 py-8">
         <ProcessDetailView processId={processId} />
       </main>
     </div>

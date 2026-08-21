@@ -23,6 +23,7 @@ import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
+import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
 import com.umss.sigesa.application.service.assistant.AssistantKeywordRouter;
 import com.umss.sigesa.application.service.assistant.AssistantToolExecutor;
 import com.umss.sigesa.application.service.assistant.AssistantToolRegistry;
@@ -94,6 +95,11 @@ public class AssistantModuleConfig {
     @Bean
     AssistantKeywordRouter assistantKeywordRouter() {
         return new AssistantKeywordRouter();
+    }
+
+    @Bean
+    AssistantChatInputValidator assistantChatInputValidator() {
+        return new AssistantChatInputValidator();
     }
 
     @Bean

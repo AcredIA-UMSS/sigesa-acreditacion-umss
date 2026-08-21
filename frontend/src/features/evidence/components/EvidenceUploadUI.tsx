@@ -113,7 +113,7 @@ export function EvidenceUploadUI({
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-8">
+      <main data-app-scroll className="flex-1 overflow-y-auto p-8">
         <div className="mx-auto max-w-6xl">
           <header className="mb-8">
             <div className="mb-4 h-1 w-12 bg-secondary" />

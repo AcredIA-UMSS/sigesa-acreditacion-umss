@@ -7,7 +7,7 @@ actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
-ultima_actualizacion: "2026-08-13"
+ultima_actualizacion: "2026-08-21"
 ---
 
 # FSD-UC-004 — Cargar Evidencia
@@ -49,9 +49,9 @@ ultima_actualizacion: "2026-08-13"
 
 **Selectores (UI):** `GET /api/v1/indicators/uploadable` → `{ indicatorId, code, title, criterionId, criterionCode, criterionTitle, currentState }[]`.
 
-**Copiloto embebido (UC-024):** en Cargar Evidencia el agente registra un **historial de acciones** de la sesión (tool, camino, fuentes) por cada respuesta.
+**Copiloto embebido (UC-024):** en Cargar Evidencia el agente usa el mismo patrón UI que fases/usuarios; modal dev de trazabilidad con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
 
-**Estructura del proceso:** cada subfase muestra un espacio de carga (PDF/Word/Excel/imagen). La persistencia sigue UC-004 (indicador + criterio); la subfase se anota en la descripción.
+**Estructura del proceso (UC-019):** en cada subfase, enlace subrayado «Subir evidencia» abre un **modal** con el formulario UC-004 (indicador, descripción, archivo). [CC] carga en el modal; [JD/TD] pueden ir al formulario dedicado. La subfase se anota en la descripción; persistencia sin FK subfase.
 
 ## Diagramas
 

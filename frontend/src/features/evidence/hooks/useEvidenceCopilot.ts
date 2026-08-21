@@ -5,45 +5,33 @@ import {
 } from '../../../api/endpoints/assistant-controller/assistant-controller';
 import type {
   AssistantChatContextDto,
-  AssistantMessageMetadata,
   AssistantResolutionPath,
   ChatMessage,
 } from '../../../api/model/assistantTypes';
+import type {
+  CopilotAgentAction,
+  CopilotAgentActionStatus,
+  CopilotAgentActionStep,
+} from '../../assistant/types/copilotAgentAction';
+import { EVIDENCE_COPILOT_DEBUG_ACTIONS_ENABLED } from '../../../lib/config/evidenceCopilotDebug';
 import { mapAssistantError } from '../../assistant/hooks/mapAssistantError';
 
-function createMessage(
-  role: ChatMessage['role'],
-  content: string,
-  metadata?: AssistantMessageMetadata,
-): ChatMessage {
+function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
   return {
     id: crypto.randomUUID(),
     role,
     content,
     createdAt: new Date().toISOString(),
-    metadata,
   };
 }
 
-export type EvidenceAgentActionStatus = 'ok' | 'error' | 'out_of_scope';
+export type EvidenceAgentActionStatus = CopilotAgentActionStatus;
+export type EvidenceAgentAction = CopilotAgentAction;
 
-/** Entrada del historial de acciones del agente (sesión actual). */
-export type EvidenceAgentAction = {
-  id: string;
-  at: string;
-  userPrompt: string;
-  summary: string;
+function summarizeEvidenceAction(input: {
   toolId: string | null;
   path: AssistantResolutionPath | 'ERROR';
-  sourceTables: string[];
-  llmInvoked: boolean;
-  status: EvidenceAgentActionStatus;
-};
-
-function summarizeAction(input: {
-  toolId: string | null;
-  path: AssistantResolutionPath | 'ERROR';
-  status: EvidenceAgentActionStatus;
+  status: CopilotAgentActionStatus;
   reply?: string;
 }): string {
   if (input.status === 'error') {
@@ -71,9 +59,10 @@ function summarizeAction(input: {
 
 export function useEvidenceCopilot(programId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [actionHistory, setActionHistory] = useState<EvidenceAgentAction[]>([]);
+  const [actionHistory, setActionHistory] = useState<CopilotAgentAction[]>([]);
   const [draft, setDraft] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [actionModalOpen, setActionModalOpen] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   const statusQuery = useAssistantStatus('evidence');
   const chatMutation = useSendChatMessage();
@@ -87,23 +76,48 @@ export function useEvidenceCopilot(programId?: string) {
   );
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
+    if (actionModalOpen) return;
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [actionModalOpen, messages, scrollToBottom]);
 
-  const appendAction = useCallback((entry: Omit<EvidenceAgentAction, 'id' | 'at'>) => {
-    setActionHistory((prev) => [
-      ...prev,
-      {
-        ...entry,
-        id: crypto.randomUUID(),
-        at: new Date().toISOString(),
-      },
-    ]);
-  }, []);
+  const appendActionStep = useCallback(
+    (actionId: string, step: Omit<CopilotAgentActionStep, 'id'>) => {
+      setActionHistory((prev) =>
+        prev.map((action) =>
+          action.id === actionId
+            ? {
+                ...action,
+                steps: [...action.steps, { ...step, id: crypto.randomUUID() }],
+              }
+            : action,
+        ),
+      );
+    },
+    [],
+  );
+
+  const finalizeAction = useCallback(
+    (
+      actionId: string,
+      update: Partial<
+        Pick<
+          CopilotAgentAction,
+          'summary' | 'toolId' | 'path' | 'sourceTables' | 'llmInvoked' | 'status'
+        >
+      >,
+    ) => {
+      setActionHistory((prev) =>
+        prev.map((action) => (action.id === actionId ? { ...action, ...update } : action)),
+      );
+    },
+    [],
+  );
 
   const sendMessage = useCallback(async () => {
     const trimmed = draft.trim();
@@ -113,6 +127,40 @@ export function useEvidenceCopilot(programId?: string) {
     setMessages((prev) => [...prev, userMessage]);
     setDraft('');
 
+    const actionId = crypto.randomUUID();
+    setActionModalOpen(true);
+    setActionHistory((prev) => [
+      ...prev,
+      {
+        id: actionId,
+        at: new Date().toISOString(),
+        userPrompt: trimmed,
+        summary: 'Procesando mensaje…',
+        toolId: null,
+        path: 'PENDING',
+        sourceTables: [],
+        llmInvoked: false,
+        status: 'pending',
+        steps: [
+          {
+            id: crypto.randomUUID(),
+            label: 'Mensaje enviado al backend (/assistant/chat)',
+            kind: 'info',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: `Contexto: agent=evidence${programId ? `, programId=${programId}` : ''}`,
+            kind: 'info',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: 'Resolviendo intención (KEYWORD / LLM / OUT_OF_SCOPE)',
+            kind: 'pending',
+          },
+        ],
+      },
+    ]);
+
     try {
       const history = messages.map(({ role, content }) => ({ role, content }));
       const response = await chatMutation.mutateAsync({
@@ -120,19 +168,29 @@ export function useEvidenceCopilot(programId?: string) {
         history,
         context: chatContext,
       });
-      const metadata: AssistantMessageMetadata = {
-        toolId: response.toolId,
-        sourceTables: response.sourceTables ?? [],
-        path: response.path,
-        llmInvoked: response.llmInvoked,
-      };
-      setMessages((prev) => [
-        ...prev,
-        createMessage('assistant', response.reply, metadata),
-      ]);
-      appendAction({
-        userPrompt: trimmed,
-        summary: summarizeAction({
+
+      appendActionStep(actionId, {
+        label: `Tool ejecutada: ${response.toolId ?? 'ninguna'} (${response.path})`,
+        kind: 'success',
+      });
+      if (response.llmInvoked) {
+        appendActionStep(actionId, {
+          label: 'LLM invocado para selección de tool',
+          kind: 'info',
+        });
+      }
+      if (response.sourceTables.length > 0) {
+        appendActionStep(actionId, {
+          label: `Fuentes consultadas: ${response.sourceTables.join(', ')}`,
+          kind: 'info',
+        });
+      }
+      appendActionStep(actionId, {
+        label: 'Respuesta entregada al chat',
+        kind: 'success',
+      });
+      finalizeAction(actionId, {
+        summary: summarizeEvidenceAction({
           toolId: response.toolId,
           path: response.path,
           status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
@@ -144,25 +202,28 @@ export function useEvidenceCopilot(programId?: string) {
         llmInvoked: response.llmInvoked,
         status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
       });
+
+      setMessages((prev) => [...prev, createMessage('assistant', response.reply)]);
     } catch {
-      setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
-      setDraft(trimmed);
-      appendAction({
-        userPrompt: trimmed,
+      appendActionStep(actionId, {
+        label: 'Error al contactar al asistente o entrada rechazada',
+        kind: 'error',
+      });
+      finalizeAction(actionId, {
         summary: 'Falló la consulta al asistente.',
-        toolId: null,
         path: 'ERROR',
-        sourceTables: [],
-        llmInvoked: false,
         status: 'error',
       });
+      setMessages((prev) => prev.filter((message) => message.id !== userMessage.id));
+      setDraft(trimmed);
     }
-  }, [appendAction, chatContext, chatMutation, draft, messages]);
+  }, [appendActionStep, chatContext, chatMutation, draft, finalizeAction, messages, programId]);
 
   const clearConversation = useCallback(() => {
     setMessages([]);
     setActionHistory([]);
     setDraft('');
+    setActionModalOpen(false);
     chatMutation.reset();
   }, [chatMutation]);
 
@@ -173,9 +234,8 @@ export function useEvidenceCopilot(programId?: string) {
     setDraft,
     sendMessage,
     clearConversation,
-    messagesEndRef,
+    messagesContainerRef,
     sampleQuestions: statusQuery.data?.demoScenarios ?? [],
-    capabilities: statusQuery.data?.capabilities ?? [],
     isAssistantEnabled: statusQuery.data?.enabled === true,
     isStatusError: statusQuery.isError,
     isStatusLoading: statusQuery.isLoading,
@@ -184,5 +244,8 @@ export function useEvidenceCopilot(programId?: string) {
       (statusQuery.error as { status?: number } | null)?.status === 403,
     isSending: chatMutation.isPending,
     errorMessage: mapAssistantError(chatMutation.error),
+    actionModalOpen,
+    setActionModalOpen,
+    showDevBadge: EVIDENCE_COPILOT_DEBUG_ACTIONS_ENABLED,
   };
 }

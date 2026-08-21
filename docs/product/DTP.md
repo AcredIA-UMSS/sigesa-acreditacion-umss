@@ -45,6 +45,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 21/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** UI copiloto alineada con fases/usuarios; modal dev `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`; seguridad chat documentada. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-020 / PR-IMPL-030 | Cursor Agent |
+| 21/08/2026 | **MOD-EVIDENCE / MOD-PROCESS:** carga de evidencia en subfases vía enlace subrayado + modal (`SubphaseEvidenceUploadModal`); [CC] upload inline; [JD/TD] redirect UC-004. | FSD-UC-004 / FSD-UC-019 / DD-UC-004 | N/A | PM-019 / PR-IMPL-029 | Cursor Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
 | 12/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** copiloto control documental (`agent=evidence`); tools `list_pending_evidences`, `get_evidence_detail`, `check_evidence_completeness`; PBAC JD/TD/CC (403 EE); UI `EvidenceCopilotPanel`; MCP `mcp/sigesa-evidence`. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-013 / PR-IMPL-026 | Cursor Agent |

@@ -23,6 +23,10 @@
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 | PM-015 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / FSD-UC-004 | Historial de acciones del agente de evidencias |
 | PM-016 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 / FSD-UC-019 | Espacio de carga de evidencias por subfase en estructura |
+| PM-017 | PR-IMPL-027 | DD-AGENT-001 §10 | FSD-UC-022 / PRD-REQ-028 | Seguridad chat copiloto fases + modal trazabilidad dev-only |
+| PM-018 | PR-IMPL-028 | DD-AGENT-002 §10 | FSD-UC-002 / PRD-REQ-028 | Modal trazabilidad copiloto usuarios + doc seguridad compartida |
+| PM-019 | PR-IMPL-029 | DD-UC-004 §8 | FSD-UC-004 / FSD-UC-019 | Enlace subrayado + modal carga evidencia por subfase |
+| PM-020 | PR-IMPL-030 | DD-AGENT-003 §10 | FSD-UC-024 / PRD-REQ-028 | Copiloto evidencias: UI unificada + modal dev + seguridad chat |
 
 ## PM-001
 
@@ -1157,4 +1161,167 @@ en esta estructura del proceso, crear un espacio para que permita subir evidenci
 
 ### Resultado obtenido
 
-Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia.
+Cada subfase muestra enlace subrayado «Subir evidencia»; modal UC-004 (ver PM-019 / PR-IMPL-029). [CC] carga en modal; [JD/TD] enlace a formulario dedicado.
+
+---
+
+## PM-017 — Seguridad chat + modal trazabilidad copiloto fases
+
+| Campo | Valor |
+|---|---|
+| **ID Mapeo** | PM-017 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Composer |
+| **Tarea** | Validaciones de seguridad en chat del agente phases + modal dev de acciones |
+| **Objetivo** | Mitigar SQLi/XSS en entrada del chat; modal de trazabilidad desactivable fuera de producción |
+| **Contexto** | Copiloto embebido `PhasesCopilotPanel`; motor compartido `/assistant/chat` |
+| **PR-IMPL vinculado** | PR-IMPL-027 |
+| **DD vinculado** | DD-AGENT-001 §10 |
+| **FSD / PRD vinculado** | FSD-UC-022 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero que para el agente de fases que disenamos hagas lo siguiente:
+- hacer validaciones de seguridad para el chat para evitar problemas como el sqlinjection y demas
+- que mientras le pregunte alguna accion al chat genere un modal de todas las acciones que hace el agente, para ver que esta realizando, esto tiene que tener un interruptor en el codigo para poder desactivar ya que solo se debe visualizar en modo desarrollo mas no en produccion, documenta todo esto, e igual en el prompt_mapping sprint 2
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/.../AssistantChatInputValidator.java` |
+| generado | `backend/.../AssistantInvalidInputException.java` |
+| generado | `backend/src/test/.../AssistantChatInputValidatorTest.java` |
+| generado | `frontend/src/lib/config/phasesCopilotDebug.ts` |
+| generado | `frontend/.../PhasesCopilotActionDebugModal.tsx` |
+| generado | `docs/prompts/impl/PR-IMPL-027.md` |
+| modificado | `AssistantController.java`, `AssistantExceptionHandler.java` |
+| modificado | `usePhasesCopilot.ts`, `PhasesCopilotPanel.tsx`, `mapAssistantError.ts` |
+| modificado | `docs/design/assistant/DD-AGENT-001.md`, `frontend/.env`, `vite-env.d.ts` |
+
+### Resultado obtenido
+
+Entrada del chat validada (400 `ASSISTANT_INVALID_INPUT`); modal de acciones del agente visible solo con `VITE_PHASES_COPILOT_DEBUG_ACTIONS=true` en desarrollo.
+
+---
+
+## PM-018 — Modal trazabilidad copiloto usuarios
+
+| Campo | Valor |
+|---|---|
+| **ID Mapeo** | PM-018 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Composer |
+| **Tarea** | Modal dev + doc seguridad para agente `users` |
+| **Objetivo** | Paridad con copiloto fases: trazabilidad build-time y validación global documentada |
+| **Contexto** | `/admin/users`, `UsersCopilotPanel`, JD-only |
+| **PR-IMPL vinculado** | PR-IMPL-028 |
+| **DD vinculado** | DD-AGENT-002 §10 |
+| **FSD / PRD vinculado** | FSD-UC-002 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+ahora haz las mismas funciones implementadas, del modal y seguridad para el agente de usaurios
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/.../AssistantCopilotActionDebugModal.tsx` |
+| generado | `frontend/.../copilotAgentAction.ts` |
+| generado | `frontend/src/lib/config/usersCopilotDebug.ts` |
+| generado | `frontend/.../UsersCopilotActionDebugModal.tsx` |
+| generado | `docs/prompts/impl/PR-IMPL-028.md` |
+| modificado | `useUsersCopilot.ts`, `UsersCopilotPanel.tsx`, `UsersAdminPage.tsx` |
+| modificado | `PhasesCopilotActionDebugModal.tsx` (wrapper compartido) |
+| modificado | `docker-compose.yml`, `frontend/Dockerfile`, `.env.example` |
+| modificado | `docs/design/assistant/DD-AGENT-002.md` |
+
+### Resultado obtenido
+
+Copiloto usuarios con modal de trazabilidad vía `VITE_USERS_COPILOT_DEBUG_ACTIONS`; seguridad chat heredada de `AssistantChatInputValidator` (PR-IMPL-027).
+
+---
+
+## PM-019 — Modal carga evidencia por subfase
+
+| Campo | Valor |
+|---|---|
+| **ID Mapeo** | PM-019 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Composer |
+| **Tarea** | Enlace subrayado + modal UC-004 en subfases del árbol de proceso |
+| **Objetivo** | Reemplazar zona inline de upload por disparador textual y modal |
+| **Contexto** | `ProcessPhaseTree` en detalle UC-019; upload sigue vía UC-004 |
+| **PR-IMPL vinculado** | PR-IMPL-029 |
+| **DD vinculado** | DD-UC-004 §8, DD-UC-019 §2.5 |
+| **FSD / PRD vinculado** | FSD-UC-004 / FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+en las subfases de las fases, hay una aprte donde puedes subir evidencias, quiero que eso sea un texto subrayado que al hacer click habra un modal donde recien suba la evidencia, luego actualiza toda la documentacion involucrada
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/.../SubphaseEvidenceUploadModal.tsx` |
+| modificado | `SubphaseEvidenceUploadSlot.tsx` |
+| modificado | `docs/design/DD-UC-004.md`, `DD-UC-019.md` |
+| modificado | `docs/product/uc/FSD-UC-004.md`, `FSD-UC-019.md`, `DTP.md` |
+| generado | `docs/prompts/impl/PR-IMPL-029.md` |
+
+### Resultado obtenido
+
+Cada subfase muestra enlace subrayado; [CC] carga en modal; [JD/TD] redirigen al formulario UC-004.
+
+---
+
+## PM-020 — Copiloto evidencias UI + modal dev + seguridad
+
+| Campo | Valor |
+|---|---|
+| **ID Mapeo** | PM-020 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Composer |
+| **Tarea** | Alinear agente evidence con fases/users + modal trazabilidad + doc seguridad |
+| **Objetivo** | Paridad UI copilotos; eliminar historial inline; modal dev build-time |
+| **Contexto** | `/evidencias/cargar`, `EvidenceCopilotPanel`, PR-IMPL-026 base |
+| **PR-IMPL vinculado** | PR-IMPL-030 |
+| **DD vinculado** | DD-AGENT-003 §10 |
+| **FSD / PRD vinculado** | FSD-UC-024 / PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+ahora modifica el agente de cargar evidencia, que la interfaz sea similar a los agentes actuales implementados, agrega lo del modal y seguridad
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/lib/config/evidenceCopilotDebug.ts` |
+| generado | `frontend/.../EvidenceCopilotActionDebugModal.tsx` |
+| generado | `docs/prompts/impl/PR-IMPL-030.md` |
+| modificado | `useEvidenceCopilot.ts`, `EvidenceCopilotPanel.tsx`, `EvidenceUploadUI.tsx` |
+| modificado | `docker-compose.yml`, `frontend/Dockerfile`, `.env.example` |
+| modificado | `docs/design/assistant/DD-AGENT-003.md`, `FSD-UC-024.md`, `FSD-UC-004.md` |
+
+### Resultado obtenido
+
+Copiloto evidencias con UI idéntica a fases/usuarios; modal dev vía `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`; seguridad chat global documentada.
