@@ -82,6 +82,14 @@ final class AssistantResponseFormatter {
         return "Consulta completada.";
     }
 
+    @SuppressWarnings("unchecked")
+    static boolean requiresConfirmation(ToolExecutionResult result) {
+        if (result == null || !result.ok() || !(result.data() instanceof java.util.Map<?, ?> dataMap)) {
+            return false;
+        }
+        return Boolean.TRUE.equals(((java.util.Map<String, Object>) dataMap).get("confirmationRequired"));
+    }
+
     private static String formatPendingEvidences(java.util.Map<String, Object> data) {
         Object evidencesNode = data.get("evidences");
         if (!(evidencesNode instanceof List<?> evidences) || evidences.isEmpty()) {

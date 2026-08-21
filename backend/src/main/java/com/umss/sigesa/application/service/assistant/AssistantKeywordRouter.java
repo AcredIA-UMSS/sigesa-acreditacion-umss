@@ -37,6 +37,15 @@ public class AssistantKeywordRouter {
     private static final Pattern CONFIRM_PATTERN = Pattern.compile(
             "(?is)^(confirmo|s[ií]\\s*,?\\s*procede|confirmar|procede)\\b.*");
 
+    private static final Pattern CONFIRMATION_PROMPT_PATTERN = Pattern.compile(
+            "(?is)Responda\\s*(\\*\\*confirmo\\*\\*|«confirmo»|confirmo)\\s*para");
+
+    private static final Pattern SUBPHASE_RESUMEN_PATTERN = Pattern.compile(
+            "(?s)Resumen:\\s*«(.+?)»\\s*→\\s*orden\\s*(\\d+)\\s*en\\s*«(.+?)»");
+
+    private static final Pattern SUBPHASE_LINK_PATTERN = Pattern.compile(
+            "Enlace:\\s*(https?://\\S+)");
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "([a-z0-9._%+-]+@umss\\.edu\\.bo)", Pattern.CASE_INSENSITIVE);
 
@@ -77,6 +86,16 @@ public class AssistantKeywordRouter {
             "(?is).*(list(a|ar|ame|arme)?|fases?|etapas?|usuarios?|procesos?\\s+activos?|"
                     + "evidencias?\\s+pendientes|activa(r)?|desactiva(r)?|crea(r)?|elimina(r)?).*");
 
+    /** Intención de estructura/subfases — no usar atajo RAG/KEYWORD normativo aislado. */
+    private static final Pattern STRUCTURE_INTENT_PATTERN = Pattern.compile(
+            "(?is).*(estructura\\s+(completa|del\\s+proceso)|muestra\\s+(la\\s+)?estructura|"
+                    + "list(a|ar|ame)?\\s+(las\\s+)?subfases|subfases\\s+(del\\s+)?proceso).*");
+
+    /** Encadenamiento explícito — delegar al bucle LLM (Nivel 4). */
+    private static final Pattern MULTI_STEP_INTENT_PATTERN = Pattern.compile(
+            "(?is).*(\\by\\s+luego\\b|\\by\\s+despu[eé]s\\b|\\btambi[eé]n\\b|\\badem[aá]s\\b|"
+                    + "\\bbusca\\s+.*\\bnormativa\\b).*");
+
     public Optional<AssistantToolInvocation> resolve(String userMessage,
                                                      List<ChatMessage> history,
                                                      AssistantAuthContext auth) {
@@ -99,6 +118,11 @@ public class AssistantKeywordRouter {
             return writeFlow;
         }
 
+        Optional<AssistantToolInvocation> phasesConfirm = resolvePhasesConfirmation(message, history, role, chatContext);
+        if (phasesConfirm.isPresent()) {
+            return phasesConfirm;
+        }
+
         Optional<AssistantToolInvocation> evidenceFlow = resolveEvidenceFlow(message, role, chatContext);
         if (evidenceFlow.isPresent()) {
             return evidenceFlow;
@@ -112,6 +136,7 @@ public class AssistantKeywordRouter {
                 }
             }
             if (!chatContext.isUsersAgent() && !chatContext.isEvidenceAgent()
+                    && !MULTI_STEP_INTENT_PATTERN.matcher(message).matches()
                     && PHASES_PATTERN.matcher(message).matches()) {
                 return Optional.of(buildPhasesInvocation(message, chatContext));
             }
@@ -141,7 +166,9 @@ public class AssistantKeywordRouter {
 
         if (isAssistantRole(role)
                 && NORMATIVE_PATTERN.matcher(message).matches()
-                && !OPERATIONAL_QUERY_PATTERN.matcher(message).matches()) {
+                && !OPERATIONAL_QUERY_PATTERN.matcher(message).matches()
+                && !STRUCTURE_INTENT_PATTERN.matcher(message).matches()
+                && !MULTI_STEP_INTENT_PATTERN.matcher(message).matches()) {
             return Optional.of(buildNormativeSearchInvocation(message, chatContext));
         }
 
@@ -230,6 +257,82 @@ public class AssistantKeywordRouter {
             return matcher.group(1);
         }
         return null;
+    }
+
+    private Optional<AssistantToolInvocation> resolvePhasesConfirmation(String message,
+                                                                        List<ChatMessage> history,
+                                                                        String role,
+                                                                        AssistantChatContext chatContext) {
+        if (!CONFIRM_PATTERN.matcher(message).matches()) {
+            return Optional.empty();
+        }
+        if (!"JD".equals(role) && !"TD".equals(role)) {
+            return Optional.empty();
+        }
+        if (chatContext == null || !chatContext.isPhasesAgent()) {
+            return Optional.empty();
+        }
+
+        PendingSubphaseCreate pending = findPendingSubphaseCreate(history);
+        if (pending == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(buildSubphaseCreateInvocation(pending, chatContext, true));
+    }
+
+    private static PendingSubphaseCreate findPendingSubphaseCreate(List<ChatMessage> history) {
+        if (history == null || history.isEmpty()) {
+            return null;
+        }
+
+        for (int i = history.size() - 1; i >= 0; i--) {
+            ChatMessage message = history.get(i);
+            if (message.role() != ChatRole.ASSISTANT || message.content() == null) {
+                continue;
+            }
+            String content = message.content();
+            if (!CONFIRMATION_PROMPT_PATTERN.matcher(content).find()) {
+                continue;
+            }
+
+            Matcher resumen = SUBPHASE_RESUMEN_PATTERN.matcher(content);
+            if (!resumen.find()) {
+                continue;
+            }
+
+            Matcher link = SUBPHASE_LINK_PATTERN.matcher(content);
+            if (!link.find()) {
+                continue;
+            }
+
+            return new PendingSubphaseCreate(
+                    resumen.group(1).trim(),
+                    resumen.group(3).trim(),
+                    link.group(1).trim());
+        }
+        return null;
+    }
+
+    private static AssistantToolInvocation buildSubphaseCreateInvocation(PendingSubphaseCreate pending,
+                                                                           AssistantChatContext chatContext,
+                                                                           boolean confirmed) {
+        String careerQuery = chatContext.careerName();
+        if (careerQuery == null || careerQuery.isBlank()) {
+            careerQuery = chatContext.careerCode();
+        }
+        StringBuilder json = new StringBuilder("{");
+        json.append("\"action\":\"CREATE\",");
+        json.append("\"careerQuery\":\"").append(escapeJson(careerQuery)).append("\",");
+        if (chatContext.templateType() != null && !chatContext.templateType().isBlank()) {
+            json.append("\"templateType\":\"").append(escapeJson(chatContext.templateType())).append("\",");
+        }
+        json.append("\"phaseName\":\"").append(escapeJson(pending.phaseName())).append("\",");
+        json.append("\"name\":\"").append(escapeJson(pending.subphaseName())).append("\",");
+        json.append("\"referenceUrl\":\"").append(escapeJson(pending.referenceUrl())).append("\",");
+        json.append("\"confirmed\":").append(confirmed);
+        json.append("}");
+        return new AssistantToolInvocation(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, json.toString());
     }
 
     private Optional<AssistantToolInvocation> resolveWriteFlow(String message,
@@ -384,7 +487,8 @@ public class AssistantKeywordRouter {
                 continue;
             }
             String content = message.content();
-            if (!content.contains("Vista previa:") && !content.contains("Confirme")) {
+            if (!content.contains("Vista previa:") && !content.contains("Confirme")
+                    && !CONFIRMATION_PROMPT_PATTERN.matcher(content).find()) {
                 continue;
             }
 
@@ -400,5 +504,8 @@ public class AssistantKeywordRouter {
     }
 
     private record PendingWriteAction(String identifier, String action) {
+    }
+
+    private record PendingSubphaseCreate(String subphaseName, String phaseName, String referenceUrl) {
     }
 }
