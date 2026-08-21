@@ -6,7 +6,7 @@ design_parent: DD-SYS-002
 status: Implemented
 ultima_actualizacion: "2026-08-21"
 fsd_uc: FSD-UC-024
-pr_impl: PR-IMPL-026
+pr_impl: PR-IMPL-026, PR-IMPL-033
 ---
 
 # DD-AGENT-003 — Copiloto de control documental
@@ -72,8 +72,17 @@ GET  /api/v1/assistant/status?agent=evidence
 | `list_pending_evidences` | read | ✓ | ✓ | ✓* |
 | `get_evidence_detail` | read | ✓ | ✓ | ✓* |
 | `check_evidence_completeness` | read | ✓ | ✓ | ✓* |
+| `search_normative_docs` | read | ✓ | ✓ | ✓* |
 
 \*CC solo sobre `programScope` del JWT.
+
+### 5.1 Encadenamiento multi-tool (Nivel 4)
+
+| # demo | Pregunta | Tools esperadas |
+|--------|----------|-----------------|
+| 4 | Lista evidencias pendientes + normativa matriz CEUB | `list_pending_evidences` → `search_normative_docs` |
+
+`EvidenceCopilotPanel` muestra metadata y traza; historial de acciones en modal con pasos individuales.
 
 ## 6. Flujo
 
@@ -114,7 +123,7 @@ Servidor MCP en `mcp/sigesa-evidence/` expone las mismas tres tools contra la AP
 | Contexto | `AssistantChatContext.evidence(programId)` |
 | Tools | `AssistantToolRegistry` + `AssistantToolExecutor` |
 | Query | `EvidenceControlQueryPort` / use cases |
-| UI | `EvidenceCopilotPanel` + `useEvidenceCopilot` |
+| UI | `EvidenceCopilotPanel` + `useEvidenceCopilot` + `CopilotAssistantMetadata` |
 | MCP | `mcp/sigesa-evidence/src/index.ts` |
 
 ## 9. Palabras clave
@@ -127,6 +136,8 @@ Servidor MCP en `mcp/sigesa-evidence/` expone las mismas tres tools contra la AP
 ### 10.1 Validación de entrada
 
 Comparte `AssistantChatInputValidator` en `POST /api/v1/assistant/chat` (SQLi, XSS, límites). Ver [`DD-AGENT-001.md`](DD-AGENT-001.md) §10.1. Respuesta: **400** `ASSISTANT_INVALID_INPUT`.
+
+RBAC: subset `evidence` (3 tools) revalidado en executor; PBAC `programScope` en use cases. Auditoría: `AUDIT_ASSISTANT_TOOL`. Ver [`TOOL-CATALOG.md`](TOOL-CATALOG.md) §1.2.1.
 
 ### 10.2 Historial de acciones (modal)
 

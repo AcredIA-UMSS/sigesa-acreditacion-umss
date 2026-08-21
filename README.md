@@ -308,8 +308,45 @@ sigesa-acreditacion-umss/
 ├── backend/          # API REST (Spring Boot)
 ├── frontend/         # SPA (React + Vite)
 ├── docs/             # Documentación de producto, diseño y baseline
-└── agents.md         # Contexto técnico para agentes de IA
+└── AGENTS.md         # Contexto técnico para agentes de IA
 ```
+
+---
+
+## Asistente virtual y copilotos (MOD-ASSISTANT)
+
+SIGESA incluye un asistente conversacional con **tool calling** sobre datos reales del sistema. El LLM solo elige herramientas; la respuesta final la formatea siempre el backend (anti-alucinación).
+
+| Superficie | Ruta / contexto | Roles |
+|------------|-----------------|-------|
+| Asistente general | `/ayuda` | Según rol JWT |
+| Copiloto fases | `/procesos/{id}` — `agent=phases` | JD, TD, CC (CC solo lectura) |
+| Copiloto usuarios | `/admin/users` — `agent=users` | Solo JD |
+| Copiloto evidencias | `/evidencias/cargar` — `agent=evidence` | JD, TD, CC |
+
+### Niveles de madurez demostrables
+
+| Nivel | Qué demuestra | Cómo probarlo |
+|-------|---------------|---------------|
+| 1 | Palabras clave → tool directa | Escenario demo #1 en cualquier copiloto |
+| 2 | LLM elige 1 tool | Escenario #2 (sinónimos) |
+| 3 | RAG normativo indexado | Pregunta normativa CEUB/ARCU-SUR |
+| **4** | ≥2 tools encadenadas + traza | Escenario **#5** (general/phases/users) o **#4** (evidence) |
+
+### Variables de entorno (LLM + multi-tool)
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `SIGESA_ASSISTANT_ENABLED` | `true` | Módulo activo |
+| `SIGESA_ASSISTANT_LLM_ENABLED` | `true` | Si `false`, solo camino KEYWORD |
+| `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` | `5` | Máximo de tools encadenadas por mensaje |
+| `SIGESA_ASSISTANT_RAG_ENABLED` | `true` | RAG normativo (`search_normative_docs`) |
+| `SIGESA_ASSISTANT_BASE_URL` | — | Open WebUI u Ollama |
+| `SIGESA_ASSISTANT_API_KEY` | — | API key Open WebUI (servidor) |
+
+Documentación detallada: [`docs/design/DD-SYS-002.md`](docs/design/DD-SYS-002.md) §11 · [`docs/design/assistant/TOOL-CATALOG.md`](docs/design/assistant/TOOL-CATALOG.md) · [`docs/product/DTP.md`](docs/product/DTP.md) §B.5.
+
+---
 
 ## Panel de Control Híbrido (PBAC Dashboard)
 

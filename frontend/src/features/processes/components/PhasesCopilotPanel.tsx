@@ -7,6 +7,7 @@ import {
   usePhasesCopilot,
   type PhasesCopilotProcessContext,
 } from '../hooks/usePhasesCopilot';
+import { CopilotAssistantMetadata } from '../../assistant/components/CopilotAssistantMetadata';
 import { PhasesCopilotActionDebugModal } from './PhasesCopilotActionDebugModal';
 
 export interface PhasesCopilotPanelProps {
@@ -233,14 +234,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
         {!isUser && message.metadata && (
-          <div className="mt-2 border-t border-gray-200 pt-2 text-label-md text-gray-600">
-            <p>
-              <span className="font-medium">Tool:</span> {message.metadata.toolId ?? '—'}
-            </p>
-            <p className="mt-0.5">
-              <span className="font-medium">Camino:</span> {message.metadata.path}
-            </p>
-          </div>
+          <CopilotAssistantMetadata metadata={message.metadata} compact />
         )}
       </div>
     </div>

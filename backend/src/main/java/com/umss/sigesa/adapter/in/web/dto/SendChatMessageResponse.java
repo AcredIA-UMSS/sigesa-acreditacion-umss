@@ -7,6 +7,7 @@ public record SendChatMessageResponse(
         String toolId,
         List<String> sourceTables,
         String path,
-        boolean llmInvoked
+        boolean llmInvoked,
+        List<AssistantToolStepResponse> steps
 ) {
 }

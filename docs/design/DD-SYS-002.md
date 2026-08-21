@@ -450,9 +450,11 @@ sequenceDiagram
   EX->>UC: invocar puerto aplicación
   UC-->>EX: resultado dominio
   EX-->>BE: JSON tool result
-  BE->>LLM: role=tool, content=result
-  LLM-->>BE: respuesta natural language
-  BE-->>FE: { reply }
+  BE->>LLM: role=assistant (tool_calls) + role=tool, content=result
+  Note over BE,LLM: Repetir hasta sin tool_calls o max iteraciones
+  LLM-->>BE: sin tool_calls (fin de encadenamiento)
+  BE->>BE: AssistantResponseFormatter (combina pasos)
+  BE-->>FE: { reply, toolId, steps[] }
 ```
 
 ### 11.3 Componentes previstos (implementación)
@@ -520,6 +522,9 @@ En fallo:
 | Parámetro | Valor propuesto |
 |-----------|-----------------|
 | Max iteraciones tool-call por mensaje | 5 (default `sigesa.assistant.max-tool-iterations`) |
+| Tools por iteración | 1 (el LLM puede encadenar en turnos sucesivos) |
+| Respuesta multi-paso | `AssistantResponseFormatter` combina resultados; separador `---` entre pasos |
+| Trazabilidad API | Campo `steps[]`: `{ step, toolId, sourceTables, success }` |
 | Timeout por tool | Hereda timeout LLM (120 s) |
 | Tools con escritura | `set_user_status` (JD); `manage_process_phase` (JD, TD) — confirmación en chat |
 
@@ -530,8 +535,10 @@ En fallo:
 | Catálogo `TOOL-CATALOG.md` | **Implementado** (Fase 1.1 read + Fase 1.2 write con RBAC JD/TD) |
 | Contrato `API-USER-03.md` | **Documentado** |
 | Loop backend + executor | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
+| Encadenamiento multi-tool (Nivel 4) | **Implementado** — [`PR-IMPL-033`](../../prompts/impl/PR-IMPL-033.md) |
+| RAG normativo | **Implementado** — [`PR-IMPL-032`](../../prompts/impl/PR-IMPL-032.md) |
 | Extensión `ChatCompletionPort` | **Implementado** — [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
-| Tests tool `list_users` | **Implementado** — unit + WebMvc |
+| Tests tool loop + multi-tool | **Implementado** — `SendChatMessageServiceToolLoopTest` |
 
 ### 11.9 Trazabilidad §11
 
@@ -541,3 +548,29 @@ En fallo:
 | API listado usuarios | [`docs/product/api/API-USER-03.md`](../product/api/API-USER-03.md) |
 | FSD gestión usuarios | [FSD-UC-002](../product/uc/FSD-UC-002.md) |
 | Prompt implementación | [`PR-IMPL-013`](../../prompts/impl/PR-IMPL-013.md) |
+| Multi-tool Nivel 4 | [`PR-IMPL-033`](../../prompts/impl/PR-IMPL-033.md) |
+| RAG normativo | [`PR-IMPL-032`](../../prompts/impl/PR-IMPL-032.md) |
+
+### 11.10 Encadenamiento multi-tool (Nivel 4)
+
+| Nivel | Capacidad | Implementación |
+|-------|-----------|----------------|
+| 1 | FAQ / palabras clave | `AssistantKeywordRouter` |
+| 2 | LLM elige 1 tool; Java formatea respuesta | `SendChatMessageService` (single iteration) |
+| 3 | RAG normativo indexado | `AssistantNormativeRagService` + `search_normative_docs` |
+| **4** | ≥2 tools en un turno + traza visible | Loop `max-tool-iterations`; API `steps[]`; UI en todos los copilotos |
+
+**Reglas:**
+
+- El LLM **no** redacta la respuesta final con datos del dominio.
+- Tras cada tool, el backend añade mensajes `assistant` (tool_calls) y `tool` (JSON) a la conversación interna.
+- Cuando el LLM responde sin `tool_calls`, se combinan los resultados formateados.
+- Si se alcanza el límite de iteraciones, se devuelven resultados parciales con aviso en `reply`.
+
+**Escenarios demo #5** (expuestos en `GET /assistant/status?agent=…`):
+
+| Agente | Encadenamiento típico |
+|--------|----------------------|
+| general / phases | `list_process_structure` → `search_normative_docs` |
+| users | `list_users` → `get_user_detail` |
+| evidence | `list_pending_evidences` → `search_normative_docs` |

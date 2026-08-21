@@ -17,6 +17,7 @@ import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
+import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
@@ -25,6 +26,8 @@ import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
 import com.umss.sigesa.application.service.assistant.AssistantKeywordRouter;
+import com.umss.sigesa.application.port.out.AssistantToolAuditPort;
+import com.umss.sigesa.application.service.assistant.AssistantNormativeRagService;
 import com.umss.sigesa.application.service.assistant.AssistantToolExecutor;
 import com.umss.sigesa.application.service.assistant.AssistantToolRegistry;
 import com.umss.sigesa.application.service.assistant.SendChatMessageService;
@@ -61,7 +64,9 @@ public class AssistantModuleConfig {
                                                 ReorderProcessStructureUseCase reorderProcessStructureUseCase,
                                                 ListPendingEvidencesUseCase listPendingEvidencesUseCase,
                                                 GetEvidenceDetailUseCase getEvidenceDetailUseCase,
-                                                CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase) {
+                                                CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase,
+                                                SearchNormativeDocumentsUseCase searchNormativeDocumentsUseCase,
+                                                AssistantToolAuditPort assistantToolAuditPort) {
         return new AssistantToolExecutor(
                 assistantToolRegistry,
                 listUsersUseCase,
@@ -83,8 +88,20 @@ public class AssistantModuleConfig {
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,
-                new ObjectMapper()
+                searchNormativeDocumentsUseCase,
+                new ObjectMapper(),
+                assistantToolAuditPort
         );
+    }
+
+    @Bean
+    AssistantNormativeRagService assistantNormativeRagService(
+            SearchNormativeDocumentsUseCase searchNormativeDocumentsUseCase,
+            AssistantProperties assistantProperties) {
+        return new AssistantNormativeRagService(
+                searchNormativeDocumentsUseCase,
+                assistantProperties.isRagEnabled(),
+                assistantProperties.getRagMaxChunks());
     }
 
     @Bean
@@ -108,7 +125,8 @@ public class AssistantModuleConfig {
             AssistantToolRegistry assistantToolRegistry,
             AssistantToolExecutor assistantToolExecutor,
             AssistantKeywordRouter assistantKeywordRouter,
-            AssistantProperties assistantProperties) {
+            AssistantProperties assistantProperties,
+            AssistantNormativeRagService assistantNormativeRagService) {
         return new SendChatMessageService(
                 chatCompletionPort,
                 assistantToolRegistry,
@@ -116,7 +134,9 @@ public class AssistantModuleConfig {
                 assistantKeywordRouter,
                 new ObjectMapper(),
                 assistantProperties.getSystemPrompt(),
-                assistantProperties.isLlmEnabled()
+                assistantProperties.isLlmEnabled(),
+                assistantProperties.getMaxToolIterations(),
+                assistantNormativeRagService
         );
     }
 }

@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +33,16 @@ class SendChatMessageServiceToolLoopTest {
     private static final String PHASES_TOOL_JSON = """
             {"ok":true,"data":{"careerName":"Ingeniería de Sistemas","careerCode":"INF-SIS",\
             "templateType":"CEUB","phases":[{"order":1,"name":"Fase 1","phaseId":"p1","subphaseCount":2}]},"error":null}
+            """;
+
+    private static final String STRUCTURE_TOOL_JSON = """
+            {"ok":true,"data":{"careerName":"Ingeniería de Sistemas","templateType":"CEUB",\
+            "phases":[{"order":1,"name":"Fase 1","subphases":[{"name":"Matriz de evidencias"}]}]},"error":null}
+            """;
+
+    private static final String NORMATIVE_TOOL_JSON = """
+            {"ok":true,"data":{"documents":[{"title":"Matriz CEUB","snippet":"Requisitos matriz",\
+            "templateType":"CEUB"}]},"error":null}
             """;
 
     @Mock
@@ -45,10 +56,15 @@ class SendChatMessageServiceToolLoopTest {
     private SendChatMessageService serviceWithLlm;
     private SendChatMessageService serviceWithoutLlm;
 
+    private AssistantNormativeRagService disabledRagService() {
+        return new AssistantNormativeRagService((query, templateType, limit) -> List.of(), false, 3);
+    }
+
     @BeforeEach
     void setUp() {
         toolRegistry = new AssistantToolRegistry();
         keywordRouter = new AssistantKeywordRouter();
+        AssistantNormativeRagService ragService = disabledRagService();
         serviceWithLlm = new SendChatMessageService(
                 chatCompletionPort,
                 toolRegistry,
@@ -56,7 +72,9 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
-                true
+                true,
+                3,
+                ragService
         );
         serviceWithoutLlm = new SendChatMessageService(
                 chatCompletionPort,
@@ -65,7 +83,9 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
-                false
+                false,
+                3,
+                ragService
         );
     }
 
@@ -75,7 +95,8 @@ class SendChatMessageServiceToolLoopTest {
         when(toolExecutor.execute(
                 eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 any(),
-                eq(auth))).thenReturn(PHASES_TOOL_JSON);
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithLlm.send(
                 "Lista las fases de Ingeniería de Sistemas CEUB",
@@ -102,7 +123,8 @@ class SendChatMessageServiceToolLoopTest {
         when(toolExecutor.execute(
                 eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 eq("{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}"),
-                eq(auth))).thenReturn(PHASES_TOOL_JSON);
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithLlm.send(
                 "¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?",
@@ -130,7 +152,7 @@ class SendChatMessageServiceToolLoopTest {
         assertThat(result.sourceTables()).isEmpty();
         assertThat(result.reply()).contains("No puedo responder eso");
         assertThat(result.reply()).contains("Puedo ayudarte con:");
-        verify(toolExecutor, never()).execute(any(), any(), any());
+        verify(toolExecutor, never()).execute(any(), any(), any(), any());
         verify(chatCompletionPort, never()).complete(any());
     }
 
@@ -140,7 +162,8 @@ class SendChatMessageServiceToolLoopTest {
         when(toolExecutor.execute(
                 eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 any(),
-                eq(auth))).thenReturn(PHASES_TOOL_JSON);
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithoutLlm.send(
                 "Lista las fases de Ingeniería de Sistemas CEUB",
@@ -162,7 +185,8 @@ class SendChatMessageServiceToolLoopTest {
         when(toolExecutor.execute(
                 eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 any(),
-                eq(auth))).thenReturn(PHASES_TOOL_JSON);
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = serviceWithLlm.send(
                 "Lista las fases de este proceso",
@@ -192,7 +216,8 @@ class SendChatMessageServiceToolLoopTest {
                 AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID);
+                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
+                AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID);
     }
 
     @Test
@@ -220,7 +245,82 @@ class SendChatMessageServiceToolLoopTest {
 
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(8);
+        assertThat(captor.getValue().tools()).hasSize(16);
+    }
+
+    @Test
+    void multiToolLoop_chainsTwoToolsAndReturnsTrace() {
+        AssistantAuthContext auth = tdContext();
+        when(chatCompletionPort.complete(any()))
+                .thenReturn(new ChatCompletionResult(null, List.of(
+                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
+                                "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
+                )))
+                .thenReturn(new ChatCompletionResult(null, List.of(
+                        new ToolCall("call_2", AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID,
+                                "{\"query\":\"matriz evidencias CEUB\",\"templateType\":\"CEUB\"}")
+                )))
+                .thenReturn(new ChatCompletionResult("", List.of()));
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(STRUCTURE_TOOL_JSON);
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(NORMATIVE_TOOL_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Muestra la estructura de Ingeniería de Sistemas CEUB y busca normativa de Matriz de evidencias",
+                List.of(),
+                auth,
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.LLM);
+        assertThat(result.llmInvoked()).isTrue();
+        assertThat(result.steps()).hasSize(2);
+        assertThat(result.steps().get(0).toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
+        assertThat(result.steps().get(1).toolId()).isEqualTo(AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID);
+        assertThat(result.reply()).contains("Paso 1");
+        assertThat(result.reply()).contains("Paso 2");
+        verify(chatCompletionPort, times(3)).complete(any());
+    }
+
+    @Test
+    void multiToolLoop_respectsMaxIterations() {
+        AssistantAuthContext auth = tdContext();
+        SendChatMessageService limitedService = new SendChatMessageService(
+                chatCompletionPort,
+                toolRegistry,
+                toolExecutor,
+                keywordRouter,
+                new ObjectMapper(),
+                "system prompt",
+                true,
+                1,
+                disabledRagService());
+        when(chatCompletionPort.complete(any()))
+                .thenReturn(new ChatCompletionResult(null, List.of(
+                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                                "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
+                )));
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
+
+        AssistantChatResult result = limitedService.send(
+                "Lista fases y luego usuarios",
+                List.of(),
+                auth,
+                AssistantChatContext.general());
+
+        assertThat(result.steps()).hasSize(1);
+        assertThat(result.reply()).contains("Límite de 1 pasos");
+        verify(chatCompletionPort, times(1)).complete(any());
     }
 
     private static AssistantAuthContext jdContext() {

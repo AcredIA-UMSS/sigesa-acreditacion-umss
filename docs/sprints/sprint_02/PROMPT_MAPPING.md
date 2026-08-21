@@ -27,6 +27,9 @@
 | PM-018 | PR-IMPL-028 | DD-AGENT-002 §10 | FSD-UC-002 / PRD-REQ-028 | Modal trazabilidad copiloto usuarios + doc seguridad compartida |
 | PM-019 | PR-IMPL-029 | DD-UC-004 §8 | FSD-UC-004 / FSD-UC-019 | Enlace subrayado + modal carga evidencia por subfase |
 | PM-020 | PR-IMPL-030 | DD-AGENT-003 §10 | FSD-UC-024 / PRD-REQ-028 | Copiloto evidencias: UI unificada + modal dev + seguridad chat |
+| PM-021 | PR-IMPL-031 | TOOL-CATALOG §1.2.1 / DD-SYS-002 | PRD-REQ-028 | RBAC executor (subset agente) + auditoría `AUDIT_ASSISTANT_TOOL` |
+| PM-022 | PR-IMPL-032 | DD-SYS-002 | PRD-REQ-028 | RAG normativo (FTS + tool search_normative_docs) |
+| PM-023 | PR-IMPL-033 | DD-SYS-002 §11.10 | PRD-REQ-028 | Encadenamiento multi-tool Nivel 4 + traza UI en todos los copilotos |
 
 ## PM-001
 
@@ -1325,3 +1328,49 @@ ahora modifica el agente de cargar evidencia, que la interfaz sea similar a los 
 ### Resultado obtenido
 
 Copiloto evidencias con UI idéntica a fases/usuarios; modal dev vía `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`; seguridad chat global documentada.
+
+---
+
+## PM-023 — Encadenamiento multi-tool Nivel 4 (todos los copilotos)
+
+| Campo | Valor |
+|---|---|
+| **ID Mapeo** | PM-023 |
+| **Fecha** | 2026-08-21 |
+| **Solicitante** | Usuario |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Composer |
+| **Tarea** | Cablear loop multi-tool + traza UI en copilotos phases/users/evidence |
+| **Objetivo** | Demostrar Nivel 4 (≥2 tools encadenadas + traza visible) en los 4 agentes |
+| **Contexto** | PR-IMPL-013 loop parcial; PR-IMPL-032 RAG; frontend copilotos sin `steps[]` |
+| **PR-IMPL vinculado** | [PR-IMPL-033](../../prompts/impl/PR-IMPL-033.md) |
+| **DD vinculado** | [DD-SYS-002 §11.10](../../design/DD-SYS-002.md), [DD-AGENT-001/002/003](../../design/assistant/) |
+| **FSD / PRD vinculado** | PRD-REQ-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Implementar Nivel 4 multi-tool: loop SendChatMessageService con maxToolIterations,
+API steps[], traza UI en /ayuda y copilotos phases/users/evidence, escenarios demo #5.
+Actualizar documentación correspondiente.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `AssistantToolStep.java`, `AssistantToolStepResponse.java` |
+| generado | `CopilotAssistantMetadata.tsx`, `mapAssistantResponseMetadata.ts`, `recordToolTraceInAction.ts` |
+| generado | `docs/prompts/impl/PR-IMPL-033.md` |
+| modificado | `SendChatMessageService.java`, `AssistantChatResult.java`, `SendChatMessageResponse.java` |
+| modificado | `AssistantController.java` (escenarios demo #5 / #4 evidence) |
+| modificado | `usePhasesCopilot.ts`, `useUsersCopilot.ts`, `useEvidenceCopilot.ts`, `useAssistantChat.ts` |
+| modificado | `PhasesCopilotPanel.tsx`, `UsersCopilotPanel.tsx`, `EvidenceCopilotPanel.tsx`, `AssistantChatUI.tsx` |
+| modificado | `SendChatMessageServiceToolLoopTest.java` |
+| modificado | `docs/product/DTP.md`, `docs/design/DD-SYS-002.md`, `TOOL-CATALOG.md`, `ENTREGA-TOOL-CALLING-SEMANA.md` |
+| modificado | `DD-AGENT-001.md`, `DD-AGENT-002.md`, `DD-AGENT-003.md`, `README.md` |
+
+### Resultado obtenido
+
+Bucle multi-tool operativo en backend para todos los agentes. API expone `steps[]`. UI muestra traza numerada cuando hay 2+ pasos. Escenarios demo Nivel 4 en general, phases, users y evidence. Documentación viva sincronizada (DTP §B.5, DD-SYS-002 §11.10).

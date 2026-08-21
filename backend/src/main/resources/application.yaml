@@ -60,3 +60,5 @@ sigesa:
       Nunca inventes datos del sistema: si no tienes una respuesta de tool ejecutada por el backend, dilo claramente.
       NUNCA afirmes que activaste/desactivaste un usuario o modificaste fases si no recibiste executed:true de una tool.
     max-tool-iterations: ${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:5}
+    rag-enabled: ${SIGESA_ASSISTANT_RAG_ENABLED:true}
+    rag-max-chunks: ${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:3}

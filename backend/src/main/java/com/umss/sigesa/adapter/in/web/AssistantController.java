@@ -3,6 +3,7 @@ package com.umss.sigesa.adapter.in.web;
 import com.umss.sigesa.adapter.in.web.dto.AssistantDemoScenarioResponse;
 import com.umss.sigesa.adapter.in.web.dto.AssistantStatusResponse;
 import com.umss.sigesa.adapter.in.web.dto.ChatMessageDto;
+import com.umss.sigesa.adapter.in.web.dto.AssistantToolStepResponse;
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageRequest;
 import com.umss.sigesa.adapter.in.web.dto.SendChatMessageResponse;
 import com.umss.sigesa.application.model.assistant.AssistantAgentProfile;
@@ -63,7 +64,12 @@ public class AssistantController {
                     4,
                     "Modelo apagado",
                     "Lista las fases de Ingeniería de Sistemas CEUB (SIGESA_ASSISTANT_LLM_ENABLED=false)",
-                    "KEYWORD")
+                    "KEYWORD"),
+            new AssistantDemoScenarioResponse(
+                    5,
+                    "Multi-tool (Nivel 4)",
+                    "Muestra la estructura de Ingeniería de Sistemas CEUB y busca la normativa de la subfase Matriz de evidencias",
+                    "LLM")
     );
 
     private static final List<AssistantDemoScenarioResponse> PHASES_COPILOT_SAMPLES = List.of(
@@ -86,6 +92,11 @@ public class AssistantController {
                     4,
                     "Edición subfase (JD/TD)",
                     "Agrega una subfase «Evidencia docente» con enlace HTTPS en la Fase 1",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    5,
+                    "Multi-tool (Nivel 4)",
+                    "Muestra la estructura completa y busca la normativa de la subfase Matriz de evidencias",
                     "LLM")
     );
 
@@ -109,7 +120,12 @@ public class AssistantController {
                     4,
                     "Desactivar (confirmación)",
                     "Desactiva al usuario cc@umss.edu.bo",
-                    "KEYWORD")
+                    "KEYWORD"),
+            new AssistantDemoScenarioResponse(
+                    5,
+                    "Multi-tool (Nivel 4)",
+                    "Lista usuarios CC activos y muéstrame el detalle de cc@umss.edu.bo",
+                    "LLM")
     );
 
     private static final List<AssistantDemoScenarioResponse> EVIDENCE_COPILOT_SAMPLES = List.of(
@@ -127,6 +143,11 @@ public class AssistantController {
                     3,
                     "Completitud",
                     "¿La evidencia del indicador Plan de estudios vigente está completa?",
+                    "LLM"),
+            new AssistantDemoScenarioResponse(
+                    4,
+                    "Multi-tool (Nivel 4)",
+                    "Lista evidencias pendientes de revisión y busca normativa sobre matriz de evidencias CEUB",
                     "LLM")
     );
 
@@ -203,7 +224,14 @@ public class AssistantController {
                 result.toolId(),
                 result.sourceTables(),
                 result.path().name(),
-                result.llmInvoked()));
+                result.llmInvoked(),
+                result.steps().stream()
+                        .map(step -> new AssistantToolStepResponse(
+                                step.step(),
+                                step.toolId(),
+                                step.sourceTables(),
+                                step.success()))
+                        .toList()));
     }
 
     private AssistantChatContext resolveChatContext(SendChatMessageRequest request,

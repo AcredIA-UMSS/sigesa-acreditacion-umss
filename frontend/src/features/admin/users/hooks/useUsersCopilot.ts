@@ -18,6 +18,8 @@ import type {
 } from '../../../assistant/types/copilotAgentAction';
 import { USERS_COPILOT_DEBUG_ACTIONS_ENABLED } from '../../../../lib/config/usersCopilotDebug';
 import { mapAssistantError } from '../../../assistant/hooks/mapAssistantError';
+import { mapAssistantResponseMetadata } from '../../../assistant/lib/mapAssistantResponseMetadata';
+import { recordToolTraceInAction } from '../../../assistant/lib/recordToolTraceInAction';
 
 function createMessage(
   role: ChatMessage['role'],
@@ -38,12 +40,16 @@ function summarizeUsersAction(input: {
   path: AssistantResolutionPath | 'ERROR';
   status: CopilotAgentActionStatus;
   reply?: string;
+  stepCount?: number;
 }): string {
   if (input.status === 'error') {
     return 'Falló la consulta al asistente.';
   }
   if (input.path === 'OUT_OF_SCOPE') {
     return 'Consulta fuera de alcance del copiloto de usuarios.';
+  }
+  if ((input.stepCount ?? 0) > 1) {
+    return `Encadenó ${input.stepCount} tools (${input.toolId ?? 'multi-tool'}).`;
   }
   switch (input.toolId) {
     case 'list_users':
@@ -185,22 +191,7 @@ export function useUsersCopilot() {
       });
 
       if (debugEnabled) {
-        appendActionStep(actionId, {
-          label: `Tool ejecutada: ${response.toolId ?? 'ninguna'} (${response.path})`,
-          kind: 'success',
-        });
-        if (response.llmInvoked) {
-          appendActionStep(actionId, {
-            label: 'LLM invocado para selección de tool',
-            kind: 'info',
-          });
-        }
-        if (response.sourceTables.length > 0) {
-          appendActionStep(actionId, {
-            label: `Fuentes consultadas: ${response.sourceTables.join(', ')}`,
-            kind: 'info',
-          });
-        }
+        recordToolTraceInAction(appendActionStep, actionId, response);
         appendActionStep(actionId, {
           label: 'Respuesta formateada entregada al panel',
           kind: 'success',
@@ -211,6 +202,7 @@ export function useUsersCopilot() {
             path: response.path,
             status: response.path === 'OUT_OF_SCOPE' ? 'out_of_scope' : 'ok',
             reply: response.reply,
+            stepCount: response.steps?.length ?? 0,
           }),
           toolId: response.toolId,
           path: response.path,
@@ -222,12 +214,7 @@ export function useUsersCopilot() {
 
       setMessages((prev) => [
         ...prev,
-        createMessage('assistant', response.reply, {
-          toolId: response.toolId,
-          sourceTables: response.sourceTables,
-          path: response.path,
-          llmInvoked: response.llmInvoked,
-        }),
+        createMessage('assistant', response.reply, mapAssistantResponseMetadata(response)),
       ]);
 
       const writeTools = new Set([

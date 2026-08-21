@@ -25,12 +25,20 @@ export interface SendChatMessageRequest {
   context?: AssistantChatContextDto;
 }
 
+export interface AssistantToolStep {
+  step: number;
+  toolId: string;
+  sourceTables: string[];
+  success: boolean;
+}
+
 export interface SendChatMessageResponse {
   reply: string;
   toolId: string | null;
   sourceTables: string[];
   path: AssistantResolutionPath;
   llmInvoked: boolean;
+  steps?: AssistantToolStep[];
 }
 
 export interface AssistantDemoScenario {
@@ -54,6 +62,7 @@ export interface AssistantMessageMetadata {
   sourceTables: string[];
   path: AssistantResolutionPath;
   llmInvoked: boolean;
+  steps?: AssistantToolStep[];
 }
 
 export interface ChatMessage {

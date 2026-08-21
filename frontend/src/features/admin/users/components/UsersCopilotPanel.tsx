@@ -4,6 +4,7 @@ import type { AssistantDemoScenario, ChatMessage } from '../../../../api/model/a
 import { Alert } from '../../../../components/ui/Alert';
 import { Button } from '../../../../components/ui/Button';
 import { useUsersCopilot } from '../hooks/useUsersCopilot';
+import { CopilotAssistantMetadata } from '../../../assistant/components/CopilotAssistantMetadata';
 import { UsersCopilotActionDebugModal } from './UsersCopilotActionDebugModal';
 
 export function UsersCopilotPanel() {
@@ -210,14 +211,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
       >
         <p className="whitespace-pre-wrap">{message.content}</p>
         {!isUser && message.metadata && (
-          <div className="mt-2 border-t border-gray-200 pt-2 text-label-md text-gray-600">
-            <p>
-              <span className="font-medium">Tool:</span> {message.metadata.toolId ?? '—'}
-            </p>
-            <p className="mt-0.5">
-              <span className="font-medium">Camino:</span> {message.metadata.path}
-            </p>
-          </div>
+          <CopilotAssistantMetadata metadata={message.metadata} compact />
         )}
       </div>
     </div>

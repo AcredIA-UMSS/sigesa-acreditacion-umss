@@ -75,6 +75,9 @@ final class AssistantResponseFormatter {
         if (data.containsKey("complete") && data.containsKey("hasEvidence")) {
             return formatEvidenceCompleteness(data);
         }
+        if (data.containsKey("documents")) {
+            return formatNormativeDocuments(data);
+        }
 
         return "Consulta completada.";
     }
@@ -288,6 +291,44 @@ final class AssistantResponseFormatter {
         } else {
             sb.append("- Carreras: (sin asignación activa)\n");
         }
+        return sb.toString().trim();
+    }
+
+    private static String formatNormativeDocuments(java.util.Map<String, Object> data) {
+        Object documentsNode = data.get("documents");
+        Object query = data.get("query");
+        if (!(documentsNode instanceof List<?> documents) || documents.isEmpty()) {
+            return "No encontré fragmentos normativos para «"
+                    + (query != null ? query : "su consulta")
+                    + "». Pruebe con términos como CEUB, ARCU-SUR o el nombre de una subfase.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Fragmentos normativos (").append(data.get("total")).append(") para «")
+                .append(query).append("»:\n\n");
+        int index = 1;
+        for (Object item : documents) {
+            if (!(item instanceof java.util.Map<?, ?> map)) {
+                continue;
+            }
+            sb.append(index++).append(". **").append(map.get("title")).append("**");
+            if (map.get("templateType") != null) {
+                sb.append(" (").append(map.get("templateType")).append(')');
+            }
+            sb.append('\n');
+            if (map.get("phaseName") != null && map.get("subphaseName") != null) {
+                sb.append("   ").append(map.get("phaseName"))
+                        .append(" → ").append(map.get("subphaseName")).append('\n');
+            }
+            if (map.get("snippet") != null) {
+                sb.append("   ").append(map.get("snippet")).append('\n');
+            }
+            if (map.get("sourceUrl") != null) {
+                sb.append("   Enlace: ").append(map.get("sourceUrl")).append('\n');
+            }
+            sb.append('\n');
+        }
+        sb.append("Fuente: índice normativo SIGESA (RAG).");
         return sb.toString().trim();
     }
 

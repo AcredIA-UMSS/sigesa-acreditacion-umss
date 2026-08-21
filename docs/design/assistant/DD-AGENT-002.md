@@ -6,7 +6,7 @@ design_parent: DD-SYS-002
 status: Implemented
 ultima_actualizacion: "2026-08-21"
 fsd_uc: FSD-UC-002
-pr_impl: PR-IMPL-025
+pr_impl: PR-IMPL-025, PR-IMPL-033
 ---
 
 # DD-AGENT-002 — Copiloto de Usuarios embebido
@@ -78,6 +78,14 @@ GET  /api/v1/assistant/status?agent=users
 | `manage_user_status` | write | ✓ | `ACTIVATE` / `DEACTIVATE` / `REACTIVATE`; bitácora UC-017 |
 | `manage_user_assignment` | write | ✓ | CREATE/UPDATE de `user_program_assignment` (mínimo privilegio) |
 
+### 5.1 Encadenamiento multi-tool (Nivel 4)
+
+| # demo | Pregunta | Tools esperadas |
+|--------|----------|-----------------|
+| 5 | Lista usuarios CC activos y muéstrame el detalle de cc@umss.edu.bo | `list_users` → `get_user_detail` |
+
+La UI (`UsersCopilotPanel`) muestra traza multi-paso; modal dev registra cada paso del backend.
+
 El asistente general conserva `set_user_status` (compatibilidad). El copiloto users usa `manage_user_status` (incluye REACTIVATE).
 
 Escritura: patrón preview/confirm → `UserActionPlan` (resumen legible, análogo a `SubphaseOrderPlan`).
@@ -130,7 +138,7 @@ sequenceDiagram
 | Tools | `AssistantToolRegistry`, `AssistantToolExecutor` |
 | Plan preview | `AssistantUserActionPlan` |
 | Asignación | `ManageUserProgramAssignmentUseCase` |
-| UI | `UsersCopilotPanel`, `useUsersCopilot` |
+| UI | `UsersCopilotPanel`, `useUsersCopilot`, `CopilotAssistantMetadata` |
 
 ## 9. Backlog (evolución)
 
@@ -149,6 +157,8 @@ sequenceDiagram
 El copiloto de usuarios comparte el endpoint `POST /api/v1/assistant/chat` con el resto de agentes. La validación **`AssistantChatInputValidator`** (SQLi, XSS, límites de longitud) se aplica **antes** del caso de uso para todos los agentes. Ver [`DD-AGENT-001.md`](DD-AGENT-001.md) §10.1.
 
 Respuesta ante entrada inválida: **HTTP 400** con código `ASSISTANT_INVALID_INPUT`.
+
+RBAC executor + auditoría: [`TOOL-CATALOG.md`](TOOL-CATALOG.md) §1.2.1 · `AssistantToolRbacGuard` · log `AUDIT_ASSISTANT_TOOL`.
 
 ### 10.2 Modal de acciones del agente (solo desarrollo)
 

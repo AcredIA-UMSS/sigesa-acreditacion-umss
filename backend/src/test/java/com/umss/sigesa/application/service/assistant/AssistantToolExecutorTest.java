@@ -17,8 +17,11 @@ import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
+import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.application.service.assistant.support.AssistantToolExecutorTestFactory;
+import com.umss.sigesa.application.service.assistant.support.RecordingAssistantToolAuditPort;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,13 +81,16 @@ class AssistantToolExecutorTest {
     private GetEvidenceDetailUseCase getEvidenceDetailUseCase;
     @Mock
     private CheckEvidenceCompletenessUseCase checkEvidenceCompletenessUseCase;
+    @Mock
+    private SearchNormativeDocumentsUseCase searchNormativeDocumentsUseCase;
 
     private AssistantToolExecutor executor;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RecordingAssistantToolAuditPort auditPort = new RecordingAssistantToolAuditPort();
 
     @BeforeEach
     void setUp() {
-        executor = new AssistantToolExecutor(
+        executor = AssistantToolExecutorTestFactory.createFull(
                 new AssistantToolRegistry(),
                 listUsersUseCase,
                 activateUserUseCase,
@@ -105,7 +111,8 @@ class AssistantToolExecutorTest {
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,
-                objectMapper
+                searchNormativeDocumentsUseCase,
+                auditPort
         );
     }
 
