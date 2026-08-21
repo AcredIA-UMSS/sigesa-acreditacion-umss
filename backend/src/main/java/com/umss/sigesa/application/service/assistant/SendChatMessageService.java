@@ -31,6 +31,7 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             - Tu única tarea es elegir la tool correcta o indicar que ya no necesitas más tools.
             - NUNCA redactes la respuesta final al usuario ni inventes datos.
             - Invoca como máximo UNA tool por turno. Si necesitas más datos, invoca otra tool en el siguiente turno tras ver el resultado JSON.
+            - Si una tool de escritura devuelve confirmationRequired o pide confirmación, DETENTE: responde sin tool_calls. NUNCA invoques confirmed=true en el mismo turno del usuario.
             - Cuando ya tengas toda la información necesaria para responder, responde con content vacío y SIN tool_calls.
             - Sinónimos permitidos: «etapas» = fases del proceso; «carreras» = programas; «proceso en curso» = proceso activo.
             - Si la pregunta es sobre presupuesto, finanzas, clima, noticias u otro tema ajeno a acreditación, responde con content vacío y SIN tool_calls.
@@ -47,7 +48,8 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             - No invoques tools de usuarios, programas ni otros procesos.
             - Fases del proceso (usa phaseOrder o phaseId REAL; NUNCA inventes UUIDs como UUID_FASE_1):
             %s
-            - Para crear subfase: action=CREATE, phaseOrder=N (o phaseName), name=..., referenceUrl=https://..., confirmed=false primero; confirmed=true solo tras confirmación del usuario.
+            - Para crear subfase: action=CREATE, phaseOrder=N (o phaseName), name=..., referenceUrl=https://..., confirmed=false primero; confirmed=true solo tras confirmación del usuario en un mensaje aparte («confirmo»).
+            - NUNCA encadenes manage_process_subphase con confirmed=true en la misma respuesta que la vista previa.
             - No envíes el campo order al crear subfases: el sistema informa el último orden existente y asigna el siguiente disponible en la vista previa.
             - «Fase N» identifica la fase contenedora (phaseOrder), NO el orden de la subfase.
             - Encadenamiento típico: list_process_structure → search_normative_docs cuando pidan estructura y normativa de subfases.
@@ -233,6 +235,10 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                     outcome.success()));
             formattedParts.add(outcome.formattedReply());
 
+            if (outcome.confirmationRequired()) {
+                break;
+            }
+
             if (iteration == maxToolIterations - 1) {
                 hitIterationLimit = true;
                 break;
@@ -293,7 +299,8 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                 json,
                 formattedReply,
                 AssistantToolSourceRegistry.sourceTablesFor(toolId),
-                result.ok());
+                result.ok(),
+                AssistantResponseFormatter.requiresConfirmation(result));
     }
 
     private static ChatMessage toAssistantToolCallMessage(List<ToolCall> toolCalls) {
@@ -391,7 +398,8 @@ public class SendChatMessageService implements SendChatMessageUseCase {
             String rawJson,
             String formattedReply,
             List<String> sourceTables,
-            boolean success
+            boolean success,
+            boolean confirmationRequired
     ) {
     }
 }

@@ -9,6 +9,8 @@ import com.umss.sigesa.application.model.assistant.ChatCompletionRequest;
 import com.umss.sigesa.application.model.assistant.ChatCompletionResult;
 import com.umss.sigesa.application.model.assistant.ToolCall;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
+import com.umss.sigesa.domain.model.ChatMessage;
+import com.umss.sigesa.domain.model.ChatRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,6 +92,26 @@ class SendChatMessageServiceToolLoopTest {
     }
 
     @Test
+    void scenario1_controlledKeyword_ccRole_doesNotCallLlm() {
+        AssistantAuthContext auth = ccContext();
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(PHASES_TOOL_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Lista las fases de Ingeniería de Sistemas CEUB",
+                List.of(),
+                auth,
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
     void scenario1_controlledKeyword_doesNotCallLlm() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
@@ -119,7 +141,8 @@ class SendChatMessageServiceToolLoopTest {
                 .thenReturn(new ChatCompletionResult(null, List.of(
                         new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                                 "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
-                )));
+                )))
+                .thenReturn(new ChatCompletionResult("", List.of()));
         when(toolExecutor.execute(
                 eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
                 eq("{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}"),
@@ -136,7 +159,7 @@ class SendChatMessageServiceToolLoopTest {
         assertThat(result.llmInvoked()).isTrue();
         assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
         assertThat(result.reply()).contains("Fase 1");
-        verify(chatCompletionPort).complete(any());
+        verify(chatCompletionPort, times(2)).complete(any());
     }
 
     @Test
@@ -313,7 +336,7 @@ class SendChatMessageServiceToolLoopTest {
                 any())).thenReturn(PHASES_TOOL_JSON);
 
         AssistantChatResult result = limitedService.send(
-                "Lista fases y luego usuarios",
+                "Consulta usuarios CC y además lista programas académicos",
                 List.of(),
                 auth,
                 AssistantChatContext.general());
@@ -323,11 +346,99 @@ class SendChatMessageServiceToolLoopTest {
         verify(chatCompletionPort, times(1)).complete(any());
     }
 
+    private static final String SUBPHASE_PREVIEW_JSON = """
+            {"ok":true,"data":{"confirmationRequired":true,"action":"CREATE_SUBPHASE",\
+            "message":"Vista previa de subfase.","preview":{"requestedAction":"CREATE_SUBPHASE",\
+            "name":"Evidencia docente","assignedOrder":2,"phaseName":"Fase 2"}},\
+            "error":null}
+            """;
+
+    @Test
+    void writeToolPreview_stopsLoop_waitsForUserConfirmation() {
+        AssistantAuthContext auth = tdContext();
+        UUID processId = UUID.fromString("950e8400-e29b-41d4-a716-446655440020");
+        AssistantChatContext context = AssistantChatContext.phases(
+                processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
+
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult(null, List.of(
+                new ToolCall(
+                        "call_1",
+                        AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
+                        "{\"action\":\"CREATE\",\"phaseOrder\":2,\"name\":\"Evidencia docente\","
+                                + "\"referenceUrl\":\"https://example.com/evidencia_docente\",\"confirmed\":false}")
+        )));
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
+                any(),
+                eq(auth),
+                any())).thenReturn(SUBPHASE_PREVIEW_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Agrega una subfase «Evidencia docente» con enlace HTTPS en la Fase 2",
+                List.of(),
+                auth,
+                context);
+
+        assertThat(result.steps()).hasSize(1);
+        assertThat(result.reply()).contains("confirmo");
+        assertThat(result.reply()).doesNotContain("Paso 2");
+        assertThat(result.reply()).doesNotContain("creada");
+        verify(chatCompletionPort, times(1)).complete(any());
+        verify(toolExecutor, times(1)).execute(
+                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
+                any(),
+                eq(auth),
+                any());
+    }
+
+    private static final String SUBPHASE_EXECUTED_JSON = """
+            {"ok":true,"data":{"confirmationRequired":false,"executed":true,\
+            "message":"Subfase «Evidencia docente» creada en «Fase 2» con orden 2."},\
+            "error":null}
+            """;
+
+    @Test
+    void phasesAgent_confirmo_afterPreview_executesViaKeywordWithoutLlm() {
+        AssistantAuthContext auth = tdContext();
+        UUID processId = UUID.fromString("950e8400-e29b-41d4-a716-446655440020");
+        AssistantChatContext context = AssistantChatContext.phases(
+                processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
+
+        String previewReply = """
+                La fase «Fase 2.: verificacion de evidencias actualizada» tiene **1** subfase(s).
+                Enlace: https://example.com/evidencia_docente
+
+                Resumen: «Evidencia docente» → orden 2 en «Fase 2.: verificacion de evidencias actualizada».
+
+                Responda **confirmo** para ejecutar la acción.""";
+
+        List<ChatMessage> history = List.of(
+                new ChatMessage(ChatRole.USER, "Agrega una subfase «Evidencia docente» en Fase 2"),
+                new ChatMessage(ChatRole.ASSISTANT, previewReply));
+
+        when(toolExecutor.execute(
+                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
+                org.mockito.ArgumentMatchers.argThat(json -> json != null && json.contains("\"confirmed\":true")),
+                eq(auth),
+                any())).thenReturn(SUBPHASE_EXECUTED_JSON);
+
+        AssistantChatResult result = serviceWithLlm.send("confirmo", history, auth, context);
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        assertThat(result.reply()).contains("creada");
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
     private static AssistantAuthContext jdContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "JD", List.of());
     }
 
     private static AssistantAuthContext tdContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "TD", List.of());
+    }
+
+    private static AssistantAuthContext ccContext() {
+        return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of(UUID.randomUUID()));
     }
 }
