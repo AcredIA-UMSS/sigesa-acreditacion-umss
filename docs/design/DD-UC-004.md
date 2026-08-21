@@ -7,7 +7,7 @@ arquitectura: Hexagonal
 tecnologia: Java 21, Spring Boot 4.x
 estado: Aprobado
 autor: AI Architect (@feature-design-doc)
-fecha: "2026-06-26"
+fecha: "2026-08-21"
 fsd_uc:
   - FSD-UC-004
 prd_refs:
@@ -118,6 +118,21 @@ Permitir al **[CC]** cargar la **Evidencia v1** de un Indicador en estado `PENDI
 Blobs: `sigesa.evidence.storage-path` (default `./data/evidences`).
 
 Seed demo (`EvidenceDataLoader`): 3 indicadores `PENDIENTE` de Inf. Sistemas con etiquetas IND-01…03 / CRIT-01…03.
+
+---
+
+## 8. UI — Carga desde estructura del proceso (UC-019)
+
+En `/procesos/{processId}`, cada subfase del árbol (`ProcessPhaseTree`) expone un **enlace subrayado** «Subir evidencia» ([CC]) o «Cargar evidencia» (otros roles). Al hacer clic se abre **`SubphaseEvidenceUploadModal`** (portal + bloqueo de scroll en `<main>`).
+
+| Rol | Comportamiento |
+|-----|----------------|
+| **CC** | Modal con select de indicador, descripción, archivo y envío multipart UC-004 |
+| **JD/TD** | Modal informativo + botón «Ir al formulario» → `/evidencias/cargar` con contexto de subfase |
+
+La evidencia sigue ligada al **indicador** (sin FK subfase); la subfase se anota en el campo `description` del upload.
+
+Componentes: `SubphaseEvidenceUploadSlot` (disparador), `SubphaseEvidenceUploadModal` (formulario).
 
 ---
 

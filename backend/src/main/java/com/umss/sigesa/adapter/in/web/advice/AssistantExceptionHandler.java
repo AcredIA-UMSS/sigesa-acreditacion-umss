@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import com.umss.sigesa.domain.exception.AssistantCompletionException;
+import com.umss.sigesa.domain.exception.AssistantInvalidInputException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +30,11 @@ public class AssistantExceptionHandler {
     public ResponseEntity<Map<String, String>> handleAgentAccessDenied(AssistantAgentAccessDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", "ACCESS_DENIED", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AssistantInvalidInputException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidInput(AssistantInvalidInputException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "ASSISTANT_INVALID_INPUT", "message", ex.getMessage()));
     }
 }

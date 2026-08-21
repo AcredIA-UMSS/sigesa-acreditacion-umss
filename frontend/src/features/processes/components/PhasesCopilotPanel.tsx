@@ -7,6 +7,7 @@ import {
   usePhasesCopilot,
   type PhasesCopilotProcessContext,
 } from '../hooks/usePhasesCopilot';
+import { PhasesCopilotActionDebugModal } from './PhasesCopilotActionDebugModal';
 
 export interface PhasesCopilotPanelProps {
   process: PhasesCopilotProcessContext;
@@ -81,7 +82,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
           </Button>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+        <div ref={copilot.messagesContainerRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
           {copilot.messages.length === 0 ? (
             <EmptyState
               readOnly={readOnly}
@@ -94,7 +95,6 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
             ))
           )}
           {copilot.isSending && <TypingIndicator />}
-          <div ref={copilot.messagesEndRef} />
         </div>
 
         <div className="border-t border-gray-200 p-4">
@@ -130,6 +130,15 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
 
   return (
     <>
+      {copilot.debugActionsEnabled && (
+        <PhasesCopilotActionDebugModal
+          isOpen={copilot.debugModalOpen}
+          isSending={copilot.isSending}
+          actions={copilot.actionHistory}
+          onClose={() => copilot.setDebugModalOpen(false)}
+        />
+      )}
+
       {/* Mobile: collapsible */}
       <aside className="overflow-hidden rounded-xl border border-primary-200 bg-body shadow-sm xl:hidden">
         <button

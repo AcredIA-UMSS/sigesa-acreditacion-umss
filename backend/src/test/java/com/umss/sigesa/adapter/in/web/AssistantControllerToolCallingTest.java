@@ -8,6 +8,8 @@ import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
+import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.domain.exception.AssistantInvalidInputException;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import org.junit.jupiter.api.AfterEach;
@@ -47,15 +49,19 @@ class AssistantControllerToolCallingTest {
     @Mock
     private AssistantChatContextFactory chatContextFactory;
 
+    private AssistantChatInputValidator chatInputValidator;
+
     private AssistantController controller;
 
     @BeforeEach
     void setUp() {
+        chatInputValidator = new AssistantChatInputValidator();
         controller = new AssistantController(
                 sendChatMessageUseCase,
                 assistantProperties,
                 assignmentRepository,
-                chatContextFactory);
+                chatContextFactory,
+                chatInputValidator);
     }
 
     @AfterEach
@@ -136,5 +142,16 @@ class AssistantControllerToolCallingTest {
                 new AssistantChatContextDto("evidence", null, null, null, null, null, null))))
                 .isInstanceOf(AssistantAgentAccessDeniedException.class)
                 .hasMessageContaining("evidence");
+    }
+
+    @Test
+    void chat_rejectsSqlInjectionPayload() {
+        when(assistantProperties.isEnabled()).thenReturn(true);
+
+        assertThatThrownBy(() -> controller.chat(new SendChatMessageRequest(
+                "SELECT * FROM app_user; DROP TABLE app_user",
+                null,
+                null)))
+                .isInstanceOf(AssistantInvalidInputException.class);
     }
 }

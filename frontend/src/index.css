@@ -81,7 +81,10 @@
 }
 
 /* Base styles usando variables CSS estándar */
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
+  overflow: hidden;
   background-color: var(--color-body);
 }

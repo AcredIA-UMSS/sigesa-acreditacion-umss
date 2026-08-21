@@ -4,7 +4,7 @@ title: Agente Copiloto de Control Documental (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-12"
+ultima_actualizacion: "2026-08-21"
 fsd_uc: FSD-UC-024
 pr_impl: PR-IMPL-026
 ---
@@ -122,6 +122,27 @@ Servidor MCP en `mcp/sigesa-evidence/` expone las mismas tres tools contra la AP
 - «evidencias pendientes», «pendientes de revisión», «documentación subida»
 - «detalle de evidencia», «completeness», «está completa la evidencia»
 
-## 10. Fase 2 (fuera de MVP)
+## 10. Seguridad del chat y trazabilidad (desarrollo)
+
+### 10.1 Validación de entrada
+
+Comparte `AssistantChatInputValidator` en `POST /api/v1/assistant/chat` (SQLi, XSS, límites). Ver [`DD-AGENT-001.md`](DD-AGENT-001.md) §10.1. Respuesta: **400** `ASSISTANT_INVALID_INPUT`.
+
+### 10.2 Historial de acciones (modal)
+
+El historial **siempre** se registra y se muestra en modal (no inline en el panel):
+
+| Aspecto | Detalle |
+|---------|---------|
+| Disparador | Enlace subrayado «Historial de acciones (N)» bajo el encabezado del chat |
+| Auto-apertura | Al enviar cada mensaje se abre el modal con el progreso en tiempo real |
+| Componente | `EvidenceCopilotActionDebugModal` → `AssistantCopilotActionDebugModal` |
+| Chat | Solo texto de respuesta; tool/camino/fuentes van al modal |
+
+Badge «Modo desarrollo» solo si `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS=true` (build-time).
+
+## 11. Fase 2 (fuera de MVP)
 
 Tools write con confirmación: `reject_indicator`, `approve_indicator` (UC-008/009).
+
+## 12. Referencias

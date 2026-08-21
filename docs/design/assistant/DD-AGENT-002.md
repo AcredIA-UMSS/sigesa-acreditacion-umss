@@ -4,7 +4,7 @@ title: Agente Copiloto de Usuarios (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-11"
+ultima_actualizacion: "2026-08-21"
 fsd_uc: FSD-UC-002
 pr_impl: PR-IMPL-025
 ---
@@ -142,7 +142,56 @@ sequenceDiagram
 | USERS-BE-02 | P2 | KEYWORD para «crea usuario CC …» |
 | USERS-QA-01 | P1 | Smoke Docker JD: alta vía copiloto + desactivación con confirm |
 
-## 10. Referencias
+## 10. Seguridad del chat y trazabilidad (desarrollo)
+
+### 10.1 Validación de entrada
+
+El copiloto de usuarios comparte el endpoint `POST /api/v1/assistant/chat` con el resto de agentes. La validación **`AssistantChatInputValidator`** (SQLi, XSS, límites de longitud) se aplica **antes** del caso de uso para todos los agentes. Ver [`DD-AGENT-001.md`](DD-AGENT-001.md) §10.1.
+
+Respuesta ante entrada inválida: **HTTP 400** con código `ASSISTANT_INVALID_INPUT`.
+
+### 10.2 Modal de acciones del agente (solo desarrollo)
+
+| Aspecto | Detalle |
+|---------|---------|
+| Componente | `UsersCopilotActionDebugModal` → `AssistantCopilotActionDebugModal` |
+| Hook | `useUsersCopilot` (`actionHistory`, `debugModalOpen`) |
+| Interruptor | `USERS_COPILOT_DEBUG_ACTIONS_ENABLED` en `frontend/src/lib/config/usersCopilotDebug.ts` |
+| Variable build | `VITE_USERS_COPILOT_DEBUG_ACTIONS=true` |
+
+#### Docker Compose
+
+En `.env` raíz:
+
+```bash
+VITE_USERS_COPILOT_DEBUG_ACTIONS=true   # activar
+VITE_USERS_COPILOT_DEBUG_ACTIONS=false  # desactivar (default)
+```
+
+`docker-compose.yml`:
+
+```yaml
+frontend:
+  build:
+    args:
+      VITE_USERS_COPILOT_DEBUG_ACTIONS: ${VITE_USERS_COPILOT_DEBUG_ACTIONS:-false}
+```
+
+Reconstruir frontend tras cambiar:
+
+```bash
+docker compose up -d --build frontend
+```
+
+#### Vite local
+
+En `frontend/.env`:
+
+```bash
+VITE_USERS_COPILOT_DEBUG_ACTIONS=true
+```
+
+## 11. Referencias
 
 - [`DD-AGENT-001.md`](DD-AGENT-001.md) — patrón phases
 - [`TOOL-CATALOG.md`](TOOL-CATALOG.md)

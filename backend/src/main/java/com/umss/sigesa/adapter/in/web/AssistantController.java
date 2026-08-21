@@ -13,6 +13,7 @@ import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantCapabilitiesCatalog;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
+import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
@@ -133,15 +134,18 @@ public class AssistantController {
     private final AssistantProperties assistantProperties;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
     private final AssistantChatContextFactory chatContextFactory;
+    private final AssistantChatInputValidator chatInputValidator;
 
     public AssistantController(SendChatMessageUseCase sendChatMessageUseCase,
                                AssistantProperties assistantProperties,
                                UserProgramAssignmentRepositoryPort assignmentRepository,
-                               AssistantChatContextFactory chatContextFactory) {
+                               AssistantChatContextFactory chatContextFactory,
+                               AssistantChatInputValidator chatInputValidator) {
         this.sendChatMessageUseCase = sendChatMessageUseCase;
         this.assistantProperties = assistantProperties;
         this.assignmentRepository = assignmentRepository;
         this.chatContextFactory = chatContextFactory;
+        this.chatInputValidator = chatInputValidator;
     }
 
     @GetMapping("/status")
@@ -180,6 +184,9 @@ public class AssistantController {
         if (!assistantProperties.isEnabled()) {
             throw new AssistantUnavailableException("El asistente está deshabilitado.");
         }
+
+        chatInputValidator.validateMessage(request.message());
+        chatInputValidator.validateHistory(request.history());
 
         List<ChatMessage> history = request.history() == null
                 ? Collections.emptyList()

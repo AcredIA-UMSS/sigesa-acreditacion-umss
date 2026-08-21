@@ -4,8 +4,8 @@ title: Agente Copiloto de Fases (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-11"
-backlog_version: "2026-08-11"
+ultima_actualizacion: "2026-08-21"
+backlog_version: "2026-08-21"
 ---
 
 # DD-AGENT-001 — Copiloto de Fases embebido
@@ -166,7 +166,84 @@ Roadmap vivo para mejorar el copiloto. Priorizar ítems **P1** en siguientes spr
 - `AssistantChatContext` duplica tipos con Orval (`assistantTypes.ts` vs `assistantChatContextDto.ts`) → consolidar o documentar convención «manual + generate».
 - Flyway deshabilitado en dev (`ddl-auto: update`) → seeds de subfases no siempre alineados con plantilla; considerar loader de estructura demo unificado.
 
-## 9. Referencias
+## 10. Seguridad del chat y trazabilidad (desarrollo)
+
+### 10.1 Validación de entrada (`AssistantChatInputValidator`)
+
+Toda petición a `POST /api/v1/assistant/chat` pasa por validación **antes** del caso de uso:
+
+| Control | Límite / regla |
+|---------|----------------|
+| Longitud mensaje | Máx. 4 000 caracteres (`message` e ítems de `history`) |
+| Historial | Máx. 30 mensajes; roles permitidos: `user`, `assistant`, `system`, `tool` |
+| Caracteres de control | Rechazados salvo `\n`, `\r`, `\t` |
+| Inyección SQL | Patrones `SELECT … FROM`, `UNION SELECT`, `DROP TABLE`, `DELETE FROM`, `INSERT INTO`, `UPDATE … SET`, `';--`, `' OR '1'='1`, comentarios `/* */`, `EXEC`/`xp_` |
+| XSS | `<script`, `javascript:`, atributos `on*=`` |
+| Null bytes | Rechazados |
+
+**Respuesta HTTP:** `400 Bad Request` con código `ASSISTANT_INVALID_INPUT`.
+
+**Ubicación:** `AssistantChatInputValidator` (capa aplicación), invocado desde `AssistantController`.
+
+> Las tools siguen ejecutándose vía casos de uso tipados (JPA); la validación es defensa en profundidad sobre el texto libre del usuario.
+
+### 10.2 Modal de acciones del agente (solo desarrollo)
+
+Para inspeccionar qué hace el copiloto durante el chat (tools, camino KEYWORD/LLM, fuentes):
+
+| Aspecto | Detalle |
+|---------|---------|
+| Componente | `PhasesCopilotActionDebugModal` |
+| Hook | `usePhasesCopilot` registra `actionHistory` y abre el modal al enviar |
+| Interruptor código | `PHASES_COPILOT_DEBUG_ACTIONS_ENABLED` en `frontend/src/lib/config/phasesCopilotDebug.ts` |
+| Variable build | `VITE_PHASES_COPILOT_DEBUG_ACTIONS=true` (incrustada en el bundle al compilar) |
+| Producción | Dejar `false` o omitir → modal **no** se renderiza |
+
+#### Docker Compose (desarrollo con contenedores)
+
+En la raíz del repo, archivo `.env` (copiar desde `.env.example`):
+
+```bash
+# Activar modal de seguimiento del agente
+VITE_PHASES_COPILOT_DEBUG_ACTIONS=true
+
+# Desactivar (valor por defecto si no se define)
+# VITE_PHASES_COPILOT_DEBUG_ACTIONS=false
+```
+
+`docker-compose.yml` pasa la variable al build del frontend:
+
+```yaml
+frontend:
+  build:
+    args:
+      VITE_PHASES_COPILOT_DEBUG_ACTIONS: ${VITE_PHASES_COPILOT_DEBUG_ACTIONS:-false}
+```
+
+**Tras cambiar el valor hay que reconstruir el frontend** (es build-time, no runtime):
+
+```bash
+docker compose up -d --build frontend
+```
+
+| Valor | Efecto |
+|-------|--------|
+| `true` | Modal visible al chatear con el copiloto de fases |
+| `false` (default) | Sin modal; comportamiento de producción |
+
+#### Vite local (`pnpm dev`)
+
+En `frontend/.env`:
+
+```bash
+VITE_PHASES_COPILOT_DEBUG_ACTIONS=true
+```
+
+Reiniciar Vite tras cambiar la variable.
+
+**Contenido del modal:** resumen por turno, pasos (envío, contexto `processId`, tool ejecutada, LLM, tablas fuente), estado (`ok` / `error` / `out_of_scope` / `pending`).
+
+## 11. Referencias
 
 - [`TOOL-CATALOG.md`](TOOL-CATALOG.md)
 - [`DD-SYS-002.md`](../DD-SYS-002.md) §11

@@ -5,6 +5,8 @@ const ERROR_LABELS: Record<string, string> = {
     'El asistente no está configurado o la API key de Open WebUI es inválida. Actualice SIGESA_ASSISTANT_API_KEY en .env y reinicie el backend.',
   ASSISTANT_COMPLETION_FAILED:
     'No se pudo obtener respuesta del modelo. Verifique que Open WebUI esté activo.',
+  ASSISTANT_INVALID_INPUT:
+    'El mensaje contiene contenido no permitido o excede los límites de seguridad del chat.',
 };
 
 export function mapAssistantError(error: Error | null): string | null {

@@ -52,7 +52,7 @@ Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucio
 4. Respuesta incluye metadatos del proceso y árbol ordenado:
    - **Fases** (`order` ascendente)
    - **Subfases** por fase (`order` ascendente)
-5. UI renderiza listado jerárquico (acordeón o árbol) de fases y subfases.
+5. UI renderiza listado jerárquico (acordeón o árbol) de fases y subfases; en cada subfase, enlace subrayado para abrir modal de carga de evidencia (UC-004).
 
 ## Modelo de respuesta (referencia)
 

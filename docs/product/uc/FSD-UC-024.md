@@ -9,7 +9,7 @@ modulo: MOD-ASSISTANT / MOD-EVIDENCE
 reglas: FSD-BR-03, FSD-BR-09, FSD-BR-14
 design_doc: DD-AGENT-003
 pr_impl: PR-IMPL-026
-ultima_actualizacion: "2026-08-12"
+ultima_actualizacion: "2026-08-21"
 ---
 
 # FSD-UC-024 — Copiloto de control documental
@@ -62,7 +62,7 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 
 - Sin mutación de estados de indicador en Fase 1.
 - Trazabilidad tool en metadata de respuesta (`toolId`, `path`, `sourceTables`).
-- Historial de acciones de la sesión en la UI del copiloto (cada respuesta registra tool, camino, fuentes y resumen).
+- Modal de trazabilidad con historial de acciones (siempre visible vía enlace y al enviar mensaje); badge dev opcional con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
 
 ## Fuera de alcance (Fase 1)
 
