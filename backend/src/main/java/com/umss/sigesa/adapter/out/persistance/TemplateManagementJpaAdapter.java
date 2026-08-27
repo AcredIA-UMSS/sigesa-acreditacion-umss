@@ -114,6 +114,7 @@ public class TemplateManagementJpaAdapter implements TemplateManagementPort {
                             .order(subphaseDomain.getOrder())
                             .referenceUrl(subphaseDomain.getReferenceUrl())
                             .description(subphaseDomain.getDescription())
+                            .requirements(subphaseDomain.getRequirements())
                             .templatePhase(phaseEntity)
                             .build());
                 }

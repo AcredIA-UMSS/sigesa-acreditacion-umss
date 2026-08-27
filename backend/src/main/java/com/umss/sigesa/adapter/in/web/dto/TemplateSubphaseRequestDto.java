@@ -29,4 +29,7 @@ public class TemplateSubphaseRequestDto {
     private String referenceUrl;
 
     private String description;
+
+    @NotBlank
+    private String requirements;
 }

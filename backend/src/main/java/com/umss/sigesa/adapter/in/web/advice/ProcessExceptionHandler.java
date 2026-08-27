@@ -10,17 +10,23 @@ import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.SubphaseHasEvidenceException;
 import com.umss.sigesa.domain.exception.SubphaseLinkRequiredException;
+import com.umss.sigesa.domain.exception.InvalidPhaseStateException;
+import com.umss.sigesa.domain.exception.PhaseClosureBlockedException;
+import com.umss.sigesa.domain.model.PendingSubphase;
 import com.umss.sigesa.domain.exception.TemplateInUseException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.exception.TemplateOrderConflictException;
 import com.umss.sigesa.domain.exception.TemplateStructureIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateSubphaseLinkRequiredException;
+import com.umss.sigesa.adapter.in.web.dto.PendingSubphaseResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice(basePackages = "com.umss.sigesa.adapter.in.web")
@@ -164,6 +170,27 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(PhaseClosureBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handlePhaseClosureBlocked(PhaseClosureBlockedException ex) {
+        List<PendingSubphaseResponseDto> pending = ex.getPendingSubphases().stream()
+                .map(ProcessExceptionHandler::toPendingDto)
+                .toList();
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "FASE_CIERRE_BLOQUEADO");
+        body.put("message", ex.getMessage());
+        body.put("pendingSubphases", pending);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(InvalidPhaseStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidPhaseState(InvalidPhaseStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "INVALID_STATE",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(InvalidResponsibleUserException.class)
     public ResponseEntity<Map<String, String>> handleInvalidResponsibleUser(InvalidResponsibleUserException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -171,5 +198,14 @@ public class ProcessExceptionHandler {
                         "error", "INVALID_RESPONSIBLE_USER",
                         "message", ex.getMessage()
                 ));
+    }
+
+    private static PendingSubphaseResponseDto toPendingDto(PendingSubphase pending) {
+        PendingSubphaseResponseDto dto = new PendingSubphaseResponseDto();
+        dto.setSubphaseId(pending.subphaseId());
+        dto.setName(pending.name());
+        dto.setStatus(pending.status().name());
+        dto.setOrder(pending.order());
+        return dto;
     }
 }

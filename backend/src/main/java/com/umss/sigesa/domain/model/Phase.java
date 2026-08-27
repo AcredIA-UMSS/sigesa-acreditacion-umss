@@ -20,6 +20,7 @@ public class Phase {
     private String name;
     private Integer order;
     private String description;
+    private PhaseState status;
     @Builder.Default
     private List<Subphase> subphases = new ArrayList<>();
 }

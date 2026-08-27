@@ -1,0 +1,12 @@
+%% diagramId: FSD-UC-006_008_009
+%% titulo: Estados de subfase (carga, rechazo, subsanación, aprobación)
+%% version: 1.1
+stateDiagram-v2
+    [*] --> PENDIENTE : subfase creada
+    PENDIENTE --> SUBIDO : UC-004 carga evidencia
+    SUBIDO --> OBSERVADO : UC-008 rechazo TD
+    SUBIDO --> APROBADO : UC-009 aprobación TD
+    OBSERVADO --> SUBSANADO : UC-006 subsanación CC
+    SUBSANADO --> OBSERVADO : UC-008 nuevo rechazo
+    SUBSANADO --> APROBADO : UC-009 aprobación TD
+    APROBADO --> [*]

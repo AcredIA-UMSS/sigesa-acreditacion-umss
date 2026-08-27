@@ -1,36 +1,29 @@
 import { customFetch } from '../../../lib/api/customFetch';
-import type { UploadEvidenceResponse } from '../../../api/model';
+import type { SubphaseUploadResult } from '../../subphases/api/subphaseApi';
 
 export type UploadEvidenceInput = {
-  indicatorId: string;
-  criterionId: string;
+  subphaseId: string;
   description: string;
   file: File;
 };
 
-type UploadEvidenceHttpResponse = {
-  data: UploadEvidenceResponse;
-  status: number;
-  headers: Headers;
-};
-
 /**
- * Multipart UC-004: parts `file`, `criterionId`, `description`
- * (el cliente Orval enviaba criterionId/description como query).
+ * Carga UC-004 por subfase (reemplaza el endpoint legacy por indicador).
  */
 export async function uploadEvidence(
   input: UploadEvidenceInput,
-): Promise<UploadEvidenceHttpResponse> {
+): Promise<SubphaseUploadResult> {
   const formData = new FormData();
   formData.append('file', input.file);
-  formData.append('criterionId', input.criterionId);
   formData.append('description', input.description);
 
-  return customFetch<UploadEvidenceHttpResponse>(
-    `/api/v1/indicators/${encodeURIComponent(input.indicatorId)}/evidences`,
+  const response = await customFetch<{ data: SubphaseUploadResult }>(
+    `/api/v1/subphases/${encodeURIComponent(input.subphaseId)}/evidences`,
     {
       method: 'POST',
       body: formData,
     },
   );
+
+  return response.data;
 }

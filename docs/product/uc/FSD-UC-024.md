@@ -40,15 +40,15 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 2. Pregunta en lenguaje natural (p. ej. «¿qué evidencias están pendientes de revisión?»).
 3. Sistema selecciona tool (`list_pending_evidences` / `get_evidence_detail` / `check_evidence_completeness`).
 4. Tool delega en casos de uso de consulta; aplica PBAC por rol/carrera.
-5. Asistente responde con resumen estructurado (programa, indicador, estado, completitud).
+5. Asistente responde con resumen estructurado (programa, subfase, estado, completitud).
 
 ## Tools (MVP)
 
 | Tool | Tipo | Descripción |
 |------|------|-------------|
-| `list_pending_evidences` | read | Indicadores en `SUBIDO` (documentación lista para control TD) |
-| `get_evidence_detail` | read | Metadatos de evidencia/versión (hash, descripción, criterio) |
-| `check_evidence_completeness` | read | Checklist: archivo, descripción, criterio, estado |
+| `list_pending_evidences` | read | Subfases/evidencias en `SUBIDO` (documentación lista para control TD) |
+| `get_evidence_detail` | read | Metadatos de evidencia/versión (hash, descripción, subfase) |
+| `check_evidence_completeness` | read | Checklist: archivo, descripción, subfase, estado |
 
 ## Excepciones
 
@@ -56,11 +56,11 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 |-----------|-----------|
 | Rol EE u otro no autorizado | `403` en chat/status `agent=evidence` |
 | [CC] consulta carrera ajena | `403` / tool `ACCESS_DENIED` |
-| Indicador sin evidencia | Tool `ok=false` con código `EVIDENCE_NOT_FOUND` |
+| Subfase sin evidencia | Tool `ok=false` con código `EVIDENCE_NOT_FOUND` |
 
 ## Postcondiciones
 
-- Sin mutación de estados de indicador en Fase 1.
+- Sin mutación de estados de subfase en Fase 1.
 - Trazabilidad tool en metadata de respuesta (`toolId`, `path`, `sourceTables`).
 - Modal de trazabilidad con historial de acciones (siempre visible vía enlace y al enviar mensaje); badge dev opcional con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
 
@@ -75,15 +75,15 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 ```gherkin
 @FSD-UC-024 @agent-evidence
 Escenario: TD lista evidencias pendientes de control
-  Dado un [TD] autenticado y al menos un indicador en SUBIDO
+  Dado un [TD] autenticado y al menos una subfase en SUBIDO
   Cuando pregunta "lista las evidencias pendientes de revisión"
   Entonces el asistente invoca list_pending_evidences
-  Y responde con programa, indicador y estado SUBIDO
+  Y responde con programa, subfase y estado SUBIDO
 
 @FSD-UC-024 @agent-evidence
 Escenario: CC no ve evidencias de otra carrera
   Dado un [CC] autenticado de la carrera A
-  Cuando solicita detalle de un indicador de la carrera B
+  Cuando solicita detalle de una subfase de la carrera B
   Entonces la tool responde ACCESS_DENIED o el ítem no aparece
 
 @FSD-UC-024 @agent-evidence

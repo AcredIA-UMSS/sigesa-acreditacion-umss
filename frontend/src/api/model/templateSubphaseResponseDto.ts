@@ -11,4 +11,5 @@ export interface TemplateSubphaseResponseDto {
   order?: number;
   referenceUrl?: string;
   description?: string;
+  requirements?: string;
 }

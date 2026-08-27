@@ -22,7 +22,8 @@ public class UpdateProcessSubphaseService implements UpdateProcessSubphaseUseCas
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Subphase execute(UUID processId, UUID phaseId, UUID subphaseId,
-                             String name, Integer order, String referenceUrl, String description) {
+                             String name, Integer order, String referenceUrl, String description,
+                             String requirements) {
         AccreditationProcess process = processStructurePort.loadActiveProcess(processId);
         guard.ensureProcessActive(process);
         Phase phase = guard.findPhase(process, phaseId);
@@ -32,8 +33,10 @@ public class UpdateProcessSubphaseService implements UpdateProcessSubphaseUseCas
         Integer updatedOrder = order != null ? order : existing.getOrder();
         String updatedReferenceUrl = referenceUrl != null ? referenceUrl : existing.getReferenceUrl();
         String updatedDescription = description != null ? description : existing.getDescription();
+        String updatedRequirements = requirements != null ? requirements : existing.getRequirements();
 
         guard.ensureReferenceUrl(updatedReferenceUrl);
+        guard.ensureRequirements(updatedRequirements);
         guard.ensureUniqueSubphaseOrder(phase, updatedOrder, subphaseId);
 
         Subphase updated = Subphase.builder()
@@ -42,6 +45,7 @@ public class UpdateProcessSubphaseService implements UpdateProcessSubphaseUseCas
                 .order(updatedOrder)
                 .referenceUrl(updatedReferenceUrl.trim())
                 .description(updatedDescription)
+                .requirements(updatedRequirements.trim())
                 .build();
 
         return processStructurePort.saveSubphase(processId, phaseId, updated);

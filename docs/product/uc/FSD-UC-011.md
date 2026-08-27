@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-011
 nombre: Dashboard [CC] y observaciones
-estado: Pendiente
+estado: En Curso
 release: v1.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-012, PRD-US-015
 modulo: MOD-DASH
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-08-27"
 ---
 
 # FSD-UC-011 — Dashboard [CC] y observaciones
@@ -19,6 +19,7 @@ ultima_actualizacion: "2026-06-15"
 | **Trazabilidad** | PRD-REQ-012 · PRD-US-012, 015 |
 | **Pantalla** | `/dashboard` (Shell Híbrido PBAC) / `/coordinator/dashboard` |
 | **API** | Suite Híbrida: `GET /api/v1/dashboards/me/summary` (KPIs PBAC), `GET /api/v1/dashboards/coordinator/details`, `GET /api/v1/dashboards/coordinator/export` |
+| **Nota implementación viva (2026-08-27)** | KPIs CC, tabla observaciones y export operativos en `/dashboard` con datos reales (PM-003). **Pendiente:** enlace «Subsanar» hasta UC-006; ruta dedicada `/coordinator/dashboard` unificada en shell híbrido. |
 
 ## Flujo principal
 
@@ -59,7 +60,7 @@ Característica: Dashboard del Coordinador de Carrera
   Escenario: Acceso rápido a observación
     Dado una observación abierta en el dashboard
     Cuando selecciona la observación
-    Entonces navega al Indicador y formulario de subsanación
+    Entonces navega a la Subfase y formulario de subsanación
 
 @PRD-US-015 @FSD-UC-011 @TC-09c
   Escenario: Orden por fecha límite

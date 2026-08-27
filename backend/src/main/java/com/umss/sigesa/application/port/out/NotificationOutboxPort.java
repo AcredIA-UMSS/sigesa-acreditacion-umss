@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public interface NotificationOutboxPort {
 
-    void enqueueEvidenceUploaded(UUID indicatorId, UUID evidenceId, UUID programId);
+    void enqueueEvidenceUploaded(UUID subphaseId, UUID evidenceId, UUID programId);
 
     void enqueue(String eventType, UUID recipientId, Map<String, String> payload);
 }

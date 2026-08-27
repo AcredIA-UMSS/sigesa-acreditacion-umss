@@ -36,6 +36,7 @@ public class TemplateStructureValidator {
             }
             for (TemplateSubphase subphase : phase.getSubphases()) {
                 ensureReferenceUrl(subphase.getReferenceUrl());
+                ensureRequirements(subphase.getRequirements());
             }
         }
     }
@@ -73,6 +74,7 @@ public class TemplateStructureValidator {
             subphaseCount += subphases.size();
             for (TemplateSubphase subphase : subphases) {
                 ensureReferenceUrl(subphase.getReferenceUrl());
+                ensureRequirements(subphase.getRequirements());
             }
         }
 
@@ -98,6 +100,13 @@ public class TemplateStructureValidator {
         if (referenceUrl == null || referenceUrl.isBlank() || !HTTPS_URL.matcher(referenceUrl.trim()).matches()) {
             throw new TemplateSubphaseLinkRequiredException(
                     "Cada subfase debe incluir un referenceUrl HTTPS válido.");
+        }
+    }
+
+    private void ensureRequirements(String requirements) {
+        if (requirements == null || requirements.isBlank()) {
+            throw new TemplateSubphaseLinkRequiredException(
+                    "Cada subfase debe incluir requisitos de completitud (requisitos_subfase).");
         }
     }
 }

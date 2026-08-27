@@ -4,15 +4,13 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Diagrama ER (fuente)** | [`07_diagramas/er-002-modelo-funcional.mmd`](07_diagramas/er-002-modelo-funcional.mmd) |
-| **Versión** | Dorada v1.0 |
-| **Timestamp** | `2026-05-16T18:30:00-04:00` |
+| **Diagrama ER (fuente)** | [`diagramas/MAR-ER-001-modelo-datos-nucleo.mmd`](diagramas/MAR-ER-001-modelo-datos-nucleo.mmd) |
+| **Versión** | v1.1 (modelo subfase-centrado) |
+| **Timestamp** | `2026-08-27T20:00:00-04:00` |
 | **Vista** | Lógica / de dominio (FSD) |
-| **Modelo físico (DTI)** | [`docs/05_dti/modelo_datos.md`](../05_dti/modelo_datos.md) |
-| **DDL** | [`docs/05_dti/ddl_sigesa_append_only.sql`](../05_dti/ddl_sigesa_append_only.sql) |
 | **Glosario** | [`glosario.md`](glosario.md) |
 
-> Este documento describe entidades, relaciones y validaciones desde la **especificación funcional**. La implementación PostgreSQL append-only está en el DTI.
+> Modelo operativo del piloto v1.0: **Proceso → Fase → Subfase → Evidencia**. Sin taxonomía Dimensión/Criterio/Indicador.
 
 ---
 
@@ -22,8 +20,8 @@
 |-----------|-----------------|
 | Append-only | Sin borrado físico de Evidencia aprobada; subsanación = nueva `EvidenceVersion` |
 | Trazabilidad | `version`, `supersedesVersion`, `observationId`, `createdBy`, `createdAt` |
-| Taxonomía | CEUB/ARCU-SUR: Fase → Dimensión → Criterio → Indicador → Evidencia |
-| Aislamiento [CC] | Datos acotados a `academicProgramId` del coordinador |
+| Jerarquía | CEUB/ARCU-SUR: **Proceso → Fase → Subfase → Evidencia** |
+| Aislamiento [CC] | Datos acotados a `programId` del coordinador |
 | Un Proceso activo | Por carrera + modalidad + periodo (FSD-BR-08) |
 
 ---
@@ -32,21 +30,17 @@
 
 ```mermaid
 erDiagram
-  FACULTY ||--o{ ACADEMIC_PROGRAM : has
   ACADEMIC_PROGRAM ||--o{ ACCREDITATION_PROCESS : runs
   ACCREDITATION_TEMPLATE ||--o{ TEMPLATE_PHASE : defines
+  TEMPLATE_PHASE ||--o{ TEMPLATE_SUBPHASE : contains
   ACCREDITATION_PROCESS ||--o{ PHASE : contains
-  EVALUATION_DIMENSION ||--o{ EVALUATION_CRITERION : groups
-  EVALUATION_CRITERION ||--o{ INDICATOR_CATALOG : defines
-  TEMPLATE_PHASE ||--o{ INDICATOR_CATALOG : scopes
-  PHASE ||--o{ INDICATOR : instantiates
-  INDICATOR ||--o{ EVIDENCE : proves
+  PHASE ||--o{ SUBPHASE : contains
+  SUBPHASE ||--o{ EVIDENCE : proves
+  SUBPHASE ||--o{ SUBPHASE_OBSERVATION : may_have
   EVIDENCE ||--o{ EVIDENCE_VERSION : versions
-  INDICATOR ||--o{ OBSERVATION : may_have
-  OBSERVATION ||--o| EVIDENCE_VERSION : triggers_subsanation
+  SUBPHASE_OBSERVATION ||--o| EVIDENCE_VERSION : triggers_subsanation
   APP_USER ||--o{ USER_PROGRAM_ASSIGNMENT : assigned
   APP_USER ||--o{ AUDIT_LOG : performs
-  APP_USER ||--o{ STATE_TRANSITION : triggers
 ```
 
 ---
@@ -57,54 +51,49 @@ erDiagram
 
 | Entidad (EN) | ES | Atributos clave | Notas |
 |--------------|-----|-----------------|-------|
-| `Faculty` | Facultad | `id`, `code`, `name` | Dato maestro UMSS |
-| `AcademicProgram` | Carrera | `id`, `facultyId`, `code`, `name`, `status` | Unidad de acreditación |
-| `AppUser` | Usuario | `id`, `email`, `role`, `status` | Rol único (`CC`/`TD`/`JD`); email `@umss.edu.bo`; estados `INACTIVE`→`ACTIVE`→`DEACTIVATED` |
-| `UserProgramAssignment` | Asignación alcance | `id`, `userId`, `programId`, `assignedAt`, `revokedAt` | Rol en `AppUser`; alcance carrera aquí (FSD-BR-09); revocación soft (`revokedAt`) |
+| `AcademicProgram` | Carrera | `id`, `code`, `name`, `status` | Unidad de acreditación |
+| `AppUser` | Usuario | `id`, `email`, `role`, `status` | Rol único (`CC`/`TD`/`JD`); email `@umss.edu.bo` |
+| `UserProgramAssignment` | Asignación alcance | `id`, `userId`, `programId`, `assignedAt`, `revokedAt` | Alcance carrera [CC] (FSD-BR-09) |
 
 ### 3.2 Plantilla normativa
 
 | Entidad | Atributos clave | Notas |
 |---------|-----------------|-------|
 | `AccreditationTemplate` | `modality` (CEUB \| ARCU-SUR), `version`, `status` | Activada por [JD] |
-| `TemplatePhase` | `templateId`, `order`, `name`, `normativeDeadline` | No editable por [CC] (BR-17) |
-| `EvaluationDimension` | `templateId`, `code`, `name` | Agrupa criterios |
-| `EvaluationCriterion` | `dimensionId`, `code`, `description` | |
-| `IndicatorCatalog` | `templatePhaseId`, `criterionId`, `code` | Definición en plantilla |
+| `TemplatePhase` | `templateId`, `order`, `name` | |
+| `TemplateSubphase` | `phaseId`, `order`, `name`, `referenceUrl`, `description`, `requirements` | Clonada al crear proceso |
 
 ### 3.3 Proceso en ejecución
 
 | Entidad | Atributos clave | Notas |
 |---------|-----------------|-------|
 | `AccreditationProcess` | `programId`, `templateId`, `managementYear`, `status` | EN_PROCESO \| ACREDITADO \| VENCIDO |
-| `Phase` | `processId`, `templatePhaseId` | Estado derivado por reglas agregadas |
-| `Indicator` | `phaseId`, `catalogId` | Estado derivado desde `indicator_state_history` |
+| `Phase` | `processId`, `order`, `name`, `description` | Estado derivado por subfases |
+| `Subphase` | `phaseId`, `order`, `name`, `referenceUrl`, `description`, `requirements` | Unidad de workflow y evidencias |
 
-### 3.4 Evidencia y auditoría
+### 3.4 Evidencia, observaciones y auditoría
 
 | Entidad | Atributos clave | Notas |
 |---------|-----------------|-------|
-| `Evidence` | `indicatorId`, `latestVersionId` | Cabecera estable; no contiene estado mutable |
-| `EvidenceVersion` | `evidenceId`, `versionNumber`, `contentHash`, `observationId`, `supersedesVersion` | Append-only |
-| `Observation` | `indicatorId`, `justification`, `createdBy`, `createdAt` | Origen de subsanación |
-| `IndicatorStateHistory` | `indicatorId`, `previousState`, `newState`, `actorId`, `role`, `createdAt` | Historial append-only de transiciones |
+| `Evidence` | `subphaseId`, `latestVersionId` | Cabecera estable; **sin** `indicatorId` |
+| `EvidenceVersion` | `evidenceId`, `versionNumber`, `contentHash`, `description`, `observationId`, `supersedesVersion` | Append-only |
+| `SubphaseObservation` | `subphaseId`, `body`, `status` (OPEN\|RESOLVED), `authorId`, `authorRole` | Origen de subsanación y rechazo TD |
 | `AuditLog` | `action`, `actorId`, `entityType`, `entityId`, `payload` | Login, DELETE denegado, etc. |
 | `NotificationOutbox` | `eventType`, `recipientId`, `payload`, `sentAt` | Patrón outbox |
-| `PublicationSnapshot` | `programId`, `publishedAt`, `publishedBy` | Portal [P] |
 
 ---
 
-## 4. Máquina de estados — estado derivado de `Indicator`
+## 4. Máquina de estados — Subfase (derivado)
 
 | Estado | Descripción |
 |--------|-------------|
 | `PENDIENTE` | Sin Evidencia cargada |
 | `SUBIDO` | Evidencia en revisión [TD] |
-| `OBSERVADO` | Rechazado con observación activa |
+| `OBSERVADO` | Rechazada con observación OPEN |
 | `SUBSANADO` | Nueva versión enviada; pendiente re-revisión |
 | `APROBADO` | Validación [TD] completa |
 
-Transiciones válidas: ver [`FSD.md`](FSD.md) §4.1 y `team/alexAlvarez/docs/context/04_state_machine.md`. La implementación física no actualiza `Indicator.status`; inserta una fila en `indicator_state_history` y expone el estado vigente mediante `indicator_current_view`.
+Transiciones: UC-004 (carga → SUBIDO), UC-008 (rechazo → OBSERVADO), UC-006 (subsanación → SUBSANADO), UC-009 (aprobación → APROBADO).
 
 ---
 
@@ -112,39 +101,34 @@ Transiciones válidas: ver [`FSD.md`](FSD.md) §4.1 y `team/alexAlvarez/docs/con
 
 | Entidad | Atributo | Tipo lógico | Obl. | Validación |
 |---------|----------|-------------|------|------------|
-| `Evidence` | `indicatorId` | UUID | sí | Existe; carrera ∈ alcance [CC] |
+| `Evidence` | `subphaseId` | UUID | sí | Subfase existe; carrera ∈ alcance [CC] |
 | `EvidenceVersion` | `contentHash` | string(64) | sí | SHA-256 del blob |
+| `EvidenceVersion` | `description` | text | sí | Metadato obligatorio |
 | `EvidenceVersion` | `observationId` | UUID | cond. | Obligatorio si subsanación |
-| `Indicator` | `currentState` | enum derivado | sí | Valores §4; se obtiene desde `indicator_current_view` |
-| `Observation` | `justification` | text | sí | min 20 caracteres (configurable) |
-| `AppUser` | `email` | string | sí | Dominio `@umss.edu.bo`; login inválido → `401` (A1); alta inválida → `422` |
-| `AppUser` | `role` | enum | sí | `CC`, `TD`, `JD` (un rol por usuario) |
-| `AppUser` | `status` | enum | sí | `INACTIVE`, `ACTIVE`, `DEACTIVATED` |
-| `UserProgramAssignment` | `revokedAt` | timestamp | no | `null` = asignación activa; índice único parcial activas |
-| `AuditLog` | `action` | string | sí | Catálogo cerrado (`AUDIT_LOGIN`, `AUDIT_DELETE_DENIED`, …) |
+| `SubphaseObservation` | `body` | text | sí | min 20 caracteres en rechazo formal TD |
+| `Subphase` | `requirements` | text | sí | Requisitos de completitud (UC-022) |
+| `AppUser` | `email` | string | sí | Dominio `@umss.edu.bo` |
 
-**Prohibido:** `isDeleted` / `deletedAt` en `Evidence` o `EvidenceVersion` aprobados, y `UPDATE` destructivo para transiciones de estado de `Indicator`.
+**Prohibido:** `isDeleted` / `deletedAt` en `Evidence` o `EvidenceVersion` aprobados.
 
 ---
 
-## 6. Mapeo lógico → físico (DTI)
+## 6. Mapeo lógico → físico (implementación v1.0)
 
 | Entidad lógica | Tabla física |
 |----------------|--------------|
-| `Faculty` | `faculty` |
-| `AcademicProgram` | `academic_program` |
+| `AcademicProgram` | `programs` |
 | `AppUser` | `app_user` |
 | `UserProgramAssignment` | `user_program_assignment` |
-| `AccreditationProcess` | `accreditation_process` |
-| `Phase` | `phase` |
-| `Indicator` | `indicator` |
-| `Evidence` | `evidence` |
+| `AccreditationProcess` | `accreditation_processes` |
+| `Phase` | `phases` | `status` (`ABIERTA`\|`COMPLETADA`) — UC-010 |
+| `Subphase` | `subphases` |
+| `Evidence` | `evidence` (`subphase_id` FK; `indicator_id` legacy nullable — **deprecado**) |
 | `EvidenceVersion` | `evidence_version` |
-| `Observation` | `observation` |
-| `IndicatorStateHistory` | `indicator_state_history` |
+| `SubphaseObservation` | `subphase_observation` |
 | `AuditLog` | `audit_log` |
 
-Detalle de columnas, índices y FK: ver DTI §2–3.
+> **Nota de migración:** columnas/tablas legacy `indicator`, `indicator_state_history` permanecen en código histórico pero **no forman parte del modelo funcional v1.1**. Nuevas features deben ignorarlas.
 
 ---
 
@@ -152,12 +136,12 @@ Detalle de columnas, índices y FK: ver DTI §2–3.
 
 | Regla FSD | Impacto en modelo |
 |-----------|-------------------|
+| FSD-BR-01 | Evidencia exige `subphaseId` + metadatos |
 | FSD-BR-02 | Sin DELETE en `evidence_version` aprobada |
 | FSD-BR-06 | FK `observation_id` en versión subsanatoria |
-| FSD-BR-08 | Índice único parcial `accreditation_process` activo |
-| FSD-BR-09 | Filtro `program_id` en queries [CC]; alcance vía `user_program_assignment` |
-| FSD-BR-12 | Dominio `@umss.edu.bo` en `app_user`; login A1 → `401` genérico |
-| Máquina de estados | `indicator_state_history` append-only + `indicator_current_view` |
+| FSD-BR-07 | Cierre de fase cuando todas las subfases = APROBADO |
+| FSD-BR-09 | Filtro `program_id` en queries [CC] |
+| FSD-BR-22 | No eliminar subfase con evidencias/workflow iniciado |
 
 ---
 
@@ -165,6 +149,6 @@ Detalle de columnas, índices y FK: ver DTI §2–3.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
-| v1.2 | 2026-06-23 | MOD-AUTH: atributos `AppUser`/`UserProgramAssignment` alineados a DD-UC-001 (sin `displayName`/`roleCode`) |
-| v1.1 | 2026-06-22 | `@dtp-sync` DD-UC-001: tabla `user_program_assignment` en mapeo lógico→físico (MOD-AUTH) |
-| Dorada v1.0 | 2026-05-16 | Vista funcional extraída de FSD.md; enlace a DTI |
+| v1.1 | 2026-08-27 | Pivot Proceso→Fase→Subfase→Evidencia; retiro taxonomía Indicador/Criterio/Dimensión |
+| v1.2 | 2026-06-23 | MOD-AUTH alineado DD-UC-001 |
+| Dorada v1.0 | 2026-05-16 | Vista funcional extraída de FSD.md |

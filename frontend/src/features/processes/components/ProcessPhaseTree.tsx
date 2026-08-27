@@ -1,25 +1,31 @@
-import { ChevronDown, ExternalLink, Layers } from 'lucide-react';
+import { ChevronDown, ExternalLink, Layers, ListChecks } from 'lucide-react';
 import { useState } from 'react';
 import type { PhaseDto } from '../../../api/model';
-import type { UploadableIndicatorDto } from '../../evidence/api/fetchUploadableIndicators';
-import { SubphaseEvidenceUploadSlot } from './SubphaseEvidenceUploadSlot';
+import { PhaseCloseAction } from '../../phases/components/PhaseCloseAction';
+import { SubphaseCollaborationSection } from '../../subphases/components/SubphaseCollaborationSection';
 
 interface ProcessPhaseTreeProps {
   phases: PhaseDto[];
   processId: string;
   canUploadEvidence?: boolean;
-  uploadableIndicators?: UploadableIndicatorDto[];
-  indicatorsLoading?: boolean;
-  indicatorsError?: string | null;
+  canObserveEvidence?: boolean;
+  canReviewEvidence?: boolean;
+  canSubsanateEvidence?: boolean;
+  canClosePhase?: boolean;
+  onStructureUpdated?: () => void;
+  onNavigateToSubphase?: (subphaseId: string) => void;
 }
 
 export function ProcessPhaseTree({
   phases,
   processId,
   canUploadEvidence = false,
-  uploadableIndicators = [],
-  indicatorsLoading = false,
-  indicatorsError = null,
+  canObserveEvidence = false,
+  canReviewEvidence = false,
+  canSubsanateEvidence = false,
+  canClosePhase = false,
+  onStructureUpdated,
+  onNavigateToSubphase,
 }: ProcessPhaseTreeProps) {
   const sortedPhases = [...phases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -37,9 +43,12 @@ export function ProcessPhaseTree({
           phase={phase}
           processId={processId}
           canUploadEvidence={canUploadEvidence}
-          uploadableIndicators={uploadableIndicators}
-          indicatorsLoading={indicatorsLoading}
-          indicatorsError={indicatorsError}
+          canObserveEvidence={canObserveEvidence}
+          canReviewEvidence={canReviewEvidence}
+          canSubsanateEvidence={canSubsanateEvidence}
+          canClosePhase={canClosePhase}
+          onStructureUpdated={onStructureUpdated}
+          onNavigateToSubphase={onNavigateToSubphase}
         />
       ))}
     </div>
@@ -50,16 +59,22 @@ function PhaseAccordion({
   phase,
   processId,
   canUploadEvidence,
-  uploadableIndicators,
-  indicatorsLoading,
-  indicatorsError,
+  canObserveEvidence,
+  canReviewEvidence,
+  canSubsanateEvidence,
+  canClosePhase,
+  onStructureUpdated,
+  onNavigateToSubphase,
 }: {
   phase: PhaseDto;
   processId: string;
   canUploadEvidence: boolean;
-  uploadableIndicators: UploadableIndicatorDto[];
-  indicatorsLoading: boolean;
-  indicatorsError: string | null;
+  canObserveEvidence: boolean;
+  canReviewEvidence: boolean;
+  canSubsanateEvidence: boolean;
+  canClosePhase: boolean;
+  onStructureUpdated?: () => void;
+  onNavigateToSubphase?: (subphaseId: string) => void;
 }) {
   const [open, setOpen] = useState(true);
   const subphases = [...(phase.subphases ?? [])].sort(
@@ -82,6 +97,11 @@ function PhaseAccordion({
             <p className="text-label-md text-gray-600">
               Fase {phase.order ?? '—'} · {subphases.length} subfase
               {subphases.length === 1 ? '' : 's'}
+              {phase.status && (
+                <span className="ml-2 rounded-full bg-primary-100 px-2 py-0.5 text-label-md font-medium text-primary-800">
+                  {phase.status}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -96,13 +116,25 @@ function PhaseAccordion({
           {subphases.map((sub) => (
             <li
               key={sub.id ?? `${phase.id}-${sub.order}`}
-              className="px-5 py-4"
+              id={sub.id ? `subphase-${sub.id}` : undefined}
+              className="scroll-mt-24 px-5 py-4 transition-shadow"
             >
               <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-body-md font-medium text-gray-800">{sub.name}</p>
                   {sub.description && (
                     <p className="text-body-md text-gray-500">{sub.description}</p>
+                  )}
+                  {sub.requirements && (
+                    <div className="mt-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                      <p className="flex items-center gap-1 text-label-md font-semibold uppercase text-gray-700">
+                        <ListChecks size={14} aria-hidden />
+                        Requisitos para completar
+                      </p>
+                      <p className="mt-1 whitespace-pre-wrap text-body-md text-gray-700">
+                        {sub.requirements}
+                      </p>
+                    </div>
                   )}
                   {sub.referenceUrl && (
                     <a
@@ -121,15 +153,15 @@ function PhaseAccordion({
                 </span>
               </div>
 
-              <SubphaseEvidenceUploadSlot
+              <SubphaseCollaborationSection
                 processId={processId}
                 phaseName={phase.name ?? 'Fase'}
                 subphaseId={sub.id}
                 subphaseName={sub.name ?? 'Subfase'}
                 canUpload={canUploadEvidence}
-                indicators={uploadableIndicators}
-                indicatorsLoading={indicatorsLoading}
-                indicatorsError={indicatorsError}
+                canObserve={canObserveEvidence}
+                canReview={canReviewEvidence}
+                canSubsanate={canSubsanateEvidence}
               />
             </li>
           ))}
@@ -137,6 +169,17 @@ function PhaseAccordion({
             <li className="px-5 py-3 text-body-md text-gray-500">Sin subfases</li>
           )}
         </ul>
+      )}
+
+      {open && canClosePhase && (
+        <PhaseCloseAction
+          processId={processId}
+          phaseId={phase.id}
+          phaseName={phase.name ?? 'Fase'}
+          phaseStatus={phase.status}
+          onCompleted={() => onStructureUpdated?.()}
+          onNavigateToSubphase={onNavigateToSubphase}
+        />
       )}
     </div>
   );

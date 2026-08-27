@@ -1,13 +1,15 @@
 ---
 id: FSD-UC-005
 nombre: Versionado y bloqueo de borrado
-estado: Pendiente
+estado: Implementado
 release: v1.0
 actor_principal: "[CC], [TD] (consulta); cualquier rol (intento DELETE)"
 trazabilidad_prd: PRD-US-007, PRD-US-008
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-02, FSD-BR-15
-ultima_actualizacion: "2026-06-15"
+design_doc: DD-UC-005
+pr_impl: PR-IMPL-035
+ultima_actualizacion: "2026-08-27"
 ---
 
 # FSD-UC-005 — Versionado y bloqueo de borrado
@@ -50,7 +52,7 @@ Historial intacto; intentos de borrado auditados.
 Característica: Historial de versiones
 
   Escenario: Versión vigente visible
-    Dado un Indicador con Evidencia en versiones 1 y 2
+    Dado una subfase con Evidencia en versiones 1 y 2
     Cuando el [TD] abre el historial
     Entonces la versión 2 aparece como vigente
     Y la versión 1 permanece consultable en solo lectura

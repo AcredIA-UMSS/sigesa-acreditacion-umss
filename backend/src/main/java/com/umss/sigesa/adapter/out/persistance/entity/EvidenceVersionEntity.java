@@ -30,7 +30,7 @@ public class EvidenceVersionEntity {
     @Column(name = "content_hash", nullable = false, length = 64)
     private String contentHash;
 
-    @Column(name = "criterion_id", nullable = false)
+    @Column(name = "criterion_id")
     private UUID criterionId;
 
     @Column(nullable = false, length = 2000)
@@ -44,4 +44,16 @@ public class EvidenceVersionEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "observation_id")
+    private UUID observationId;
+
+    @Column(name = "supersedes_version_number")
+    private Integer supersedesVersionNumber;
+
+    @Column(name = "blob_purged", nullable = false)
+    private boolean blobPurged;
+
+    @Column(name = "original_filename", length = 500)
+    private String originalFilename;
 }

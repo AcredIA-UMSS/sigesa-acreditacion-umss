@@ -43,4 +43,9 @@ public class NoOpAuditLogAdapter implements AuditLogPort {
         log.info("AUDIT_EVIDENCE_UPLOADED uploadedBy={} evidenceId={} indicatorId={}",
                 uploadedBy, evidenceId, indicatorId);
     }
+
+    @Override
+    public void logDeleteDenied(UUID actorId, UUID evidenceId) {
+        log.info("AUDIT_DELETE_DENIED actorId={} evidenceId={}", actorId, evidenceId);
+    }
 }

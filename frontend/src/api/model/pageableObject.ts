@@ -7,8 +7,8 @@
 import type { SortObject } from './sortObject.ts';
 
 export interface PageableObject {
-  pageNumber?: number;
   unpaged?: boolean;
+  pageNumber?: number;
   paged?: boolean;
   pageSize?: number;
   offset?: number;

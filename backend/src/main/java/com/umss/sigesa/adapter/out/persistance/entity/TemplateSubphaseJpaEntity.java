@@ -41,6 +41,9 @@ public class TemplateSubphaseJpaEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(columnDefinition = "TEXT")
+    private String requirements;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_phase_id", nullable = false)
     private TemplatePhaseJpaEntity templatePhase;

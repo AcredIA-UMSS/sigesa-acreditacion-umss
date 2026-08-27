@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useUpload } from '../../../api/endpoints/evidence-controller/evidence-controller';
 import type { UploadEvidenceResponse } from '../../../api/model';
+import { uploadSubphaseEvidence } from '../../subphases/api/subphaseApi';
 import { mapUploadError } from './mapUploadError';
 
 /** 10 MiB — aviso de archivo grande en UI */
 export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024;
 
 export type EvidenceUploadForm = {
-  indicatorId: string;
-  criterionId: string;
+  processId: string;
+  subphaseId: string;
   description: string;
   file: File | null;
 };
@@ -21,8 +21,8 @@ export type EvidenceUploadValidationErrors = Partial<
 >;
 
 const defaultForm: EvidenceUploadForm = {
-  indicatorId: '',
-  criterionId: '',
+  processId: '',
+  subphaseId: '',
   description: '',
   file: null,
 };
@@ -37,19 +37,19 @@ function isUuid(value: string): boolean {
 function validateForm(form: EvidenceUploadForm): EvidenceUploadValidationErrors {
   const errors: EvidenceUploadValidationErrors = {};
 
-  const indicatorId = form.indicatorId.trim();
-  const criterionId = form.criterionId.trim();
+  const processId = form.processId.trim();
+  const subphaseId = form.subphaseId.trim();
 
-  if (!indicatorId) {
-    errors.indicatorId = 'Seleccione un indicador.';
-  } else if (!isUuid(indicatorId)) {
-    errors.indicatorId = 'El indicador seleccionado no es válido.';
+  if (!processId) {
+    errors.processId = 'Seleccione un proceso activo.';
+  } else if (!isUuid(processId)) {
+    errors.processId = 'El proceso seleccionado no es válido.';
   }
 
-  if (!criterionId) {
-    errors.criterionId = 'Seleccione un indicador para fijar el criterio.';
-  } else if (!isUuid(criterionId)) {
-    errors.criterionId = 'El criterio asociado no es válido.';
+  if (!subphaseId) {
+    errors.subphaseId = 'Seleccione una subfase.';
+  } else if (!isUuid(subphaseId)) {
+    errors.subphaseId = 'La subfase seleccionada no es válida.';
   }
 
   if (!form.description.trim()) {
@@ -69,65 +69,45 @@ export function useEvidenceUpload() {
   const [result, setResult] = useState<UploadEvidenceResponse | null>(null);
   const [validationErrors, setValidationErrors] =
     useState<EvidenceUploadValidationErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const indicatorId = searchParams.get('indicatorId')?.trim() ?? '';
-    const criterionId = searchParams.get('criterionId')?.trim() ?? '';
-    if (!indicatorId && !criterionId) {
+    const processId = searchParams.get('processId')?.trim() ?? '';
+    const subphaseId = searchParams.get('subphaseId')?.trim() ?? '';
+    if (!processId && !subphaseId) {
       return;
     }
     setForm((prev) => ({
       ...prev,
-      indicatorId: indicatorId || prev.indicatorId,
-      criterionId: criterionId || prev.criterionId,
+      processId: processId || prev.processId,
+      subphaseId: subphaseId || prev.subphaseId,
     }));
   }, [searchParams]);
 
-  const mutation = useUpload({
-    mutation: {
-      onSuccess: (response) => {
-        if (response.status === 200) {
-          setResult(response.data);
-        }
-        setProgress(100);
-        setValidationErrors({});
-      },
-    },
-  });
-
   const updateField = useCallback(
     <K extends EvidenceUploadField>(key: K, value: EvidenceUploadForm[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
+      setForm((prev) => {
+        const next = { ...prev, [key]: value };
+        if (key === 'processId' && value !== prev.processId) {
+          next.subphaseId = '';
+        }
+        return next;
+      });
       setValidationErrors((prev) => {
         if (!prev[key]) return prev;
         const next = { ...prev };
         delete next[key];
+        if (key === 'processId') {
+          delete next.subphaseId;
+        }
         return next;
       });
     },
     [],
   );
 
-  /** Al elegir indicador en el select, fija indicatorId + criterionId (1:1). */
-  const selectIndicator = useCallback(
-    (indicatorId: string, criterionId: string) => {
-      setForm((prev) => ({
-        ...prev,
-        indicatorId,
-        criterionId,
-      }));
-      setValidationErrors((prev) => {
-        if (!prev.indicatorId && !prev.criterionId) return prev;
-        const next = { ...prev };
-        delete next.indicatorId;
-        delete next.criterionId;
-        return next;
-      });
-    },
-    [],
-  );
-
-  const submit = useCallback(() => {
+  const submit = useCallback(async () => {
     const errors = validateForm(form);
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -137,35 +117,50 @@ export function useEvidenceUpload() {
 
     if (!form.file) return;
 
-    setProgress(0);
+    setProgress(10);
     setResult(null);
     setValidationErrors({});
-    mutation.mutate({
-      indicatorId: form.indicatorId.trim(),
-      params: {
-        criterionId: form.criterionId.trim(),
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      setProgress(40);
+      const response = await uploadSubphaseEvidence({
+        subphaseId: form.subphaseId.trim(),
         description: form.description.trim(),
-      },
-      data: { file: form.file },
-    });
-  }, [form, mutation]);
+        file: form.file,
+      });
+      setProgress(100);
+      setResult({
+        evidenceId: response.evidenceId,
+        version: response.version,
+        contentHash: response.contentHash,
+        event: response.event,
+        currentState: response.currentState,
+      });
+    } catch (err) {
+      setProgress(0);
+      setSubmitError(err instanceof Error ? err : new Error('Error al cargar'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [form]);
 
   const reset = useCallback(() => {
     setForm(defaultForm);
     setProgress(0);
     setResult(null);
     setValidationErrors({});
-    mutation.reset();
-  }, [mutation]);
+    setSubmitError(null);
+  }, []);
 
   const isLargeFile =
     form.file !== null && form.file.size > LARGE_FILE_THRESHOLD_BYTES;
-  const isBlocked = mutation.isPending;
+  const isBlocked = isSubmitting;
 
   return {
     form,
     updateField,
-    selectIndicator,
     submit,
     reset,
     progress,
@@ -173,9 +168,7 @@ export function useEvidenceUpload() {
     isBlocked,
     result,
     validationErrors,
-    errorMessage: mapUploadError(
-      mutation.error instanceof Error ? mutation.error : null,
-    ),
-    isSubmitting: mutation.isPending,
+    errorMessage: mapUploadError(submitError),
+    isSubmitting,
   };
 }

@@ -11,7 +11,9 @@ import com.umss.sigesa.application.port.out.ProcessStructurePort;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Phase;
+import com.umss.sigesa.domain.model.PhaseState;
 import com.umss.sigesa.domain.model.Subphase;
+import com.umss.sigesa.domain.model.SubphaseState;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +57,9 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
                     .name(phase.getName())
                     .order(phase.getOrder())
                     .description(phase.getDescription())
+                    .status(phase.getStatus() != null
+                            ? phase.getStatus().name()
+                            : PhaseState.ABIERTA.name())
                     .process(entityManager.getReference(AccreditationProcessJpaEntity.class, processId))
                     .build();
             phaseEntity = phaseRepository.save(phaseEntity);
@@ -62,6 +67,9 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
             phaseEntity.setName(phase.getName());
             phaseEntity.setOrder(phase.getOrder());
             phaseEntity.setDescription(phase.getDescription());
+            if (phase.getStatus() != null) {
+                phaseEntity.setStatus(phase.getStatus().name());
+            }
             phaseEntity = phaseRepository.save(phaseEntity);
         }
         List<SubphaseJpaEntity> subphases = subphaseRepository.findByPhaseIdOrderByOrderAsc(phaseEntity.getId());
@@ -70,6 +78,9 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
                 .name(phaseEntity.getName())
                 .order(phaseEntity.getOrder())
                 .description(phaseEntity.getDescription())
+                .status(phaseEntity.getStatus() != null
+                        ? PhaseState.valueOf(phaseEntity.getStatus())
+                        : PhaseState.ABIERTA)
                 .subphases(subphases.stream().map(this::toSubphaseDomain).toList())
                 .build();
     }
@@ -88,6 +99,10 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
                     .order(subphase.getOrder())
                     .referenceUrl(subphase.getReferenceUrl())
                     .description(subphase.getDescription())
+                    .requirements(subphase.getRequirements())
+                    .status(subphase.getStatus() != null
+                            ? subphase.getStatus().name()
+                            : SubphaseState.PENDIENTE.name())
                     .phase(entityManager.getReference(PhaseJpaEntity.class, phaseId))
                     .build();
             subphaseEntity = subphaseRepository.save(subphaseEntity);
@@ -96,6 +111,7 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
             subphaseEntity.setOrder(subphase.getOrder());
             subphaseEntity.setReferenceUrl(subphase.getReferenceUrl());
             subphaseEntity.setDescription(subphase.getDescription());
+            subphaseEntity.setRequirements(subphase.getRequirements());
             subphaseEntity = subphaseRepository.save(subphaseEntity);
         }
 
@@ -180,11 +196,15 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
     }
 
     private Phase toPhaseDomain(PhaseJpaEntity entity) {
+        PhaseState status = entity.getStatus() != null
+                ? PhaseState.valueOf(entity.getStatus())
+                : PhaseState.ABIERTA;
         return Phase.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .order(entity.getOrder())
                 .description(entity.getDescription())
+                .status(status)
                 .subphases(entity.getSubphases() == null ? List.of() : entity.getSubphases().stream()
                         .map(this::toSubphaseDomain)
                         .toList())
@@ -192,12 +212,17 @@ public class ProcessStructureJpaAdapter implements ProcessStructurePort {
     }
 
     private Subphase toSubphaseDomain(SubphaseJpaEntity entity) {
+        SubphaseState status = entity.getStatus() != null
+                ? SubphaseState.valueOf(entity.getStatus())
+                : SubphaseState.PENDIENTE;
         return Subphase.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .order(entity.getOrder())
                 .referenceUrl(entity.getReferenceUrl())
                 .description(entity.getDescription())
+                .requirements(entity.getRequirements())
+                .status(status)
                 .build();
     }
 }

@@ -27,6 +27,7 @@ public class ProcessResponseDto {
         private String name;
         private Integer order;
         private String description;
+        private String status;
         private List<SubphaseDto> subphases;
     }
 
@@ -37,5 +38,7 @@ public class ProcessResponseDto {
         private Integer order;
         private String referenceUrl;
         private String description;
+        private String requirements;
+        private String status;
     }
 }

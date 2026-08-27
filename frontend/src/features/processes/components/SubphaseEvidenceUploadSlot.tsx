@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { UploadableIndicatorDto } from '../../evidence/api/fetchUploadableIndicators';
 import { SubphaseEvidenceUploadModal } from './SubphaseEvidenceUploadModal';
 
 export type SubphaseEvidenceUploadSlotProps = {
@@ -8,9 +7,7 @@ export type SubphaseEvidenceUploadSlotProps = {
   subphaseId?: string;
   subphaseName: string;
   canUpload: boolean;
-  indicators: UploadableIndicatorDto[];
-  indicatorsLoading: boolean;
-  indicatorsError: string | null;
+  onUploaded?: () => void;
 };
 
 export function SubphaseEvidenceUploadSlot(props: SubphaseEvidenceUploadSlotProps) {
@@ -30,6 +27,9 @@ export function SubphaseEvidenceUploadSlot(props: SubphaseEvidenceUploadSlotProp
         {...props}
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        onUploaded={() => {
+          props.onUploaded?.();
+        }}
       />
     </>
   );

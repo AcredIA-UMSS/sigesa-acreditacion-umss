@@ -23,6 +23,7 @@ export interface SubphaseFormErrors {
   name?: string;
   order?: string;
   referenceUrl?: string;
+  requirements?: string;
 }
 
 const HTTPS_URL_PATTERN = /^https:\/\/.+/i;
@@ -54,6 +55,10 @@ function validateSubphase(subphase: TemplateSubphaseFormItem): SubphaseFormError
     errors.referenceUrl = 'El enlace HTTPS es obligatorio.';
   } else if (!HTTPS_URL_PATTERN.test(subphase.referenceUrl.trim())) {
     errors.referenceUrl = 'Use una URL que comience con https://';
+  }
+
+  if (!subphase.requirements.trim()) {
+    errors.requirements = 'Los requisitos de completitud son obligatorios.';
   }
 
   return errors;

@@ -62,13 +62,15 @@ class AddSubphaseServiceTest {
                 "Informe parcial",
                 2,
                 "https://duea.umss.edu.bo/ref/informe",
-                "Descripción");
+                "Descripción",
+                "Entregar informe parcial firmado y fechado.");
 
         assertNotNull(created.getId());
         assertEquals("Informe parcial", created.getName());
         assertEquals("https://duea.umss.edu.bo/ref/informe", created.getReferenceUrl());
         verify(guard).ensureProcessActive(process);
         verify(guard).ensureReferenceUrl("https://duea.umss.edu.bo/ref/informe");
+        verify(guard).ensureRequirements("Entregar informe parcial firmado y fechado.");
         verify(processStructurePort).saveSubphase(eq(processId), eq(phaseId), any(Subphase.class));
     }
 
@@ -86,6 +88,6 @@ class AddSubphaseServiceTest {
                 .when(guard).ensureReferenceUrl("http://bad.url");
 
         assertThrows(SubphaseLinkRequiredException.class, () -> addProcessSubphaseService.execute(
-                processId, phaseId, "Sub", 1, "http://bad.url", null));
+                processId, phaseId, "Sub", 1, "http://bad.url", null, "Requisitos mínimos"));
     }
 }

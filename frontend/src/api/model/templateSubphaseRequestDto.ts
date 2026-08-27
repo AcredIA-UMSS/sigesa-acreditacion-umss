@@ -13,4 +13,6 @@ export interface TemplateSubphaseRequestDto {
   /** @minLength 1 */
   referenceUrl: string;
   description?: string;
+  /** @minLength 1 */
+  requirements: string;
 }

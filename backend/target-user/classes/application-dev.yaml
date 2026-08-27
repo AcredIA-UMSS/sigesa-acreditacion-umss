@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/sigesa}
+    username: ${SPRING_DATASOURCE_USERNAME:sigesa_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:sigesa_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # Dev Docker: Hibernate crea/actualiza el esquema base; Flyway solo en prod.
+      ddl-auto: update
+  flyway:
+    enabled: false

@@ -25,7 +25,7 @@ agents_md: "/AGENTS.md"
 artefactos_vivos:
   prd: "docs/product/03_prd/PRD.md"          
   fsd: "docs/product/FSD.md"          
-  prompt_mapping: "docs/sprints/sprint_02/PROMPT_MAPPING.md"
+  prompt_mapping: "docs/sprints/sprint_03/PROMPT_MAPPING.md"
   design_docs_dir: "docs/design/"     
   adr_dir: "docs/adr/"
 ---
@@ -45,6 +45,15 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 27/08/2026 | **MOD-WORKFLOW UC-010:** cierre de fase TD (`PhaseState` ABIERTA/COMPLETADA, Flyway V13); API-WF-03 `POST /processes/{id}/phases/{id}/complete`; `409 FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]`; evento outbox `PhaseCompleted`; UI «Cerrar fase» en detalle proceso. | FSD-UC-010 / DD-UC-010 | N/A | PM-006 / PR-IMPL-039 | Boris Anthony Angulo Urquieta |
+| 27/08/2026 | **MOD-EVIDENCE:** deprecación `POST /indicators/{id}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); sucesor `POST /subphases/{id}/evidences`; Orval `DeprecatedEndpointResponseDto`; UI UC-004 migrada a selector proceso/subfase. | FSD-UC-004 / api_contracts API-EVD-LEGACY | N/A | docs + Orval sync | Cursor Agent |
+| 27/08/2026 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia; retiro Dimensión/Criterio/Indicador del alcance piloto; docs FSD/glosario/modelo/api alineados | FSD v1.1 | N/A | docs sync | Boris Anthony Angulo Urquieta |
+| 27/08/2026 | **MOD-WORKFLOW:** rechazo/aprobación de subfase (API-SUB-03/04); observación OPEN en rechazo TD | FSD-UC-008 / FSD-UC-009 | N/A | PM-005 / PR-IMPL-038 | Boris Anthony Angulo Urquieta |
+| 27/08/2026 | **MOD-EVIDENCE UC-005:** historial versiones + DELETE rechazado (`EVIDENCE_IMMUTABLE`, `AUDIT_DELETE_DENIED`); API-EVD-03/04. | FSD-UC-005 / DD-UC-005 | N/A | PM-002 / PR-IMPL-035 | Boris Anthony Angulo Urquieta |
+| 27/08/2026 | **MOD-EVIDENCE:** FTS GIN en `evidence_version.search_vector` (Flyway V11); ranking `ts_rank` en API-EVD-02. | FSD-UC-007 / DD-UC-007 | N/A | PM-004 / PR-IMPL-037 | Cursor Agent |
+| 27/08/2026 | **MOD-EVIDENCE:** búsqueda multifiltro API-EVD-02; panel buscador en detalle de proceso (fases/subfases). | FSD-UC-007 / DD-UC-007 | N/A | PM-004 / PR-IMPL-037 | Cursor Agent |
+| 27/08/2026 | **MOD-EVIDENCE:** subsanación por subfase (API-SUB-02); observación OPEN/RESOLVED; historial liviano (`blob_purged`, Flyway V10); bloqueo upload con observación pendiente. | FSD-UC-006 / DD-UC-006 | N/A | PM-003 / PR-IMPL-036 | Cursor Agent |
+| 27/08/2026 | **MOD-PROCESS / MOD-EVIDENCE:** subfases con `requirements`; evidencias múltiples por subfase (`evidence.subphase_id`, Flyway V9); observaciones TD/JD (`subphase_observation`); API `/api/v1/subphases/{id}/evidences|observations`; UI detalle + editor estructura + plantillas. | FSD-UC-022 / FSD-UC-004 / DD-UC-022 | N/A | PM-001 / PR-IMPL-034 | Cursor Agent |
 | 21/08/2026 | **MOD-ASSISTANT Nivel 4 (multi-tool):** loop encadenado en `SendChatMessageService`; API `steps[]`; traza UI en `/ayuda` + copilotos phases/users/evidence; escenarios demo #5 por agente. | DD-SYS-002 §11.10 / TOOL-CATALOG §5 | N/A | PM-023 / PR-IMPL-033 | Cursor Agent |
 | 21/08/2026 | **MOD-ASSISTANT RAG normativo:** tabla `normative_document` (V8 FTS); tool `search_normative_docs`; `AssistantNormativeRagService`; config `rag-enabled`, `rag-max-chunks`. | DD-SYS-002 / PR-IMPL-032 | N/A | PM-022 / PR-IMPL-032 | Cursor Agent |
 | 21/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** UI copiloto alineada con fases/usuarios; modal dev `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`; seguridad chat documentada. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-020 / PR-IMPL-030 | Cursor Agent |
@@ -117,7 +126,10 @@ artefactos_vivos:
 | `FSD-UC-021` | `DD-UC-021` | **hecho (backend)** | `v1.0` | Unit validator + services template; WebMvc `TemplateControllerWebMvcTest`; JaCoCo pendiente `mvn verify` | `PR-IMPL-021` / PM-006 | API-TPL-01…08 solo [JD]; FE pendiente `PR-IMPL-021-FE` |
 | `FSD-UC-022` | `DD-UC-022` | **hecho (Full-Stack)** | `v1.0` | Unit `ProcessStructureGuard`, `Add/Delete/Reorder*Service`; WebMvc `ProcessStructureControllerWebMvcTest`; `./mvnw test` | `PR-IMPL-022` / PM-009 | API-PROC-05…08 [JD]; UI `/procesos/{id}/estructura`; `SubphaseWorkflowPort` stub v1.0 |
 | `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `v1.0` | Unit `Assign/RemoveProcessResponsibleService`; WebMvc `ProcessResponsibleControllerWebMvcTest`; `./mvnw test` 157 tests | `PR-IMPL-023` / PM-010 | API-PROC-09…11 [JD]; UI responsable en `/procesos/{id}` + columna listado |
-| `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
+| `FSD-UC-004` | `DD-UC-004` | implementado | `release/3.0.0` | Upload por subfase (API-SUB-01) | `PR-IMPL-006` / `PR-IMPL-034` |
+| `FSD-UC-005` | `DD-UC-005` | **hecho** | `v1.0` | Unit `EvidenceLifecycleServiceTest`; JaCoCo pendiente | `PR-IMPL-035` / PM-002 | API-EVD-03/04 historial + append-only |
+| `FSD-UC-006` | `DD-UC-006` | **hecho (Full-Stack)** | `v1.0` | Unit subsanación pendiente CI; `./mvnw test` local | `PR-IMPL-036` / PM-003 | API-SUB-02; V10; historial liviano |
+| `FSD-UC-007` | `DD-UC-007` | **hecho (Full-Stack)** | `v1.0` | `./mvnw test` local; smoke proceso | `PR-IMPL-037` / PM-004 | API-EVD-02; FTS V11; buscador en `/procesos/{id}` |
 | `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
@@ -244,16 +256,19 @@ artefactos_vivos:
 
 | Área | Detalle vigente |
 |---|---|
-| **Endpoint** | `POST /api/v1/indicators/{indicatorId}/evidences` (multipart) |
+| **Endpoint** | `POST /api/v1/subphases/{subphaseId}/evidences` (multipart) — **API-EVD-01** |
+| **Legacy retirado** | `POST /api/v1/indicators/{indicatorId}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); header `Deprecation: true` |
+| **Frontend UC-004** | `/evidencias/cargar` usa selector proceso/subfase + API-SUB-01; hooks Orval legacy marcados `@deprecated` |
 | **RBAC** | Solo `[CC]`; alcance carrera vía `user_program_assignment` (FSD-BR-09) |
-| **Tablas JPA** | `indicator`, `indicator_state_history`, `evidence`, `evidence_version` |
-| **Estado Indicador** | Append-only history; transición upload: `PENDIENTE → SUBIDO` |
+| **Tablas JPA** | `subphases`, `evidence` (`subphase_id`), `evidence_version`, `subphase_observation` |
+| **Estado Subfase** | Derivado del workflow: `PENDIENTE` → `SUBIDO` → `OBSERVADO`/`APROBADO` |
 | **Hash** | SHA-256 hex (`Sha256ContentHashAdapter`) |
 | **Storage** | `./data/evidences` (local v1.0) |
 | **MIME** | pdf, doc/docx, xls/xlsx, png, jpeg — max 50MB |
 | **Lock upload** | `InMemoryEvidenceUploadLockAdapter` (FSD-BR-18 anti-doble-envío) |
 | **Notificaciones** | `NoOpNotificationOutboxAdapter` → `EvidenceUploaded` (UC-015 stub) |
-| **Seed dev** | `cc@umss.edu.bo` / indicador `550e8400-…-440003` PENDIENTE |
+| **Seed dev** | `cc@umss.edu.bo` / subfases en proceso demo con evidencias |
+| **Legacy** | Tablas `indicator`, `indicator_state_history` — **deprecadas** en modelo v1.1 |
 
 ### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
 

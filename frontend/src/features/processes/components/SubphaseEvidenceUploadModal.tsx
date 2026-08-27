@@ -3,11 +3,9 @@ import { CheckCircle2, Loader2, Upload, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
-import { Select } from '../../../components/ui/Select';
 import { useLockBodyScroll } from '../../../lib/hooks/useLockBodyScroll';
-import { uploadEvidence } from '../../evidence/api/uploadEvidence';
-import type { UploadableIndicatorDto } from '../../evidence/api/fetchUploadableIndicators';
 import { mapUploadError } from '../../evidence/hooks/mapUploadError';
+import { uploadSubphaseEvidence } from '../../subphases/api/subphaseApi';
 
 const ACCEPTED_EXTENSIONS = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg';
 const ACCEPTED_LABEL = 'PDF, Word, Excel o imagen — máx. 50 MB';
@@ -20,9 +18,7 @@ export type SubphaseEvidenceUploadModalProps = {
   subphaseId?: string;
   subphaseName: string;
   canUpload: boolean;
-  indicators: UploadableIndicatorDto[];
-  indicatorsLoading: boolean;
-  indicatorsError: string | null;
+  onUploaded?: () => void;
 };
 
 export function SubphaseEvidenceUploadModal({
@@ -33,13 +29,10 @@ export function SubphaseEvidenceUploadModal({
   subphaseId,
   subphaseName,
   canUpload,
-  indicators,
-  indicatorsLoading,
-  indicatorsError,
+  onUploaded,
 }: SubphaseEvidenceUploadModalProps) {
   const navigate = useNavigate();
   const fieldId = useId();
-  const [indicatorId, setIndicatorId] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,20 +40,6 @@ export function SubphaseEvidenceUploadModal({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useLockBodyScroll(isOpen);
-
-  const selected = indicators.find((item) => item.indicatorId === indicatorId);
-  const indicatorOptions = [
-    {
-      value: '',
-      label: indicatorsLoading
-        ? 'Cargando indicadores…'
-        : 'Seleccione un indicador',
-    },
-    ...indicators.map((item) => ({
-      value: item.indicatorId,
-      label: `${item.code} — ${item.title} (${item.currentState})`,
-    })),
-  ];
 
   const cargarUrl = `/evidencias/cargar?processId=${encodeURIComponent(processId)}${
     subphaseId ? `&subphaseId=${encodeURIComponent(subphaseId)}` : ''
@@ -87,8 +66,8 @@ export function SubphaseEvidenceUploadModal({
       setErrorMessage('Seleccione un archivo.');
       return;
     }
-    if (!selected) {
-      setErrorMessage('Seleccione un indicador PENDIENTE u OBSERVADO.');
+    if (!subphaseId) {
+      setErrorMessage('La subfase no tiene identificador válido.');
       return;
     }
     if (!description.trim()) {
@@ -98,20 +77,15 @@ export function SubphaseEvidenceUploadModal({
 
     setIsSubmitting(true);
     try {
-      const response = await uploadEvidence({
-        indicatorId: selected.indicatorId,
-        criterionId: selected.criterionId,
-        description: `${description.trim()} [Subfase: ${subphaseName} · Fase: ${phaseName}]`,
+      const result = await uploadSubphaseEvidence({
+        subphaseId,
+        description: description.trim(),
         file,
       });
-      if (response.status === 200 || response.status === 201) {
-        setSuccessMessage(
-          `Evidencia cargada (v${response.data.version}) — indicador ${response.data.currentState}`,
-        );
-        setFile(null);
-        setDescription('');
-        setIndicatorId('');
-      }
+      setSuccessMessage(`Evidencia cargada (v${result.version}).`);
+      setFile(null);
+      setDescription('');
+      onUploaded?.();
     } catch (err) {
       setErrorMessage(
         mapUploadError(err instanceof Error ? err : new Error('Error al cargar')),
@@ -165,31 +139,12 @@ export function SubphaseEvidenceUploadModal({
           {!canUpload && (
             <p className="text-body-md text-gray-600">
               La carga directa está reservada al coordinador [CC]. Puede continuar en el
-              formulario completo de UC-004.
+              formulario de carga por subfase.
             </p>
           )}
 
           {canUpload && (
             <>
-              {indicatorsError && (
-                <p className="text-body-md text-danger" role="alert">
-                  {indicatorsError}
-                </p>
-              )}
-              <Select
-                id={`${fieldId}-indicator`}
-                label="Indicador"
-                requiredMark
-                options={indicatorOptions}
-                value={indicatorId}
-                disabled={isSubmitting || indicatorsLoading || indicators.length === 0}
-                onChange={(event) => setIndicatorId(event.target.value)}
-                helperText={
-                  selected
-                    ? `Criterio: ${selected.criterionCode} — ${selected.criterionTitle}`
-                    : 'Solo indicadores PENDIENTE/OBSERVADO de su carrera'
-                }
-              />
               <div>
                 <label
                   htmlFor={`${fieldId}-description`}

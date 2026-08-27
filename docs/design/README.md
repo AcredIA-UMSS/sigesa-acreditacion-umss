@@ -4,6 +4,8 @@ Esta guía define el flujo de trabajo estándar para todo el equipo de desarroll
 
 > ⚠️ **Regla de Oro:** La carpeta `docs/baseline/` es nuestro registro histórico intocable. Todo el diseño evolutivo y las decisiones ocurren en la capa viva (`docs/product/`, `docs/design/`, `docs/adr/`).
 
+> **Modelo v1.1 (2026-08-27):** El piloto opera con **Proceso → Fase → Subfase → Evidencia**. No usar Dimensión/Criterio/Indicador en nuevos diseños; ver [`glosario.md`](../product/glosario.md).
+
 ---
 
 ## Si tiene tokens ilimitados o con poder, invoca al orquestador (subagente de proyecto)

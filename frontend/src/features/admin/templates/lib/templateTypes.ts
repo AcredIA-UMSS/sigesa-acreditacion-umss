@@ -9,6 +9,7 @@ export interface TemplateSubphaseFormItem {
   order: number;
   referenceUrl: string;
   description: string;
+  requirements: string;
 }
 
 export interface TemplatePhaseFormItem {

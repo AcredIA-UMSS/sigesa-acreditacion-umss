@@ -84,6 +84,7 @@ public class TemplatePersistenceMapper {
                                     .order(subphaseDomain.getOrder())
                                     .referenceUrl(subphaseDomain.getReferenceUrl())
                                     .description(subphaseDomain.getDescription())
+                                    .requirements(subphaseDomain.getRequirements())
                                     .templatePhase(phaseEntity)
                                     .build()
                     ));
@@ -112,6 +113,7 @@ public class TemplatePersistenceMapper {
                 .order(entity.getOrder())
                 .referenceUrl(entity.getReferenceUrl())
                 .description(entity.getDescription())
+                .requirements(entity.getRequirements())
                 .build();
     }
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertCircle,
   Bell,
@@ -11,7 +12,10 @@ import {
 } from 'lucide-react';
 import type { UploadEvidenceResponse } from '../../../api/model';
 import { Select } from '../../../components/ui/Select';
-import type { UploadableIndicatorDto } from '../api/fetchUploadableIndicators';
+import type {
+  ProcessUploadOption,
+  SubphaseUploadOption,
+} from '../hooks/useSubphaseUploadTargets';
 import type {
   EvidenceUploadField,
   EvidenceUploadForm,
@@ -28,12 +32,13 @@ export type EvidenceUploadUIProps = {
     key: K,
     value: EvidenceUploadForm[K],
   ) => void;
-  onSelectIndicator: (indicatorId: string, criterionId: string) => void;
-  uploadableIndicators: UploadableIndicatorDto[];
-  indicatorsLoading: boolean;
-  indicatorsError: string | null;
-  indicatorsEmpty: boolean;
-  onReloadIndicators: () => void;
+  processOptions: ProcessUploadOption[];
+  subphaseOptions: SubphaseUploadOption[];
+  targetsLoading: boolean;
+  targetsError: string | null;
+  targetsEmpty: boolean;
+  subphasesEmpty: boolean;
+  onReloadTargets: () => void;
   onSubmit: () => void;
   onReset: () => void;
   progress: number;
@@ -48,12 +53,13 @@ export type EvidenceUploadUIProps = {
 export function EvidenceUploadUI({
   form,
   onFieldChange,
-  onSelectIndicator,
-  uploadableIndicators,
-  indicatorsLoading,
-  indicatorsError,
-  indicatorsEmpty,
-  onReloadIndicators,
+  processOptions,
+  subphaseOptions,
+  targetsLoading,
+  targetsError,
+  targetsEmpty,
+  subphasesEmpty,
+  onReloadTargets,
   onSubmit,
   onReset,
   progress,
@@ -65,26 +71,35 @@ export function EvidenceUploadUI({
   validationErrors,
 }: EvidenceUploadUIProps) {
   const showProgress = isSubmitting || progress > 0;
-  const selected = uploadableIndicators.find(
-    (item) => item.indicatorId === form.indicatorId,
+  const selectedSubphase = subphaseOptions.find(
+    (item) => item.subphaseId === form.subphaseId,
   );
-  const indicatorOptions = [
+
+  const processSelectOptions = [
     {
       value: '',
-      label: indicatorsLoading
-        ? 'Cargando indicadores…'
-        : 'Seleccione un indicador',
+      label: targetsLoading ? 'Cargando procesos…' : 'Seleccione un proceso activo',
     },
-    ...uploadableIndicators.map((item) => ({
-      value: item.indicatorId,
-      label: `${item.code} — ${item.title} (${item.currentState})`,
+    ...processOptions.map((item) => ({
+      value: item.processId,
+      label: item.label,
     })),
   ];
-  const criterionLabel = selected
-    ? `${selected.criterionCode} — ${selected.criterionTitle}`
-    : form.criterionId
-      ? 'Criterio asociado'
-      : 'Se completa al elegir el indicador';
+
+  const subphaseSelectOptions = [
+    {
+      value: '',
+      label: !form.processId
+        ? 'Primero seleccione un proceso'
+        : targetsLoading
+          ? 'Cargando subfases…'
+          : 'Seleccione una subfase',
+    },
+    ...subphaseOptions.map((item) => ({
+      value: item.subphaseId,
+      label: `${item.phaseName} — ${item.subphaseName}`,
+    })),
+  ];
 
   return (
     <div className="flex flex-1 flex-col h-screen overflow-hidden bg-gray-50">
@@ -121,10 +136,9 @@ export function EvidenceUploadUI({
               Cargar Evidencia
             </h1>
             <p className="text-body-lg text-gray-600">
-              El coordinador de carrera adjunta el archivo con los
-              metadatos obligatorios. El indicador pasará a estado{' '}
-              <strong className="font-semibold text-primary-700">SUBIDO</strong>{' '}
-              tras una carga exitosa.
+              El coordinador de carrera adjunta el archivo a una subfase del proceso
+              activo. Tras una carga exitosa, la subfase pasa a estado{' '}
+              <strong className="font-semibold text-primary-700">SUBIDO</strong>.
             </p>
           </header>
 
@@ -134,7 +148,7 @@ export function EvidenceUploadUI({
                 className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  onSubmit();
+                  void onSubmit();
                 }}
                 noValidate
               >
@@ -147,80 +161,76 @@ export function EvidenceUploadUI({
                       Metadatos y archivo
                     </h2>
                     <p className="text-body-md text-gray-500">
-                      Indicador, criterio, descripción y documento de respaldo
+                      Proceso, subfase, descripción y documento de respaldo
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-5">
-                  {indicatorsError && (
+                  {targetsError && (
                     <div className="space-y-2">
-                      <Alert message={indicatorsError} />
+                      <Alert message={targetsError} />
                       <button
                         type="button"
-                        onClick={onReloadIndicators}
+                        onClick={onReloadTargets}
                         className="text-label-md font-medium text-primary-700 underline-offset-2 hover:underline"
                       >
-                        Reintentar carga de indicadores
+                        Reintentar carga de procesos
                       </button>
                     </div>
                   )}
-                  {indicatorsEmpty && (
+                  {targetsEmpty && (
                     <div
                       className="space-y-2 rounded-lg border border-warning/40 bg-warning/10 p-4 text-body-md text-gray-800"
                       role="status"
                     >
                       <p>
-                        No hay indicadores PENDIENTE u OBSERVADO en su carrera.
-                        Si reinició el backend, recargue el listado o vuelva a
-                        iniciar sesión.
+                        No hay procesos activos en su carrera. Inicie o active un
+                        proceso antes de cargar evidencias.
                       </p>
-                      <button
-                        type="button"
-                        onClick={onReloadIndicators}
-                        className="rounded-lg bg-primary-600 px-3 py-2 text-label-md font-medium text-body hover:bg-primary-700"
+                      <Link
+                        to="/procesos"
+                        className="inline-block rounded-lg bg-primary-600 px-3 py-2 text-label-md font-medium text-body hover:bg-primary-700"
                       >
-                        Recargar indicadores
-                      </button>
+                        Ver procesos
+                      </Link>
+                    </div>
+                  )}
+                  {subphasesEmpty && form.processId && (
+                    <div
+                      className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-body-md text-gray-800"
+                      role="status"
+                    >
+                      El proceso seleccionado no tiene subfases configuradas.
                     </div>
                   )}
 
                   <Select
-                    id="indicator-id"
-                    label="Indicador"
+                    id="process-id"
+                    label="Proceso"
                     requiredMark
-                    options={indicatorOptions}
-                    value={form.indicatorId}
-                    disabled={isBlocked || indicatorsLoading}
-                    error={validationErrors.indicatorId}
-                    helperText="Solo indicadores PENDIENTE/OBSERVADO de su carrera"
-                    onChange={(event) => {
-                      const indicatorId = event.target.value;
-                      if (!indicatorId) {
-                        onSelectIndicator('', '');
-                        return;
-                      }
-                      const match = uploadableIndicators.find(
-                        (item) => item.indicatorId === indicatorId,
-                      );
-                      onSelectIndicator(indicatorId, match?.criterionId ?? '');
-                    }}
+                    options={processSelectOptions}
+                    value={form.processId}
+                    disabled={isBlocked || targetsLoading}
+                    error={validationErrors.processId}
+                    helperText="Solo procesos ACTIVE de su carrera"
+                    onChange={(event) => onFieldChange('processId', event.target.value)}
                   />
 
                   <Select
-                    id="criterion-id"
-                    label="Criterio"
+                    id="subphase-id"
+                    label="Subfase"
                     requiredMark
-                    options={[
-                      {
-                        value: form.criterionId || '',
-                        label: criterionLabel,
-                      },
-                    ]}
-                    value={form.criterionId}
-                    disabled
-                    error={validationErrors.criterionId}
-                    helperText="Asociado automáticamente al indicador (1:1)"
+                    options={subphaseSelectOptions}
+                    value={form.subphaseId}
+                    disabled={isBlocked || targetsLoading || !form.processId}
+                    error={validationErrors.subphaseId}
+                    helperText={
+                      selectedSubphase
+                        ? `Proceso: ${selectedSubphase.processLabel}`
+                        : 'Elija la subfase donde registrará la evidencia'
+                    }
+                    onChange={(event) => onFieldChange('subphaseId', event.target.value)}
                   />
 
                   <FormField
@@ -339,7 +349,7 @@ export function EvidenceUploadUI({
                           <dd>{result.version}</dd>
                         </div>
                         <div className="flex flex-wrap gap-x-2">
-                          <dt className="font-medium">Estado indicador:</dt>
+                          <dt className="font-medium">Estado subfase:</dt>
                           <dd className="font-semibold text-primary-700">
                             {result.currentState}
                           </dd>
@@ -395,15 +405,15 @@ export function EvidenceUploadUI({
                 <ol className="space-y-4">
                   <GuideStep
                     step="01"
-                    text="Elija el indicador en el listado (PENDIENTE u OBSERVADO de su carrera)."
+                    text="Elija el proceso activo y la subfase donde corresponde la evidencia."
                   />
                   <GuideStep
                     step="02"
-                    text="El criterio se completa solo; agregue descripción y el archivo."
+                    text="Agregue una descripción clara y adjunte el archivo de respaldo."
                   />
                   <GuideStep
                     step="03"
-                    text="Tras la carga, el indicador queda en SUBIDO y se notifica al técnico DUEA."
+                    text="Tras la carga, la subfase queda en SUBIDO y se notifica al técnico DUEA."
                   />
                 </ol>
               </section>
@@ -478,6 +488,7 @@ function Alert({ message }: { message: string }) {
     </div>
   );
 }
+
 function GuideStep({ step, text }: { step: string; text: string }) {
   return (
     <li className="flex gap-3">
@@ -486,4 +497,3 @@ function GuideStep({ step, text }: { step: string; text: string }) {
     </li>
   );
 }
-

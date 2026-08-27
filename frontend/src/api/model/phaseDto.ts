@@ -11,5 +11,6 @@ export interface PhaseDto {
   name?: string;
   order?: number;
   description?: string;
+  status?: string;
   subphases?: SubphaseDto[];
 }

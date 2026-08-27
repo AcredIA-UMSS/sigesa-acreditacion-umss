@@ -25,6 +25,7 @@ import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 import com.umss.sigesa.domain.model.Role;
+import com.umss.sigesa.domain.model.SubphaseState;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -102,7 +103,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
                     evidenceId, 1, command.fileContent(), command.originalFilename());
 
             LocalDateTime now = LocalDateTime.now();
-            Evidence evidence = new Evidence(evidenceId, command.indicatorId(), versionId, now);
+            Evidence evidence = new Evidence(evidenceId, command.indicatorId(), null, versionId, now);
             EvidenceVersion version = new EvidenceVersion(
                     versionId,
                     evidenceId,
@@ -141,7 +142,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
                     1,
                     hash,
                     EVENT_EVIDENCE_UPLOADED,
-                    IndicatorState.SUBIDO
+                    SubphaseState.SUBIDO
             );
         } finally {
             uploadLock.release(command.indicatorId());

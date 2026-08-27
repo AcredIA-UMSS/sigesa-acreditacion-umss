@@ -32,16 +32,16 @@
 
 ## Catálogo detallado
 
-### FSD-BR-01 — Evidencia siempre ligada a Indicador/Criterio
+### FSD-BR-01 — Evidencia siempre ligada a Subfase
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Validación |
 | **Origen BRD** | BRD-RB-06 |
 | **UC** | UC-004 |
-| **Enunciado** | Ninguna Evidencia puede persistirse sin `indicatorId` válido y clasificación en la taxonomía (Criterio/Indicador del marco activo). |
+| **Enunciado** | Ninguna Evidencia puede persistirse sin `subphaseId` válido, descripción y archivo. |
 | **Violación** | `400 EVIDENCE_UNCLASSIFIED` |
-| **Verificación** | Test API carga sin `indicatorId`; UAT formulario incompleto (PRD-US-005). |
+| **Verificación** | Test API carga sin `subphaseId`; UAT formulario incompleto (PRD-US-005). |
 
 ---
 
@@ -71,14 +71,14 @@
 
 ---
 
-### FSD-BR-04 — Solo [TD] aprueba/rechaza Indicador
+### FSD-BR-04 — Solo [TD] aprueba/rechaza Subfase
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Autorización |
 | **Origen BRD** | BRD-REQ-009 |
 | **UC** | UC-008, UC-009 |
-| **Enunciado** | Transiciones de validación normativa del Indicador (`APROBADO`, `OBSERVADO`) exclusivas de [TD]. [JD] no sustituye dictamen técnico salvo política institucional explícita documentada en ADR. |
+| **Enunciado** | Transiciones de validación normativa de la Subfase (`APROBADO`, `OBSERVADO`) exclusivas de [TD]. [JD] no sustituye dictamen técnico salvo política institucional explícita documentada en ADR. |
 | **Violación** | `403 FORBIDDEN_ROLE` (TC-SAD-004 si [CC] aprueba). |
 
 ---
@@ -90,7 +90,7 @@
 | **Tipo** | Validación |
 | **Origen BRD** | BRD-REQ-008 |
 | **UC** | UC-008 |
-| **Enunciado** | Todo rechazo crea `Observation` con `justification` no vacía (mínimo configurable, default 20 caracteres). |
+| **Enunciado** | Todo rechazo formal de subfase crea `subphase_observation` OPEN con `body` no vacío (mínimo configurable, default 20 caracteres). |
 | **Violación** | `422 JUSTIFICATION_REQUIRED` |
 | **Verificación** | TC-SAD-003; PRD-US-009. |
 
@@ -116,7 +116,7 @@
 | **Tipo** | Estado |
 | **Origen BRD** | BRD-CST-03, BRD-REQ-014 |
 | **UC** | UC-010 |
-| **Enunciado** | `COUNT(indicadores_fase) = COUNT(indicadores WHERE estado = APROBADO)` antes de cerrar Fase. |
+| **Enunciado** | `COUNT(subfases_fase) = COUNT(subfases WHERE estado = APROBADO)` antes de cerrar Fase. |
 | **Violación** | `409 FASE_CIERRE_BLOQUEADO` + lista pendientes |
 | **Verificación** | TC-SAD-002; PRD-US-011. |
 
@@ -252,7 +252,7 @@
 | **Tipo** | Autorización |
 | **Origen BRD** | BRD-REQ-001 |
 | **UC** | UC-019 |
-| **Enunciado** | El evaluador externo [EE] solo consulta documentación de su carrera asignada. Prohibidas carga/subsanación de Evidencia, dictamen de Indicador, cierre de Fase, administración de usuarios y exportación de reportes. |
+| **Enunciado** | El evaluador externo [EE] solo consulta documentación de su carrera asignada. Prohibidas carga/subsanación de Evidencia, dictamen de Subfase, cierre de Fase, administración de usuarios y exportación de reportes. |
 | **Violación** | `403 FORBIDDEN_ROLE` |
 | **Verificación** | PRD-US-026; tests security EE vs POST evidencias/export. |
 
@@ -303,7 +303,7 @@
 | **Tipo** | Estructura |
 | **Origen BRD** | BRD-REQ-004 |
 | **UC** | UC-022 |
-| **Enunciado** | No se puede eliminar una **subfase** de proceso si tiene indicadores con evidencia en workflow iniciado (estado ≠ vacío/`PENDIENTE` sin carga). No se elimina **fase** si alguna subfase bloquea. |
+| **Enunciado** | No se puede eliminar una **subfase** de proceso si tiene evidencias en workflow iniciado (estado ≠ `PENDIENTE` vacío). No se elimina **fase** si alguna subfase bloquea. |
 | **Violación** | `409 SUBPHASE_HAS_EVIDENCE` |
 | **Verificación** | Tests delete subfase con evidencia SUBIDA/OBSERVADA/APROBADA. |
 
@@ -355,3 +355,4 @@
 |---------|-------|--------|
 | Dorada v1.0 | 2026-05-16 | Extracción y detalle de 18 reglas desde FSD.md |
 | v1.1 | 2026-08-07 | BR-20…23 para plantillas, estructura de proceso y responsable [CC] (UC-021…023) |
+| v1.2 | 2026-08-27 | Pivot subfase-centrado: BR-01, BR-04, BR-05, BR-07, BR-19, BR-22 |

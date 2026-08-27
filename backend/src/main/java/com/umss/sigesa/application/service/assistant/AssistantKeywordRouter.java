@@ -330,6 +330,7 @@ public class AssistantKeywordRouter {
         json.append("\"phaseName\":\"").append(escapeJson(pending.phaseName())).append("\",");
         json.append("\"name\":\"").append(escapeJson(pending.subphaseName())).append("\",");
         json.append("\"referenceUrl\":\"").append(escapeJson(pending.referenceUrl())).append("\",");
+        json.append("\"requirements\":\"Documentación y criterios mínimos definidos para la subfase.\",");
         json.append("\"confirmed\":").append(confirmed);
         json.append("}");
         return new AssistantToolInvocation(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, json.toString());

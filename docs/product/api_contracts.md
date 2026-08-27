@@ -210,9 +210,59 @@ security:
 | **UC** | FSD-UC-022 |
 | **Rutas** | `POST/PUT/DELETE /processes/{processId}/phases/{phaseId}/subphases[/{subphaseId}]` |
 | **x-allowed-roles** | `[JD]`, `[TD]` |
-| **Body subfase** | `{ "name", "order", "referenceUrl", "description?" }` |
-| **400** | `SUBPHASE_LINK_REQUIRED` |
+| **Body subfase** | `{ "name", "order", "referenceUrl", "description?", "requirements" }` |
+| **400** | `SUBPHASE_LINK_REQUIRED` (URL HTTPS o requisitos vacíos) |
 | **409** | `SUBPHASE_HAS_EVIDENCE` / `PROCESS_NOT_EDITABLE` |
+
+### API-SUB-01 — Evidencias y observaciones por subfase
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-004 / FSD-UC-022 |
+| **Rutas** | `POST/GET /subphases/{subphaseId}/evidences`; `GET/POST /subphases/{subphaseId}/observations` |
+| **POST evidencias** | multipart: `file`, `description`. Rol `[CC]` |
+| **POST observaciones** | `{ "body": "texto" }`. Roles `[TD]`, `[JD]` |
+| **201 evidencia** | `{ evidenceId, version, contentHash, event, currentState? }` |
+| **200 listado** | evidencias u observaciones ordenadas por fecha descendente |
+| **Observación** | `{ id, body, status: OPEN\|RESOLVED, resolvedAt?, resolvedVersionId? }` |
+| **409 upload** | `SUBSANATION_NOT_ALLOWED` si hay observación OPEN pendiente |
+| **409 observación** | `INVALID_STATE` si ya existe observación OPEN |
+
+### API-SUB-02 — Subsanación de evidencia en subfase
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-006 |
+| **Rutas** | `GET /subphases/{subphaseId}/subsanation-eligibility`; `POST /subphases/{subphaseId}/evidences/{evidenceId}/subsanate` |
+| **GET elegibilidad** | `{ canSubsanate, openObservationId?, reason? }`. Rol `[CC]` |
+| **POST subsanate** | multipart: `file`, `description`, `observationId`. Rol `[CC]` |
+| **201** | `{ evidenceId, version, observationId, supersedesVersion, contentHash, event: "EvidenceSubsanated" }` |
+| **409** | `SUBSANATION_NOT_ALLOWED` — sin observación OPEN, ya subsanada, o upload bloqueado |
+| **Nota historial** | Versiones anteriores exponen `blobAvailable: false` en API-EVD-03 |
+
+### API-SUB-03 — Rechazar subfase
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-008 |
+| **Ruta** | `POST /api/v1/subphases/{subphaseId}/reject` |
+| **x-allowed-roles** | `[TD]` |
+| **Body** | `{ "justification": "texto mínimo 20 chars" }` |
+| **Precondición** | ≥1 evidencia en subfase |
+| **200** | `{ observationId, subphaseId, newState: "OBSERVADO" }` |
+| **409** | `EVIDENCE_REQUIRED`, `INVALID_STATE` (observación OPEN) |
+| **422** | `JUSTIFICATION_REQUIRED` |
+
+### API-SUB-04 — Aprobar subfase
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-009 |
+| **Ruta** | `POST /api/v1/subphases/{subphaseId}/approve` |
+| **x-allowed-roles** | `[TD]` |
+| **Precondición** | ≥1 evidencia; sin observación OPEN |
+| **200** | `{ subphaseId, newState: "APROBADO" }` |
+| **409** | `EVIDENCE_REQUIRED`, `SUBSANATION_NOT_ALLOWED` (observación OPEN), `INVALID_STATE` |
 
 ### API-PROC-09 — `PUT /processes/{processId}/responsible`
 
@@ -260,7 +310,7 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-021 |
 | **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "name", "description?", "type", "phases": [{ "name", "order", "description?", "subphases": [{ "name", "order", "referenceUrl", "description?" }] }] }` |
+| **Body** | `{ "name", "description?", "type", "phases": [{ "name", "order", "description?", "subphases": [{ "name", "order", "referenceUrl", "description?", "requirements" }] }] }` |
 | **201** | Plantilla `DRAFT` creada |
 | **400** | `TEMPLATE_SUBPHASE_LINK_REQUIRED` / `TEMPLATE_STRUCTURE_INCOMPLETE` |
 
@@ -319,30 +369,45 @@ security:
 
 ## 5. MOD-EVIDENCE
 
-### API-EVD-01 — `POST /api/v1/indicators/{indicatorId}/evidences`
+> Evidencias **siempre** ligadas a subfase (`evidence.subphase_id`). Sin taxonomía Indicador/Criterio en v1.1.
+
+### API-EVD-01 — `POST /api/v1/subphases/{subphaseId}/evidences`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-004 |
+| **Alias** | API-SUB-01 (upload) |
 | **x-allowed-roles** | `[CC]` |
 | **Content-Type** | `multipart/form-data` |
-| **Body** | `file`, `criterionId`, `description` |
-| **Prohibido en body** | `status` / `estado` (Audit Service deriva estado desde evento) |
-| **201** | `{ "evidenceId", "version": 1, "contentHash", "event": "EvidenceUploaded", "currentState": "SUBIDO" }` |
+| **Body** | `file`, `description` |
+| **201** | `{ "evidenceId", "version": 1, "contentHash", "event": "EvidenceUploaded" }` |
 | **400** | `EVIDENCE_UNCLASSIFIED` |
 | **403** | `PROGRAM_SCOPE_DENIED` |
-| **409** | `INDICATOR_NOT_UPLOADABLE`, `UPLOAD_IN_PROGRESS` |
+| **409** | `SUBSANATION_NOT_ALLOWED`, `UPLOAD_IN_PROGRESS` |
 | **413** | `PAYLOAD_TOO_LARGE` |
 | **422** | `INVALID_EVIDENCE_FORMAT` |
 
-### API-EVD-02 — `GET /evidences/search`
+### API-EVD-LEGACY — `POST /api/v1/indicators/{indicatorId}/evidences` (deprecado)
+
+| Campo | Valor |
+|-------|-------|
+| **Estado** | **Retirado** desde modelo v1.1 (2026-08-27) |
+| **Sucesor** | `POST /api/v1/subphases/{subphaseId}/evidences` (API-EVD-01) |
+| **x-allowed-roles** | `[CC]` (sigue protegido; respuesta siempre error) |
+| **410** | `{ "error": "ENDPOINT_DEPRECATED", "message": "…", "indicatorId": "…" }` |
+| **Headers** | `Deprecation: true`; `Link: </api/v1/subphases/{subphaseId}/evidences>; rel="successor-version"` |
+| **Nota** | No acepta carga multipart; clientes Orval deben migrar a API-SUB-01 |
+
+### API-EVD-02 — `GET /api/v1/evidences/search`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-007 |
-| **x-allowed-roles** | `[CC]`, `[TD]` |
-| **Query** | `programId`, `phaseId`, `indicatorId`, `q`, `managementYear` |
-| **200** | Lista paginada; [CC] solo su carrera (FSD-BR-09) |
+| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` |
+| **Query** | `processId?`, `phaseId?`, `subphaseId?`, `programId?`, `q?`, `managementYear?`, `page=0`, `size=20` |
+| **200** | `{ items: [{ evidenceId, subphaseId, subphaseName, phaseId, phaseName, processId, version, description, originalFilename, uploadedAt, uploadedBy, blobAvailable }], total, page, size }` |
+| **403** | `PROGRAM_SCOPE_DENIED` ([CC] sin carrera) |
+| **Nota FTS** | Flyway `V11__evidence_version_fts.sql`: GIN `search_vector`; dev/H2 → fallback LIKE |
 
 ### API-EVD-03 — `GET /evidences/{id}/versions`
 
@@ -350,7 +415,7 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-005 |
 | **x-allowed-roles** | `[CC]`, `[TD]` |
-| **200** | `[{ "version", "supersedesId", "observationId", "createdAt", "createdBy" }]` |
+| **200** | `[{ "versionId", "version", "supersedesVersion", "observationId", "description", "contentHash", "originalFilename", "createdAt", "createdBy", "current", "blobAvailable" }]` |
 
 ### API-EVD-04 — `DELETE /evidences/{id}`
 
@@ -360,14 +425,15 @@ security:
 | **Nota** | Endpoint existe para auditoría; **siempre 409** si aprobado |
 | **409** | `EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED` en log |
 
-### API-EVD-05 — `POST /evidences/{id}/versions`
+### API-EVD-05 — Subsanación por subfase
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-006 |
+| **Alias** | API-SUB-02 |
+| **Rutas** | `GET /subphases/{subphaseId}/subsanation-eligibility`; `POST /subphases/{subphaseId}/evidences/{evidenceId}/subsanate` |
 | **x-allowed-roles** | `[CC]` |
-| **Body** | `evidenceBlob`, `observationId`, `description` |
-| **201** | `{ "version": 2, "observationId", "supersedesVersion": 1, "event": "EvidenceSubsanated" }` |
+| **201** | `{ "version": n+1, "observationId", "supersedesVersion", "event": "EvidenceSubsanated" }` |
 
 ### API-IMP-01 — `POST /imports/evidences`
 
@@ -382,36 +448,44 @@ security:
 
 ## 6. MOD-WORKFLOW
 
-> Usar endpoints **semánticos**; no `PATCH /indicators/{id}` con `{ "status": "APROBADO" }`. Todo cambio de estado se persiste como `INSERT` en `indicator_state_history`.
+> Workflow centrado en **Subfase**. Rechazo/aprobación vía API-SUB-03/04. Cierre de fase UC-010 cuando todas las subfases = APROBADO.
 
-### API-WF-01 — `POST /indicators/{id}/reject`
+### API-WF-01 — `POST /subphases/{subphaseId}/reject`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-008 |
+| **Alias** | API-SUB-03 |
 | **x-allowed-roles** | `[TD]` |
 | **Body** | `{ "justification": "texto mínimo 20 chars" }` |
-| **200** | `{ "newState": "OBSERVADO", "observationId", "stateHistoryId" }` |
+| **Precondición** | ≥1 evidencia en subfase |
+| **200** | `{ "observationId", "subphaseId", "newState": "OBSERVADO" }` |
+| **409** | `EVIDENCE_REQUIRED`, `INVALID_STATE` |
 | **422** | `JUSTIFICATION_REQUIRED` |
 
-### API-WF-02 — `POST /indicators/{id}/approve`
+### API-WF-02 — `POST /subphases/{subphaseId}/approve`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-009 |
+| **Alias** | API-SUB-04 |
 | **x-allowed-roles** | `[TD]` |
-| **200** | `{ "newState": "APROBADO", "stateHistoryId", "event": "IndicatorApproved" }` |
+| **Precondición** | ≥1 evidencia; sin observación OPEN |
+| **200** | `{ "subphaseId", "newState": "APROBADO", "event": "SubphaseApproved" }` |
+| **409** | `EVIDENCE_REQUIRED`, `SUBSANATION_NOT_ALLOWED`, `INVALID_STATE` |
 | **403** | `FORBIDDEN_ROLE` si [CC] |
 
-### API-WF-03 — `IndicatorApproved` → SQS FIFO → Orchestration Service
+### API-WF-03 — Cierre de fase
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-010 |
-| **x-allowed-roles** | sistema |
-| **Entrada** | Evento `IndicatorApproved` con `phaseId` y `correlationId` |
-| **Salida** | Evento `PhaseCompleted` solo si `COUNT(APROBADO) == COUNT(TOTAL)` |
-| **Sin cierre** | No emite evento; pendientes consultables desde dashboard |
+| **Método / Ruta** | `POST /api/v1/processes/{processId}/phases/{phaseId}/complete` |
+| **x-allowed-roles** | `[TD]` |
+| **Precondición** | Todas las subfases de la fase en `APROBADO` |
+| **200** | `{ "phaseId", "previousState", "newState": "COMPLETADA", "event": "PhaseCompleted" }` |
+| **409** | `FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]` |
+| **403** | `FORBIDDEN_ROLE` si [CC] |
 
 ---
 
@@ -434,7 +508,7 @@ security:
 | **UC** | FSD-UC-011 (`DD-UC-011`) |
 | **x-allowed-roles** | `[CC]` |
 | **Query Params** | `page` (default 0), `size` (default 10), `sort` (default `fechaLimite,asc`), `faseId`, `estado` |
-| **200 OK** | Page JSON Object (`content`: listado de observaciones/indicadores, `totalElements`, `totalPages`, etc.) |
+| **200 OK** | Page JSON Object (`content`: listado de observaciones/subfases, `totalElements`, `totalPages`, etc.) |
 
 #### API-DASH-01c — `GET /api/v1/dashboards/coordinator/export`
 | Campo | Valor |
@@ -453,7 +527,7 @@ security:
 | **UC** | FSD-UC-012 |
 | **x-allowed-roles** | `[TD]` |
 | **Query** | `programId`, `phaseId`, `status` |
-| **200** | Bandeja de Indicadores pendientes de revisión |
+| **200** | Bandeja de subfases pendientes de revisión |
 
 ### API-DASH-03 — `GET /dashboard/executive`
 
@@ -520,10 +594,10 @@ security:
 
 | Endpoint | CC | TD | JD | P |
 |----------|:--:|:--:|:--:|:--:|
-| POST /indicators/{id}/evidences | ✓ | | | |
-| POST .../reject | | ✓ | | |
-| POST .../approve | | ✓ | | |
-| Evento IndicatorApproved → SQS FIFO | | sistema | | |
+| POST /subphases/{id}/evidences | ✓ | | | |
+| POST /indicators/{id}/evidences (legacy) | ✓ | | | | **410 deprecado** |
+| POST /subphases/{id}/reject | | ✓ | | |
+| POST /subphases/{id}/approve | | ✓ | | |
 | GET /dashboard/coordinator | ✓ | | | |
 | GET /dashboard/technician | | ✓ | | |
 | GET /dashboard/executive | | | ✓ | |
@@ -539,7 +613,7 @@ security:
 | Anti-patrón | Alternativa |
 |-------------|-------------|
 | `DELETE /evidences/{id}` que borre aprobados | 409 + append-only |
-| `PUT/PATCH /indicators/{id}` con `status` en body | `POST /approve`, `POST /reject` + `indicator_state_history` |
+| `PUT/PATCH /subphases/{id}` con `status` en body | `POST /reject`, `POST /approve` + observaciones/historial |
 | [CC] en `/approve` | 403 estricto |
 | Exponer observaciones internas en `/public/*` | Filtro `published` |
 
@@ -549,6 +623,8 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.8 | 2026-08-27 | API-EVD-LEGACY: `POST /indicators/{id}/evidences` retorna **410 Gone**; sucesor API-EVD-01; Orval `DeprecatedEndpointResponseDto` |
+| v1.7 | 2026-08-27 | Pivot v1.1: Proceso→Fase→Subfase→Evidencia; retiro Indicador/Criterio; WF-01/02 por subfase |
 | v1.5 | 2026-08-03 | API-CAT-01: catálogo `programs` en BD + query `q`; FSD-UC-003 autocomplete carreras; plantillas proceso solo CEUB/ARCU-SUR |
 | v1.4 | 2026-07-31 | API-USER-03: contrato formal `docs/product/api/API-USER-03.md`; GET `/admin/users`; tool `list_users` |
 | v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |

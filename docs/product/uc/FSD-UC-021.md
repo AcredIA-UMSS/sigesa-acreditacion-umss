@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-021
 nombre: Gestión de plantillas normativas (fases y subfases)
-estado: Hecho (backend)
+estado: Hecho (Full-Stack)
 release: v1.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
 reglas: FSD-BR-21, FSD-BR-23
-ultima_actualizacion: "2026-08-07"
+ultima_actualizacion: "2026-08-27"
 design_doc: DD-UC-021
 pr_impl: PR-IMPL-021
 ---
@@ -90,7 +90,7 @@ Permite a **[JD]** crear, consultar, modificar y desactivar **plantillas normati
 
 ## Fuera de alcance (v1.0)
 
-- Indicadores/criterios dentro de subfase (taxonomía Dimensión → Criterio → Indicador; release posterior).
+- Indicadores/criterios/dimensiones (retirados del alcance v1.1; ver glosario v1.1).
 - Versionado automático con diff normativo (v1.1 — alineado a plantillas versionadas en ROADMAP).
 - Importación masiva desde Excel/CSV.
 

@@ -26,14 +26,15 @@ pr_impl: PR-IMPL-022
 
 Permite a **[JD]** y **[TD]** **crear, modificar y eliminar** fases y subfases **dentro de un proceso ya instanciado**, cuando la operación institucional lo requiera (ajuste puntual de cronograma o estructura no cubierta por la plantilla base). También disponible vía asistente virtual (`manage_process_phase`, `list_process_phases`).
 
-> **No confundir con [FSD-UC-010](FSD-UC-010.md):** UC-010 es **cerrar/avanzar** fase por workflow de indicadores aprobados, no editar la taxonomía.
+> **No confundir con [FSD-UC-010](FSD-UC-010.md):** UC-010 es **cerrar/avanzar** fase cuando todas las subfases están aprobadas, no editar la estructura.
 
 ## Flujo principal — Agregar estructura
 
 1. [JD] abre detalle del proceso (`/procesos/{processId}`) y entra a **Editar estructura**.
 2. Puede **agregar fase** con nombre, `order` y descripción opcional.
-3. Dentro de una fase, **agregar subfase** con nombre, `order`, **`referenceUrl`** y descripción opcional.
+3. Dentro de una fase, **agregar subfase** con `name` (nombre_subfase), `order`, **`referenceUrl`**, `description` (descripcion_subfase) y **`requirements`** (requisitos_subfase — criterios para considerarla hecha).
 4. Puede **reordenar** fases/subfases (actualiza `order` sin colisiones).
+5. En detalle del proceso (UC-019), cada subfase muestra requisitos, evidencias cargadas (1..N) y observaciones registradas por [TD]/[JD].
 5. Guarda cambios; el árbol actualizado es visible de inmediato en UC-019.
 
 ## Flujos alternos — Modificar y eliminar
@@ -41,7 +42,7 @@ Permite a **[JD]** y **[TD]** **crear, modificar y eliminar** fases y subfases *
 | ID | Acción | Regla |
 |----|--------|-------|
 | M1 | Modificar nombre/descripción/enlace | Permitido en cualquier subfase sin evidencias bloqueadas |
-| M2 | Eliminar subfase | Solo si **no** tiene indicadores con evidencia en estado distinto de `PENDIENTE` vacío (FSD-BR-22) |
+| M2 | Eliminar subfase | Solo si **no** tiene evidencias en workflow iniciado (estado ≠ `PENDIENTE` vacío) (FSD-BR-22) |
 | M3 | Eliminar fase | Solo si **todas** sus subfases cumplen regla M2 |
 | M4 | Proceso `COMPLETED` o `CANCELLED` | Estructura **solo lectura** |
 
@@ -51,7 +52,7 @@ Permite a **[JD]** y **[TD]** **crear, modificar y eliminar** fases y subfases *
 |----|-----------|-----------|
 | A1 | Eliminar subfase con evidencia/workflow iniciado | `409 SUBPHASE_HAS_EVIDENCE` |
 | A2 | `order` duplicado | `400 PROCESS_STRUCTURE_ORDER_CONFLICT` |
-| A3 | Subfase sin `referenceUrl` | `400 SUBPHASE_LINK_REQUIRED` |
+| A3 | Subfase sin `referenceUrl` o sin `requirements` | `400 SUBPHASE_LINK_REQUIRED` |
 | A4 | Proceso no `ACTIVE` | `409 PROCESS_NOT_EDITABLE` |
 | A5 | Rol distinto de [JD] o [TD] (p. ej. [CC], [EE]) | `403 FORBIDDEN_ROLE` |
 
@@ -63,7 +64,7 @@ Permite a **[JD]** y **[TD]** **crear, modificar y eliminar** fases y subfases *
 
 ## Fuera de alcance (v1.0)
 
-- Creación/eliminación de **indicadores** dentro de subfase.
+- CRUD de **indicadores/criterios** (fuera de alcance v1.1; modelo = Proceso→Fase→Subfase).
 - Migración masiva desde otra plantilla.
 - Edición por [CC].
 

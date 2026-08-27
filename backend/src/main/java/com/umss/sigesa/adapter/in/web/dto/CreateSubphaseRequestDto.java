@@ -19,4 +19,7 @@ public class CreateSubphaseRequestDto {
     private String referenceUrl;
 
     private String description;
+
+    @NotBlank
+    private String requirements;
 }

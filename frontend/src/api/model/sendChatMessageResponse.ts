@@ -4,13 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-
-export interface AssistantToolStepResponse {
-  step?: number;
-  toolId?: string;
-  sourceTables?: string[];
-  success?: boolean;
-}
+import type { AssistantToolStepResponse } from './assistantToolStepResponse.ts';
 
 export interface SendChatMessageResponse {
   reply?: string;

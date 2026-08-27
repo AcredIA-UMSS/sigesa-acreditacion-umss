@@ -20,4 +20,5 @@ public class TemplateSubphaseResponseDto {
     private Integer order;
     private String referenceUrl;
     private String description;
+    private String requirements;
 }

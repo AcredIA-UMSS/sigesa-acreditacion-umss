@@ -1,87 +1,76 @@
 ---
 id: FSD-UC-004
-nombre: Cargar Evidencia
+nombre: Cargar Evidencia en Subfase
 estado: Implementado
 release: v1.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
-ultima_actualizacion: "2026-08-21"
+ultima_actualizacion: "2026-08-27"
 ---
 
-# FSD-UC-004 — Cargar Evidencia
+# FSD-UC-004 — Cargar Evidencia en Subfase
 
 ## Contexto
 
 | Campo | Valor |
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-005, 022 · PRD-US-005, 025 |
-| **Precondiciones** | Indicador en `PENDIENTE` u `OBSERVADO`; permiso sobre carrera del [CC] |
+| **Precondiciones** | Subfase en proceso ACTIVE; [CC] con alcance sobre la carrera del proceso; sin observación OPEN pendiente |
 
 ## Flujo principal
 
-1. [CC] abre Cargar Evidencia; el sistema lista indicadores cargables (`GET /api/v1/indicators/uploadable`) de su carrera en `PENDIENTE`/`OBSERVADO`.
-2. [CC] elige **Indicador** en un select (etiqueta `código — título`); el **Criterio** se fija automáticamente (1:1).
-3. Adjunta Evidence y descripción; envía multipart con `indicatorId`, `criterionId`, `description`.
-4. Sistema valida tipo/tamaño; calcula SHA-256.
-5. Evidence Service persiste `Evidence` v1 y publica `EvidenceUploaded`.
-6. Audit Service inserta transición `PENDIENTE → SUBIDO` en `indicator_state_history`.
-7. Notification Service notifica al [TD] (UC-015).
-8. Si Evidence > 5 MB: barra de progreso y carga asíncrona (US-025).
+1. [CC] abre detalle del proceso (`/procesos/{id}`) y selecciona **Subir evidencia** en la subfase.
+2. Adjunta archivo y descripción; envía multipart a `POST /api/v1/subphases/{subphaseId}/evidences`.
+3. Sistema valida tipo/tamaño; calcula SHA-256.
+4. Evidence Service persiste `Evidence` v1 con FK `subphase_id`.
+5. Subfase transiciona a `SUBIDO`.
+6. Notification Service notifica al [TD] (UC-015).
+7. Si Evidence > 5 MB: barra de progreso y carga asíncrona (US-025).
 
 ## Excepciones y flujos alternos
 
 | Condición | Respuesta |
 |-----------|-----------|
-| Sin Indicador asociado | `400` |
-| Formato inválido | `422` |
+| Sin `subphaseId` o metadatos | `400 EVIDENCE_UNCLASSIFIED` |
+| Observación OPEN pendiente | `409 SUBSANATION_NOT_ALLOWED` |
+| Formato inválido | `422 INVALID_EVIDENCE_FORMAT` |
 
 ## Postcondiciones
 
-`evidenceId`, `version=1`, `contentHash`, evento `EvidenceUploaded`; Indicador en `SUBIDO`.
+`evidenceId`, `version=1`, `contentHash`, evento `EvidenceUploaded`; subfase en `SUBIDO`.
 
 ## Datos
 
 | Entrada | Salida |
 |---------|--------|
-| `indicatorId`, `evidenceBlob`, `description`, `criterionId` | `evidenceId`, `version`, `contentHash`, `currentState` |
+| `subphaseId`, `file`, `description` | `evidenceId`, `version`, `contentHash` |
 
-**Selectores (UI):** `GET /api/v1/indicators/uploadable` → `{ indicatorId, code, title, criterionId, criterionCode, criterionTitle, currentState }[]`.
+**API:** `POST /api/v1/subphases/{subphaseId}/evidences` (multipart). Listado: `GET /api/v1/subphases/{subphaseId}/evidences`.
 
-**Copiloto embebido (UC-024):** en Cargar Evidencia el agente usa el mismo patrón UI que fases/usuarios; modal dev de trazabilidad con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
-
-**Estructura del proceso (UC-019):** en cada subfase, enlace subrayado «Subir evidencia» abre un **modal** con el formulario UC-004 (indicador, descripción, archivo). [CC] carga en el modal; [JD/TD] pueden ir al formulario dedicado. La subfase se anota en la descripción; persistencia sin FK subfase.
+**Copiloto embebido (UC-024):** modal dev de trazabilidad con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
 
 ## Diagramas
 
 - [Carga evidencia versionada](../diagramas/MAR-SEQ-002-carga-evidencia-versionada.mmd)
-- [D-SEQ-002 carga](../diagramas/D-SEQ-002-carga-evidencia.mmd)
-- [diag-02 evidencias](../diagramas/diag-02-seq-evidencias.mmd)
+- [Estados subfase](../diagramas/FSD-UC-006_008_009_estados_subfase.mmd)
 
 ## Escenarios Gherkin
 
 ```gherkin
 # language: es
 @PRD-US-005 @FSD-UC-004 @FSD-BR-01 @TC-04
-Característica: Carga de Evidencia
+Característica: Carga de Evidencia en subfase
 
   Escenario: Carga exitosa con metadatos obligatorios
-    Dado un [CC] autenticado y un Indicador válido en su carrera
-    Cuando carga una Evidence y completa metadatos obligatorios
-    Entonces el sistema crea la Evidencia versión 1 vinculada al Indicador
-    Y notifica al [TD] asignado que hay revisión pendiente
+    Dado un [CC] autenticado y una subfase válida en su carrera
+    Cuando carga una Evidencia con descripción y archivo
+    Entonces el sistema crea la Evidencia versión 1 vinculada a la subfase
+    Y notifica al [TD] que hay revisión pendiente
 
-  Escenario: Carga sin clasificación rechazada
-    Dado un [CC] en el formulario de carga
-    Cuando intenta guardar sin Indicador/Criterio asociado
+  Escenario: Carga sin metadatos rechazada
+    Dado un [CC] en el modal de carga de subfase
+    Cuando intenta guardar sin descripción o archivo
     Entonces el sistema rechaza la operación
-    Y indica qué campo falta completar
-
-@PRD-US-025 @FSD-UC-004 @NFR-011 @TC-04b
-  Escenario: Progreso en carga de Evidence grande
-    Dado un [CC] cargando una Evidence mayor al umbral configurado de 5 MB
-    Cuando la carga está en curso
-    Entonces el sistema muestra barra de progreso determinada
-    Y evita permitir un segundo envío duplicado hasta completar
 ```

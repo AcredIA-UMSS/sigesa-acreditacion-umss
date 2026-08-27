@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import com.umss.sigesa.domain.model.SubphaseState;
+
 import java.util.UUID;
 
 @Getter
@@ -19,4 +21,6 @@ public class Subphase {
     private Integer order;
     private String referenceUrl;
     private String description;
+    private String requirements;
+    private SubphaseState status;
 }

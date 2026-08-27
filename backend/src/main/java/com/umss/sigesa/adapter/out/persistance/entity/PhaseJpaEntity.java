@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.out.persistance.entity;
 
+import com.umss.sigesa.domain.model.PhaseState;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,6 +42,10 @@ public class PhaseJpaEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private String status = PhaseState.ABIERTA.name();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "process_id", nullable = false)

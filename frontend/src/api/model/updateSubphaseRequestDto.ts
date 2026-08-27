@@ -10,4 +10,5 @@ export interface UpdateSubphaseRequestDto {
   order?: number;
   referenceUrl?: string;
   description?: string;
+  requirements?: string;
 }

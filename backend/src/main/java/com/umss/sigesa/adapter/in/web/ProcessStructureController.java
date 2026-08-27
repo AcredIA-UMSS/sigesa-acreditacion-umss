@@ -15,7 +15,9 @@ import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Phase;
+import com.umss.sigesa.domain.model.PhaseState;
 import com.umss.sigesa.domain.model.Subphase;
+import com.umss.sigesa.domain.model.SubphaseState;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -92,7 +94,8 @@ public class ProcessStructureController {
                 request.getName(),
                 request.getOrder(),
                 request.getReferenceUrl(),
-                request.getDescription());
+                request.getDescription(),
+                request.getRequirements());
         return ResponseEntity.status(HttpStatus.CREATED).body(toSubphaseDto(subphase));
     }
 
@@ -110,7 +113,8 @@ public class ProcessStructureController {
                 request.getName(),
                 request.getOrder(),
                 request.getReferenceUrl(),
-                request.getDescription());
+                request.getDescription(),
+                request.getRequirements());
         return ResponseEntity.ok(toSubphaseDto(subphase));
     }
 
@@ -154,6 +158,7 @@ public class ProcessStructureController {
                 .name(phase.getName())
                 .order(phase.getOrder())
                 .description(phase.getDescription())
+                .status(phase.getStatus() != null ? phase.getStatus().name() : PhaseState.ABIERTA.name())
                 .subphases(phase.getSubphases() == null ? null : phase.getSubphases().stream()
                         .sorted(Comparator.comparing(Subphase::getOrder, Comparator.nullsLast(Integer::compareTo)))
                         .map(this::toSubphaseDto)
@@ -168,6 +173,10 @@ public class ProcessStructureController {
                 .order(subphase.getOrder())
                 .referenceUrl(subphase.getReferenceUrl())
                 .description(subphase.getDescription())
+                .requirements(subphase.getRequirements())
+                .status(subphase.getStatus() != null
+                        ? subphase.getStatus().name()
+                        : SubphaseState.PENDIENTE.name())
                 .build();
     }
 }

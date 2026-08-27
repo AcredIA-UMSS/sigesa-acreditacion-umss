@@ -143,6 +143,7 @@ public class TemplateController {
                                 .order(subphaseDto.getOrder())
                                 .referenceUrl(subphaseDto.getReferenceUrl())
                                 .description(subphaseDto.getDescription())
+                                .requirements(subphaseDto.getRequirements())
                                 .build());
                     }
                 }
@@ -212,6 +213,7 @@ public class TemplateController {
                 .order(subphase.getOrder())
                 .referenceUrl(subphase.getReferenceUrl())
                 .description(subphase.getDescription())
+                .requirements(subphase.getRequirements())
                 .build();
     }
 

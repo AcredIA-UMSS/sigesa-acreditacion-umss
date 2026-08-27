@@ -7,6 +7,6 @@ public record EvidenceUploadResult(
         int version,
         String contentHash,
         String event,
-        IndicatorState currentState
+        SubphaseState currentState
 ) {
 }

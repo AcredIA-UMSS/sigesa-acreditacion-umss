@@ -22,6 +22,7 @@ export interface SubphaseDraft {
   order: string;
   referenceUrl: string;
   description: string;
+  requirements: string;
 }
 
 interface ProcessStructureEditorUIProps {
@@ -52,6 +53,7 @@ const emptySubphase = (order: number): SubphaseDraft => ({
   order: String(order),
   referenceUrl: 'https://duea.umss.edu.bo/normativa/pendiente',
   description: '',
+  requirements: '',
 });
 
 function toPhaseDraft(phase: PhaseDto): PhaseDraft {
@@ -68,6 +70,7 @@ function toSubphaseDraft(subphase: SubphaseDto): SubphaseDraft {
     order: String(subphase.order ?? 1),
     referenceUrl: subphase.referenceUrl ?? '',
     description: subphase.description ?? '',
+    requirements: subphase.requirements ?? '',
   };
 }
 
@@ -243,7 +246,12 @@ function PhaseEditorCard({
   const addSubphase = async () => {
     if (!phase.id) return;
     const order = Number.parseInt(newSubphase.order, 10);
-    if (!newSubphase.name.trim() || !newSubphase.referenceUrl.trim() || Number.isNaN(order)) {
+    if (
+      !newSubphase.name.trim() ||
+      !newSubphase.referenceUrl.trim() ||
+      !newSubphase.requirements.trim() ||
+      Number.isNaN(order)
+    ) {
       return;
     }
     const ok = await onAddSubphase(phase.id, newSubphase);
@@ -276,7 +284,8 @@ function PhaseEditorCard({
               onChange={(event) => setDraft((c) => ({ ...c, order: event.target.value }))}
             />
             <TextInput
-              label="Descripción"
+              id={`phase-desc-${phase.id ?? 'new'}`}
+              label="Descripción de la fase"
               value={draft.description}
               disabled={!isEditable}
               onChange={(event) => setDraft((c) => ({ ...c, description: event.target.value }))}
@@ -339,20 +348,48 @@ function PhaseEditorCard({
                   onNewSubphaseChange({ ...newSubphase, order: event.target.value })
                 }
               />
-              <TextInput
-                label="Enlace HTTPS"
-                value={newSubphase.referenceUrl}
-                onChange={(event) =>
-                  onNewSubphaseChange({ ...newSubphase, referenceUrl: event.target.value })
-                }
-              />
-              <TextInput
-                label="Descripción"
-                value={newSubphase.description}
-                onChange={(event) =>
-                  onNewSubphaseChange({ ...newSubphase, description: event.target.value })
-                }
-              />
+              <div className="md:col-span-2">
+                <TextInput
+                  id={`new-subphase-url-${phase.id ?? 'new'}`}
+                  label="Enlace HTTPS"
+                  value={newSubphase.referenceUrl}
+                  onChange={(event) =>
+                    onNewSubphaseChange({ ...newSubphase, referenceUrl: event.target.value })
+                  }
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label
+                  htmlFor={`new-subphase-desc-${phase.id ?? 'new'}`}
+                  className="mb-1 block text-label-md text-gray-700"
+                >
+                  Descripción de la subfase
+                </label>
+                <textarea
+                  id={`new-subphase-desc-${phase.id ?? 'new'}`}
+                  rows={3}
+                  value={newSubphase.description}
+                  placeholder="Contexto, alcance o notas para el coordinador sobre esta subfase"
+                  className="w-full rounded-lg border border-gray-300 bg-body px-3 py-2 text-body-md text-gray-900 outline-none focus:border-primary-500"
+                  onChange={(event) =>
+                    onNewSubphaseChange({ ...newSubphase, description: event.target.value })
+                  }
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-label-md text-gray-700">
+                  Requisitos de completitud <span className="text-secondary">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={newSubphase.requirements}
+                  placeholder="Liste los criterios que deben cumplirse para considerar la subfase hecha"
+                  className="w-full rounded-lg border border-gray-300 bg-body px-3 py-2 text-body-md text-gray-900 outline-none focus:border-primary-500"
+                  onChange={(event) =>
+                    onNewSubphaseChange({ ...newSubphase, requirements: event.target.value })
+                  }
+                />
+              </div>
             </div>
             <Button className="mt-3 px-3 py-2" onClick={() => void addSubphase()} isLoading={isBusy}>
               <Plus size={14} />
@@ -402,7 +439,14 @@ function SubphaseEditorRow({
   const saveSubphase = async () => {
     if (!subphase.id) return;
     const order = Number.parseInt(draft.order, 10);
-    if (!draft.name.trim() || !draft.referenceUrl.trim() || Number.isNaN(order)) return;
+    if (
+      !draft.name.trim() ||
+      !draft.referenceUrl.trim() ||
+      !draft.requirements.trim() ||
+      Number.isNaN(order)
+    ) {
+      return;
+    }
     await onUpdateSubphase(phaseId, subphase.id, draft);
   };
 
@@ -431,17 +475,42 @@ function SubphaseEditorRow({
           onChange={(event) => setDraft((c) => ({ ...c, order: event.target.value }))}
         />
         <TextInput
+          id={`subphase-url-${subphase.id ?? 'edit'}`}
           label="Enlace HTTPS"
           value={draft.referenceUrl}
           disabled={!isEditable}
           onChange={(event) => setDraft((c) => ({ ...c, referenceUrl: event.target.value }))}
         />
-        <TextInput
-          label="Descripción"
-          value={draft.description}
-          disabled={!isEditable}
-          onChange={(event) => setDraft((c) => ({ ...c, description: event.target.value }))}
-        />
+        <div className="md:col-span-2">
+          <label
+            htmlFor={`subphase-desc-${subphase.id ?? 'edit'}`}
+            className="mb-1 block text-label-md text-gray-700"
+          >
+            Descripción de la subfase
+          </label>
+          <textarea
+            id={`subphase-desc-${subphase.id ?? 'edit'}`}
+            rows={3}
+            value={draft.description}
+            disabled={!isEditable}
+            placeholder="Contexto, alcance o notas para el coordinador sobre esta subfase"
+            className="w-full rounded-lg border border-gray-300 bg-body px-3 py-2 text-body-md text-gray-900 outline-none focus:border-primary-500 disabled:bg-gray-100"
+            onChange={(event) => setDraft((c) => ({ ...c, description: event.target.value }))}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-label-md text-gray-700">
+            Requisitos de completitud <span className="text-secondary">*</span>
+          </label>
+          <textarea
+            rows={3}
+            value={draft.requirements}
+            disabled={!isEditable}
+            placeholder="Criterios para considerar la subfase completada"
+            className="w-full rounded-lg border border-gray-300 bg-body px-3 py-2 text-body-md text-gray-900 outline-none focus:border-primary-500 disabled:bg-gray-100"
+            onChange={(event) => setDraft((c) => ({ ...c, requirements: event.target.value }))}
+          />
+        </div>
       </div>
 
       {draft.referenceUrl && (

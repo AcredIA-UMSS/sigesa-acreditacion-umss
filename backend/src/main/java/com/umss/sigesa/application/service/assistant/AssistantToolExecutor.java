@@ -963,6 +963,7 @@ public class AssistantToolExecutor {
                 AssistantStructureLookup.planCreateSubphaseOrder(phase, llmOrder);
         int order = orderPlan.assignedOrder();
         String description = args.hasNonNull("description") ? args.get("description").asText(null) : null;
+        String requirements = resolveRequirements(args, description);
 
         Map<String, Object> preview = basePhasePreview(resolved, "CREATE_SUBPHASE");
         preview.put("phaseId", phase.getId().toString());
@@ -974,6 +975,7 @@ public class AssistantToolExecutor {
         preview.put("assignedOrder", orderPlan.assignedOrder());
         preview.put("referenceUrl", referenceUrl);
         preview.put("description", description);
+        preview.put("requirements", requirements);
 
         if (!confirmed) {
             return AssistantConfirmationSupport.confirmationRequired(
@@ -983,7 +985,7 @@ public class AssistantToolExecutor {
         }
 
         Subphase created = addProcessSubphaseUseCase.execute(
-                processId, phase.getId(), name, order, referenceUrl, description);
+                processId, phase.getId(), name, order, referenceUrl, description, requirements);
         Map<String, Object> result = new LinkedHashMap<>(preview);
         result.put("subphaseId", created.getId().toString());
         return AssistantConfirmationSupport.executed(
@@ -1009,6 +1011,9 @@ public class AssistantToolExecutor {
         String description = args.hasNonNull("description")
                 ? args.get("description").asText(null)
                 : existing.getDescription();
+        String requirements = args.hasNonNull("requirements")
+                ? args.get("requirements").asText(null)
+                : existing.getRequirements();
 
         Map<String, Object> preview = basePhasePreview(resolved, "UPDATE_SUBPHASE");
         preview.put("phaseId", phase.getId().toString());
@@ -1026,7 +1031,7 @@ public class AssistantToolExecutor {
         }
 
         Subphase updated = updateProcessSubphaseUseCase.execute(
-                processId, phase.getId(), existing.getId(), name, order, referenceUrl, description);
+                processId, phase.getId(), existing.getId(), name, order, referenceUrl, description, requirements);
         Map<String, Object> result = new LinkedHashMap<>(preview);
         result.put("subphaseId", updated.getId().toString());
         return AssistantConfirmationSupport.executed("UPDATE", result, "Subfase actualizada correctamente.");
@@ -1201,6 +1206,16 @@ public class AssistantToolExecutor {
             throw new IllegalArgumentException("El campo '" + field + "' es obligatorio.");
         }
         return args.get(field).asText().trim();
+    }
+
+    private static String resolveRequirements(JsonNode args, String description) {
+        if (args != null && args.hasNonNull("requirements") && !args.get("requirements").asText().isBlank()) {
+            return args.get("requirements").asText().trim();
+        }
+        if (description != null && !description.isBlank()) {
+            return description.trim();
+        }
+        return "Documentación y criterios mínimos definidos para la subfase.";
     }
 
     private Map<String, Object> toUserMap(ListUsersUseCase.UserSummary user) {

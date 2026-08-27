@@ -1,6 +1,6 @@
 ﻿%% diagramId: D-CLASS-001
-%% fsdTrace: docs/LFSD.md dominio NFR-013 auditoria
-%% version: 1.0
+%% fsdTrace: docs/product/FSD.md — modelo subfase-centrado v1.1
+%% version: 1.1
 classDiagram
     class Usuario {
         +UUID id
@@ -18,12 +18,18 @@ classDiagram
         +Integer gestion
         +EstadoProceso estado
     }
-    class Indicador {
+    class Fase {
         +UUID id
-        +String codigo
-        +EstadoIndicador estado
+        +String nombre
+        +Integer orden
     }
-    class Documento {
+    class Subfase {
+        +UUID id
+        +String nombre
+        +String requisitos
+        +EstadoSubfase estado
+    }
+    class Evidencia {
         +UUID id
         +Integer version
         +String hash
@@ -33,8 +39,9 @@ classDiagram
         +String accion
         +DateTime creadoEn
     }
-    Usuario "1" --> "*" Documento : carga
     Carrera "1" --> "*" ProcesoAcreditacion
-    ProcesoAcreditacion "1" --> "*" Indicador : contiene via subfase
-    Indicador "1" --> "*" Documento : versiona
+    ProcesoAcreditacion "1" --> "*" Fase
+    Fase "1" --> "*" Subfase
+    Subfase "1" --> "*" Evidencia : versiona
+    Usuario "1" --> "*" Evidencia : carga
     Usuario "1" --> "*" LogAuditoria : genera

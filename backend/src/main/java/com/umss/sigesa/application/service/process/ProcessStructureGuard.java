@@ -25,6 +25,13 @@ public class ProcessStructureGuard {
         }
     }
 
+    public void ensureRequirements(String requirements) {
+        if (requirements == null || requirements.isBlank()) {
+            throw new SubphaseLinkRequiredException(
+                    "Cada subfase debe incluir requisitos de completitud (requisitos_subfase).");
+        }
+    }
+
     public void ensureReferenceUrl(String referenceUrl) {
         if (referenceUrl == null || referenceUrl.isBlank()
                 || !HTTPS_URL.matcher(referenceUrl.trim()).matches()) {

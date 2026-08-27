@@ -405,7 +405,9 @@ public class AssistantToolRegistry {
         properties.put("name", stringProperty("Nombre de la subfase (CREATE/UPDATE)."));
         properties.put("order", integerProperty("Orden de la subfase (CREATE/UPDATE)."));
         properties.put("referenceUrl", stringProperty("Enlace HTTPS normativo (CREATE/UPDATE)."));
-        properties.put("description", stringProperty("Descripción opcional (CREATE/UPDATE)."));
+        properties.put("description", stringProperty("Descripción auxiliar (CREATE/UPDATE)."));
+        properties.put("requirements", stringProperty(
+                "Requisitos de completitud (requisitos_subfase) para considerar la subfase hecha."));
         properties.put("confirmed", booleanProperty(
                 "false para vista previa; true solo tras confirmación explícita del usuario."));
         return requiredObjectSchema(properties, List.of("action", "careerQuery"));

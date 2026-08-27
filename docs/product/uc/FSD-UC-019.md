@@ -106,7 +106,7 @@ Alineado al DTO existente `ProcessResponseDto` (POST create) extendido con datos
 - Gestión de plantillas normativas → [FSD-UC-021](FSD-UC-021.md).
 - Asignación de responsable [CC] → [FSD-UC-023](FSD-UC-023.md).
 - Cierre/avance de fase por workflow → [FSD-UC-010](FSD-UC-010.md).
-- Indicadores y evidencias por subfase (UC-004 en adelante).
+- Evidencias por subfase (UC-004 en adelante).
 - Paginación/filtros avanzados en listado (v1.1).
 
 ## Diagramas

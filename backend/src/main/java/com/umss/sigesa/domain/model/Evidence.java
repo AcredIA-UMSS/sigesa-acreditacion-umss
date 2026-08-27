@@ -7,12 +7,14 @@ public class Evidence {
 
     private final UUID id;
     private final UUID indicatorId;
+    private final UUID subphaseId;
     private UUID latestVersionId;
     private final LocalDateTime createdAt;
 
-    public Evidence(UUID id, UUID indicatorId, UUID latestVersionId, LocalDateTime createdAt) {
+    public Evidence(UUID id, UUID indicatorId, UUID subphaseId, UUID latestVersionId, LocalDateTime createdAt) {
         this.id = id;
         this.indicatorId = indicatorId;
+        this.subphaseId = subphaseId;
         this.latestVersionId = latestVersionId;
         this.createdAt = createdAt;
     }
@@ -23,6 +25,10 @@ public class Evidence {
 
     public UUID getIndicatorId() {
         return indicatorId;
+    }
+
+    public UUID getSubphaseId() {
+        return subphaseId;
     }
 
     public UUID getLatestVersionId() {

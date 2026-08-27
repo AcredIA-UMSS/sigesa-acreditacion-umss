@@ -18,6 +18,7 @@ export function createEmptySubphase(order: number): TemplateSubphaseFormItem {
     order,
     referenceUrl: '',
     description: '',
+    requirements: '',
   };
 }
 
@@ -58,6 +59,7 @@ export function mapDetailToForm(detail: TemplateDetailResponseDto): TemplateForm
       order: subphase.order ?? subIndex + 1,
       referenceUrl: subphase.referenceUrl ?? '',
       description: subphase.description ?? '',
+      requirements: subphase.requirements ?? '',
     })),
   }));
 
@@ -85,6 +87,7 @@ export function mapFormToUpsertRequest(form: TemplateFormViewModel): UpsertTempl
         order: subphase.order,
         referenceUrl: subphase.referenceUrl.trim(),
         description: subphase.description.trim() || undefined,
+        requirements: subphase.requirements.trim(),
       })),
     })),
   };

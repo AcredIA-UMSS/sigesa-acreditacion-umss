@@ -12,4 +12,6 @@ export interface CreateSubphaseRequestDto {
   /** @minLength 1 */
   referenceUrl: string;
   description?: string;
+  /** @minLength 1 */
+  requirements: string;
 }

@@ -13,8 +13,8 @@ adrs: []
 prompts:
   - "PR-IMPL-022"
 release: "v1.0"
-status: implementado (Full-Stack v1.0)
-ultima_actualizacion: "2026-08-09"
+status: implementado (Full-Stack v1.1 — requisitos + evidencias múltiples + observaciones)
+ultima_actualizacion: "2026-08-27"
 autores:
   - "Design Product Owner & Lead Solutions Architect"
 ---
@@ -85,9 +85,21 @@ String description;
 // Subphase — agregar
 String referenceUrl;
 String description;
+String requirements; // requisitos_subfase — criterios de completitud
 ```
 
-Actualizar **`AccreditationProcess.createFromTemplate()`** y **`ProcessPersistenceMapper`** para clonar `referenceUrl` y `description` desde plantilla (post DD-UC-021).
+Migración **`V9__subphase_requirements_evidence_observations.sql`**: columna `requirements` en `subphases` y `template_subphases`; FK `evidence.subphase_id`; tabla `subphase_observation`.
+
+#### API colaboración por subfase (`SubphaseController`)
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| POST | `/api/v1/subphases/{id}/evidences` | CC | Carga 1..N evidencias (multipart) |
+| GET | `/api/v1/subphases/{id}/evidences` | auth | Listado evidencias de la subfase |
+| GET | `/api/v1/subphases/{id}/observations` | auth | Listado observaciones |
+| POST | `/api/v1/subphases/{id}/observations` | TD, JD | Registrar observación sobre evidencias |
+
+Actualizar **`AccreditationProcess.createFromTemplate()`** y **`ProcessPersistenceMapper`** para clonar `referenceUrl`, `description` y `requirements` desde plantilla (post DD-UC-021).
 
 ### 2.3 Capas hexagonales
 

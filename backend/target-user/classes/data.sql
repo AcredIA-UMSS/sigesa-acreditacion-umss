@@ -1,0 +1,2 @@
+-- Datos de prueba: Universidad Mayor de San Simón (UMSS) - Cochabamba, Bolivia
+-- Procesos de acreditación institucional ARCUSUR y CEUB

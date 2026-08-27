@@ -17,6 +17,8 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+import com.umss.sigesa.domain.model.SubphaseState;
+
 @Entity
 @Table(name = "subphases")
 @Getter
@@ -40,6 +42,13 @@ public class SubphaseJpaEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String requirements;
+
+    @Column(nullable = false, length = 32)
+    @Builder.Default
+    private String status = SubphaseState.PENDIENTE.name();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phase_id", nullable = false)

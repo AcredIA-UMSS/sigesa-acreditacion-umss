@@ -11,4 +11,6 @@ export interface SubphaseDto {
   order?: number;
   referenceUrl?: string;
   description?: string;
+  requirements?: string;
+  status?: string;
 }

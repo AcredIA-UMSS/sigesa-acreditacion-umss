@@ -6,6 +6,8 @@ import com.umss.sigesa.domain.model.Subphase;
 import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.PhaseJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.SubphaseJpaEntity;
+import com.umss.sigesa.domain.model.PhaseState;
+import com.umss.sigesa.domain.model.SubphaseState;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -29,6 +31,9 @@ public class ProcessPersistenceMapper {
                         .name(pDomain.getName())
                         .order(pDomain.getOrder())
                         .description(pDomain.getDescription())
+                        .status(pDomain.getStatus() != null
+                                ? pDomain.getStatus().name()
+                                : PhaseState.ABIERTA.name())
                         .process(processEntity)
                         .build();
 
@@ -39,6 +44,10 @@ public class ProcessPersistenceMapper {
                             .order(sDomain.getOrder())
                             .referenceUrl(sDomain.getReferenceUrl())
                             .description(sDomain.getDescription())
+                            .requirements(sDomain.getRequirements())
+                            .status(sDomain.getStatus() != null
+                                    ? sDomain.getStatus().name()
+                                    : SubphaseState.PENDIENTE.name())
                             .phase(phaseEntity)
                             .build()).collect(Collectors.toList()));
                 }
@@ -60,12 +69,19 @@ public class ProcessPersistenceMapper {
                         .name(p.getName())
                         .order(p.getOrder())
                         .description(p.getDescription())
+                        .status(p.getStatus() != null
+                                ? PhaseState.valueOf(p.getStatus())
+                                : PhaseState.ABIERTA)
                         .subphases(p.getSubphases().stream().map(s -> Subphase.builder()
                                 .id(s.getId())
                                 .name(s.getName())
                                 .order(s.getOrder())
                                 .referenceUrl(s.getReferenceUrl())
                                 .description(s.getDescription())
+                                .requirements(s.getRequirements())
+                                .status(s.getStatus() != null
+                                        ? SubphaseState.valueOf(s.getStatus())
+                                        : SubphaseState.PENDIENTE)
                                 .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
                 .build();

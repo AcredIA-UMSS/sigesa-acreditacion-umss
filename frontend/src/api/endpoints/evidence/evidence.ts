@@ -5,94 +5,78 @@
  * OpenAPI spec version: v0
  */
 import {
-  useMutation
+  useQuery
 } from '@tanstack/react-query';
 import type {
-  MutationFunction,
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   QueryClient,
-  UseMutationOptions,
-  UseMutationResult
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-  UploadEvidenceMultipartRequest,
-  UploadEvidenceResponse
+  UploadableIndicatorResponse
 } from '../../model';
 
-import { customFetch } from '../../../lib/api/customFetch';
+import { customFetch } from '../../../lib/api/customFetch.ts';
+
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-
-export type uploadResponse201 = {
-  data: UploadEvidenceResponse
-  status: 201
-}
-
-export type uploadResponse400 = {
-  data: void
-  status: 400
-}
-
-export type uploadResponse403 = {
-  data: void
-  status: 403
-}
-
-export type uploadResponse404 = {
-  data: void
-  status: 404
-}
-
-export type uploadResponse409 = {
-  data: void
-  status: 409
-}
-
-export type uploadResponse413 = {
-  data: void
-  status: 413
-}
-
-export type uploadResponse422 = {
-  data: void
-  status: 422
-}
-
-export type uploadResponseSuccess = (uploadResponse201) & {
-  headers: Headers;
-};
-export type uploadResponseError = (uploadResponse400 | uploadResponse403 | uploadResponse404 | uploadResponse409 | uploadResponse413 | uploadResponse422) & {
-  headers: Headers;
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
 };
 
-export type uploadResponse = (uploadResponseSuccess | uploadResponseError)
+export type listUploadableResponse200 = {
+  data: UploadableIndicatorResponse[]
+  status: 200
+}
 
-export const getUploadUrl = (indicatorId: string,) => {
+export type listUploadableResponseSuccess = (listUploadableResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listUploadableResponse = (listUploadableResponseSuccess)
+
+export const getListUploadableUrl = () => {
 
 
 
 
-  return `/api/v1/indicators/${indicatorId}/evidences`
+  return `/api/v1/indicators/uploadable`
 }
 
 /**
- * Multipart: file + criterionId + description. Rol CC. Respuesta 201.
- * @summary Cargar evidencia v1
+ * Indicadores PENDIENTE/OBSERVADO de las carreras del [CC], con etiquetas para selects.
+ * @summary Listar indicadores cargables
  */
-export const upload = async (indicatorId: string,
-    uploadEvidenceMultipartRequest: UploadEvidenceMultipartRequest, options?: RequestInit): Promise<uploadResponse> => {
-    const formData = new FormData();
-formData.append(`file`, uploadEvidenceMultipartRequest.file);
-formData.append(`criterionId`, uploadEvidenceMultipartRequest.criterionId);
-formData.append(`description`, uploadEvidenceMultipartRequest.description);
+export const listUploadable = async ( options?: Parameters<typeof customFetch>[1]): Promise<listUploadableResponse> => {
 
-  return customFetch<uploadResponse>(getUploadUrl(indicatorId),
+  return customFetch<listUploadableResponse>(getListUploadableUrl(),
   {
     ...options,
-    method: 'POST'
-    ,
-    body: formData
+    method: 'GET'
+
+
   }
 );}
 
@@ -100,47 +84,77 @@ formData.append(`description`, uploadEvidenceMultipartRequest.description);
 
 
 
-export const getUploadMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext> => {
-
-const mutationKey = ['upload'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upload>>, {indicatorId: string;data: UploadEvidenceMultipartRequest}> = (props) => {
-          const {indicatorId,data} = props ?? {};
-
-          return  upload(indicatorId,data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UploadMutationResult = NonNullable<Awaited<ReturnType<typeof upload>>>
-    export type UploadMutationBody = UploadEvidenceMultipartRequest
-    export type UploadMutationError = void
-
-    /**
- * @summary Cargar evidencia v1
- */
-export const useUpload = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{indicatorId: string;data: UploadEvidenceMultipartRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof upload>>,
-        TError,
-        {indicatorId: string;data: UploadEvidenceMultipartRequest},
-        TContext
-      > => {
-      return useMutation(getUploadMutationOptions(options), queryClient);
+export const getListUploadableQueryKey = () => {
+    return [
+    `/api/v1/indicators/uploadable`
+    ] as const;
     }
+
+
+export const getListUploadableQueryOptions = <TData = Awaited<ReturnType<typeof listUploadable>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUploadableQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUploadable>>> = ({ signal }) => listUploadable({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListUploadableQueryResult = NonNullable<Awaited<ReturnType<typeof listUploadable>>>
+export type ListUploadableQueryError = unknown
+
+
+export function useListUploadable<TData = Awaited<ReturnType<typeof listUploadable>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUploadable>>,
+          TError,
+          Awaited<ReturnType<typeof listUploadable>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListUploadable<TData = Awaited<ReturnType<typeof listUploadable>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listUploadable>>,
+          TError,
+          Awaited<ReturnType<typeof listUploadable>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListUploadable<TData = Awaited<ReturnType<typeof listUploadable>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar indicadores cargables
+ */
+
+export function useListUploadable<TData = Awaited<ReturnType<typeof listUploadable>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUploadable>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListUploadableQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+

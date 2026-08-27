@@ -3,11 +3,13 @@ import { useAuth } from '../../lib/auth/useAuth';
 import { EvidenceCopilotPanel } from './components/EvidenceCopilotPanel';
 import { EvidenceUploadUI } from './components/EvidenceUploadUI';
 import { useEvidenceUpload } from './hooks/useEvidenceUpload';
-import { useUploadableIndicators } from './hooks/useUploadableIndicators';
+import { useSubphaseUploadTargets } from './hooks/useSubphaseUploadTargets';
 
 export function EvidenceUploadPage() {
   const upload = useEvidenceUpload();
-  const uploadable = useUploadableIndicators();
+  const targets = useSubphaseUploadTargets(
+    upload.form.processId.trim() || undefined,
+  );
   const { session } = useAuth();
   const role = session?.role;
   const showEvidenceCopilot =
@@ -17,12 +19,13 @@ export function EvidenceUploadPage() {
     <EvidenceUploadUI
       form={upload.form}
       onFieldChange={upload.updateField}
-      onSelectIndicator={upload.selectIndicator}
-      uploadableIndicators={uploadable.indicators}
-      indicatorsLoading={uploadable.isLoading}
-      indicatorsError={uploadable.errorMessage}
-      indicatorsEmpty={uploadable.isEmpty}
-      onReloadIndicators={uploadable.reload}
+      processOptions={targets.processOptions}
+      subphaseOptions={targets.subphaseOptions}
+      targetsLoading={targets.isLoading}
+      targetsError={targets.errorMessage}
+      targetsEmpty={targets.isEmpty}
+      subphasesEmpty={targets.subphasesEmpty}
+      onReloadTargets={targets.reload}
       onSubmit={upload.submit}
       onReset={upload.reset}
       progress={upload.progress}
@@ -43,7 +46,7 @@ export function EvidenceUploadPage() {
           <div className="grid flex-1 gap-0 xl:grid-cols-[minmax(0,1fr)_340px]">
             {uploadUi}
             <div className="border-l border-gray-200 bg-gray-50 p-4 xl:p-6">
-              <EvidenceCopilotPanel />
+              <EvidenceCopilotPanel programId={targets.selectedProcess?.careerId} />
             </div>
           </div>
         ) : (

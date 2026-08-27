@@ -2,12 +2,14 @@ import { isAxiosError } from 'axios';
 import { isApiError } from '../../../lib/api/apiError';
 
 const ERROR_LABELS: Record<string, string> = {
-  EVIDENCE_UNCLASSIFIED: 'Complete el indicador y el criterio antes de cargar.',
+  EVIDENCE_UNCLASSIFIED: 'Complete la subfase, descripción y archivo antes de cargar.',
   INVALID_EVIDENCE_FORMAT: 'Formato de archivo no permitido.',
   INDICATOR_NOT_FOUND: 'Indicador no encontrado.',
   INDICATOR_NOT_UPLOADABLE: 'El indicador no admite carga en su estado actual.',
   PROGRAM_SCOPE_DENIED: 'No tiene permiso sobre la carrera de este indicador.',
   UPLOAD_IN_PROGRESS: 'Ya hay una carga en curso para este indicador.',
+  SUBSANATION_NOT_ALLOWED: 'No puede subsanar en este momento (observación pendiente o ya resuelta).',
+  INVALID_STATE: 'Operación no permitida en el estado actual.',
   PAYLOAD_TOO_LARGE: 'El archivo supera el tamaño máximo permitido (50 MB).',
 };
 

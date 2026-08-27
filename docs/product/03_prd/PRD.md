@@ -13,6 +13,8 @@
 
 > **Propósito:** definir **qué debe hacer el producto** para cumplir BRD y MRD, con nivel suficiente para diseño, ingeniería y QA. Responde a «¿qué hace SIGESA?» (no cómo lo implementa la arquitectura).
 
+> **Nota v1.1 (2026-08-27):** La capa viva [`docs/product/`](../) adopta el modelo **Proceso → Fase → Subfase → Evidencia**. Las referencias históricas a Dimensión/Criterio/Indicador en este PRD Dorada permanecen como baseline; la implementación piloto sigue [`FSD.md`](../FSD.md) y [`glosario.md`](../glosario.md) v1.1.
+
 ---
 
 ## 0. Metadatos

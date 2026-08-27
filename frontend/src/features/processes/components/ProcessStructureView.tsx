@@ -76,6 +76,7 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
         order,
         referenceUrl: draft.referenceUrl.trim(),
         description: draft.description.trim() || undefined,
+        requirements: draft.requirements.trim(),
       },
     });
   };
@@ -97,6 +98,7 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
         order,
         referenceUrl: draft.referenceUrl.trim(),
         description: draft.description.trim() || undefined,
+        requirements: draft.requirements.trim(),
       },
     });
   };

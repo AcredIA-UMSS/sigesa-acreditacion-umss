@@ -49,6 +49,7 @@ public class AccreditationProcess {
                         .order(tSubphase.getOrder())
                         .referenceUrl(tSubphase.getReferenceUrl())
                         .description(tSubphase.getDescription())
+                        .requirements(tSubphase.getRequirements())
                         .build());
             });
 

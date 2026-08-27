@@ -22,11 +22,12 @@ public class AddProcessSubphaseService implements AddProcessSubphaseUseCase {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Subphase execute(UUID processId, UUID phaseId, String name, Integer order,
-                            String referenceUrl, String description) {
+                            String referenceUrl, String description, String requirements) {
         AccreditationProcess process = processStructurePort.loadActiveProcess(processId);
         guard.ensureProcessActive(process);
         Phase phase = guard.findPhase(process, phaseId);
         guard.ensureReferenceUrl(referenceUrl);
+        guard.ensureRequirements(requirements);
         guard.ensureUniqueSubphaseOrder(phase, order, null);
 
         Subphase subphase = Subphase.builder()
@@ -34,6 +35,7 @@ public class AddProcessSubphaseService implements AddProcessSubphaseUseCase {
                 .order(order)
                 .referenceUrl(referenceUrl.trim())
                 .description(description)
+                .requirements(requirements.trim())
                 .build();
 
         return processStructurePort.saveSubphase(processId, phaseId, subphase);

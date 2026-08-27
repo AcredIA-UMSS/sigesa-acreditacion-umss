@@ -335,11 +335,13 @@ export function TemplateEditorFormUI({
                           htmlFor={`subphase-description-${subphase.clientId}`}
                           className="block text-label-md text-gray-700"
                         >
-                          Descripción auxiliar
+                          Descripción de la subfase
                         </label>
-                        <input
+                        <textarea
                           id={`subphase-description-${subphase.clientId}`}
+                          rows={3}
                           value={subphase.description}
+                          placeholder="Contexto, alcance o notas para el coordinador sobre esta subfase"
                           onChange={(event) =>
                             updateSubphase(phase.clientId, subphase.clientId, {
                               description: event.target.value,
@@ -347,6 +349,28 @@ export function TemplateEditorFormUI({
                           }
                           className="mt-1 w-full rounded-lg border border-gray-300 bg-body px-3 py-3 text-body-md text-gray-900 outline-none focus:border-primary-500"
                         />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label
+                          htmlFor={`subphase-requirements-${subphase.clientId}`}
+                          className="block text-label-md text-gray-700"
+                        >
+                          Requisitos de completitud <span className="text-secondary">*</span>
+                        </label>
+                        <textarea
+                          id={`subphase-requirements-${subphase.clientId}`}
+                          rows={3}
+                          value={subphase.requirements}
+                          onChange={(event) =>
+                            updateSubphase(phase.clientId, subphase.clientId, {
+                              requirements: event.target.value,
+                            })
+                          }
+                          className="mt-1 w-full rounded-lg border border-gray-300 bg-body px-3 py-3 text-body-md text-gray-900 outline-none focus:border-primary-500"
+                        />
+                        {subphaseError?.requirements && (
+                          <p className="mt-1 text-body-md text-danger">{subphaseError.requirements}</p>
+                        )}
                       </div>
                     </div>
                   </div>

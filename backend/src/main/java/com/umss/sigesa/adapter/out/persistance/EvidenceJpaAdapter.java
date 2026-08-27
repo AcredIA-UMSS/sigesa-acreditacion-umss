@@ -33,6 +33,7 @@ public class EvidenceJpaAdapter implements EvidenceRepositoryPort {
         EvidenceEntity evidenceEntity = new EvidenceEntity();
         evidenceEntity.setId(evidence.getId());
         evidenceEntity.setIndicatorId(evidence.getIndicatorId());
+        evidenceEntity.setSubphaseId(evidence.getSubphaseId());
         evidenceEntity.setLatestVersionId(version.getId());
         evidenceEntity.setCreatedAt(evidence.getCreatedAt());
         evidenceRepository.save(evidenceEntity);
