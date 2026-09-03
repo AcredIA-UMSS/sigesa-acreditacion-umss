@@ -10,6 +10,7 @@
 | PM-004 | PR-IMPL-037 | DD-UC-007 | FSD-UC-007 | Buscador de evidencias en vista fases/subfases del proceso |
 | PM-005 | PR-IMPL-038 | DD-UC-008 / DD-UC-009 | FSD-UC-008 / FSD-UC-009 | Rechazo y aprobación de indicadores vía subfase (TD; requiere evidencia + indicatorId) |
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
+| PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
 
 ---
 
@@ -324,3 +325,84 @@ Implement FSD-UC-010 end-to-end for sprint 3 following `.cursor/agents/sigesa-or
 - [x] Paso 3c Docker smoke — OK vía `scripts/smoke-uc010.sh` (TD login, list/detail, `POST .../complete` → **409** + `pendingSubphases[]`, proxy nginx `:3000`)
 - [x] Fix esquema dev Docker: columnas `phases.status` / `subphases.status` (V12/V13) aplicadas manualmente en Postgres (Flyway off en dev)
 - [ ] CC en `POST .../complete` devuelve **401** en lugar de **403** esperado — revisar `AccessDeniedHandler` (no bloquea UC-010)
+
+---
+
+## PM-007
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-007 |
+| **Fecha** | 2026-09-02 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | Unificación UI copilotos de dominio (MOD-ASSISTANT) |
+| **Objetivo** | Misma ventana flotante inferior derecha para agentes fases/evidencias/usuarios; botón historial; sin ocupar layout; `/ayuda` conserva diseño propio |
+| **Contexto** | Refactor frontend post PM-006; sin cambio de contrato API `/assistant/chat` |
+| **PR-IMPL vinculado** | N/A (patrón UI derivado de [PR-IMPL-033](../../prompts/impl/PR-IMPL-033.md)) |
+| **DD vinculado** | [DD-AGENT-UI-SHELL](../../design/assistant/DD-AGENT-UI-SHELL.md) |
+| **FSD vinculado** | FSD-UC-024 · agentes [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md) / [002](../../design/assistant/DD-AGENT-002.md) / [003](../../design/assistant/DD-AGENT-003.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Bien ahora quiero que modifiques nuestros chats de agentes, para que todos usen una misma vista o diseno, el diseno quiero que sea una ventana desplegable desde la parte inferior derecha, que no ocupe espacio, este chatbot debe tener su boton de historial que abre el historial de conversaciones, saber cuando estemos en la vista fases, evidencias, usuarios, el unico diseno que se mantiene es el chatbot de ayuda los demas deben compartir un mismo diseno especidficado
+
+ahora documenta todo eso donde sea necesario y en el prompt mapping de sprint 3
+```
+
+### Entradas auxiliares
+
+- [DD-AGENT-UI-SHELL](../../design/assistant/DD-AGENT-UI-SHELL.md) (nuevo)
+- Actualización layout en DD-AGENT-001, DD-AGENT-002, DD-AGENT-003
+- [DTP.md](../../product/DTP.md) §A.1 + §B.5
+- [FSD-UC-024.md](../../product/uc/FSD-UC-024.md) (superficie UI)
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `frontend/src/features/assistant/components/domain-copilot/DomainCopilotFloatingChat.tsx` |
+| generado | `frontend/src/features/assistant/components/domain-copilot/CopilotConversationHistoryPanel.tsx` |
+| generado | `frontend/src/features/assistant/components/domain-copilot/CopilotMessageBubble.tsx` |
+| generado | `frontend/src/features/assistant/lib/domainCopilotPresentation.ts` |
+| generado | `frontend/src/features/assistant/lib/useCopilotConversationArchive.ts` |
+| generado | `frontend/src/features/assistant/types/domainCopilotKind.ts` |
+| generado | `docs/design/assistant/DD-AGENT-UI-SHELL.md` |
+| modificado | `frontend/src/features/processes/components/PhasesCopilotPanel.tsx` |
+| modificado | `frontend/src/features/evidence/components/EvidenceCopilotPanel.tsx` |
+| modificado | `frontend/src/features/admin/users/components/UsersCopilotPanel.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessStructureView.tsx` |
+| modificado | `frontend/src/features/evidence/EvidenceUploadPage.tsx` |
+| modificado | `frontend/src/features/admin/users/pages/UsersAdminPage.tsx` |
+| modificado | `docs/design/assistant/DD-AGENT-001.md`, `DD-AGENT-002.md`, `DD-AGENT-003.md` |
+| modificado | `docs/design/DD-SYS-002.md` (§4.5 shell flotante) |
+| modificado | `docs/product/DTP.md`, `docs/product/FSD.md`, `docs/product/uc/FSD-UC-024.md` |
+| modificado | `docs/prompts/impl/PR-IMPL-033.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` (PM-007) |
+
+### Cambios realizados
+
+1. **Shell compartido:** `DomainCopilotFloatingChat` — FAB + panel portal `bottom-right`; badges Fases/Evidencias/Usuarios.
+2. **Historial:** botón abre panel con conversación actual + archivos en `sessionStorage` al limpiar chat.
+3. **Wrappers:** `PhasesCopilotPanel`, `EvidenceCopilotPanel`, `UsersCopilotPanel` delegan al shell; lógica en hooks existentes.
+4. **Layouts:** eliminada columna lateral 340px en detalle/estructura proceso, carga evidencias y admin usuarios.
+5. **Exclusión:** `/ayuda` + `AssistantChatUI` sin cambios.
+6. **Docs:** design doc `DD-AGENT-UI-SHELL`; DTP y agentes 001–003 actualizados.
+
+### Validación ejecutada
+
+- [x] `pnpm exec tsc -b` — OK
+- [x] `pnpm lint` — OK
+- [ ] Smoke manual FAB + historial en Docker `:3000`
+
+### Resultado obtenido
+
+Copilotos de dominio comparten UX flotante; páginas ganan ancho útil; trazabilidad en PM-007 y design doc dedicado.
+
+### Próximos pasos
+
+- [ ] Rebuild frontend Docker tras merge
+- [ ] Smoke: historial archiva al limpiar; badge correcto por ruta

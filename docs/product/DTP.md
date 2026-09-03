@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 02/09/2026 | **MOD-ASSISTANT UI shell:** copilotos `phases`/`evidence`/`users` unificados en ventana flotante inferior derecha (`DomainCopilotFloatingChat`); historial de conversaciones en `sessionStorage`; layouts sin columna 340px; `/ayuda` sin cambios. | DD-AGENT-UI-SHELL / DD-AGENT-001…003 | N/A | PM-007 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-WORKFLOW UC-010:** cierre de fase TD (`PhaseState` ABIERTA/COMPLETADA, Flyway V13); API-WF-03 `POST /processes/{id}/phases/{id}/complete`; `409 FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]`; evento outbox `PhaseCompleted`; UI «Cerrar fase» en detalle proceso. | FSD-UC-010 / DD-UC-010 | N/A | PM-006 / PR-IMPL-039 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-EVIDENCE:** deprecación `POST /indicators/{id}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); sucesor `POST /subphases/{id}/evidences`; Orval `DeprecatedEndpointResponseDto`; UI UC-004 migrada a selector proceso/subfase. | FSD-UC-004 / api_contracts API-EVD-LEGACY | N/A | docs + Orval sync | Cursor Agent |
 | 27/08/2026 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia; retiro Dimensión/Criterio/Indicador del alcance piloto; docs FSD/glosario/modelo/api alineados | FSD v1.1 | N/A | docs sync | Boris Anthony Angulo Urquieta |
@@ -291,8 +292,8 @@ artefactos_vivos:
 | **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks` |
 | **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS` |
 | **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
-| **Frontend** | `/ayuda` (`AssistantChatUI`); copilotos `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; metadata + traza vía `CopilotAssistantMetadata` |
-| **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence` |
+| **Frontend** | `/ayuda` (`AssistantChatUI` — diseño página completa); copilotos dominio vía **`DomainCopilotFloatingChat`** ([DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md)): `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; historial conversaciones `sessionStorage`; metadata + traza vía `CopilotAssistantMetadata` |
+| **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence`; **shell UI compartido** [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md) |
 | **Respuesta chat** | `{ reply, toolId, sourceTables, path, llmInvoked, steps[] }` |
 | **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED`; 403 `ACCESS_DENIED` (agente users sin rol JD) |
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |

@@ -151,3 +151,4 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | 2026-08-27 | **FSD-UC-007:** API-EVD-02 búsqueda multifiltro; panel en detalle de proceso; PM-004 sprint 3 |
 | 2026-08-27 | **FSD-UC-006:** subsanación por subfase (API-SUB-02), una subsanación por observación OPEN, historial liviano (`blob_purged`); PM-003 sprint 3 |
 | 2026-08-27 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia; retiro Dimensión/Criterio/Indicador del alcance piloto; UC-008/009 renombrados a Rechazar/Aprobar Subfase |
+| 2026-09-02 | **MOD-ASSISTANT UI shell:** copilotos fases/evidencias/usuarios unificados en ventana flotante (`DomainCopilotFloatingChat`); historial conversaciones `sessionStorage`; `/ayuda` sin cambios; [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md); PM-007 sprint 3 |

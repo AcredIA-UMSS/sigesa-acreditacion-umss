@@ -27,7 +27,7 @@ Cablear el **bucle multi-tool** en `SendChatMessageService`, exponer la **traza*
 - `mapAssistantResponseMetadata()` + `recordToolTraceInAction()` compartidos.
 - Componente `CopilotAssistantMetadata` (traza visible cuando `steps.length > 1`).
 - Hooks: `usePhasesCopilot`, `useUsersCopilot`, `useEvidenceCopilot`, `useAssistantChat`.
-- Paneles: `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`, `AssistantChatUI`.
+- Paneles: `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel` → shell compartido [`DomainCopilotFloatingChat`](../../frontend/src/features/assistant/components/domain-copilot/DomainCopilotFloatingChat.tsx) ([DD-AGENT-UI-SHELL](../../design/assistant/DD-AGENT-UI-SHELL.md)); `AssistantChatUI` en `/ayuda` sin cambios.
 
 ### Tests
 
@@ -88,5 +88,6 @@ Cablear el **bucle multi-tool** en `SendChatMessageService`, exponer la **traza*
 | Design | [DD-SYS-002 §11.10](../../design/DD-SYS-002.md) |
 | Catálogo | [TOOL-CATALOG.md §5](../../design/assistant/TOOL-CATALOG.md) |
 | Agentes | [DD-AGENT-001](../../design/assistant/DD-AGENT-001.md), [002](../../design/assistant/DD-AGENT-002.md), [003](../../design/assistant/DD-AGENT-003.md) |
+| Shell UI | [DD-AGENT-UI-SHELL](../../design/assistant/DD-AGENT-UI-SHELL.md) — PM-007 sprint 3 |
 | DTP | [DTP.md §B.5](../../product/DTP.md) |
 | Sprint | [PM-023](../../sprints/sprint_02/PROMPT_MAPPING.md) |

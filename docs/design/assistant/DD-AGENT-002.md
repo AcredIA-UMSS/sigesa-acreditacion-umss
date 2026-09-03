@@ -4,7 +4,7 @@ title: Agente Copiloto de Usuarios (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-21"
+ultima_actualizacion: "2026-09-02"
 fsd_uc: FSD-UC-002
 pr_impl: PR-IMPL-025, PR-IMPL-033
 ---
@@ -37,10 +37,9 @@ Extiende la gestión CRUD tradicional de [FSD-UC-002](../../product/uc/FSD-UC-00
 | Otros roles | — | Panel **no montado** (JdOnlyRoute + sin nav) |
 | `/ayuda` | Según rol | Asistente general (catálogo completo; no subset users) |
 
-### Layout responsive
+### Layout (shell unificado — DD-AGENT-UI-SHELL)
 
-- **Desktop (`xl+`):** panel sticky ~340px a la derecha (mismo patrón que `PhasesCopilotPanel`).
-- **Mobile:** panel colapsable (acordeón) bajo el listado.
+Ventana flotante inferior derecha (`DomainCopilotFloatingChat`), badge **Usuarios**. Sin columna lateral en `/admin/users`. Ver [DD-AGENT-UI-SHELL](DD-AGENT-UI-SHELL.md).
 
 ## 4. Contrato API
 
