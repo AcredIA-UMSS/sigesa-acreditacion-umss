@@ -8,7 +8,7 @@ prompts: [PR-IMPL-012, PR-IMPL-013]
 prompt_mapping: docs/sprints/sprint_02/PROMPT_MAPPING.md#pm-001
 release: v1.1-tools
 status: Implemented
-ultima_actualizacion: "2026-07-31"
+ultima_actualizacion: "2026-09-02"
 ---
 
 # DD-SYS-002: Asistente Virtual SIGESA
@@ -243,6 +243,31 @@ frontend/src/
 - **Historial:** vive en `useState` del hook; se pierde al recargar la página (MVP sin persistencia).
 - **Atajos:** Enter envía, Shift+Enter nueva línea.
 - **Errores:** `mapAssistantError` prioriza el `message` detallado del backend sobre etiquetas genéricas.
+
+### 4.5 Copilotos de dominio (shell flotante)
+
+Desde **2026-09-02** los agentes embebidos (`phases`, `evidence`, `users`) comparten el shell [`DD-AGENT-UI-SHELL`](assistant/DD-AGENT-UI-SHELL.md):
+
+```
+frontend/src/features/assistant/
+├── components/domain-copilot/
+│   ├── DomainCopilotFloatingChat.tsx      # FAB + panel portal (bottom-right)
+│   ├── CopilotConversationHistoryPanel.tsx
+│   └── CopilotMessageBubble.tsx
+├── lib/domainCopilotPresentation.ts
+├── lib/useCopilotConversationArchive.ts   # sessionStorage
+└── types/domainCopilotKind.ts
+```
+
+| Wrapper | Pantalla | Badge |
+|---------|----------|-------|
+| `PhasesCopilotPanel` | `/procesos/{id}`, `/procesos/{id}/estructura` | Fases |
+| `EvidenceCopilotPanel` | `/evidencias/cargar` | Evidencias |
+| `UsersCopilotPanel` | `/admin/users` | Usuarios |
+
+- **Layout:** las vistas host ya **no** reservan columna lateral; el copiloto flota vía `createPortal`.
+- **Historial:** archivado local al pulsar «Limpiar»; sin persistencia backend.
+- **Trazabilidad sprint:** [PM-007](../../sprints/sprint_03/PROMPT_MAPPING.md).
 
 ### 4.4 Contrato TypeScript
 

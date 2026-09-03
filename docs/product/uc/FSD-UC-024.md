@@ -9,7 +9,7 @@ modulo: MOD-ASSISTANT / MOD-EVIDENCE
 reglas: FSD-BR-03, FSD-BR-09, FSD-BR-14
 design_doc: DD-AGENT-003
 pr_impl: PR-IMPL-026
-ultima_actualizacion: "2026-08-21"
+ultima_actualizacion: "2026-09-02"
 ---
 
 # FSD-UC-024 — Copiloto de control documental
@@ -21,6 +21,7 @@ ultima_actualizacion: "2026-08-21"
 | **Trazabilidad** | PRD-REQ-028 (asistente) · UC-004 carga · UC-007/008/009 (extensión futura) |
 | **Precondiciones** | Usuario autenticado [TD]/[CC]/[JD]; evidencias cargadas vía UC-004 |
 | **Design agente** | [`DD-AGENT-003`](../../design/assistant/DD-AGENT-003.md) |
+| **Shell UI** | [`DD-AGENT-UI-SHELL`](../../design/assistant/DD-AGENT-UI-SHELL.md) (ventana flotante compartida) |
 | **Prompt** | [`PR-IMPL-026`](../../prompts/impl/PR-IMPL-026.md) |
 
 Agente conversacional (`agent=evidence`) que permite **controlar y auditar la documentación subida por el [CC]** sin reemplazar el flujo formal de aprobación/rechazo (UC-008/009, Fase 2).
@@ -36,7 +37,7 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 
 ## Flujo principal (Fase 1 — lectura)
 
-1. Usuario abre superficie con copiloto (p. ej. `/evidencias/cargar`) o `/ayuda` con `agent=evidence`.
+1. Usuario abre superficie con copiloto (FAB inferior derecha en `/evidencias/cargar`; ver [DD-AGENT-UI-SHELL](../../design/assistant/DD-AGENT-UI-SHELL.md)) o `/ayuda` con `agent=evidence`.
 2. Pregunta en lenguaje natural (p. ej. «¿qué evidencias están pendientes de revisión?»).
 3. Sistema selecciona tool (`list_pending_evidences` / `get_evidence_detail` / `check_evidence_completeness`).
 4. Tool delega en casos de uso de consulta; aplica PBAC por rol/carrera.

@@ -64,22 +64,18 @@ export function UsersAdminPage() {
               </div>
             )}
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-              <div className="space-y-6">
-                <UsersTableUI
-                  users={usersList.users}
-                  isLoading={usersList.isLoading}
-                  isError={usersList.isError}
-                  errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
-                  isDeactivating={deactivateAction.isDeactivating}
-                  deactivatingUserId={deactivateAction.deactivatingUserId}
-                  onAddUser={registerForm.openModal}
-                  onDeactivate={handleDeactivate}
-                />
-              </div>
+            <UsersTableUI
+              users={usersList.users}
+              isLoading={usersList.isLoading}
+              isError={usersList.isError}
+              errorMessage={usersList.error ? getApiErrorMessage(usersList.error) : undefined}
+              isDeactivating={deactivateAction.isDeactivating}
+              deactivatingUserId={deactivateAction.deactivatingUserId}
+              onAddUser={registerForm.openModal}
+              onDeactivate={handleDeactivate}
+            />
 
-              {showUsersCopilot ? <UsersCopilotPanel /> : null}
-            </div>
+            {showUsersCopilot ? <UsersCopilotPanel /> : null}
           </div>
         </main>
       </div>

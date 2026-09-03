@@ -4,7 +4,7 @@ title: Agente Copiloto de Control Documental (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-21"
+ultima_actualizacion: "2026-09-02"
 fsd_uc: FSD-UC-024
 pr_impl: PR-IMPL-026, PR-IMPL-033
 ---
@@ -36,10 +36,9 @@ Extiende MOD-EVIDENCE con interacción conversacional de **solo lectura** en MVP
 | `/ayuda` | Según rol | Asistente general (catálogo completo; subset si `agent=evidence`) |
 | EE | — | Panel no montado; API 403 |
 
-### Layout
+### Layout (shell unificado — DD-AGENT-UI-SHELL)
 
-- Desktop (`xl+`): panel sticky ~340px (patrón Phases/Users).
-- Mobile: acordeón colapsable.
+Ventana flotante inferior derecha (`DomainCopilotFloatingChat`), badge **Evidencias**. Enlace **Historial de acciones** (tools) dentro del panel. Sin columna lateral en `/evidencias/cargar`. Ver [DD-AGENT-UI-SHELL](DD-AGENT-UI-SHELL.md).
 
 ## 4. Contrato API
 

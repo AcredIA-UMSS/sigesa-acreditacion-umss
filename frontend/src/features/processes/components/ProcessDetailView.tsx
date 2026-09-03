@@ -91,8 +91,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
       )}
 
       {!isLoading && !isError && process && (
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-          <div className="space-y-6">
+        <div className="space-y-6">
           <section className="rounded-2xl border border-primary-200/40 bg-gradient-to-r from-primary-600 to-primary-500 p-6 text-body shadow-md">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
@@ -155,7 +154,6 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
               onNavigateToSubphase={navigateToSubphase}
             />
           </section>
-          </div>
 
           {canUseCopilot && (
             <PhasesCopilotPanel

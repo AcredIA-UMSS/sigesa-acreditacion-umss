@@ -4,7 +4,7 @@ title: Agente Copiloto de Fases (MOD-ASSISTANT)
 modulo: MOD-ASSISTANT
 design_parent: DD-SYS-002
 status: Implemented
-ultima_actualizacion: "2026-08-21"
+ultima_actualizacion: "2026-09-02"
 pr_impl: PR-IMPL-024, PR-IMPL-033
 backlog_version: "2026-08-21"
 ---
@@ -25,10 +25,17 @@ Perfil especializado del asistente SIGESA (`agent=phases`) embebido en las panta
 
 \*Escritura vía chat con confirmación (`confirmed=true`).
 
-### Layout responsive
+### Layout (shell unificado — DD-AGENT-UI-SHELL)
 
-- **Desktop (`xl+`):** panel sticky 340px a la derecha.
-- **Mobile:** panel colapsable bajo el contenido principal.
+Desde **2026-09-02** el copiloto usa la **ventana flotante inferior derecha** compartida (`DomainCopilotFloatingChat`). Ya **no** ocupa columna lateral de 340px.
+
+| Estado | Comportamiento |
+|--------|----------------|
+| Cerrado | FAB con badge **Fases** |
+| Abierto | Panel ~24rem; historial de conversaciones en `sessionStorage` al limpiar |
+| `/ayuda` | Sin cambios — diseño propio |
+
+Ver [DD-AGENT-UI-SHELL](DD-AGENT-UI-SHELL.md).
 
 ## 3. Contrato API
 
@@ -111,7 +118,7 @@ sequenceDiagram
 | Router | `AssistantKeywordRouter` |
 | Tools | `AssistantToolRegistry`, `AssistantToolExecutor`, `AssistantStructureLookup` |
 | Resolución orden | `AssistantStructureLookup.SubphaseOrderPlan` (CREATE subfase) |
-| UI | `PhasesCopilotPanel`, `usePhasesCopilot`, `CopilotAssistantMetadata` |
+| UI | `PhasesCopilotPanel` → `DomainCopilotFloatingChat`, `usePhasesCopilot`, `CopilotAssistantMetadata` |
 
 ### 7.1 Lecciones aprendidas (iteración 2026-08-11)
 
