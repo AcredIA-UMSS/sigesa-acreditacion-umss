@@ -222,6 +222,7 @@ public class AssistantToolRegistry {
     }
 
     public List<AssistantToolDefinition> toolsForRoleAndAgent(String role, AssistantAgentProfile agentProfile) {
+        String normalizedRole = role == null || role.isBlank() ? "" : role.trim().toUpperCase();
         List<AssistantToolDefinition> roleTools = toolsForRole(role);
         if (agentProfile == AssistantAgentProfile.PHASES) {
             return roleTools.stream()
@@ -229,6 +230,9 @@ public class AssistantToolRegistry {
                     .toList();
         }
         if (agentProfile == AssistantAgentProfile.USERS) {
+            if (!"JD".equals(normalizedRole)) {
+                return List.of();
+            }
             return roleTools.stream()
                     .filter(tool -> USERS_AGENT_TOOL_IDS.contains(tool.id()))
                     .toList();

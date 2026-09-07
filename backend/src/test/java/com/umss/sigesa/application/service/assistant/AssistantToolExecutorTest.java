@@ -3,6 +3,7 @@ package com.umss.sigesa.application.service.assistant;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
+import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
@@ -23,13 +24,18 @@ import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.assistant.support.AssistantToolExecutorTestFactory;
 import com.umss.sigesa.application.service.assistant.support.RecordingAssistantToolAuditPort;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
+import com.umss.sigesa.domain.model.IndicatorState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -231,11 +237,133 @@ class AssistantToolExecutorTest {
         assertThat(root.path("error").path("code").asText()).isEqualTo("TOOL_NOT_FOUND");
     }
 
+    @Test
+    void executeListPendingEvidences_withTdReturnsEvidences() throws Exception {
+        UUID programId = UUID.randomUUID();
+        UUID indicatorId = UUID.randomUUID();
+        when(listPendingEvidencesUseCase.list(any(), isNull())).thenReturn(List.of(
+                new EvidenceControlItem(
+                        indicatorId,
+                        programId,
+                        null,
+                        null,
+                        IndicatorState.SUBIDO,
+                        UUID.randomUUID(),
+                        1,
+                        "abc123",
+                        "Matriz de evidencias",
+                        LocalDateTime.parse("2026-01-15T10:00:00")
+                )
+        ));
+
+        String json = executor.execute(AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, "{}", tdContext());
+        JsonNode root = objectMapper.readTree(json);
+
+        assertThat(root.path("ok").asBoolean()).isTrue();
+        assertThat(root.path("data").path("total").asInt()).isEqualTo(1);
+        assertThat(root.path("data").path("evidences").get(0).path("indicatorId").asText())
+                .isEqualTo(indicatorId.toString());
+        assertThat(root.path("data").path("stateFilter").asText()).isEqualTo("SUBIDO");
+    }
+
+    @Test
+    void executeListPendingEvidences_withCcScopedProgram() throws Exception {
+        UUID programId = UUID.randomUUID();
+        AssistantAuthContext auth = ccContext();
+        when(listPendingEvidencesUseCase.list(eq(auth), eq(programId))).thenReturn(List.of(
+                new EvidenceControlItem(
+                        UUID.randomUUID(),
+                        programId,
+                        null,
+                        null,
+                        IndicatorState.SUBIDO,
+                        UUID.randomUUID(),
+                        1,
+                        null,
+                        "Evidencia CC",
+                        null
+                )
+        ));
+
+        String json = executor.execute(
+                AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
+                "{\"programId\":\"" + programId + "\"}",
+                auth);
+        JsonNode root = objectMapper.readTree(json);
+
+        assertThat(root.path("ok").asBoolean()).isTrue();
+        assertThat(root.path("data").path("total").asInt()).isEqualTo(1);
+        verify(listPendingEvidencesUseCase).list(eq(auth), eq(programId));
+    }
+
+    @Test
+    void executeGetEvidenceDetail_withValidIndicator() throws Exception {
+        UUID indicatorId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        UUID evidenceId = UUID.randomUUID();
+        when(getEvidenceDetailUseCase.get(any(), eq(indicatorId))).thenReturn(Optional.of(
+                new EvidenceControlItem(
+                        indicatorId,
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        IndicatorState.SUBIDO,
+                        evidenceId,
+                        2,
+                        "deadbeef",
+                        "Detalle evidencia",
+                        LocalDateTime.parse("2026-02-01T12:00:00")
+                )
+        ));
+
+        String json = executor.execute(
+                AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
+                "{\"indicatorId\":\"" + indicatorId + "\"}",
+                tdContext());
+        JsonNode root = objectMapper.readTree(json);
+
+        assertThat(root.path("ok").asBoolean()).isTrue();
+        assertThat(root.path("data").path("evidence").path("indicatorId").asText())
+                .isEqualTo(indicatorId.toString());
+        assertThat(root.path("data").path("evidence").path("evidenceId").asText())
+                .isEqualTo(evidenceId.toString());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true", "false"})
+    void executeCheckEvidenceCompleteness_reportsCompleteFlag(boolean complete) throws Exception {
+        UUID indicatorId = UUID.fromString("223e4567-e89b-12d3-a456-426614174001");
+        when(checkEvidenceCompletenessUseCase.check(any(), eq(indicatorId)))
+                .thenReturn(new CheckEvidenceCompletenessUseCase.CompletenessChecklist(
+                        indicatorId,
+                        complete,
+                        complete,
+                        complete,
+                        complete,
+                        IndicatorState.SUBIDO,
+                        complete));
+
+        String json = executor.execute(
+                AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
+                "{\"indicatorId\":\"" + indicatorId + "\"}",
+                tdContext());
+        JsonNode root = objectMapper.readTree(json);
+
+        assertThat(root.path("ok").asBoolean()).isTrue();
+        assertThat(root.path("data").path("complete").asBoolean()).isEqualTo(complete);
+        assertThat(root.path("data").path("indicatorId").asText()).isEqualTo(indicatorId.toString());
+        assertThat(root.path("data").path("currentState").asText()).isEqualTo("SUBIDO");
+    }
+
     private static AssistantAuthContext jdContext() {
         return new AssistantAuthContext(UUID.randomUUID(), "JD", List.of());
     }
 
+    private static AssistantAuthContext tdContext() {
+        return new AssistantAuthContext(UUID.randomUUID(), "TD", List.of());
+    }
+
     private static AssistantAuthContext ccContext() {
-        return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of(UUID.randomUUID()));
+        UUID programId = UUID.randomUUID();
+        return new AssistantAuthContext(UUID.randomUUID(), "CC", List.of(programId));
     }
 }

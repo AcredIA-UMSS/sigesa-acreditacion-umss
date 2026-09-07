@@ -1,0 +1,1697 @@
+[
+  {
+    "class": "JwtAuthenticationFilterTest",
+    "package": "com.umss.sigesa.adapter.in.security",
+    "path": "com/umss/sigesa/adapter/in/security/JwtAuthenticationFilterTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "sensitiveActionWithoutTokenReturns401",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantControllerToolCallingTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/AssistantControllerToolCallingTest.java",
+    "disabled": false,
+    "methodCount": 5,
+    "invocations": 5,
+    "methods": [
+      {
+        "name": "chat_withJdPassesAuthContextToUseCase",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "chat_withCcPassesCcRole",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "status_withEvidenceAgentAndEe_throwsAccessDenied",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "chat_withEvidenceAgentAndEe_throwsAccessDenied",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "chat_rejectsSqlInjectionPayload",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AuthControllerTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/AuthControllerTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "login_returnsJwtOnSuccess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "login_invalidCredentialsReturnsIdentical401BodyForMissingUserAndBadPassword",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "login_blankEmailReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "login_blankPasswordReturns401",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AuthenticatedApiSmokeTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/AuthenticatedApiSmokeTest.java",
+    "disabled": false,
+    "methodCount": 7,
+    "invocations": 7,
+    "methods": [
+      {
+        "name": "dashboardSummaryWithoutTokenReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "loginInvalidEmailDomainReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "loginBlankEmailReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "loginBlankPasswordReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "processesWithoutTokenReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "processesWithValidJwtPassesSecurity",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "dashboardSummaryWithValidJwtReturns200",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DashboardCompositeControllerTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/DashboardCompositeControllerTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "getSummary_retornaOk",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "enqueueExportJob_retorna202",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "EvidenceUploadControllerIT",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/EvidenceUploadControllerIT.java",
+    "disabled": true,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "placeholder",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessControllerQueryTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/ProcessControllerQueryTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "listReturns200",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getProcessNotFoundReturns404",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getProcessDetailReturnsPhases",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessResponsibleControllerWebMvcTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/ProcessResponsibleControllerWebMvcTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "jdCanAssignResponsible",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccCannotAssignResponsible",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "jdCanListCandidates",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "jdCanRemoveResponsible",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessStructureControllerWebMvcTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/ProcessStructureControllerWebMvcTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "shouldCreatePhaseForJd",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldCreatePhaseForTd",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectCcMutations",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProgramCatalogControllerTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/ProgramCatalogControllerTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "list_withoutAuthenticationReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "list_withAuthenticationReturns200",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "list_withSearchQueryDelegatesToUseCase",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "TemplateControllerWebMvcTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/TemplateControllerWebMvcTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "shouldListTemplatesForJd",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectCcAccessToTemplates",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldCreateTemplate",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "UserAdminControllerTest",
+    "package": "com.umss.sigesa.adapter.in.web",
+    "path": "com/umss/sigesa/adapter/in/web/UserAdminControllerTest.java",
+    "disabled": false,
+    "methodCount": 8,
+    "invocations": 8,
+    "methods": [
+      {
+        "name": "register_withoutAuthenticationReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "register_withCcRoleReturns403",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "register_withJdRoleReturns201Inactive",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "deactivate_withJdRoleReturns204",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "list_withoutAuthenticationReturns401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "list_withCcRoleReturns403",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "list_withJdRoleReturns200",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "register_duplicateEmailReturns409",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "LocalAuthAdapterTest",
+    "package": "com.umss.sigesa.adapter.out.auth",
+    "path": "com/umss/sigesa/adapter/out/auth/LocalAuthAdapterTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "authenticate_validCredentialsReturnsIdentityWithProgramScope",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "authenticate_wrongPasswordReturnsEmpty",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "authenticate_deactivatedUserReturnsEmpty",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "authenticate_missingUserReturnsEmpty",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "UserProgramAssignmentRepositoryTest",
+    "package": "com.umss.sigesa.adapter.out.persistance",
+    "path": "com/umss/sigesa/adapter/out/persistance/UserProgramAssignmentRepositoryTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "saveAssignment_persistsForeignKeyToUser",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "revokeAllActiveByUserId_setsRevokedAtWithoutDeletingHistory",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ApachePoiReportStreamingAdapterTest",
+    "package": "com.umss.sigesa.adapter.out.report",
+    "path": "com/umss/sigesa/adapter/out/report/ApachePoiReportStreamingAdapterTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "supports_xlsx",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "generateReport_exitoso",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "OpenPdfReportStreamingAdapterTest",
+    "package": "com.umss.sigesa.adapter.out.report",
+    "path": "com/umss/sigesa/adapter/out/report/OpenPdfReportStreamingAdapterTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "supports_pdfOnly",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "generateReport_exitoso",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "UploadEvidenceServiceTest",
+    "package": "com.umss.sigesa.application.service",
+    "path": "com/umss/sigesa/application/service/UploadEvidenceServiceTest.java",
+    "disabled": true,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "placeholder",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantChatInputValidatorTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantChatInputValidatorTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "validateMessage_acceptsNaturalLanguage",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantNormativeRagServiceTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantNormativeRagServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "tryDirectAnswer_returnsFormattedReplyWhenHitsExist",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "tryDirectAnswer_emptyWhenDisabled",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantOutOfScopeDetectorTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantOutOfScopeDetectorTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "detectsBudgetQuestion",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "allowsAccreditationQuestions",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantProcessQueryParserTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantProcessQueryParserTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "parse_extractsArcuSurTemplateFromCombinedQuery",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "parse_extractsCeubTemplate",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantStructureLookupTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantStructureLookupTest.java",
+    "disabled": false,
+    "methodCount": 6,
+    "invocations": 6,
+    "methods": [
+      {
+        "name": "findPhase_resolvesPlaceholderUuidFase1ByOrder",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "findPhase_resolvesPhaseOrderDirectly",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "findPhase_resolvesNaturalLanguageFaseName",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "findPhase_invalidPlaceholderWithoutOrderFailsHelpfully",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "planCreateSubphaseOrder_withExistingSubphases_assignsNextAvailable",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "planCreateSubphaseOrder_emptyPhase_startsAtOne",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantToolExecutorTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantToolExecutorTest.java",
+    "disabled": false,
+    "methodCount": 6,
+    "invocations": 6,
+    "methods": [
+      {
+        "name": "executeListUsers_withJdReturnsUsers",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "executeListUsers_withCcReturnsAccessDenied",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "executeListUsers_withInvalidRoleReturnsError",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "executeSetUserStatus_withoutConfirmationReturnsPreview",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "executeSetUserStatus_withConfirmationDeactivatesUser",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "execute_unknownToolReturnsNotFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantToolRbacGuardTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantToolRbacGuardTest.java",
+    "disabled": false,
+    "methodCount": 7,
+    "invocations": 7,
+    "methods": [
+      {
+        "name": "ccCannotExecuteListUsers_evenIfLlmHallucinates",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "jdListUsersDeniedInPhasesAgent_subsetViolation",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccPhasesAgentCannotExecuteManageProcessPhase",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "tdUsersAgentSubset_excludesListUsersForTdRole",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "eeHasNormativeSearchOnly",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "isToolAllowedForAgent_phasesRejectsUserTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "successfulAuditRecord_logsOkOutcome",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssistantToolRegistryTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/AssistantToolRegistryTest.java",
+    "disabled": false,
+    "methodCount": 11,
+    "invocations": 11,
+    "methods": [
+      {
+        "name": "toolsForRole_jdIncludesAllTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRole_tdIncludesPhaseAndEvidenceTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRoleAndAgent_phasesProfile_filtersToPhaseTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRoleAndAgent_usersProfile_filtersToUserTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRoleAndAgent_evidenceProfile_filtersToEvidenceTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRole_ccReturnsReadOnlyPhaseAndEvidenceTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRole_eeHasNormativeSearchOnly",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRoleAndAgent_ccUsersProfile_isEmpty",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "toolsForRoleAndAgent_tdUsersProfile_isEmpty",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "isToolAllowedForAgent_rejectsCrossAgentTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "isToolAllowedForAgent_generalAllowsAllRegisteredTools",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "SendChatMessageServiceToolLoopTest",
+    "package": "com.umss.sigesa.application.service.assistant",
+    "path": "com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java",
+    "disabled": false,
+    "methodCount": 13,
+    "invocations": 13,
+    "methods": [
+      {
+        "name": "scenario1_controlledKeyword_ccRole_doesNotCallLlm",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "scenario1_controlledKeyword_doesNotCallLlm",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "scenario2_synonym_usesLlmToPickTool_codeFormatsAnswer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "scenario3_outOfScope_noToolNoInventedData",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "scenario4_llmDisabled_sameKeywordQuestionStillWorks",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "phasesAgent_contextualListPhases_doesNotCallLlm",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "phasesAgent_llmSelection_onlyPhaseTools",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "scenario4_llmDisabled_synonymFallsToOutOfScope",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "send_jdRequestIncludesToolsInLlmSelection",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "multiToolLoop_chainsTwoToolsAndReturnsTrace",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "multiToolLoop_respectsMaxIterations",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "writeToolPreview_stopsLoop_waitsForUserConfirmation",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "phasesAgent_confirmo_afterPreview_executesViaKeywordWithoutLlm",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ActivateUserServiceTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/ActivateUserServiceTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "activate_reactivatesDeactivatedUser",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "activate_whenAlreadyActiveThrows",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "activate_whenMissingThrowsNotFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AuthenticateServiceTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/AuthenticateServiceTest.java",
+    "disabled": false,
+    "methodCount": 8,
+    "invocations": 8,
+    "methods": [
+      {
+        "name": "loginExitosoConRolCc_retornaJwtYActivaInactive",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "loginExitosoConRolJd_noReactivaUsuario",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "credencialesInvalidas_usuarioInexistente",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "credencialesInvalidas_passwordIncorrecto",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "credencialesInvalidas_usuarioDesactivadoViaAuthPort",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "sinRolAsignado_lanza403",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "credencialesInvalidas_emailNoUmss",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "passwordNuloOVacio_lanza401",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DeactivateUserServiceTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/DeactivateUserServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "revocacion_desactivaUsuarioYRevocaAssignments",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "usuarioInexistente_lanzaNotFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ManageUserProgramAssignmentServiceTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/ManageUserProgramAssignmentServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "update_revokesActiveAndCreatesNewAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "assign_rejectsJdRole",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ModAuthServiceIntegrationTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/ModAuthServiceIntegrationTest.java",
+    "disabled": false,
+    "methodCount": 6,
+    "invocations": 6,
+    "methods": [
+      {
+        "name": "fsdUc001_loginExitosoConRol_creaSesionJwt",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "fsdUc001_credencialesInvalidas_mismo401UsuarioInexistenteYPasswordIncorrecto",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "fsdUc001_emailNoUmss_mismo401",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "fsdUc002_altaUsuarioCc_inactivoConAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "fsdUc002_emailDuplicado_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "fsdUc002_revocacion_loginBloqueadoHistorialIntacto",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "RegisterUserServiceTest",
+    "package": "com.umss.sigesa.application.service.auth",
+    "path": "com/umss/sigesa/application/service/auth/RegisterUserServiceTest.java",
+    "disabled": false,
+    "methodCount": 10,
+    "invocations": 10,
+    "methods": [
+      {
+        "name": "altaCc_inactivoConAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "altaTd_inactivoSinAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "altaJd_inactivoSinAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "emailNoUmss_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccSinProgramId_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "rolInvalido_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "emailDuplicado_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "altaEe_inactivoConAssignment",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "eeSinProgramId_rechazado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "rolVacio_rechazado",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DashboardSummaryAggregationServiceTest",
+    "package": "com.umss.sigesa.application.service.dashboard",
+    "path": "com/umss/sigesa/application/service/dashboard/DashboardSummaryAggregationServiceTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "summarySoloCc_retornaSoloCoordinator",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "summaryMultiRol_retornaMultiplesSecciones",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "summaryJd_retornaExecutiveSection",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getObservationsDetails_delegaAlPuerto",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "EvidenceLifecycleServiceTest",
+    "package": "com.umss.sigesa.application.service.evidence",
+    "path": "com/umss/sigesa/application/service/evidence/EvidenceLifecycleServiceTest.java",
+    "disabled": false,
+    "methodCount": 5,
+    "invocations": 5,
+    "methods": [
+      {
+        "name": "listVersions_marksCurrentForTd",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "listVersions_deniesCcOutsideScope",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "listVersions_allowsCcInScope",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "delete_alwaysImmutableAndAudited",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "listVersions_notFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ListUploadableIndicatorsServiceTest",
+    "package": "com.umss.sigesa.application.service.evidence",
+    "path": "com/umss/sigesa/application/service/evidence/ListUploadableIndicatorsServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "emptyScope_returnsEmptyWithoutQuery",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "withScope_queriesPendienteAndObservado",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "UploadEvidenceServiceTest",
+    "package": "com.umss.sigesa.application.service.evidence",
+    "path": "com/umss/sigesa/application/service/evidence/UploadEvidenceServiceTest.java",
+    "disabled": false,
+    "methodCount": 5,
+    "invocations": 5,
+    "methods": [
+      {
+        "name": "upload_success",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "upload_rejectsMissingCriterion",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "upload_rejectsCriterionMismatch",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "upload_rejectsScope",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "upload_compensatesBlobOnPersistenceFailure",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "NormativeSearchQueryNormalizerTest",
+    "package": "com.umss.sigesa.application.service.normative",
+    "path": "com/umss/sigesa/application/service/normative/NormativeSearchQueryNormalizerTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "condensed_stripsNormativeQuestionPrefix",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "condensed_keepsArcuSurTerms",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "significantTerms_returnsSearchableTokens",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AddSubphaseServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/AddSubphaseServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "shouldAddSubphaseWithValidLink",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectInvalidReferenceUrl",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "AssignProcessResponsibleServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/AssignProcessResponsibleServiceTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "shouldAssignEligibleCc",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectCcAlreadyAssignedElsewhere",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectCareerMismatch",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectNonCcUser",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DeleteSubphaseServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/DeleteSubphaseServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "shouldRejectDeleteWhenBlockingEvidenceExists",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldDeleteWhenNoBlockingEvidence",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "GetProcessDetailServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/GetProcessDetailServiceTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "jdGetsDetailWithSortedPhases",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccCannotAccessForeignProcess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "missingProcessThrowsNotFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ListProcessesServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/ListProcessesServiceTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "jdSeesAllProcesses",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "tdSeesAllProcesses",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccSeesOnlyAssignedCareer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccWithEmptyScopeReturnsEmptyList",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessAccessPolicyTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/ProcessAccessPolicyTest.java",
+    "disabled": false,
+    "methodCount": 5,
+    "invocations": 5,
+    "methods": [
+      {
+        "name": "jdCanAccessAnyCareer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "tdCanAccessAnyCareer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccCanAccessAssignedCareer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccCannotAccessForeignCareer",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "ccWithEmptyScopeCannotAccess",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessStructureGuardTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/ProcessStructureGuardTest.java",
+    "disabled": false,
+    "methodCount": 6,
+    "invocations": 6,
+    "methods": [
+      {
+        "name": "shouldAllowActiveProcess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectCompletedProcess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectClosedProcess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRequireHttpsReferenceUrl",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldDetectDuplicatePhaseOrder",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldDetectDuplicateSubphaseOrder",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "RemoveProcessResponsibleServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/RemoveProcessResponsibleServiceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "shouldRevokeActiveAssignment",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ReorderProcessStructureServiceTest",
+    "package": "com.umss.sigesa.application.service.process",
+    "path": "com/umss/sigesa/application/service/process/ReorderProcessStructureServiceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "shouldReorderPhasesAndSubphases",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "GenerateExecutiveReportServiceTest",
+    "package": "com.umss.sigesa.application.service.report",
+    "path": "com/umss/sigesa/application/service/report/GenerateExecutiveReportServiceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "generate_createsPendingJob",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "GetReportJobStatusServiceTest",
+    "package": "com.umss.sigesa.application.service.report",
+    "path": "com/umss/sigesa/application/service/report/GetReportJobStatusServiceTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "getStatus_returnsDownloadPathWhenCompleted",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getStatus_deniesForeignRequester",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getStatus_throwsWhenMissing",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ProcessReportJobServiceTest",
+    "package": "com.umss.sigesa.application.service.report",
+    "path": "com/umss/sigesa/application/service/report/ProcessReportJobServiceTest.java",
+    "disabled": false,
+    "methodCount": 3,
+    "invocations": 3,
+    "methods": [
+      {
+        "name": "process_marksCompletedOnSuccess",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "process_marksFailedOnTemplateError",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "process_marksFailedOnUnexpectedError",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ReportExportJobServiceTest",
+    "package": "com.umss.sigesa.application.service.report",
+    "path": "com/umss/sigesa/application/service/report/ReportExportJobServiceTest.java",
+    "disabled": false,
+    "methodCount": 7,
+    "invocations": 7,
+    "methods": [
+      {
+        "name": "enqueueJob_exitoso",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "processJobAsync_exitoso",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "processJobAsync_jobNoEncontrado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "processJobAsync_errorEnGeneracion",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getJobStatus_noEncontrado",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getJobStatus_usuarioDistinto",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "getJobFileStream_exitoso",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "CreateTemplateServiceTest",
+    "package": "com.umss.sigesa.application.service.template",
+    "path": "com/umss/sigesa/application/service/template/CreateTemplateServiceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "shouldCreateDraftTemplateWithPhasesAndLinks",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DeleteTemplateServiceTest",
+    "package": "com.umss.sigesa.application.service.template",
+    "path": "com/umss/sigesa/application/service/template/DeleteTemplateServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "shouldDeleteDraftTemplateWithoutProcesses",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectDeleteWhenTemplateReferencedByProcess",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "DuplicateTemplateServiceTest",
+    "package": "com.umss.sigesa.application.service.template",
+    "path": "com/umss/sigesa/application/service/template/DuplicateTemplateServiceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "shouldCreateDraftCopyWithNewId",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "PublishTemplateServiceTest",
+    "package": "com.umss.sigesa.application.service.template",
+    "path": "com/umss/sigesa/application/service/template/PublishTemplateServiceTest.java",
+    "disabled": false,
+    "methodCount": 2,
+    "invocations": 2,
+    "methods": [
+      {
+        "name": "shouldPublishDraftTemplate",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldThrowWhenTemplateNotFound",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "TemplateStructureValidatorTest",
+    "package": "com.umss.sigesa.application.service.template",
+    "path": "com/umss/sigesa/application/service/template/TemplateStructureValidatorTest.java",
+    "disabled": false,
+    "methodCount": 4,
+    "invocations": 4,
+    "methods": [
+      {
+        "name": "shouldRejectSubphaseWithoutHttpsLink",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectDuplicatePhaseOrder",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectPublishWithoutSubphases",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldAcceptValidPublishStructure",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ClosePhaseServiceTest",
+    "package": "com.umss.sigesa.application.service.workflow",
+    "path": "com/umss/sigesa/application/service/workflow/ClosePhaseServiceTest.java",
+    "disabled": false,
+    "methodCount": 7,
+    "invocations": 7,
+    "methods": [
+      {
+        "name": "shouldClosePhaseWhenAllSubphasesApproved",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldClosePhaseWithNoSubphases",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldBlockClosureWhenPendingSubphasesExist",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectNonTdRole",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectWhenPhaseNotFound",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectWhenPhaseAlreadyCompleted",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldEnqueuePhaseCompletedWithPayload",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "CreateProcessUseCaseImplTest",
+    "package": "com.umss.sigesa.application.usecase",
+    "path": "com/umss/sigesa/application/usecase/CreateProcessUseCaseImplTest.java",
+    "disabled": false,
+    "methodCount": 5,
+    "invocations": 5,
+    "methods": [
+      {
+        "name": "shouldThrowExceptionIfProgramNotFound",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldThrowExceptionIfActiveProcessExistsForSameTemplateType",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldCreateProcessSuccessfully",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldRejectDraftTemplate",
+        "type": "Test",
+        "invocations": 1
+      },
+      {
+        "name": "shouldAllowActiveProcessWithDifferentTemplateType",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "ReportExportAsyncE2EIT",
+    "package": "com.umss.sigesa.e2e",
+    "path": "com/umss/sigesa/e2e/ReportExportAsyncE2EIT.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "flujoCompletoExportacion",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  },
+  {
+    "class": "Dashboard1MPerformanceTest",
+    "package": "com.umss.sigesa.performance",
+    "path": "com/umss/sigesa/performance/Dashboard1MPerformanceTest.java",
+    "disabled": false,
+    "methodCount": 1,
+    "invocations": 1,
+    "methods": [
+      {
+        "name": "testFastCsvPerformanceSimulated",
+        "type": "Test",
+        "invocations": 1
+      }
+    ]
+  }
+]
