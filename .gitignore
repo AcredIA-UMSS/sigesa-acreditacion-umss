@@ -36,6 +36,9 @@ build/
 ### Local env ###
 .env
 
+# Test generator — respuestas crudas del LLM en fallos
+tools/test-generator/.output/
+
 ### pnpm local store ###
 .pnpm-store/
 

@@ -8,6 +8,7 @@ import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.service.assistant.support.AssistantToolExecutorTestFactory;
 import com.umss.sigesa.application.service.assistant.support.RecordingAssistantToolAuditPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -76,11 +77,13 @@ class AssistantToolRbacGuardTest {
     }
 
     @Test
+    @Disabled("Duplicado de AssistantToolRegistryTest.toolsForRoleAndAgent_tdUsersProfile_isEmpty — Fase 2b AcredIA")
     void tdUsersAgentSubset_excludesListUsersForTdRole() {
         assertThat(registry.toolsForRoleAndAgent("TD", AssistantAgentProfile.USERS)).isEmpty();
     }
 
     @Test
+    @Disabled("Duplicado de AssistantToolRegistryTest.toolsForRole_eeHasNormativeSearchOnly — Fase 2b AcredIA")
     void eeHasNormativeSearchOnly() {
         assertThat(registry.toolsForRole("EE")).extracting(def -> def.id())
                 .containsExactly(AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID);

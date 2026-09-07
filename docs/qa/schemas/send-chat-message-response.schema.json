@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sigesa.umss.edu.bo/schemas/assistant/send-chat-message-response.json",
+  "title": "SendChatMessageResponse",
+  "description": "Respuesta de POST /api/v1/assistant/chat — MOD-ASSISTANT SIGESA (AcredIA contract test)",
+  "type": "object",
+  "required": ["reply", "path", "llmInvoked", "steps"],
+  "properties": {
+    "reply": {
+      "type": "string",
+      "description": "Texto formateado para el usuario (Java, no texto libre del LLM)."
+    },
+    "toolId": {
+      "type": ["string", "null"],
+      "description": "ID de la última tool ejecutada en el flujo, o null si ninguna."
+    },
+    "sourceTables": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tablas/fuentes agregadas de todos los pasos ejecutados."
+    },
+    "path": {
+      "type": "string",
+      "enum": ["KEYWORD", "LLM", "RAG", "OUT_OF_SCOPE"],
+      "description": "Camino de resolución del mensaje."
+    },
+    "llmInvoked": {
+      "type": "boolean",
+      "description": "true si se invocó el modelo en algún punto del pipeline."
+    },
+    "steps": {
+      "type": "array",
+      "description": "Traza Nivel 4 multi-tool; vacía si no hubo tools.",
+      "items": {
+        "type": "object",
+        "required": ["step", "toolId", "sourceTables", "success"],
+        "properties": {
+          "step": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Índice secuencial del paso (1-based)."
+          },
+          "toolId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceTables": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

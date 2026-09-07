@@ -1,0 +1,62 @@
+{
+  "batches": {
+    "L1": {
+      "sourceRelativePath": "com/umss/sigesa/application/service/assistant/AssistantKeywordRouter.java",
+      "outputClassName": "AssistantKeywordRouterTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [
+        "com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java",
+        "com/umss/sigesa/application/service/assistant/AssistantChatInputValidatorTest.java"
+      ],
+      "maxTests": 8,
+      "notes": "S2 unit — router KEYWORD aislado; no duplicar escenarios SMS tool loop"
+    },
+    "L2": {
+      "sourceRelativePath": "com/umss/sigesa/application/service/assistant/AssistantResponseFormatter.java",
+      "outputClassName": "AssistantResponseFormatterTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [
+        "com/umss/sigesa/application/service/assistant/SendChatMessageServiceToolLoopTest.java"
+      ],
+      "maxTests": 8,
+      "notes": "S2 unit — formateo JSON tool results a reply legible"
+    },
+    "L3": {
+      "sourceRelativePath": "com/umss/sigesa/application/service/assistant/AssistantToolExecutor.java",
+      "outputClassName": "AssistantToolExecutorEvidenceTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [
+        "com/umss/sigesa/application/service/assistant/AssistantToolExecutorTest.java",
+        "com/umss/sigesa/application/service/assistant/AssistantToolRbacGuardTest.java"
+      ],
+      "maxTests": 4,
+      "notes": "S2 unit — ampliación evidence tools: list_pending, get_detail, check_completeness"
+    },
+    "L4": {
+      "sourceRelativePath": "com/umss/sigesa/adapter/in/web/AssistantController.java",
+      "outputClassName": "AssistantControllerWebMvcTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [
+        "com/umss/sigesa/adapter/in/web/AssistantControllerToolCallingTest.java"
+      ],
+      "maxTests": 8,
+      "notes": "S3 @WebMvcTest — contrato HTTP chat/status, 401/403/400"
+    },
+    "L5": {
+      "sourceRelativePath": "com/umss/sigesa/adapter/out/assistant/OpenWebUiChatAdapter.java",
+      "outputClassName": "OpenWebUiChatAdapterTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [],
+      "maxTests": 6,
+      "notes": "S3 — WireMock HTTP adapter; sin red real"
+    },
+    "L6": {
+      "sourceRelativePath": "com/umss/sigesa/application/service/assistant/AssistantChatContextFactory.java",
+      "outputClassName": "AssistantChatContextFactoryTest_AgentGenerated",
+      "outputPackage": "com.umss.sigesa.generated.assistant",
+      "contextTestRelativePaths": [],
+      "maxTests": 5,
+      "notes": "S2 unit — resolución contexto proceso/fase"
+    }
+  }
+}

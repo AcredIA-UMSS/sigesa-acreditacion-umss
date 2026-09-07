@@ -5,10 +5,12 @@ services:
     image: postgres:16-alpine
     container_name: sigesa-postgres
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: sigesa_user
-      POSTGRES_PASSWORD: sigesa_password
-      POSTGRES_DB: sigesa
+      POSTGRES_USER: ${POSTGRES_USER:-sigesa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigesa_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sigesa}
     ports:
       - "5432:5432"
     volumes:
@@ -61,26 +63,29 @@ services:
       dockerfile: Dockerfile
     container_name: sigesa-backend
     restart: always
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_started
       open-webui:
         condition: service_started
     environment:
+      - SIGESA_IN_DOCKER=true
       - SPRING_PROFILES_ACTIVE=dev
       - DB_URL=jdbc:postgresql://db:5432/sigesa
-      - DB_USERNAME=sigesa_user
-      - DB_PASSWORD=sigesa_password
-      - SIGESA_JWT_SECRET=xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==
+      - DB_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
+      - SIGESA_JWT_SECRET=${SIGESA_JWT_SECRET:-xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
-      - SPRING_DATASOURCE_USERNAME=sigesa_user
-      - SPRING_DATASOURCE_PASSWORD=sigesa_password
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-      - SIGESA_ASSISTANT_ENABLED=true
+      - SIGESA_ASSISTANT_ENABLED=${SIGESA_ASSISTANT_ENABLED:-true}
       - SIGESA_ASSISTANT_LLM_ENABLED=${SIGESA_ASSISTANT_LLM_ENABLED:-true}
-      - SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api
-      - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-}
+      - SIGESA_ASSISTANT_BASE_URL=${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://open-webui:8080/api}}
+      - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-${GROQ_API_KEY:-}}
       - SIGESA_ASSISTANT_MODEL=${SIGESA_ASSISTANT_MODEL:-qwen2.5:7b}
       - SIGESA_ASSISTANT_RAG_ENABLED=${SIGESA_ASSISTANT_RAG_ENABLED:-true}
       - SIGESA_ASSISTANT_RAG_MAX_CHUNKS=${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:-3}
@@ -105,6 +110,28 @@ services:
       - backend
     ports:
       - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
+
+  # Generador de tests AcredIA (Python) — NO producción; profile tools
+  # Uso: ./tools/test-generator/run.sh --batch L1
+  test-generator:
+    profiles: ["tools"]
+    build:
+      context: ./tools/test-generator
+      dockerfile: Dockerfile
+    container_name: sigesa-test-generator
+    env_file:
+      - .env
+    depends_on:
+      ollama:
+        condition: service_started
+    environment:
+      SIGESA_REPO_ROOT: /workspace
+      SIGESA_RUNTIME: docker
+      SIGESA_IN_DOCKER: "true"
+    volumes:
+      - .:/workspace:rw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   postgres_data:
