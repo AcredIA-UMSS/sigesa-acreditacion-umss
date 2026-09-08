@@ -1,14 +1,14 @@
 ---
 id: FSD-UC-003
 nombre: Plantillas y Proceso CEUB/ARCU-SUR
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
 reglas: FSD-BR-08, FSD-BR-17, FSD-BR-21
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x clona Fase→Subfase; migración v2.0 pendiente"
+nota_implementacion: "POST /processes clona árbol v2 N1→N2→N3→Indicador desde plantilla PUBLISHED; coexistencia legacy Fase/Subfase (M5)"
 ---
 
 # FSD-UC-003 — Plantillas y Proceso CEUB/ARCU-SUR
@@ -20,7 +20,7 @@ nota_implementacion: "Código v1.x clona Fase→Subfase; migración v2.0 pendien
 | **Trazabilidad** | PRD-REQ-002, 004, 016 · PRD-US-023 |
 | **Relación** | **Creación de proceso** desde plantilla. La **gestión de plantillas** (CRUD jerarquía normativa N1→N2→N3→Indicador) está en [FSD-UC-021](FSD-UC-021.md). La **edición estructural del proceso instanciado** en [FSD-UC-022](FSD-UC-022.md). La **asignación de responsable [CC]** en [FSD-UC-023](FSD-UC-023.md). |
 | **Precondiciones** | Plantilla `PUBLISHED` (CEUB o ARCU-SUR); carrera registrada en catálogo `programs` |
-| **Nota implementación viva** | Catálogo de **carreras UMSS** persistido en BD (`programs`) con búsqueda `GET /programs?q=`. UI: autocomplete de carrera en `/procesos/nuevo`. Selector de plantillas alimentado por plantillas publicadas (UC-021). **v2.0 objetivo:** `POST /api/v1/processes` + clonación **Nivel 1 → Nivel 2 → Nivel 3 → Indicador** desde plantilla `PUBLISHED`. |
+| **Nota implementación viva** | Catálogo de **carreras UMSS** persistido en BD (`programs`) con búsqueda `GET /programs?q=`. UI: autocomplete de carrera en `/procesos/nuevo`. Selector de plantillas alimentado por plantillas publicadas (UC-021). **`POST /api/v1/processes`** clona **Nivel 1 → Nivel 2 → Nivel 3 → Indicador** desde plantilla `PUBLISHED` (`ProcessNormativeTreeCloner`); validación A4 si plantilla sin árbol v2 ni fases legacy. |
 
 ## Jerarquía normativa (v2.0)
 

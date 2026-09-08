@@ -1,16 +1,16 @@
 ---
 id: FSD-UC-021
 nombre: Gestión de plantillas normativas (jerarquía N1–N3 + Indicador)
-estado: Reespecificado
+estado: Hecho (Full-Stack v2)
 release: v2.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-023
 modulo: MOD-PROCESS
-reglas: FSD-BR-21, FSD-BR-23
+reglas: FSD-BR-21, FSD-BR-23, FSD-BR-24, FSD-BR-25
 ultima_actualizacion: "2026-09-08"
 design_doc: DD-UC-021
 pr_impl: PR-IMPL-021
-nota_implementacion: "Código v1.x usa TemplatePhase/TemplateSubphase; migración v2.0 pendiente"
+nota_implementacion: "API-TPL-08 jerarquía v2 + UI `/admin/plantillas` (tabs v2/legacy); publicación exige indicadores v2 (BR-24); duplicar clona árbol v2"
 ---
 
 # FSD-UC-021 — Gestión de plantillas normativas (jerarquía N1–N3 + Indicador)

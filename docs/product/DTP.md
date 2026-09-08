@@ -33,7 +33,7 @@ artefactos_vivos:
 # Documento Técnico del Producto (DTP) – SIGESA
 
 > **Qué es**: El contrato técnico vigente de SIGESA durante la fase de implementación.  
-> **Release 2.0.0**: jerarquía normativa **N1→N2→N3→Indicador→Evidencia** ([ADR-0004](../adr/ADR-0004-normative-hierarchy-v2.md)). Código en `main` aún en **legacy Fase/Subfase** hasta migración M1–M5.  
+> **Release 2.0.0**: jerarquía normativa **N1→N2→N3→Indicador→Evidencia** ([ADR-0004](../adr/ADR-0004-normative-hierarchy-v2.md)). UC-003/021/022 implementan clonado/edición v2; **legacy Fase/Subfase** coexiste hasta M5.  
 > **Regla de oro**: Cero divergencia silenciosa. El baseline de la Fase de Diseño permanece intacto en `docs/baseline/`.
 
 ---
@@ -46,6 +46,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 08/09/2026 | **MOD-PROCESS (FSD-UC-003 v2):** `CreateProcessUseCaseImpl` clona árbol normativo N1→N2→N3→Indicador vía `ProcessNormativeTreeCloner`; validación A4 `TEMPLATE_STRUCTURE_INCOMPLETE`; coexistencia clonado legacy Fase/Subfase. | FSD-UC-003 / DD-UC-003 | ADR-0004 | PM-009 / PR-IMPL-003 | Boris Anthony Angulo Urquieta |
+| 08/09/2026 | **MOD-TEMPLATE (FSD-UC-021 v2 Full-Stack):** API-TPL-08 `TemplateNormativeStructureController`; publicación BR-24 (`PublishTemplateService` + árbol v2); UI tabs v2/legacy `/admin/plantillas`; Orval `jerarquía-normativa-plantilla-v2`; `DuplicateTemplateService` deep-copy v2 (`TemplateNormativeTreeCloner`). | FSD-UC-021 / DD-UC-021 | ADR-0004 | PM-008 / PR-IMPL-021 | Boris Anthony Angulo Urquieta |
 | 08/09/2026 | **Release 2.0.0 (documental):** jerarquía normativa N1→N2→N3→Indicador→Evidencia; FSD/glosario/modelo/reglas/api v2; workflow en Indicador; cierre Nivel 1. Código legacy Fase/Subfase sin migrar. | FSD v2.0 | **ADR-0004** | docs sync | Boris Anthony Angulo Urquieta |
 | 02/09/2026 | **MOD-ASSISTANT UI shell:** copilotos `phases`/`evidence`/`users` unificados en ventana flotante inferior derecha (`DomainCopilotFloatingChat`); historial de conversaciones en `sessionStorage`; layouts sin columna 340px; `/ayuda` sin cambios. | DD-AGENT-UI-SHELL / DD-AGENT-001…003 | N/A | PM-007 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-WORKFLOW UC-010:** cierre de fase TD (`PhaseState` ABIERTA/COMPLETADA, Flyway V13); API-WF-03 `POST /processes/{id}/phases/{id}/complete`; `409 FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]`; evento outbox `PhaseCompleted`; UI «Cerrar fase» en detalle proceso. | FSD-UC-010 / DD-UC-010 | N/A | PM-006 / PR-IMPL-039 | Boris Anthony Angulo Urquieta |
@@ -125,9 +127,9 @@ artefactos_vivos:
 | -------- | ------------ | -------- | --------- | ------------- | --------- | ------- |
 | `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | `PR-IMPL-001` | JWT + LocalAuthAdapter; A1 estricto → 401 |
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
-| `FSD-UC-003` | `DD-UC-003` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Clonación Fase/Subfase en prod; objetivo clonar N1→Indicador (M2) | `PR-IMPL-003V3` | Migración ADR-0004 M1–M2 |
+| `FSD-UC-003` | `DD-UC-003` | **hecho v2** *(legacy coexist.)* | `2.0.0` | `ProcessNormativeTreeClonerTest`, `CreateProcessUseCaseImplTest` | `PR-IMPL-003` | Clona N1→Indicador; legacy Fase/Subfase paralelo |
 | `FSD-UC-019` | `DD-UC-019` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | GET devuelve `phases/subphases`; objetivo `level1Nodes` | `PR-IMPL-019` | |
-| `FSD-UC-021` | `DD-UC-021` | **legacy backend hecho** / **v2.0 reespecificado** | `2.0.0` | TemplatePhase/Subphase; objetivo TemplateLevel1…Indicator | `PR-IMPL-021` | FE + esquema v2 pendiente |
+| `FSD-UC-021` | `DD-UC-021` | **hecho (Full-Stack v2)** | `2.0.0` | API-TPL-08 + WebMvc; UI `/admin/plantillas`; publish BR-24 | `PR-IMPL-021` | Duplicate v2; legacy tabs coexisten |
 | `FSD-UC-022` | `DD-UC-022` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-PROC-05…08 phases; objetivo API-STR-01…05 | `PR-IMPL-022` | |
 | `FSD-UC-004` | `DD-UC-004` | **legacy implementado** / **v2.0 reespecificado** | `2.0.0` | Upload `/subphases/…`; objetivo `/indicators/…` | `PR-IMPL-006` | API-EVD-01 revive path indicator |
 | `FSD-UC-005` | `DD-UC-005` | **hecho** | `2.0.0` | Append-only sin cambio de contrato | `PR-IMPL-035` | |

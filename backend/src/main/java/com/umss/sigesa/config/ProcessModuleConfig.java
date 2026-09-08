@@ -47,6 +47,7 @@ import com.umss.sigesa.application.service.process.GetNormativeIndicatorService;
 import com.umss.sigesa.application.service.process.GetProcessDetailService;
 import com.umss.sigesa.application.service.process.NormativeStructureCommandService;
 import com.umss.sigesa.application.service.process.NormativeStructureGuard;
+import com.umss.sigesa.application.service.process.ProcessNormativeTreeCloner;
 import com.umss.sigesa.application.service.process.ListEligibleResponsiblesService;
 import com.umss.sigesa.application.service.process.ListProcessesService;
 import com.umss.sigesa.application.service.process.ProcessStructureGuard;
@@ -62,6 +63,7 @@ import com.umss.sigesa.application.service.template.DuplicateTemplateService;
 import com.umss.sigesa.application.service.template.GetTemplateService;
 import com.umss.sigesa.application.service.template.ListTemplatesService;
 import com.umss.sigesa.application.service.template.PublishTemplateService;
+import com.umss.sigesa.application.service.template.TemplateNormativeTreeCloner;
 import com.umss.sigesa.application.service.template.TemplateStructureValidator;
 import com.umss.sigesa.application.service.template.UpdateTemplateService;
 import com.umss.sigesa.application.service.template.CreateTemplateService;
@@ -116,8 +118,17 @@ public class ProcessModuleConfig {
     }
 
     @Bean
-    DuplicateTemplateUseCase duplicateTemplateUseCase(TemplateManagementPort templateManagementPort) {
-        return new DuplicateTemplateService(templateManagementPort);
+    DuplicateTemplateUseCase duplicateTemplateUseCase(TemplateManagementPort templateManagementPort,
+                                                      NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+                                                      TemplateNormativeTreeCloner templateNormativeTreeCloner) {
+        return new DuplicateTemplateService(
+                templateManagementPort, normativeHierarchyQueryPort, templateNormativeTreeCloner);
+    }
+
+    @Bean
+    TemplateNormativeTreeCloner templateNormativeTreeCloner(
+            TemplateNormativeStructurePort templateNormativeStructurePort) {
+        return new TemplateNormativeTreeCloner(templateNormativeStructurePort);
     }
 
     @Bean
@@ -128,8 +139,20 @@ public class ProcessModuleConfig {
     @Bean
     CreateProcessUseCase createProcessUseCase(AccreditationProcessPort accreditationProcessPort,
                                               TemplatePort templatePort,
-                                              ProgramCatalogPort programCatalogPort) {
-        return new CreateProcessUseCaseImpl(accreditationProcessPort, templatePort, programCatalogPort);
+                                              ProgramCatalogPort programCatalogPort,
+                                              NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+                                              ProcessNormativeTreeCloner processNormativeTreeCloner) {
+        return new CreateProcessUseCaseImpl(
+                accreditationProcessPort,
+                templatePort,
+                programCatalogPort,
+                normativeHierarchyQueryPort,
+                processNormativeTreeCloner);
+    }
+
+    @Bean
+    ProcessNormativeTreeCloner processNormativeTreeCloner(NormativeStructurePort normativeStructurePort) {
+        return new ProcessNormativeTreeCloner(normativeStructurePort);
     }
 
     @Bean

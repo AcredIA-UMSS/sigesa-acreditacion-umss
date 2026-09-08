@@ -11,6 +11,8 @@
 | PM-005 | PR-IMPL-038 | DD-UC-008 / DD-UC-009 | FSD-UC-008 / FSD-UC-009 | Rechazo y aprobación de indicadores vía subfase (TD; requiere evidencia + indicatorId) |
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
+| PM-008 | PR-IMPL-021 | DD-UC-021 | FSD-UC-021 | Full-Stack v2 plantillas: API-TPL-08, UI tabs, publish BR-24, duplicate v2 |
+| PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Clonado árbol v2 al crear proceso (`ProcessNormativeTreeCloner`) |
 
 ---
 
@@ -406,3 +408,125 @@ Copilotos de dominio comparten UX flotante; páginas ganan ancho útil; trazabil
 
 - [ ] Rebuild frontend Docker tras merge
 - [ ] Smoke: historial archiva al limpiar; badge correcto por ruta
+
+---
+
+## PM-008
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-008 |
+| **Fecha** | 2026-09-08 |
+| **Hora** | 14:20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Cierre Full-Stack FSD-UC-021 v2 (jerarquía normativa plantilla) |
+| **Objetivo** | Completar M4 `/admin/plantillas`: API-TPL-08, editor v2, publicación BR-24, duplicar con árbol v2 y trazabilidad documental |
+| **Contexto** | ADR-0004 M4; espejo de UC-022 en plantillas DRAFT; Orval `jerarquía-normativa-plantilla-v2` |
+| **PR-IMPL vinculado** | [PR-IMPL-021](../../prompts/impl/PR-IMPL-021.md) |
+| **DD-UC vinculado** | [DD-UC-021](../../design/DD-UC-021.md) |
+| **FSD-UC vinculado** | [FSD-UC-021](../../product/uc/FSD-UC-021.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+continua con el UC-003
+haz los pendientes relacionados: DuplicateTemplateService v2 deep-copy, Cierre documental UC-021 (@save-prompt-mapping, @dtp-sync), Actualizar FSD-UC-003.md estado → Implementado v2
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/.../TemplateNormativeStructureController.java` |
+| generado | `backend/.../TemplateNormativeStructureCommandService.java` |
+| generado | `backend/.../TemplateNormativeTreeCloner.java` |
+| modificado | `backend/.../PublishTemplateService.java` |
+| modificado | `backend/.../TemplateStructureValidator.java` |
+| modificado | `backend/.../DuplicateTemplateService.java` |
+| generado | `frontend/.../useTemplateNormativeStructureEditor.ts` |
+| generado | `frontend/.../TemplateNormativeStructurePanel.tsx` |
+| modificado | `frontend/.../TemplateEditorPage.tsx` |
+| modificado | `docs/product/uc/FSD-UC-021.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- Backend API-TPL-08 CRUD jerarquía plantilla (DRAFT, JD).
+- `PublishTemplateService` valida árbol v2 (FSD-BR-24) antes de publicar.
+- Frontend tabs «Jerarquía normativa v2» \| «Fases legacy» en editor plantillas.
+- `DuplicateTemplateService` deep-copy v2 vía `TemplateNormativeTreeCloner`.
+- `@dtp-sync` + estados FSD/DTP actualizados a **Hecho (Full-Stack v2)**.
+
+### Validación ejecutada
+
+- [x] `./mvnw test -Dtest=TemplateNormativeStructureControllerWebMvcTest,PublishTemplateServiceTest,DuplicateTemplateServiceTest` — OK
+- [x] `pnpm exec tsc -b` (frontend) — OK
+
+### Resultado obtenido
+
+FSD-UC-021 cerrado en capa viva como Full-Stack v2 con coexistencia legacy M5.
+
+### Próximos pasos
+
+- [ ] Smoke E2E Docker: JD → plantillas → CRUD v2 → publicar → duplicar
+
+---
+
+## PM-009
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-009 |
+| **Fecha** | 2026-09-08 |
+| **Hora** | 14:20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | FSD-UC-003 — clonado árbol normativo v2 al crear proceso |
+| **Objetivo** | `POST /api/v1/processes` instancia N1→N2→N3→Indicador desde plantilla PUBLISHED |
+| **Contexto** | Complemento UC-021; ADR-0004 M3/M4; validación A4 |
+| **PR-IMPL vinculado** | [PR-IMPL-003](../../prompts/impl/PR-IMPL-003.md) |
+| **DD-UC vinculado** | [DD-UC-003](../../design/DD-UC-003.md) |
+| **FSD-UC vinculado** | [FSD-UC-003](../../product/uc/FSD-UC-003.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+continua con el UC-003
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/process/ProcessNormativeTreeCloner.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/usecase/CreateProcessUseCaseImpl.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/ProcessModuleConfig.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/process/ProcessNormativeTreeClonerTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/usecase/CreateProcessUseCaseImplTest.java` |
+| modificado | `docs/product/uc/FSD-UC-003.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- `ProcessNormativeTreeCloner` persiste árbol v2 en proceso ACTIVE tras `save`.
+- Validación plantilla sin indicadores v2 ni fases legacy → `TEMPLATE_STRUCTURE_INCOMPLETE`.
+- Coexistencia: clonado legacy Fase/Subfase se mantiene en `AccreditationProcess.createFromTemplate`.
+
+### Validación ejecutada
+
+- [x] `./mvnw test -Dtest=CreateProcessUseCaseImplTest,ProcessNormativeTreeClonerTest` — OK
+
+### Resultado obtenido
+
+FSD-UC-003 marcado **Implementado v2** en capa viva; flujo end-to-end plantilla publicada → proceso con árbol v2 habilitado.
+
+### Próximos pasos
+
+- [ ] Smoke: publicar plantilla v2 → `/procesos/nuevo` → verificar árbol en detalle proceso
