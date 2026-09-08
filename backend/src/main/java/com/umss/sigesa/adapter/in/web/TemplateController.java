@@ -2,10 +2,6 @@ package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.dto.NormativeLevel1NodeDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplateDetailResponseDto;
-import com.umss.sigesa.adapter.in.web.dto.TemplatePhaseRequestDto;
-import com.umss.sigesa.adapter.in.web.dto.TemplatePhaseResponseDto;
-import com.umss.sigesa.adapter.in.web.dto.TemplateSubphaseRequestDto;
-import com.umss.sigesa.adapter.in.web.dto.TemplateSubphaseResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplateSummaryResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.UpsertTemplateRequestDto;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
@@ -20,9 +16,7 @@ import com.umss.sigesa.application.port.in.PublishTemplateUseCase;
 import com.umss.sigesa.application.port.in.UpdateTemplateUseCase;
 import com.umss.sigesa.application.service.process.ProcessEnrichmentHelper;
 import com.umss.sigesa.domain.model.Template;
-import com.umss.sigesa.domain.model.TemplatePhase;
 import com.umss.sigesa.domain.model.TemplateStatus;
-import com.umss.sigesa.domain.model.TemplateSubphase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -137,57 +131,27 @@ public class TemplateController {
     }
 
     private Template fromRequest(UpsertTemplateRequestDto request) {
-        List<TemplatePhase> phases = new ArrayList<>();
-        if (request.getPhases() != null) {
-            for (TemplatePhaseRequestDto phaseDto : request.getPhases()) {
-                List<TemplateSubphase> subphases = new ArrayList<>();
-                if (phaseDto.getSubphases() != null) {
-                    for (TemplateSubphaseRequestDto subphaseDto : phaseDto.getSubphases()) {
-                        subphases.add(TemplateSubphase.builder()
-                                .id(subphaseDto.getId())
-                                .name(subphaseDto.getName())
-                                .order(subphaseDto.getOrder())
-                                .referenceUrl(subphaseDto.getReferenceUrl())
-                                .description(subphaseDto.getDescription())
-                                .requirements(subphaseDto.getRequirements())
-                                .build());
-                    }
-                }
-                phases.add(TemplatePhase.builder()
-                        .id(phaseDto.getId())
-                        .name(phaseDto.getName())
-                        .order(phaseDto.getOrder())
-                        .description(phaseDto.getDescription())
-                        .subphases(subphases)
-                        .build());
-            }
-        }
-
         return Template.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .type(request.getType())
-                .phases(phases)
                 .build();
     }
 
     private TemplateSummaryResponseDto toSummaryDto(Template template) {
         UUID templateId = template.getId();
-        boolean hasV2 = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId);
-        int level1Count = hasV2
+        int level1Count = templateId != null
                 ? (int) normativeHierarchyQueryPort.countLevel1NodesByTemplateId(templateId)
-                : countPhases(template);
-        int indicatorCount = hasV2
+                : 0;
+        int indicatorCount = templateId != null
                 ? (int) normativeHierarchyQueryPort.countIndicatorsByTemplateId(templateId)
-                : countSubphases(template);
+                : 0;
         return TemplateSummaryResponseDto.builder()
                 .id(template.getId())
                 .name(template.getName())
                 .description(template.getDescription())
                 .type(template.getType())
                 .status(template.getStatus() != null ? template.getStatus().name() : null)
-                .phaseCount(countPhases(template))
-                .subphaseCount(countSubphases(template))
                 .level1Count(level1Count)
                 .indicatorCount(indicatorCount)
                 .evaluatorModel(ProcessEnrichmentHelper.resolveEvaluatorModel(template.getType()))
@@ -205,65 +169,24 @@ public class TemplateController {
             ProcessEnrichmentHelper.sortTemplateNormativeTree(treeNodes);
             level1Nodes = normativeStructureWebMapper.toTemplateLevel1DtoList(treeNodes, evaluatorModel);
         }
-        int level1Count = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId)
+        int level1Count = templateId != null
                 ? (int) normativeHierarchyQueryPort.countLevel1NodesByTemplateId(templateId)
-                : countPhases(template);
-        int indicatorCount = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId)
+                : 0;
+        int indicatorCount = templateId != null
                 ? (int) normativeHierarchyQueryPort.countIndicatorsByTemplateId(templateId)
-                : countSubphases(template);
+                : 0;
         return TemplateDetailResponseDto.builder()
                 .id(template.getId())
                 .name(template.getName())
                 .description(template.getDescription())
                 .type(template.getType())
                 .status(template.getStatus() != null ? template.getStatus().name() : null)
-                .phaseCount(countPhases(template))
-                .subphaseCount(countSubphases(template))
                 .level1Count(level1Count)
                 .indicatorCount(indicatorCount)
                 .evaluatorModel(evaluatorModel)
                 .createdAt(template.getCreatedAt())
                 .updatedAt(template.getUpdatedAt())
-                .phases(template.getPhases() != null
-                        ? template.getPhases().stream().map(this::toPhaseResponse).collect(Collectors.toList())
-                        : List.of())
                 .level1Nodes(level1Nodes)
                 .build();
-    }
-
-    private TemplatePhaseResponseDto toPhaseResponse(TemplatePhase phase) {
-        return TemplatePhaseResponseDto.builder()
-                .id(phase.getId())
-                .name(phase.getName())
-                .order(phase.getOrder())
-                .description(phase.getDescription())
-                .subphases(phase.getSubphases() != null
-                        ? phase.getSubphases().stream().map(this::toSubphaseResponse).collect(Collectors.toList())
-                        : List.of())
-                .build();
-    }
-
-    private TemplateSubphaseResponseDto toSubphaseResponse(TemplateSubphase subphase) {
-        return TemplateSubphaseResponseDto.builder()
-                .id(subphase.getId())
-                .name(subphase.getName())
-                .order(subphase.getOrder())
-                .referenceUrl(subphase.getReferenceUrl())
-                .description(subphase.getDescription())
-                .requirements(subphase.getRequirements())
-                .build();
-    }
-
-    private int countPhases(Template template) {
-        return template.getPhases() != null ? template.getPhases().size() : 0;
-    }
-
-    private int countSubphases(Template template) {
-        if (template.getPhases() == null) {
-            return 0;
-        }
-        return template.getPhases().stream()
-                .mapToInt(phase -> phase.getSubphases() != null ? phase.getSubphases().size() : 0)
-                .sum();
     }
 }

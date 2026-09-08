@@ -13,7 +13,7 @@ public interface SpringDataIndicatorObservationRepository extends JpaRepository<
 
     List<IndicatorObservationJpaEntity> findByIndicatorIdOrderByCreatedAtDesc(UUID indicatorId);
 
-    Optional<IndicatorObservationJpaEntity> findFirstByIndicatorIdAndStatusOrderByCreatedAtDesc(
+    Optional<IndicatorObservationJpaEntity> findFirstByIndicator_IdAndStatusOrderByCreatedAtDesc(
             UUID indicatorId,
             String status);
 }

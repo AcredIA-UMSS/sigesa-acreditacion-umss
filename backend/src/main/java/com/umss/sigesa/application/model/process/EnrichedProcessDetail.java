@@ -1,7 +1,6 @@
 package com.umss.sigesa.application.model.process;
 
 import com.umss.sigesa.domain.model.Level1Node;
-import com.umss.sigesa.domain.model.Phase;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +17,6 @@ public record EnrichedProcessDetail(
         String evaluatorModel,
         String status,
         LocalDateTime startDate,
-        List<Phase> phases,
         List<Level1Node> level1Nodes,
         ProcessResponsibleInfo responsible
 ) {

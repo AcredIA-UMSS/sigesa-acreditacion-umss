@@ -130,7 +130,6 @@ class TemplateNormativeStructureControllerWebMvcTest {
                 .name("Plantilla test")
                 .type(type)
                 .status(TemplateStatus.DRAFT)
-                .phases(List.of())
                 .build();
     }
 }

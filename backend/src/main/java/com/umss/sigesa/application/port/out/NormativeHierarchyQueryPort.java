@@ -42,6 +42,14 @@ public interface NormativeHierarchyQueryPort {
             PhaseState status) {
     }
 
+    record IndicatorStatusItem(
+            UUID indicatorId,
+            String code,
+            String name,
+            IndicatorState status,
+            Integer order) {
+    }
+
     boolean hasNormativeTreeForProcess(UUID processId);
 
     boolean hasNormativeTreeForTemplate(UUID templateId);
@@ -65,4 +73,6 @@ public interface NormativeHierarchyQueryPort {
     Optional<NormativeIndicatorContext> findIndicatorContext(UUID indicatorId);
 
     Optional<Level1Context> findLevel1Context(UUID level1Id);
+
+    List<IndicatorStatusItem> listIndicatorsWithStatusByLevel1Id(UUID level1Id);
 }

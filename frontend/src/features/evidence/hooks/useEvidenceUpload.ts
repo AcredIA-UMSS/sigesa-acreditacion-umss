@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { UploadEvidenceResponse } from '../../../api/model';
-import { uploadSubphaseEvidence } from '../../subphases/api/subphaseApi';
+import { uploadNormativeIndicatorEvidence } from '../api/normativeIndicatorEvidenceApi';
 import { mapUploadError } from './mapUploadError';
 
 /** 10 MiB — aviso de archivo grande en UI */
@@ -9,7 +8,7 @@ export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024;
 
 export type EvidenceUploadForm = {
   processId: string;
-  subphaseId: string;
+  indicatorId: string;
   description: string;
   file: File | null;
 };
@@ -20,9 +19,17 @@ export type EvidenceUploadValidationErrors = Partial<
   Record<EvidenceUploadField, string>
 >;
 
+export type EvidenceUploadResult = {
+  evidenceId: string;
+  version: number;
+  contentHash: string;
+  event?: string;
+  currentState: string;
+};
+
 const defaultForm: EvidenceUploadForm = {
   processId: '',
-  subphaseId: '',
+  indicatorId: '',
   description: '',
   file: null,
 };
@@ -38,7 +45,7 @@ function validateForm(form: EvidenceUploadForm): EvidenceUploadValidationErrors 
   const errors: EvidenceUploadValidationErrors = {};
 
   const processId = form.processId.trim();
-  const subphaseId = form.subphaseId.trim();
+  const indicatorId = form.indicatorId.trim();
 
   if (!processId) {
     errors.processId = 'Seleccione un proceso activo.';
@@ -46,10 +53,10 @@ function validateForm(form: EvidenceUploadForm): EvidenceUploadValidationErrors 
     errors.processId = 'El proceso seleccionado no es válido.';
   }
 
-  if (!subphaseId) {
-    errors.subphaseId = 'Seleccione una subfase.';
-  } else if (!isUuid(subphaseId)) {
-    errors.subphaseId = 'La subfase seleccionada no es válida.';
+  if (!indicatorId) {
+    errors.indicatorId = 'Seleccione un indicador.';
+  } else if (!isUuid(indicatorId)) {
+    errors.indicatorId = 'El indicador seleccionado no es válido.';
   }
 
   if (!form.description.trim()) {
@@ -66,7 +73,7 @@ export function useEvidenceUpload() {
   const [searchParams] = useSearchParams();
   const [form, setForm] = useState<EvidenceUploadForm>(defaultForm);
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<UploadEvidenceResponse | null>(null);
+  const [result, setResult] = useState<EvidenceUploadResult | null>(null);
   const [validationErrors, setValidationErrors] =
     useState<EvidenceUploadValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,14 +81,14 @@ export function useEvidenceUpload() {
 
   useEffect(() => {
     const processId = searchParams.get('processId')?.trim() ?? '';
-    const subphaseId = searchParams.get('subphaseId')?.trim() ?? '';
-    if (!processId && !subphaseId) {
+    const indicatorId = searchParams.get('indicatorId')?.trim() ?? '';
+    if (!processId && !indicatorId) {
       return;
     }
     setForm((prev) => ({
       ...prev,
       processId: processId || prev.processId,
-      subphaseId: subphaseId || prev.subphaseId,
+      indicatorId: indicatorId || prev.indicatorId,
     }));
   }, [searchParams]);
 
@@ -90,7 +97,7 @@ export function useEvidenceUpload() {
       setForm((prev) => {
         const next = { ...prev, [key]: value };
         if (key === 'processId' && value !== prev.processId) {
-          next.subphaseId = '';
+          next.indicatorId = '';
         }
         return next;
       });
@@ -99,7 +106,7 @@ export function useEvidenceUpload() {
         const next = { ...prev };
         delete next[key];
         if (key === 'processId') {
-          delete next.subphaseId;
+          delete next.indicatorId;
         }
         return next;
       });
@@ -125,8 +132,8 @@ export function useEvidenceUpload() {
 
     try {
       setProgress(40);
-      const response = await uploadSubphaseEvidence({
-        subphaseId: form.subphaseId.trim(),
+      const response = await uploadNormativeIndicatorEvidence({
+        indicatorId: form.indicatorId.trim(),
         description: form.description.trim(),
         file: form.file,
       });

@@ -166,7 +166,6 @@ class NormativeStructureControllerWebMvcTest {
                         "CEUB",
                         "ACTIVE",
                         LocalDateTime.now(),
-                        List.of(),
                         List.of(Level1Node.builder()
                                 .id(level1Id)
                                 .name("Dimensión 1")
@@ -258,7 +257,6 @@ class NormativeStructureControllerWebMvcTest {
                 evaluatorModel,
                 "ACTIVE",
                 LocalDateTime.now(),
-                List.of(),
                 List.of(),
                 null);
     }

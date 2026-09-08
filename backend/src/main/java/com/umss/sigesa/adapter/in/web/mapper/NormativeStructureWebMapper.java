@@ -77,7 +77,6 @@ public class NormativeStructureWebMapper {
                 .order(indicator.getOrder())
                 .status(indicator.getStatus() != null ? indicator.getStatus().name() : "PENDIENTE")
                 .referenceUrl(indicator.getReferenceUrl())
-                .legacySubphaseId(indicator.getLegacySubphaseId())
                 .build();
     }
 

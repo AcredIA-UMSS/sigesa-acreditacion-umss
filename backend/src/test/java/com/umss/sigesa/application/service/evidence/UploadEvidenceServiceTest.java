@@ -14,6 +14,7 @@ import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.model.EvidenceUploadCommand;
 import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
+import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

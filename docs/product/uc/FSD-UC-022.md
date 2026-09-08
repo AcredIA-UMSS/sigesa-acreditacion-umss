@@ -1,7 +1,7 @@
 ---
 id: FSD-UC-022
 nombre: Gestión de estructura normativa en proceso
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[JD], [TD]"
 trazabilidad_prd: PRD-US-023
@@ -10,7 +10,7 @@ reglas: FSD-BR-07, FSD-BR-21, FSD-BR-22, FSD-BR-23
 ultima_actualizacion: "2026-09-08"
 design_doc: DD-UC-022
 pr_impl: PR-IMPL-022
-nota_implementacion: "Código v1.x opera Phase/Subphase; migración v2.0 pendiente"
+nota_implementacion: "API-STR-01…04 + UI /procesos/{id}/estructura v2; legacy fases/subfases coexisten hasta M5"
 ---
 
 # FSD-UC-022 — Gestión de estructura normativa en proceso

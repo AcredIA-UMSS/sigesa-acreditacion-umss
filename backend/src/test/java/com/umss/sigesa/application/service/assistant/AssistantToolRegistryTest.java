@@ -19,13 +19,10 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.CREATE_USER_ID,
                 AssistantToolRegistry.LIST_PROGRAMS_ID,
                 AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.SET_USER_STATUS_ID,
                 AssistantToolRegistry.MANAGE_USER_STATUS_ID,
                 AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
                 AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
@@ -34,16 +31,13 @@ class AssistantToolRegistryTest {
     }
 
     @Test
-    void toolsForRole_tdIncludesPhaseAndEvidenceTools() {
+    void toolsForRole_tdIncludesStructureAndEvidenceTools() {
         var tools = registry.toolsForRole("TD");
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
                 AssistantToolRegistry.LIST_PROGRAMS_ID,
                 AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID,
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
                 AssistantToolRegistry.CHECK_EVIDENCE_COMPLETENESS_ID,
@@ -52,14 +46,11 @@ class AssistantToolRegistryTest {
     }
 
     @Test
-    void toolsForRoleAndAgent_phasesProfile_filtersToPhaseTools() {
+    void toolsForRoleAndAgent_phasesProfile_filtersToStructureTools() {
         var tools = registry.toolsForRoleAndAgent("TD", AssistantAgentProfile.PHASES);
 
         assertThat(tools).extracting(def -> def.id()).containsExactly(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID
         );
     }
@@ -91,9 +82,8 @@ class AssistantToolRegistryTest {
     }
 
     @Test
-    void toolsForRole_ccReturnsReadOnlyPhaseAndEvidenceTools() {
+    void toolsForRole_ccReturnsReadOnlyStructureAndEvidenceTools() {
         assertThat(registry.toolsForRole("CC")).extracting(def -> def.id()).containsExactly(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID,
                 AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID,
@@ -127,7 +117,7 @@ class AssistantToolRegistryTest {
                 AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, AssistantAgentProfile.USERS))
                 .isFalse();
         assertThat(registry.isToolAllowedForAgent(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID, AssistantAgentProfile.EVIDENCE))
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID, AssistantAgentProfile.EVIDENCE))
                 .isFalse();
     }
 

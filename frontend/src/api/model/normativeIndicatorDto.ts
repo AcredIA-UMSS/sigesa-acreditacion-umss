@@ -13,5 +13,4 @@ export interface NormativeIndicatorDto {
   order?: number;
   status?: string;
   referenceUrl?: string;
-  legacySubphaseId?: string;
 }

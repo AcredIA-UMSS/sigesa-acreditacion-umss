@@ -24,9 +24,6 @@ public class EvidenceEntity {
     @Column(name = "indicator_id")
     private UUID indicatorId;
 
-    @Column(name = "subphase_id")
-    private UUID subphaseId;
-
     @Column(name = "normative_indicator_id")
     private UUID normativeIndicatorId;
 

@@ -8,8 +8,6 @@ import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.Level1Node;
-import com.umss.sigesa.domain.model.Phase;
-import com.umss.sigesa.domain.model.Subphase;
 import com.umss.sigesa.domain.model.Template;
 import com.umss.sigesa.domain.model.TemplateLevel1Node;
 import com.umss.sigesa.domain.model.TemplateLevel2Node;
@@ -36,15 +34,8 @@ public final class ProcessEnrichmentHelper {
         String templateType = template != null ? template.getType() : "";
         String evaluatorModel = resolveEvaluatorModel(templateType);
 
-        int level1Count;
-        int indicatorCount;
-        if (normativeHierarchyQueryPort.hasNormativeTreeForProcess(item.id())) {
-            level1Count = (int) normativeHierarchyQueryPort.countLevel1NodesByProcessId(item.id());
-            indicatorCount = (int) normativeHierarchyQueryPort.countIndicatorsByProcessId(item.id());
-        } else {
-            level1Count = item.phaseCount();
-            indicatorCount = item.subphaseCount();
-        }
+        int level1Count = (int) normativeHierarchyQueryPort.countLevel1NodesByProcessId(item.id());
+        int indicatorCount = (int) normativeHierarchyQueryPort.countIndicatorsByProcessId(item.id());
 
         return new ProcessSummary(
                 item.id(),
@@ -57,8 +48,6 @@ public final class ProcessEnrichmentHelper {
                 evaluatorModel,
                 item.status(),
                 item.startDate(),
-                item.phaseCount(),
-                item.subphaseCount(),
                 level1Count,
                 indicatorCount,
                 null
@@ -69,8 +58,6 @@ public final class ProcessEnrichmentHelper {
                                                  ProgramCatalogPort programCatalogPort,
                                                  TemplatePort templatePort,
                                                  NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
-        sortPhasesAndSubphases(process);
-
         ProgramCatalogPort.ProgramEntry program = programCatalogPort.findById(process.getCareerId())
                 .orElse(new ProgramCatalogPort.ProgramEntry(process.getCareerId(), "", ""));
         Template template = templatePort.findMetadataById(process.getTemplateId()).orElse(null);
@@ -94,24 +81,9 @@ public final class ProcessEnrichmentHelper {
                 evaluatorModel,
                 process.getStatus(),
                 process.getStartDate(),
-                process.getPhases(),
                 level1Nodes,
                 null
         );
-    }
-
-    public static void sortPhasesAndSubphases(AccreditationProcess process) {
-        if (process.getPhases() == null) {
-            return;
-        }
-        process.setPhases(new ArrayList<>(process.getPhases()));
-        process.getPhases().sort(Comparator.comparing(PhaseOrder::orderOf));
-        process.getPhases().forEach(phase -> {
-            if (phase.getSubphases() != null) {
-                phase.setSubphases(new ArrayList<>(phase.getSubphases()));
-                phase.getSubphases().sort(Comparator.comparing(PhaseOrder::orderOfSubphase));
-            }
-        });
     }
 
     public static void sortNormativeTree(List<Level1Node> level1Nodes) {
@@ -173,15 +145,5 @@ public final class ProcessEnrichmentHelper {
             return "";
         }
         return templateType;
-    }
-
-    private static final class PhaseOrder {
-        static Integer orderOf(Phase phase) {
-            return phase.getOrder() != null ? phase.getOrder() : 0;
-        }
-
-        static Integer orderOfSubphase(Subphase subphase) {
-            return subphase.getOrder() != null ? subphase.getOrder() : 0;
-        }
     }
 }

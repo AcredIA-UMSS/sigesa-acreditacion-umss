@@ -16,5 +16,4 @@ public class NormativeIndicatorDto {
     private Integer order;
     private String status;
     private String referenceUrl;
-    private UUID legacySubphaseId;
 }

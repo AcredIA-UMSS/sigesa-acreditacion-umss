@@ -1,14 +1,14 @@
 ---
 id: FSD-UC-009
 nombre: Aprobar Indicador
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[TD]"
 trazabilidad_prd: PRD-US-010
 modulo: MOD-WORKFLOW
 reglas: FSD-BR-04
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x usa POST /subphases/{id}/approve; migración v2.0 pendiente"
+nota_implementacion: "API-WF-02 activo: POST /indicators/{id}/approve sobre indicador normativo v2. Legacy subfase coexistiendo hasta M5."
 ---
 
 # FSD-UC-009 — Aprobar Indicador

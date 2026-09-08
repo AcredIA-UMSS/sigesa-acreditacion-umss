@@ -3,11 +3,11 @@ import { useAuth } from '../../lib/auth/useAuth';
 import { EvidenceCopilotPanel } from './components/EvidenceCopilotPanel';
 import { EvidenceUploadUI } from './components/EvidenceUploadUI';
 import { useEvidenceUpload } from './hooks/useEvidenceUpload';
-import { useSubphaseUploadTargets } from './hooks/useSubphaseUploadTargets';
+import { useNormativeIndicatorUploadTargets } from './hooks/useNormativeIndicatorUploadTargets';
 
 export function EvidenceUploadPage() {
   const upload = useEvidenceUpload();
-  const targets = useSubphaseUploadTargets(
+  const targets = useNormativeIndicatorUploadTargets(
     upload.form.processId.trim() || undefined,
   );
   const { session } = useAuth();
@@ -23,11 +23,11 @@ export function EvidenceUploadPage() {
           form={upload.form}
           onFieldChange={upload.updateField}
           processOptions={targets.processOptions}
-          subphaseOptions={targets.subphaseOptions}
+          indicatorOptions={targets.indicatorOptions}
           targetsLoading={targets.isLoading}
           targetsError={targets.errorMessage}
           targetsEmpty={targets.isEmpty}
-          subphasesEmpty={targets.subphasesEmpty}
+          indicatorsEmpty={targets.indicatorsEmpty}
           onReloadTargets={targets.reload}
           onSubmit={upload.submit}
           onReset={upload.reset}

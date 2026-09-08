@@ -1,8 +1,6 @@
 package com.umss.sigesa.config;
 
 import com.umss.sigesa.adapter.out.persistance.entity.TemplateJpaEntity;
-import com.umss.sigesa.adapter.out.persistance.entity.TemplatePhaseJpaEntity;
-import com.umss.sigesa.adapter.out.persistance.entity.TemplateSubphaseJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataTemplateRepository;
 import jakarta.persistence.EntityManager;
 import org.springframework.boot.ApplicationArguments;
@@ -17,7 +15,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * Plantillas de demostración CEUB / ARCU-SUR con taxonomía Fase → Subfase.
+ * Plantillas de demostración CEUB / ARCU-SUR (metadatos; árbol normativo v2 se carga aparte).
  */
 @Component
 @Profile("!prod")
@@ -36,28 +34,11 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        seedTemplate(
-                DevSeedData.TEMPLATE_CEUB_2026,
-                "CEUB 2026",
-                "CEUB",
-                new String[][]{
-                        {"Autoevaluación", "Diagnóstico institucional", "Matriz de evidencias"},
-                        {"Evaluación externa", "Informe preliminar", "Informe final"}
-                }
-        );
-
-        seedTemplate(
-                DevSeedData.TEMPLATE_ARCUSUR_2026,
-                "ARCU-SUR 2026",
-                "ARCU-SUR",
-                new String[][]{
-                        {"Planificación", "Cronograma", "Designación de responsables"},
-                        {"Ejecución", "Recolección documental", "Validación de criterios"}
-                }
-        );
+        seedTemplate(DevSeedData.TEMPLATE_CEUB_2026, "CEUB 2026", "CEUB");
+        seedTemplate(DevSeedData.TEMPLATE_ARCUSUR_2026, "ARCU-SUR 2026", "ARCU-SUR");
     }
 
-    private void seedTemplate(UUID id, String name, String type, String[][] phaseDefinitions) {
+    private void seedTemplate(UUID id, String name, String type) {
         if (templateRepository.findById(id).isPresent()) {
             return;
         }
@@ -71,40 +52,9 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
                 .status("PUBLISHED")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .phases(new ArrayList<>())
                 .level1Nodes(new ArrayList<>())
                 .build();
 
-        for (int phaseIndex = 0; phaseIndex < phaseDefinitions.length; phaseIndex++) {
-            String[] phaseDefinition = phaseDefinitions[phaseIndex];
-            TemplatePhaseJpaEntity phase = TemplatePhaseJpaEntity.builder()
-                    .name(phaseDefinition[0])
-                    .order(phaseIndex + 1)
-                    .description("Fase " + (phaseIndex + 1))
-                    .template(template)
-                    .subphases(new ArrayList<>())
-                    .build();
-
-            for (int subphaseIndex = 1; subphaseIndex < phaseDefinition.length; subphaseIndex++) {
-                String subphaseName = phaseDefinition[subphaseIndex];
-                TemplateSubphaseJpaEntity subphase = TemplateSubphaseJpaEntity.builder()
-                        .name(subphaseName)
-                        .order(subphaseIndex)
-                        .referenceUrl("https://duea.umss.edu.bo/normativa/"
-                                + slug(type) + "/" + slug(subphaseName))
-                        .description("Recurso normativo: " + subphaseName)
-                        .templatePhase(phase)
-                        .build();
-                phase.getSubphases().add(subphase);
-            }
-
-            template.getPhases().add(phase);
-        }
-
         entityManager.persist(template);
-    }
-
-    private static String slug(String value) {
-        return value.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
     }
 }

@@ -4,11 +4,15 @@ import com.umss.sigesa.application.port.in.AttemptDeleteEvidenceUseCase;
 import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.ListEvidenceVersionsUseCase;
+import com.umss.sigesa.application.port.in.GetNormativeIndicatorSubsanationEligibilityUseCase;
+import com.umss.sigesa.application.port.in.ListNormativeIndicatorEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
 import com.umss.sigesa.application.port.in.ListUploadableIndicatorsUseCase;
 import com.umss.sigesa.application.port.in.SearchEvidencesUseCase;
 import com.umss.sigesa.application.port.out.EvidenceSearchQueryPort;
+import com.umss.sigesa.application.port.in.SubsanateNormativeIndicatorEvidenceUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
+import com.umss.sigesa.application.port.in.UploadNormativeIndicatorEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
@@ -18,16 +22,24 @@ import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadLockPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evidence.AttemptDeleteEvidenceService;
 import com.umss.sigesa.application.service.evidence.CheckEvidenceCompletenessService;
+import com.umss.sigesa.application.service.evidence.GetNormativeIndicatorSubsanationEligibilityService;
 import com.umss.sigesa.application.service.evidence.GetEvidenceDetailService;
 import com.umss.sigesa.application.service.evidence.ListEvidenceVersionsService;
+import com.umss.sigesa.application.service.evidence.ListNormativeIndicatorEvidencesService;
 import com.umss.sigesa.application.service.evidence.ListPendingEvidencesService;
 import com.umss.sigesa.application.service.evidence.ListUploadableIndicatorsService;
 import com.umss.sigesa.application.service.evidence.SearchEvidencesService;
+import com.umss.sigesa.application.service.evidence.SubsanateNormativeIndicatorEvidenceService;
 import com.umss.sigesa.application.service.evidence.UploadEvidenceService;
+import com.umss.sigesa.application.service.evidence.UploadNormativeIndicatorEvidenceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -56,6 +68,68 @@ public class EvidenceModuleConfig {
                 auditLogPort,
                 assignmentRepository
         );
+    }
+
+    @Bean
+    UploadNormativeIndicatorEvidenceUseCase uploadNormativeIndicatorEvidenceUseCase(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorObservationPort observationPort,
+            NormativeIndicatorWorkflowPort workflowPort,
+            EvidenceUploadPersistencePort uploadPersistence,
+            EvidenceBlobStoragePort blobStorage,
+            ContentHashPort contentHashPort,
+            NotificationOutboxPort notificationOutbox,
+            AuditLogPort auditLogPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new UploadNormativeIndicatorEvidenceService(
+                hierarchyQueryPort,
+                observationPort,
+                workflowPort,
+                uploadPersistence,
+                blobStorage,
+                contentHashPort,
+                notificationOutbox,
+                auditLogPort,
+                assignmentRepository);
+    }
+
+    @Bean
+    ListNormativeIndicatorEvidencesUseCase listNormativeIndicatorEvidencesUseCase(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new ListNormativeIndicatorEvidencesService(
+                hierarchyQueryPort, evidenceQueryPort, assignmentRepository);
+    }
+
+    @Bean
+    GetNormativeIndicatorSubsanationEligibilityUseCase getNormativeIndicatorSubsanationEligibilityUseCase(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorObservationPort observationPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new GetNormativeIndicatorSubsanationEligibilityService(
+                hierarchyQueryPort, observationPort, assignmentRepository);
+    }
+
+    @Bean
+    SubsanateNormativeIndicatorEvidenceUseCase subsanateNormativeIndicatorEvidenceUseCase(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorObservationPort observationPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            NormativeIndicatorWorkflowPort workflowPort,
+            EvidenceUploadPersistencePort uploadPersistence,
+            EvidenceBlobStoragePort blobStorage,
+            ContentHashPort contentHashPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new SubsanateNormativeIndicatorEvidenceService(
+                hierarchyQueryPort,
+                observationPort,
+                evidenceQueryPort,
+                workflowPort,
+                uploadPersistence,
+                blobStorage,
+                contentHashPort,
+                assignmentRepository);
     }
 
     @Bean

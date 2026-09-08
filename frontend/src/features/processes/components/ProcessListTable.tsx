@@ -85,7 +85,7 @@ export function ProcessListTable({ processes }: ProcessListTableProps) {
                   {process.responsible?.fullName ?? '—'}
                 </td>
                 <td className="px-6 py-4 text-body-md text-gray-700">
-                  {process.phaseCount ?? 0} fases · {process.subphaseCount ?? 0} subfases
+                  {process.level1Count ?? 0} N1 · {process.indicatorCount ?? 0} indicadores
                 </td>
                 <td className="px-6 py-4 text-right">
                   {process.id && (

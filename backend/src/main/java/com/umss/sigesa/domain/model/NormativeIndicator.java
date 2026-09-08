@@ -22,5 +22,4 @@ public class NormativeIndicator {
     private Integer order;
     private String referenceUrl;
     private IndicatorState status;
-    private UUID legacySubphaseId;
 }

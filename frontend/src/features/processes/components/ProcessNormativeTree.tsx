@@ -6,15 +6,17 @@ import type {
   NormativeLevel2NodeDto,
   NormativeLevel3NodeDto,
 } from '../../../api/model';
-import { SubphaseCollaborationSection } from '../../subphases/components/SubphaseCollaborationSection';
+import { Level1CloseAction } from '../../level1/components/Level1CloseAction';
+import { NormativeIndicatorCollaborationSection } from './NormativeIndicatorCollaborationSection';
 
 interface ProcessNormativeTreeProps {
   level1Nodes: NormativeLevel1NodeDto[];
   processId: string;
   canUploadEvidence?: boolean;
-  canObserveEvidence?: boolean;
   canReviewEvidence?: boolean;
   canSubsanateEvidence?: boolean;
+  canCloseLevel1?: boolean;
+  onStructureUpdated?: () => void;
   onNavigateToIndicator?: (indicatorId: string) => void;
 }
 
@@ -22,9 +24,10 @@ export function ProcessNormativeTree({
   level1Nodes,
   processId,
   canUploadEvidence = false,
-  canObserveEvidence = false,
   canReviewEvidence = false,
   canSubsanateEvidence = false,
+  canCloseLevel1 = false,
+  onStructureUpdated,
   onNavigateToIndicator,
 }: ProcessNormativeTreeProps) {
   const sorted = [...level1Nodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -45,9 +48,10 @@ export function ProcessNormativeTree({
           node={node}
           processId={processId}
           canUploadEvidence={canUploadEvidence}
-          canObserveEvidence={canObserveEvidence}
           canReviewEvidence={canReviewEvidence}
           canSubsanateEvidence={canSubsanateEvidence}
+          canCloseLevel1={canCloseLevel1}
+          onStructureUpdated={onStructureUpdated}
           onNavigateToIndicator={onNavigateToIndicator}
         />
       ))}
@@ -59,17 +63,19 @@ function Level1Accordion({
   node,
   processId,
   canUploadEvidence,
-  canObserveEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
+  canCloseLevel1,
+  onStructureUpdated,
   onNavigateToIndicator,
 }: {
   node: NormativeLevel1NodeDto;
   processId: string;
   canUploadEvidence: boolean;
-  canObserveEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
+  canCloseLevel1: boolean;
+  onStructureUpdated?: () => void;
   onNavigateToIndicator?: (indicatorId: string) => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -115,9 +121,7 @@ function Level1Accordion({
               key={level2.id ?? level2.name}
               node={level2}
               level1Name={node.name ?? label}
-              processId={processId}
               canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
               canReviewEvidence={canReviewEvidence}
               canSubsanateEvidence={canSubsanateEvidence}
               onNavigateToIndicator={onNavigateToIndicator}
@@ -125,6 +129,17 @@ function Level1Accordion({
           ))}
           {level2Nodes.length === 0 && (
             <p className="px-5 py-3 text-body-md text-gray-500">Sin subnodos</p>
+          )}
+          {canCloseLevel1 && (
+            <Level1CloseAction
+              processId={processId}
+              level1Id={node.id}
+              level1Name={node.name ?? label}
+              level1Label={label}
+              level1Status={node.status}
+              onCompleted={() => onStructureUpdated?.()}
+              onNavigateToIndicator={onNavigateToIndicator}
+            />
           )}
         </div>
       )}
@@ -135,18 +150,14 @@ function Level1Accordion({
 function Level2Section({
   node,
   level1Name,
-  processId,
   canUploadEvidence,
-  canObserveEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
 }: {
   node: NormativeLevel2NodeDto;
   level1Name: string;
-  processId: string;
   canUploadEvidence: boolean;
-  canObserveEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -188,9 +199,7 @@ function Level2Section({
               node={level3}
               level1Name={level1Name}
               level2Name={node.name ?? label}
-              processId={processId}
               canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
               canReviewEvidence={canReviewEvidence}
               canSubsanateEvidence={canSubsanateEvidence}
               onNavigateToIndicator={onNavigateToIndicator}
@@ -209,9 +218,7 @@ function Level3Section({
   node,
   level1Name,
   level2Name,
-  processId,
   canUploadEvidence,
-  canObserveEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
@@ -219,9 +226,7 @@ function Level3Section({
   node: NormativeLevel3NodeDto;
   level1Name: string;
   level2Name: string;
-  processId: string;
   canUploadEvidence: boolean;
-  canObserveEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -246,9 +251,7 @@ function Level3Section({
             level1Name={level1Name}
             level2Name={level2Name}
             level3Name={node.name ?? label}
-            processId={processId}
             canUploadEvidence={canUploadEvidence}
-            canObserveEvidence={canObserveEvidence}
             canReviewEvidence={canReviewEvidence}
             canSubsanateEvidence={canSubsanateEvidence}
             onNavigateToIndicator={onNavigateToIndicator}
@@ -267,9 +270,7 @@ function IndicatorRow({
   level1Name,
   level2Name,
   level3Name,
-  processId,
   canUploadEvidence,
-  canObserveEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
@@ -278,9 +279,7 @@ function IndicatorRow({
   level1Name: string;
   level2Name: string;
   level3Name: string;
-  processId: string;
   canUploadEvidence: boolean;
-  canObserveEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -331,27 +330,27 @@ function IndicatorRow({
         <span className="text-label-md text-gray-500">Orden {indicator.order ?? '—'}</span>
       </div>
 
-      {indicator.legacySubphaseId ? (
-        <SubphaseCollaborationSection
-          processId={processId}
-          phaseName={level1Name}
-          subphaseId={indicator.legacySubphaseId}
-          subphaseName={indicator.description ?? indicator.code ?? 'Indicador'}
-          canUpload={canUploadEvidence}
-          canObserve={canObserveEvidence}
-          canReview={canReviewEvidence}
-          canSubsanate={canSubsanateEvidence}
-        />
-      ) : (
-        indicator.id && onNavigateToIndicator && (
-          <button
-            type="button"
-            onClick={() => onNavigateToIndicator(indicator.id!)}
-            className="mt-3 text-body-md text-primary-600 hover:text-primary-800"
-          >
-            Ver detalle del indicador
-          </button>
-        )
+      {indicator.id && (
+        <div className="mt-3 space-y-2">
+          <NormativeIndicatorCollaborationSection
+            indicatorId={indicator.id}
+            indicatorLabel={indicator.code ?? indicator.description ?? 'Indicador'}
+            indicatorStatus={indicator.status}
+            breadcrumb={breadcrumb}
+            canUpload={canUploadEvidence}
+            canSubsanate={canSubsanateEvidence}
+            canReview={canReviewEvidence}
+          />
+          {onNavigateToIndicator && (
+            <button
+              type="button"
+              onClick={() => onNavigateToIndicator(indicator.id!)}
+              className="text-body-md text-primary-600 hover:text-primary-800"
+            >
+              Ver detalle del indicador
+            </button>
+          )}
+        </div>
       )}
     </li>
   );

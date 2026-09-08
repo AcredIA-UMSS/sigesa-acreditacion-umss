@@ -85,8 +85,8 @@ class AssistantControllerWebMvcTest {
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 new AssistantChatResult(
                         "Fases del proceso **Ingeniería de Sistemas**",
-                        LIST_PROCESS_PHASES_ID,
-                        List.of("phases"),
+                        LIST_PROCESS_STRUCTURE_ID,
+                        List.of("level1_nodes"),
                         AssistantResolutionPath.KEYWORD,
                         false));
 
@@ -98,10 +98,10 @@ class AssistantControllerWebMvcTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reply").isNotEmpty())
-                .andExpect(jsonPath("$.toolId").value(LIST_PROCESS_PHASES_ID))
+                .andExpect(jsonPath("$.toolId").value(LIST_PROCESS_STRUCTURE_ID))
                 .andExpect(jsonPath("$.path").value("KEYWORD"))
                 .andExpect(jsonPath("$.llmInvoked").value(false))
-                .andExpect(jsonPath("$.sourceTables[0]").value("phases"));
+                .andExpect(jsonPath("$.sourceTables[0]").value("level1_nodes"));
     }
 
     @Test

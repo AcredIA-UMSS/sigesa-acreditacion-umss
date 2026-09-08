@@ -62,7 +62,6 @@ public class GetProcessDetailService implements GetProcessDetailUseCase {
                 detail.evaluatorModel(),
                 detail.status(),
                 detail.startDate(),
-                detail.phases(),
                 detail.level1Nodes(),
                 responsible
         );

@@ -50,9 +50,5 @@ public class TemplateJpaEntity {
 
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<TemplatePhaseJpaEntity> phases = new ArrayList<>();
-
-    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
     private List<TemplateLevel1NodeJpaEntity> level1Nodes = new ArrayList<>();
 }

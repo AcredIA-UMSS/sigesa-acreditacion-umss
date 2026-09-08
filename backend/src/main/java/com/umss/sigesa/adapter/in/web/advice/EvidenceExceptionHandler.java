@@ -12,7 +12,6 @@ import com.umss.sigesa.domain.exception.InvalidFileFormatException;
 import com.umss.sigesa.domain.exception.MaxFileSizeExceededException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
-import com.umss.sigesa.domain.exception.InvalidSubphaseStateException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
 import com.umss.sigesa.domain.exception.IndicatorNotLinkedException;
 import com.umss.sigesa.domain.exception.JustificationRequiredException;
@@ -92,12 +91,6 @@ public class EvidenceExceptionHandler {
     public ResponseEntity<Map<String, String>> handleEvidenceRequired(EvidenceRequiredException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", "EVIDENCE_REQUIRED", "message", ex.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidSubphaseStateException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidSubphaseState(InvalidSubphaseStateException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "INVALID_STATE", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidIndicatorStateException.class)

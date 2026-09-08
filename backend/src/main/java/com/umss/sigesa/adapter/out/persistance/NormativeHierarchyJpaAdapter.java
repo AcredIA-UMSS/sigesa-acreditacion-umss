@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -130,6 +131,22 @@ public class NormativeHierarchyJpaAdapter implements NormativeHierarchyQueryPort
                 entity.getProcess().getCareerId(),
                 entity.getName(),
                 parsePhaseState(entity.getStatus())));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<IndicatorStatusItem> listIndicatorsWithStatusByLevel1Id(UUID level1Id) {
+        return indicatorRepository.findAllByLevel1Id(level1Id).stream()
+                .map(entity -> new IndicatorStatusItem(
+                        entity.getId(),
+                        entity.getCode(),
+                        entity.getDescription(),
+                        parseIndicatorState(entity.getStatus()),
+                        entity.getOrder()))
+                .sorted(Comparator.comparing(
+                        IndicatorStatusItem::order,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
     }
 
     private void initializeProcessSubtree(Level1NodeJpaEntity level1) {

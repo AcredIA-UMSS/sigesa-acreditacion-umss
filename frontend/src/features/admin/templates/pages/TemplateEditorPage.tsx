@@ -2,20 +2,16 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Sidebar } from '../../../../components/layout/Sidebar';
 import { Alert } from '../../../../components/ui/Alert';
-import { Button } from '../../../../components/ui/Button';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import { TemplateEditorFormUI } from '../components/TemplateEditorFormUI';
 import { TemplateNormativeStructurePanel } from '../components/TemplateNormativeStructurePanel';
 import { useTemplateActions } from '../hooks/useTemplateActions';
 import { useTemplateEditor } from '../hooks/useTemplateEditor';
 
-type StructureEditorMode = 'normative' | 'legacy';
-
 export function TemplateEditorPage() {
   const navigate = useNavigate();
   const { templateId } = useParams<{ templateId: string }>();
   const [actionError, setActionError] = useState<string | null>(null);
-  const [mode, setMode] = useState<StructureEditorMode>('normative');
   const editor = useTemplateEditor(templateId);
   const actions = useTemplateActions(templateId);
 
@@ -59,7 +55,6 @@ export function TemplateEditorPage() {
   };
 
   const pageTitle = editor.isEditMode ? 'Editar plantilla' : 'Nueva plantilla';
-  const canEditNormative = Boolean(templateId);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -77,8 +72,8 @@ export function TemplateEditorPage() {
               <div className="mb-4 h-1 w-12 bg-secondary" />
               <h1 className="text-heading-xl text-primary-800">{pageTitle}</h1>
               <p className="mt-2 text-body-lg text-gray-600">
-                Configure la jerarquía normativa v2 (N1→N2→N3→Indicador) o las fases legacy con
-                enlaces HTTPS. Publicar habilita la plantilla en «Nuevo proceso».
+                Configure la jerarquía normativa v2 (N1→N2→N3→Indicador). Publicar habilita la
+                plantilla en «Nuevo proceso».
               </p>
             </div>
 
@@ -98,32 +93,23 @@ export function TemplateEditorPage() {
 
             {!editor.isLoading && editor.isHydrated && (
               <div className="space-y-6">
-                {canEditNormative && (
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={mode === 'normative' ? 'primary' : 'ghost'}
-                      onClick={() => setMode('normative')}
-                    >
-                      Jerarquía normativa v2
-                    </Button>
-                    <Button
-                      variant={mode === 'legacy' ? 'primary' : 'ghost'}
-                      onClick={() => setMode('legacy')}
-                    >
-                      Fases / subfases (legacy)
-                    </Button>
-                  </div>
-                )}
+                <TemplateEditorFormUI
+                  form={editor.form}
+                  fieldErrors={editor.fieldErrors}
+                  status={editor.status}
+                  isSaving={editor.isSaving}
+                  onFormChange={editor.setForm}
+                  onSave={() => void handleSave()}
+                  onPublish={() => void handleAction('publish')}
+                  onArchive={() => void handleAction('archive')}
+                  onDuplicate={() => void handleAction('duplicate')}
+                  onDelete={() => void handleAction('delete')}
+                  onCancel={() => navigate('/admin/plantillas')}
+                />
 
-                {!canEditNormative && (
-                  <Alert variant="info">
-                    Guarde la plantilla para habilitar el editor de jerarquía normativa v2.
-                  </Alert>
-                )}
-
-                {canEditNormative && mode === 'normative' ? (
+                {templateId ? (
                   <TemplateNormativeStructurePanel
-                    templateId={templateId ?? ''}
+                    templateId={templateId}
                     status={editor.status}
                     isSaving={editor.isSaving}
                     onCancel={() => navigate('/admin/plantillas')}
@@ -134,19 +120,9 @@ export function TemplateEditorPage() {
                     onDelete={() => void handleAction('delete')}
                   />
                 ) : (
-                  <TemplateEditorFormUI
-                    form={editor.form}
-                    fieldErrors={editor.fieldErrors}
-                    status={editor.status}
-                    isSaving={editor.isSaving}
-                    onFormChange={editor.setForm}
-                    onSave={() => void handleSave()}
-                    onPublish={() => void handleAction('publish')}
-                    onArchive={() => void handleAction('archive')}
-                    onDuplicate={() => void handleAction('duplicate')}
-                    onDelete={() => void handleAction('delete')}
-                    onCancel={() => navigate('/admin/plantillas')}
-                  />
+                  <Alert variant="info">
+                    Guarde la plantilla para habilitar el editor de jerarquía normativa v2.
+                  </Alert>
                 )}
               </div>
             )}

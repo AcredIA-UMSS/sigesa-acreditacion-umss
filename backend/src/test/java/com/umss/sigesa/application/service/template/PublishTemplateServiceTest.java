@@ -4,16 +4,13 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.model.Template;
-import com.umss.sigesa.domain.model.TemplatePhase;
 import com.umss.sigesa.domain.model.TemplateStatus;
-import com.umss.sigesa.domain.model.TemplateSubphase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,15 +70,6 @@ class PublishTemplateServiceTest {
                 .name("CEUB Piloto")
                 .type("CEUB")
                 .status(TemplateStatus.DRAFT)
-                .phases(List.of(TemplatePhase.builder()
-                        .name("Autoevaluación")
-                        .order(1)
-                        .subphases(List.of(TemplateSubphase.builder()
-                                .name("Diagnóstico")
-                                .order(1)
-                                .referenceUrl("https://duea.umss.edu.bo/guia/diagnostico")
-                                .build()))
-                        .build()))
                 .build();
     }
 }

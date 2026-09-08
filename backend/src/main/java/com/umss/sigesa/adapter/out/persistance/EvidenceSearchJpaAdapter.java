@@ -28,22 +28,22 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
     private static final String BASE_FROM = """
             FROM evidence e
             INNER JOIN evidence_version ev ON ev.id = e.latest_version_id
-            LEFT JOIN subphases sp ON sp.id = e.subphase_id
-            LEFT JOIN phases ph ON ph.id = sp.phase_id
-            LEFT JOIN accreditation_processes ap ON ap.id = ph.process_id
-            LEFT JOIN indicator ind ON ind.id = e.indicator_id
+            LEFT JOIN indicators ni ON ni.id = e.normative_indicator_id
+            LEFT JOIN level3_nodes l3 ON l3.id = ni.level3_id
+            LEFT JOIN level2_nodes l2 ON l2.id = l3.level2_id
+            LEFT JOIN level1_nodes l1 ON l1.id = l2.level1_id
+            LEFT JOIN accreditation_processes ap ON ap.id = l1.process_id
             """;
 
     private static final String BASE_SELECT = """
             SELECT e.id AS evidence_id,
-                   e.subphase_id,
-                   sp.name AS subphase_name,
-                   ph.id AS phase_id,
-                   ph.name AS phase_name,
+                   l1.id AS level1_id,
+                   l1.name AS level1_name,
+                   l3.name AS level3_name,
                    ap.id AS process_id,
-                   e.indicator_id,
-                   ind.code AS indicator_code,
-                   ind.title AS indicator_title,
+                   ni.id AS indicator_id,
+                   ni.code AS indicator_code,
+                   ni.description AS indicator_title,
                    ev.version_number,
                    ev.description,
                    ev.original_filename,
@@ -56,10 +56,11 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
 
     private static final String CONTEXT_VECTOR = """
             to_tsvector('spanish',
-                coalesce(sp.name, '') || ' ' ||
-                coalesce(ph.name, '') || ' ' ||
-                coalesce(ind.code, '') || ' ' ||
-                coalesce(ind.title, '')
+                coalesce(l1.name, '') || ' ' ||
+                coalesce(l2.name, '') || ' ' ||
+                coalesce(l3.name, '') || ' ' ||
+                coalesce(ni.code, '') || ' ' ||
+                coalesce(ni.description, '')
             )
             """;
 
@@ -118,7 +119,7 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
             EvidenceSearchCriteria criteria,
             List<UUID> allowedProgramIds,
             boolean useFullText) {
-        StringBuilder sql = new StringBuilder(" WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder(" WHERE e.normative_indicator_id IS NOT NULL ");
         Map<String, Object> params = new HashMap<>();
 
         appendScopeFilters(sql, params, criteria, allowedProgramIds);
@@ -133,12 +134,7 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
             EvidenceSearchCriteria criteria,
             List<UUID> allowedProgramIds) {
         if (allowedProgramIds != null) {
-            sql.append("""
-                     AND (
-                       (ap.career_id IN :allowedProgramIds)
-                       OR (e.subphase_id IS NULL AND ind.program_id IN :allowedProgramIds)
-                     )
-                    """);
+            sql.append(" AND ap.career_id IN :allowedProgramIds ");
             params.put("allowedProgramIds", allowedProgramIds);
         }
 
@@ -146,20 +142,16 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
             sql.append(" AND ap.id = :processId ");
             params.put("processId", criteria.processId());
         }
-        if (criteria.phaseId() != null) {
-            sql.append(" AND ph.id = :phaseId ");
-            params.put("phaseId", criteria.phaseId());
-        }
-        if (criteria.subphaseId() != null) {
-            sql.append(" AND sp.id = :subphaseId ");
-            params.put("subphaseId", criteria.subphaseId());
+        if (criteria.level1Id() != null) {
+            sql.append(" AND l1.id = :level1Id ");
+            params.put("level1Id", criteria.level1Id());
         }
         if (criteria.indicatorId() != null) {
-            sql.append(" AND e.indicator_id = :indicatorId ");
+            sql.append(" AND ni.id = :indicatorId ");
             params.put("indicatorId", criteria.indicatorId());
         }
         if (criteria.programId() != null) {
-            sql.append(" AND (ap.career_id = :programId OR ind.program_id = :programId) ");
+            sql.append(" AND ap.career_id = :programId ");
             params.put("programId", criteria.programId());
         }
         if (criteria.managementYear() != null) {
@@ -195,10 +187,11 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
                  AND (
                    LOWER(ev.description) LIKE :q
                    OR LOWER(COALESCE(ev.original_filename, '')) LIKE :q
-                   OR LOWER(COALESCE(sp.name, '')) LIKE :q
-                   OR LOWER(COALESCE(ph.name, '')) LIKE :q
-                   OR LOWER(COALESCE(ind.code, '')) LIKE :q
-                   OR LOWER(COALESCE(ind.title, '')) LIKE :q
+                   OR LOWER(COALESCE(l1.name, '')) LIKE :q
+                   OR LOWER(COALESCE(l2.name, '')) LIKE :q
+                   OR LOWER(COALESCE(l3.name, '')) LIKE :q
+                   OR LOWER(COALESCE(ni.code, '')) LIKE :q
+                   OR LOWER(COALESCE(ni.description, '')) LIKE :q
                  )
                 """);
         params.put("q", "%" + criteria.query().trim().toLowerCase(Locale.ROOT) + "%");
@@ -244,18 +237,17 @@ public class EvidenceSearchJpaAdapter implements EvidenceSearchQueryPort {
                 asUuid(row[0]),
                 asUuid(row[1]),
                 asString(row[2]),
-                asUuid(row[3]),
-                asString(row[4]),
+                asString(row[3]),
+                asUuid(row[4]),
                 asUuid(row[5]),
-                asUuid(row[6]),
+                asString(row[6]),
                 asString(row[7]),
-                asString(row[8]),
-                row[9] != null ? ((Number) row[9]).intValue() : 0,
+                row[8] != null ? ((Number) row[8]).intValue() : 0,
+                asString(row[9]),
                 asString(row[10]),
-                asString(row[11]),
-                asDateTime(row[12]),
-                asUuid(row[13]),
-                !toBoolean(row[14])
+                asDateTime(row[11]),
+                asUuid(row[12]),
+                !toBoolean(row[13])
         );
     }
 

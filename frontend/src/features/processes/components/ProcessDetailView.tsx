@@ -6,8 +6,6 @@ import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
 import { ProcessNormativeTree } from './ProcessNormativeTree';
-import { ProcessPhaseTree } from './ProcessPhaseTree';
-import { PhasesCopilotPanel } from './PhasesCopilotPanel';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
@@ -33,23 +31,9 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     useProcessDetail(processId);
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
-  const canUseCopilot =
-    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
-  const copilotReadOnly = session?.role === 'CC';
   const canUploadEvidence = session?.role === 'CC';
-  const canObserveEvidence = session?.role === 'JD' || session?.role === 'TD';
   const canReviewEvidence = session?.role === 'TD';
-  const subphaseAnchorRef = useRef<HTMLDivElement>(null);
-  const hasNormativeTree = (process?.level1Nodes?.length ?? 0) > 0;
-
-  const navigateToSubphase = useCallback((subphaseId: string) => {
-    const element = document.getElementById(`subphase-${subphaseId}`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element?.classList.add('ring-2', 'ring-primary-400');
-    window.setTimeout(() => {
-      element?.classList.remove('ring-2', 'ring-primary-400');
-    }, 2000);
-  }, []);
+  const structureAnchorRef = useRef<HTMLDivElement>(null);
 
   const navigateToIndicator = useCallback((indicatorId: string) => {
     const element = document.getElementById(`indicator-${indicatorId}`);
@@ -61,7 +45,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   }, []);
 
   return (
-    <div className="space-y-6" ref={subphaseAnchorRef}>
+    <div className="space-y-6" ref={structureAnchorRef}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/procesos"
@@ -134,64 +118,41 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  {hasNormativeTree
-                    ? `Jerarquía normativa ${process.evaluatorModel ?? process.templateType ?? ''} (N1→N2→N3→Indicador). Cada indicador admite evidencias y observaciones del equipo técnico.`
-                    : 'Fases y subfases con requisitos de completitud. En cada subfase puede cargar una o más evidencias y el equipo técnico puede registrar observaciones.'}
+                  Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
+                  (N1→N2→N3→Indicador). Cada indicador admite evidencias y observaciones del equipo
+                  técnico.
                 </p>
               </div>
               {canEditStructure && (
                 <Link to={`/procesos/${processId}/estructura`}>
                   <Button variant="secondary">
                     <Pencil size={16} />
-                    Editar estructura
+                    Editar estructura normativa
                   </Button>
                 </Link>
               )}
             </div>
-            {!hasNormativeTree && (
-              <ProcessEvidenceSearchPanel
-                processId={processId}
-                programId={process.careerId}
-                phases={process.phases ?? []}
-                onNavigateToSubphase={navigateToSubphase}
-              />
-            )}
-            {hasNormativeTree ? (
+
+            <ProcessEvidenceSearchPanel
+              processId={processId}
+              programId={process.careerId}
+              level1Nodes={process.level1Nodes ?? []}
+              onNavigateToIndicator={navigateToIndicator}
+            />
+
+            <div className="mt-6">
               <ProcessNormativeTree
                 level1Nodes={process.level1Nodes ?? []}
                 processId={processId}
                 canUploadEvidence={canUploadEvidence}
-                canObserveEvidence={canObserveEvidence}
                 canReviewEvidence={canReviewEvidence}
                 canSubsanateEvidence={canUploadEvidence}
+                canCloseLevel1={canReviewEvidence}
+                onStructureUpdated={refetch}
                 onNavigateToIndicator={navigateToIndicator}
               />
-            ) : (
-              <ProcessPhaseTree
-                phases={process.phases ?? []}
-                processId={processId}
-                canUploadEvidence={canUploadEvidence}
-                canObserveEvidence={canObserveEvidence}
-                canReviewEvidence={canReviewEvidence}
-                canSubsanateEvidence={canUploadEvidence}
-                canClosePhase={canReviewEvidence}
-                onStructureUpdated={refetch}
-                onNavigateToSubphase={navigateToSubphase}
-              />
-            )}
+            </div>
           </section>
-
-          {canUseCopilot && (
-            <PhasesCopilotPanel
-              readOnly={copilotReadOnly}
-              process={{
-                processId,
-                careerName: process.careerName ?? 'Carrera',
-                careerCode: process.careerCode ?? '—',
-                templateType: process.templateType ?? 'CEUB',
-              }}
-            />
-          )}
         </div>
       )}
     </div>

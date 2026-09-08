@@ -2,10 +2,9 @@ import { customFetch } from '../../../lib/api/customFetch';
 
 export type EvidenceSearchHit = {
   evidenceId: string;
-  subphaseId?: string;
-  subphaseName?: string;
-  phaseId?: string;
-  phaseName?: string;
+  level1Id?: string;
+  level1Name?: string;
+  level3Name?: string;
   processId?: string;
   indicatorId?: string;
   indicatorCode?: string;
@@ -27,8 +26,7 @@ export type EvidenceSearchPage = {
 
 export type EvidenceSearchParams = {
   processId?: string;
-  phaseId?: string;
-  subphaseId?: string;
+  level1Id?: string;
   indicatorId?: string;
   programId?: string;
   q?: string;
@@ -40,8 +38,7 @@ export type EvidenceSearchParams = {
 function buildQuery(params: EvidenceSearchParams): string {
   const search = new URLSearchParams();
   if (params.processId) search.set('processId', params.processId);
-  if (params.phaseId) search.set('phaseId', params.phaseId);
-  if (params.subphaseId) search.set('subphaseId', params.subphaseId);
+  if (params.level1Id) search.set('level1Id', params.level1Id);
   if (params.indicatorId) search.set('indicatorId', params.indicatorId);
   if (params.programId) search.set('programId', params.programId);
   if (params.q?.trim()) search.set('q', params.q.trim());

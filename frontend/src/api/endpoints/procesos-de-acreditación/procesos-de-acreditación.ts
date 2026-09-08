@@ -428,7 +428,7 @@ export const getCreateProcessUrl = () => {
 }
 
 /**
- * Inicia un proceso clonando la taxonomía de una plantilla (Fase -> Subfase).
+ * Inicia un proceso clonando el árbol normativo v2 de una plantilla.
  * @summary Crear un nuevo proceso
  */
 export const createProcess = async (createProcessRequestDto: CreateProcessRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<createProcessResponse> => {
@@ -528,7 +528,7 @@ export const getGetProcessUrl = (processId: string,) => {
 }
 
 /**
- * Incluye árbol normativo v2 (N1→N2→N3→Indicador) y legacy Fase→Subfase.
+ * Incluye árbol normativo v2 (N1→N2→N3→Indicador).
  * @summary Detalle de proceso
  */
 export const getProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getProcessResponse> => {

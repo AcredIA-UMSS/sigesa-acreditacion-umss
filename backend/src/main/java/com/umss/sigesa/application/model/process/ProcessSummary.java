@@ -14,8 +14,6 @@ public record ProcessSummary(
         String evaluatorModel,
         String status,
         LocalDateTime startDate,
-        int phaseCount,
-        int subphaseCount,
         int level1Count,
         int indicatorCount,
         ProcessResponsibleInfo responsible

@@ -1,14 +1,14 @@
 ---
 id: FSD-UC-004
 nombre: Cargar Evidencia en Indicador
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x usa POST /subphases/{id}/evidences; migración v2.0 pendiente"
+nota_implementacion: "API-EVD-01 activo: POST/GET /indicators/{id}/evidences. Legacy subfase coexistiendo hasta M5."
 ---
 
 # FSD-UC-004 — Cargar Evidencia en Indicador

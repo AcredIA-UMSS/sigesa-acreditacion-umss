@@ -4,9 +4,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.domain.model.Template;
 import com.umss.sigesa.domain.model.TemplateLevel1Node;
-import com.umss.sigesa.domain.model.TemplatePhase;
 import com.umss.sigesa.domain.model.TemplateStatus;
-import com.umss.sigesa.domain.model.TemplateSubphase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,15 +47,6 @@ class DuplicateTemplateServiceTest {
                 .description("Original")
                 .type("CEUB")
                 .status(TemplateStatus.PUBLISHED)
-                .phases(List.of(TemplatePhase.builder()
-                        .name("Fase")
-                        .order(1)
-                        .subphases(List.of(TemplateSubphase.builder()
-                                .name("Sub")
-                                .order(1)
-                                .referenceUrl("https://duea.umss.edu.bo/ref/sub")
-                                .build()))
-                        .build()))
                 .build();
 
         when(templateManagementPort.findByIdForEdit(sourceId)).thenReturn(Optional.of(source));
@@ -70,7 +59,6 @@ class DuplicateTemplateServiceTest {
         assertNotEquals(sourceId, copy.getId());
         assertEquals(TemplateStatus.DRAFT, copy.getStatus());
         assertEquals("Copia de CEUB 2026", copy.getName());
-        assertEquals(1, copy.getPhases().size());
         verify(normativeTreeCloner, never()).cloneFromTemplate(any(), any());
     }
 
@@ -86,7 +74,6 @@ class DuplicateTemplateServiceTest {
                 .name("CEUB 2026")
                 .type("CEUB")
                 .status(TemplateStatus.PUBLISHED)
-                .phases(List.of())
                 .build();
 
         when(templateManagementPort.findByIdForEdit(sourceId)).thenReturn(Optional.of(source));

@@ -38,7 +38,6 @@ class RemoveProcessResponsibleServiceTest {
                         .id(processId)
                         .status("ACTIVE")
                         .startDate(LocalDateTime.now())
-                        .phases(List.of())
                         .build()));
 
         service.remove(processId);

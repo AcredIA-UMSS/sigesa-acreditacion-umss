@@ -1,6 +1,6 @@
 import { FileSearch, Search, X } from 'lucide-react';
 import type { FormEvent } from 'react';
-import type { PhaseDto } from '../../../api/model';
+import type { NormativeLevel1NodeDto } from '../../../api/model';
 import { Button } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Select';
 import { useEvidenceSearch } from '../hooks/useEvidenceSearch';
@@ -8,23 +8,60 @@ import { useEvidenceSearch } from '../hooks/useEvidenceSearch';
 export type ProcessEvidenceSearchPanelProps = {
   processId: string;
   programId?: string;
-  phases: PhaseDto[];
-  onNavigateToSubphase?: (subphaseId: string) => void;
+  level1Nodes: NormativeLevel1NodeDto[];
+  onNavigateToIndicator?: (indicatorId: string) => void;
 };
+
+type IndicatorOption = {
+  value: string;
+  label: string;
+};
+
+function buildIndicatorOptions(
+  level1Nodes: NormativeLevel1NodeDto[],
+  level1Id: string,
+): IndicatorOption[] {
+  const sortedLevel1 = [...level1Nodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const scopedLevel1 = level1Id
+    ? sortedLevel1.filter((node) => node.id === level1Id)
+    : sortedLevel1;
+
+  const options: IndicatorOption[] = [];
+  for (const level1 of scopedLevel1) {
+    for (const level2 of [...(level1.level2Nodes ?? [])].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    )) {
+      for (const level3 of [...(level2.level3Nodes ?? [])].sort(
+        (a, b) => (a.order ?? 0) - (b.order ?? 0),
+      )) {
+        for (const indicator of [...(level3.indicators ?? [])].sort(
+          (a, b) => (a.order ?? 0) - (b.order ?? 0),
+        )) {
+          if (!indicator.id) continue;
+          options.push({
+            value: indicator.id,
+            label: `${indicator.code ?? 'IND'} · ${indicator.description ?? 'Indicador'}`,
+          });
+        }
+      }
+    }
+  }
+  return options;
+}
 
 export function ProcessEvidenceSearchPanel({
   processId,
   programId,
-  phases,
-  onNavigateToSubphase,
+  level1Nodes,
+  onNavigateToIndicator,
 }: ProcessEvidenceSearchPanelProps) {
   const {
     query,
     setQuery,
-    phaseId,
-    setPhaseId,
-    subphaseId,
-    setSubphaseId,
+    level1Id,
+    setLevel1Id,
+    indicatorId,
+    setIndicatorId,
     results,
     total,
     isSearching,
@@ -34,25 +71,20 @@ export function ProcessEvidenceSearchPanel({
     reset,
   } = useEvidenceSearch({ processId, programId });
 
-  const sortedPhases = [...phases].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  const selectedPhase = sortedPhases.find((phase) => phase.id === phaseId);
-  const subphases = [...(selectedPhase?.subphases ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
-
-  const phaseOptions = [
-    { value: '', label: 'Todas las fases' },
-    ...sortedPhases.map((phase) => ({
-      value: phase.id ?? '',
-      label: phase.name ?? 'Fase',
+  const sortedLevel1 = [...level1Nodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const level1Options = [
+    { value: '', label: 'Todos los nodos N1' },
+    ...sortedLevel1.map((node) => ({
+      value: node.id ?? '',
+      label: node.name ?? 'N1',
     })),
   ];
 
-  const subphaseOptions = [
-    { value: '', label: 'Todas las subfases' },
-    ...subphases.map((sub) => ({
-      value: sub.id ?? '',
-      label: sub.name ?? 'Subfase',
+  const indicatorOptions = [
+    { value: '', label: 'Todos los indicadores' },
+    ...buildIndicatorOptions(level1Nodes, level1Id).map((item) => ({
+      value: item.value,
+      label: item.label,
     })),
   ];
 
@@ -85,22 +117,21 @@ export function ProcessEvidenceSearchPanel({
 
         <div>
           <Select
-            label="Fase"
-            id="evidence-search-phase"
-            value={phaseId}
-            options={phaseOptions}
-            onChange={(event) => setPhaseId(event.target.value)}
+            label="Nivel 1"
+            id="evidence-search-level1"
+            value={level1Id}
+            options={level1Options}
+            onChange={(event) => setLevel1Id(event.target.value)}
           />
         </div>
 
         <div>
           <Select
-            label="Subfase"
-            id="evidence-search-subphase"
-            value={subphaseId}
-            disabled={!phaseId}
-            options={subphaseOptions}
-            onChange={(event) => setSubphaseId(event.target.value)}
+            label="Indicador"
+            id="evidence-search-indicator"
+            value={indicatorId}
+            options={indicatorOptions}
+            onChange={(event) => setIndicatorId(event.target.value)}
           />
         </div>
 
@@ -109,7 +140,7 @@ export function ProcessEvidenceSearchPanel({
             <Search size={16} aria-hidden />
             Buscar
           </Button>
-          {(hasSearched || query || phaseId || subphaseId) && (
+          {(hasSearched || query || level1Id || indicatorId) && (
             <Button type="button" variant="ghost" onClick={reset}>
               <X size={16} aria-hidden />
               Limpiar
@@ -148,19 +179,19 @@ export function ProcessEvidenceSearchPanel({
                         </p>
                         <p className="text-body-md text-gray-600">{item.description}</p>
                         <p className="mt-1 text-label-md text-gray-500">
-                          {item.phaseName ?? '—'} · {item.subphaseName ?? '—'}
+                          {item.level1Name ?? '—'} · {item.level3Name ?? '—'}
                           {item.indicatorCode ? ` · ${item.indicatorCode}` : ''}
                           {' · '}v{item.version}
                           {!item.blobAvailable ? ' · solo metadatos' : ''}
                         </p>
                       </div>
-                      {item.subphaseId && onNavigateToSubphase && (
+                      {item.indicatorId && onNavigateToIndicator && (
                         <button
                           type="button"
                           className="shrink-0 text-body-md font-medium text-primary-600 underline decoration-primary-400 underline-offset-2 hover:text-primary-800"
-                          onClick={() => onNavigateToSubphase(item.subphaseId!)}
+                          onClick={() => onNavigateToIndicator(item.indicatorId!)}
                         >
-                          Ir a subfase
+                          Ir al indicador
                         </button>
                       )}
                     </div>

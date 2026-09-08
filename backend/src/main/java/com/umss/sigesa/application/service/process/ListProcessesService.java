@@ -72,8 +72,6 @@ public class ListProcessesService implements ListProcessesUseCase {
                         summary.evaluatorModel(),
                         summary.status(),
                         summary.startDate(),
-                        summary.phaseCount(),
-                        summary.subphaseCount(),
                         summary.level1Count(),
                         summary.indicatorCount(),
                         responsibles.get(summary.id())

@@ -16,7 +16,7 @@ import com.umss.sigesa.domain.model.Level2Node;
 import com.umss.sigesa.domain.model.Level3Node;
 import com.umss.sigesa.domain.model.NormativeIndicator;
 import com.umss.sigesa.domain.model.PhaseState;
-import com.umss.sigesa.domain.model.SubphaseObservationStatus;
+import com.umss.sigesa.domain.model.IndicatorObservationStatus;
 import com.umss.sigesa.domain.model.TemplateLevel1Node;
 import com.umss.sigesa.domain.model.TemplateLevel2Node;
 import com.umss.sigesa.domain.model.TemplateLevel3Node;
@@ -87,7 +87,6 @@ public class NormativeHierarchyPersistenceMapper {
                 .order(entity.getOrder())
                 .referenceUrl(entity.getReferenceUrl())
                 .status(parseIndicatorState(entity.getStatus()))
-                .legacySubphaseId(entity.getLegacySubphaseId())
                 .build();
     }
 
@@ -182,10 +181,10 @@ public class NormativeHierarchyPersistenceMapper {
         return IndicatorState.valueOf(status);
     }
 
-    private SubphaseObservationStatus parseObservationStatus(String status) {
+    private IndicatorObservationStatus parseObservationStatus(String status) {
         if (status == null || status.isBlank()) {
-            return SubphaseObservationStatus.OPEN;
+            return IndicatorObservationStatus.OPEN;
         }
-        return SubphaseObservationStatus.valueOf(status);
+        return IndicatorObservationStatus.valueOf(status);
     }
 }

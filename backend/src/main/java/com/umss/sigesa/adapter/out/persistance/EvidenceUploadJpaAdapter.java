@@ -2,13 +2,15 @@ package com.umss.sigesa.adapter.out.persistance;
 
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
+import com.umss.sigesa.adapter.out.persistance.entity.IndicatorObservationJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
-import com.umss.sigesa.adapter.out.persistance.entity.SubphaseObservationEntity;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataIndicatorObservationRepository;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeIndicatorRepository;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.EvidenceVersion;
+import com.umss.sigesa.domain.model.IndicatorObservationStatus;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
-import com.umss.sigesa.domain.model.SubphaseObservationStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,37 +23,46 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
     private final EvidenceJpaRepository evidenceRepository;
     private final EvidenceVersionJpaRepository versionRepository;
     private final IndicatorStateHistoryJpaRepository historyRepository;
-    private final SubphaseObservationJpaRepository observationRepository;
+    private final SpringDataIndicatorObservationRepository indicatorObservationRepository;
+    private final SpringDataNormativeIndicatorRepository normativeIndicatorRepository;
 
     public EvidenceUploadJpaAdapter(EvidenceJpaRepository evidenceRepository,
-                                      EvidenceVersionJpaRepository versionRepository,
-                                      IndicatorStateHistoryJpaRepository historyRepository,
-                                      SubphaseObservationJpaRepository observationRepository) {
+                                    EvidenceVersionJpaRepository versionRepository,
+                                    IndicatorStateHistoryJpaRepository historyRepository,
+                                    SpringDataIndicatorObservationRepository indicatorObservationRepository,
+                                    SpringDataNormativeIndicatorRepository normativeIndicatorRepository) {
         this.evidenceRepository = evidenceRepository;
         this.versionRepository = versionRepository;
         this.historyRepository = historyRepository;
-        this.observationRepository = observationRepository;
+        this.indicatorObservationRepository = indicatorObservationRepository;
+        this.normativeIndicatorRepository = normativeIndicatorRepository;
     }
 
     @Override
     @Transactional
     public void persistUpload(Evidence evidence, EvidenceVersion version, IndicatorStateHistoryEntry historyEntry) {
-        persistSubphaseUpload(evidence, version, historyEntry);
+        persistEvidenceUpload(evidence, version, historyEntry);
     }
 
     @Override
     @Transactional
-    public void persistSubphaseUpload(Evidence evidence, EvidenceVersion version) {
-        persistSubphaseUpload(evidence, version, null);
+    public void persistNormativeIndicatorUpload(Evidence evidence, EvidenceVersion version, String externalUrl) {
+        persistEvidenceUpload(evidence, version, null);
+        if (externalUrl != null && !externalUrl.isBlank()) {
+            EvidenceVersionEntity versionEntity = versionRepository.findById(version.getId())
+                    .orElseThrow(() -> new IllegalStateException("Version not found: " + version.getId()));
+            versionEntity.setExternalUrl(externalUrl);
+            versionRepository.save(versionEntity);
+        }
     }
 
     @Transactional
-    public void persistSubphaseUpload(Evidence evidence, EvidenceVersion version,
+    public void persistEvidenceUpload(Evidence evidence, EvidenceVersion version,
                                       IndicatorStateHistoryEntry historyEntry) {
         EvidenceEntity evidenceEntity = new EvidenceEntity();
         evidenceEntity.setId(evidence.getId());
         evidenceEntity.setIndicatorId(evidence.getIndicatorId());
-        evidenceEntity.setSubphaseId(evidence.getSubphaseId());
+        evidenceEntity.setNormativeIndicatorId(evidence.getNormativeIndicatorId());
         evidenceEntity.setLatestVersionId(version.getId());
         evidenceEntity.setCreatedAt(evidence.getCreatedAt());
         evidenceRepository.save(evidenceEntity);
@@ -85,11 +96,11 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
 
     @Override
     @Transactional
-    public String persistSubphaseSubsanation(UUID evidenceId,
-                                             EvidenceVersion newVersion,
-                                             UUID observationId,
-                                             int supersedesVersionNumber,
-                                             UUID supersededVersionId) {
+    public String persistNormativeIndicatorSubsanation(UUID evidenceId,
+                                                       EvidenceVersion newVersion,
+                                                       UUID observationId,
+                                                       int supersedesVersionNumber,
+                                                       UUID supersededVersionId) {
         EvidenceEntity evidence = evidenceRepository.findById(evidenceId)
                 .orElseThrow(() -> new IllegalStateException("Evidence not found: " + evidenceId));
         EvidenceVersionEntity superseded = versionRepository.findById(supersededVersionId)
@@ -105,7 +116,7 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
         versionEntity.setStorageKey(newVersion.getStorageKey());
         versionEntity.setCreatedBy(newVersion.getCreatedBy());
         versionEntity.setCreatedAt(newVersion.getCreatedAt());
-        versionEntity.setObservationId(observationId);
+        versionEntity.setIndicatorObservationId(observationId);
         versionEntity.setSupersedesVersionNumber(supersedesVersionNumber);
         versionEntity.setBlobPurged(false);
         versionEntity.setOriginalFilename(extractFilename(newVersion.getStorageKey()));
@@ -117,13 +128,13 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
         superseded.setBlobPurged(true);
         versionRepository.save(superseded);
 
-        SubphaseObservationEntity observation = observationRepository.findById(observationId)
-                .orElseThrow(() -> new IllegalStateException("Observation not found"));
-        observation.setStatus(SubphaseObservationStatus.RESOLVED.name());
+        IndicatorObservationJpaEntity observation = indicatorObservationRepository.findById(observationId)
+                .orElseThrow(() -> new IllegalStateException("Indicator observation not found"));
+        observation.setStatus(IndicatorObservationStatus.RESOLVED.name());
         observation.setResolvedAt(LocalDateTime.now());
         observation.setResolvedVersionId(newVersion.getId());
         observation.setUpdatedAt(LocalDateTime.now());
-        observationRepository.save(observation);
+        indicatorObservationRepository.save(observation);
 
         return superseded.getStorageKey();
     }

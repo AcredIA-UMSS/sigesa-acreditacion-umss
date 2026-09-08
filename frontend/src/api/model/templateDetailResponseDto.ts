@@ -5,7 +5,6 @@
  * OpenAPI spec version: v0
  */
 import type { NormativeLevel1NodeDto } from './normativeLevel1NodeDto.ts';
-import type { TemplatePhaseResponseDto } from './templatePhaseResponseDto.ts';
 
 export interface TemplateDetailResponseDto {
   id?: string;
@@ -13,13 +12,10 @@ export interface TemplateDetailResponseDto {
   description?: string;
   type?: string;
   status?: string;
-  phaseCount?: number;
-  subphaseCount?: number;
   level1Count?: number;
   indicatorCount?: number;
   evaluatorModel?: string;
   createdAt?: string;
   updatedAt?: string;
-  phases?: TemplatePhaseResponseDto[];
   level1Nodes?: NormativeLevel1NodeDto[];
 }

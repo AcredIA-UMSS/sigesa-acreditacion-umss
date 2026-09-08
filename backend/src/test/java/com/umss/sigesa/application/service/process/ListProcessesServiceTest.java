@@ -60,8 +60,10 @@ class ListProcessesServiceTest {
                 userRepositoryPort,
                 normativeHierarchyQueryPort);
         lenient().when(processResponsiblePort.findAllActive()).thenReturn(List.of());
-        lenient().when(normativeHierarchyQueryPort.hasNormativeTreeForProcess(org.mockito.ArgumentMatchers.any()))
-                .thenReturn(false);
+        lenient().when(normativeHierarchyQueryPort.countLevel1NodesByProcessId(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(0L);
+        lenient().when(normativeHierarchyQueryPort.countIndicatorsByProcessId(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(0L);
     }
 
     @Test
@@ -112,7 +114,7 @@ class ListProcessesServiceTest {
 
     private ProcessQueryPort.ProcessListItem listItem(UUID processId, UUID careerId) {
         return new ProcessQueryPort.ProcessListItem(
-                processId, careerId, templateId, "ACTIVE", LocalDateTime.now(), 2, 5
+                processId, careerId, templateId, "ACTIVE", LocalDateTime.now()
         );
     }
 

@@ -17,8 +17,6 @@ public interface SpringDataNormativeIndicatorRepository extends JpaRepository<No
 
     Optional<NormativeIndicatorJpaEntity> findByIdAndLevel3NodeId(UUID id, UUID level3Id);
 
-    Optional<NormativeIndicatorJpaEntity> findByLegacySubphaseId(UUID legacySubphaseId);
-
     @Query("""
             SELECT i FROM NormativeIndicatorJpaEntity i
             JOIN FETCH i.level3Node l3

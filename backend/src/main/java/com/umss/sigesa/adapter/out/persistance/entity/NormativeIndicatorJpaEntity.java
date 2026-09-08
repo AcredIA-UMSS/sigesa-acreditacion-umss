@@ -53,9 +53,6 @@ public class NormativeIndicatorJpaEntity {
     @Builder.Default
     private String status = IndicatorState.PENDIENTE.name();
 
-    @Column(name = "legacy_subphase_id")
-    private UUID legacySubphaseId;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

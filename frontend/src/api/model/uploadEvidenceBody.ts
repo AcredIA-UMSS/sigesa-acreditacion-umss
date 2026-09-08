@@ -6,6 +6,7 @@
  */
 
 export type UploadEvidenceBody = {
-  file: Blob;
+  file?: Blob;
+  externalUrl?: string;
   description: string;
 };

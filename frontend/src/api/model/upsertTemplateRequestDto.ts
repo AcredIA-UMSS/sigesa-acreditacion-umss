@@ -4,7 +4,6 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import type { TemplatePhaseRequestDto } from './templatePhaseRequestDto.ts';
 
 export interface UpsertTemplateRequestDto {
   /** @minLength 1 */
@@ -12,6 +11,4 @@ export interface UpsertTemplateRequestDto {
   description?: string;
   /** @minLength 1 */
   type: string;
-  /** @minItems 1 */
-  phases: TemplatePhaseRequestDto[];
 }

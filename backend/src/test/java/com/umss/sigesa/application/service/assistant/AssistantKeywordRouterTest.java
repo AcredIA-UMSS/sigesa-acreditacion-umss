@@ -3,8 +3,6 @@ package com.umss.sigesa.application.service.assistant;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
 import com.umss.sigesa.application.model.assistant.AssistantChatContext;
 import com.umss.sigesa.application.model.assistant.AssistantToolInvocation;
-import com.umss.sigesa.domain.model.ChatMessage;
-import com.umss.sigesa.domain.model.ChatRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +24,7 @@ class AssistantKeywordRouterTest {
     }
 
     @Test
-    void listPhasesQuestion_resolvesToListProcessPhases() {
+    void listStructureQuestion_resolvesToListProcessStructure() {
         Optional<AssistantToolInvocation> result = router.resolve(
                 "Lista las fases de Ingeniería de Sistemas CEUB",
                 List.of(),
@@ -34,7 +32,7 @@ class AssistantKeywordRouterTest {
                 AssistantChatContext.general());
 
         assertThat(result).isPresent();
-        assertThat(result.get().toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.get().toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
         assertThat(result.get().argumentsJson()).contains("careerQuery");
     }
 
@@ -50,13 +48,13 @@ class AssistantKeywordRouterTest {
                 context);
 
         assertThat(result).isPresent();
-        assertThat(result.get().toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.get().toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
         assertThat(result.get().argumentsJson()).contains("Ingeniería de Sistemas");
         assertThat(result.get().argumentsJson()).contains("CEUB");
     }
 
     @Test
-    void phasesAgent_confirmoAfterSubphasePreview_resolvesManageSubphaseConfirmed() {
+    void phasesAgent_confirmoAfterSubphasePreview_returnsEmpty() {
         AssistantChatContext context = AssistantChatContext.phases(
                 PROCESS_ID, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
 
@@ -68,9 +66,11 @@ class AssistantKeywordRouterTest {
 
                 Responda **confirmo** para ejecutar la acción.""";
 
-        List<ChatMessage> history = List.of(
-                new ChatMessage(ChatRole.USER, "Agrega una subfase «Evidencia docente» en Fase 2"),
-                new ChatMessage(ChatRole.ASSISTANT, previewReply));
+        List<com.umss.sigesa.domain.model.ChatMessage> history = List.of(
+                new com.umss.sigesa.domain.model.ChatMessage(
+                        com.umss.sigesa.domain.model.ChatRole.USER, "Agrega una subfase «Evidencia docente» en Fase 2"),
+                new com.umss.sigesa.domain.model.ChatMessage(
+                        com.umss.sigesa.domain.model.ChatRole.ASSISTANT, previewReply));
 
         Optional<AssistantToolInvocation> result = router.resolve(
                 "confirmo",
@@ -78,10 +78,7 @@ class AssistantKeywordRouterTest {
                 tdAuth(),
                 context);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().toolId()).isEqualTo(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID);
-        assertThat(result.get().argumentsJson()).contains("\"confirmed\":true");
-        assertThat(result.get().argumentsJson()).contains("Evidencia docente");
+        assertThat(result).isEmpty();
     }
 
     @Test

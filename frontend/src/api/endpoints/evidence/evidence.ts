@@ -5,21 +5,31 @@
  * OpenAPI spec version: v0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  NormativeIndicatorEvidenceResponseDto,
+  NormativeIndicatorSubsanationEligibilityResponseDto,
+  SubsanateEvidenceBody,
+  SubsanateNormativeIndicatorEvidenceResponseDto,
+  UploadEvidenceBody,
+  UploadEvidenceResponse,
   UploadableIndicatorResponse
 } from '../../model';
 
@@ -44,6 +54,418 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export type listEvidencesResponse200 = {
+  data: NormativeIndicatorEvidenceResponseDto[]
+  status: 200
+}
+
+export type listEvidencesResponseSuccess = (listEvidencesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listEvidencesResponse = (listEvidencesResponseSuccess)
+
+export const getListEvidencesUrl = (indicatorId: string,) => {
+
+
+
+
+  return `/api/v1/indicators/${indicatorId}/evidences`
+}
+
+/**
+ * @summary Listar evidencias cargadas en el indicador normativo
+ */
+export const listEvidences = async (indicatorId: string, options?: Parameters<typeof customFetch>[1]): Promise<listEvidencesResponse> => {
+
+  return customFetch<listEvidencesResponse>(getListEvidencesUrl(indicatorId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEvidencesQueryKey = (indicatorId: string,) => {
+    return [
+    `/api/v1/indicators/${indicatorId}/evidences`
+    ] as const;
+    }
+
+
+export const getListEvidencesQueryOptions = <TData = Awaited<ReturnType<typeof listEvidences>>, TError = unknown>(indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEvidencesQueryKey(indicatorId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEvidences>>> = ({ signal }) => listEvidences(indicatorId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: indicatorId !== null && indicatorId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListEvidencesQueryResult = NonNullable<Awaited<ReturnType<typeof listEvidences>>>
+export type ListEvidencesQueryError = unknown
+
+
+export function useListEvidences<TData = Awaited<ReturnType<typeof listEvidences>>, TError = unknown>(
+ indicatorId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEvidences>>,
+          TError,
+          Awaited<ReturnType<typeof listEvidences>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListEvidences<TData = Awaited<ReturnType<typeof listEvidences>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEvidences>>,
+          TError,
+          Awaited<ReturnType<typeof listEvidences>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListEvidences<TData = Awaited<ReturnType<typeof listEvidences>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar evidencias cargadas en el indicador normativo
+ */
+
+export function useListEvidences<TData = Awaited<ReturnType<typeof listEvidences>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listEvidences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListEvidencesQueryOptions(indicatorId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type uploadEvidenceResponse200 = {
+  data: UploadEvidenceResponse
+  status: 200
+}
+
+export type uploadEvidenceResponseSuccess = (uploadEvidenceResponse200) & {
+  headers: Headers;
+};
+;
+
+export type uploadEvidenceResponse = (uploadEvidenceResponseSuccess)
+
+export const getUploadEvidenceUrl = (indicatorId: string,) => {
+
+
+
+
+  return `/api/v1/indicators/${indicatorId}/evidences`
+}
+
+/**
+ * @summary Cargar evidencia en indicador normativo (API-EVD-01)
+ */
+export const uploadEvidence = async (indicatorId: string,
+    uploadEvidenceBody?: UploadEvidenceBody, options?: Parameters<typeof customFetch>[1]): Promise<uploadEvidenceResponse> => {
+    const formData = new FormData();
+if(uploadEvidenceBody?.file !== undefined) {
+ formData.append(`file`, uploadEvidenceBody.file);
+ }
+if(uploadEvidenceBody?.externalUrl !== undefined) {
+ formData.append(`externalUrl`, uploadEvidenceBody.externalUrl);
+ }
+if(uploadEvidenceBody?.description !== undefined) {
+ formData.append(`description`, uploadEvidenceBody.description);
+ }
+
+  return customFetch<uploadEvidenceResponse>(getUploadEvidenceUrl(indicatorId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getUploadEvidenceMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext> => {
+
+const mutationKey = ['uploadEvidence'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadEvidence>>, {indicatorId: string;data?: UploadEvidenceBody}> = (props) => {
+          const {indicatorId,data} = props ?? {};
+
+          return  uploadEvidence(indicatorId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadEvidenceMutationResult = NonNullable<Awaited<ReturnType<typeof uploadEvidence>>>
+    export type UploadEvidenceMutationBody = UploadEvidenceBody | undefined
+    export type UploadEvidenceMutationError = unknown
+
+    /**
+ * @summary Cargar evidencia en indicador normativo (API-EVD-01)
+ */
+export const useUploadEvidence = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof uploadEvidence>>,
+        TError,
+        {indicatorId: string;data?: UploadEvidenceBody},
+        TContext
+      > => {
+      return useMutation(getUploadEvidenceMutationOptions(options), queryClient);
+    }
+    export type subsanateEvidenceResponse200 = {
+  data: SubsanateNormativeIndicatorEvidenceResponseDto
+  status: 200
+}
+
+export type subsanateEvidenceResponseSuccess = (subsanateEvidenceResponse200) & {
+  headers: Headers;
+};
+;
+
+export type subsanateEvidenceResponse = (subsanateEvidenceResponseSuccess)
+
+export const getSubsanateEvidenceUrl = (indicatorId: string,
+    evidenceId: string,) => {
+
+
+
+
+  return `/api/v1/indicators/${indicatorId}/evidences/${evidenceId}/subsanate`
+}
+
+/**
+ * @summary Subsanar evidencia del indicador (una vez por observación OPEN)
+ */
+export const subsanateEvidence = async (indicatorId: string,
+    evidenceId: string,
+    subsanateEvidenceBody?: SubsanateEvidenceBody, options?: Parameters<typeof customFetch>[1]): Promise<subsanateEvidenceResponse> => {
+    const formData = new FormData();
+if(subsanateEvidenceBody?.file !== undefined) {
+ formData.append(`file`, subsanateEvidenceBody.file);
+ }
+if(subsanateEvidenceBody?.description !== undefined) {
+ formData.append(`description`, subsanateEvidenceBody.description);
+ }
+if(subsanateEvidenceBody?.observationId !== undefined) {
+ formData.append(`observationId`, subsanateEvidenceBody.observationId);
+ }
+
+  return customFetch<subsanateEvidenceResponse>(getSubsanateEvidenceUrl(indicatorId,evidenceId),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getSubsanateEvidenceMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subsanateEvidence>>, TError,{indicatorId: string;evidenceId: string;data?: SubsanateEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof subsanateEvidence>>, TError,{indicatorId: string;evidenceId: string;data?: SubsanateEvidenceBody}, TContext> => {
+
+const mutationKey = ['subsanateEvidence'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof subsanateEvidence>>, {indicatorId: string;evidenceId: string;data?: SubsanateEvidenceBody}> = (props) => {
+          const {indicatorId,evidenceId,data} = props ?? {};
+
+          return  subsanateEvidence(indicatorId,evidenceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubsanateEvidenceMutationResult = NonNullable<Awaited<ReturnType<typeof subsanateEvidence>>>
+    export type SubsanateEvidenceMutationBody = SubsanateEvidenceBody | undefined
+    export type SubsanateEvidenceMutationError = unknown
+
+    /**
+ * @summary Subsanar evidencia del indicador (una vez por observación OPEN)
+ */
+export const useSubsanateEvidence = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subsanateEvidence>>, TError,{indicatorId: string;evidenceId: string;data?: SubsanateEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof subsanateEvidence>>,
+        TError,
+        {indicatorId: string;evidenceId: string;data?: SubsanateEvidenceBody},
+        TContext
+      > => {
+      return useMutation(getSubsanateEvidenceMutationOptions(options), queryClient);
+    }
+    export type subsanationEligibilityResponse200 = {
+  data: NormativeIndicatorSubsanationEligibilityResponseDto
+  status: 200
+}
+
+export type subsanationEligibilityResponseSuccess = (subsanationEligibilityResponse200) & {
+  headers: Headers;
+};
+;
+
+export type subsanationEligibilityResponse = (subsanationEligibilityResponseSuccess)
+
+export const getSubsanationEligibilityUrl = (indicatorId: string,) => {
+
+
+
+
+  return `/api/v1/indicators/${indicatorId}/subsanation-eligibility`
+}
+
+/**
+ * @summary Verificar si el indicador permite subsanación (API-EVD-05)
+ */
+export const subsanationEligibility = async (indicatorId: string, options?: Parameters<typeof customFetch>[1]): Promise<subsanationEligibilityResponse> => {
+
+  return customFetch<subsanationEligibilityResponse>(getSubsanationEligibilityUrl(indicatorId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSubsanationEligibilityQueryKey = (indicatorId: string,) => {
+    return [
+    `/api/v1/indicators/${indicatorId}/subsanation-eligibility`
+    ] as const;
+    }
+
+
+export const getSubsanationEligibilityQueryOptions = <TData = Awaited<ReturnType<typeof subsanationEligibility>>, TError = unknown>(indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSubsanationEligibilityQueryKey(indicatorId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof subsanationEligibility>>> = ({ signal }) => subsanationEligibility(indicatorId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: indicatorId !== null && indicatorId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SubsanationEligibilityQueryResult = NonNullable<Awaited<ReturnType<typeof subsanationEligibility>>>
+export type SubsanationEligibilityQueryError = unknown
+
+
+export function useSubsanationEligibility<TData = Awaited<ReturnType<typeof subsanationEligibility>>, TError = unknown>(
+ indicatorId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subsanationEligibility>>,
+          TError,
+          Awaited<ReturnType<typeof subsanationEligibility>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubsanationEligibility<TData = Awaited<ReturnType<typeof subsanationEligibility>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof subsanationEligibility>>,
+          TError,
+          Awaited<ReturnType<typeof subsanationEligibility>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSubsanationEligibility<TData = Awaited<ReturnType<typeof subsanationEligibility>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Verificar si el indicador permite subsanación (API-EVD-05)
+ */
+
+export function useSubsanationEligibility<TData = Awaited<ReturnType<typeof subsanationEligibility>>, TError = unknown>(
+ indicatorId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof subsanationEligibility>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSubsanationEligibilityQueryOptions(indicatorId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
 
 export type listUploadableResponse200 = {
   data: UploadableIndicatorResponse[]

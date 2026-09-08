@@ -20,7 +20,7 @@ public class IndicatorObservation {
     private UUID authorId;
     private String authorRole;
     private String body;
-    private SubphaseObservationStatus status;
+    private IndicatorObservationStatus status;
     private LocalDateTime resolvedAt;
     private UUID resolvedVersionId;
     private LocalDateTime createdAt;

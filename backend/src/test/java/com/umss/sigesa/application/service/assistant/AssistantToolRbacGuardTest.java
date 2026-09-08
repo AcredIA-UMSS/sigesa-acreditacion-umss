@@ -66,10 +66,10 @@ class AssistantToolRbacGuardTest {
     }
 
     @Test
-    void ccPhasesAgentCannotExecuteManageProcessPhase() throws Exception {
+    void ccPhasesAgentCannotExecuteListUsers() throws Exception {
         String json = executor.execute(
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                "{\"action\":\"CREATE\",\"careerQuery\":\"INF-SIS\"}",
+                AssistantToolRegistry.LIST_USERS_ID,
+                "{}",
                 new AssistantAuthContext(UUID.randomUUID(), "CC", List.of(UUID.randomUUID())),
                 AssistantAgentProfile.PHASES);
 
@@ -94,7 +94,7 @@ class AssistantToolRbacGuardTest {
         assertThat(registry.isToolAllowedForAgent(AssistantToolRegistry.LIST_USERS_ID, AssistantAgentProfile.PHASES))
                 .isFalse();
         assertThat(registry.isToolAllowedForAgent(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID, AssistantAgentProfile.PHASES))
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID, AssistantAgentProfile.PHASES))
                 .isTrue();
     }
 

@@ -61,13 +61,13 @@ ultima_actualizacion: "2026-09-08"
 | `FSD-UC-019` | Consulta de procesos de acreditación | [JD], [TD], [CC] | v2.0 | **Reespecificado** | [Ver detalle](uc/FSD-UC-019.md) | [DD-UC-019](../design/DD-UC-019.md) | [PR-IMPL-019](../prompts/impl/PR-IMPL-019.md) |
 | `FSD-UC-020` | Revisión documental [EE] | [EE] | v2.0 | **En Curso** | [Ver detalle](uc/FSD-UC-020.md) | [`DD-UC-020`](../design/DD-UC-020.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |
 | `FSD-UC-021` | Gestión de plantillas normativas (jerarquía N1–N3 + Indicador) | [JD] | v2.0 | **Hecho (Full-Stack v2)** | [Ver detalle](uc/FSD-UC-021.md) | [`DD-UC-021`](../design/DD-UC-021.md) | [`PR-IMPL-021`](../prompts/impl/PR-IMPL-021.md) |
-| `FSD-UC-022` | Gestión de estructura normativa en proceso | [JD] | v2.0 | **Reespecificado** *(impl. v1: fases/subfases)* | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
+| `FSD-UC-022` | Gestión de estructura normativa en proceso | [JD], [TD] | v2.0 | **Implementado v2** | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
 | `FSD-UC-023` | Asignación de responsable [CC] a proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-023.md) | [`DD-UC-023`](../design/DD-UC-023.md) | [`PR-IMPL-023`](../prompts/impl/PR-IMPL-023.md) |
 | `FSD-UC-024` | Copiloto de control documental | [TD]/[CC]/[JD] | v2.0 | **Hecho (Full-Stack + MCP)** *(tools: migrar a indicador)* | [Ver detalle](uc/FSD-UC-024.md) | [`DD-AGENT-003`](../design/assistant/DD-AGENT-003.md) | [`PR-IMPL-026`](../prompts/impl/PR-IMPL-026.md) |
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Hecho` / `Hecho (Full-Stack)` · `Reespecificado` *(FSD v2.0; código legacy v1.x)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-09-08):** Release **2.0.0** — M4 UI v2 en `/admin/plantillas` y `/procesos/{id}/estructura`; UC-003 clona árbol v2 al crear proceso; legacy Fase/Subfase coexisten (M5).
+**Snapshot (2026-09-08):** Release **2.0.0** — M5 retiro legacy Fase/Subfase; solo jerarquía normativa v2 en UI y API.
 
 ---
 
@@ -119,7 +119,7 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 
 | Kit | Estado |
 |-----|--------|
-| T-001 | ⚠️ Parcial v2.0 — UC-003/021/022 v2 en código; legacy Fase/Subfase hasta M5 |
+| T-001 | ✅ Cerrado v2.0 — M5 retiró legacy Fase/Subfase (Flyway V16, UI/API v2-only) |
 | T-002 | ✅ Cerrado |
 | T-003 | ⚠️ Reabierto v2.0 — evidencia en Indicador |
 | T-004 | ⚠️ Reabierto v2.0 — workflow en Indicador + cierre Nivel 1 |
@@ -158,7 +158,7 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | 2026-09-08 | **FSD-UC-021 Full-Stack v2:** API-TPL-08 jerarquía plantilla; UI tabs v2/legacy `/admin/plantillas`; publicación BR-24; duplicar clona árbol v2; PM-008 sprint 3 |
 | 2026-09-08 | **FSD-UC-003 v2:** `POST /processes` clona N1→N2→N3→Indicador (`ProcessNormativeTreeCloner`); validación A4; PM-009 sprint 3 |
 | 2026-09-08 | **ADR-0004** aceptada; `modelo_datos.md`, `reglas_negocio.md`, `api_contracts.md`, `DTP.md` v2.0 |
-| 2026-09-08 | **Release 2.0.0 (FSD):** jerarquía Modelo evaluador → N1 → N2 → N3 → Indicador → Evidencia; obsolescencia Fase/Subfase; UC-003/004/008–010/019/021/022 reespecificados |
+| 2026-09-08 | **M5 retiro legacy:** Flyway `V16__drop_legacy_phase_subphase.sql`; eliminados controllers `/phases/*`, `/subphases/*`; UI v2-only; búsqueda evidencias por N1/indicador |
 | 2026-08-27 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia *(supersedido por v2.0)* |
 ---
 
@@ -170,10 +170,10 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | ADR-0004 | ✅ Aceptada | — |
 | `modelo_datos.md`, `reglas_negocio.md` | ✅ Actualizado v2.0 | — |
 | `api_contracts.md`, `DTP.md` | ✅ Actualizado v2.0 | — |
-| Backend (`Phase`, `Subphase`, `/subphases/*`) | ⏳ Coexistencia dual | v2 en UC-003/021/022; retiro M5 |
-| Frontend (árbol fases/subfases) | ⏳ Tabs v2 + legacy | M4 parcial en plantillas/procesos |
+| Backend (`Phase`, `Subphase`, `/subphases/*`) | ✅ Retirado M5 | Flyway V16; solo normativa v2 |
+| Frontend (árbol fases/subfases) | ✅ Retirado M5 | Solo `ProcessNormativeTree` y editores v2 |
 | Diagramas `.mmd` | ⏳ Parcial | Renombrar/crear diagramas indicador y Nivel 1 |
 
-**Mapeo rápido:** Fase → Nivel 1 · Subfase → Indicador (unidad workflow) · evidencia: `subphaseId` → `indicatorId`.
+**Mapeo rápido (histórico v1.x):** Fase → Nivel 1 · Subfase → Indicador · evidencia: `subphaseId` → `normative_indicator_id`.
 
 Divergencias de implementación respecto a este FSD requieren **ADR** en `docs/adr/` antes de merge.

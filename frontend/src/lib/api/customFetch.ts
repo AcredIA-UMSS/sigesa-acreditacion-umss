@@ -4,6 +4,8 @@ import { ApiError } from './apiError';
 export interface CustomFetchOptions extends RequestInit {
   /** When false, Authorization header is omitted (e.g. login). Default: true. */
   auth?: boolean;
+  /** When true, a 401 response will not trigger global logout. Default: false. */
+  skipUnauthorizedLogout?: boolean;
 }
 
 function resolveHttpErrorMessage(status: number, rawBody: string | null): string {
@@ -43,7 +45,7 @@ export async function customFetch<TData>(
   url: string,
   options: CustomFetchOptions = {},
 ): Promise<TData> {
-  const { auth = true, headers: initHeaders, ...init } = options;
+  const { auth = true, headers: initHeaders, skipUnauthorizedLogout = false, ...init } = options;
   const headers = new Headers(initHeaders);
 
 
@@ -93,9 +95,10 @@ export async function customFetch<TData>(
       }
     }
 
-    // Ignore stale 401s from in-flight requests after re-login (old token ≠ current).
+    // Global logout only when the current session token is rejected (not for optional reads).
     if (
-      response.status === 401
+      !skipUnauthorizedLogout
+      && response.status === 401
       && accessToken
       && resolveAccessToken() === accessToken
     ) {

@@ -71,9 +71,8 @@ public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
         List<TemplateLevel1Node> templateLevel1Nodes = hierarchyQueryPort.findTemplateTree(templateId)
                 .map(NormativeHierarchyQueryPort.TemplateNormativeTree::level1Nodes)
                 .orElse(List.of());
-        boolean hasLegacyPhases = template.getPhases() != null && !template.getPhases().isEmpty();
 
-        if (templateIndicatorCount < 1 && !hasLegacyPhases) {
+        if (templateIndicatorCount < 1) {
             throw new TemplateStructureIncompleteException(
                     "La plantilla debe tener al menos un indicador en el árbol normativo v2 para crear un proceso.");
         }
@@ -81,9 +80,7 @@ public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
         AccreditationProcess newProcess = AccreditationProcess.createFromTemplate(careerId, template);
         AccreditationProcess savedProcess = accreditationProcessPort.save(newProcess);
 
-        if (templateIndicatorCount > 0) {
-            normativeTreeCloner.cloneFromTemplate(savedProcess.getId(), templateLevel1Nodes);
-        }
+        normativeTreeCloner.cloneFromTemplate(savedProcess.getId(), templateLevel1Nodes);
 
         return savedProcess;
     }

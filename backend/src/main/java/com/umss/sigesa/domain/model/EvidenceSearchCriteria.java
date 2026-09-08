@@ -4,8 +4,7 @@ import java.util.UUID;
 
 public record EvidenceSearchCriteria(
         UUID processId,
-        UUID phaseId,
-        UUID subphaseId,
+        UUID level1Id,
         UUID indicatorId,
         UUID programId,
         String query,

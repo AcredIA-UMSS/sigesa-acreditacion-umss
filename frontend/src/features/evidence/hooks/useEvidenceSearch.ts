@@ -13,8 +13,8 @@ export type UseEvidenceSearchOptions = {
 
 export function useEvidenceSearch({ processId, programId, enabled = true }: UseEvidenceSearchOptions) {
   const [query, setQuery] = useState('');
-  const [phaseId, setPhaseId] = useState('');
-  const [subphaseId, setSubphaseId] = useState('');
+  const [level1Id, setLevel1Id] = useState('');
+  const [indicatorId, setIndicatorId] = useState('');
   const [results, setResults] = useState<EvidenceSearchHit[]>([]);
   const [total, setTotal] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
@@ -32,8 +32,8 @@ export function useEvidenceSearch({ processId, programId, enabled = true }: UseE
         processId,
         programId,
         q: query,
-        phaseId: phaseId || undefined,
-        subphaseId: subphaseId || undefined,
+        level1Id: level1Id || undefined,
+        indicatorId: indicatorId || undefined,
         page: 0,
         size: 20,
       };
@@ -48,18 +48,16 @@ export function useEvidenceSearch({ processId, programId, enabled = true }: UseE
     } finally {
       setIsSearching(false);
     }
-  }, [enabled, processId, programId, query, phaseId, subphaseId]);
+  }, [enabled, processId, programId, query, level1Id, indicatorId]);
 
   useEffect(() => {
-    if (!phaseId) {
-      setSubphaseId('');
-    }
-  }, [phaseId]);
+    setIndicatorId('');
+  }, [level1Id]);
 
   const reset = useCallback(() => {
     setQuery('');
-    setPhaseId('');
-    setSubphaseId('');
+    setLevel1Id('');
+    setIndicatorId('');
     setResults([]);
     setTotal(0);
     setHasSearched(false);
@@ -69,10 +67,10 @@ export function useEvidenceSearch({ processId, programId, enabled = true }: UseE
   return {
     query,
     setQuery,
-    phaseId,
-    setPhaseId,
-    subphaseId,
-    setSubphaseId,
+    level1Id,
+    setLevel1Id,
+    indicatorId,
+    setIndicatorId,
     results,
     total,
     isSearching,

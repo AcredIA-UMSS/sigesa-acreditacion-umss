@@ -24,8 +24,6 @@ public class CreateTemplateService implements CreateTemplateUseCase {
     @Transactional(rollbackFor = Exception.class)
     public Template create(Template template) {
         validator.validateType(template.getType());
-        validator.validateOrders(template);
-        validator.validateSubphaseLinks(template);
 
         LocalDateTime now = LocalDateTime.now();
         template.setId(UUID.randomUUID());

@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -24,6 +22,4 @@ public class Template {
     private TemplateStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    @Builder.Default
-    private List<TemplatePhase> phases = new ArrayList<>();
 }

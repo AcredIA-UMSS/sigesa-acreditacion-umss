@@ -1,25 +1,18 @@
 package com.umss.sigesa.application.service.template;
 
-import com.umss.sigesa.domain.exception.TemplateIndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateOrderConflictException;
 import com.umss.sigesa.domain.exception.TemplateStructureIncompleteException;
-import com.umss.sigesa.domain.exception.TemplateSubphaseLinkRequiredException;
 import com.umss.sigesa.domain.model.Template;
 import com.umss.sigesa.domain.model.TemplateLevel1Node;
 import com.umss.sigesa.domain.model.TemplateLevel2Node;
 import com.umss.sigesa.domain.model.TemplateLevel3Node;
 import com.umss.sigesa.domain.model.TemplateNormativeIndicator;
-import com.umss.sigesa.domain.model.TemplatePhase;
-import com.umss.sigesa.domain.model.TemplateSubphase;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class TemplateStructureValidator {
-
-    private static final Pattern HTTPS_URL = Pattern.compile("^https://.+");
 
     public void validateType(String type) {
         if (type == null || type.isBlank()) {
@@ -31,71 +24,10 @@ public class TemplateStructureValidator {
         }
     }
 
-    public void validateSubphaseLinks(Template template) {
-        if (template.getPhases() == null) {
-            return;
-        }
-        for (TemplatePhase phase : template.getPhases()) {
-            if (phase.getSubphases() == null) {
-                continue;
-            }
-            for (TemplateSubphase subphase : phase.getSubphases()) {
-                ensureReferenceUrl(subphase.getReferenceUrl());
-                ensureRequirements(subphase.getRequirements());
-            }
-        }
-    }
-
-    public void validateOrders(Template template) {
-        if (template.getPhases() == null || template.getPhases().isEmpty()) {
-            return;
-        }
-        Set<Integer> phaseOrders = new HashSet<>();
-        for (TemplatePhase phase : template.getPhases()) {
-            if (phase.getOrder() == null || !phaseOrders.add(phase.getOrder())) {
-                throw new TemplateOrderConflictException("Orden de fase duplicado en la plantilla.");
-            }
-            validateSubphaseOrders(phase.getSubphases());
-        }
-    }
-
     public void validateForPublish(Template template, List<TemplateLevel1Node> level1Nodes,
                                    TemplateNormativeStructureGuard guard) {
         validateType(template.getType());
         validateNormativeTreeForPublish(level1Nodes, guard);
-    }
-
-    /**
-     * Validación legacy fases/subfases (coexistencia M5). No usada en publicación v2.0.
-     */
-    public void validateLegacyPhasesForPublish(Template template) {
-        validateType(template.getType());
-        validateOrders(template);
-
-        List<TemplatePhase> phases = template.getPhases();
-        if (phases == null || phases.isEmpty()) {
-            throw new TemplateStructureIncompleteException(
-                    "La plantilla debe tener al menos una fase para publicarse.");
-        }
-
-        int subphaseCount = 0;
-        for (TemplatePhase phase : phases) {
-            List<TemplateSubphase> subphases = phase.getSubphases();
-            if (subphases == null || subphases.isEmpty()) {
-                throw new TemplateStructureIncompleteException(
-                        "Cada fase debe tener al menos una subfase para publicarse.");
-            }
-            subphaseCount += subphases.size();
-            for (TemplateSubphase subphase : subphases) {
-                ensureReferenceUrl(subphase.getReferenceUrl());
-                ensureRequirements(subphase.getRequirements());
-            }
-        }
-
-        if (subphaseCount < 1) {
-            throw new TemplateStructureIncompleteException(
-                    "La plantilla debe tener al menos una subfase para publicarse.");
-        }
     }
 
     public void validateNormativeTreeForPublish(List<TemplateLevel1Node> level1Nodes,
@@ -198,31 +130,5 @@ public class TemplateStructureValidator {
             }
         }
         return count;
-    }
-
-    private void validateSubphaseOrders(List<TemplateSubphase> subphases) {
-        if (subphases == null || subphases.isEmpty()) {
-            return;
-        }
-        Set<Integer> subphaseOrders = new HashSet<>();
-        for (TemplateSubphase subphase : subphases) {
-            if (subphase.getOrder() == null || !subphaseOrders.add(subphase.getOrder())) {
-                throw new TemplateOrderConflictException("Orden de subfase duplicado en la misma fase.");
-            }
-        }
-    }
-
-    private void ensureReferenceUrl(String referenceUrl) {
-        if (referenceUrl == null || referenceUrl.isBlank() || !HTTPS_URL.matcher(referenceUrl.trim()).matches()) {
-            throw new TemplateSubphaseLinkRequiredException(
-                    "Cada subfase debe incluir un referenceUrl HTTPS válido.");
-        }
-    }
-
-    private void ensureRequirements(String requirements) {
-        if (requirements == null || requirements.isBlank()) {
-            throw new TemplateSubphaseLinkRequiredException(
-                    "Cada subfase debe incluir requisitos de completitud (requisitos_subfase).");
-        }
     }
 }

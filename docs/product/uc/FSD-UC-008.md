@@ -1,14 +1,14 @@
 ---
 id: FSD-UC-008
 nombre: Rechazar Indicador
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[TD]"
 trazabilidad_prd: PRD-US-009
 modulo: MOD-WORKFLOW
 reglas: FSD-BR-04, FSD-BR-05
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x usa POST /subphases/{id}/reject; migración v2.0 pendiente"
+nota_implementacion: "API-WF-01 activo: POST /indicators/{id}/reject con indicator_observation v2. Legacy subfase coexistiendo hasta M5."
 ---
 
 # FSD-UC-008 — Rechazar Indicador

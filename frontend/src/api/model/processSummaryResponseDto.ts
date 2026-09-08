@@ -17,8 +17,6 @@ export interface ProcessSummaryResponseDto {
   evaluatorModel?: string;
   status?: string;
   startDate?: string;
-  phaseCount?: number;
-  subphaseCount?: number;
   level1Count?: number;
   indicatorCount?: number;
   responsible?: ProcessResponsibleDto;

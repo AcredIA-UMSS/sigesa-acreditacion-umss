@@ -22,13 +22,10 @@ public class TemplateDetailResponseDto {
     private String description;
     private String type;
     private String status;
-    private int phaseCount;
-    private int subphaseCount;
     private int level1Count;
     private int indicatorCount;
     private String evaluatorModel;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<TemplatePhaseResponseDto> phases;
     private List<NormativeLevel1NodeDto> level1Nodes;
 }
