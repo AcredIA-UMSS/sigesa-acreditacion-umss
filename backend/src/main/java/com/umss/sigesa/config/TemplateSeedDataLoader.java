@@ -67,10 +67,12 @@ public class TemplateSeedDataLoader implements ApplicationRunner {
                 .name(name)
                 .description("Plantilla normativa de demostración " + type)
                 .type(type)
+                .evaluatorModel(type)
                 .status("PUBLISHED")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .phases(new ArrayList<>())
+                .level1Nodes(new ArrayList<>())
                 .build();
 
         for (int phaseIndex = 0; phaseIndex < phaseDefinitions.length; phaseIndex++) {

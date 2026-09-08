@@ -46,4 +46,8 @@ public class AccreditationProcessJpaEntity {
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PhaseJpaEntity> phases = new ArrayList<>();
+
+    @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Level1NodeJpaEntity> level1Nodes = new ArrayList<>();
 }

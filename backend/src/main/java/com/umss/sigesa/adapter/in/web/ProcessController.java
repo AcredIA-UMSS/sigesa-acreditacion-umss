@@ -18,6 +18,7 @@ import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponsibleDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponseDto;
+import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class ProcessController {
     private final ListProcessesUseCase listProcessesUseCase;
     private final GetProcessDetailUseCase getProcessDetailUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
+    private final NormativeStructureWebMapper normativeStructureWebMapper;
 
     @PostMapping
     @PreAuthorize("hasRole('JD')")
@@ -82,7 +84,7 @@ public class ProcessController {
 
     @GetMapping("/{processId}")
     @PreAuthorize("hasAnyRole('JD','TD','CC')")
-    @Operation(summary = "Detalle de proceso", description = "Incluye árbol Fase -> Subfase ordenado por order.")
+    @Operation(summary = "Detalle de proceso", description = "Incluye árbol normativo v2 (N1→N2→N3→Indicador) y legacy Fase→Subfase.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Detalle del proceso"),
             @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content),
@@ -158,10 +160,13 @@ public class ProcessController {
                 .templateId(summary.templateId())
                 .templateName(summary.templateName())
                 .templateType(summary.templateType())
+                .evaluatorModel(summary.evaluatorModel())
                 .status(summary.status())
                 .startDate(summary.startDate())
                 .phaseCount(summary.phaseCount())
                 .subphaseCount(summary.subphaseCount())
+                .level1Count(summary.level1Count())
+                .indicatorCount(summary.indicatorCount())
                 .responsible(mapResponsibleToDto(summary.responsible()))
                 .build();
     }
@@ -175,6 +180,7 @@ public class ProcessController {
                 .templateId(detail.templateId())
                 .templateName(detail.templateName())
                 .templateType(detail.templateType())
+                .evaluatorModel(detail.evaluatorModel())
                 .status(detail.status())
                 .startDate(detail.startDate())
                 .phases(detail.phases().stream().map(p -> ProcessResponseDto.PhaseDto.builder()
@@ -193,6 +199,8 @@ public class ProcessController {
                                 .status(s.getStatus() != null ? s.getStatus().name() : "PENDIENTE")
                                 .build()).collect(Collectors.toList()))
                         .build()).collect(Collectors.toList()))
+                .level1Nodes(normativeStructureWebMapper.toLevel1DtoList(
+                        detail.level1Nodes(), detail.evaluatorModel()))
                 .responsible(mapResponsibleToDto(detail.responsible()))
                 .build();
     }

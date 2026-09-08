@@ -19,6 +19,8 @@ public interface EvidenceJpaRepository extends JpaRepository<EvidenceEntity, UUI
 
     long countBySubphaseId(UUID subphaseId);
 
+    long countByNormativeIndicatorId(UUID normativeIndicatorId);
+
     @Query("""
             SELECT DISTINCT e.indicatorId FROM EvidenceEntity e
             WHERE e.subphaseId = :subphaseId AND e.indicatorId IS NOT NULL

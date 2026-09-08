@@ -29,7 +29,9 @@ export function useProcessDetail(processId: string | undefined): UseProcessDetai
 
   let errorMessage: string | null = null;
   if (isError) {
-    if (isNotFound) {
+    if (isApiError(error) && error.status === 401) {
+      errorMessage = 'Sesión expirada o no autenticada. Inicie sesión nuevamente.';
+    } else if (isNotFound) {
       errorMessage = 'Proceso no encontrado o no tiene permiso para verlo.';
     } else {
       errorMessage = isApiError(error)

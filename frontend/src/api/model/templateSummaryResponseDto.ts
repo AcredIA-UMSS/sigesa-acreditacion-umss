@@ -13,4 +13,7 @@ export interface TemplateSummaryResponseDto {
   status?: string;
   phaseCount?: number;
   subphaseCount?: number;
+  level1Count?: number;
+  indicatorCount?: number;
+  evaluatorModel?: string;
 }

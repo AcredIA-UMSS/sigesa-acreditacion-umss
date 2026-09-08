@@ -1,13 +1,14 @@
 ---
 id: FSD-UC-019
 nombre: Consulta de procesos de acreditación
-estado: Implementado
-release: v1.0
+estado: Reespecificado
+release: v2.0
 actor_principal: "[JD], [TD], [CC]"
 trazabilidad_prd: PRD-US-023, PRD-US-012
 modulo: MOD-PROCESS
 reglas: FSD-BR-09, FSD-BR-17
-ultima_actualizacion: "2026-08-07"
+ultima_actualizacion: "2026-09-08"
+nota_implementacion: "Código v1.x devuelve phases/subphases; migración v2.0 pendiente"
 ---
 
 # FSD-UC-019 — Consulta de procesos de acreditación
@@ -22,7 +23,7 @@ ultima_actualizacion: "2026-08-07"
 | **Pantallas** | `/procesos` (listado) · `/procesos/{processId}` (detalle) |
 | **API propuesta** | `GET /api/v1/processes` · `GET /api/v1/processes/{processId}` |
 
-Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucional (CEUB / ARCU-SUR) con visibilidad acotada por rol. En el **detalle**, el usuario ve el árbol completo **Fase → Subfase** clonado al crear el proceso (taxonomía de FSD-UC-003).
+Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucional (CEUB / ARCU-SUR) con visibilidad acotada por rol. En el **detalle**, el usuario ve el árbol normativo completo **Nivel 1 → Nivel 2 → Nivel 3 → Indicador** clonado al crear el proceso (taxonomía de FSD-UC-003). La UI debe mostrar la **nomenclatura del modelo evaluador** (Dimensión/Área, etc.) según [`glosario.md`](../glosario.md) §2.2.
 
 ## Matriz de autorización (RBAC)
 
@@ -49,10 +50,12 @@ Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucio
 1. Usuario abre `/procesos/{processId}`.
 2. Frontend invoca `GET /api/v1/processes/{processId}`.
 3. Backend valida permisos (rol + alcance carrera para [CC]).
-4. Respuesta incluye metadatos del proceso y árbol ordenado:
-   - **Fases** (`order` ascendente)
-   - **Subfases** por fase (`order` ascendente)
-5. UI renderiza listado jerárquico (acordeón o árbol) de fases y subfases; en cada subfase, enlace subrayado para abrir modal de carga de evidencia (UC-004).
+4. Respuesta incluye metadatos del proceso y árbol normativo ordenado:
+   - **Nivel 1** (`order` ascendente)
+   - **Nivel 2** por Nivel 1
+   - **Nivel 3** por Nivel 2
+   - **Indicadores** por Nivel 3 (`code`, `description`, `weight`, `status`, `order`)
+5. UI renderiza árbol jerárquico (acordeón o árbol expandible); en cada **indicador**, acción **Subir evidencia** (UC-004) y badge de estado de workflow.
 
 ## Modelo de respuesta (referencia)
 
@@ -66,24 +69,47 @@ Alineado al DTO existente `ProcessResponseDto` (POST create) extendido con datos
   "careerName": "Ingeniería de Sistemas",
   "templateId": "850e8400-e29b-41d4-a716-446655440010",
   "templateName": "CEUB 2026",
-  "templateType": "CEUB",
+  "evaluatorModel": "CEUB",
   "status": "ACTIVE",
   "startDate": "2026-08-03T10:00:00",
-  "phases": [
+  "level1Nodes": [
     {
       "id": "...",
-      "name": "Autoevaluación",
+      "name": "Área académica",
+      "label": "Área",
       "order": 1,
-      "subphases": [
-        { "id": "...", "name": "Diagnóstico institucional", "order": 1 },
-        { "id": "...", "name": "Matriz de evidencias", "order": 2 }
+      "level2Nodes": [
+        {
+          "id": "...",
+          "name": "Variable docente",
+          "label": "Variable",
+          "order": 1,
+          "level3Nodes": [
+            {
+              "id": "...",
+              "name": "Sub-variable formación",
+              "label": "Sub-variable",
+              "order": 1,
+              "indicators": [
+                {
+                  "id": "...",
+                  "code": "IND-01",
+                  "description": "Plan de formación docente",
+                  "weight": 0.15,
+                  "order": 1,
+                  "status": "PENDIENTE"
+                }
+              ]
+            }
+          ]
+        }
       ]
     }
   ]
 }
 ```
 
-**Listado (resumen):** array de objetos sin árbol completo de subfases (solo conteos opcionales: `phaseCount`, `subphaseCount`) para performance.
+**Listado (resumen):** array de objetos sin árbol completo (conteos opcionales: `level1Count`, `indicatorCount`) para performance.
 
 ## Excepciones y flujos alternos
 
@@ -98,21 +124,21 @@ Alineado al DTO existente `ProcessResponseDto` (POST create) extendido con datos
 ## Postcondiciones
 
 - Usuario visualiza solo los procesos permitidos por su rol.
-- En detalle, visualiza la estructura completa **Fase → Subfase** del proceso seleccionado (solo lectura en v1.0).
+- En detalle, visualiza la estructura normativa completa del proceso (solo lectura; edición en UC-022).
 
-## Fuera de alcance (v1.0)
+## Fuera de alcance (v2.0)
 
-- Edición de fases/subfases → [FSD-UC-022](FSD-UC-022.md).
+- Edición del árbol normativo → [FSD-UC-022](FSD-UC-022.md).
 - Gestión de plantillas normativas → [FSD-UC-021](FSD-UC-021.md).
 - Asignación de responsable [CC] → [FSD-UC-023](FSD-UC-023.md).
-- Cierre/avance de fase por workflow → [FSD-UC-010](FSD-UC-010.md).
-- Evidencias por subfase (UC-004 en adelante).
+- Cierre de Nivel 1 por workflow → [FSD-UC-010](FSD-UC-010.md).
+- Evidencias por indicador (UC-004 en adelante).
 - Paginación/filtros avanzados en listado (v1.1).
 
 ## Diagramas
 
 - [Ciclo proceso acreditación](../diagramas/MAR-STA-002-ciclo-proceso-acreditacion.mmd)
-- [Proceso y cierre de fase](../diagramas/FSD-UC-003_010_proceso_y_cierre_fase_secuencia.mmd)
+- [Proceso y cierre Nivel 1](../diagramas/FSD-UC-003_010_proceso_y_cierre_nivel1_secuencia.mmd)
 
 ## Escenarios Gherkin
 
@@ -148,12 +174,12 @@ Característica: Consulta de procesos de acreditación
     Cuando solicita GET /api/v1/processes/{id de P}
     Entonces el sistema responde con error PROCESS_NOT_FOUND o FORBIDDEN_SCOPE
 
-  Escenario: Detalle muestra fases y subfases ordenadas
+  Escenario: Detalle muestra árbol normativo e indicadores ordenados
     Dado un [JD] autenticado
-    Y un proceso creado desde plantilla CEUB con 2 fases y 3 subfases en total
+    Y un proceso CEUB con 1 Nivel 1, 1 Nivel 2, 1 Nivel 3 y 3 indicadores
     Cuando solicita GET /api/v1/processes/{processId}
-    Entonces la respuesta incluye 2 fases ordenadas por "order"
-    Y cada fase incluye sus subfases ordenadas por "order"
+    Entonces la respuesta incluye el árbol N1→N2→N3 ordenado por "order"
+    Y cada Nivel 3 incluye sus indicadores con code, weight y status
 
   Escenario: Listado vacío para [CC] sin proceso en su carrera
     Dado un [CC] autenticado asignado a una carrera sin proceso activo
@@ -168,5 +194,5 @@ Característica: Consulta de procesos de acreditación
 | `DD-UC-019` | Borrador | [`docs/design/DD-UC-019.md`](../../design/DD-UC-019.md) |
 | `PR-IMPL-019` | Aprobado (backend Spring Boot) | [`docs/prompts/impl/PR-IMPL-019.md`](../../prompts/impl/PR-IMPL-019.md) |
 | `api_contracts.md` | Pendiente (post-impl) | API-PROC-03, API-PROC-04 |
-| Frontend | Pendiente (post-impl) | Feature `processes/` — listado + detalle con árbol fases/subfases |
+| Frontend | Legacy v1.x | Feature `processes/` — migrar a árbol normativo v2.0 |
 | Tests | Pendiente (post-impl) | Aislamiento [CC] carrera A vs B; JD/TD ven todos |

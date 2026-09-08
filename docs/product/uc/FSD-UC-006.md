@@ -1,13 +1,14 @@
 ---
 id: FSD-UC-006
 nombre: Subsanar Evidencia
-estado: Implementado
-release: v1.0
+estado: Reespecificado
+release: v2.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-006
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-06
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
+nota_implementacion: "Código v1.x subsana por subfase; migración v2.0 pendiente"
 ---
 
 # FSD-UC-006 — Subsanar Evidencia
@@ -17,12 +18,12 @@ ultima_actualizacion: "2026-08-27"
 | Campo | Valor |
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-008 · PRD-US-006 · BRD-RB-16 |
-| **Precondiciones** | Subfase con evidencia cargada; observación TD/JD en estado `OPEN` |
-| **Alcance v1 (2026-08-27)** | Subsanación **por subfase** (API-SUB-02); historial liviano (metadatos sin blob en versiones anteriores) |
+| **Precondiciones** | Indicador con evidencia cargada; observación TD/JD en estado `OPEN` |
+| **Alcance v2.0** | Subsanación **por indicador**; historial liviano (metadatos sin blob en versiones anteriores) |
 
 ## Flujo principal
 
-1. [TD]/[JD] registra observación sobre la subfase → `subphase_observation.status = OPEN`.
+1. [TD]/[JD] registra observación sobre el **indicador** → `indicator_observation.status = OPEN`.
 2. Sistema bloquea nuevas cargas y observaciones mientras exista observación OPEN.
 3. [CC] consulta elegibilidad (`GET .../subsanation-eligibility`).
 4. [CC] subsana **una vez** por observación: `POST .../evidences/{evidenceId}/subsanate` con `file`, `description`, `observationId`.
@@ -50,17 +51,17 @@ ultima_actualizacion: "2026-08-27"
 
 - [Secuencia subsanación](../diagramas/FSD-UC-006_subsanar_evidencia_secuencia.mmd)
 - [Journey CC subsanación](../diagramas/PRD_journey_CC_subsanacion_secuencia.mmd)
-- [Estados subfase](../diagramas/FSD-UC-006_008_009_estados_subfase.mmd)
+- [Estados indicador](../diagramas/FSD-UC-006_008_009_estados_indicador.mmd)
 
 ## Escenarios Gherkin
 
 ```gherkin
 # language: es
 @PRD-US-006 @FSD-UC-006 @FSD-BR-06 @TC-06
-Característica: Subsanación de Evidencia en subfase
+Característica: Subsanación de Evidencia en indicador
 
   Escenario: Subsanación enlazada a observación OPEN
-    Dado una subfase con evidencia v1 y observación O-123 en estado OPEN
+    Dado un indicador con evidencia v1 y observación O-123 en estado OPEN
     Cuando el [CC] subsana la evidencia con un nuevo archivo
     Entonces el sistema registra la versión 2 enlazada a O-123
     Y marca O-123 como RESOLVED

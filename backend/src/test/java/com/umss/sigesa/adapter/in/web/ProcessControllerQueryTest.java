@@ -7,9 +7,10 @@ import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
-import com.umss.sigesa.domain.exception.ProcessNotFoundException;
+import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.domain.model.Phase;
 import com.umss.sigesa.domain.model.Subphase;
+import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,8 @@ class ProcessControllerQueryTest {
                 createProcessUseCase,
                 listProcessesUseCase,
                 getProcessDetailUseCase,
-                userProgramAssignmentRepositoryPort
+                userProgramAssignmentRepositoryPort,
+                new NormativeStructureWebMapper()
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ProcessExceptionHandler())
@@ -65,7 +67,8 @@ class ProcessControllerQueryTest {
         when(userProgramAssignmentRepositoryPort.findActiveByUserId(any())).thenReturn(List.of());
         when(listProcessesUseCase.list(any())).thenReturn(List.of(
                 new ProcessSummary(processId, careerId, "INF-SIS", "Ingeniería de Sistemas",
-                        templateId, "CEUB 2026", "CEUB", "ACTIVE", LocalDateTime.now(), 2, 5, null)
+                        templateId, "CEUB 2026", "CEUB", "CEUB", "ACTIVE", LocalDateTime.now(),
+                        2, 5, 2, 5, null)
         ));
 
         mockMvc.perform(get("/api/v1/processes"))
@@ -102,6 +105,7 @@ class ProcessControllerQueryTest {
                         UUID.randomUUID(),
                         "CEUB 2026",
                         "CEUB",
+                        "CEUB",
                         "ACTIVE",
                         LocalDateTime.now(),
                         List.of(Phase.builder()
@@ -114,6 +118,7 @@ class ProcessControllerQueryTest {
                                         .order(1)
                                         .build()))
                                 .build()),
+                        List.of(),
                         null
                 )
         );

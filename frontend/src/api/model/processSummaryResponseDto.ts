@@ -14,9 +14,12 @@ export interface ProcessSummaryResponseDto {
   templateId?: string;
   templateName?: string;
   templateType?: string;
+  evaluatorModel?: string;
   status?: string;
   startDate?: string;
   phaseCount?: number;
   subphaseCount?: number;
+  level1Count?: number;
+  indicatorCount?: number;
   responsible?: ProcessResponsibleDto;
 }

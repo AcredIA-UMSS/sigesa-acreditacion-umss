@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.CareerScopeMismatchException;
+import com.umss.sigesa.domain.exception.IndicatorHasEvidenceException;
+import com.umss.sigesa.domain.exception.IndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.CcAlreadyAssignedToProcessException;
 import com.umss.sigesa.domain.exception.InvalidResponsibleUserException;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
@@ -13,7 +15,9 @@ import com.umss.sigesa.domain.exception.SubphaseLinkRequiredException;
 import com.umss.sigesa.domain.exception.InvalidPhaseStateException;
 import com.umss.sigesa.domain.exception.PhaseClosureBlockedException;
 import com.umss.sigesa.domain.model.PendingSubphase;
+import com.umss.sigesa.domain.exception.TemplateIndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateInUseException;
+import com.umss.sigesa.domain.exception.TemplateNotEditableException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.exception.TemplateOrderConflictException;
@@ -115,6 +119,25 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(TemplateNotEditableException.class)
+    public ResponseEntity<Map<String, String>> handleTemplateNotEditable(TemplateNotEditableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "TEMPLATE_NOT_EDITABLE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(TemplateIndicatorIncompleteException.class)
+    public ResponseEntity<Map<String, String>> handleTemplateIndicatorIncomplete(
+            TemplateIndicatorIncompleteException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "TEMPLATE_INDICATOR_INCOMPLETE",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(ProcessNotEditableException.class)
     public ResponseEntity<Map<String, String>> handleProcessNotEditable(ProcessNotEditableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -129,6 +152,24 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
                         "error", "SUBPHASE_HAS_EVIDENCE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(IndicatorHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorHasEvidence(IndicatorHasEvidenceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "INDICATOR_HAS_EVIDENCE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(IndicatorIncompleteException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorIncomplete(IndicatorIncompleteException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "INDICATOR_INCOMPLETE",
                         "message", ex.getMessage()
                 ));
     }

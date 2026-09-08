@@ -2,14 +2,15 @@
 id: FSD-UC-024
 nombre: Copiloto de control documental
 estado: Implementado
-release: v1.0
+release: v2.0
 actor_principal: "[TD], [CC], [JD]"
 trazabilidad_prd: PRD-REQ-028, PRD-US-005
 modulo: MOD-ASSISTANT / MOD-EVIDENCE
 reglas: FSD-BR-03, FSD-BR-09, FSD-BR-14
 design_doc: DD-AGENT-003
 pr_impl: PR-IMPL-026
-ultima_actualizacion: "2026-09-02"
+ultima_actualizacion: "2026-09-08"
+nota_implementacion: "Tools MVP referencian subfase; migrar a indicador en v2.0"
 ---
 
 # FSD-UC-024 — Copiloto de control documental
@@ -41,15 +42,17 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 2. Pregunta en lenguaje natural (p. ej. «¿qué evidencias están pendientes de revisión?»).
 3. Sistema selecciona tool (`list_pending_evidences` / `get_evidence_detail` / `check_evidence_completeness`).
 4. Tool delega en casos de uso de consulta; aplica PBAC por rol/carrera.
-5. Asistente responde con resumen estructurado (programa, subfase, estado, completitud).
+5. Asistente responde con resumen estructurado (programa, ruta normativa, indicador, estado, completitud).
+
+> **Nota:** «Fase 1/2» en este UC se refiere a **fases de rollout del agente**, no a la entidad de dominio obsoleta Fase/Subfase.
 
 ## Tools (MVP)
 
 | Tool | Tipo | Descripción |
 |------|------|-------------|
-| `list_pending_evidences` | read | Subfases/evidencias en `SUBIDO` (documentación lista para control TD) |
-| `get_evidence_detail` | read | Metadatos de evidencia/versión (hash, descripción, subfase) |
-| `check_evidence_completeness` | read | Checklist: archivo, descripción, subfase, estado |
+| `list_pending_evidences` | read | Indicadores/evidencias en `SUBIDO` (documentación lista para control TD) |
+| `get_evidence_detail` | read | Metadatos de evidencia/versión (hash, descripción, indicador) |
+| `check_evidence_completeness` | read | Checklist: archivo/enlace, descripción, indicador, estado |
 
 ## Excepciones
 
@@ -57,11 +60,11 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 |-----------|-----------|
 | Rol EE u otro no autorizado | `403` en chat/status `agent=evidence` |
 | [CC] consulta carrera ajena | `403` / tool `ACCESS_DENIED` |
-| Subfase sin evidencia | Tool `ok=false` con código `EVIDENCE_NOT_FOUND` |
+| Indicador sin evidencia | Tool `ok=false` con código `EVIDENCE_NOT_FOUND` |
 
 ## Postcondiciones
 
-- Sin mutación de estados de subfase en Fase 1.
+- Sin mutación de estados de indicador en Fase 1 (rollout agente).
 - Trazabilidad tool en metadata de respuesta (`toolId`, `path`, `sourceTables`).
 - Modal de trazabilidad con historial de acciones (siempre visible vía enlace y al enviar mensaje); badge dev opcional con `VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS`.
 
@@ -76,15 +79,15 @@ Agente conversacional (`agent=evidence`) que permite **controlar y auditar la do
 ```gherkin
 @FSD-UC-024 @agent-evidence
 Escenario: TD lista evidencias pendientes de control
-  Dado un [TD] autenticado y al menos una subfase en SUBIDO
+  Dado un [TD] autenticado y al menos un indicador en SUBIDO
   Cuando pregunta "lista las evidencias pendientes de revisión"
   Entonces el asistente invoca list_pending_evidences
-  Y responde con programa, subfase y estado SUBIDO
+  Y responde con programa, indicador y estado SUBIDO
 
 @FSD-UC-024 @agent-evidence
 Escenario: CC no ve evidencias de otra carrera
   Dado un [CC] autenticado de la carrera A
-  Cuando solicita detalle de una subfase de la carrera B
+  Cuando solicita detalle de un indicador de la carrera B
   Entonces la tool responde ACCESS_DENIED o el ítem no aparece
 
 @FSD-UC-024 @agent-evidence

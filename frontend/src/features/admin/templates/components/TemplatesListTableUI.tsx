@@ -99,7 +99,7 @@ export function TemplatesListTableUI({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {['Nombre', 'Tipo', 'Estado', 'Fases', 'Subfases', 'Acciones'].map((header) => (
+              {['Nombre', 'Tipo', 'Estado', 'N1 v2', 'Indicadores', 'Fases', 'Subfases', 'Acciones'].map((header) => (
                 <th
                   key={header}
                   className="px-4 py-3 text-left text-label-md font-medium uppercase tracking-wide text-gray-600"
@@ -112,7 +112,7 @@ export function TemplatesListTableUI({
           <tbody className="divide-y divide-gray-100 bg-body">
             {isLoading && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-body-md text-gray-500">
+                <td colSpan={8} className="px-4 py-10 text-center text-body-md text-gray-500">
                   Cargando plantillas…
                 </td>
               </tr>
@@ -120,7 +120,7 @@ export function TemplatesListTableUI({
 
             {!isLoading && templates.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-body-md text-gray-500">
+                <td colSpan={8} className="px-4 py-10 text-center text-body-md text-gray-500">
                   No hay plantillas con los filtros seleccionados.
                 </td>
               </tr>
@@ -139,6 +139,8 @@ export function TemplatesListTableUI({
                   <td className="px-4 py-4">
                     <TemplateStatusBadge status={template.status} />
                   </td>
+                  <td className="px-4 py-4 text-body-md text-gray-700">{template.level1Count}</td>
+                  <td className="px-4 py-4 text-body-md text-gray-700">{template.indicatorCount}</td>
                   <td className="px-4 py-4 text-body-md text-gray-700">{template.phaseCount}</td>
                   <td className="px-4 py-4 text-body-md text-gray-700">{template.subphaseCount}</td>
                   <td className="px-4 py-4">

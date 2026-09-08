@@ -26,6 +26,9 @@ function toRow(template: TemplateSummaryResponseDto): TemplateRowViewModel | nul
     status: toStatus(template.status),
     phaseCount: template.phaseCount ?? 0,
     subphaseCount: template.subphaseCount ?? 0,
+    level1Count: template.level1Count ?? 0,
+    indicatorCount: template.indicatorCount ?? 0,
+    evaluatorModel: template.evaluatorModel,
   };
 }
 

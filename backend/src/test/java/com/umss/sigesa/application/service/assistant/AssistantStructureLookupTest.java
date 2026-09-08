@@ -116,9 +116,11 @@ class AssistantStructureLookupTest {
                 UUID.randomUUID(),
                 "Plantilla CEUB",
                 "CEUB",
+                "CEUB",
                 "ACTIVE",
                 null,
                 List.of(phaseOne, phaseTwo),
+                List.of(),
                 null);
     }
 }

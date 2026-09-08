@@ -2,15 +2,15 @@
 producto: "SIGESA"
 grupo: "ACREDIA"
 documento: DTP                 
-version: v1.2                  
-fecha: "2026-07-27"
-status: vivo                   
-audiencia: dual               
-baseline_ref:                 
+version: v2.0
+fecha: "2026-09-08"
+status: vivo
+audiencia: dual
+baseline_ref:
   dti: "docs/baseline/DTI_vFinal.md"
   tag: "release/2.0.0"
   commit: "HEAD"
-release: "release/3.0.0"      
+release: "2.0.0"
 stack:
   - "Java 21"
   - "Spring Boot 4.x"
@@ -32,8 +32,9 @@ artefactos_vivos:
 
 # Documento Técnico del Producto (DTP) – SIGESA
 
-> **Qué es**: El contrato técnico vigente de SIGESA durante la fase de implementación.
-> **Regla de oro**: Cero divergencia silenciosa. El baseline de la Fase de Diseño (`release/2.0.0`) permanece intacto en `docs/baseline/`.
+> **Qué es**: El contrato técnico vigente de SIGESA durante la fase de implementación.  
+> **Release 2.0.0**: jerarquía normativa **N1→N2→N3→Indicador→Evidencia** ([ADR-0004](../adr/ADR-0004-normative-hierarchy-v2.md)). Código en `main` aún en **legacy Fase/Subfase** hasta migración M1–M5.  
+> **Regla de oro**: Cero divergencia silenciosa. El baseline de la Fase de Diseño permanece intacto en `docs/baseline/`.
 
 ---
 
@@ -45,6 +46,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 08/09/2026 | **Release 2.0.0 (documental):** jerarquía normativa N1→N2→N3→Indicador→Evidencia; FSD/glosario/modelo/reglas/api v2; workflow en Indicador; cierre Nivel 1. Código legacy Fase/Subfase sin migrar. | FSD v2.0 | **ADR-0004** | docs sync | Boris Anthony Angulo Urquieta |
 | 02/09/2026 | **MOD-ASSISTANT UI shell:** copilotos `phases`/`evidence`/`users` unificados en ventana flotante inferior derecha (`DomainCopilotFloatingChat`); historial de conversaciones en `sessionStorage`; layouts sin columna 340px; `/ayuda` sin cambios. | DD-AGENT-UI-SHELL / DD-AGENT-001…003 | N/A | PM-007 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-WORKFLOW UC-010:** cierre de fase TD (`PhaseState` ABIERTA/COMPLETADA, Flyway V13); API-WF-03 `POST /processes/{id}/phases/{id}/complete`; `409 FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]`; evento outbox `PhaseCompleted`; UI «Cerrar fase» en detalle proceso. | FSD-UC-010 / DD-UC-010 | N/A | PM-006 / PR-IMPL-039 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-EVIDENCE:** deprecación `POST /indicators/{id}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); sucesor `POST /subphases/{id}/evidences`; Orval `DeprecatedEndpointResponseDto`; UI UC-004 migrada a selector proceso/subfase. | FSD-UC-004 / api_contracts API-EVD-LEGACY | N/A | docs + Orval sync | Cursor Agent |
@@ -115,6 +117,7 @@ artefactos_vivos:
 | 11 | Asistente / IA | Chatbot FAQ normativo (Could, v2.0 PRD) | **MOD-ASSISTANT MVP:** proxy backend → Open WebUI → Ollama; sin RAG ni persistencia de chats | Piloto self-hosted local; API key Open WebUI solo en servidor | DD-SYS-002 |
 | 12 | RBAC consulta proceso [CC] | 403 Forbidden cross-scope (patrón REST típico) | **404 `PROCESS_NOT_FOUND`** cuando `career_id ∉ programScope` | No revelar existencia de procesos ajenos al coordinador | N/A (DD-UC-019) |
 | 13 | Migraciones dev Docker | Flyway habilitado en perfil `dev` | **`ddl-auto: update`** + **`flyway.enabled: false`** en `application-dev.yaml`; scripts `V5…V6` aplican solo en **prod** | Migraciones incrementales asumen tablas base Hibernate; BD Docker fresca fallaba en `V4` (`app_user` inexistente) | N/A (operacional dev) |
+| 14 | Modelo acreditación (MOD-PROCESS/EVIDENCE) | Piloto v1.x: Proceso→Fase→Subfase→Evidencia; `POST /indicators/...` deprecado (410) | **v2.0 objetivo:** Modelo evaluador→N1→N2→N3→Indicador→Evidencia; API-STR/API-WF/API-EVD v2 en [`api_contracts.md`](api_contracts.md); legacy Fase/Subfase hasta M3 | Alineación normativa CEUB/ARCU-SUR; ponderación por indicador | **ADR-0004** |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -122,21 +125,24 @@ artefactos_vivos:
 | -------- | ------------ | -------- | --------- | ------------- | --------- | ------- |
 | `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | `PR-IMPL-001` | JWT + LocalAuthAdapter; A1 estricto → 401 |
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
-| `FSD-UC-003` | `DD-UC-003` | **hecho (Full-Stack)** | `release/3.0.0` | Suite unitaria (Mockito); React Hooks | `PR-IMPL-003V3` | Arquitectura Hexagonal (Backend) + UI React c/ Orval |
-| `FSD-UC-019` | `DD-UC-019` | **hecho (Full-Stack)** | `v1.0` | Unit `ListProcessesService`, `GetProcessDetailService`, `ProcessAccessPolicy`; WebMvc standalone | `PR-IMPL-019` / PM-003 | GET listado + detalle; [CC] 404 cross-carrera |
-| `FSD-UC-021` | `DD-UC-021` | **hecho (backend)** | `v1.0` | Unit validator + services template; WebMvc `TemplateControllerWebMvcTest`; JaCoCo pendiente `mvn verify` | `PR-IMPL-021` / PM-006 | API-TPL-01…08 solo [JD]; FE pendiente `PR-IMPL-021-FE` |
-| `FSD-UC-022` | `DD-UC-022` | **hecho (Full-Stack)** | `v1.0` | Unit `ProcessStructureGuard`, `Add/Delete/Reorder*Service`; WebMvc `ProcessStructureControllerWebMvcTest`; `./mvnw test` | `PR-IMPL-022` / PM-009 | API-PROC-05…08 [JD]; UI `/procesos/{id}/estructura`; `SubphaseWorkflowPort` stub v1.0 |
-| `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `v1.0` | Unit `Assign/RemoveProcessResponsibleService`; WebMvc `ProcessResponsibleControllerWebMvcTest`; `./mvnw test` 157 tests | `PR-IMPL-023` / PM-010 | API-PROC-09…11 [JD]; UI responsable en `/procesos/{id}` + columna listado |
-| `FSD-UC-004` | `DD-UC-004` | implementado | `release/3.0.0` | Upload por subfase (API-SUB-01) | `PR-IMPL-006` / `PR-IMPL-034` |
-| `FSD-UC-005` | `DD-UC-005` | **hecho** | `v1.0` | Unit `EvidenceLifecycleServiceTest`; JaCoCo pendiente | `PR-IMPL-035` / PM-002 | API-EVD-03/04 historial + append-only |
-| `FSD-UC-006` | `DD-UC-006` | **hecho (Full-Stack)** | `v1.0` | Unit subsanación pendiente CI; `./mvnw test` local | `PR-IMPL-036` / PM-003 | API-SUB-02; V10; historial liviano |
-| `FSD-UC-007` | `DD-UC-007` | **hecho (Full-Stack)** | `v1.0` | `./mvnw test` local; smoke proceso | `PR-IMPL-037` / PM-004 | API-EVD-02; FTS V11; buscador en `/procesos/{id}` |
-| `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
+| `FSD-UC-003` | `DD-UC-003` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Clonación Fase/Subfase en prod; objetivo clonar N1→Indicador (M2) | `PR-IMPL-003V3` | Migración ADR-0004 M1–M2 |
+| `FSD-UC-019` | `DD-UC-019` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | GET devuelve `phases/subphases`; objetivo `level1Nodes` | `PR-IMPL-019` | |
+| `FSD-UC-021` | `DD-UC-021` | **legacy backend hecho** / **v2.0 reespecificado** | `2.0.0` | TemplatePhase/Subphase; objetivo TemplateLevel1…Indicator | `PR-IMPL-021` | FE + esquema v2 pendiente |
+| `FSD-UC-022` | `DD-UC-022` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-PROC-05…08 phases; objetivo API-STR-01…05 | `PR-IMPL-022` | |
+| `FSD-UC-004` | `DD-UC-004` | **legacy implementado** / **v2.0 reespecificado** | `2.0.0` | Upload `/subphases/…`; objetivo `/indicators/…` | `PR-IMPL-006` | API-EVD-01 revive path indicator |
+| `FSD-UC-005` | `DD-UC-005` | **hecho** | `2.0.0` | Append-only sin cambio de contrato | `PR-IMPL-035` | |
+| `FSD-UC-006` | `DD-UC-006` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Subsanación por subfase | `PR-IMPL-036` | API-EVD-05 por indicador |
+| `FSD-UC-007` | `DD-UC-007` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Filtros phase/subphase | `PR-IMPL-037` | Query `level1Id`, `indicatorId` |
+| `FSD-UC-008` | `DD-UC-008` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-SUB-03 | `PR-IMPL-038` | API-WF-01 |
+| `FSD-UC-009` | `DD-UC-009` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-SUB-04 | `PR-IMPL-038` | API-WF-02 |
+| `FSD-UC-010` | `DD-UC-010` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Cierre fase V13 | `PR-IMPL-039` | API-WF-03 Nivel 1 |
+| `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `2.0.0` | Sin cambio contrato | `PR-IMPL-023` | Responsable [CC] — independiente del árbol |
+| `FSD-UC-011` | `DD-UC-011` | hecho / **v2.0 filtros pendientes** | `2.0.0` | PBAC summary/details | `PR-IMPL-011` | Migrar filtros a level1Id/indicatorStatus |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
-| `FSD-UC-019` | `DD-UC-019` | **hecho** | `release/3.0.0` | `RegisterUserServiceTest` EE; manual E2E dashboard | `PR-IMPL-014` | Rol EE solo lectura; scope carrera; seed `ee@umss.edu.bo` |
+| `FSD-UC-020` | `DD-UC-020` | **en curso** | `2.0.0` | EE solo lectura | `PR-IMPL-014` | Vista árbol normativo pendiente UI |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -153,18 +159,19 @@ artefactos_vivos:
 | §1 Visión del producto | no | DTI vFinal §1 |
 | §2 Contexto del sistema (C4 N1) | no | DTI vFinal §2 |
 | §3 Arquitectura de alto nivel (C4 N2/N3) | **sí** | PostgreSQL reemplaza H2 en la persistencia principal (C4 N2 Container Diagram) |
-| §4 Modelo de dominio | no | DTI vFinal §4 |
+| §4 Modelo de dominio | **sí** | v2.0: [`modelo_datos.md`](modelo_datos.md) — N1→N2→N3→Indicador; legacy Fase/Subfase en JPA hasta Flyway V14+ |
 | §5 Arquitectura hexagonal del core | **sí** | Confirmada su exigencia estricta en FSD-UC-003. Dominio encapsulado. |
 | **MOD-AUTH (identidad)** | **sí** | Ver §B.1 abajo; design docs `DD-UC-001`, `DD-UC-002` |
 | **MOD-PROCESS (acreditación)** | **sí** | Ver §B.2 abajo; design docs `DD-UC-003`, `DD-UC-019`, **`DD-UC-022` (§B.2.1)**, **`DD-UC-023` (§B.2.2)** |
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
+| **MOD-WORKFLOW (indicador / N1)** | **sí** | Ver §B.4.1 abajo; DD-UC-008, 009, 010 |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
 | **MOD-REVIEW (evaluador externo [EE])** | **sí** | Ver §B.6 abajo; design doc `DD-UC-019` |
 | **MOD-TEMPLATE (plantillas normativas)** | **sí** | Ver §B.7 abajo; design doc `DD-UC-021` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
-| §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**; baseline en `docs/baseline/05_dti/adrs/`) |
+| §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**, **ADR-0004 jerarquía v2.0**; baseline en `docs/baseline/05_dti/adrs/`) |
 
 ### B.1 MOD-AUTH — contrato técnico vigente (`DD-UC-001` + `DD-UC-002`)
 
@@ -181,40 +188,33 @@ artefactos_vivos:
 
 ### B.2 MOD-PROCESS — contrato técnico vigente (`DD-UC-003` + `DD-UC-019`)
 
+**Release 2.0.0 objetivo:** clonación y consulta del árbol **N1→N2→N3→Indicador** — ver [`api_contracts.md`](api_contracts.md) §4.  
+**Implementación actual (legacy):** Fase/Subfase — mantener hasta ADR-0004 M2–M3.
+
 **Implementación creación:** PM-001 · **Prompts vigentes:** `PR-IMPL-003V3`  
 **Implementación consulta:** `PR-IMPL-019` · **Design doc consulta:** `DD-UC-019`
 
-| Área | Detalle vigente |
-| --- | --- |
-| **Endpoints (Web Adapter)** | `POST /api/v1/processes` ([JD]); `GET /api/v1/processes` ([JD], [TD], [CC]); `GET /api/v1/processes/{processId}` ([JD], [TD], [CC]); catálogo `GET /api/v1/programs?q=` |
-| **DTOs (Web Adapter)** | `CreateProcessRequestDto`, `ProcessResponseDto` (enriquecido), `ProcessSummaryResponseDto`, `ProgramSummaryResponse` |
-| **Puertos aplicación (consulta)** | `ListProcessesUseCase`, `GetProcessDetailUseCase`; OUT: `ProcessQueryPort` (separado de `AccreditationProcessPort`) |
-| **RBAC consulta** | JD/TD: todos los procesos; CC: filtro `career_id ∈ JWT.programScope`; acceso ajeno → **404 `PROCESS_NOT_FOUND`** (no 403) |
-| **Lógica de Negocio (Use Case)** | Clonación profunda Plantilla → Proceso (POST); enriquecimiento carrera/plantilla vía `ProgramCatalogPort` + `TemplatePort` (GET) |
-| **Tablas JPA (Persistencia)** | `programs`, `templates`, `template_phases`, `template_subphases`, `accreditation_processes`, `phases`, `subphases` |
-| **Seed dev carreras** | `ProgramSeedDataLoader` — 25 carreras UMSS (`DevSeedData.PROGRAM_*`) |
-| **Regla Unicidad (BD + App)** | Error HTTP 409 `PROCESS_ALREADY_ACTIVE`. Índice parcial `career_id` WHERE `status = 'ACTIVE'` |
-| **Errores proceso** | 404 `PROGRAM_NOT_FOUND`, 404 `TEMPLATE_NOT_FOUND`, 404 `PROCESS_NOT_FOUND`, 409 `PROCESS_ALREADY_ACTIVE` |
-| **Frontend** | `/procesos` (listado); `/procesos/{processId}` (detalle árbol fases/subfases); `/procesos/nuevo` ([JD]); sidebar desplegable «Ver procesos» / «Nuevo proceso» |
-| **Hooks Orval** | `useListProcesses`, `useGetProcess`, `useCreateProcess` en `procesos-de-acreditación.ts` |
-| **Modelos de Dominio** | Puros (sin `@Entity`); JPA vía mappers/adapters hexagonales |
+| Área | Detalle vigente (legacy en prod) | Objetivo v2.0 |
+| --- | --- | --- |
+| **Endpoints creación/consulta** | `POST/GET /processes`, `GET /processes/{id}` | Igual; payload con `level1Nodes[]` |
+| **DTOs** | `ProcessResponseDto` con `phases[].subphases[]` | `evaluatorModel`, `level1Nodes` anidado |
+| **Puertos consulta** | `ProcessQueryPort` | + proyección árbol normativo |
+| **Tablas JPA (prod)** | `phases`, `subphases`, `template_phases`, `template_subphases` | `level1_nodes`, `level2_nodes`, `level3_nodes`, `indicators`, `template_*` equivalentes (V14+) |
+| **Clonación** | Fase→Subfase desde plantilla | N1→N2→N3→Indicador |
+| **Frontend** | `/procesos/{id}` árbol fases/subfases | Árbol multinivel + badges indicador |
+| **Hooks Orval** | `useListProcesses`, `useGetProcess` | Regenerar post-OpenAPI v2 |
 
 #### B.2.1 MOD-PROCESS — estructura en proceso ACTIVE (`DD-UC-022`)
 
-**Implementación:** Sprint 02 PM-009 · **Prompt:** `PR-IMPL-022` · **FSD:** FSD-UC-022 · **Estado:** **hecho (Full-Stack)**
+**Implementación legacy:** Sprint 02 PM-009 · **Objetivo v2.0:** API-STR-01…05 · **Estado:** legacy hecho; v2.0 pendiente M3
 
-| Área | Detalle vigente |
-| --- | --- |
-| **Endpoints** | `POST/PUT/DELETE /api/v1/processes/{processId}/phases[/{phaseId}]`; CRUD subfases bajo fase; `PUT /processes/{processId}/structure/reorder` |
-| **RBAC** | Solo **[JD]** — `@PreAuthorize("hasRole('JD')")` en `ProcessStructureController` |
-| **Puertos aplicación** | IN: `AddProcessPhaseUseCase` … `ReorderProcessStructureUseCase`; OUT: **`ProcessStructurePort`**, **`SubphaseWorkflowPort`** (stub v1.0 → `false`) |
-| **Adaptadores** | `ProcessStructureJpaAdapter` (operaciones granulares; evita orphanRemoval en agregado); `SubphaseWorkflowStubAdapter` |
-| **Guard** | `ProcessStructureGuard` — solo `process.status == ACTIVE` → else `409 PROCESS_NOT_EDITABLE` |
-| **Errores clave** | 400 `SUBPHASE_LINK_REQUIRED`, `PROCESS_STRUCTURE_ORDER_CONFLICT`; 409 `SUBPHASE_HAS_EVIDENCE`, `PROCESS_NOT_EDITABLE` |
-| **Extensión UC-019** | GET detalle incluye `description` + `referenceUrl` en subfases |
-| **Dependencia** | `PR-IMPL-021` (V5 + clonación `referenceUrl` desde plantilla) |
-| **Frontend** | `/procesos/{processId}/estructura` — `ProcessStructurePage`, `useProcessStructureEditor`, Orval `estructura-de-proceso/` |
-| **Anti-patrón JPA** | No persistir agregado `AccreditationProcess` completo con colecciones reemplazadas; no preasignar UUID con `@GeneratedValue` |
+| Área | Legacy (prod) | Objetivo v2.0 |
+| --- | --- | --- |
+| **Endpoints** | API-PROC-05…08 `/phases`, `/subphases` | API-STR-01…05 `/level1-nodes`, `/level2-nodes`, `/level3-nodes`, `/indicators` |
+| **RBAC** | `[JD]`, `[TD]` en controller (verificar vs FSD-BR-23) | Igual |
+| **Puertos** | `ProcessStructurePort`, `SubphaseWorkflowPort` | `NormativeStructurePort`, `IndicatorWorkflowPort` |
+| **Errores** | `SUBPHASE_HAS_EVIDENCE` | `INDICATOR_HAS_EVIDENCE` |
+| **Frontend** | `/procesos/{processId}/estructura` (2 niveles) | Editor árbol 4 niveles |
 
 #### B.2.2 MOD-PROCESS — responsable [CC] (`DD-UC-023`)
 
@@ -253,23 +253,28 @@ artefactos_vivos:
 
 ### B.4 MOD-EVIDENCE — contrato técnico vigente (DD-UC-004)
 
-**Implementación:** PM-012 · **Prompts:** `PR-IMPL-006` · **FSD:** FSD-UC-004
+**Release 2.0.0 objetivo:** evidencia en **Indicador** — API-EVD-01 `POST /indicators/{id}/evidences`.  
+**Legacy en prod:** upload por **Subfase**; path `/indicators/...` retorna **410 Gone** (decisión v1.1, revertir en M3).
 
-| Área | Detalle vigente |
-|---|---|
-| **Endpoint** | `POST /api/v1/subphases/{subphaseId}/evidences` (multipart) — **API-EVD-01** |
-| **Legacy retirado** | `POST /api/v1/indicators/{indicatorId}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); header `Deprecation: true` |
-| **Frontend UC-004** | `/evidencias/cargar` usa selector proceso/subfase + API-SUB-01; hooks Orval legacy marcados `@deprecated` |
-| **RBAC** | Solo `[CC]`; alcance carrera vía `user_program_assignment` (FSD-BR-09) |
-| **Tablas JPA** | `subphases`, `evidence` (`subphase_id`), `evidence_version`, `subphase_observation` |
-| **Estado Subfase** | Derivado del workflow: `PENDIENTE` → `SUBIDO` → `OBSERVADO`/`APROBADO` |
-| **Hash** | SHA-256 hex (`Sha256ContentHashAdapter`) |
-| **Storage** | `./data/evidences` (local v1.0) |
-| **MIME** | pdf, doc/docx, xls/xlsx, png, jpeg — max 50MB |
-| **Lock upload** | `InMemoryEvidenceUploadLockAdapter` (FSD-BR-18 anti-doble-envío) |
-| **Notificaciones** | `NoOpNotificationOutboxAdapter` → `EvidenceUploaded` (UC-015 stub) |
-| **Seed dev** | `cc@umss.edu.bo` / subfases en proceso demo con evidencias |
-| **Legacy** | Tablas `indicator`, `indicator_state_history` — **deprecadas** en modelo v1.1 |
+| Área | Legacy (prod) | Objetivo v2.0 |
+|---|---|---|
+| **Upload** | `POST /subphases/{subphaseId}/evidences` | `POST /indicators/{indicatorId}/evidences` |
+| **Subsanación** | API-SUB-02 por subfase | API-EVD-05 por indicador |
+| **Tablas** | `evidence.subphase_id`, `subphase_observation` | `evidence.indicator_id` NOT NULL, `indicator_observation` |
+| **Estado workflow** | Derivado en `subphases.status` | Derivado en `indicators.status` |
+| **Búsqueda** | API-EVD-02 filtros `phaseId`, `subphaseId` | `level1Id`, `indicatorId`, `normativePath` |
+| **RBAC** | `[CC]` alcance carrera | Sin cambio |
+| **Hash / storage** | SHA-256, `./data/evidences` | Sin cambio |
+
+#### B.4.1 MOD-WORKFLOW — indicador y cierre Nivel 1 (DD-UC-008, 009, 010)
+
+| Área | Legacy (prod) | Objetivo v2.0 |
+|---|---|---|
+| **Rechazo** | `POST /subphases/{id}/reject` (API-SUB-03) | `POST /indicators/{id}/reject` (API-WF-01) |
+| **Aprobación** | `POST /subphases/{id}/approve` (API-SUB-04) | `POST /indicators/{id}/approve` (API-WF-02) |
+| **Cierre agregado** | `POST /phases/{id}/complete` — `PhaseCompleted` | `POST /level1-nodes/{id}/complete` — `Level1Completed` |
+| **Flyway** | V12 subphase status, V13 phase status | V14+ indicator + level1 status |
+| **Eventos outbox** | `SubphaseApproved`, `PhaseCompleted` | `IndicatorApproved`, `Level1Completed` |
 
 ### B.5 MOD-ASSISTANT — contrato técnico vigente (`DD-SYS-002`)
 
@@ -315,22 +320,16 @@ artefactos_vivos:
 
 ### B.7 MOD-TEMPLATE — plantillas normativas (`DD-UC-021`)
 
-**Implementación:** Sprint 02 PM-006 · **Prompt:** `PR-IMPL-021` · **FSD:** FSD-UC-021
+**Objetivo v2.0:** plantilla con árbol **N1→N2→N3→Indicador** (`evaluatorModel`, `code`, `weight`).  
+**Legacy en prod:** `template_phases`, `template_subphases`.
 
-| Área | Detalle vigente |
-| --- | --- |
-| **Endpoints** | `GET/POST /api/v1/templates`; `GET/PUT/DELETE /api/v1/templates/{templateId}`; `POST …/publish`, `…/duplicate`, `…/archive` |
-| **RBAC** | Solo **[JD]** — `@PreAuthorize("hasRole('JD')")` en `TemplateController` |
-| **Puertos aplicación** | IN: `CreateTemplateUseCase` … `DeleteTemplateUseCase`; OUT write: **`TemplateManagementPort`**; OUT read: **`TemplatePort`** (CQRS) |
-| **Validador dominio** | `TemplateStructureValidator` — URL HTTPS obligatoria, órdenes únicos, estructura mínima al publicar |
-| **Ciclo de vida** | `DRAFT` → `PUBLISHED` → `ARCHIVED`; duplicar crea copia `DRAFT` |
-| **Errores clave** | 400 `TEMPLATE_SUBPHASE_LINK_REQUIRED`, `TEMPLATE_STRUCTURE_INCOMPLETE`, `TEMPLATE_ORDER_CONFLICT`; 409 `TEMPLATE_IN_USE`; 400 `TEMPLATE_NOT_PUBLISHED` en `POST /processes` |
-| **Hook UC-003** | `CreateProcessUseCaseImpl` rechaza plantilla no `PUBLISHED`; clona `referenceUrl`/`description` a subfases del proceso |
-| **Migración Flyway** | `V5__template_management.sql` (columnas `description`, `status`, `reference_url`, timestamps) — perfil **prod** |
-| **Dev Docker** | `application-dev.yaml`: Hibernate `ddl-auto: update`; Flyway deshabilitado (delta §A.2 #13) |
-| **Tablas JPA** | `templates`, `template_phases`, `template_subphases` |
-| **Frontend** | Pendiente `PR-IMPL-021-FE` — rutas `/admin/plantillas/**` |
-| **Hooks Orval (post-FE)** | `useListTemplates`, `useGetTemplate`, `useCreateTemplate`, … en `plantillas-normativas.ts` |
+| Área | Legacy (prod) | Objetivo v2.0 |
+| --- | --- | --- |
+| **Endpoints** | API-TPL-01…08 con `phases/subphases` | Misma base `/templates`; payload con `level1Nodes` |
+| **Validador** | URL + requisitos subfase | `code`, `weight`, `referenceUrl` por indicador (BR-24, BR-25) |
+| **Publicación** | ≥1 fase + 1 subfase | ≥1 indicador en árbol completo |
+| **Flyway** | `V5__template_management.sql` | `V14+` tablas normativas v2 |
+| **Hook UC-003** | Clona subfases | Clona indicadores con ponderación |
 
 ## C. Integraciones
 

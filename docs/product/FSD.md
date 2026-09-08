@@ -1,18 +1,20 @@
 ---
 producto: "SIGESA / AcredIA"
 documento: LFSD ⚡ (Lean Functional Specification Document)
-version: v1.0 (Vivo)
+version: v2.0 (Vivo)
+release: "2.0.0"
 fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
 
 > **Qué es:** Índice ágil de requerimientos funcionales durante la implementación.  
-> **Modelo v1.1:** **Proceso → Fase → Subfase → Evidencia** (sin Dimensión/Criterio/Indicador en el piloto).  
+> **Modelo v2.0 (release 2.0.0):** **Modelo evaluador (CEUB \| ARCU-SUR) → Nivel 1 → Nivel 2 → Nivel 3 → Indicador → Evidencia**, instanciado en un **Proceso** de acreditación por carrera. Ver [`glosario.md`](glosario.md) §2.  
+> **Legacy v1.x:** Fase/Subfase — obsoleto; código en `main` aún no migrado (ver §7).  
 > **Atención agentes IA:** Para implementar un feature, naveguen al `FSD-UC-NNN` enlazado en la tabla inferior.  
 > **Baseline congelado (no editar):** [`docs/baseline/04_fsd/FSD.md`](../baseline/04_fsd/FSD.md) · Dorada v1.0 · 2026-05-16
 
@@ -26,7 +28,8 @@ ultima_actualizacion: "2026-08-27"
 | Reglas de negocio globales | [`reglas_negocio.md`](reglas_negocio.md) |
 | Catálogo API completo | [`api_contracts.md`](api_contracts.md) |
 | DTP (contrato técnico vivo) | [`DTP.md`](DTP.md) |
-| Máquina de estados Subfase | `PENDIENTE` → `SUBIDO` ↔ `OBSERVADO` / `APROBADO` · [`diagramas/FSD-UC-006_008_009_estados_subfase.mmd`](diagramas/FSD-UC-006_008_009_estados_subfase.mmd) |
+| Máquina de estados Indicador | `PENDIENTE` → `SUBIDO` ↔ `OBSERVADO` / `APROBADO` · [`diagramas/FSD-UC-006_008_009_estados_indicador.mmd`](diagramas/FSD-UC-006_008_009_estados_indicador.mmd) *(diagrama legacy: `estados_subfase.mmd`)* |
+| Jerarquía normativa v2.0 | [`glosario.md`](glosario.md) §2 · CEUB: Área→Variable→Sub-variable→Indicador · ARCU-SUR: Dimensión→Componente→Criterio→Indicador |
 | Modelo documental AI-SDLC | [`../MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUMENTAL_IMPLEMENTACION.md) |
 
 **Artefactos descompuestos (solo lectura / histórico):** [`docs/baseline/04_fsd/`](../baseline/04_fsd/) — fuente de extracción del baseline.
@@ -39,42 +42,43 @@ ultima_actualizacion: "2026-08-27"
 |----|--------|-------|---------|--------|-----|------------|---------|
 | `FSD-UC-001` | Autenticación y sesión | Interno | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-001.md) | [`DD-UC-001`](../design/DD-UC-001.md) | [`PR-IMPL-001`](../prompts/impl/PR-IMPL-001.md) |
 | `FSD-UC-002` | Gestión de usuarios [JD] | [JD] | v1.0 | **Hecho** | [Ver detalle](uc/FSD-UC-002.md) | [`DD-UC-002`](../design/DD-UC-002.md) | [`PR-IMPL-002`](../prompts/impl/PR-IMPL-002.md) |
-| `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-003.md) | [`DD-UC-003`](../design/DD-UC-003.md) | [`PR-IMPL-003`](../prompts/impl/PR-IMPL-003.md) |
-| `FSD-UC-004` | Cargar Evidencia | [CC] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-004.md) | [`DD-UC-004`](../design/DD-UC-004.md) | [`PR-IMPL-006`](../prompts/impl/PR-IMPL-006.md) |
-| `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-005.md) | [`DD-UC-005`](../design/DD-UC-005.md) | [`PR-IMPL-035`](../prompts/impl/PR-IMPL-035.md) |
-| `FSD-UC-006` | Subsanar Evidencia | [CC] | v1.0 | Implementado | [Ver detalle](uc/FSD-UC-006.md) | DD-UC-006 | PR-IMPL-036 |
-| `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v1.0 | Implementado | [Ver detalle](uc/FSD-UC-007.md) | DD-UC-007 | PR-IMPL-037 |
-| `FSD-UC-008` | Rechazar Subfase | [TD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-008.md) | [`DD-UC-008`](../design/DD-UC-008.md) | [`PR-IMPL-038`](../prompts/impl/PR-IMPL-038.md) |
-| `FSD-UC-009` | Aprobar Subfase | [TD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-009.md) | [`DD-UC-009`](../design/DD-UC-009.md) | [`PR-IMPL-038`](../prompts/impl/PR-IMPL-038.md) |
-| `FSD-UC-010` | Avanzar/cerrar Fase | [TD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-010.md) | [`DD-UC-010`](../design/DD-UC-010.md) | [`PR-IMPL-039`](../prompts/impl/PR-IMPL-039.md) |
-| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-011.md) | [`DD-UC-011`](../design/DD-UC-011.md) | [`PR-IMPL-011`](../prompts/impl/PR-IMPL-011.md) |
-| `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-012.md) | — | — |
-| `FSD-UC-013` | Panel semáforo [JD] | [JD] | v1.0 | **En Curso** | [Ver detalle](uc/FSD-UC-013.md) | — | — |
+| `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR | [JD] | v2.0 | **Reespecificado** | [Ver detalle](uc/FSD-UC-003.md) | [`DD-UC-003`](../design/DD-UC-003.md) | [`PR-IMPL-003`](../prompts/impl/PR-IMPL-003.md) |
+| `FSD-UC-004` | Cargar Evidencia en Indicador | [CC] | v2.0 | **Reespecificado** *(impl. v1: subfase)* | [Ver detalle](uc/FSD-UC-004.md) | [`DD-UC-004`](../design/DD-UC-004.md) | [`PR-IMPL-006`](../prompts/impl/PR-IMPL-006.md) |
+| `FSD-UC-005` | Versionado y bloqueo de borrado | [CC], [TD] | v2.0 | **Implementado** *(evidencia por indicador en v2)* | [Ver detalle](uc/FSD-UC-005.md) | [`DD-UC-005`](../design/DD-UC-005.md) | [`PR-IMPL-035`](../prompts/impl/PR-IMPL-035.md) |
+| `FSD-UC-006` | Subsanar Evidencia | [CC] | v2.0 | **Reespecificado** | [Ver detalle](uc/FSD-UC-006.md) | DD-UC-006 | PR-IMPL-036 |
+| `FSD-UC-007` | Buscar Evidencia | [CC], [TD] | v2.0 | **Reespecificado** | [Ver detalle](uc/FSD-UC-007.md) | DD-UC-007 | PR-IMPL-037 |
+| `FSD-UC-008` | Rechazar Indicador | [TD] | v2.0 | **Reespecificado** *(impl. v1: subfase)* | [Ver detalle](uc/FSD-UC-008.md) | [`DD-UC-008`](../design/DD-UC-008.md) | [`PR-IMPL-038`](../prompts/impl/PR-IMPL-038.md) |
+| `FSD-UC-009` | Aprobar Indicador | [TD] | v2.0 | **Reespecificado** *(impl. v1: subfase)* | [Ver detalle](uc/FSD-UC-009.md) | [`DD-UC-009`](../design/DD-UC-009.md) | [`PR-IMPL-038`](../prompts/impl/PR-IMPL-038.md) |
+| `FSD-UC-010` | Cerrar Nivel 1 (Dimensión/Área) | [TD] | v2.0 | **Reespecificado** *(impl. v1: fase)* | [Ver detalle](uc/FSD-UC-010.md) | [`DD-UC-010`](../design/DD-UC-010.md) | [`PR-IMPL-039`](../prompts/impl/PR-IMPL-039.md) |
+| `FSD-UC-011` | Dashboard [CC] y observaciones | [CC] | v2.0 | **En Curso** | [Ver detalle](uc/FSD-UC-011.md) | [`DD-UC-011`](../design/DD-UC-011.md) | [`PR-IMPL-011`](../prompts/impl/PR-IMPL-011.md) |
+| `FSD-UC-012` | Bandeja auditoría [TD] | [TD] | v2.0 | **En Curso** | [Ver detalle](uc/FSD-UC-012.md) | — | — |
+| `FSD-UC-013` | Panel semáforo [JD] | [JD] | v2.0 | **En Curso** | [Ver detalle](uc/FSD-UC-013.md) | — | — |
 | `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-014.md) | [`DD-UC-014`](../design/DD-UC-014.md) | [`PR-IMPL-005`](../prompts/impl/PR-IMPL-005.md) |
-| `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) | — | — |
+| `FSD-UC-015` | Notificaciones y alertas | Sistema | v2.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) | — | — |
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
 | `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |
 | `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
-| `FSD-UC-019` | Consulta de procesos de acreditación | [JD], [TD], [CC] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-019.md) | [DD-UC-019](../design/DD-UC-019.md) | [PR-IMPL-019](../prompts/impl/PR-IMPL-019.md) |
-| `FSD-UC-020` | Revisión documental [EE] | [EE] | v1.1 | **En Curso** | [Ver detalle](uc/FSD-UC-020.md) | [`DD-UC-020`](../design/DD-UC-020.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |
-| `FSD-UC-021` | Gestión de plantillas normativas | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-021.md) | [`DD-UC-021`](../design/DD-UC-021.md) | [`PR-IMPL-021`](../prompts/impl/PR-IMPL-021.md) |
-| `FSD-UC-022` | Gestión de fases/subfases en proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
+| `FSD-UC-019` | Consulta de procesos de acreditación | [JD], [TD], [CC] | v2.0 | **Reespecificado** | [Ver detalle](uc/FSD-UC-019.md) | [DD-UC-019](../design/DD-UC-019.md) | [PR-IMPL-019](../prompts/impl/PR-IMPL-019.md) |
+| `FSD-UC-020` | Revisión documental [EE] | [EE] | v2.0 | **En Curso** | [Ver detalle](uc/FSD-UC-020.md) | [`DD-UC-020`](../design/DD-UC-020.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |
+| `FSD-UC-021` | Gestión de plantillas normativas (jerarquía N1–N3 + Indicador) | [JD] | v2.0 | **Reespecificado** *(impl. v1: fases/subfases)* | [Ver detalle](uc/FSD-UC-021.md) | [`DD-UC-021`](../design/DD-UC-021.md) | [`PR-IMPL-021`](../prompts/impl/PR-IMPL-021.md) |
+| `FSD-UC-022` | Gestión de estructura normativa en proceso | [JD] | v2.0 | **Reespecificado** *(impl. v1: fases/subfases)* | [Ver detalle](uc/FSD-UC-022.md) | [`DD-UC-022`](../design/DD-UC-022.md) | [`PR-IMPL-022`](../prompts/impl/PR-IMPL-022.md) |
 | `FSD-UC-023` | Asignación de responsable [CC] a proceso | [JD] | v1.0 | **Hecho (Full-Stack)** | [Ver detalle](uc/FSD-UC-023.md) | [`DD-UC-023`](../design/DD-UC-023.md) | [`PR-IMPL-023`](../prompts/impl/PR-IMPL-023.md) |
-| `FSD-UC-024` | Copiloto de control documental | [TD]/[CC]/[JD] | v1.0 | **Hecho (Full-Stack + MCP)** | [Ver detalle](uc/FSD-UC-024.md) | [`DD-AGENT-003`](../design/assistant/DD-AGENT-003.md) | [`PR-IMPL-026`](../prompts/impl/PR-IMPL-026.md) |
+| `FSD-UC-024` | Copiloto de control documental | [TD]/[CC]/[JD] | v2.0 | **Hecho (Full-Stack + MCP)** *(tools: migrar a indicador)* | [Ver detalle](uc/FSD-UC-024.md) | [`DD-AGENT-003`](../design/assistant/DD-AGENT-003.md) | [`PR-IMPL-026`](../prompts/impl/PR-IMPL-026.md) |
 
-**Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Hecho` / `Hecho (Full-Stack)` · `Verificado` · `Obsoleto`
+**Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` · `Hecho` / `Hecho (Full-Stack)` · `Reespecificado` *(FSD v2.0; código legacy v1.x)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-08-27):** 15 UC cerrados o implementados · 4 en curso (dashboards + EE) · 5 pendientes v1.0 · 2 pendientes v1.1. **Bloque crítico abierto:** servicios transversales UC-015/017 (adaptadores NoOp en código).
+**Snapshot (2026-09-08):** Release **2.0.0** — FSD actualizado a jerarquía normativa multinivel. Implementación en código **pendiente de migración** desde Fase/Subfase (v1.x). UC transversales UC-015/017 siguen pendientes.
 
 ---
 
 ## 3. Reglas críticas del sistema (hard constraints)
 
 1. **Append-Only:** Prohibido el borrado físico (`DELETE`) de Evidencias aprobadas. Intentos → `409 EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED` (FSD-BR-02, FSD-BR-15).
-2. **Cierre de Fase:** `COUNT(subfases_fase) == COUNT(subfases WHERE estado = APROBADO)`. Si no se cumple → `409 FASE_CIERRE_BLOQUEADO` (FSD-BR-07).
+2. **Cierre de Nivel 1:** `COUNT(indicadores_subárbol) == COUNT(indicadores WHERE estado = APROBADO)`. Si no se cumple → `409 NIVEL1_CIERRE_BLOQUEADO` (FSD-BR-07). *Legacy v1: cierre de Fase.*
 3. **Aislamiento de rol:** El Coordinador [CC] solo accede a información de **su propia carrera** (FSD-BR-09).
-4. **Separación de dictamen:** Solo [TD] aprueba/rechaza **Subfase**; dictamen final institucional solo humano (FSD-BR-04, FSD-BR-11).
+4. **Separación de dictamen:** Solo [TD] aprueba/rechaza **Indicador**; dictamen final institucional solo humano (FSD-BR-04, FSD-BR-11). *Legacy v1: Subfase.*
 5. **Correo institucional:** Cuentas solo `@umss.edu.bo` (FSD-BR-12).
+6. **Jerarquía normativa:** Toda Evidencia exige `indicatorId` válido en el árbol N1→N2→N3 del proceso (FSD-BR-01). *Legacy v1: `subphaseId`.*
 
 ---
 
@@ -83,7 +87,7 @@ ultima_actualizacion: "2026-08-27"
 | Actor | Responsabilidad |
 |-------|-----------------|
 | [CC] | Carga y subsana Evidencia de su carrera |
-| [TD] | Revisa, aprueba/rechaza Subfase; cierra Fase |
+| [TD] | Revisa, aprueba/rechaza Indicador; cierra Nivel 1 |
 | [JD] | Usuarios, plantillas, semáforo, PDF, publicación |
 | [P] | Consulta pública (solo publicados) |
 
@@ -97,10 +101,10 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 
 | Task Spec Kit | FSD-UC | Release |
 |---------------|--------|---------|
-| T-001 Modelo Proceso/Fase/Subfase | UC-003, UC-021, UC-022, UC-023 | v1.0-rc |
+| T-001 Modelo normativo + Proceso | UC-003, UC-021, UC-022, UC-023 | v2.0 |
 | T-002 Auth + RBAC | UC-001, UC-002 | v1.0-rc |
-| T-003 Upload + versionado | UC-004, UC-005 | v1.0-rc |
-| T-004 State machine Subfase | UC-008, UC-009, UC-010 | v1.0-rc |
+| T-003 Upload + versionado | UC-004, UC-005 | v2.0 |
+| T-004 State machine Indicador | UC-008, UC-009, UC-010 | v2.0 |
 | T-005 Observaciones + subsanación | UC-006, UC-008 | v1.0-rc |
 | T-006 Búsqueda indexada | UC-007 | v1.0-rc |
 | T-007 Dashboards + semáforo | UC-011, UC-012, UC-013 | v1.0 |
@@ -111,14 +115,14 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | T-012 Importación CSV | UC-018 | v1.1 |
 | T-013 MOD-ASSISTANT copilotos | UC-024 (+ agentes embebidos UC-002/022) | v1.0 |
 
-**Estado Task Spec Kits (2026-08-27):**
+**Estado Task Spec Kits (2026-09-08):**
 
 | Kit | Estado |
 |-----|--------|
-| T-001 | ✅ Cerrado (UC-003, 021, 022, 023) |
+| T-001 | ⚠️ Reabierto v2.0 — FSD actualizado; código legacy Fase/Subfase |
 | T-002 | ✅ Cerrado |
-| T-003 | ✅ Cerrado (upload UC-004 + versionado UC-005) |
-| T-004 | ✅ Completo (UC-008, UC-009, UC-010) |
+| T-003 | ⚠️ Reabierto v2.0 — evidencia en Indicador |
+| T-004 | ⚠️ Reabierto v2.0 — workflow en Indicador + cierre Nivel 1 |
 | T-005 | ✅ Cerrado (UC-006 subsanación + UC-008 rechazo formal TD) |
 | T-006 | ✅ Implementado (buscador + FTS GIN V11 en prod; LIKE fallback dev/H2) |
 | T-007 | ⚠️ Parcial — UI híbrida `/dashboard`; rutas dedicadas y workflow TD/JD incompletos |
@@ -150,5 +154,24 @@ Cadena obligatoria (ver [`MODELO_DOCUMENTAL_IMPLEMENTACION.md`](../MODELO_DOCUME
 | 2026-08-27 | **FSD-UC-005:** historial de versiones (`GET /evidences/{id}/versions`) + bloqueo DELETE append-only (`409 EVIDENCE_IMMUTABLE`); UI historial en subfases; PM-002 sprint 3 |
 | 2026-08-27 | **FSD-UC-007:** API-EVD-02 búsqueda multifiltro; panel en detalle de proceso; PM-004 sprint 3 |
 | 2026-08-27 | **FSD-UC-006:** subsanación por subfase (API-SUB-02), una subsanación por observación OPEN, historial liviano (`blob_purged`); PM-003 sprint 3 |
-| 2026-08-27 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia; retiro Dimensión/Criterio/Indicador del alcance piloto; UC-008/009 renombrados a Rechazar/Aprobar Subfase |
 | 2026-09-02 | **MOD-ASSISTANT UI shell:** copilotos fases/evidencias/usuarios unificados en ventana flotante (`DomainCopilotFloatingChat`); historial conversaciones `sessionStorage`; `/ayuda` sin cambios; [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md); PM-007 sprint 3 |
+| 2026-09-08 | **ADR-0004** aceptada; `modelo_datos.md`, `reglas_negocio.md`, `api_contracts.md`, `DTP.md` v2.0 |
+| 2026-09-08 | **Release 2.0.0 (FSD):** jerarquía Modelo evaluador → N1 → N2 → N3 → Indicador → Evidencia; obsolescencia Fase/Subfase; UC-003/004/008–010/019/021/022 reespecificados |
+| 2026-08-27 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia *(supersedido por v2.0)* |
+---
+
+## 7. Migración implementación v1.x → v2.0
+
+| Capa | Estado (2026-09-08) | Acción pendiente |
+|------|---------------------|------------------|
+| FSD / glosario | ✅ Actualizado | — |
+| ADR-0004 | ✅ Aceptada | — |
+| `modelo_datos.md`, `reglas_negocio.md` | ✅ Actualizado v2.0 | — |
+| `api_contracts.md`, `DTP.md` | ✅ Actualizado v2.0 | — |
+| Backend (`Phase`, `Subphase`, `/subphases/*`) | ❌ Legacy v1.x | Migración BD + API + dominio (M1–M3) |
+| Frontend (árbol fases/subfases) | ❌ Legacy v1.x | UI multinivel + indicadores |
+| Diagramas `.mmd` | ⏳ Parcial | Renombrar/crear diagramas indicador y Nivel 1 |
+
+**Mapeo rápido:** Fase → Nivel 1 · Subfase → Indicador (unidad workflow) · evidencia: `subphaseId` → `indicatorId`.
+
+Divergencias de implementación respecto a este FSD requieren **ADR** en `docs/adr/` antes de merge.

@@ -528,7 +528,7 @@ export const getGetProcessUrl = (processId: string,) => {
 }
 
 /**
- * Incluye árbol Fase -> Subfase ordenado por order.
+ * Incluye árbol normativo v2 (N1→N2→N3→Indicador) y legacy Fase→Subfase.
  * @summary Detalle de proceso
  */
 export const getProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getProcessResponse> => {

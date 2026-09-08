@@ -4,6 +4,7 @@ import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -21,17 +22,20 @@ public class ListProcessesService implements ListProcessesUseCase {
     private final TemplatePort templatePort;
     private final ProcessResponsiblePort processResponsiblePort;
     private final UserRepositoryPort userRepositoryPort;
+    private final NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     public ListProcessesService(ProcessQueryPort processQueryPort,
                                 ProgramCatalogPort programCatalogPort,
                                 TemplatePort templatePort,
                                 ProcessResponsiblePort processResponsiblePort,
-                                UserRepositoryPort userRepositoryPort) {
+                                UserRepositoryPort userRepositoryPort,
+                                NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
         this.processQueryPort = processQueryPort;
         this.programCatalogPort = programCatalogPort;
         this.templatePort = templatePort;
         this.processResponsiblePort = processResponsiblePort;
         this.userRepositoryPort = userRepositoryPort;
+        this.normativeHierarchyQueryPort = normativeHierarchyQueryPort;
     }
 
     @Override
@@ -48,7 +52,8 @@ public class ListProcessesService implements ListProcessesUseCase {
         }
 
         List<ProcessSummary> summaries = items.stream()
-                .map(item -> ProcessEnrichmentHelper.toSummary(item, programCatalogPort, templatePort))
+                .map(item -> ProcessEnrichmentHelper.toSummary(
+                        item, programCatalogPort, templatePort, normativeHierarchyQueryPort))
                 .toList();
 
         List<UUID> processIds = summaries.stream().map(ProcessSummary::id).toList();
@@ -64,10 +69,13 @@ public class ListProcessesService implements ListProcessesUseCase {
                         summary.templateId(),
                         summary.templateName(),
                         summary.templateType(),
+                        summary.evaluatorModel(),
                         summary.status(),
                         summary.startDate(),
                         summary.phaseCount(),
                         summary.subphaseCount(),
+                        summary.level1Count(),
+                        summary.indicatorCount(),
                         responsibles.get(summary.id())
                 ))
                 .toList();

@@ -1,6 +1,12 @@
 import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
+import {
+  ProcessNormativeStructureEditorUI,
+  type NormativeIndicatorDraft,
+  type NormativeNodeDraft,
+} from './ProcessNormativeStructureEditorUI';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 import {
   ProcessStructureEditorUI,
@@ -9,13 +15,24 @@ import {
   type SubphaseDraft,
 } from './ProcessStructureEditorUI';
 import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { useProcessNormativeStructureEditor } from '../hooks/useProcessNormativeStructureEditor';
 import { useProcessStructureEditor } from '../hooks/useProcessStructureEditor';
 
 interface ProcessStructureViewProps {
   processId: string;
 }
 
+type StructureEditorMode = 'normative' | 'legacy';
+
 export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
+  const legacy = useProcessStructureEditor(processId);
+  const normative = useProcessNormativeStructureEditor(processId);
+  const hasNormativeTree = (legacy.process?.level1Nodes?.length ?? 0) > 0;
+  const [mode, setMode] = useState<StructureEditorMode>(
+    hasNormativeTree ? 'normative' : 'legacy',
+  );
+
+  const active = mode === 'normative' ? normative : legacy;
   const {
     process,
     isLoading,
@@ -23,23 +40,12 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
     isNotFound,
     errorMessage,
     refetch,
-    actionError,
-    isEditable,
-    isBusy,
-    addPhase,
-    updatePhase,
-    deletePhase,
-    addSubphase,
-    updateSubphase,
-    deleteSubphase,
-  } = useProcessStructureEditor(processId);
+  } = active;
 
   const handleAddPhase = async (draft: NewPhaseDraft): Promise<boolean> => {
     const order = Number.parseInt(draft.order, 10);
-    if (Number.isNaN(order)) {
-      return false;
-    }
-    return addPhase({
+    if (Number.isNaN(order)) return false;
+    return legacy.addPhase({
       name: draft.name,
       order,
       description: draft.description.trim() || undefined,
@@ -48,10 +54,8 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
 
   const handleUpdatePhase = async (phaseId: string, draft: PhaseDraft): Promise<boolean> => {
     const order = Number.parseInt(draft.order, 10);
-    if (Number.isNaN(order)) {
-      return false;
-    }
-    return updatePhase({
+    if (Number.isNaN(order)) return false;
+    return legacy.updatePhase({
       phaseId,
       data: {
         name: draft.name,
@@ -61,15 +65,10 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
     });
   };
 
-  const handleAddSubphase = async (
-    phaseId: string,
-    draft: SubphaseDraft,
-  ): Promise<boolean> => {
+  const handleAddSubphase = async (phaseId: string, draft: SubphaseDraft): Promise<boolean> => {
     const order = Number.parseInt(draft.order, 10);
-    if (Number.isNaN(order)) {
-      return false;
-    }
-    return addSubphase({
+    if (Number.isNaN(order)) return false;
+    return legacy.addSubphase({
       phaseId,
       data: {
         name: draft.name,
@@ -87,10 +86,8 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
     draft: SubphaseDraft,
   ): Promise<boolean> => {
     const order = Number.parseInt(draft.order, 10);
-    if (Number.isNaN(order)) {
-      return false;
-    }
-    return updateSubphase({
+    if (Number.isNaN(order)) return false;
+    return legacy.updateSubphase({
       phaseId,
       subphaseId,
       data: {
@@ -101,6 +98,29 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
         requirements: draft.requirements.trim(),
       },
     });
+  };
+
+  const submitNode = (draft: NormativeNodeDraft) => {
+    const order = Number.parseInt(draft.order, 10);
+    if (Number.isNaN(order)) return null;
+    return {
+      name: draft.name.trim(),
+      order,
+      description: draft.description.trim() || undefined,
+    };
+  };
+
+  const submitIndicator = (draft: NormativeIndicatorDraft) => {
+    const order = Number.parseInt(draft.order, 10);
+    const weight = Number.parseFloat(draft.weight);
+    if (Number.isNaN(order) || Number.isNaN(weight)) return null;
+    return {
+      code: draft.code.trim(),
+      description: draft.description.trim(),
+      weight,
+      order,
+      referenceUrl: draft.referenceUrl.trim(),
+    };
   };
 
   return (
@@ -143,7 +163,7 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
               <div>
                 <p className="text-label-md uppercase tracking-wide text-primary-100">
-                  Edición estructural · {process.templateType ?? 'Plantilla'}
+                  Edición estructural · {process.evaluatorModel ?? process.templateType ?? 'Plantilla'}
                 </p>
                 <h1 className="mt-1 text-heading-xl font-bold">{process.careerName ?? 'Carrera'}</h1>
                 <p className="mt-1 text-body-md text-primary-100">
@@ -154,22 +174,82 @@ export function ProcessStructureView({ processId }: ProcessStructureViewProps) {
             </div>
           </section>
 
-          <ProcessStructureEditorUI
-            phases={process.phases ?? []}
-            isEditable={isEditable}
-            isBusy={isBusy}
-            actionError={actionError}
-            onAddPhase={handleAddPhase}
-            onUpdatePhase={handleUpdatePhase}
-            onDeletePhase={deletePhase}
-            onAddSubphase={handleAddSubphase}
-            onUpdateSubphase={handleUpdateSubphase}
-            onDeleteSubphase={(phaseId, subphaseId) =>
-              deleteSubphase({ phaseId, subphaseId })
-            }
-          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={mode === 'normative' ? 'primary' : 'ghost'}
+              onClick={() => setMode('normative')}
+            >
+              Jerarquía normativa v2
+            </Button>
+            <Button
+              variant={mode === 'legacy' ? 'primary' : 'ghost'}
+              onClick={() => setMode('legacy')}
+            >
+              Fases / subfases (legacy)
+            </Button>
+          </div>
 
-          {isEditable && (
+          {mode === 'normative' ? (
+            <ProcessNormativeStructureEditorUI
+              level1Nodes={process.level1Nodes ?? []}
+              isEditable={normative.isEditable}
+              isBusy={normative.isBusy}
+              actionError={normative.actionError}
+              onAddLevel1={async (draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.addLevel1(payload) : false;
+              }}
+              onUpdateLevel1={async (level1Id, draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.updateLevel1({ level1Id, data: payload }) : false;
+              }}
+              onDeleteLevel1={normative.deleteLevel1}
+              onAddLevel2={async (level1Id, draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.addLevel2({ level1Id, data: payload }) : false;
+              }}
+              onUpdateLevel2={async (level2Id, draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.updateLevel2({ level2Id, data: payload }) : false;
+              }}
+              onDeleteLevel2={normative.deleteLevel2}
+              onAddLevel3={async (level2Id, draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.addLevel3({ level2Id, data: payload }) : false;
+              }}
+              onUpdateLevel3={async (level3Id, draft) => {
+                const payload = submitNode(draft);
+                return payload ? normative.updateLevel3({ level3Id, data: payload }) : false;
+              }}
+              onDeleteLevel3={normative.deleteLevel3}
+              onAddIndicator={async (level3Id, draft) => {
+                const payload = submitIndicator(draft);
+                return payload ? normative.addIndicator({ level3Id, data: payload }) : false;
+              }}
+              onUpdateIndicator={async (indicatorId, draft) => {
+                const payload = submitIndicator(draft);
+                return payload ? normative.updateIndicator({ indicatorId, data: payload }) : false;
+              }}
+              onDeleteIndicator={normative.deleteIndicator}
+            />
+          ) : (
+            <ProcessStructureEditorUI
+              phases={process.phases ?? []}
+              isEditable={legacy.isEditable}
+              isBusy={legacy.isBusy}
+              actionError={legacy.actionError}
+              onAddPhase={handleAddPhase}
+              onUpdatePhase={handleUpdatePhase}
+              onDeletePhase={legacy.deletePhase}
+              onAddSubphase={handleAddSubphase}
+              onUpdateSubphase={handleUpdateSubphase}
+              onDeleteSubphase={(phaseId, subphaseId) =>
+                legacy.deleteSubphase({ phaseId, subphaseId })
+              }
+            />
+          )}
+
+          {legacy.isEditable && (
             <PhasesCopilotPanel
               process={{
                 processId,

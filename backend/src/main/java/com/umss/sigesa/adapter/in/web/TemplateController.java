@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.web.dto.NormativeLevel1NodeDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplateDetailResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplatePhaseRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplatePhaseResponseDto;
@@ -7,6 +8,8 @@ import com.umss.sigesa.adapter.in.web.dto.TemplateSubphaseRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplateSubphaseResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.TemplateSummaryResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.UpsertTemplateRequestDto;
+import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
 import com.umss.sigesa.application.port.in.DeleteTemplateUseCase;
@@ -15,6 +18,7 @@ import com.umss.sigesa.application.port.in.GetTemplateUseCase;
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
 import com.umss.sigesa.application.port.in.PublishTemplateUseCase;
 import com.umss.sigesa.application.port.in.UpdateTemplateUseCase;
+import com.umss.sigesa.application.service.process.ProcessEnrichmentHelper;
 import com.umss.sigesa.domain.model.Template;
 import com.umss.sigesa.domain.model.TemplatePhase;
 import com.umss.sigesa.domain.model.TemplateStatus;
@@ -57,6 +61,8 @@ public class TemplateController {
     private final ArchiveTemplateUseCase archiveTemplateUseCase;
     private final DuplicateTemplateUseCase duplicateTemplateUseCase;
     private final DeleteTemplateUseCase deleteTemplateUseCase;
+    private final NormativeHierarchyQueryPort normativeHierarchyQueryPort;
+    private final NormativeStructureWebMapper normativeStructureWebMapper;
 
     @GetMapping
     @Operation(summary = "Listar plantillas normativas")
@@ -166,6 +172,14 @@ public class TemplateController {
     }
 
     private TemplateSummaryResponseDto toSummaryDto(Template template) {
+        UUID templateId = template.getId();
+        boolean hasV2 = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId);
+        int level1Count = hasV2
+                ? (int) normativeHierarchyQueryPort.countLevel1NodesByTemplateId(templateId)
+                : countPhases(template);
+        int indicatorCount = hasV2
+                ? (int) normativeHierarchyQueryPort.countIndicatorsByTemplateId(templateId)
+                : countSubphases(template);
         return TemplateSummaryResponseDto.builder()
                 .id(template.getId())
                 .name(template.getName())
@@ -174,10 +188,29 @@ public class TemplateController {
                 .status(template.getStatus() != null ? template.getStatus().name() : null)
                 .phaseCount(countPhases(template))
                 .subphaseCount(countSubphases(template))
+                .level1Count(level1Count)
+                .indicatorCount(indicatorCount)
+                .evaluatorModel(ProcessEnrichmentHelper.resolveEvaluatorModel(template.getType()))
                 .build();
     }
 
     private TemplateDetailResponseDto toDetailDto(Template template) {
+        UUID templateId = template.getId();
+        String evaluatorModel = ProcessEnrichmentHelper.resolveEvaluatorModel(template.getType());
+        List<NormativeLevel1NodeDto> level1Nodes = List.of();
+        if (templateId != null) {
+            var treeNodes = normativeHierarchyQueryPort.findTemplateTree(templateId)
+                    .map(tree -> new ArrayList<>(tree.level1Nodes()))
+                    .orElseGet(ArrayList::new);
+            ProcessEnrichmentHelper.sortTemplateNormativeTree(treeNodes);
+            level1Nodes = normativeStructureWebMapper.toTemplateLevel1DtoList(treeNodes, evaluatorModel);
+        }
+        int level1Count = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId)
+                ? (int) normativeHierarchyQueryPort.countLevel1NodesByTemplateId(templateId)
+                : countPhases(template);
+        int indicatorCount = templateId != null && normativeHierarchyQueryPort.hasNormativeTreeForTemplate(templateId)
+                ? (int) normativeHierarchyQueryPort.countIndicatorsByTemplateId(templateId)
+                : countSubphases(template);
         return TemplateDetailResponseDto.builder()
                 .id(template.getId())
                 .name(template.getName())
@@ -186,11 +219,15 @@ public class TemplateController {
                 .status(template.getStatus() != null ? template.getStatus().name() : null)
                 .phaseCount(countPhases(template))
                 .subphaseCount(countSubphases(template))
+                .level1Count(level1Count)
+                .indicatorCount(indicatorCount)
+                .evaluatorModel(evaluatorModel)
                 .createdAt(template.getCreatedAt())
                 .updatedAt(template.getUpdatedAt())
                 .phases(template.getPhases() != null
                         ? template.getPhases().stream().map(this::toPhaseResponse).collect(Collectors.toList())
                         : List.of())
+                .level1Nodes(level1Nodes)
                 .build();
     }
 

@@ -4,6 +4,7 @@ import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -21,17 +22,20 @@ public class GetProcessDetailService implements GetProcessDetailUseCase {
     private final TemplatePort templatePort;
     private final ProcessResponsiblePort processResponsiblePort;
     private final UserRepositoryPort userRepositoryPort;
+    private final NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     public GetProcessDetailService(ProcessQueryPort processQueryPort,
                                    ProgramCatalogPort programCatalogPort,
                                    TemplatePort templatePort,
                                    ProcessResponsiblePort processResponsiblePort,
-                                   UserRepositoryPort userRepositoryPort) {
+                                   UserRepositoryPort userRepositoryPort,
+                                   NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
         this.processQueryPort = processQueryPort;
         this.programCatalogPort = programCatalogPort;
         this.templatePort = templatePort;
         this.processResponsiblePort = processResponsiblePort;
         this.userRepositoryPort = userRepositoryPort;
+        this.normativeHierarchyQueryPort = normativeHierarchyQueryPort;
     }
 
     @Override
@@ -41,7 +45,8 @@ public class GetProcessDetailService implements GetProcessDetailUseCase {
 
         ProcessAccessPolicy.assertCanAccess(ctx.role(), process.getCareerId(), ctx.programScope(), processId);
 
-        EnrichedProcessDetail detail = ProcessEnrichmentHelper.toDetail(process, programCatalogPort, templatePort);
+        EnrichedProcessDetail detail = ProcessEnrichmentHelper.toDetail(
+                process, programCatalogPort, templatePort, normativeHierarchyQueryPort);
         ProcessResponsibleInfo responsible = ProcessResponsibleEnrichmentHelper
                 .resolveForProcess(processId, processResponsiblePort, userRepositoryPort)
                 .orElse(null);
@@ -54,9 +59,11 @@ public class GetProcessDetailService implements GetProcessDetailUseCase {
                 detail.templateId(),
                 detail.templateName(),
                 detail.templateType(),
+                detail.evaluatorModel(),
                 detail.status(),
                 detail.startDate(),
                 detail.phases(),
+                detail.level1Nodes(),
                 responsible
         );
     }

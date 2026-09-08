@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.process;
 
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -38,6 +39,8 @@ class ListProcessesServiceTest {
     private ProcessResponsiblePort processResponsiblePort;
     @Mock
     private UserRepositoryPort userRepositoryPort;
+    @Mock
+    private NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     private ListProcessesService service;
 
@@ -50,8 +53,15 @@ class ListProcessesServiceTest {
     @BeforeEach
     void setUp() {
         service = new ListProcessesService(
-                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+                processQueryPort,
+                programCatalogPort,
+                templatePort,
+                processResponsiblePort,
+                userRepositoryPort,
+                normativeHierarchyQueryPort);
         lenient().when(processResponsiblePort.findAllActive()).thenReturn(List.of());
+        lenient().when(normativeHierarchyQueryPort.hasNormativeTreeForProcess(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(false);
     }
 
     @Test

@@ -16,9 +16,11 @@ public class ProcessResponseDto {
     private UUID templateId;
     private String templateName;
     private String templateType;
+    private String evaluatorModel;
     private String status;
     private LocalDateTime startDate;
     private List<PhaseDto> phases;
+    private List<NormativeLevel1NodeDto> level1Nodes;
     private ProcessResponsibleDto responsible;
 
     @Getter @Builder

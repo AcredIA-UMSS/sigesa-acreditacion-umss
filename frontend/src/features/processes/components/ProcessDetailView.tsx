@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
+import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessPhaseTree } from './ProcessPhaseTree';
 import { PhasesCopilotPanel } from './PhasesCopilotPanel';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
@@ -39,9 +40,19 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const canObserveEvidence = session?.role === 'JD' || session?.role === 'TD';
   const canReviewEvidence = session?.role === 'TD';
   const subphaseAnchorRef = useRef<HTMLDivElement>(null);
+  const hasNormativeTree = (process?.level1Nodes?.length ?? 0) > 0;
 
   const navigateToSubphase = useCallback((subphaseId: string) => {
     const element = document.getElementById(`subphase-${subphaseId}`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    element?.classList.add('ring-2', 'ring-primary-400');
+    window.setTimeout(() => {
+      element?.classList.remove('ring-2', 'ring-primary-400');
+    }, 2000);
+  }, []);
+
+  const navigateToIndicator = useCallback((indicatorId: string) => {
+    const element = document.getElementById(`indicator-${indicatorId}`);
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     element?.classList.add('ring-2', 'ring-primary-400');
     window.setTimeout(() => {
@@ -123,8 +134,9 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  Fases y subfases con requisitos de completitud. En cada subfase puede
-                  cargar una o más evidencias y el equipo técnico puede registrar observaciones.
+                  {hasNormativeTree
+                    ? `Jerarquía normativa ${process.evaluatorModel ?? process.templateType ?? ''} (N1→N2→N3→Indicador). Cada indicador admite evidencias y observaciones del equipo técnico.`
+                    : 'Fases y subfases con requisitos de completitud. En cada subfase puede cargar una o más evidencias y el equipo técnico puede registrar observaciones.'}
                 </p>
               </div>
               {canEditStructure && (
@@ -136,23 +148,37 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 </Link>
               )}
             </div>
-            <ProcessEvidenceSearchPanel
-              processId={processId}
-              programId={process.careerId}
-              phases={process.phases ?? []}
-              onNavigateToSubphase={navigateToSubphase}
-            />
-            <ProcessPhaseTree
-              phases={process.phases ?? []}
-              processId={processId}
-              canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canUploadEvidence}
-              canClosePhase={canReviewEvidence}
-              onStructureUpdated={refetch}
-              onNavigateToSubphase={navigateToSubphase}
-            />
+            {!hasNormativeTree && (
+              <ProcessEvidenceSearchPanel
+                processId={processId}
+                programId={process.careerId}
+                phases={process.phases ?? []}
+                onNavigateToSubphase={navigateToSubphase}
+              />
+            )}
+            {hasNormativeTree ? (
+              <ProcessNormativeTree
+                level1Nodes={process.level1Nodes ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canObserveEvidence={canObserveEvidence}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                onNavigateToIndicator={navigateToIndicator}
+              />
+            ) : (
+              <ProcessPhaseTree
+                phases={process.phases ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canObserveEvidence={canObserveEvidence}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                canClosePhase={canReviewEvidence}
+                onStructureUpdated={refetch}
+                onNavigateToSubphase={navigateToSubphase}
+              />
+            )}
           </section>
 
           {canUseCopilot && (

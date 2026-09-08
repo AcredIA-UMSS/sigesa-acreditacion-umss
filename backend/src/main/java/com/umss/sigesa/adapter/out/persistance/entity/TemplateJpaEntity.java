@@ -33,6 +33,9 @@ public class TemplateJpaEntity {
     @Column(nullable = false)
     private String type;
 
+    @Column(name = "evaluator_model", nullable = false, length = 20)
+    private String evaluatorModel;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -48,4 +51,8 @@ public class TemplateJpaEntity {
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TemplatePhaseJpaEntity> phases = new ArrayList<>();
+
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TemplateLevel1NodeJpaEntity> level1Nodes = new ArrayList<>();
 }

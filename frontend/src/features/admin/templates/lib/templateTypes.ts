@@ -41,4 +41,7 @@ export interface TemplateRowViewModel {
   status: TemplateStatusCode;
   phaseCount: number;
   subphaseCount: number;
+  level1Count: number;
+  indicatorCount: number;
+  evaluatorModel?: string;
 }

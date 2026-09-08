@@ -4,12 +4,14 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Versión** | Dorada v1.0 |
-| **Timestamp** | `2026-05-16T18:30:00-04:00` |
-| **Fuente** | [`FSD.md`](FSD.md) §8 · [`reglas_negocio.md`](reglas_negocio.md) |
-| **OpenAPI (futuro)** | `docs/05_dti/openapi.yaml` (pendiente DTI) |
+| **Versión** | v2.0 (jerarquía normativa multinivel) |
+| **Release** | `2.0.0` |
+| **Timestamp** | `2026-09-08T00:00:00-04:00` |
+| **Fuente** | [`FSD.md`](FSD.md) · [`reglas_negocio.md`](reglas_negocio.md) · [`ADR-0004`](../adr/ADR-0004-normative-hierarchy-v2.md) |
+| **OpenAPI (futuro)** | `docs/05_dti/openapi.yaml` (pendiente sync v2) |
 
-> Contratos **lógicos** REST v1. El cliente **no** envía `estado` en payloads; el backend aplica la máquina de estados. Autenticación: JWT Bearer (sesión UMSS).
+> Contratos **lógicos** REST bajo `/api/v1`. El cliente **no** envía `status` de workflow en payloads; el backend deriva la máquina de estados del **Indicador**.  
+> **Estado implementación (2026-09-08):** endpoints **v2.0** documentados como objetivo; código en `main` aún expone **legacy** Fase/Subfase (§12). Fase **M3** ADR-0004: coexistencia dual → retiro legacy.
 
 ---
 
@@ -20,18 +22,30 @@
 | Base URL | `/api/v1` |
 | Formato | `application/json` (salvo upload: `multipart/form-data`) |
 | Auth | `Authorization: Bearer {token}` |
-| Errores | `{ "error": "ERROR_CODE", "message": "...", "details": {} }` (campo `error` en v1.0; specs legacy pueden decir `code`) |
-| Paginación | `?page=&size=`; respuesta `{ "items": [], "total": n }` |
+| Errores | `{ "error": "ERROR_CODE", "message": "...", "details": {} }` |
+| Paginación | `?page=&size=`; respuesta `{ "items": [], "total": n, "page", "size" }` |
 | Idempotencia | `Idempotency-Key` en POST críticos (carga, importación) |
+| Nomenclatura UI | Alias CEUB/ARCU-SUR en respuestas: `label` por nodo (`Área`, `Dimensión`, …) |
 
 ### Códigos HTTP frecuentes
 
 | Código | Uso |
 |--------|-----|
-| 401 | Sin sesión / token inválido (`UNAUTHORIZED` en perímetro JWT); login A1 → `AUTH_INVALID_CREDENTIALS` |
+| 401 | Sin sesión / token inválido |
 | 403 | Rol o alcance insuficiente |
-| 409 | Conflicto de estado (`EVIDENCE_IMMUTABLE`, `FASE_CIERRE_BLOQUEADO`, `PROCESS_ALREADY_ACTIVE`) |
-| 422 | Validación (`JUSTIFICATION_REQUIRED`, `EVIDENCE_UNCLASSIFIED`) |
+| 409 | Conflicto de estado (`EVIDENCE_IMMUTABLE`, `NIVEL1_CIERRE_BLOQUEADO`, `INDICATOR_HAS_EVIDENCE`, `PROCESS_ALREADY_ACTIVE`) |
+| 410 | Endpoint legacy retirado (post-M5) |
+| 422 | Validación (`JUSTIFICATION_REQUIRED`, `EVIDENCE_UNCLASSIFIED`, `INDICATOR_INCOMPLETE`) |
+
+### Códigos de error v2.0 (dominio)
+
+| Código | Sustituye legacy | Regla |
+|--------|----------------|-------|
+| `NIVEL1_CIERRE_BLOQUEADO` | `FASE_CIERRE_BLOQUEADO` | FSD-BR-07 |
+| `INDICATOR_HAS_EVIDENCE` | `SUBPHASE_HAS_EVIDENCE` | FSD-BR-22 |
+| `TEMPLATE_INDICATOR_LINK_REQUIRED` | `TEMPLATE_SUBPHASE_LINK_REQUIRED` | FSD-BR-24 |
+| `TEMPLATE_INDICATOR_INCOMPLETE` | — | FSD-BR-24, BR-25 |
+| `INDICATOR_INCOMPLETE` | `SUBPHASE_LINK_REQUIRED` | FSD-BR-25 |
 
 ---
 
@@ -41,8 +55,8 @@
 openapi: 3.0.3
 info:
   title: SIGESA API
-  version: "1.0.0"
-  description: Sistema de automatización de acreditación UMSS
+  version: "2.0.0"
+  description: Sistema de automatización de acreditación UMSS — jerarquía normativa CEUB/ARCU-SUR
 
 components:
   securitySchemes:
@@ -56,12 +70,21 @@ components:
       type: object
       required: [error, message]
       properties:
-        error:
-          type: string
-        message:
-          type: string
-        details:
-          type: object
+        error: { type: string }
+        message: { type: string }
+        details: { type: object }
+
+    IndicatorSummary:
+      type: object
+      required: [id, code, description, weight, order, status]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        description: { type: string }
+        weight: { type: number, minimum: 0 }
+        order: { type: integer }
+        referenceUrl: { type: string, format: uri }
+        status: { enum: [PENDIENTE, SUBIDO, OBSERVADO, SUBSANADO, APROBADO] }
 
 security:
   - bearerAuth: []
@@ -71,7 +94,7 @@ security:
 
 ## 3. MOD-AUTH
 
-> Rutas relativas a Base URL `/api/v1`. Errores MOD-AUTH usan campo `error` (no `code`).
+> Sin cambios v2.0. Rutas relativas a `/api/v1`.
 
 ### API-AUTH-01 — `POST /auth/login`
 
@@ -81,7 +104,7 @@ security:
 | **Roles** | — (público) |
 | **Body** | `{ "email": "user@umss.edu.bo", "password": "***" }` |
 | **200** | `{ "accessToken", "expiresIn", "role", "programScope" }` |
-| **401** | `AUTH_INVALID_CREDENTIALS` (mensaje genérico; A1: dominio inválido, vacío, user/password incorrecto) |
+| **401** | `AUTH_INVALID_CREDENTIALS` |
 
 ### API-USER-01 — `POST /admin/users`
 
@@ -91,48 +114,35 @@ security:
 | **x-allowed-roles** | `[JD]` |
 | **Body** | `{ "email", "role", "programId?" }` |
 | **201** | `{ "userId", "status": "INACTIVE" }` |
-| **409** | `EMAIL_ALREADY_REGISTERED` (mensaje genérico) |
-| **422** | `INVALID_EMAIL_DOMAIN` si no es `@umss.edu.bo` |
+| **409** | `EMAIL_ALREADY_REGISTERED` |
+| **422** | `INVALID_EMAIL_DOMAIN` |
 
 ### API-USER-02 — `PATCH /admin/users/{id}/deactivate`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-002 |
-| **x-allowed-roles** | `[JD]` |
-| **204** | Usuario desactivado; historial conservado |
+| **UC** | FSD-UC-002 · **x-allowed-roles** | `[JD]` · **204** |
 
 ### API-USER-03 — `GET /admin/users`
 
-> **Contrato completo:** [`docs/product/api/API-USER-03.md`](api/API-USER-03.md)
+> Contrato completo: [`api/API-USER-03.md`](api/API-USER-03.md)
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-002 |
 | **x-allowed-roles** | `[JD]` |
-| **Query** | `role?` (`CC`/`TD`/`JD`), `status?` (`INACTIVE`/`ACTIVE`/`DEACTIVATED`) |
+| **Query** | `role?`, `status?` |
 | **200** | `[{ "userId", "email", "role", "status", "programIds" }]` |
-| **401** | `UNAUTHORIZED` — sin JWT o token inválido |
-| **403** | Rol distinto de JD |
-| **422** | `INVALID_ROLE` / `INVALID_FILTER` si filtro inválido |
-| **Tool asistente** | `list_users`, `set_user_status` (solo JD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
 
 ### API-CAT-01 — `GET /programs`
 
 | Campo | Valor |
 |-------|-------|
-| **UC** | FSD-UC-002 (alta CC), FSD-UC-003 (selección carrera al crear proceso) |
-| **Auth** | JWT Bearer (cualquier rol autenticado) |
-| **Query** | `q?` — búsqueda parcial por nombre o código (autocomplete) |
+| **UC** | FSD-UC-002, FSD-UC-003 |
+| **Query** | `q?` — autocomplete nombre/código |
 | **200** | `[{ "id", "code", "name" }]` |
-| **Persistencia** | Tabla `programs` (PostgreSQL); seed dev vía `ProgramSeedDataLoader` (25 carreras UMSS) |
-| **Migración** | Flyway `V3__programs_catalog.sql` |
-| **Adapter** | `ProgramCatalogJpaAdapter` → `ProgramCatalogPort` |
-| **Frontend** | `CareerAutocomplete` en `/procesos/nuevo` (debounce 300 ms) |
 
 ---
 
-## 4. MOD-PROCESS
+## 4. MOD-PROCESS (v2.0)
 
 ### API-PROC-01 — `POST /processes`
 
@@ -141,19 +151,14 @@ security:
 | **UC** | FSD-UC-003 |
 | **x-allowed-roles** | `[JD]` |
 | **Body** | `{ "career_id": "uuid", "template_id": "uuid" }` |
-| **Plantillas permitidas** | Solo tipos **CEUB** y **ARCU-SUR** (validación en use case) |
-| **201** | Proceso creado con fases/subfases clonadas (`ProcessResponseDto`) |
+| **201** | Proceso creado; árbol **N1→N2→N3→Indicador** clonado (`ProcessResponseDto` v2) |
 | **404** | `PROGRAM_NOT_FOUND` / `TEMPLATE_NOT_FOUND` |
 | **409** | `PROCESS_ALREADY_ACTIVE` |
+| **400** | `TEMPLATE_NOT_PUBLISHED` |
 
 ### API-PROC-02 — `POST /templates/{templateId}/activate`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-003 |
-| **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "effectiveFrom": "2026-01-01" }` |
-| **200** | Plantilla activa para nuevos procesos |
+| **UC** | FSD-UC-003 · **x-allowed-roles** | `[JD]` · **200** plantilla activa |
 
 ### API-PROC-03 — `GET /processes`
 
@@ -161,9 +166,8 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-019 |
 | **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
-| **200** | `[ProcessSummaryResponseDto]` — carrera, plantilla, estado, conteos fase/subfase |
-| **Filtrado [CC]** | Solo procesos con `career_id ∈ JWT.programScope` |
-| **200 vacío** | `[]` si [CC] sin carreras asignadas o sin procesos en alcance |
+| **200** | `[ProcessSummaryResponseDto]` — `evaluatorModel`, `level1Count`, `indicatorCount`, estado |
+| **Filtrado [CC]** | Solo `career_id ∈ JWT.programScope` |
 
 ### API-PROC-04 — `GET /processes/{processId}`
 
@@ -171,440 +175,291 @@ security:
 |-------|-------|
 | **UC** | FSD-UC-019 |
 | **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
-| **200** | `ProcessResponseDto` enriquecido con árbol Fase → Subfase ordenado por `order` (incluye `referenceUrl` por subfase) y `responsibleUser` opcional (UC-023) |
-| **404** | `PROCESS_NOT_FOUND` — ID inexistente o [CC] fuera de `programScope` |
-
-### API-PROC-05 — `POST /processes/{processId}/phases`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]`, `[TD]` |
-| **Body** | `{ "name", "order", "description?" }` |
-| **201** | Fase creada en proceso ACTIVE |
-| **409** | `PROCESS_NOT_EDITABLE` |
-| **Tool asistente** | `manage_process_phase` (JD, TD) — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md) |
-
-### API-PROC-06 — `PUT /processes/{processId}/phases/{phaseId}`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]`, `[TD]` |
-| **Body** | `{ "name?", "order?", "description?" }` |
-| **200** | Fase actualizada |
-
-### API-PROC-07 — `DELETE /processes/{processId}/phases/{phaseId}`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-022 |
-| **x-allowed-roles** | `[JD]`, `[TD]` |
-| **204** | Fase eliminada si subfases elegibles |
-| **409** | `SUBPHASE_HAS_EVIDENCE` |
-
-### API-PROC-08 — CRUD subfases bajo fase
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-022 |
-| **Rutas** | `POST/PUT/DELETE /processes/{processId}/phases/{phaseId}/subphases[/{subphaseId}]` |
-| **x-allowed-roles** | `[JD]`, `[TD]` |
-| **Body subfase** | `{ "name", "order", "referenceUrl", "description?", "requirements" }` |
-| **400** | `SUBPHASE_LINK_REQUIRED` (URL HTTPS o requisitos vacíos) |
-| **409** | `SUBPHASE_HAS_EVIDENCE` / `PROCESS_NOT_EDITABLE` |
-
-### API-SUB-01 — Evidencias y observaciones por subfase
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-004 / FSD-UC-022 |
-| **Rutas** | `POST/GET /subphases/{subphaseId}/evidences`; `GET/POST /subphases/{subphaseId}/observations` |
-| **POST evidencias** | multipart: `file`, `description`. Rol `[CC]` |
-| **POST observaciones** | `{ "body": "texto" }`. Roles `[TD]`, `[JD]` |
-| **201 evidencia** | `{ evidenceId, version, contentHash, event, currentState? }` |
-| **200 listado** | evidencias u observaciones ordenadas por fecha descendente |
-| **Observación** | `{ id, body, status: OPEN\|RESOLVED, resolvedAt?, resolvedVersionId? }` |
-| **409 upload** | `SUBSANATION_NOT_ALLOWED` si hay observación OPEN pendiente |
-| **409 observación** | `INVALID_STATE` si ya existe observación OPEN |
-
-### API-SUB-02 — Subsanación de evidencia en subfase
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-006 |
-| **Rutas** | `GET /subphases/{subphaseId}/subsanation-eligibility`; `POST /subphases/{subphaseId}/evidences/{evidenceId}/subsanate` |
-| **GET elegibilidad** | `{ canSubsanate, openObservationId?, reason? }`. Rol `[CC]` |
-| **POST subsanate** | multipart: `file`, `description`, `observationId`. Rol `[CC]` |
-| **201** | `{ evidenceId, version, observationId, supersedesVersion, contentHash, event: "EvidenceSubsanated" }` |
-| **409** | `SUBSANATION_NOT_ALLOWED` — sin observación OPEN, ya subsanada, o upload bloqueado |
-| **Nota historial** | Versiones anteriores exponen `blobAvailable: false` en API-EVD-03 |
-
-### API-SUB-03 — Rechazar subfase
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-008 |
-| **Ruta** | `POST /api/v1/subphases/{subphaseId}/reject` |
-| **x-allowed-roles** | `[TD]` |
-| **Body** | `{ "justification": "texto mínimo 20 chars" }` |
-| **Precondición** | ≥1 evidencia en subfase |
-| **200** | `{ observationId, subphaseId, newState: "OBSERVADO" }` |
-| **409** | `EVIDENCE_REQUIRED`, `INVALID_STATE` (observación OPEN) |
-| **422** | `JUSTIFICATION_REQUIRED` |
-
-### API-SUB-04 — Aprobar subfase
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-009 |
-| **Ruta** | `POST /api/v1/subphases/{subphaseId}/approve` |
-| **x-allowed-roles** | `[TD]` |
-| **Precondición** | ≥1 evidencia; sin observación OPEN |
-| **200** | `{ subphaseId, newState: "APROBADO" }` |
-| **409** | `EVIDENCE_REQUIRED`, `SUBSANATION_NOT_ALLOWED` (observación OPEN), `INVALID_STATE` |
-
-### API-PROC-09 — `PUT /processes/{processId}/responsible`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-023 |
-| **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "userId": "uuid" }` — [CC] activo, misma carrera, sin otro proceso ACTIVE |
-| **200** | Responsable asignado |
-| **409** | `CC_ALREADY_ASSIGNED_TO_PROCESS` / `CAREER_SCOPE_MISMATCH` |
-
-### API-PROC-10 — `DELETE /processes/{processId}/responsible`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-023 |
-| **x-allowed-roles** | `[JD]` |
-| **204** | Responsable removido; [CC] disponible para otro proceso |
-
-### API-PROC-11 — `GET /processes/{processId}/responsible/candidates`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-023 |
-| **x-allowed-roles** | `[JD]` |
-| **200** | `[{ userId, fullName, email }]` — [CC] activos de la carrera del proceso sin otro proceso ACTIVE como responsable |
+| **200** | `ProcessResponseDto` v2 — metadatos + `level1Nodes[]` anidado (N2→N3→`indicators[]`) + `responsibleUser?` |
 | **404** | `PROCESS_NOT_FOUND` |
+
+**Fragmento respuesta v2.0:**
+
+```json
+{
+  "id": "uuid",
+  "careerId": "uuid",
+  "evaluatorModel": "CEUB",
+  "templateName": "CEUB 2026",
+  "status": "ACTIVE",
+  "level1Nodes": [{
+    "id": "uuid",
+    "name": "Área académica",
+    "label": "Área",
+    "order": 1,
+    "status": "ABIERTA",
+    "level2Nodes": [{
+      "name": "Variable docente",
+      "level3Nodes": [{
+        "name": "Sub-variable formación",
+        "indicators": [{
+          "id": "uuid",
+          "code": "IND-01",
+          "description": "Plan de formación",
+          "weight": 0.15,
+          "order": 1,
+          "status": "PENDIENTE",
+          "referenceUrl": "https://..."
+        }]
+      }]
+    }]
+  }]
+}
+```
+
+### API-PROC-09…11 — Responsable [CC]
+
+> Sin cambios v2.0. Ver legacy implementado: `PUT/DELETE /processes/{id}/responsible`, `GET …/candidates` (FSD-UC-023).
 
 ---
 
-## 4.1 MOD-TEMPLATE (plantillas normativas)
+## 4.1 MOD-PROCESS — estructura normativa en proceso (v2.0)
+
+> Sustituye API-PROC-05…08 legacy (fases/subfases). **UC:** FSD-UC-022 · **Roles:** `[JD]`, `[TD]`.
+
+### API-STR-01 — Nivel 1
+
+| Método | Ruta | Body | Respuesta |
+|--------|------|------|-----------|
+| POST | `/processes/{processId}/level1-nodes` | `{ name, order, description? }` | **201** N1 creado |
+| PUT | `/processes/{processId}/level1-nodes/{level1Id}` | `{ name?, order?, description? }` | **200** |
+| DELETE | `/processes/{processId}/level1-nodes/{level1Id}` | — | **204** o **409** `INDICATOR_HAS_EVIDENCE` |
+
+### API-STR-02 — Nivel 2
+
+| Método | Ruta | Body |
+|--------|------|------|
+| POST | `/level1-nodes/{level1Id}/level2-nodes` | `{ name, order, description? }` |
+| PUT | `/level2-nodes/{level2Id}` | `{ name?, order?, description? }` |
+| DELETE | `/level2-nodes/{level2Id}` | — |
+
+### API-STR-03 — Nivel 3
+
+| Método | Ruta | Body |
+|--------|------|------|
+| POST | `/level2-nodes/{level2Id}/level3-nodes` | `{ name, order, description? }` |
+| PUT | `/level3-nodes/{level3Id}` | `{ name?, order?, description? }` |
+| DELETE | `/level3-nodes/{level3Id}` | — |
+
+### API-STR-04 — Indicador (estructura)
+
+| Método | Ruta | Body |
+|--------|------|------|
+| POST | `/level3-nodes/{level3Id}/indicators` | `{ code, description, weight, order, referenceUrl }` |
+| PUT | `/indicators/{indicatorId}` | campos parciales |
+| DELETE | `/indicators/{indicatorId}` | — |
+
+| Error | Condición |
+|-------|-----------|
+| `409 PROCESS_NOT_EDITABLE` | Proceso ≠ ACTIVE |
+| `409 INDICATOR_HAS_EVIDENCE` | Workflow/evidencias iniciados |
+| `400 PROCESS_STRUCTURE_ORDER_CONFLICT` | `order` duplicado |
+| `400 INDICATOR_INCOMPLETE` | Falta `code`, `weight` o `referenceUrl` |
+
+### API-STR-05 — Reordenar
+
+| Método | Ruta | Body |
+|--------|------|------|
+| PUT | `/processes/{processId}/structure/reorder` | `{ nodes: [{ id, type, order, parentId? }] }` |
+
+**Tools asistente (v2.0 objetivo):** `list_process_indicators`, `manage_process_level1` — ver [`TOOL-CATALOG`](../design/assistant/TOOL-CATALOG.md).
+
+---
+
+## 4.2 MOD-TEMPLATE — plantillas normativas (v2.0)
+
+> **UC:** FSD-UC-021 · **Roles:** `[JD]`
 
 ### API-TPL-01 — `GET /templates`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **Query** | `status?`, `type?` (`CEUB` \| `ARCU-SUR`) |
-| **200** | `[{ id, name, description, type, status, phaseCount, subphaseCount }]` |
+| Query | `status?`, `evaluatorModel?` (`CEUB` \| `ARCU-SUR`) |
+| **200** | `[{ id, name, evaluatorModel, status, level1Count, indicatorCount }]` |
 
 ### API-TPL-02 — `POST /templates`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "name", "description?", "type", "phases": [{ "name", "order", "description?", "subphases": [{ "name", "order", "referenceUrl", "description?", "requirements" }] }] }` |
-| **201** | Plantilla `DRAFT` creada |
-| **400** | `TEMPLATE_SUBPHASE_LINK_REQUIRED` / `TEMPLATE_STRUCTURE_INCOMPLETE` |
+| Body | `{ name, description?, evaluatorModel, level1Nodes: [{ name, order, level2Nodes: [{ … level3Nodes: [{ … indicators: [{ code, description, weight, order, referenceUrl }] }] }] }] }` |
+| **201** | `DRAFT` |
+| **400** | `TEMPLATE_INDICATOR_LINK_REQUIRED`, `TEMPLATE_STRUCTURE_INCOMPLETE`, `TEMPLATE_INDICATOR_INCOMPLETE` |
 
 ### API-TPL-03 — `GET /templates/{templateId}`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **200** | Plantilla con árbol completo fases/subfases y enlaces |
+| **200** | Árbol completo N1→N2→N3→Indicador |
 
 ### API-TPL-04 — `PUT /templates/{templateId}`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **Body** | Metadatos y/o árbol (misma forma que POST) |
-| **200** | Plantilla actualizada (FSD-BR-21) |
+Metadatos y/o árbol (misma forma que POST). FSD-BR-21: no migra procesos ACTIVE.
 
 ### API-TPL-05 — `DELETE /templates/{templateId}`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **204** | Eliminación lógica o archivado |
-| **409** | `TEMPLATE_IN_USE` — usar archivar |
+| **204** | Archivar · **409** `TEMPLATE_IN_USE` |
 
 ### API-TPL-06 — `POST /templates/{templateId}/publish`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **200** | `status = PUBLISHED`; disponible en UC-003 |
+| **200** | `PUBLISHED` — exige ≥1 indicador válido (FSD-BR-24) |
 
 ### API-TPL-07 — `POST /templates/{templateId}/duplicate`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **x-allowed-roles** | `[JD]` |
-| **201** | Copia `DRAFT` con misma estructura |
+| **201** | Copia `DRAFT` |
 
-### API-TPL-08 — CRUD fases/subfases en plantilla `DRAFT`
+### API-TPL-08 — CRUD granular en plantilla `DRAFT`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-021 |
-| **Rutas** | `POST/PUT/DELETE /templates/{templateId}/phases[/{phaseId}/subphases[/{subphaseId}]]` |
-| **x-allowed-roles** | `[JD]` |
-| **400** | `TEMPLATE_ORDER_CONFLICT` / `TEMPLATE_SUBPHASE_LINK_REQUIRED` |
+Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 
 ---
 
-## 5. MOD-EVIDENCE
+## 5. MOD-EVIDENCE (v2.0)
 
-> Evidencias **siempre** ligadas a subfase (`evidence.subphase_id`). Sin taxonomía Indicador/Criterio en v1.1.
+> Evidencias **siempre** ligadas a **Indicador** (`evidence.indicator_id` NOT NULL). FSD-BR-01.
 
-### API-EVD-01 — `POST /api/v1/subphases/{subphaseId}/evidences`
+### API-EVD-01 — `POST /indicators/{indicatorId}/evidences`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-004 |
-| **Alias** | API-SUB-01 (upload) |
 | **x-allowed-roles** | `[CC]` |
 | **Content-Type** | `multipart/form-data` |
-| **Body** | `file`, `description` |
-| **201** | `{ "evidenceId", "version": 1, "contentHash", "event": "EvidenceUploaded" }` |
+| **Body** | `file?`, `externalUrl?`, `description` (al menos file o externalUrl) |
+| **201** | `{ evidenceId, version: 1, contentHash?, event: "EvidenceUploaded", indicatorState: "SUBIDO" }` |
 | **400** | `EVIDENCE_UNCLASSIFIED` |
 | **403** | `PROGRAM_SCOPE_DENIED` |
-| **409** | `SUBSANATION_NOT_ALLOWED`, `UPLOAD_IN_PROGRESS` |
-| **413** | `PAYLOAD_TOO_LARGE` |
-| **422** | `INVALID_EVIDENCE_FORMAT` |
+| **409** | `SUBSANATION_NOT_ALLOWED` |
 
-### API-EVD-LEGACY — `POST /api/v1/indicators/{indicatorId}/evidences` (deprecado)
-
-| Campo | Valor |
-|-------|-------|
-| **Estado** | **Retirado** desde modelo v1.1 (2026-08-27) |
-| **Sucesor** | `POST /api/v1/subphases/{subphaseId}/evidences` (API-EVD-01) |
-| **x-allowed-roles** | `[CC]` (sigue protegido; respuesta siempre error) |
-| **410** | `{ "error": "ENDPOINT_DEPRECATED", "message": "…", "indicatorId": "…" }` |
-| **Headers** | `Deprecation: true`; `Link: </api/v1/subphases/{subphaseId}/evidences>; rel="successor-version"` |
-| **Nota** | No acepta carga multipart; clientes Orval deben migrar a API-SUB-01 |
-
-### API-EVD-02 — `GET /api/v1/evidences/search`
+### API-EVD-02 — `GET /evidences/search`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-007 |
 | **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` |
-| **Query** | `processId?`, `phaseId?`, `subphaseId?`, `programId?`, `q?`, `managementYear?`, `page=0`, `size=20` |
-| **200** | `{ items: [{ evidenceId, subphaseId, subphaseName, phaseId, phaseName, processId, version, description, originalFilename, uploadedAt, uploadedBy, blobAvailable }], total, page, size }` |
-| **403** | `PROGRAM_SCOPE_DENIED` ([CC] sin carrera) |
-| **Nota FTS** | Flyway `V11__evidence_version_fts.sql`: GIN `search_vector`; dev/H2 → fallback LIKE |
+| **Query** | `processId?`, `level1Id?`, `level3Id?`, `indicatorId?`, `programId?`, `q?`, `page`, `size` |
+| **200** | `{ items: [{ evidenceId, indicatorId, indicatorCode, normativePath[], processId, version, description, … }], total, page, size }` |
 
 ### API-EVD-03 — `GET /evidences/{id}/versions`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-005 |
-| **x-allowed-roles** | `[CC]`, `[TD]` |
-| **200** | `[{ "versionId", "version", "supersedesVersion", "observationId", "description", "contentHash", "originalFilename", "createdAt", "createdBy", "current", "blobAvailable" }]` |
+| **UC** | FSD-UC-005 · **200** historial append-only |
 
 ### API-EVD-04 — `DELETE /evidences/{id}`
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-005 |
-| **Nota** | Endpoint existe para auditoría; **siempre 409** si aprobado |
-| **409** | `EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED` en log |
+| **UC** | FSD-UC-005 · **409** `EVIDENCE_IMMUTABLE` siempre si aprobado |
 
-### API-EVD-05 — Subsanación por subfase
+### API-EVD-05 — Subsanación por indicador
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-006 |
-| **Alias** | API-SUB-02 |
-| **Rutas** | `GET /subphases/{subphaseId}/subsanation-eligibility`; `POST /subphases/{subphaseId}/evidences/{evidenceId}/subsanate` |
+| **Rutas** | `GET /indicators/{indicatorId}/subsanation-eligibility`; `POST /indicators/{indicatorId}/evidences/{evidenceId}/subsanate` |
 | **x-allowed-roles** | `[CC]` |
-| **201** | `{ "version": n+1, "observationId", "supersedesVersion", "event": "EvidenceSubsanated" }` |
+| **POST** | multipart: `file?`, `externalUrl?`, `description`, `observationId` |
+| **201** | `{ version, observationId, supersedesVersion, event: "EvidenceSubsanated" }` |
 
-### API-IMP-01 — `POST /imports/evidences`
+### API-IND-OBS-01 — Observaciones por indicador
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-018 |
-| **x-allowed-roles** | `[CC]` |
-| **Body** | `multipart` CSV |
-| **200** | `{ "accepted": n, "rejected": [{ "row", "reason" }] }` |
+| Método | Ruta | Rol | Body |
+|--------|------|-----|------|
+| GET | `/indicators/{indicatorId}/observations` | TD, JD, CC (lectura) | — |
+| POST | `/indicators/{indicatorId}/observations` | TD, JD | `{ body }` (rechazo formal vía API-WF-01 preferido) |
 
 ---
 
-## 6. MOD-WORKFLOW
+## 6. MOD-WORKFLOW (v2.0)
 
-> Workflow centrado en **Subfase**. Rechazo/aprobación vía API-SUB-03/04. Cierre de fase UC-010 cuando todas las subfases = APROBADO.
+> Workflow centrado en **Indicador**. Cierre agregado en **Nivel 1**.
 
-### API-WF-01 — `POST /subphases/{subphaseId}/reject`
+### API-WF-01 — `POST /indicators/{indicatorId}/reject`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-008 |
-| **Alias** | API-SUB-03 |
 | **x-allowed-roles** | `[TD]` |
-| **Body** | `{ "justification": "texto mínimo 20 chars" }` |
-| **Precondición** | ≥1 evidencia en subfase |
-| **200** | `{ "observationId", "subphaseId", "newState": "OBSERVADO" }` |
+| **Body** | `{ "justification": "≥20 chars" }` |
+| **200** | `{ observationId, indicatorId, newState: "OBSERVADO" }` |
 | **409** | `EVIDENCE_REQUIRED`, `INVALID_STATE` |
 | **422** | `JUSTIFICATION_REQUIRED` |
 
-### API-WF-02 — `POST /subphases/{subphaseId}/approve`
+### API-WF-02 — `POST /indicators/{indicatorId}/approve`
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-009 |
-| **Alias** | API-SUB-04 |
 | **x-allowed-roles** | `[TD]` |
-| **Precondición** | ≥1 evidencia; sin observación OPEN |
-| **200** | `{ "subphaseId", "newState": "APROBADO", "event": "SubphaseApproved" }` |
+| **200** | `{ indicatorId, newState: "APROBADO", event: "IndicatorApproved" }` |
 | **409** | `EVIDENCE_REQUIRED`, `SUBSANATION_NOT_ALLOWED`, `INVALID_STATE` |
-| **403** | `FORBIDDEN_ROLE` si [CC] |
 
-### API-WF-03 — Cierre de fase
+### API-WF-03 — Cierre de Nivel 1
 
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-010 |
-| **Método / Ruta** | `POST /api/v1/processes/{processId}/phases/{phaseId}/complete` |
+| **Ruta** | `POST /processes/{processId}/level1-nodes/{level1Id}/complete` |
 | **x-allowed-roles** | `[TD]` |
-| **Precondición** | Todas las subfases de la fase en `APROBADO` |
-| **200** | `{ "phaseId", "previousState", "newState": "COMPLETADA", "event": "PhaseCompleted" }` |
-| **409** | `FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]` |
-| **403** | `FORBIDDEN_ROLE` si [CC] |
+| **Precondición** | Todos los indicadores del subárbol = `APROBADO` |
+| **200** | `{ level1Id, previousState, newState: "COMPLETADA", event: "Level1Completed" }` |
+| **409** | `NIVEL1_CIERRE_BLOQUEADO` + `pendingIndicators[]` |
 
 ---
 
 ## 7. MOD-DASH
 
-### API-DASH-01 — Suite Híbrida Compuesta Dashboard (`FSD-UC-011` / `DD-UC-011`)
+### API-DASH-01 — Suite Híbrida PBAC
 
-#### API-DASH-01a — `GET /api/v1/dashboards/me/summary` (Composite PBAC Summary)
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-011, FSD-UC-012, FSD-UC-013 (`DD-UC-011`) |
-| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` (Evaluación dinámica por permisos PBAC) |
-| **Filtro Scope** | `academic_program_id` y autorizaciones extraídas del JWT |
-| **200 OK** | `{ "userId", "grantedPermissions": [...], "coordinatorSection": {...}, "technicianSection": {...}, "executiveSection": {...} }` |
+#### API-DASH-01a — `GET /dashboards/me/summary`
 
+| **UC** | FSD-UC-011, 012, 013 · PBAC por JWT |
 
-#### API-DASH-01b — `GET /api/v1/dashboards/coordinator/details`
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-011 (`DD-UC-011`) |
-| **x-allowed-roles** | `[CC]` |
-| **Query Params** | `page` (default 0), `size` (default 10), `sort` (default `fechaLimite,asc`), `faseId`, `estado` |
-| **200 OK** | Page JSON Object (`content`: listado de observaciones/subfases, `totalElements`, `totalPages`, etc.) |
+#### API-DASH-01b — `GET /dashboards/coordinator/details`
 
-#### API-DASH-01c — `GET /api/v1/dashboards/coordinator/export`
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-011 (`DD-UC-011`) |
-| **x-allowed-roles** | `[CC]` |
-| **Query Params** | `format` (`xlsx` \| `csv` \| `pdf`), `faseId`, `estado` |
-| **Headers** | `Content-Disposition: attachment; filename="reporte_dashboard_coordinator_{timestamp}.xlsx"` |
-| **200 OK** | Binary File Stream (StreamingResponseBody) filtrado por rol y programa |
+| Query v2.0 | `level1Id?`, `indicatorStatus?`, `page`, `size`, `sort` |
+| **200** | Observaciones/indicadores del [CC] |
 
+#### API-DASH-01c — `GET /dashboards/coordinator/export`
 
-### API-DASH-02 — `GET /dashboard/technician`
+| Query v2.0 | `format`, `level1Id?`, `indicatorStatus?` |
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-012 |
-| **x-allowed-roles** | `[TD]` |
-| **Query** | `programId`, `phaseId`, `status` |
-| **200** | Bandeja de subfases pendientes de revisión |
+### API-DASH-02 — Bandeja [TD]
 
-### API-DASH-03 — `GET /dashboard/executive`
+| Query v2.0 | `programId`, `level1Id`, `indicatorStatus` |
+| **200** | Indicadores pendientes de revisión |
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-013 |
-| **x-allowed-roles** | `[JD]` |
-| **200** | `{ "faculties": [{ "programs": [{ "semaphore": "RED|YELLOW|GREEN" }] }] }` |
+### API-DASH-03 — Semáforo [JD]
+
+| **200** | `{ faculties: [{ programs: [{ semaphore, indicatorCompletionPct }] }] }` |
 
 ---
 
 ## 8. MOD-REPORT · MOD-NOTIFY · MOD-PUBLIC · MOD-AUDIT
 
-### API-REP-01 — `POST /api/v1/reports/executive/pdf`
+> Sin cambios de rutas v2.0. Reportes PDF consumirán agregados por **Indicador** / Nivel 1 en v2.1.
 
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-014 |
-| **x-allowed-roles** | `[JD]` |
-| **Body** | `{ "facultyId?", "programId?", "managementYear" }` |
-| **202** | `{ "jobId" }` |
-| **SLA** | P95 ≤ 5 min (NFR-003) |
-
-### API-REP-02 — `GET /api/v1/reports/executive/pdf/{jobId}`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-014 |
-| **x-allowed-roles** | `[JD]` (solo solicitante del job) |
-| **200** | `{ "jobId", "status", "downloadUrl?", "errorCode?" }` |
-| **404** | Job inexistente |
-
-### API-REP-03 — `GET /api/v1/reports/executive/pdf/{jobId}/download`
-
-| Campo | Valor |
-|-------|-------|
-| **UC** | FSD-UC-014 |
-| **x-allowed-roles** | `[JD]` (solo solicitante; job `COMPLETED`) |
-| **200** | `application/pdf` |
-| **409** | `REPORT_NOT_READY` |
-
-### API-NOTIF-01 — Outbox interno
-
-| UC | FSD-UC-015 |
-| Tipo | Eventos internos → worker SMTP; no expuesto a cliente |
-
-### API-PUB-01 — `GET /public/programs/{slug}`
-
-| UC | FSD-UC-016 |
-| Auth | — |
-| **200** | Solo `published=true` |
-| **404** | Borradores no publicados |
-
-### API-AUDIT-01 — `GET /audit/logs`
-
-| UC | FSD-UC-017 |
-| **x-allowed-roles** | `[JD]` |
-| **Query** | `actorId`, `action`, `from`, `to` |
-| **200** | Log paginado; export `Accept: text/csv` |
+| ID | Resumen |
+|----|---------|
+| API-REP-01…03 | PDF ejecutivo [JD] — FSD-UC-014 |
+| API-NOTIF-01 | Outbox interno — FSD-UC-015 |
+| API-PUB-01 | Portal público — FSD-UC-016 |
+| API-AUDIT-01 | Bitácora [JD] — FSD-UC-017 |
+| API-IMP-01 | `POST /imports/evidences` — filas con `indicatorCode` — FSD-UC-018 |
 
 ---
 
-## 9. Matriz endpoint × rol (resumen)
+## 9. Matriz endpoint × rol (v2.0 objetivo)
 
-| Endpoint | CC | TD | JD | P |
-|----------|:--:|:--:|:--:|:--:|
-| POST /subphases/{id}/evidences | ✓ | | | |
-| POST /indicators/{id}/evidences (legacy) | ✓ | | | | **410 deprecado** |
-| POST /subphases/{id}/reject | | ✓ | | |
-| POST /subphases/{id}/approve | | ✓ | | |
-| GET /dashboard/coordinator | ✓ | | | |
-| GET /dashboard/technician | | ✓ | | |
-| GET /dashboard/executive | | | ✓ | |
-| POST /reports/executive/pdf | | | ✓ | |
-| GET /public/programs/* | | | | ✓ |
-| POST /admin/users | | | ✓ | |
-| GET /admin/users | | | ✓ | |
+| Endpoint | CC | TD | JD | EE | P |
+|----------|:--:|:--:|:--:|:--:|:--:|
+| POST /indicators/{id}/evidences | ✓ | | | | |
+| POST /indicators/{id}/reject | | ✓ | | | |
+| POST /indicators/{id}/approve | | ✓ | | | |
+| POST /level1-nodes/{id}/complete | | ✓ | | | |
+| GET /dashboards/coordinator/* | ✓ | | | ✓* | |
+| GET /dashboards/me/summary (TD) | | ✓ | | | |
+| POST /templates | | | ✓ | | |
+| POST /processes | | | ✓ | | |
+| POST /admin/users | | | ✓ | | |
+| GET /public/programs/* | | | | | ✓ |
+
+\* [EE] solo lectura; sin mutaciones (FSD-BR-19).
 
 ---
 
@@ -613,9 +468,40 @@ security:
 | Anti-patrón | Alternativa |
 |-------------|-------------|
 | `DELETE /evidences/{id}` que borre aprobados | 409 + append-only |
-| `PUT/PATCH /subphases/{id}` con `status` en body | `POST /reject`, `POST /approve` + observaciones/historial |
+| `PATCH /indicators/{id}` con `status` en body | `POST /reject`, `POST /approve` |
+| Evidencia sin `indicatorId` | 400 `EVIDENCE_UNCLASSIFIED` |
+| Cierre de N2/N3 directamente | Solo cierre **Nivel 1** agregado |
 | [CC] en `/approve` | 403 estricto |
-| Exponer observaciones internas en `/public/*` | Filtro `published` |
+
+---
+
+## 11. MOD-ASSISTANT (referencia)
+
+Sin cambio de rutas (`/assistant/status`, `/assistant/chat`). Tools v2.0 objetivo: referencias a **indicador** y ruta normativa — migración en PR post-M3.
+
+---
+
+## 12. Legacy v1.x — Fase/Subfase *(implementado en `main`; deprecación M3–M5)*
+
+> **No usar en clientes nuevos.** Mantener hasta migración Orval/UI. Sucesor: §4–§6 v2.0.
+
+| ID legacy | Ruta implementada | Sucesor v2.0 |
+|-----------|-------------------|--------------|
+| API-PROC-05…08 | `/processes/{id}/phases`, `/subphases` | API-STR-01…05 |
+| API-SUB-01 | `/subphases/{id}/evidences`, `/observations` | API-EVD-01, API-IND-OBS-01 |
+| API-SUB-02 | `/subphases/{id}/subsanate` | API-EVD-05 |
+| API-SUB-03/04 | `/subphases/{id}/reject\|approve` | API-WF-01/02 |
+| API-WF-03 legacy | `/phases/{id}/complete` | API-WF-03 |
+| API-TPL-01…08 legacy | plantillas `phases/subphases` | API-TPL-01…08 v2 |
+| API-EVD-LEGACY | `POST /indicators/{id}/evidences` → **410** (v1.1) | **Revive** como API-EVD-01 en v2.0 |
+
+### API-EVD-LEGACY — estado transitorio
+
+| Campo | Valor |
+|-------|-------|
+| **Estado 2026-09** | `POST /indicators/{id}/evidences` retorna **410 Gone** (decisión v1.1) |
+| **v2.0** | Mismo path **reactivado** como contrato canónico (API-EVD-01) tras migración M3 |
+| **Headers deprecación** | Retirar `Deprecation: true` al activar v2 |
 
 ---
 
@@ -623,9 +509,7 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
-| v1.8 | 2026-08-27 | API-EVD-LEGACY: `POST /indicators/{id}/evidences` retorna **410 Gone**; sucesor API-EVD-01; Orval `DeprecatedEndpointResponseDto` |
-| v1.7 | 2026-08-27 | Pivot v1.1: Proceso→Fase→Subfase→Evidencia; retiro Indicador/Criterio; WF-01/02 por subfase |
-| v1.5 | 2026-08-03 | API-CAT-01: catálogo `programs` en BD + query `q`; FSD-UC-003 autocomplete carreras; plantillas proceso solo CEUB/ARCU-SUR |
-| v1.4 | 2026-07-31 | API-USER-03: contrato formal `docs/product/api/API-USER-03.md`; GET `/admin/users`; tool `list_users` |
-| v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |
-| Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8; RBAC y errores de estado |
+| v2.0 | 2026-09-08 | Release 2.0.0: contratos N1→N2→N3→Indicador→Evidencia; API-STR/WF/EVD/TPL v2; §12 legacy; ADR-0004 |
+| v1.8 | 2026-08-27 | API-EVD-LEGACY 410 Gone; pivot subfase |
+| v1.5 | 2026-08-03 | API-CAT-01 programs |
+| Dorada v1.0 | 2026-05-16 | Catálogo API desde FSD §8 |

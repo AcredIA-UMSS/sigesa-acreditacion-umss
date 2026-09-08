@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-007
 nombre: Buscar Evidencia
-estado: Implementado
-release: v1.0
+estado: Reespecificado
+release: v2.0
 actor_principal: "[CC] (alcance carrera), [TD] (global)"
 trazabilidad_prd: PRD-US-004
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-007 — Buscar Evidencia
@@ -23,9 +23,9 @@ ultima_actualizacion: "2026-08-27"
 ## Flujo principal
 
 1. Usuario abre detalle de proceso (`/procesos/{id}`).
-2. Aplica filtros: texto libre, fase, subfase (precargado `processId`).
+2. Aplica filtros: texto libre, Nivel 1, indicador (precargado `processId`).
 3. Sistema consulta evidencias (versión vigente) con paginación.
-4. Resultados muestran fase/subfase; enlace **Ir a subfase** hace scroll al bloque correspondiente.
+4. Resultados muestran ruta normativa (N1→…→Indicador); enlace **Ir a indicador** hace scroll al bloque correspondiente.
 
 ## Excepciones y flujos alternos
 
@@ -56,9 +56,9 @@ Característica: Búsqueda de Evidencia
 
   Escenario: Búsqueda en proceso con resultados
     Dado un usuario autenticado en el detalle de un proceso con evidencias
-    Cuando busca por fase y término conocido
-    Entonces el sistema muestra resultados con fase y subfase
-    Y puede navegar a la subfase correspondiente
+    Cuando busca por Nivel 1 e indicador con término conocido
+    Entonces el sistema muestra resultados con ruta normativa e indicador
+    Y puede navegar al indicador correspondiente
 
   Escenario: Sin resultados
     Dado que no existen evidencias que coincidan con el filtro

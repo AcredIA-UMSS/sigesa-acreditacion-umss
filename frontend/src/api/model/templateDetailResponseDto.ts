@@ -4,6 +4,7 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
+import type { NormativeLevel1NodeDto } from './normativeLevel1NodeDto.ts';
 import type { TemplatePhaseResponseDto } from './templatePhaseResponseDto.ts';
 
 export interface TemplateDetailResponseDto {
@@ -14,7 +15,11 @@ export interface TemplateDetailResponseDto {
   status?: string;
   phaseCount?: number;
   subphaseCount?: number;
+  level1Count?: number;
+  indicatorCount?: number;
+  evaluatorModel?: string;
   createdAt?: string;
   updatedAt?: string;
   phases?: TemplatePhaseResponseDto[];
+  level1Nodes?: NormativeLevel1NodeDto[];
 }

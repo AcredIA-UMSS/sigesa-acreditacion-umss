@@ -2,12 +2,12 @@
 id: FSD-UC-012
 nombre: Bandeja auditoría [TD]
 estado: En Curso
-release: v1.0
+release: v2.0
 actor_principal: "[TD]"
 trazabilidad_prd: PRD-US-014
 modulo: MOD-DASH
 reglas: —
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-012 — Bandeja auditoría [TD]
@@ -24,8 +24,8 @@ ultima_actualizacion: "2026-08-27"
 ## Flujo principal
 
 1. [TD] abre `/technician/inbox`.
-2. Filtra por carrera, Fase, estado (`SUBIDO`, `SUBSANADO`, etc.).
-3. Accede a revisión, rechazo (UC-008) o aprobación (UC-009) de la **Subfase**.
+2. Filtra por carrera, Nivel 1, estado de indicador (`SUBIDO`, `SUBSANADO`, etc.).
+3. Accede a revisión, rechazo (UC-008) o aprobación (UC-009) del **Indicador**.
 
 ## Excepciones y flujos alternos
 
@@ -44,7 +44,7 @@ Filtro representativo en ≤ **2 min** (BRD-REQ-026).
 ## Diagramas
 
 - [Dashboard drilldown](../diagramas/MAR-SEQ-004-dashboard-drilldown.mmd)
-- [Aprobación/rechazo](../diagramas/MAR-SEQ-003-aprobacion-rechazo-subfase.mmd)
+- [Aprobación/rechazo indicador](../diagramas/MAR-SEQ-003-aprobacion-rechazo-indicador.mmd)
 
 ## Escenarios Gherkin
 
@@ -56,5 +56,5 @@ Característica: Bandeja de auditoría [TD]
   Escenario: Filtro por carrera y estado
     Dado un [TD] en la bandeja de revisión
     Cuando filtra por carrera "Ingeniería" y estado Pendiente
-    Entonces solo ve Subfases que cumplen ambos filtros
+    Entonces solo ve Indicadores que cumplen ambos filtros
 ```

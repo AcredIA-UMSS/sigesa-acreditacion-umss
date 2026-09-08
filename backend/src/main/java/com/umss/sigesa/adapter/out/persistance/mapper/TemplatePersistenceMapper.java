@@ -59,10 +59,12 @@ public class TemplatePersistenceMapper {
                 .name(domain.getName())
                 .description(domain.getDescription())
                 .type(domain.getType())
+                .evaluatorModel(domain.getType())
                 .status(domain.getStatus() != null ? domain.getStatus().name() : TemplateStatus.DRAFT.name())
                 .createdAt(domain.getCreatedAt() != null ? domain.getCreatedAt() : now)
                 .updatedAt(domain.getUpdatedAt() != null ? domain.getUpdatedAt() : now)
                 .phases(new ArrayList<>())
+                .level1Nodes(new ArrayList<>())
                 .build();
 
         if (domain.getPhases() != null) {

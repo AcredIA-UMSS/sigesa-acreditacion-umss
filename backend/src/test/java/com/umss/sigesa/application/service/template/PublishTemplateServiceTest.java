@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.template;
 
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.model.Template;
@@ -13,12 +14,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +32,13 @@ class PublishTemplateServiceTest {
     private TemplateManagementPort templateManagementPort;
 
     @Mock
+    private NormativeHierarchyQueryPort hierarchyQueryPort;
+
+    @Mock
     private TemplateStructureValidator validator;
+
+    @Mock
+    private TemplateNormativeStructureGuard structureGuard;
 
     @InjectMocks
     private PublishTemplateService publishTemplateService;
@@ -40,11 +49,13 @@ class PublishTemplateServiceTest {
         Template draft = draftTemplate(templateId);
 
         when(templateManagementPort.findByIdForEdit(templateId)).thenReturn(Optional.of(draft));
+        when(hierarchyQueryPort.findTemplateTree(templateId)).thenReturn(Optional.empty());
         when(templateManagementPort.save(any(Template.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Template published = publishTemplateService.publish(templateId);
 
         assertEquals(TemplateStatus.PUBLISHED, published.getStatus());
+        verify(validator).validateForPublish(eq(draft), eq(List.of()), eq(structureGuard));
         verify(templateManagementPort).save(any(Template.class));
     }
 

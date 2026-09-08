@@ -4,12 +4,14 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Versión** | Dorada v1.0 |
-| **Timestamp** | `2026-05-16T18:30:00-04:00` |
-| **Fuente maestra** | [`FSD.md`](FSD.md) §6 · [`docs/01_brd/BRD.md`](../01_brd/BRD.md) |
-| **Casos de uso** | [`casos_uso.md`](casos_uso.md) |
+| **Versión** | v2.0 (jerarquía normativa multinivel) |
+| **Release** | `2.0.0` |
+| **Timestamp** | `2026-09-08T00:00:00-04:00` |
+| **Fuente maestra** | [`FSD.md`](FSD.md) §3 · [`docs/01_brd/BRD.md`](../01_brd/BRD.md) |
+| **ADR** | [`ADR-0004-normative-hierarchy-v2.md`](../adr/ADR-0004-normative-hierarchy-v2.md) |
+| **Modelo datos** | [`modelo_datos.md`](modelo_datos.md) |
 
-> Catálogo normativo **`FSD-BR-01`…`18`**. Toda implementación y prueba de dominio debe respetarlas; conflicto con documento inferior → prevalece esta tabla y el BRD.
+> Catálogo normativo **`FSD-BR-01`…`25`**. Toda implementación y prueba de dominio debe respetarlas; conflicto con documento inferior → prevalece esta tabla, el FSD vivo y el BRD.
 
 ---
 
@@ -17,31 +19,32 @@
 
 | Tipo | IDs |
 |------|-----|
-| Validación | BR-01, BR-05, BR-07 |
+| Validación | BR-01, BR-05, BR-07, BR-24, BR-25 |
 | Política | BR-02, BR-03, BR-10, BR-14, BR-16, BR-18 |
-| Autorización | BR-04, BR-09, BR-12, BR-19 |
+| Autorización | BR-04, BR-09, BR-12, BR-19, BR-23 |
 | Trazabilidad | BR-06, BR-15 |
 | Estado | BR-07 |
 | Negocio | BR-08, BR-17, BR-20, BR-21 |
 | SLA | BR-13 |
 | Ética | BR-11 |
 | Alcance | BR-16 |
-| Estructura | BR-22, BR-23 |
+| Estructura | BR-22 |
 
 ---
 
 ## Catálogo detallado
 
-### FSD-BR-01 — Evidencia siempre ligada a Subfase
+### FSD-BR-01 — Evidencia siempre ligada a Indicador
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Validación |
 | **Origen BRD** | BRD-RB-06 |
 | **UC** | UC-004 |
-| **Enunciado** | Ninguna Evidencia puede persistirse sin `subphaseId` válido, descripción y archivo. |
+| **Enunciado** | Ninguna Evidencia puede persistirse sin `indicatorId` válido, descripción y al menos un medio de prueba (archivo con hash o `externalUrl` HTTPS). |
 | **Violación** | `400 EVIDENCE_UNCLASSIFIED` |
-| **Verificación** | Test API carga sin `subphaseId`; UAT formulario incompleto (PRD-US-005). |
+| **Verificación** | Test API carga sin `indicatorId`; UAT formulario incompleto (PRD-US-005). |
+| **Legacy v1.x** | `subphaseId` — obsoleto desde 2.0.0 |
 
 ---
 
@@ -67,19 +70,20 @@
 | **UC** | UC-004 |
 | **Enunciado** | Rol [TD] no puede sustituir la carga operativa del [CC] salvo delegación formal registrada en auditoría. |
 | **Violación** | `403 FORBIDDEN_ROLE` |
-| **Verificación** | Matriz RBAC endpoint `POST /evidences`. |
+| **Verificación** | Matriz RBAC endpoint `POST /indicators/{id}/evidences`. |
 
 ---
 
-### FSD-BR-04 — Solo [TD] aprueba/rechaza Subfase
+### FSD-BR-04 — Solo [TD] aprueba/rechaza Indicador
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Autorización |
 | **Origen BRD** | BRD-REQ-009 |
 | **UC** | UC-008, UC-009 |
-| **Enunciado** | Transiciones de validación normativa de la Subfase (`APROBADO`, `OBSERVADO`) exclusivas de [TD]. [JD] no sustituye dictamen técnico salvo política institucional explícita documentada en ADR. |
+| **Enunciado** | Transiciones de validación normativa del **Indicador** (`APROBADO`, `OBSERVADO`) exclusivas de [TD]. [JD] no sustituye dictamen técnico salvo política institucional explícita documentada en ADR. |
 | **Violación** | `403 FORBIDDEN_ROLE` (TC-SAD-004 si [CC] aprueba). |
+| **Legacy v1.x** | Subfase — obsoleto desde 2.0.0 |
 
 ---
 
@@ -90,7 +94,7 @@
 | **Tipo** | Validación |
 | **Origen BRD** | BRD-REQ-008 |
 | **UC** | UC-008 |
-| **Enunciado** | Todo rechazo formal de subfase crea `subphase_observation` OPEN con `body` no vacío (mínimo configurable, default 20 caracteres). |
+| **Enunciado** | Todo rechazo formal de **indicador** crea `indicator_observation` OPEN con `body` no vacío (mínimo configurable, default 20 caracteres). |
 | **Violación** | `422 JUSTIFICATION_REQUIRED` |
 | **Verificación** | TC-SAD-003; PRD-US-009. |
 
@@ -109,16 +113,17 @@
 
 ---
 
-### FSD-BR-07 — Cierre de Fase solo si todos APROBADO
+### FSD-BR-07 — Cierre de Nivel 1 solo si todos los Indicadores APROBADO
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Estado |
 | **Origen BRD** | BRD-CST-03, BRD-REQ-014 |
 | **UC** | UC-010 |
-| **Enunciado** | `COUNT(subfases_fase) = COUNT(subfases WHERE estado = APROBADO)` antes de cerrar Fase. |
-| **Violación** | `409 FASE_CIERRE_BLOQUEADO` + lista pendientes |
+| **Enunciado** | `COUNT(indicadores_subárbol_nivel1) = COUNT(indicadores WHERE estado = APROBADO)` antes de marcar el **Nivel 1** (Dimensión/Área) como `COMPLETADO`. |
+| **Violación** | `409 NIVEL1_CIERRE_BLOQUEADO` + lista de indicadores pendientes |
 | **Verificación** | TC-SAD-002; PRD-US-011. |
+| **Legacy v1.x** | Cierre de Fase / `FASE_CIERRE_BLOQUEADO` — obsoleto |
 
 ---
 
@@ -129,7 +134,7 @@
 | **Tipo** | Negocio |
 | **Origen BRD** | BRD-RB-02, BRD-REQ-013 |
 | **UC** | UC-003 |
-| **Enunciado** | Máximo un `AccreditationProcess` activo por combinación modalidad (CEUB/ARCU-SUR), carrera y periodo/gestión. |
+| **Enunciado** | Máximo un `AccreditationProcess` activo por combinación **modelo evaluador** (CEUB/ARCU-SUR), carrera y periodo/gestión. |
 | **Violación** | `409 PROCESS_ALREADY_ACTIVE` |
 | **Verificación** | Índice único parcial en DDL; TC-03c. |
 
@@ -141,7 +146,7 @@
 |-------|-------|
 | **Tipo** | Seguridad |
 | **Origen BRD** | BRD-CST-04 |
-| **UC** | UC-007, UC-011, UC-019 |
+| **UC** | UC-007, UC-011, UC-019, UC-023 |
 | **Enunciado** | Consultas y mutaciones de [CC] filtradas por `academic_program_id` de su asignación. |
 | **Violación** | `403 FORBIDDEN_SCOPE`; 0 incidentes críticos (NFR-009). |
 | **Verificación** | Test aislamiento carrera A vs B. |
@@ -168,7 +173,7 @@
 | **Tipo** | Ética |
 | **Origen BRD** | BRD-RB-14 |
 | **UC** | — (transversal) |
-| **Enunciado** | Ningún agente IA ni regla automática emite dictamen de acreditación vinculante. IA solo sugiere con trazabilidad (v2+). |
+| **Enunciado** | Ningún agente IA ni regla automática emite dictamen de acreditación vinculante. IA solo sugiere con trazabilidad (UC-024 Fase rollout). |
 | **Verificación** | Revisión de alcance release; ausencia de endpoint auto-dictamen. |
 
 ---
@@ -192,7 +197,7 @@
 | **Tipo** | SLA |
 | **Origen BRD** | BRD-REQ-011 |
 | **UC** | UC-015 |
-| **Enunciado** | Eventos críticos (rechazo, aprobación, nueva Evidencia pendiente revisión) encolados y enviados en ≤ 15 min (NFR-004). |
+| **Enunciado** | Eventos críticos (rechazo/aprobación de indicador, nueva Evidencia pendiente revisión) encolados y enviados en ≤ 15 min (NFR-004). |
 | **Verificación** | Métricas `notification_outbox.sent_at - created_at`. |
 
 ---
@@ -240,21 +245,9 @@
 | **Tipo** | Normativa |
 | **Origen BRD** | BRD-RB-09 |
 | **UC** | UC-003 |
-| **Enunciado** | Fechas límite de Fase definidas en plantilla; [CC] no las modifica. |
+| **Enunciado** | Fechas límite asociadas al **Nivel 1** (Dimensión/Área) definidas en plantilla o política institucional; [CC] no las modifica. |
 | **Violación** | `403 FORBIDDEN_ROLE` en PATCH de plazos. |
-
----
-
-### FSD-BR-19 — [EE] solo lectura documental
-
-| Campo | Valor |
-|-------|-------|
-| **Tipo** | Autorización |
-| **Origen BRD** | BRD-REQ-001 |
-| **UC** | UC-019 |
-| **Enunciado** | El evaluador externo [EE] solo consulta documentación de su carrera asignada. Prohibidas carga/subsanación de Evidencia, dictamen de Subfase, cierre de Fase, administración de usuarios y exportación de reportes. |
-| **Violación** | `403 FORBIDDEN_ROLE` |
-| **Verificación** | PRD-US-026; tests security EE vs POST evidencias/export. |
+| **Legacy v1.x** | Plazos en Fase — obsoleto |
 
 ---
 
@@ -267,6 +260,19 @@
 | **UC** | UC-004 |
 | **Enunciado** | Evidence > **5 MB** requiere barra de progreso determinada y bloqueo de doble envío (NFR-011). |
 | **Verificación** | PRD-US-025; E2E upload. |
+
+---
+
+### FSD-BR-19 — [EE] solo lectura documental
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Autorización |
+| **Origen BRD** | BRD-REQ-001 |
+| **UC** | UC-019, UC-020 |
+| **Enunciado** | El evaluador externo [EE] solo consulta documentación de su carrera asignada. Prohibidas carga/subsanación de Evidencia, dictamen de **Indicador**, cierre de **Nivel 1**, administración de usuarios y exportación de reportes. |
+| **Violación** | `403 FORBIDDEN_ROLE` |
+| **Verificación** | PRD-US-026; tests security EE vs POST evidencias/export. |
 
 ---
 
@@ -290,7 +296,7 @@
 | **Tipo** | Negocio |
 | **Origen BRD** | BRD-REQ-004 |
 | **UC** | UC-003, UC-021, UC-022 |
-| **Enunciado** | Cambios en plantilla normativa o estructura editorial no alteran retroactivamente procesos ya instanciados; solo afectan **nuevos** procesos o instancias editadas explícitamente vía UC-022. |
+| **Enunciado** | Cambios en plantilla normativa no alteran retroactivamente procesos ya instanciados; solo afectan **nuevos** procesos o instancias editadas explícitamente vía UC-022. |
 | **Violación** | N/A (regla preventiva de diseño) |
 | **Verificación** | Test: editar plantilla PUBLISHED no cambia árbol de proceso ACTIVE existente. |
 
@@ -303,22 +309,49 @@
 | **Tipo** | Estructura |
 | **Origen BRD** | BRD-REQ-004 |
 | **UC** | UC-022 |
-| **Enunciado** | No se puede eliminar una **subfase** de proceso si tiene evidencias en workflow iniciado (estado ≠ `PENDIENTE` vacío). No se elimina **fase** si alguna subfase bloquea. |
-| **Violación** | `409 SUBPHASE_HAS_EVIDENCE` |
-| **Verificación** | Tests delete subfase con evidencia SUBIDA/OBSERVADA/APROBADA. |
+| **Enunciado** | No se puede eliminar un **Indicador** si tiene evidencias en workflow iniciado (estado ≠ `PENDIENTE` vacío). No se elimina **Nivel 3/2/1** si algún descendiente bloquea la eliminación. |
+| **Violación** | `409 INDICATOR_HAS_EVIDENCE` |
+| **Verificación** | Tests delete indicador con evidencia SUBIDA/OBSERVADA/APROBADA. |
+| **Legacy v1.x** | `SUBPHASE_HAS_EVIDENCE` — obsoleto |
 
 ---
 
-### FSD-BR-23 — Gestión normativa solo [JD]
+### FSD-BR-23 — Gestión normativa: [JD] plantillas; [JD]/[TD] estructura en proceso
 
 | Campo | Valor |
 |-------|-------|
 | **Tipo** | Autorización |
 | **Origen BRD** | BRD-REQ-004 |
 | **UC** | UC-021, UC-022, UC-023 |
-| **Enunciado** | Crear/editar/eliminar plantillas, estructura de proceso instanciado y asignación de responsable [CC] es exclusivo de Jefatura DUEA [JD]. |
+| **Enunciado** | Crear/editar/archivar **plantillas** normativas y asignación de responsable [CC] es exclusivo de [JD]. Edición de **estructura en proceso instanciado** (UC-022): [JD] y [TD]. |
 | **Violación** | `403 FORBIDDEN_ROLE` |
-| **Verificación** | Tests security TD/CC en endpoints TPL y PROC estructura. |
+| **Verificación** | Tests security TD/CC en endpoints TPL; TD permitido en PROC estructura. |
+
+---
+
+### FSD-BR-24 — Plantilla publicada exige árbol normativo completo
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Validación |
+| **Origen BRD** | BRD-REQ-004 |
+| **UC** | UC-021, UC-003 |
+| **Enunciado** | Una plantilla no puede pasar a `PUBLISHED` sin al menos un **Indicador** en el árbol (N1→N2→N3→Indicador), cada indicador con `code`, `weight`, `referenceUrl` válidos. |
+| **Violación** | `400 TEMPLATE_STRUCTURE_INCOMPLETE` · `400 TEMPLATE_INDICATOR_INCOMPLETE` |
+| **Verificación** | Test publicación plantilla vacía o indicador sin código. |
+
+---
+
+### FSD-BR-25 — Ponderación de Indicador no negativa
+
+| Campo | Valor |
+|-------|-------|
+| **Tipo** | Validación |
+| **Origen BRD** | BRD-REQ-004 |
+| **UC** | UC-021, UC-022 |
+| **Enunciado** | Todo **Indicador** (plantilla o proceso) debe tener `weight` numérico definido y **≥ 0**. La suma ponderada por Nivel 3 o proceso es responsabilidad normativa de [JD] (sin auto-normalización en v2.0). |
+| **Violación** | `400 TEMPLATE_INDICATOR_INCOMPLETE` · `400 INDICATOR_INCOMPLETE` |
+| **Verificación** | Test crear indicador con weight negativo o nulo. |
 
 ---
 
@@ -346,6 +379,20 @@
 | BR-21 | 003, 021, 022 |
 | BR-22 | 022 |
 | BR-23 | 021, 022, 023 |
+| BR-24 | 003, 021 |
+| BR-25 | 021, 022 |
+
+---
+
+## Códigos de error legacy (v1.x)
+
+| Código legacy | Reemplazo v2.0 | Regla |
+|---------------|----------------|-------|
+| `FASE_CIERRE_BLOQUEADO` | `NIVEL1_CIERRE_BLOQUEADO` | BR-07 |
+| `SUBPHASE_HAS_EVIDENCE` | `INDICATOR_HAS_EVIDENCE` | BR-22 |
+| `TEMPLATE_SUBPHASE_LINK_REQUIRED` | `TEMPLATE_INDICATOR_LINK_REQUIRED` | BR-24 |
+
+Mantener compatibilidad dual en API durante fase M3 (ADR-0004) si aplica.
 
 ---
 
@@ -353,6 +400,7 @@
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.0 | 2026-09-08 | Release 2.0.0: BR-01, 04, 05, 07, 13, 17, 19, 22, 23 actualizados; BR-24, BR-25 nuevos; ADR-0004 |
+| v1.2 | 2026-08-27 | Pivot subfase-centrado *(supersedido)* |
+| v1.1 | 2026-08-07 | BR-20…23 para plantillas, estructura y responsable [CC] |
 | Dorada v1.0 | 2026-05-16 | Extracción y detalle de 18 reglas desde FSD.md |
-| v1.1 | 2026-08-07 | BR-20…23 para plantillas, estructura de proceso y responsable [CC] (UC-021…023) |
-| v1.2 | 2026-08-27 | Pivot subfase-centrado: BR-01, BR-04, BR-05, BR-07, BR-19, BR-22 |

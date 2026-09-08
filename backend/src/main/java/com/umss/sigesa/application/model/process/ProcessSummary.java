@@ -11,10 +11,13 @@ public record ProcessSummary(
         UUID templateId,
         String templateName,
         String templateType,
+        String evaluatorModel,
         String status,
         LocalDateTime startDate,
         int phaseCount,
         int subphaseCount,
+        int level1Count,
+        int indicatorCount,
         ProcessResponsibleInfo responsible
 ) {
 }
