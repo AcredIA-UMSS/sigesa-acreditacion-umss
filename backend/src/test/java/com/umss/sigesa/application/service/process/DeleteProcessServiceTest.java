@@ -60,10 +60,25 @@ class DeleteProcessServiceTest {
     }
 
     @Test
-    void shouldRejectWhenProcessNotActive() {
+    void shouldArchiveClosedProcessEvenWithEvidence() {
         AccreditationProcess process = AccreditationProcess.builder()
                 .id(processId)
                 .status("CLOSED")
+                .build();
+        when(accreditationProcessPort.findById(processId)).thenReturn(Optional.of(process));
+
+        service.delete(processId);
+
+        assertEquals("ARCHIVED", process.getStatus());
+        verify(accreditationProcessPort).save(process);
+        verify(evaluationMetricsPort, never()).countIndicatorsWithEvidenceByProcessId(processId);
+    }
+
+    @Test
+    void shouldRejectWhenProcessAlreadyArchived() {
+        AccreditationProcess process = AccreditationProcess.builder()
+                .id(processId)
+                .status("ARCHIVED")
                 .build();
         when(accreditationProcessPort.findById(processId)).thenReturn(Optional.of(process));
 

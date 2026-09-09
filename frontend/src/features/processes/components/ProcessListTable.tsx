@@ -22,8 +22,9 @@ function formatDate(iso?: string): string {
   }
 }
 
-function isActiveProcess(status?: string): boolean {
-  return status?.toUpperCase() === 'ACTIVE';
+function isDeletableProcess(status?: string): boolean {
+  const normalized = status?.toUpperCase() ?? '';
+  return normalized === 'ACTIVE' || normalized === 'CLOSED';
 }
 
 export function ProcessListTable({
@@ -86,7 +87,7 @@ export function ProcessListTable({
             {processes.map((process) => {
               const processId = process.id;
               const showDelete =
-                canDelete && processId && isActiveProcess(process.status) && onDeleteRequest;
+                canDelete && processId && isDeletableProcess(process.status) && onDeleteRequest;
 
               return (
                 <tr

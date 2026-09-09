@@ -29,14 +29,21 @@ public class DeleteProcessService implements DeleteProcessUseCase {
         AccreditationProcess process = accreditationProcessPort.findById(processId)
                 .orElseThrow(() -> new ProcessNotFoundException("Proceso no encontrado: " + processId));
 
-        if (!ProcessStatus.ACTIVE.name().equals(process.getStatus())) {
-            throw new ProcessNotDeletableException(
-                    "Solo se pueden eliminar procesos en estado ACTIVE.");
+        String status = process.getStatus();
+        if (ProcessStatus.ARCHIVED.name().equals(status)) {
+            throw new ProcessNotDeletableException("El proceso ya está archivado.");
         }
 
-        if (evaluationMetricsPort.countIndicatorsWithEvidenceByProcessId(processId) > 0) {
+        boolean isActive = ProcessStatus.ACTIVE.name().equals(status);
+        boolean isClosed = ProcessStatus.CLOSED.name().equals(status);
+        if (!isActive && !isClosed) {
+            throw new ProcessNotDeletableException(
+                    "Solo se pueden eliminar procesos activos o cerrados (desactivados).");
+        }
+
+        if (isActive && evaluationMetricsPort.countIndicatorsWithEvidenceByProcessId(processId) > 0) {
             throw new ProcessHasEvidenceException(
-                    "El proceso tiene evidencias cargadas y no puede eliminarse.");
+                    "El proceso activo tiene evidencias cargadas y no puede eliminarse.");
         }
 
         process.setStatus(ProcessStatus.ARCHIVED.name());

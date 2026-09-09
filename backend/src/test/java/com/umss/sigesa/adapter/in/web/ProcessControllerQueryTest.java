@@ -4,6 +4,7 @@ import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
@@ -40,6 +41,8 @@ class ProcessControllerQueryTest {
     @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
+    private DeleteProcessUseCase deleteProcessUseCase;
+    @Mock
     private UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
 
     private MockMvc mockMvc;
@@ -50,6 +53,7 @@ class ProcessControllerQueryTest {
                 createProcessUseCase,
                 listProcessesUseCase,
                 getProcessDetailUseCase,
+                deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,
                 new NormativeStructureWebMapper()
         );

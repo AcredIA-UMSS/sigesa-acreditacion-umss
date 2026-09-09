@@ -101,7 +101,7 @@ public class ProcessController {
 
     @DeleteMapping("/{processId}")
     @PreAuthorize("hasRole('JD')")
-    @Operation(summary = "Eliminar (archivar) proceso", description = "Solo JD. Archiva procesos ACTIVE sin evidencias cargadas.")
+    @Operation(summary = "Eliminar (archivar) proceso", description = "Solo JD. Archiva procesos ACTIVE (sin evidencias) o CLOSED (desactivados).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Proceso archivado"),
             @ApiResponse(responseCode = "403", description = "No autorizado", content = @Content),

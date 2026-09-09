@@ -108,7 +108,7 @@ export function ProcessListView() {
         title="Eliminar proceso"
         description={
           processToDelete
-            ? `¿Eliminar el proceso de ${processToDelete.careerName ?? 'esta carrera'}? Solo aplica a procesos activos sin evidencias cargadas.`
+            ? `¿Eliminar el proceso de ${processToDelete.careerName ?? 'esta carrera'}? Los procesos activos requieren no tener evidencias; los cerrados (desactivados) siempre pueden archivarse.`
             : ''
         }
         confirmLabel="Eliminar"
