@@ -2,15 +2,15 @@
 producto: "SIGESA"
 grupo: "ACREDIA"
 documento: DTP                 
-version: v2.0
-fecha: "2026-09-08"
+version: v2.1
+fecha: "2026-09-09"
 status: vivo
 audiencia: dual
 baseline_ref:
   dti: "docs/baseline/DTI_vFinal.md"
   tag: "release/2.0.0"
   commit: "HEAD"
-release: "2.0.0"
+release: "2.1.0"
 stack:
   - "Java 21"
   - "Spring Boot 4.x"
@@ -33,7 +33,8 @@ artefactos_vivos:
 # Documento Técnico del Producto (DTP) – SIGESA
 
 > **Qué es**: El contrato técnico vigente de SIGESA durante la fase de implementación.  
-> **Release 2.0.0**: jerarquía normativa **N1→N2→N3→Indicador→Evidencia** ([ADR-0004](../adr/ADR-0004-normative-hierarchy-v2.md)). UC-003/021/022 implementan clonado/edición v2; **legacy Fase/Subfase** coexiste hasta M5.  
+> **Release 2.0.0** (cerrado): jerarquía normativa **N1→N2→N3→Indicador→Evidencia** ([ADR-0004](../adr/ADR-0004-normative-hierarchy-v2.md)); legacy Fase/Subfase retirado (M5).  
+> **Release 2.1.0** (en curso): workflow metodológico 7 etapas ([ADR-0005](../adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md)); **M6** implementado (UC-025…028, Flyway V17).  
 > **Regla de oro**: Cero divergencia silenciosa. El baseline de la Fase de Diseño permanece intacto en `docs/baseline/`.
 
 ---
@@ -46,6 +47,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 09/09/2026 | **MOD-WORKFLOW metodológico (M6):** Flyway V17 (`methodological_stages`, `stage_deliverables`, `stage_gate_evaluations`, `primary_survey_batches`; `operational_mode`, `current_stage_id` en procesos); bootstrap 7 etapas + E1/E2 en `CreateProcessUseCaseImpl`; API-WF-04…08 (`StageWorkflowController`); `EvaluationMetricsPort`; UI `MethodologicalStageTimeline`; docs sync FSD/DTP/ADR. | FSD-UC-025…028 / DD-UC-025 | ADR-0005 | PM-010 / PR-IMPL-M6-025 | Boris Anthony Angulo Urquieta |
+| 09/09/2026 | **Reconciliación documental v2.0:** índice FSD UC-004…010, UC-019 → Implementado v2; T-003/T-004 cerrados. | FSD sync | ADR-0004 | docs sync | Cursor Agent |
 | 08/09/2026 | **MOD-PROCESS (FSD-UC-003 v2):** `CreateProcessUseCaseImpl` clona árbol normativo N1→N2→N3→Indicador vía `ProcessNormativeTreeCloner`; validación A4 `TEMPLATE_STRUCTURE_INCOMPLETE`; coexistencia clonado legacy Fase/Subfase. | FSD-UC-003 / DD-UC-003 | ADR-0004 | PM-009 / PR-IMPL-003 | Boris Anthony Angulo Urquieta |
 | 08/09/2026 | **MOD-TEMPLATE (FSD-UC-021 v2 Full-Stack):** API-TPL-08 `TemplateNormativeStructureController`; publicación BR-24 (`PublishTemplateService` + árbol v2); UI tabs v2/legacy `/admin/plantillas`; Orval `jerarquía-normativa-plantilla-v2`; `DuplicateTemplateService` deep-copy v2 (`TemplateNormativeTreeCloner`). | FSD-UC-021 / DD-UC-021 | ADR-0004 | PM-008 / PR-IMPL-021 | Boris Anthony Angulo Urquieta |
 | 08/09/2026 | **Release 2.0.0 (documental):** jerarquía normativa N1→N2→N3→Indicador→Evidencia; FSD/glosario/modelo/reglas/api v2; workflow en Indicador; cierre Nivel 1. Código legacy Fase/Subfase sin migrar. | FSD v2.0 | **ADR-0004** | docs sync | Boris Anthony Angulo Urquieta |
@@ -128,16 +131,20 @@ artefactos_vivos:
 | `FSD-UC-001` | `DD-UC-001` | hecho | `release/3.0.0` | Suite §6 DD-UC-001; JaCoCo pendiente `mvn verify` | `PR-IMPL-001` | JWT + LocalAuthAdapter; A1 estricto → 401 |
 | `FSD-UC-002` | `DD-UC-002` | hecho | `release/3.0.0` | Suite §6 DD-UC-002; JaCoCo pendiente `mvn verify` | `PR-IMPL-002` | Alta INACTIVE; revoke soft; 409 email dup |
 | `FSD-UC-003` | `DD-UC-003` | **hecho v2** *(legacy coexist.)* | `2.0.0` | `ProcessNormativeTreeClonerTest`, `CreateProcessUseCaseImplTest` | `PR-IMPL-003` | Clona N1→Indicador; legacy Fase/Subfase paralelo |
-| `FSD-UC-019` | `DD-UC-019` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | GET devuelve `phases/subphases`; objetivo `level1Nodes` | `PR-IMPL-019` | |
+| `FSD-UC-019` | `DD-UC-019` | **hecho v2** | `2.0.0` | GET devuelve `level1Nodes[]` + timeline M6 | `PR-IMPL-019` | |
 | `FSD-UC-021` | `DD-UC-021` | **hecho (Full-Stack v2)** | `2.0.0` | API-TPL-08 + WebMvc; UI `/admin/plantillas`; publish BR-24 | `PR-IMPL-021` | Duplicate v2; legacy tabs coexisten |
-| `FSD-UC-022` | `DD-UC-022` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-PROC-05…08 phases; objetivo API-STR-01…05 | `PR-IMPL-022` | |
-| `FSD-UC-004` | `DD-UC-004` | **legacy implementado** / **v2.0 reespecificado** | `2.0.0` | Upload `/subphases/…`; objetivo `/indicators/…` | `PR-IMPL-006` | API-EVD-01 revive path indicator |
+| `FSD-UC-022` | `DD-UC-022` | **hecho v2** | `2.0.0` | API-STR-01…05 + UI estructura v2 | `PR-IMPL-022` | |
+| `FSD-UC-004` | `DD-UC-004` | **hecho v2** | `2.0.0` | `POST/GET /indicators/{id}/evidences` | `PR-IMPL-006` | |
 | `FSD-UC-005` | `DD-UC-005` | **hecho** | `2.0.0` | Append-only sin cambio de contrato | `PR-IMPL-035` | |
-| `FSD-UC-006` | `DD-UC-006` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Subsanación por subfase | `PR-IMPL-036` | API-EVD-05 por indicador |
-| `FSD-UC-007` | `DD-UC-007` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Filtros phase/subphase | `PR-IMPL-037` | Query `level1Id`, `indicatorId` |
-| `FSD-UC-008` | `DD-UC-008` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-SUB-03 | `PR-IMPL-038` | API-WF-01 |
-| `FSD-UC-009` | `DD-UC-009` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | API-SUB-04 | `PR-IMPL-038` | API-WF-02 |
-| `FSD-UC-010` | `DD-UC-010` | **legacy hecho** / **v2.0 reespecificado** | `2.0.0` | Cierre fase V13 | `PR-IMPL-039` | API-WF-03 Nivel 1 |
+| `FSD-UC-006` | `DD-UC-006` | **hecho v2** | `2.0.0` | Subsanación por indicador API-EVD-05 | `PR-IMPL-036` | |
+| `FSD-UC-007` | `DD-UC-007` | **hecho v2** | `2.0.0` | API-EVD-02 filtros `level1Id`, `indicatorId` | `PR-IMPL-037` | |
+| `FSD-UC-008` | `DD-UC-008` | **hecho v2** | `2.0.0` | API-WF-01 reject indicador | `PR-IMPL-038` | |
+| `FSD-UC-009` | `DD-UC-009` | **hecho v2** | `2.0.0` | API-WF-02 approve indicador | `PR-IMPL-038` | |
+| `FSD-UC-010` | `DD-UC-010` | **hecho v2** | `2.0.0` | API-WF-03 cierre N1 | `PR-IMPL-039` | |
+| `FSD-UC-025` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | API-WF-04…08; bootstrap etapas | `PR-IMPL-M6-025` | UC-026…028 mismo contrato |
+| `FSD-UC-026` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST submit etapa | `PR-IMPL-M6-025` | |
+| `FSD-UC-027` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST approve/observe etapa | `PR-IMPL-M6-025` | |
+| `FSD-UC-028` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | GET gate preview | `PR-IMPL-M6-025` | |
 | `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `2.0.0` | Sin cambio contrato | `PR-IMPL-023` | Responsable [CC] — independiente del árbol |
 | `FSD-UC-011` | `DD-UC-011` | hecho / **v2.0 filtros pendientes** | `2.0.0` | PBAC summary/details | `PR-IMPL-011` | Migrar filtros a level1Id/indicatorStatus |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
@@ -168,6 +175,7 @@ artefactos_vivos:
 | **MOD-REPORT (PDF ejecutivo)** | **sí** | Ver §B.3 abajo; design doc `DD-UC-014` |
 | **MOD-EVIDENCE (carga v1)** | **sí** | Ver §B.4 abajo; design doc `DD-UC-004` |
 | **MOD-WORKFLOW (indicador / N1)** | **sí** | Ver §B.4.1 abajo; DD-UC-008, 009, 010 |
+| **MOD-WORKFLOW (metodológico 7 etapas)** | **sí** | Ver §B.8 abajo; DD-UC-025; ADR-0005 |
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
 | **MOD-REVIEW (evaluador externo [EE])** | **sí** | Ver §B.6 abajo; design doc `DD-UC-019` |
 | **MOD-TEMPLATE (plantillas normativas)** | **sí** | Ver §B.7 abajo; design doc `DD-UC-021` |
@@ -319,6 +327,24 @@ artefactos_vivos:
 | **Lectura** | `GET /api/v1/dashboards/me/summary`, `GET /api/v1/dashboards/coordinator/details` |
 | **Prohibido** | Carga evidencias, export dashboard, admin, reportes PDF (FSD-BR-19) |
 | **Seed dev** | `ee@umss.edu.bo` / `EvalDemo2026!` → carrera INF-SIS |
+
+### B.8 MOD-WORKFLOW — etapas metodológicas (`DD-UC-025`, M6 / v2.1)
+
+**Implementación:** Sprint 03 PM-010 · **Prompt:** `PR-IMPL-M6-025` · **FSD:** UC-025…028 · **ADR:** ADR-0005
+
+| Área | Detalle vigente (M6) |
+| --- | --- |
+| **Endpoints** | API-WF-04 `GET /processes/{id}/stages`; WF-05 submit; WF-06 approve/observe; WF-07 gate; WF-08 approve deliverable |
+| **RBAC** | CC submit; TD/JD approve/observe; TD gate + deliverables |
+| **Puertos aplicación** | IN: `ListProcessStagesUseCase`, `SubmitStageForReviewUseCase`, `ApproveStageUseCase`, `ObserveStageUseCase`, `EvaluateStageGateUseCase`, `ApproveStageDeliverableUseCase`; OUT: **`MethodologicalStagePort`**, **`EvaluationMetricsPort`** |
+| **Bootstrap** | `MethodologicalStageBootstrapper` en `CreateProcessUseCaseImpl` — 7 etapas + catálogo E1/E2 |
+| **Compuertas** | `StageGateEvaluator` — E1 entregables; E2 100% indicadores con evidencia + encuesta primaria |
+| **Tablas JPA** | `methodological_stages`, `stage_deliverables`, `stage_gate_evaluations`, `primary_survey_batches` |
+| **Columnas proceso** | `accreditation_processes.operational_mode`, `current_stage_id` |
+| **Migración Flyway** | `V17__methodological_workflow_stages.sql` (prod); dev Docker: Hibernate `ddl-auto: update` + `DevWorkflowSchemaAlignmentRunner` |
+| **Errores clave** | 409 `STAGE_GATE_BLOCKED`, `INVALID_STAGE_STATE`; 404 `STAGE_NOT_FOUND` |
+| **Frontend** | `MethodologicalStageTimeline` + container en `ProcessDetailView`; Orval `stage-workflow` |
+| **Pendiente M7–M11** | UC-029 métricas, UC-030 freeze, UC-031 plan mejoras, entregables E3–E7 |
 
 ### B.7 MOD-TEMPLATE — plantillas normativas (`DD-UC-021`)
 

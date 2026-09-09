@@ -1,14 +1,54 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, RefreshCw } from 'lucide-react';
+import {
+  getListProcessesQueryKey,
+  useDeleteProcess,
+} from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
+import type { ProcessSummaryResponseDto } from '../../../api/model';
+import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { useAuth } from '../../../lib/auth/useAuth';
+import { getApiErrorMessage } from '../../../lib/api/mapApiError';
 import { useProcessList } from '../hooks/useProcessList';
 import { ProcessListTable } from './ProcessListTable';
 
 export function ProcessListView() {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   const { processes, isLoading, isError, errorMessage, refetch } = useProcessList();
   const isJd = session?.role === 'JD';
+
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [processToDelete, setProcessToDelete] = useState<ProcessSummaryResponseDto | null>(null);
+
+  const { mutateAsync: deleteProcess, isPending: isDeleting } = useDeleteProcess({
+    mutation: {
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: getListProcessesQueryKey() });
+      },
+    },
+  });
+
+  const handleConfirmDelete = async () => {
+    if (!processToDelete?.id) {
+      return;
+    }
+
+    setActionError(null);
+    try {
+      const response = await deleteProcess({ processId: processToDelete.id });
+      if (response.status !== 204) {
+        setActionError('No se pudo eliminar el proceso.');
+        return;
+      }
+      setProcessToDelete(null);
+    } catch (error) {
+      setActionError(getApiErrorMessage(error, 'No se pudo eliminar el proceso.'));
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -16,7 +56,8 @@ export function ProcessListView() {
         <div>
           <h1 className="text-heading-xl font-bold text-primary-800">Procesos de acreditación</h1>
           <p className="mt-1 text-body-md text-gray-600">
-            Consulta procesos CEUB / ARCU-SUR según su rol y alcance de carrera.
+            Consulta procesos CEUB / ARCU-SUR según su rol y alcance de carrera. Haga clic en una
+            fila para ver el detalle.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -36,6 +77,8 @@ export function ProcessListView() {
         </div>
       </div>
 
+      {actionError && <Alert variant="error">{actionError}</Alert>}
+
       {isLoading && (
         <div className="rounded-2xl border border-gray-200 bg-body p-12 text-center">
           <p className="text-body-md text-gray-600">Cargando procesos…</p>
@@ -51,7 +94,30 @@ export function ProcessListView() {
         </div>
       )}
 
-      {!isLoading && !isError && <ProcessListTable processes={processes} />}
+      {!isLoading && !isError && (
+        <ProcessListTable
+          processes={processes}
+          canDelete={isJd}
+          isDeleteBusy={isDeleting}
+          onDeleteRequest={setProcessToDelete}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={processToDelete !== null}
+        title="Eliminar proceso"
+        description={
+          processToDelete
+            ? `¿Eliminar el proceso de ${processToDelete.careerName ?? 'esta carrera'}? Solo aplica a procesos activos sin evidencias cargadas.`
+            : ''
+        }
+        confirmLabel="Eliminar"
+        isLoading={isDeleting}
+        onClose={() => setProcessToDelete(null)}
+        onConfirm={() => {
+          void handleConfirmDelete();
+        }}
+      />
     </div>
   );
 }

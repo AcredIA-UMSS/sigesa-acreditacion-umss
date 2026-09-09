@@ -1,7 +1,7 @@
 ---
 id: FSD-UC-010
 nombre: Cerrar Nivel 1 (Dimensión/Área)
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[TD]"
 trazabilidad_prd: PRD-US-011
@@ -9,8 +9,8 @@ modulo: MOD-WORKFLOW
 reglas: FSD-BR-07
 design_doc: DD-UC-010
 pr_impl: PR-IMPL-039
-ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x cierra Phase; migración v2.0 pendiente"
+ultima_actualizacion: "2026-09-09"
+nota_implementacion: "API-WF-03 activo: POST /processes/{id}/level1-nodes/{level1Id}/complete; 409 NIVEL1_CIERRE_BLOQUEADO + pendingIndicators[]."
 ---
 
 # FSD-UC-010 — Cerrar Nivel 1 (Dimensión/Área)

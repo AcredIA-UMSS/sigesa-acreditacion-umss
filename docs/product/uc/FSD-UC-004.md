@@ -8,7 +8,7 @@ trazabilidad_prd: PRD-US-005, PRD-US-025
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "API-EVD-01 activo: POST/GET /indicators/{id}/evidences. Legacy subfase coexistiendo hasta M5."
+nota_implementacion: "API-EVD-01 activo: POST/GET /indicators/{id}/evidences (v2 post-M5)."
 ---
 
 # FSD-UC-004 — Cargar Evidencia en Indicador

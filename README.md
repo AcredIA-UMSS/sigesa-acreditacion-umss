@@ -1,5 +1,24 @@
 # SIGESA — Acreditación UMSS
 
+Sistema de gestión de acreditación institucional de la UMSS (monorepo backend + frontend).
+
+## Estado del proyecto (releases)
+
+| Release | Alcance | Estado |
+| ------- | ------- | ------ |
+| **2.0.0** | Jerarquía normativa **N1→N2→N3→Indicador→Evidencia**; UC-003…022; legacy Fase/Subfase retirado (M5) | **Cerrado** |
+| **2.1.0** | Workflow metodológico 7 etapas ([ADR-0005](docs/adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md)) | **En curso** — **M6 ✅** (UC-025…028); M7–M11 pendientes |
+
+**Documentación viva:** [`docs/product/FSD.md`](docs/product/FSD.md) · [`docs/product/DTP.md`](docs/product/DTP.md) · [`docs/sprints/sprint_03/PROMPT_MAPPING.md`](docs/sprints/sprint_03/PROMPT_MAPPING.md)
+
+### Funcionalidades destacadas (2.1.0 / M6)
+
+- **Timeline metodológico** en `/procesos/{id}` — 7 etapas, entregables E1–E2, submit/approve/gate (API-WF-04…08).
+- **Árbol normativo desplegable** — solo dimensiones (N1) visibles al entrar; expandir hasta indicadores.
+- **Evaluación v2** — evidencias, subsanación, aprobación/rechazo y cierre N1 sobre indicadores normativos.
+
+---
+
 ## Credenciales de acceso (desarrollo local)
 
 Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automáticamente usuarios y datos de prueba. Usa estas credenciales para iniciar sesión en **http://localhost:5173**:
@@ -45,6 +64,8 @@ API: `GET /api/v1/programs?q=ingen` — autocompletado por nombre o código.
 | `950e8400-e29b-41d4-a716-446655440020` | INF-SIS | 2026-1 | CEUB | ACTIVE |
 | `950e8400-e29b-41d4-a716-446655440021` | CEUB | 2025-2 | CEUB | CLOSED |
 | `950e8400-e29b-41d4-a716-446655440022` | ARCU-SUR | 2025-2 | ARCU_SUR | ARCHIVED |
+
+Procesos **ACTIVE** creados tras M6 incluyen **7 etapas metodológicas** bootstrap (E1 en `IN_PROGRESS`) y columnas `operational_mode` / `current_stage_id`.
 
 **Asignaciones usuario–programa** (`user_program_assignment`):
 
@@ -183,6 +204,8 @@ docker-compose down -v
 
 El Backend falla al conectar a la BD al iniciar: A veces el backend levanta milisegundos antes que PostgreSQL acepte conexiones. El contenedor del backend se reiniciará automáticamente (restart: always) e intentará reconectar exitosamente.
 
+Login OK pero vuelve al formulario / errores SQL `operational_mode does not exist`: la BD Docker puede estar desalineada tras M6 (Flyway off en perfil `dev`). Reconstruir backend: `docker compose up -d --build backend`. Alternativa: aplicar manualmente `V17__methodological_workflow_stages.sql` o reiniciar con volumen limpio (`docker compose down -v`).
+
 ### 1. Backend
 
 Por defecto el backend usa una base de datos **H2 en memoria** y carga automáticamente usuarios, plantillas y procesos de prueba al iniciar (ver sección [Credenciales de acceso](#credenciales-de-acceso-desarrollo-local)).
@@ -308,8 +331,16 @@ sigesa-acreditacion-umss/
 ├── backend/          # API REST (Spring Boot)
 ├── frontend/         # SPA (React + Vite)
 ├── docs/             # Documentación de producto, diseño y baseline
+│   ├── product/      # FSD, DTP, api_contracts (capa viva)
+│   ├── design/       # DD-UC-NNN
+│   ├── prompts/impl/ # PR-IMPL-NNN
+│   └── sprints/      # PROMPT_MAPPING por sprint (auditoría PM-NNN)
 └── AGENTS.md         # Contexto técnico para agentes de IA
 ```
+
+### Trazabilidad sprint 03
+
+Registro append-only de prompts ejecutados: [`docs/sprints/sprint_03/PROMPT_MAPPING.md`](docs/sprints/sprint_03/PROMPT_MAPPING.md) (PM-001…PM-013).
 
 ---
 
@@ -320,7 +351,7 @@ SIGESA incluye un asistente conversacional con **tool calling** sobre datos real
 | Superficie | Ruta / contexto | Roles |
 |------------|-----------------|-------|
 | Asistente general | `/ayuda` | Según rol JWT |
-| Copiloto fases | `/procesos/{id}` — `agent=phases` | JD, TD, CC (CC solo lectura) |
+| Copiloto procesos | `/procesos/{id}` — `agent=phases` | JD, TD, CC (CC solo lectura) |
 | Copiloto usuarios | `/admin/users` — `agent=users` | Solo JD |
 | Copiloto evidencias | `/evidencias/cargar` — `agent=evidence` | JD, TD, CC |
 
@@ -351,7 +382,7 @@ Documentación detallada: [`docs/design/DD-SYS-002.md`](docs/design/DD-SYS-002.m
 ## Panel de Control Híbrido (PBAC Dashboard)
 
 El frontend de SIGESA incluye un panel de control híbrido basado en permisos (PBAC) que adapta la interfaz de usuario dinámicamente según las autorizaciones del usuario (`READ_CC_DASHBOARD`, `READ_TD_DASHBOARD`, `READ_JD_DASHBOARD`):
-- **Coordinador de Carrera [CC]**: Acceso a indicadores de avance del programa académico asignado, progreso de fases, alertas de cuellos de botella y tabla de observaciones pendientes con paginación y ordenamiento.
+- **Coordinador de Carrera [CC]**: Acceso a indicadores de avance del programa académico asignado, progreso normativo (N1→Indicador), timeline metodológico, alertas de cuellos de botella y tabla de observaciones pendientes con paginación y ordenamiento.
 - **Técnico DUEA [TD]**: Visualización de evidencias pendientes de revisión y últimas evaluaciones realizadas.
 - **Jefatura DUEA [JD]**: Panel ejecutivo con semáforo de calidad de programas y KPIs agregados institucionales.
 

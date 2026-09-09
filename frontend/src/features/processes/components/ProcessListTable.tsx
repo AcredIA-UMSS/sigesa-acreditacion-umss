@@ -1,10 +1,13 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, FolderOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { FolderOpen, Trash2 } from 'lucide-react';
 import type { ProcessSummaryResponseDto } from '../../../api/model';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessListTableProps {
   processes: ProcessSummaryResponseDto[];
+  canDelete?: boolean;
+  isDeleteBusy?: boolean;
+  onDeleteRequest?: (process: ProcessSummaryResponseDto) => void;
 }
 
 function formatDate(iso?: string): string {
@@ -19,7 +22,22 @@ function formatDate(iso?: string): string {
   }
 }
 
-export function ProcessListTable({ processes }: ProcessListTableProps) {
+function isActiveProcess(status?: string): boolean {
+  return status?.toUpperCase() === 'ACTIVE';
+}
+
+export function ProcessListTable({
+  processes,
+  canDelete = false,
+  isDeleteBusy = false,
+  onDeleteRequest,
+}: ProcessListTableProps) {
+  const navigate = useNavigate();
+
+  const handleRowNavigate = (processId: string) => {
+    navigate(`/procesos/${processId}`);
+  };
+
   if (processes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-body px-8 py-16 text-center">
@@ -57,49 +75,86 @@ export function ProcessListTable({ processes }: ProcessListTableProps) {
               <th className="px-6 py-4 text-left text-label-md font-semibold uppercase tracking-wide text-primary-700">
                 Estructura
               </th>
-              <th className="px-6 py-4 text-right text-label-md font-semibold uppercase tracking-wide text-primary-700">
-                Acción
-              </th>
+              {canDelete && (
+                <th className="w-16 px-4 py-4 text-right text-label-md font-semibold uppercase tracking-wide text-primary-700">
+                  <span className="sr-only">Eliminar</span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {processes.map((process) => (
-              <tr key={process.id} className="transition-colors hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <p className="text-body-md font-semibold text-primary-900">
-                    {process.careerName ?? '—'}
-                  </p>
-                  <p className="text-label-md text-gray-500">{process.careerCode ?? '—'}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-body-md text-gray-800">{process.templateName ?? '—'}</p>
-                  <p className="text-label-md text-gray-500">{process.templateType ?? '—'}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
-                </td>
-                <td className="px-6 py-4 text-body-md text-gray-700">
-                  {formatDate(process.startDate)}
-                </td>
-                <td className="px-6 py-4 text-body-md text-gray-700">
-                  {process.responsible?.fullName ?? '—'}
-                </td>
-                <td className="px-6 py-4 text-body-md text-gray-700">
-                  {process.level1Count ?? 0} N1 · {process.indicatorCount ?? 0} indicadores
-                </td>
-                <td className="px-6 py-4 text-right">
-                  {process.id && (
-                    <Link
-                      to={`/procesos/${process.id}`}
-                      className="inline-flex items-center gap-1 text-label-md font-medium text-primary-600 hover:text-primary-800"
-                    >
-                      Ver detalle
-                      <ArrowRight size={16} />
-                    </Link>
+            {processes.map((process) => {
+              const processId = process.id;
+              const showDelete =
+                canDelete && processId && isActiveProcess(process.status) && onDeleteRequest;
+
+              return (
+                <tr
+                  key={processId ?? process.careerCode}
+                  className="cursor-pointer transition-colors hover:bg-primary-50 focus-within:bg-primary-50"
+                  onClick={() => {
+                    if (processId) {
+                      handleRowNavigate(processId);
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (!processId) return;
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleRowNavigate(processId);
+                    }
+                  }}
+                  tabIndex={processId ? 0 : -1}
+                  role="link"
+                  aria-label={
+                    processId
+                      ? `Ver detalle del proceso ${process.careerName ?? process.careerCode ?? ''}`
+                      : undefined
+                  }
+                >
+                  <td className="px-6 py-4">
+                    <p className="text-body-md font-semibold text-primary-900">
+                      {process.careerName ?? '—'}
+                    </p>
+                    <p className="text-label-md text-gray-500">{process.careerCode ?? '—'}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-body-md text-gray-800">{process.templateName ?? '—'}</p>
+                    <p className="text-label-md text-gray-500">{process.templateType ?? '—'}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+                  </td>
+                  <td className="px-6 py-4 text-body-md text-gray-700">
+                    {formatDate(process.startDate)}
+                  </td>
+                  <td className="px-6 py-4 text-body-md text-gray-700">
+                    {process.responsible?.fullName ?? '—'}
+                  </td>
+                  <td className="px-6 py-4 text-body-md text-gray-700">
+                    {process.level1Count ?? 0} N1 · {process.indicatorCount ?? 0} indicadores
+                  </td>
+                  {canDelete && (
+                    <td className="px-4 py-4 text-right">
+                      {showDelete && (
+                        <button
+                          type="button"
+                          className="inline-flex rounded-lg p-2 text-gray-500 transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+                          aria-label={`Eliminar proceso ${process.careerName ?? ''}`}
+                          disabled={isDeleteBusy}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDeleteRequest(process);
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </td>
                   )}
-                </td>
-              </tr>
-            ))}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

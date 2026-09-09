@@ -9,6 +9,7 @@ import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
@@ -28,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +49,7 @@ public class ProcessController {
     private final CreateProcessUseCase createProcessUseCase;
     private final ListProcessesUseCase listProcessesUseCase;
     private final GetProcessDetailUseCase getProcessDetailUseCase;
+    private final DeleteProcessUseCase deleteProcessUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
     private final NormativeStructureWebMapper normativeStructureWebMapper;
 
@@ -94,6 +97,20 @@ public class ProcessController {
         ProcessQueryContext ctx = buildQueryContext();
         EnrichedProcessDetail detail = getProcessDetailUseCase.getDetail(processId, ctx);
         return ResponseEntity.ok(mapDetailToDto(detail));
+    }
+
+    @DeleteMapping("/{processId}")
+    @PreAuthorize("hasRole('JD')")
+    @Operation(summary = "Eliminar (archivar) proceso", description = "Solo JD. Archiva procesos ACTIVE sin evidencias cargadas.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Proceso archivado"),
+            @ApiResponse(responseCode = "403", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "404", description = "PROCESS_NOT_FOUND", content = @Content),
+            @ApiResponse(responseCode = "409", description = "PROCESS_HAS_EVIDENCE o PROCESS_NOT_DELETABLE", content = @Content)
+    })
+    public ResponseEntity<Void> deleteProcess(@PathVariable UUID processId) {
+        deleteProcessUseCase.delete(processId);
+        return ResponseEntity.noContent().build();
     }
 
     private ProcessQueryContext buildQueryContext() {

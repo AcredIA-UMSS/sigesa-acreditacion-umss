@@ -400,6 +400,52 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | **200** | `{ level1Id, previousState, newState: "COMPLETADA", event: "Level1Completed" }` |
 | **409** | `NIVEL1_CIERRE_BLOQUEADO` + `pendingIndicators[]` |
 
+### API-WF-04 — Timeline etapas metodológicas (M6 / v2.1)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-025 |
+| **Ruta** | `GET /processes/{processId}/stages` |
+| **x-allowed-roles** | `[CC, TD, JD]` |
+| **200** | `MethodologicalStageResponseDto[]` (7 etapas + entregables E1–E2) |
+
+### API-WF-05 — Enviar etapa a revisión
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-026 |
+| **Ruta** | `POST /processes/{processId}/stages/{stageId}/submit` |
+| **x-allowed-roles** | `[CC]` |
+| **200** | `{ status: "SUBMITTED_FOR_REVIEW" }` |
+| **409** | `INVALID_STATE` |
+
+### API-WF-06 — Aprobar / observar etapa
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-027 |
+| **Rutas** | `POST …/approve` · `POST …/observe` |
+| **x-allowed-roles** | `[TD, JD]` |
+| **409 approve** | `STAGE_GATE_BLOCKED` + `failedRules[]` |
+| **409 observe** | `INVALID_STATE` |
+
+### API-WF-07 — Preview compuerta
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-028 |
+| **Ruta** | `GET /processes/{processId}/stages/{stageId}/gate` |
+| **x-allowed-roles** | `[TD]` |
+| **200** | `{ pass, failedRules[], summary }` |
+
+### API-WF-08 — Aprobar entregable
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-025 ext. |
+| **Ruta** | `POST /processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/approve` |
+| **x-allowed-roles** | `[TD]` |
+
 ---
 
 ## 7. MOD-DASH

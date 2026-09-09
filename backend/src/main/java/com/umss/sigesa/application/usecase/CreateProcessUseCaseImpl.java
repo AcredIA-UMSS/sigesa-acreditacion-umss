@@ -6,6 +6,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.service.process.ProcessNormativeTreeCloner;
+import com.umss.sigesa.application.service.workflow.MethodologicalStageBootstrapper;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
@@ -27,17 +28,20 @@ public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
     private final ProgramCatalogPort programCatalogPort;
     private final NormativeHierarchyQueryPort hierarchyQueryPort;
     private final ProcessNormativeTreeCloner normativeTreeCloner;
+    private final MethodologicalStageBootstrapper stageBootstrapper;
 
     public CreateProcessUseCaseImpl(AccreditationProcessPort accreditationProcessPort,
                                     TemplatePort templatePort,
                                     ProgramCatalogPort programCatalogPort,
                                     NormativeHierarchyQueryPort hierarchyQueryPort,
-                                    ProcessNormativeTreeCloner normativeTreeCloner) {
+                                    ProcessNormativeTreeCloner normativeTreeCloner,
+                                    MethodologicalStageBootstrapper stageBootstrapper) {
         this.accreditationProcessPort = accreditationProcessPort;
         this.templatePort = templatePort;
         this.programCatalogPort = programCatalogPort;
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.normativeTreeCloner = normativeTreeCloner;
+        this.stageBootstrapper = stageBootstrapper;
     }
 
     @Override
@@ -81,6 +85,7 @@ public class CreateProcessUseCaseImpl implements CreateProcessUseCase {
         AccreditationProcess savedProcess = accreditationProcessPort.save(newProcess);
 
         normativeTreeCloner.cloneFromTemplate(savedProcess.getId(), templateLevel1Nodes);
+        stageBootstrapper.bootstrapForProcess(savedProcess.getId());
 
         return savedProcess;
     }

@@ -6,9 +6,15 @@ import type {
   NormativeLevel2NodeDto,
   NormativeLevel3NodeDto,
 } from '../../../api/model';
+import { NormativeCollapsibleLayer } from '../../../components/normative/NormativeCollapsibleLayer';
 import { Button } from '../../../components/ui/Button';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { TextInput } from '../../../components/ui/TextInput';
+import {
+  countIndicatorsUnderLevel1,
+  countIndicatorsUnderLevel2,
+  sortByOrder,
+} from '../lib/normativeTreeUtils';
 
 export interface NormativeNodeDraft {
   name: string;
@@ -93,7 +99,7 @@ export function ProcessNormativeStructureEditorUI({
   onUpdateIndicator,
   onDeleteIndicator,
 }: ProcessNormativeStructureEditorUIProps) {
-  const sorted = [...level1Nodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const sorted = sortByOrder(level1Nodes);
   const [newLevel1, setNewLevel1] = useState<NormativeNodeDraft>(() =>
     emptyNode(sorted.length + 1),
   );
@@ -107,15 +113,24 @@ export function ProcessNormativeStructureEditorUI({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {actionError && (
         <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-body-md text-danger">
           {actionError}
         </div>
       )}
 
-      <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
-        <h2 className="text-heading-md font-semibold text-primary-800">Agregar nivel 1</h2>
+      <p className="text-body-md text-gray-600">
+        Solo se listan las dimensiones (nivel 1). Despliegue cada fila con ▸ para editar áreas,
+        criterios e indicadores.
+      </p>
+
+      <NormativeCollapsibleLayer
+        depth={1}
+        title="Agregar nueva dimensión (nivel 1)"
+        meta="Formulario de alta"
+        leadingIcon={<Plus size={18} className="text-primary-600" />}
+      >
         <NodeDraftForm
           draft={newLevel1}
           onChange={setNewLevel1}
@@ -129,7 +144,7 @@ export function ProcessNormativeStructureEditorUI({
           isBusy={isBusy}
           submitLabel="Agregar nivel 1"
         />
-      </section>
+      </NormativeCollapsibleLayer>
 
       {sorted.map((level1) => (
         <Level1Editor
@@ -185,28 +200,26 @@ function Level1Editor({
   const level1Id = level1.id ?? '';
   const [draft, setDraft] = useState(() => toNodeDraft(level1));
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const level2Nodes = [...(level1.level2Nodes ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
+  const level2Nodes = sortByOrder(level1.level2Nodes ?? []);
   const [newLevel2, setNewLevel2] = useState<NormativeNodeDraft>(() =>
     emptyNode(level2Nodes.length + 1),
   );
+  const level1Label = level1.label ?? 'Dimensión';
+  const indicatorCount = countIndicatorsUnderLevel1(level1);
 
   return (
-    <section className="rounded-2xl border border-primary-200 bg-body p-6 shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <Layers size={20} className="text-primary-600" />
-        <h2 className="text-heading-md font-semibold text-primary-800">
-          {level1.label ?? 'Nivel 1'}: {level1.name}
-        </h2>
-      </div>
-
+    <NormativeCollapsibleLayer
+      depth={1}
+      title={level1.name ?? level1Label}
+      meta={`${level1Label} ${level1.order ?? '—'} · ${level2Nodes.length} subnivel(es) · ${indicatorCount} indicador(es)`}
+      leadingIcon={<Layers size={18} className="text-primary-600" />}
+    >
       <NodeDraftForm
         draft={draft}
         onChange={setDraft}
         onSubmit={() => onUpdateLevel1(level1Id, draft)}
         isBusy={isBusy}
-        submitLabel="Guardar nivel 1"
+        submitLabel="Guardar dimensión"
         extraActions={
           <Button variant="danger" onClick={() => setConfirmDelete(true)} disabled={isBusy}>
             <Trash2 size={16} />
@@ -217,7 +230,7 @@ function Level1Editor({
 
       <ConfirmDialog
         isOpen={confirmDelete}
-        title="Eliminar nivel 1"
+        title="Eliminar dimensión"
         description="Se eliminarán todos los subnodos e indicadores. No se puede deshacer."
         confirmLabel="Eliminar"
         isLoading={isBusy}
@@ -229,39 +242,43 @@ function Level1Editor({
         }}
       />
 
-      <div className="mt-6 border-t border-gray-100 pt-6">
-        <h3 className="text-heading-sm font-semibold text-gray-800">
-          Agregar {level1.level2Nodes?.[0]?.label ?? 'nivel 2'}
-        </h3>
-        <NodeDraftForm
-          draft={newLevel2}
-          onChange={setNewLevel2}
-          onSubmit={async () => {
-            const ok = await onAddLevel2(level1Id, newLevel2);
-            if (ok) setNewLevel2(emptyNode(level2Nodes.length + 2));
-            return ok;
-          }}
-          isBusy={isBusy}
-          submitLabel="Agregar subnodo"
-        />
-      </div>
+      <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
+        <NormativeCollapsibleLayer
+          depth={2}
+          title={`Agregar ${level1.level2Nodes?.[0]?.label ?? 'área (nivel 2)'}`}
+          meta="Formulario de alta"
+          leadingIcon={<Plus size={16} className="text-primary-600" />}
+        >
+          <NodeDraftForm
+            draft={newLevel2}
+            onChange={setNewLevel2}
+            onSubmit={async () => {
+              const ok = await onAddLevel2(level1Id, newLevel2);
+              if (ok) setNewLevel2(emptyNode(level2Nodes.length + 2));
+              return ok;
+            }}
+            isBusy={isBusy}
+            submitLabel="Agregar subnodo"
+          />
+        </NormativeCollapsibleLayer>
 
-      {level2Nodes.map((level2) => (
-        <Level2Editor
-          key={level2.id ?? level2.name}
-          level2={level2}
-          isBusy={isBusy}
-          onUpdateLevel2={onUpdateLevel2}
-          onDeleteLevel2={onDeleteLevel2}
-          onAddLevel3={onAddLevel3}
-          onUpdateLevel3={onUpdateLevel3}
-          onDeleteLevel3={onDeleteLevel3}
-          onAddIndicator={onAddIndicator}
-          onUpdateIndicator={onUpdateIndicator}
-          onDeleteIndicator={onDeleteIndicator}
-        />
-      ))}
-    </section>
+        {level2Nodes.map((level2) => (
+          <Level2Editor
+            key={level2.id ?? level2.name}
+            level2={level2}
+            isBusy={isBusy}
+            onUpdateLevel2={onUpdateLevel2}
+            onDeleteLevel2={onDeleteLevel2}
+            onAddLevel3={onAddLevel3}
+            onUpdateLevel3={onUpdateLevel3}
+            onDeleteLevel3={onDeleteLevel3}
+            onAddIndicator={onAddIndicator}
+            onUpdateIndicator={onUpdateIndicator}
+            onDeleteIndicator={onDeleteIndicator}
+          />
+        ))}
+      </div>
+    </NormativeCollapsibleLayer>
   );
 }
 
@@ -290,61 +307,68 @@ function Level2Editor({
 }) {
   const level2Id = level2.id ?? '';
   const [draft, setDraft] = useState(() => toNodeDraft(level2));
-  const level3Nodes = [...(level2.level3Nodes ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
+  const level3Nodes = sortByOrder(level2.level3Nodes ?? []);
   const [newLevel3, setNewLevel3] = useState<NormativeNodeDraft>(() =>
     emptyNode(level3Nodes.length + 1),
   );
+  const level2Label = level2.label ?? 'Área';
+  const indicatorCount = countIndicatorsUnderLevel2(level2);
 
   return (
-    <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <GitBranch size={18} className="text-primary-600" />
-        <h3 className="text-heading-sm font-semibold text-gray-800">
-          {level2.label ?? 'Nivel 2'}: {level2.name}
-        </h3>
-      </div>
+    <NormativeCollapsibleLayer
+      depth={2}
+      title={level2.name ?? level2Label}
+      meta={`${level2Label} ${level2.order ?? '—'} · ${level3Nodes.length} subnivel(es) · ${indicatorCount} indicador(es)`}
+      leadingIcon={<GitBranch size={16} className="text-primary-600" />}
+    >
       <NodeDraftForm
         draft={draft}
         onChange={setDraft}
         onSubmit={() => onUpdateLevel2(level2Id, draft)}
         isBusy={isBusy}
-        submitLabel="Guardar"
+        submitLabel="Guardar área"
         extraActions={
           <Button variant="danger" onClick={() => onDeleteLevel2(level2Id)} disabled={isBusy}>
             <Trash2 size={16} />
+            Eliminar
           </Button>
         }
       />
 
-      <div className="mt-4">
-        <NodeDraftForm
-          draft={newLevel3}
-          onChange={setNewLevel3}
-          onSubmit={async () => {
-            const ok = await onAddLevel3(level2Id, newLevel3);
-            if (ok) setNewLevel3(emptyNode(level3Nodes.length + 2));
-            return ok;
-          }}
-          isBusy={isBusy}
-          submitLabel={`Agregar ${level2.level3Nodes?.[0]?.label ?? 'nivel 3'}`}
-        />
-      </div>
+      <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
+        <NormativeCollapsibleLayer
+          depth={3}
+          title={`Agregar ${level2.level3Nodes?.[0]?.label ?? 'criterio (nivel 3)'}`}
+          meta="Formulario de alta"
+          leadingIcon={<Plus size={16} className="text-primary-600" />}
+        >
+          <NodeDraftForm
+            draft={newLevel3}
+            onChange={setNewLevel3}
+            onSubmit={async () => {
+              const ok = await onAddLevel3(level2Id, newLevel3);
+              if (ok) setNewLevel3(emptyNode(level3Nodes.length + 2));
+              return ok;
+            }}
+            isBusy={isBusy}
+            submitLabel={`Agregar ${level2.level3Nodes?.[0]?.label ?? 'nivel 3'}`}
+          />
+        </NormativeCollapsibleLayer>
 
-      {level3Nodes.map((level3) => (
-        <Level3Editor
-          key={level3.id ?? level3.name}
-          level3={level3}
-          isBusy={isBusy}
-          onUpdateLevel3={onUpdateLevel3}
-          onDeleteLevel3={onDeleteLevel3}
-          onAddIndicator={onAddIndicator}
-          onUpdateIndicator={onUpdateIndicator}
-          onDeleteIndicator={onDeleteIndicator}
-        />
-      ))}
-    </div>
+        {level3Nodes.map((level3) => (
+          <Level3Editor
+            key={level3.id ?? level3.name}
+            level3={level3}
+            isBusy={isBusy}
+            onUpdateLevel3={onUpdateLevel3}
+            onDeleteLevel3={onDeleteLevel3}
+            onAddIndicator={onAddIndicator}
+            onUpdateIndicator={onUpdateIndicator}
+            onDeleteIndicator={onDeleteIndicator}
+          />
+        ))}
+      </div>
+    </NormativeCollapsibleLayer>
   );
 }
 
@@ -367,49 +391,54 @@ function Level3Editor({
 }) {
   const level3Id = level3.id ?? '';
   const [draft, setDraft] = useState(() => toNodeDraft(level3));
-  const indicators = [...(level3.indicators ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
+  const indicators = sortByOrder(level3.indicators ?? []);
   const [newIndicator, setNewIndicator] = useState<NormativeIndicatorDraft>(() =>
     emptyIndicator(indicators.length + 1),
   );
+  const level3Label = level3.label ?? 'Criterio';
 
   return (
-    <div className="mt-4 rounded-lg border border-gray-200 bg-body p-4">
-      <h4 className="text-body-md font-semibold text-gray-800">
-        {level3.label ?? 'Nivel 3'}: {level3.name}
-      </h4>
+    <NormativeCollapsibleLayer
+      depth={3}
+      title={level3.name ?? level3Label}
+      meta={`${level3Label} ${level3.order ?? '—'} · ${indicators.length} indicador(es)`}
+      leadingIcon={<ListChecks size={16} className="text-primary-600" />}
+    >
       <NodeDraftForm
         draft={draft}
         onChange={setDraft}
         onSubmit={() => onUpdateLevel3(level3Id, draft)}
         isBusy={isBusy}
-        submitLabel="Guardar"
+        submitLabel="Guardar criterio"
         extraActions={
           <Button variant="danger" onClick={() => onDeleteLevel3(level3Id)} disabled={isBusy}>
             <Trash2 size={16} />
+            Eliminar
           </Button>
         }
       />
 
-      <div className="mt-4 border-t border-gray-100 pt-4">
-        <h5 className="mb-2 flex items-center gap-1 text-body-md font-semibold text-gray-800">
-          <ListChecks size={16} />
-          Indicadores
-        </h5>
-        <IndicatorDraftForm
-          draft={newIndicator}
-          onChange={setNewIndicator}
-          onSubmit={async () => {
-            const ok = await onAddIndicator(level3Id, newIndicator);
-            if (ok) setNewIndicator(emptyIndicator(indicators.length + 2));
-            return ok;
-          }}
-          isBusy={isBusy}
-          submitLabel="Agregar indicador"
-        />
+      <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
+        <NormativeCollapsibleLayer
+          depth={4}
+          title="Agregar indicador"
+          meta="Formulario de alta"
+          leadingIcon={<Plus size={14} className="text-primary-600" />}
+        >
+          <IndicatorDraftForm
+            draft={newIndicator}
+            onChange={setNewIndicator}
+            onSubmit={async () => {
+              const ok = await onAddIndicator(level3Id, newIndicator);
+              if (ok) setNewIndicator(emptyIndicator(indicators.length + 2));
+              return ok;
+            }}
+            isBusy={isBusy}
+            submitLabel="Agregar indicador"
+          />
+        </NormativeCollapsibleLayer>
 
-        <ul className="mt-4 space-y-3">
+        <ul className="space-y-2">
           {indicators.map((indicator) => (
             <IndicatorEditorRow
               key={indicator.id ?? indicator.code}
@@ -421,7 +450,7 @@ function Level3Editor({
           ))}
         </ul>
       </div>
-    </div>
+    </NormativeCollapsibleLayer>
   );
 }
 
@@ -438,21 +467,27 @@ function IndicatorEditorRow({
 }) {
   const indicatorId = indicator.id ?? '';
   const [draft, setDraft] = useState(() => toIndicatorDraft(indicator));
+  const title = indicator.code
+    ? `${indicator.code} — ${indicator.description ?? 'Indicador'}`
+    : (indicator.description ?? 'Indicador');
 
   return (
-    <li className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-      <IndicatorDraftForm
-        draft={draft}
-        onChange={setDraft}
-        onSubmit={() => onUpdateIndicator(indicatorId, draft)}
-        isBusy={isBusy}
-        submitLabel="Guardar indicador"
-        extraActions={
-          <Button variant="danger" onClick={() => onDeleteIndicator(indicatorId)} disabled={isBusy}>
-            <Trash2 size={16} />
-          </Button>
-        }
-      />
+    <li className="list-none">
+      <NormativeCollapsibleLayer depth={4} title={title} meta={`Orden ${indicator.order ?? '—'}`}>
+        <IndicatorDraftForm
+          draft={draft}
+          onChange={setDraft}
+          onSubmit={() => onUpdateIndicator(indicatorId, draft)}
+          isBusy={isBusy}
+          submitLabel="Guardar indicador"
+          extraActions={
+            <Button variant="danger" onClick={() => onDeleteIndicator(indicatorId)} disabled={isBusy}>
+              <Trash2 size={16} />
+              Eliminar
+            </Button>
+          }
+        />
+      </NormativeCollapsibleLayer>
     </li>
   );
 }

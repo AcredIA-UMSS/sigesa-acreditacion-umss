@@ -1,12 +1,19 @@
-import { ChevronDown, ExternalLink, GitBranch, Layers, ListChecks, Scale } from 'lucide-react';
-import { useState } from 'react';
+import { ExternalLink, Scale } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import type {
   NormativeIndicatorDto,
   NormativeLevel1NodeDto,
   NormativeLevel2NodeDto,
   NormativeLevel3NodeDto,
 } from '../../../api/model';
+import { NormativeCollapsibleLayer } from '../../../components/normative/NormativeCollapsibleLayer';
 import { Level1CloseAction } from '../../level1/components/Level1CloseAction';
+import {
+  countIndicatorsUnderLevel1,
+  countIndicatorsUnderLevel2,
+  findNormativeIndicatorPath,
+  sortByOrder,
+} from '../lib/normativeTreeUtils';
 import { NormativeIndicatorCollaborationSection } from './NormativeIndicatorCollaborationSection';
 
 interface ProcessNormativeTreeProps {
@@ -18,6 +25,8 @@ interface ProcessNormativeTreeProps {
   canCloseLevel1?: boolean;
   onStructureUpdated?: () => void;
   onNavigateToIndicator?: (indicatorId: string) => void;
+  /** Abre automáticamente la ruta hasta este indicador (p. ej. desde búsqueda). */
+  expandToIndicatorId?: string;
 }
 
 export function ProcessNormativeTree({
@@ -29,8 +38,37 @@ export function ProcessNormativeTree({
   canCloseLevel1 = false,
   onStructureUpdated,
   onNavigateToIndicator,
+  expandToIndicatorId,
 }: ProcessNormativeTreeProps) {
-  const sorted = [...level1Nodes].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  const sorted = sortByOrder(level1Nodes);
+  const [openLevel1, setOpenLevel1] = useState<Record<string, boolean>>({});
+  const [openLevel2, setOpenLevel2] = useState<Record<string, boolean>>({});
+  const [openLevel3, setOpenLevel3] = useState<Record<string, boolean>>({});
+  const [openIndicators, setOpenIndicators] = useState<Record<string, boolean>>({});
+
+  const expandPath = useMemo(
+    () =>
+      expandToIndicatorId
+        ? findNormativeIndicatorPath(level1Nodes, expandToIndicatorId)
+        : null,
+    [expandToIndicatorId, level1Nodes],
+  );
+
+  useEffect(() => {
+    if (!expandPath) return;
+
+    setOpenLevel1((prev) => ({ ...prev, [expandPath.level1Id]: true }));
+    setOpenLevel2((prev) => ({ ...prev, [expandPath.level2Id]: true }));
+    setOpenLevel3((prev) => ({ ...prev, [expandPath.level3Id]: true }));
+    setOpenIndicators((prev) => ({ ...prev, [expandPath.indicatorId]: true }));
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(`indicator-${expandPath.indicatorId}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+  }, [expandPath]);
 
   if (sorted.length === 0) {
     return (
@@ -42,107 +80,75 @@ export function ProcessNormativeTree({
 
   return (
     <div className="space-y-3">
-      {sorted.map((node) => (
-        <Level1Accordion
-          key={node.id ?? node.name}
-          node={node}
-          processId={processId}
-          canUploadEvidence={canUploadEvidence}
-          canReviewEvidence={canReviewEvidence}
-          canSubsanateEvidence={canSubsanateEvidence}
-          canCloseLevel1={canCloseLevel1}
-          onStructureUpdated={onStructureUpdated}
-          onNavigateToIndicator={onNavigateToIndicator}
-        />
-      ))}
-    </div>
-  );
-}
+      <p className="text-body-md text-gray-600">
+        Se muestran solo las dimensiones (nivel 1). Use el icono ▸ en cada fila para desplegar
+        áreas, criterios e indicadores según necesite.
+      </p>
+      {sorted.map((node) => {
+        const level1Id = node.id ?? node.name ?? '';
+        const level2Nodes = sortByOrder(node.level2Nodes ?? []);
+        const label = node.label ?? 'Dimensión';
+        const indicatorCount = countIndicatorsUnderLevel1(node);
 
-function Level1Accordion({
-  node,
-  processId,
-  canUploadEvidence,
-  canReviewEvidence,
-  canSubsanateEvidence,
-  canCloseLevel1,
-  onStructureUpdated,
-  onNavigateToIndicator,
-}: {
-  node: NormativeLevel1NodeDto;
-  processId: string;
-  canUploadEvidence: boolean;
-  canReviewEvidence: boolean;
-  canSubsanateEvidence: boolean;
-  canCloseLevel1: boolean;
-  onStructureUpdated?: () => void;
-  onNavigateToIndicator?: (indicatorId: string) => void;
-}) {
-  const [open, setOpen] = useState(true);
-  const level2Nodes = [...(node.level2Nodes ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
-  const label = node.label ?? 'Nivel 1';
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-body shadow-sm">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-3 bg-primary-50 px-5 py-4 text-left transition-colors hover:bg-primary-100"
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-body">
-            <Layers size={18} />
-          </div>
-          <div>
-            <p className="text-heading-sm font-semibold text-primary-800">{node.name}</p>
-            <p className="text-label-md text-gray-600">
-              {label} {node.order ?? '—'} · {level2Nodes.length} subnodo
-              {level2Nodes.length === 1 ? '' : 's'}
-              {node.status && (
-                <span className="ml-2 rounded-full bg-primary-100 px-2 py-0.5 text-label-md font-medium text-primary-800">
+        return (
+          <NormativeCollapsibleLayer
+            key={level1Id}
+            depth={1}
+            title={node.name ?? label}
+            meta={`${label} ${node.order ?? '—'} · ${level2Nodes.length} subnivel(es) · ${indicatorCount} indicador(es)`}
+            badge={
+              node.status ? (
+                <span className="rounded-full bg-primary-100 px-2 py-0.5 text-label-md font-medium text-primary-800">
                   {node.status}
                 </span>
+              ) : undefined
+            }
+            open={openLevel1[level1Id]}
+            onOpenChange={(open) => setOpenLevel1((prev) => ({ ...prev, [level1Id]: open }))}
+          >
+            <div className="space-y-2">
+              {level2Nodes.map((level2) => (
+                <Level2Section
+                  key={level2.id ?? level2.name}
+                  node={level2}
+                  level1Name={node.name ?? label}
+                  open={Boolean(level2.id && openLevel2[level2.id])}
+                  onOpenChange={(open) => {
+                    if (!level2.id) return;
+                    setOpenLevel2((prev) => ({ ...prev, [level2.id!]: open }));
+                  }}
+                  openLevel3={openLevel3}
+                  onOpenLevel3Change={(level3Id, open) =>
+                    setOpenLevel3((prev) => ({ ...prev, [level3Id]: open }))
+                  }
+                  openIndicators={openIndicators}
+                  onOpenIndicatorChange={(indicatorId, open) =>
+                    setOpenIndicators((prev) => ({ ...prev, [indicatorId]: open }))
+                  }
+                  canUploadEvidence={canUploadEvidence}
+                  canReviewEvidence={canReviewEvidence}
+                  canSubsanateEvidence={canSubsanateEvidence}
+                  onNavigateToIndicator={onNavigateToIndicator}
+                />
+              ))}
+              {level2Nodes.length === 0 && (
+                <p className="text-body-md text-gray-500">Sin subnodos en esta dimensión.</p>
               )}
-            </p>
-          </div>
-        </div>
-        <ChevronDown
-          size={20}
-          className={`text-primary-600 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {open && (
-        <div className="divide-y divide-gray-100 border-t border-gray-100">
-          {level2Nodes.map((level2) => (
-            <Level2Section
-              key={level2.id ?? level2.name}
-              node={level2}
-              level1Name={node.name ?? label}
-              canUploadEvidence={canUploadEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canSubsanateEvidence}
-              onNavigateToIndicator={onNavigateToIndicator}
-            />
-          ))}
-          {level2Nodes.length === 0 && (
-            <p className="px-5 py-3 text-body-md text-gray-500">Sin subnodos</p>
-          )}
-          {canCloseLevel1 && (
-            <Level1CloseAction
-              processId={processId}
-              level1Id={node.id}
-              level1Name={node.name ?? label}
-              level1Label={label}
-              level1Status={node.status}
-              onCompleted={() => onStructureUpdated?.()}
-              onNavigateToIndicator={onNavigateToIndicator}
-            />
-          )}
-        </div>
-      )}
+              {canCloseLevel1 && node.id && (
+                <Level1CloseAction
+                  processId={processId}
+                  level1Id={node.id}
+                  level1Name={node.name ?? label}
+                  level1Label={label}
+                  level1Status={node.status}
+                  onCompleted={() => onStructureUpdated?.()}
+                  onNavigateToIndicator={onNavigateToIndicator}
+                />
+              )}
+            </div>
+          </NormativeCollapsibleLayer>
+        );
+      })}
     </div>
   );
 }
@@ -150,6 +156,12 @@ function Level1Accordion({
 function Level2Section({
   node,
   level1Name,
+  open,
+  onOpenChange,
+  openLevel3,
+  onOpenLevel3Change,
+  openIndicators,
+  onOpenIndicatorChange,
   canUploadEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
@@ -157,60 +169,54 @@ function Level2Section({
 }: {
   node: NormativeLevel2NodeDto;
   level1Name: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  openLevel3: Record<string, boolean>;
+  onOpenLevel3Change: (level3Id: string, open: boolean) => void;
+  openIndicators: Record<string, boolean>;
+  onOpenIndicatorChange: (indicatorId: string, open: boolean) => void;
   canUploadEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
 }) {
-  const [open, setOpen] = useState(true);
-  const level3Nodes = [...(node.level3Nodes ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
-  const label = node.label ?? 'Nivel 2';
+  const level3Nodes = sortByOrder(node.level3Nodes ?? []);
+  const label = node.label ?? 'Área';
+  const indicatorCount = countIndicatorsUnderLevel2(node);
 
   return (
-    <div className="bg-gray-50/50">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-3 px-5 py-3 text-left hover:bg-gray-100"
-      >
-        <div className="flex items-center gap-2">
-          <GitBranch size={16} className="text-primary-600" />
-          <div>
-            <p className="text-body-md font-semibold text-gray-800">{node.name}</p>
-            <p className="text-label-md text-gray-500">
-              {label} {node.order ?? '—'} · {level3Nodes.length} subnodo
-              {level3Nodes.length === 1 ? '' : 's'}
-            </p>
-          </div>
-        </div>
-        <ChevronDown
-          size={18}
-          className={`text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      {open && (
-        <div className="space-y-2 border-t border-gray-100 bg-body px-4 py-3">
-          {level3Nodes.map((level3) => (
-            <Level3Section
-              key={level3.id ?? level3.name}
-              node={level3}
-              level1Name={level1Name}
-              level2Name={node.name ?? label}
-              canUploadEvidence={canUploadEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canSubsanateEvidence}
-              onNavigateToIndicator={onNavigateToIndicator}
-            />
-          ))}
-          {level3Nodes.length === 0 && (
-            <p className="text-body-md text-gray-500">Sin subnodos</p>
-          )}
-        </div>
-      )}
-    </div>
+    <NormativeCollapsibleLayer
+      depth={2}
+      title={node.name ?? label}
+      meta={`${label} ${node.order ?? '—'} · ${level3Nodes.length} subnivel(es) · ${indicatorCount} indicador(es)`}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <div className="space-y-2">
+        {level3Nodes.map((level3) => (
+          <Level3Section
+            key={level3.id ?? level3.name}
+            node={level3}
+            level1Name={level1Name}
+            level2Name={node.name ?? label}
+            open={Boolean(level3.id && openLevel3[level3.id])}
+            onOpenChange={(next) => {
+              if (!level3.id) return;
+              onOpenLevel3Change(level3.id, next);
+            }}
+            openIndicators={openIndicators}
+            onOpenIndicatorChange={onOpenIndicatorChange}
+            canUploadEvidence={canUploadEvidence}
+            canReviewEvidence={canReviewEvidence}
+            canSubsanateEvidence={canSubsanateEvidence}
+            onNavigateToIndicator={onNavigateToIndicator}
+          />
+        ))}
+        {level3Nodes.length === 0 && (
+          <p className="text-body-md text-gray-500">Sin subnodos en esta área.</p>
+        )}
+      </div>
+    </NormativeCollapsibleLayer>
   );
 }
 
@@ -218,6 +224,10 @@ function Level3Section({
   node,
   level1Name,
   level2Name,
+  open,
+  onOpenChange,
+  openIndicators,
+  onOpenIndicatorChange,
   canUploadEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
@@ -226,24 +236,27 @@ function Level3Section({
   node: NormativeLevel3NodeDto;
   level1Name: string;
   level2Name: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  openIndicators: Record<string, boolean>;
+  onOpenIndicatorChange: (indicatorId: string, open: boolean) => void;
   canUploadEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
 }) {
-  const indicators = [...(node.indicators ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0),
-  );
-  const label = node.label ?? 'Nivel 3';
+  const indicators = sortByOrder(node.indicators ?? []);
+  const label = node.label ?? 'Criterio';
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50/80 p-4">
-      <p className="text-body-md font-semibold text-gray-800">{node.name}</p>
-      <p className="text-label-md text-gray-500">
-        {label} {node.order ?? '—'} · {indicators.length} indicador
-        {indicators.length === 1 ? '' : 'es'}
-      </p>
-      <ul className="mt-3 space-y-3">
+    <NormativeCollapsibleLayer
+      depth={3}
+      title={node.name ?? label}
+      meta={`${label} ${node.order ?? '—'} · ${indicators.length} indicador(es)`}
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <ul className="space-y-2">
         {indicators.map((indicator) => (
           <IndicatorRow
             key={indicator.id ?? indicator.code}
@@ -251,6 +264,11 @@ function Level3Section({
             level1Name={level1Name}
             level2Name={level2Name}
             level3Name={node.name ?? label}
+            open={Boolean(indicator.id && openIndicators[indicator.id])}
+            onOpenChange={(next) => {
+              if (!indicator.id) return;
+              onOpenIndicatorChange(indicator.id, next);
+            }}
             canUploadEvidence={canUploadEvidence}
             canReviewEvidence={canReviewEvidence}
             canSubsanateEvidence={canSubsanateEvidence}
@@ -258,10 +276,10 @@ function Level3Section({
           />
         ))}
         {indicators.length === 0 && (
-          <li className="text-body-md text-gray-500">Sin indicadores</li>
+          <li className="text-body-md text-gray-500">Sin indicadores en este criterio.</li>
         )}
       </ul>
-    </div>
+    </NormativeCollapsibleLayer>
   );
 }
 
@@ -270,6 +288,8 @@ function IndicatorRow({
   level1Name,
   level2Name,
   level3Name,
+  open,
+  onOpenChange,
   canUploadEvidence,
   canReviewEvidence,
   canSubsanateEvidence,
@@ -279,6 +299,8 @@ function IndicatorRow({
   level1Name: string;
   level2Name: string;
   level3Name: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   canUploadEvidence: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
@@ -286,25 +308,29 @@ function IndicatorRow({
 }) {
   const anchorId = indicator.id ? `indicator-${indicator.id}` : undefined;
   const breadcrumb = [level1Name, level2Name, level3Name].filter(Boolean).join(' › ');
+  const title = indicator.code
+    ? `${indicator.code} — ${indicator.description ?? 'Indicador'}`
+    : (indicator.description ?? 'Indicador');
 
   return (
-    <li
-      id={anchorId}
-      className="scroll-mt-24 rounded-lg border border-gray-200 bg-body px-4 py-3 transition-shadow"
-    >
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-body-md font-medium text-gray-800">
-            {indicator.code && (
-              <span className="mr-2 rounded bg-primary-100 px-2 py-0.5 font-mono text-label-md text-primary-800">
-                {indicator.code}
-              </span>
-            )}
-            {indicator.description}
-          </p>
-          <p className="text-label-md text-gray-500">{breadcrumb}</p>
+    <li id={anchorId} className="scroll-mt-24 list-none">
+      <NormativeCollapsibleLayer
+        depth={4}
+        title={title}
+        meta={breadcrumb}
+        badge={
+          indicator.status ? (
+            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-label-md font-medium text-gray-700">
+              {indicator.status}
+            </span>
+          ) : undefined
+        }
+        open={open}
+        onOpenChange={onOpenChange}
+      >
+        <div className="space-y-2">
           {indicator.weight != null && (
-            <p className="mt-1 flex items-center gap-1 text-label-md text-gray-600">
+            <p className="flex items-center gap-1 text-label-md text-gray-600">
               <Scale size={14} aria-hidden />
               Ponderación: {indicator.weight}
             </p>
@@ -314,44 +340,34 @@ function IndicatorRow({
               href={indicator.referenceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-body-md text-primary-600 hover:text-primary-800"
+              className="inline-flex items-center gap-1 text-body-md text-primary-600 hover:text-primary-800"
             >
               <ExternalLink size={14} />
               Referencia normativa
             </a>
           )}
-          {indicator.status && (
-            <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-label-md font-medium text-gray-700">
-              <ListChecks size={14} aria-hidden />
-              {indicator.status}
-            </span>
+          {indicator.id && (
+            <NormativeIndicatorCollaborationSection
+              indicatorId={indicator.id}
+              indicatorLabel={indicator.code ?? indicator.description ?? 'Indicador'}
+              indicatorStatus={indicator.status}
+              breadcrumb={breadcrumb}
+              canUpload={canUploadEvidence}
+              canSubsanate={canSubsanateEvidence}
+              canReview={canReviewEvidence}
+            />
           )}
-        </div>
-        <span className="text-label-md text-gray-500">Orden {indicator.order ?? '—'}</span>
-      </div>
-
-      {indicator.id && (
-        <div className="mt-3 space-y-2">
-          <NormativeIndicatorCollaborationSection
-            indicatorId={indicator.id}
-            indicatorLabel={indicator.code ?? indicator.description ?? 'Indicador'}
-            indicatorStatus={indicator.status}
-            breadcrumb={breadcrumb}
-            canUpload={canUploadEvidence}
-            canSubsanate={canSubsanateEvidence}
-            canReview={canReviewEvidence}
-          />
-          {onNavigateToIndicator && (
+          {onNavigateToIndicator && indicator.id && (
             <button
               type="button"
               onClick={() => onNavigateToIndicator(indicator.id!)}
               className="text-body-md text-primary-600 hover:text-primary-800"
             >
-              Ver detalle del indicador
+              Resaltar en la página
             </button>
           )}
         </div>
-      )}
+      </NormativeCollapsibleLayer>
     </li>
   );
 }

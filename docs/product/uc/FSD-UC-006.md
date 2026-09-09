@@ -8,7 +8,7 @@ trazabilidad_prd: PRD-US-006
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-06
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "API-EVD-05 activo: GET/POST subsanación por indicador normativo. Legacy subfase coexistiendo hasta M5."
+nota_implementacion: "API-EVD-05 activo: GET/POST subsanación por indicador normativo (v2 post-M5)."
 ---
 
 # FSD-UC-006 — Subsanar Evidencia

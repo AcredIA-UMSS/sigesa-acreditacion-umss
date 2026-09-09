@@ -8,7 +8,7 @@ trazabilidad_prd: PRD-US-009
 modulo: MOD-WORKFLOW
 reglas: FSD-BR-04, FSD-BR-05
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "API-WF-01 activo: POST /indicators/{id}/reject con indicator_observation v2. Legacy subfase coexistiendo hasta M5."
+nota_implementacion: "API-WF-01 activo: POST /indicators/{id}/reject con indicator_observation v2 (post-M5)."
 ---
 
 # FSD-UC-008 — Rechazar Indicador

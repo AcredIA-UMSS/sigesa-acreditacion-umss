@@ -1,14 +1,16 @@
 ---
 id: FSD-UC-019
 nombre: Consulta de procesos de acreditación
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[JD], [TD], [CC]"
 trazabilidad_prd: PRD-US-023, PRD-US-012
 modulo: MOD-PROCESS
 reglas: FSD-BR-09, FSD-BR-17
-ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Código v1.x devuelve phases/subphases; migración v2.0 pendiente"
+ultima_actualizacion: "2026-09-09"
+design_doc: DD-UC-019
+pr_impl: PR-IMPL-019
+nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desplegable N1→Indicador; timeline metodológico M6 en detalle."
 ---
 
 # FSD-UC-019 — Consulta de procesos de acreditación

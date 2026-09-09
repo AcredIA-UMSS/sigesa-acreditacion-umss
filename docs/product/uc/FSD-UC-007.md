@@ -1,13 +1,16 @@
 ---
 id: FSD-UC-007
 nombre: Buscar Evidencia
-estado: Reespecificado
+estado: Implementado v2
 release: v2.0
 actor_principal: "[CC] (alcance carrera), [TD] (global)"
 trazabilidad_prd: PRD-US-004
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-09-08"
+ultima_actualizacion: "2026-09-09"
+design_doc: DD-UC-007
+pr_impl: PR-IMPL-037
+nota_implementacion: "API-EVD-02 activo con filtros level1Id, indicatorId; FTS GIN prod; panel buscador en detalle proceso v2."
 ---
 
 # FSD-UC-007 — Buscar Evidencia

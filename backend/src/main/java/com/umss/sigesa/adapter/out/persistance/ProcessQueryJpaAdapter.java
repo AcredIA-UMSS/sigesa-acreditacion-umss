@@ -19,9 +19,12 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
     private final SpringDataAccreditationProcessRepository repository;
     private final ProcessPersistenceMapper mapper;
 
+    private static final String ARCHIVED_STATUS = "ARCHIVED";
+
     @Override
     public List<ProcessListItem> findAllSummaryItems() {
         return repository.findAllByOrderByStartDateDesc().stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
                 .map(this::toListItem)
                 .toList();
     }
@@ -32,6 +35,7 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
             return List.of();
         }
         return repository.findByCareerIdInOrderByStartDateDesc(careerIds).stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
                 .map(this::toListItem)
                 .toList();
     }

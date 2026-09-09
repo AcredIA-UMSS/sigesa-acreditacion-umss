@@ -6,12 +6,17 @@ import com.umss.sigesa.domain.exception.IndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.CcAlreadyAssignedToProcessException;
 import com.umss.sigesa.domain.exception.InvalidResponsibleUserException;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
+import com.umss.sigesa.domain.exception.ProcessHasEvidenceException;
+import com.umss.sigesa.domain.exception.ProcessNotDeletableException;
 import com.umss.sigesa.domain.exception.ProcessNotEditableException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidLevel1StateException;
+import com.umss.sigesa.domain.exception.InvalidStageStateException;
 import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
+import com.umss.sigesa.domain.exception.StageGateBlockedException;
+import com.umss.sigesa.domain.exception.StageNotFoundException;
 import com.umss.sigesa.domain.model.PendingIndicator;
 import com.umss.sigesa.domain.exception.TemplateIndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateInUseException;
@@ -65,6 +70,24 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
                         "error", "PROCESS_NOT_FOUND",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ProcessHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleProcessHasEvidence(ProcessHasEvidenceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "PROCESS_HAS_EVIDENCE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ProcessNotDeletableException.class)
+    public ResponseEntity<Map<String, String>> handleProcessNotDeletable(ProcessNotDeletableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "PROCESS_NOT_DELETABLE",
                         "message", ex.getMessage()
                 ));
     }
@@ -187,6 +210,33 @@ public class ProcessExceptionHandler {
                         "error", "INVALID_STATE",
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(InvalidStageStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidStageState(InvalidStageStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "INVALID_STATE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(StageNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleStageNotFound(StageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", "STAGE_NOT_FOUND",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(StageGateBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleStageGateBlocked(StageGateBlockedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "STAGE_GATE_BLOCKED");
+        body.put("message", ex.getMessage());
+        body.put("failedRules", ex.getFailedRules());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(Level1ClosureBlockedException.class)

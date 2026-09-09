@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
@@ -7,6 +7,7 @@ import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
 import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
+import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessDetailViewProps {
@@ -34,14 +35,18 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const canUploadEvidence = session?.role === 'CC';
   const canReviewEvidence = session?.role === 'TD';
   const structureAnchorRef = useRef<HTMLDivElement>(null);
+  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
 
   const navigateToIndicator = useCallback((indicatorId: string) => {
-    const element = document.getElementById(`indicator-${indicatorId}`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element?.classList.add('ring-2', 'ring-primary-400');
+    setExpandToIndicatorId(indicatorId);
     window.setTimeout(() => {
-      element?.classList.remove('ring-2', 'ring-primary-400');
-    }, 2000);
+      const element = document.getElementById(`indicator-${indicatorId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element?.classList.add('ring-2', 'ring-primary-400');
+      window.setTimeout(() => {
+        element?.classList.remove('ring-2', 'ring-primary-400');
+      }, 2000);
+    }, 150);
   }, []);
 
   return (
@@ -111,6 +116,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             onUpdated={refetch}
           />
 
+          <MethodologicalStageTimelineContainer processId={processId} />
+
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -119,8 +126,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
                   Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
-                  (N1→N2→N3→Indicador). Cada indicador admite evidencias y observaciones del equipo
-                  técnico.
+                  (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
                 </p>
               </div>
               {canEditStructure && (
@@ -150,6 +156,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 canCloseLevel1={canReviewEvidence}
                 onStructureUpdated={refetch}
                 onNavigateToIndicator={navigateToIndicator}
+                expandToIndicatorId={expandToIndicatorId}
               />
             </div>
           </section>

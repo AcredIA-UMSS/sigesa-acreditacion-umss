@@ -8,7 +8,7 @@ trazabilidad_prd: PRD-US-010
 modulo: MOD-WORKFLOW
 reglas: FSD-BR-04
 ultima_actualizacion: "2026-09-08"
-nota_implementacion: "API-WF-02 activo: POST /indicators/{id}/approve sobre indicador normativo v2. Legacy subfase coexistiendo hasta M5."
+nota_implementacion: "API-WF-02 activo: POST /indicators/{id}/approve sobre indicador normativo v2 (post-M5)."
 ---
 
 # FSD-UC-009 — Aprobar Indicador

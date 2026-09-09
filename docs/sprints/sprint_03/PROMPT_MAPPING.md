@@ -1,6 +1,7 @@
 # PROMPT_MAPPING — Sprint 03
 
-> Registro PM del sprint 03. Trazabilidad: `Código → PR-IMPL → DD-UC-022 → FSD-UC-022/004 → DTP`.
+> Registro PM del sprint 03. Trazabilidad: `Código → PR-IMPL → DD-UC-NNN → FSD-UC-NNN → DTP`.  
+> **Índice:** PM-001…PM-013 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs).
 
 | ID Mapeo | PR-IMPL | Design Doc | FSD / PRD | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
@@ -13,6 +14,10 @@
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
 | PM-008 | PR-IMPL-021 | DD-UC-021 | FSD-UC-021 | Full-Stack v2 plantillas: API-TPL-08, UI tabs, publish BR-24, duplicate v2 |
 | PM-009 | PR-IMPL-003 | DD-UC-003 | FSD-UC-003 | Clonado árbol v2 al crear proceso (`ProcessNormativeTreeCloner`) |
+| PM-010 | PR-IMPL-M6-025 | DD-UC-025 | FSD-UC-025…028 | M6 workflow metodológico (V17, API-WF-04…08, timeline UI) |
+| PM-011 | N/A | DD-UC-019 / DD-UC-022 | FSD-UC-019 / FSD-UC-022 | Árbol normativo en capas desplegables N1→Indicador (UI) |
+| PM-012 | N/A | DD-UC-001 | FSD-UC-001 | Fix login en bucle post-M6 (operational_mode, redirect, 401 global) |
+| PM-013 | N/A | DD-UC-025 | FSD / DTP / ADR-0005 | Sincronización documental v2.0/v2.1 + README |
 
 ---
 
@@ -530,3 +535,238 @@ FSD-UC-003 marcado **Implementado v2** en capa viva; flujo end-to-end plantilla 
 ### Próximos pasos
 
 - [ ] Smoke: publicar plantilla v2 → `/procesos/nuevo` → verificar árbol en detalle proceso
+
+---
+
+## PM-010
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-010 |
+| **Fecha** | 2026-09-09 |
+| **Hora** | 15:00 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | M6 — Workflow metodológico (UC-025…028) |
+| **Objetivo** | 7 etapas + entregables E1–E2, API submit/approve/gate, timeline UI Orval |
+| **Contexto** | ADR-0005; Flyway V17; complemento release 2.1.0 parcial |
+| **PR-IMPL vinculado** | [PR-IMPL-M6-025](../../prompts/impl/PR-IMPL-M6-025.md) |
+| **DD-UC vinculado** | [DD-UC-025](../../design/DD-UC-025.md) |
+| **FSD-UC vinculado** | [FSD-UC-025](../../product/uc/FSD-UC-025.md) (UC-026…028 mismo contrato) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Implementar workflow metodológico M6 (UC-025…028) según ADR-0005 y DD-UC-025: backend V17, StageWorkflowController, bootstrap etapas, timeline UI Orval, tests StageGateEvaluator.
+```
+
+### Archivos generados o modificados (principales)
+
+**Backend**
+
+- `db/migration/V17__methodological_workflow_stages.sql`
+- Dominio: `MethodologicalStage`, `StageDeliverable`, enums, excepciones gate
+- Servicios: `MethodologicalStageBootstrapper`, `StageGateEvaluator`, `*Stage*Service`
+- `StageWorkflowController`, JPA adapters/repos, `EvaluationMetricsJpaAdapter`
+- `StageGateEvaluatorTest`, `CreateProcessUseCaseImplTest` (bootstrap)
+
+**Frontend**
+
+- `MethodologicalStageTimeline.tsx`, `MethodologicalStageTimelineContainer.tsx`
+- `ProcessDetailView.tsx` (sección timeline)
+- Orval: `stage-workflow/`, DTOs metodológicos
+
+**Documentación (contrato M6)**
+
+- `docs/design/DD-UC-025.md`
+- `docs/product/api_contracts.md` (API-WF-04…08)
+
+### Cambios realizados
+
+1. **Bootstrap:** 7 `MethodologicalStage` + entregables E1/E2 al crear proceso; E1 `IN_PROGRESS`.
+2. **API:** submit, approve, observe, gate preview, approve deliverable.
+3. **Compuertas:** E1 entregables aprobados; E2 100% indicadores con evidencia + encuesta primaria.
+4. **UI:** timeline con badges y acciones CC/TD.
+
+### Validación ejecutada
+
+- [x] `./mvnw test` — suite backend OK (~286 tests, incl. `StageGateEvaluatorTest`)
+- [x] Orval regenerado — endpoints `stage-workflow`
+- [ ] Docker smoke timeline (requiere rebuild backend para V17 / `operational_mode`)
+
+### Resultado obtenido
+
+Release **2.1.0** parcial: milestone **M6** implementado en código. Documentación cerrada en PM-013.
+
+### Próximos pasos
+
+- [ ] M7: DocumentAsset M:N indicadores
+- [ ] M8: FODA + compuerta E2→E3
+
+---
+
+## PM-011
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-011 |
+| **Fecha** | 2026-09-09 |
+| **Hora** | 15:10 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | UI árbol normativo en capas desplegables |
+| **Objetivo** | Mostrar solo N1 (dimensiones/áreas) al entrar; expandir con ▸ hasta indicadores; auto-expansión al buscar desde detalle |
+| **Contexto** | Mejora UX post-v2.0 en detalle proceso y editor estructura |
+| **PR-IMPL vinculado** | N/A (refactor UI sobre FSD-UC-019 / FSD-UC-022) |
+| **DD-UC vinculado** | [DD-UC-019](../../design/DD-UC-019.md) · [DD-UC-022](../../design/DD-UC-022.md) |
+| **FSD-UC vinculado** | [FSD-UC-019](../../product/uc/FSD-UC-019.md) · [FSD-UC-022](../../product/uc/FSD-UC-022.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero que la jerarquía normativa en el detalle del proceso se muestre en capas desplegables: al entrar solo dimensiones (N1), expandir hasta indicadores. Mismo patrón en el editor de estructura normativa.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `frontend/src/components/normative/NormativeCollapsibleLayer.tsx` |
+| generado | `frontend/src/features/processes/lib/normativeTreeUtils.ts` |
+| modificado | `frontend/src/features/processes/components/ProcessNormativeTree.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessNormativeStructureEditorUI.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `frontend/src/features/admin/templates/components/TemplateNormativeStructurePanel.tsx` |
+
+### Cambios realizados
+
+1. Componente compartido `NormativeCollapsibleLayer` con tokens Tailwind institucionales.
+2. Utils de árbol (`expandPathToIndicator`, etc.) para búsqueda con auto-expansión.
+3. Refactor vista proceso y editor estructura; plantillas admin alineadas al mismo patrón.
+
+### Validación ejecutada
+
+- [x] `pnpm exec tsc -b` — OK (frontend)
+- [ ] Smoke manual: expandir N1→N2→N3→Indicador en `/procesos/{id}`
+
+### Resultado obtenido
+
+Árbol normativo legible en 4 niveles sin saturar la vista inicial; coherente en proceso, editor y plantillas.
+
+---
+
+## PM-012
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-012 |
+| **Fecha** | 2026-09-09 |
+| **Hora** | 15:15 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Fix login en bucle post-M6 (Docker dev) |
+| **Objetivo** | Evitar redirect/login loop tras autenticación cuando APIs post-login fallan por esquema desalineado |
+| **Contexto** | Columna `operational_mode` faltante en Postgres Docker (Flyway off + Hibernate ddl-auto parcial) |
+| **PR-IMPL vinculado** | N/A (hotfix operacional dev) |
+| **DD-UC vinculado** | [DD-UC-001](../../design/DD-UC-001.md) |
+| **FSD-UC vinculado** | [FSD-UC-001](../../product/uc/FSD-UC-001.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+El login entra en bucle: autentica pero vuelve al formulario. Revisar errores post-login (operational_mode, 401 global) y corregir frontend/backend dev.
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/src/main/java/com/umss/sigesa/config/DevWorkflowSchemaAlignmentRunner.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/AccreditationProcessJpaEntity.java` |
+| modificado | `frontend/src/features/auth/pages/LoginPage.tsx` |
+| modificado | `frontend/src/lib/api/customFetch.ts` |
+
+### Cambios realizados
+
+1. **`DevWorkflowSchemaAlignmentRunner`:** alinea columnas workflow en perfil `dev` al arrancar.
+2. **`AccreditationProcessJpaEntity`:** `operational_mode` nullable para Hibernate ddl-auto.
+3. **`LoginPage`:** redirect post-login vía `useEffect` (evita parpadeos/re-mount).
+4. **`customFetch`:** logout global solo en 401 de autenticación real (no errores SQL/500).
+
+### Validación ejecutada
+
+- [ ] `docker compose up -d --build backend` — aplicar V17 + alignment en Postgres dev
+- [x] Código compilable backend/frontend
+
+### Resultado obtenido
+
+Causa raíz documentada; mitigaciones en código. Rebuild Docker sigue siendo paso operativo obligatorio en entornos con BD stale.
+
+### Próximos pasos
+
+- [ ] Rebuild backend Docker tras merge M6
+
+---
+
+## PM-013
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-013 |
+| **Fecha** | 2026-09-09 |
+| **Hora** | 15:20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Composer |
+| **Tarea** | Sincronización documental v2.0/v2.1 + README |
+| **Objetivo** | Cerrar deuda FSD/DTP/ADR; crear FSD-UC-025 y PR-IMPL-M6-025; reconciliar índice Reespecificado→Implementado v2; actualizar README releases |
+| **Contexto** | Post-implementación M6; pregunta usuario sobre estado «Reespecificado» vs «Implementado» |
+| **PR-IMPL vinculado** | [PR-IMPL-M6-025](../../prompts/impl/PR-IMPL-M6-025.md) |
+| **DD-UC vinculado** | [DD-UC-025](../../design/DD-UC-025.md) |
+| **FSD-UC vinculado** | FSD-UC-025…028 · FSD-UC-004…010 · FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+hazlo
+
+(si por favor, y tambien que agregas todos los promp mapping que hicimos al sprint 3)
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `docs/product/uc/FSD-UC-025.md` |
+| generado | `docs/prompts/impl/PR-IMPL-M6-025.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md` |
+| modificado | `docs/design/DD-UC-025.md` |
+| modificado | `docs/product/uc/FSD-UC-004.md` … `FSD-UC-010.md`, `FSD-UC-019.md` |
+| modificado | `README.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+1. **FSD:** UC-004…010, UC-019 → Implementado v2; UC-025…028 enlazados; T-003/T-004 cerrados; T-014 parcial M6; §8/§10/§11; changelog.
+2. **DTP:** release 2.1.0, changelog M6, §B.8, tabla A.3.
+3. **ADR-0005:** trazabilidad M6 implementado.
+4. **README:** sección releases 2.0.0/2.1.0, M6 features, troubleshooting login, índice sprint 03.
+5. **PM-010…013:** registro completo sprint 03.
+
+### Validación ejecutada
+
+- [x] Enlaces relativos FSD ↔ DD ↔ PR-IMPL verificados
+- [x] Tabla resumen sprint 03 con PM-001…PM-013
+
+### Resultado obtenido
+
+Capa viva alineada con código post-M5/M6; auditoría sprint 03 completa hasta PM-013.

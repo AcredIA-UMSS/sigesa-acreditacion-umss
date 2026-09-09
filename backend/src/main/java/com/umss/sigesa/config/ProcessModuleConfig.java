@@ -3,6 +3,7 @@ package com.umss.sigesa.config;
 import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
 import com.umss.sigesa.application.port.in.GetNormativeIndicatorUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
@@ -16,6 +17,7 @@ import com.umss.sigesa.application.port.in.PublishTemplateUseCase;
 import com.umss.sigesa.application.port.in.RemoveProcessResponsibleUseCase;
 import com.umss.sigesa.application.port.in.UpdateTemplateUseCase;
 import com.umss.sigesa.application.port.out.AccreditationProcessPort;
+import com.umss.sigesa.application.port.out.EvaluationMetricsPort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NormativeStructurePort;
@@ -28,6 +30,7 @@ import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.process.AssignProcessResponsibleService;
+import com.umss.sigesa.application.service.process.DeleteProcessService;
 import com.umss.sigesa.application.service.process.GetNormativeIndicatorService;
 import com.umss.sigesa.application.service.process.GetProcessDetailService;
 import com.umss.sigesa.application.service.process.NormativeStructureCommandService;
@@ -124,13 +127,15 @@ public class ProcessModuleConfig {
                                               TemplatePort templatePort,
                                               ProgramCatalogPort programCatalogPort,
                                               NormativeHierarchyQueryPort normativeHierarchyQueryPort,
-                                              ProcessNormativeTreeCloner processNormativeTreeCloner) {
+                                              ProcessNormativeTreeCloner processNormativeTreeCloner,
+                                              com.umss.sigesa.application.service.workflow.MethodologicalStageBootstrapper stageBootstrapper) {
         return new CreateProcessUseCaseImpl(
                 accreditationProcessPort,
                 templatePort,
                 programCatalogPort,
                 normativeHierarchyQueryPort,
-                processNormativeTreeCloner);
+                processNormativeTreeCloner,
+                stageBootstrapper);
     }
 
     @Bean
@@ -152,6 +157,12 @@ public class ProcessModuleConfig {
                 processResponsiblePort,
                 userRepositoryPort,
                 normativeHierarchyQueryPort);
+    }
+
+    @Bean
+    DeleteProcessUseCase deleteProcessUseCase(AccreditationProcessPort accreditationProcessPort,
+                                              EvaluationMetricsPort evaluationMetricsPort) {
+        return new DeleteProcessService(accreditationProcessPort, evaluationMetricsPort);
     }
 
     @Bean

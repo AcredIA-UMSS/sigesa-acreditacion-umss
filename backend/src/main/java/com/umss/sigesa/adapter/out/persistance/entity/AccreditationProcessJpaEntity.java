@@ -43,6 +43,13 @@ public class AccreditationProcessJpaEntity {
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
 
+    @Column(name = "operational_mode", length = 32)
+    @Builder.Default
+    private String operationalMode = "ACTIVE";
+
+    @Column(name = "current_stage_id")
+    private UUID currentStageId;
+
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Level1NodeJpaEntity> level1Nodes = new ArrayList<>();

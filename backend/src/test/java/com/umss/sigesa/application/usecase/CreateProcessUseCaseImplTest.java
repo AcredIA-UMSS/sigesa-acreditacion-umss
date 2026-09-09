@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.service.process.ProcessNormativeTreeCloner;
+import com.umss.sigesa.application.service.workflow.MethodologicalStageBootstrapper;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
@@ -51,6 +52,9 @@ class CreateProcessUseCaseImplTest {
 
     @Mock
     private ProcessNormativeTreeCloner normativeTreeCloner;
+
+    @Mock
+    private MethodologicalStageBootstrapper stageBootstrapper;
 
     @InjectMocks
     private CreateProcessUseCaseImpl useCase;

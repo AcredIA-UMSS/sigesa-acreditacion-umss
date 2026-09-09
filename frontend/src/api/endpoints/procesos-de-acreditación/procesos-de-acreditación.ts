@@ -740,7 +740,112 @@ export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidat
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type deleteProcessResponse204 = {
+  data: void
+  status: 204
+}
 
+export type deleteProcessResponse403 = {
+  data: void
+  status: 403
+}
+
+export type deleteProcessResponse404 = {
+  data: void
+  status: 404
+}
+
+export type deleteProcessResponse409 = {
+  data: void
+  status: 409
+}
+
+export type deleteProcessResponseSuccess = (deleteProcessResponse204) & {
+  headers: Headers;
+};
+
+export type deleteProcessResponseError = (
+  deleteProcessResponse403 | deleteProcessResponse404 | deleteProcessResponse409
+) & {
+  headers: Headers;
+};
+
+export type deleteProcessResponse = deleteProcessResponseSuccess | deleteProcessResponseError;
+
+export const getDeleteProcessUrl = (processId: string) => `/api/v1/processes/${processId}`;
+
+/**
+ * Archiva un proceso ACTIVE sin evidencias (solo JD).
+ * @summary Eliminar (archivar) proceso
+ */
+export const deleteProcess = async (
+  processId: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<deleteProcessResponse> => {
+  return customFetch<deleteProcessResponse>(getDeleteProcessUrl(processId), {
+    ...options,
+    method: 'DELETE',
+  });
+};
+
+export const getDeleteProcessMutationOptions = <TError = void, TContext = unknown>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteProcess>>,
+    TError,
+    { processId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteProcess>>,
+  TError,
+  { processId: string },
+  TContext
+> => {
+  const mutationKey = ['deleteProcess'];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteProcess>>,
+    { processId: string }
+  > = (props) => {
+    const { processId } = props ?? {};
+    return deleteProcess(processId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteProcessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProcess>>>;
+
+export type DeleteProcessMutationError = void;
+
+/**
+ * @summary Eliminar (archivar) proceso
+ */
+export const useDeleteProcess = <TError = void, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteProcess>>,
+      TError,
+      { processId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteProcess>>,
+  TError,
+  { processId: string },
+  TContext
+> => {
+  return useMutation(getDeleteProcessMutationOptions(options), queryClient);
+};
 
 
 

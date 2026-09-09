@@ -95,10 +95,16 @@ export async function customFetch<TData>(
       }
     }
 
-    // Global logout only when the current session token is rejected (not for optional reads).
+    // Global logout only when the session token is rejected (not PBAC/403 ni login).
+    const isAuthRejection =
+      response.status === 401
+      && (code === 'UNAUTHORIZED'
+        || code === 'INVALID_TOKEN'
+        || code === 'JWT_EXPIRED'
+        || code === 'UNKNOWN_ERROR');
     if (
       !skipUnauthorizedLogout
-      && response.status === 401
+      && isAuthRejection
       && accessToken
       && resolveAccessToken() === accessToken
     ) {

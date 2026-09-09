@@ -1,5 +1,6 @@
 import { GraduationCap } from 'lucide-react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LoginFormUI } from '../components/LoginFormUI';
 import { useLoginForm } from '../hooks/useLoginForm';
 import { getPostLoginPath } from '../../../lib/auth/getPostLoginPath';
@@ -12,13 +13,25 @@ interface LoginLocationState {
 export function LoginPage() {
   const { isAuthenticated, session } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const loginForm = useLoginForm();
 
-  if (isAuthenticated && session) {
+  useEffect(() => {
+    if (!isAuthenticated || !session || loginForm.isPending) {
+      return;
+    }
     const from = (location.state as LoginLocationState | null)?.from;
     const destination =
       from && from !== '/login' ? from : getPostLoginPath(session.role);
-    return <Navigate to={destination} replace />;
+    navigate(destination, { replace: true });
+  }, [isAuthenticated, session, location.state, navigate, loginForm.isPending]);
+
+  if (isAuthenticated && session) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-body">
+        <p className="text-body-md text-gray-600">Redirigiendo a su panel…</p>
+      </div>
+    );
   }
 
   return (

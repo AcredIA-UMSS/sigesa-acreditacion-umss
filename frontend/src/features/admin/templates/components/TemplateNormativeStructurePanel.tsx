@@ -90,7 +90,8 @@ export function TemplateNormativeStructurePanel({
             <TemplateStatusBadge status={status} />
           </div>
           <p className="text-body-md text-gray-600">
-            Estructura N1→N2→N3→Indicador. Edite metadatos (nombre, tipo) en la pestaña legacy.
+            Dimensión → área → criterio → indicador. Despliegue cada nivel con ▸; ideal para
+            plantillas con cientos de indicadores.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
