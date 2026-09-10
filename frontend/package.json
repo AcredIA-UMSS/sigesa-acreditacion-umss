@@ -8,7 +8,11 @@
     "build": "pnpm lint && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "generate:api": "orval"
+    "generate:api": "orval",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "PW_HEADLESS=false playwright test",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.1",
@@ -21,6 +25,7 @@
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

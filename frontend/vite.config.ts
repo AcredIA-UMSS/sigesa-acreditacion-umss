@@ -11,7 +11,9 @@ export default defineConfig(({ mode }) => {
     'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL ?? ''),
   },
   server: {
+    host: '127.0.0.1',
     port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

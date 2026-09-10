@@ -1,4 +1,20 @@
-# React + TypeScript + Vite
+# SIGESA Frontend
+
+React 19 + TypeScript + Vite. Cliente Orval contra el backend Spring Boot.
+
+## Pruebas E2E (Playwright)
+
+Manual completo: **[docs/MANUAL_E2E.md](docs/MANUAL_E2E.md)**
+
+```bash
+docker compose up -d backend    # desde la raíz del monorepo
+pnpm dev
+PW_SKIP_BACKEND=1 pnpm test:e2e tests/tradicional/login.spec.ts
+```
+
+---
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 

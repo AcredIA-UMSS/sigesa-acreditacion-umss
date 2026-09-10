@@ -1,0 +1,24 @@
+- generic [ref=f1e3]:
+  - generic [ref=f1e4]:
+    - generic [ref=f1e11]: SIGESA
+    - generic [ref=f1e18]:
+      - heading "Accede a SIGESA" [level=2] [ref=f1e19]
+      - paragraph [ref=f1e20]: Gestiona procesos académicos y administrativos con la plataforma institucional de alto rendimiento.
+  - generic [ref=f1e27]:
+    - generic [ref=f1e28]:
+      - heading "Bienvenido" [level=1] [ref=f1e29]
+      - paragraph [ref=f1e30]: Ingresa tus credenciales para continuar
+    - generic [ref=f1e31]:
+      - generic [ref=f1e32]:
+        - generic [ref=f1e33]: Correo Institucional
+        - textbox "Correo Institucional" [ref=f1e35]:
+          - /placeholder: nombre@umss.edu.bo
+        - paragraph [ref=f1e50]: El correo es obligatorio.
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]: Contraseña
+        - generic [ref=f1e38]:
+          - textbox "Contraseña" [ref=f1e39]
+          - button "Mostrar contraseña" [ref=f1e41]
+        - paragraph [ref=f1e51]: La contraseña es obligatoria.
+      - paragraph [ref=f1e45]: ¿Olvidaste tu contraseña?
+      - button "Iniciar sesión" [active] [ref=f1e46]
