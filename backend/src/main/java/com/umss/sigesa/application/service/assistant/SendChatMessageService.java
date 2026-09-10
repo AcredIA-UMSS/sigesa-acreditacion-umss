@@ -99,6 +99,7 @@ public class SendChatMessageService implements SendChatMessageUseCase {
     private final AssistantKeywordRouter keywordRouter;
     private final ObjectMapper objectMapper;
     private final String systemPrompt;
+    private final String configuredModel;
     private final boolean llmEnabled;
     private final int maxToolIterations;
     private final AssistantNormativeRagService normativeRagService;
@@ -109,6 +110,7 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                                   AssistantKeywordRouter keywordRouter,
                                   ObjectMapper objectMapper,
                                   String systemPrompt,
+                                  String configuredModel,
                                   boolean llmEnabled,
                                   int maxToolIterations,
                                   AssistantNormativeRagService normativeRagService) {
@@ -118,6 +120,7 @@ public class SendChatMessageService implements SendChatMessageUseCase {
         this.keywordRouter = keywordRouter;
         this.objectMapper = objectMapper;
         this.systemPrompt = systemPrompt;
+        this.configuredModel = configuredModel;
         this.llmEnabled = llmEnabled;
         this.maxToolIterations = Math.max(1, maxToolIterations);
         this.normativeRagService = normativeRagService;
@@ -165,6 +168,15 @@ public class SendChatMessageService implements SendChatMessageUseCase {
                             authContext.role(), false, agentProfile));
         }
 
+        if (AssistantMetaQuestionDetector.isMetaQuestion(userMessage)) {
+            return AssistantChatResult.fromSteps(
+                    AssistantCapabilitiesCatalog.formatSelfIntroductionMessage(
+                            authContext.role(), agentProfile, configuredModel),
+                    AssistantResolutionPath.KEYWORD,
+                    false,
+                    List.of());
+        }
+
         List<AssistantToolDefinition> tools = toolRegistry.toolsForRoleAndAgent(
                 authContext.role(), agentProfile);
         if (tools.isEmpty()) {
@@ -200,6 +212,13 @@ public class SendChatMessageService implements SendChatMessageUseCase {
 
             if (!selection.hasToolCalls()) {
                 if (steps.isEmpty()) {
+                    if (selection.content() != null && !selection.content().isBlank()) {
+                        return AssistantChatResult.fromSteps(
+                                selection.content(),
+                                AssistantResolutionPath.LLM,
+                                true,
+                                List.of());
+                    }
                     if (normativeRagService.isEnabled()) {
                         var fallbackRag = normativeRagService.tryDirectAnswer(userMessage, templateType);
                         if (fallbackRag.isPresent()) {

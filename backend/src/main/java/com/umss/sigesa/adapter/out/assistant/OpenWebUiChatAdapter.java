@@ -169,11 +169,12 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
         }
 
         JsonNode content = message.path("content");
-        if (content.isMissingNode() || content.isNull() || content.asText().isBlank()) {
-            throw new AssistantCompletionException("Open WebUI no devolvió contenido en la respuesta.");
+        if (!content.isMissingNode() && !content.isNull() && !content.asText().isBlank()) {
+            return new ChatCompletionResult(content.asText(), List.of());
         }
 
-        return new ChatCompletionResult(content.asText(), List.of());
+        // Modo selección de tools: el LLM puede devolver content vacío sin tool_calls a propósito.
+        return new ChatCompletionResult(null, List.of());
     }
 
     private static boolean isDirectOllamaEndpoint(String baseUrl) {

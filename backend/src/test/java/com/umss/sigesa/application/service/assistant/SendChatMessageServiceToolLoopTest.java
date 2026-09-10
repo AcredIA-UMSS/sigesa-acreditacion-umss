@@ -74,6 +74,7 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 true,
                 3,
                 ragService
@@ -85,6 +86,7 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 false,
                 3,
                 ragService
@@ -160,6 +162,36 @@ class SendChatMessageServiceToolLoopTest {
         assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
         assertThat(result.reply()).contains("Fase 1");
         verify(chatCompletionPort, times(2)).complete(any());
+    }
+
+    @Test
+    void metaQuestion_returnsSelfIntroductionWithoutLlm() {
+        AssistantChatResult result = serviceWithLlm.send(
+                "Hola sobrino que modelo estas usando y mas info acerca de vos",
+                List.of(),
+                tdContext(),
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        assertThat(result.reply()).contains("asistente virtual de SIGESA");
+        assertThat(result.reply()).contains("test-model");
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
+    void emptyLlmSelectionWithoutTools_fallsBackToOutOfScope() {
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult(null, List.of()));
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Dame el estado del proceso de acreditación de Medicina",
+                List.of(),
+                tdContext(),
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
+        assertThat(result.reply()).contains("No puedo responder eso");
+        verify(chatCompletionPort).complete(any());
     }
 
     @Test
@@ -318,6 +350,7 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 true,
                 1,
                 disabledRagService());

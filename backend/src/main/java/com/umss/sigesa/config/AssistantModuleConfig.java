@@ -113,6 +113,7 @@ public class AssistantModuleConfig {
                 assistantKeywordRouter,
                 new ObjectMapper(),
                 assistantProperties.getSystemPrompt(),
+                assistantProperties.getModel(),
                 assistantProperties.isLlmEnabled(),
                 assistantProperties.getMaxToolIterations(),
                 assistantNormativeRagService
