@@ -64,6 +64,70 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     });
   });
 
+  // Single-block full E2E User Journey Test
+  test('Complete E2E User Journey: Login -> Navigate via Sidebar -> Standard Search -> Toggle AI ON -> Verify AI Header -> Reset', async ({ page }) => {
+    let lastQuery = '';
+    let lastAiHeader = '';
+    let lastAiParam = '';
+
+    await page.route(API_SEARCH_URL, async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      lastQuery = url.searchParams.get('q') || '';
+      lastAiParam = url.searchParams.get('aiEnabled') || '';
+      lastAiHeader = request.headers()['x-ai-enabled'] || '';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockSearchResults }),
+      });
+    });
+
+    // 1. User starts at Dashboard
+    await page.goto('/dashboard');
+
+    // 2. Navigates via Sidebar to "BUSCAR EVIDENCIAS"
+    const searchNav = page.getByRole('link', { name: /buscar evidencias/i });
+    await expect(searchNav).toBeVisible();
+    await searchNav.click();
+
+    await expect(page).toHaveURL(new RegExp(SEARCH_ROUTE));
+    await expect(page.getByRole('heading', { name: /Buscador de Evidencias/i })).toBeVisible();
+
+    // 3. Step A: Perform standard search (AI OFF)
+    const searchInput = page.locator('#evidence-search-q');
+    await searchInput.fill('informe');
+
+    const searchButton = page.getByRole('button', { name: /buscar/i });
+    await searchButton.click();
+
+    expect(lastQuery).toBe('informe');
+    expect(lastAiHeader).toBe(''); // AI header was NOT sent
+    await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
+
+    // 4. Step B: Enable AI Toggle (AI ON) and search again
+    const aiToggle = page.locator('#evidence-search-ai-toggle');
+    await aiToggle.check();
+    await expect(aiToggle).toBeChecked();
+
+    await searchInput.fill('aulas de clase');
+    await searchButton.click();
+
+    // Verification: Confirm AI WAS called via HTTP Header + Query Param + UI Badges
+    expect(lastQuery).toBe('aulas de clase');
+    expect(lastAiHeader).toBe('true'); // AI header WAS sent to backend
+    expect(lastAiParam).toBe('true');
+    await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
+    await expect(page.getByText(/ampliados vía Asistente MCP IA/i)).toBeVisible();
+
+    // 5. Step C: Reset search
+    const resetButton = page.getByRole('button', { name: /limpiar/i });
+    await resetButton.click();
+    await expect(searchInput).toHaveValue('');
+    await expect(aiToggle).not.toBeChecked();
+  });
+
+  // Granular Modular Tests for Isolated CI Debugging
   test('should navigate to production route /evidencias/buscar and verify main elements', async ({ page }) => {
     await page.goto(SEARCH_ROUTE);
 
