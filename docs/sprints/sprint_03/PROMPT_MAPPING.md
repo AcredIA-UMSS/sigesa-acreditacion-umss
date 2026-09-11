@@ -11,6 +11,7 @@
 | PM-005 | PR-IMPL-038 | DD-UC-008 / DD-UC-009 | FSD-UC-008 / FSD-UC-009 | Rechazo y aprobación de indicadores vía subfase (TD; requiere evidencia + indicatorId) |
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
+| PM-008 | PR-IMPL-037 | DD-UC-007 | FSD-UC-007 | Buscador de evidencias E2E Playwright + Modo IA MCP (header `X-AI-Enabled`, toggle UI, preset escenarios demo 1-3) |
 
 ---
 
@@ -406,3 +407,56 @@ Copilotos de dominio comparten UX flotante; páginas ganan ancho útil; trazabil
 
 - [ ] Rebuild frontend Docker tras merge
 - [ ] Smoke: historial archiva al limpiar; badge correcto por ruta
+
+---
+
+## PM-008
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-008 |
+| **Fecha** | 2026-09-11 |
+| **Solicitante** | Tech Lead / User |
+| **Agente/Entorno** | Antigravity AI — Agent |
+| **Tarea** | FSD-UC-007 — Búsqueda de Evidencias E2E Playwright + Modo IA MCP (`X-AI-Enabled`) |
+| **Objetivo** | Soportar búsqueda estándar sin IA y búsqueda asistida por IA (con expansión de sinónimos MCP / header `X-AI-Enabled`), conmutador en UI y botones preset de escenario demo (Escenarios 1, 2, 3), verificados 100% mediante suite Playwright E2E a través de componentes UI. |
+| **PR-IMPL vinculado** | [PR-IMPL-037](../../prompts/impl/PR-IMPL-037.md) |
+| **DD vinculado** | [DD-UC-007](../../design/DD-UC-007.md) |
+| **FSD vinculado** | [FSD-UC-007](../../product/uc/FSD-UC-007.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+you just change the way or the full feature to search evidences using AI mode to check similars, etc. pls review it and fix it with the actual UC available for this,take in mind all the scenarios described (without ai, using a toogle to select when to use or not use ai, and finally using synominc (call to function)), etc. pls provide me a good answer and then pls put it available for the users, and if reuqired pls fix the answer, tka ein mind since we are doing a E2E test for this the test cases must use the frontend, buttons and components to call to this feature
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| modificado | `playwright.config.ts` |
+| modificado | `frontend/src/features/evidence/api/fetchEvidenceSearch.ts` |
+| modificado | `frontend/src/features/evidence/hooks/useEvidenceSearch.ts` |
+| modificado | `frontend/src/features/evidence/components/ProcessEvidenceSearchPanel.tsx` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `test/ui/alex_search_evidence/search_evidence.spec.ts` |
+| generado | `frontend/src/features/evidence/EvidenceSearchPage.tsx` |
+
+### Cambios realizados
+
+1. **Configuración Playwright (`playwright.config.ts`):** Corregidas claves de configuración (`launchOptions`, `CHROMIUM_PATH`), configurados reporteros `list` y `html` (`open: 'never'`) para ejecución en tiempo real y generación de reportes con `npm run reporte`.
+2. **API & Estado Frontend (`fetchEvidenceSearch.ts`, `useEvidenceSearch.ts`):** Añadido parámetro `aiEnabled` y cabecera HTTP `X-AI-Enabled: true` cuando el modo IA está activo. Desenvolvimiento seguro de respuestas `{ data: ... }`.
+3. **Panel de Búsqueda UI (`ProcessEvidenceSearchPanel.tsx`):** Añadido checkbox selector `#evidence-search-ai-toggle`, badge "Modo IA MCP Activo", botones interactivos de escenarios demo (Escenario 1: Coincidencia Directa, Escenario 2: IA MCP Multitoken, Escenario 3: Consulta Fuera de Alcance) e insignias explicativas de expansión IA.
+4. **Suite E2E Playwright (`search_evidence.spec.ts`):** 14 casos de prueba E2E interactuando exclusivamente a través del DOM frontend (inputs, selecciones, botones preset, tecla Enter, filtros en cascada, reseteo, roles de usuario CC/TD/JD, errores de backend).
+
+### Validación ejecutada
+
+- [x] `npx playwright test --reporter=list` — 14/14 tests PASADOS (19.4s)
+- [x] `npm run reporte` (`npx playwright show-report`) — Reporte HTML generado correctamente
+- [x] `docker compose build frontend && docker compose up -d frontend` — Contenedores actualizados y funcionando en puerto 3000
+
+### Resultado obtenido
+
+Buscador de evidencias completamente interactivo mediante UI, con toggle para activar/desactivar Modo IA MCP (envío de cabecera `X-AI-Enabled`), escenarios preconfigurados demo y suite de pruebas E2E 100% verde con Playwright.
+
