@@ -1,0 +1,103 @@
+- generic [ref=f1e161]:
+  - complementary [ref=f1e162]:
+    - button [ref=f1e163]
+    - generic [ref=f1e166]:
+      - img "UMSS" [ref=f1e168]
+      - generic [ref=f1e169]:
+        - heading "UMSS DUEA" [level=1] [ref=f1e170]
+        - paragraph [ref=f1e171]: PANEL ADMINISTRATIVO
+    - navigation [ref=f1e172]:
+      - link "PANEL DE CONTROL ▼" [ref=f1e173] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e174]: PANEL DE CONTROL
+        - generic [ref=f1e182]: ▼
+      - generic [ref=f1e183]:
+        - button "GESTIÓN PROCESOS" [expanded] [ref=f1e184]
+        - list [ref=f1e195]:
+          - listitem [ref=f1e196]:
+            - link "Ver procesos" [ref=f1e197] [cursor=pointer]:
+              - /url: /procesos
+          - listitem [ref=f1e200]:
+            - link "Nuevo proceso" [ref=f1e201] [cursor=pointer]:
+              - /url: /procesos/nuevo
+      - link "PLANTILLAS" [ref=f1e204] [cursor=pointer]:
+        - /url: /admin/plantillas
+      - link "GESTIÓN USUARIOS" [ref=f1e212] [cursor=pointer]:
+        - /url: /admin/users
+      - link "REPORTES" [ref=f1e221] [cursor=pointer]:
+        - /url: /reportes/ejecutivo
+      - button "HISTORIAL" [ref=f1e226]
+      - link "AYUDA" [ref=f1e234] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f1e241]:
+      - generic [ref=f1e242]:
+        - generic [ref=f1e243]: JD
+        - generic [ref=f1e246]:
+          - paragraph [ref=f1e247]: Jefatura DUEA [JD]
+          - paragraph [ref=f1e248]: SIGESA
+      - button "Cerrar sesión" [ref=f1e249]
+  - main [ref=f1e253]:
+    - generic [ref=f1e254]:
+      - generic [ref=f1e255]:
+        - link "Volver al listado" [ref=f1e256] [cursor=pointer]:
+          - /url: /procesos
+        - button "Actualizar" [ref=f1e259]
+      - generic [ref=f1e265]:
+        - generic [ref=f1e266]:
+          - generic [ref=f1e267]:
+            - generic [ref=f1e268]:
+              - paragraph [ref=f1e269]: CEUB
+              - heading "Administración de Empresas" [level=1] [ref=f1e270]
+              - paragraph [ref=f1e271]: ADM-EMP · CEUB prueba
+            - generic [ref=f1e272]: Activo
+          - paragraph [ref=f1e273]: "Inicio: 8 de septiembre de 2026 a las 6:48 p. m."
+        - generic [ref=f1e274]:
+          - generic [ref=f1e275]:
+            - generic [ref=f1e276]:
+              - heading "Responsable del proceso" [level=2] [ref=f1e277]
+              - paragraph [ref=f1e278]: Coordinador [CC] designado para liderar operativamente esta acreditación.
+            - button "Asignar responsable" [ref=f1e280]
+          - paragraph [ref=f1e285]: Sin responsable asignado.
+        - generic [ref=f1e286]:
+          - generic [ref=f1e287]:
+            - heading "Ciclo metodológico" [level=2] [ref=f1e288]
+            - paragraph [ref=f1e289]: Siete etapas de gestión del proceso de acreditación (ADR-0005). La evaluación normativa continúa siendo transversal en paralelo.
+          - list [ref=f1e290]
+        - generic [ref=f1e291]:
+          - generic [ref=f1e292]:
+            - generic [ref=f1e293]:
+              - heading "Estructura del proceso" [level=2] [ref=f1e294]
+              - paragraph [ref=f1e295]: Jerarquía normativa CEUB (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
+            - link [ref=f1e296] [cursor=pointer]:
+              - /url: /procesos/8d38cabf-02f5-4d62-86e8-4aae588c4f9c/estructura
+              - button "Editar estructura normativa" [ref=f1e297]
+          - generic [ref=f1e301]:
+            - generic [ref=f1e302]: Buscar evidencias en este proceso
+            - generic [ref=f1e308]:
+              - generic [ref=f1e309]:
+                - generic [ref=f1e310]: Texto (nombre archivo, descripción, indicador…)
+                - searchbox "Texto (nombre archivo, descripción, indicador…)" [ref=f1e311]
+              - generic [ref=f1e313]:
+                - generic [ref=f1e314]: Nivel 1
+                - combobox "Nivel 1" [ref=f1e315]:
+                  - option "Todos los nodos N1" [selected]
+                  - option "Juanot"
+                  - option "Roman"
+              - generic [ref=f1e317]:
+                - generic [ref=f1e318]: Indicador
+                - combobox "Indicador" [ref=f1e319]:
+                  - option "Todos los indicadores" [selected]
+                  - option "sdadsa · sda"
+              - button "Buscar" [ref=f1e321]
+          - generic [ref=f1e326]:
+            - paragraph [ref=f1e327]: Se muestran solo las dimensiones (nivel 1). Use el icono ▸ en cada fila para desplegar áreas, criterios e indicadores según necesite.
+            - button "Juanot Área 1 · 1 subnivel(es) · 1 indicador(es) ABIERTA" [ref=f1e329]:
+              - generic [ref=f1e333]:
+                - generic [ref=f1e334]: Juanot
+                - generic [ref=f1e335]: Área 1 · 1 subnivel(es) · 1 indicador(es)
+              - generic [ref=f1e336]: ABIERTA
+            - button "Roman Área 2 · 0 subnivel(es) · 0 indicador(es) ABIERTA" [ref=f1e338]:
+              - generic [ref=f1e342]:
+                - generic [ref=f1e343]: Roman
+                - generic [ref=f1e344]: Área 2 · 0 subnivel(es) · 0 indicador(es)
+              - generic [ref=f1e345]: ABIERTA
