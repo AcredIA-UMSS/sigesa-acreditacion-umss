@@ -30,7 +30,7 @@ export function UsersAdminPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50" data-testid="users-admin-page">
       <Sidebar activeNav="users" />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-gray-200 bg-body px-8 py-4">

@@ -10,7 +10,7 @@ export function ProcessStructurePage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50" data-testid="process-structure-page">
       <Sidebar activeNav="processes" />
       <main className="flex-1 overflow-y-auto px-8 py-8">
         <ProcessStructureView processId={processId} />

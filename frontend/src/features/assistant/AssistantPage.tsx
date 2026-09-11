@@ -6,7 +6,7 @@ export function AssistantPage() {
   const chat = useAssistantChat();
 
   return (
-    <div className="flex h-screen bg-body">
+    <div className="flex h-screen bg-body" data-testid="assistant-page">
       <Sidebar activeNav="help" />
       <AssistantChatUI
         messages={chat.messages}

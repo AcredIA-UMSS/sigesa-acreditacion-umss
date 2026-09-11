@@ -4,7 +4,7 @@ import { CreateProcessView } from '../components/CreateProcessView';
 
 export function CreateProcessPage() {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50" data-testid="create-process-page">
       <Sidebar activeNav="processes" />
       <main className="flex-1 overflow-y-auto px-8 py-8">
         <nav className="mb-6 text-body-md text-gray-500">

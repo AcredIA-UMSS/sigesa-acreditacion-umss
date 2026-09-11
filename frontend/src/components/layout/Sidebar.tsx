@@ -71,12 +71,14 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
 
   return (
     <aside
+      data-testid="sidebar"
       className={`relative flex h-screen flex-col border-r border-primary-800 bg-primary-900 text-body transition-all duration-300 ease-in-out ${
         isExpanded ? 'w-72' : 'w-20'
       }`}
     >
       <button
         type="button"
+        data-testid="sidebar-toggle"
         onClick={() => setIsExpanded(!isExpanded)}
         className="absolute -right-3 top-6 z-10 rounded-full border-2 border-primary-900 bg-secondary p-1 text-body transition-colors hover:bg-secondary-600"
       >
@@ -99,7 +101,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         )}
       </div>
 
-      <nav className="flex-1 space-y-2 overflow-x-hidden overflow-y-auto px-4 py-6">
+      <nav className="flex-1 space-y-2 overflow-x-hidden overflow-y-auto px-4 py-6" data-testid="sidebar-nav">
         <NavItem
           icon={<LayoutDashboard size={20} />}
           label="PANEL DE CONTROL"
@@ -107,12 +109,14 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           hasDropdown
           active={activeNav === 'dashboard'}
           to="/dashboard"
+          testId="sidebar-nav-dashboard"
         />
 
         {!isExternalEvaluator && (
           <div>
             <button
               type="button"
+              data-testid="sidebar-nav-processes"
               onClick={toggleProcesses}
               className={`flex w-full items-center rounded-lg p-3 transition-colors ${
                 isExpanded ? 'justify-between' : 'justify-center'
@@ -148,6 +152,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                   icon={<List size={16} />}
                   label="Ver procesos"
                   to="/procesos"
+                  testId="sidebar-nav-processes-list"
                   active={
                     location.pathname === '/procesos' ||
                     /^\/procesos\/[0-9a-f-]{36}(\/estructura)?$/i.test(location.pathname)
@@ -158,6 +163,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     icon={<Plus size={16} />}
                     label="Nuevo proceso"
                     to="/procesos/nuevo"
+                    testId="sidebar-nav-process-new"
                     active={location.pathname === '/procesos/nuevo'}
                   />
                 )}
@@ -170,6 +176,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                   icon={<List size={16} />}
                   label="Ver procesos"
                   to="/procesos"
+                  testId="sidebar-nav-processes-list"
                   active={location.pathname === '/procesos'}
                   compact
                 />
@@ -178,6 +185,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                     icon={<Plus size={16} />}
                     label="Nuevo"
                     to="/procesos/nuevo"
+                    testId="sidebar-nav-process-new"
                     active={location.pathname === '/procesos/nuevo'}
                     compact
                   />
@@ -195,6 +203,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               isExpanded={isExpanded}
               active={activeNav === 'templates'}
               to="/admin/plantillas"
+              testId="sidebar-nav-templates"
             />
             <NavItem
               icon={<Users size={20} />}
@@ -202,6 +211,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               isExpanded={isExpanded}
               active={activeNav === 'users'}
               to="/admin/users"
+              testId="sidebar-nav-users"
             />
           </>
         )}
@@ -213,6 +223,8 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             isExpanded={isExpanded}
             active={activeNav === 'evidence'}
             to="/evidencias/cargar"
+            testId="sidebar-nav-evidence"
+            ariaLabel="Cargar evidencia"
           />
         )}
 
@@ -225,6 +237,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 isExpanded={isExpanded}
                 active={activeNav === 'reports'}
                 to="/reportes/ejecutivo"
+                testId="sidebar-nav-reports"
               />
             ) : (
               <NavItem
@@ -233,6 +246,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 isExpanded={isExpanded}
                 hasDropdown
                 active={activeNav === 'reports'}
+                testId="sidebar-nav-reports"
               />
             )}
             <NavItem
@@ -240,6 +254,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               label="HISTORIAL"
               isExpanded={isExpanded}
               active={activeNav === 'history'}
+              testId="sidebar-nav-history"
             />
           </>
         )}
@@ -250,6 +265,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           isExpanded={isExpanded}
           active={activeNav === 'help'}
           to="/ayuda"
+          testId="sidebar-nav-help"
         />
 
       </nav>
@@ -276,6 +292,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         {isExpanded && (
           <button
             type="button"
+            data-testid="sidebar-logout"
             onClick={handleLogout}
             className="text-primary-300 transition-colors hover:text-body"
             aria-label="Cerrar sesión"
@@ -294,16 +311,19 @@ const SubNavItem = ({
   to,
   active,
   compact = false,
+  testId,
 }: {
   icon: React.ReactNode;
   label: string;
   to: string;
   active?: boolean;
   compact?: boolean;
+  testId?: string;
 }) => (
   <li>
     <Link
       to={to}
+      data-testid={testId}
       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-label-md transition-colors ${
         compact ? 'justify-center' : ''
       } ${
@@ -326,6 +346,8 @@ const NavItem = ({
   active,
   isExpanded,
   to,
+  testId,
+  ariaLabel,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -333,6 +355,8 @@ const NavItem = ({
   active?: boolean;
   isExpanded: boolean;
   to?: string;
+  testId?: string;
+  ariaLabel?: string;
 }) => {
   const content = (
     <>
@@ -350,16 +374,30 @@ const NavItem = ({
     isExpanded ? 'justify-between' : 'justify-center'
   } ${active ? 'border-l-4 border-secondary bg-primary-800 text-body' : 'text-primary-200 hover:bg-primary-800 hover:text-body'}`;
 
+  const accessibleName = ariaLabel ?? label;
+
   if (to) {
     return (
-      <Link to={to} className={className} title={!isExpanded ? label : undefined}>
+      <Link
+        to={to}
+        data-testid={testId}
+        aria-label={accessibleName}
+        className={className}
+        title={!isExpanded ? label : undefined}
+      >
         {content}
       </Link>
     );
   }
 
   return (
-    <button type="button" className={className} title={!isExpanded ? label : undefined}>
+    <button
+      type="button"
+      data-testid={testId}
+      aria-label={accessibleName}
+      className={className}
+      title={!isExpanded ? label : undefined}
+    >
       {content}
     </button>
   );

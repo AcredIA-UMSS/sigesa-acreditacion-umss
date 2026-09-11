@@ -77,7 +77,7 @@ export function ExecutiveReportUI({
   const isCompleted = jobStatus?.status === 'COMPLETED';
 
   return (
-    <div className="flex h-screen flex-1 flex-col overflow-hidden bg-gray-50">
+    <div className="flex h-screen flex-1 flex-col overflow-hidden bg-gray-50" data-testid="report-executive">
       <header className="flex items-center justify-between border-b border-gray-200 bg-body px-8 py-4">
         <nav className="text-body-md text-gray-600" aria-label="Ruta de navegación">
           <span className="text-primary-600">Inicio</span>
@@ -122,6 +122,7 @@ export function ExecutiveReportUI({
             <section className="space-y-6 xl:col-span-5">
               <form
                 className="rounded-2xl border border-gray-100 bg-body p-6 shadow-sm md:p-8"
+                data-testid="report-executive-form"
                 onSubmit={(event) => {
                   event.preventDefault();
                   onSubmit();
@@ -150,6 +151,7 @@ export function ExecutiveReportUI({
                   >
                     <input
                       id="management-year"
+                      data-testid="report-executive-year"
                       type="number"
                       min={2000}
                       max={2100}
@@ -208,6 +210,7 @@ export function ExecutiveReportUI({
                   <div className="flex flex-wrap gap-3 pt-2">
                     <button
                       type="submit"
+                      data-testid="report-executive-submit"
                       disabled={isBlocked}
                       className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-label-md font-semibold text-body transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >

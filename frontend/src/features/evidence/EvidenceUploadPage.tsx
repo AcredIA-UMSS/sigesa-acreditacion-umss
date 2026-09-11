@@ -36,7 +36,7 @@ export function EvidenceUploadPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50" data-testid="evidence-upload-page">
       <Sidebar activeNav="evidence" />
       <div className="flex min-w-0 flex-1 flex-col">
         {showEvidenceCopilot ? (

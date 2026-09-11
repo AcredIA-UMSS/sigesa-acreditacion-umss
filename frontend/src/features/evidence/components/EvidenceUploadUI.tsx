@@ -87,7 +87,7 @@ export function EvidenceUploadUI({
       : 'Se completa al elegir el indicador';
 
   return (
-    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-gray-50">
+    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-gray-50" data-testid="evidence-upload">
       <header className="flex items-center justify-between border-b border-gray-200 bg-body px-8 py-4">
         <nav className="text-body-md text-gray-600" aria-label="Ruta de navegación">
           <span className="text-primary-600">Inicio</span>
@@ -117,7 +117,7 @@ export function EvidenceUploadUI({
         <div className="mx-auto max-w-6xl">
           <header className="mb-8">
             <div className="mb-4 h-1 w-12 bg-secondary" />
-            <h1 className="mb-2 text-heading-xl text-primary-800">
+            <h1 className="mb-2 text-heading-xl text-primary-800" data-testid="evidence-upload-heading">
               Cargar Evidencia
             </h1>
             <p className="text-body-lg text-gray-600">
@@ -132,6 +132,7 @@ export function EvidenceUploadUI({
             <section className="space-y-6 lg:col-span-2">
               <form
                 className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm"
+                data-testid="evidence-upload-form"
                 onSubmit={(event) => {
                   event.preventDefault();
                   onSubmit();
@@ -187,6 +188,7 @@ export function EvidenceUploadUI({
 
                   <Select
                     id="indicator-id"
+                    data-testid="evidence-indicator"
                     label="Indicador"
                     requiredMark
                     options={indicatorOptions}
@@ -209,6 +211,7 @@ export function EvidenceUploadUI({
 
                   <Select
                     id="criterion-id"
+                    data-testid="evidence-criterion"
                     label="Criterio"
                     requiredMark
                     options={[
@@ -224,12 +227,13 @@ export function EvidenceUploadUI({
                   />
 
                   <FormField
-                    label="DESCRIPCIÓN"
+                    label="Descripción"
                     htmlFor="description"
                     error={validationErrors.description}
                   >
                     <textarea
                       id="description"
+                      data-testid="evidence-description"
                       rows={4}
                       value={form.description}
                       disabled={isBlocked}
@@ -242,12 +246,13 @@ export function EvidenceUploadUI({
                   </FormField>
 
                   <FormField
-                    label="ARCHIVO DE EVIDENCIA"
+                    label="Archivo de evidencia"
                     htmlFor="evidence-file"
                     error={validationErrors.file}
                   >
                     <label
                       htmlFor="evidence-file"
+                      data-testid="evidence-file-dropzone"
                       className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 transition-colors ${
                         isBlocked
                           ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-60'
@@ -274,10 +279,12 @@ export function EvidenceUploadUI({
                       )}
                       <input
                         id="evidence-file"
+                        data-testid="evidence-file"
                         type="file"
                         accept={ACCEPTED_EXTENSIONS}
                         disabled={isBlocked}
                         className="sr-only"
+                        aria-label="Archivo de evidencia"
                         onChange={(event) =>
                           onFieldChange(
                             'file',
@@ -324,6 +331,7 @@ export function EvidenceUploadUI({
                     <div
                       className="rounded-xl border border-success/30 bg-success/5 p-4"
                       role="status"
+                      data-testid="evidence-upload-success"
                     >
                       <div className="mb-2 flex items-center gap-2 text-heading-sm text-success">
                         <CheckCircle2 size={20} aria-hidden />
@@ -357,6 +365,8 @@ export function EvidenceUploadUI({
                   <div className="flex flex-wrap gap-3 pt-2">
                     <button
                       type="submit"
+                      data-testid="evidence-submit"
+                      aria-label="Subir evidencia"
                       disabled={isSubmitting || isBlocked}
                       className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-3 text-label-md font-semibold text-body transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -472,6 +482,7 @@ function Alert({ message }: { message: string }) {
     <div
       className="flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/5 p-4 text-body-md text-danger"
       role="alert"
+      data-testid="evidence-error"
     >
       <AlertCircle size={20} className="mt-0.5 shrink-0" aria-hidden />
       <span>{message}</span>

@@ -125,7 +125,7 @@ export function TemplateEditorFormUI({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="template-editor-form">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="mb-3 flex items-center gap-3">
@@ -140,7 +140,7 @@ export function TemplateEditorFormUI({
           <Button type="button" variant="ghost" onClick={onCancel}>
             Volver
           </Button>
-          <Button type="button" onClick={onSave} isLoading={isSaving}>
+          <Button type="button" onClick={onSave} isLoading={isSaving} data-testid="template-editor-save">
             Guardar
           </Button>
           {status === 'DRAFT' && (

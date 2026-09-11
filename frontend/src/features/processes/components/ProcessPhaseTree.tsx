@@ -30,7 +30,7 @@ export function ProcessPhaseTree({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" data-testid="process-phase-tree">
       {sortedPhases.map((phase) => (
         <PhaseAccordion
           key={phase.id ?? phase.name}
@@ -67,7 +67,10 @@ function PhaseAccordion({
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-body shadow-sm">
+    <div
+      className="overflow-hidden rounded-xl border border-gray-200 bg-body shadow-sm"
+      data-testid={phase.id ? `process-phase-${phase.id}` : undefined}
+    >
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -97,6 +100,7 @@ function PhaseAccordion({
             <li
               key={sub.id ?? `${phase.id}-${sub.order}`}
               className="px-5 py-4"
+              data-testid={sub.id ? `process-subphase-${sub.id}` : undefined}
             >
               <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                 <div>

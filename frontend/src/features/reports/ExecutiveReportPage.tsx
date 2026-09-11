@@ -6,7 +6,7 @@ export function ExecutiveReportPage() {
   const report = useExecutiveReport();
 
   return (
-    <div className="flex h-screen bg-body">
+    <div className="flex h-screen bg-body" data-testid="executive-report-page">
       <Sidebar activeNav="reports" />
       <ExecutiveReportUI
         form={report.form}

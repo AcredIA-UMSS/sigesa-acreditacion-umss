@@ -41,7 +41,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const indicatorsError = canUploadEvidence ? uploadable.errorMessage : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="process-detail">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/procesos"
@@ -108,7 +108,10 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             onUpdated={refetch}
           />
 
-          <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
+          <section
+            className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm"
+            data-testid="process-structure-section"
+          >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-heading-lg font-semibold text-primary-800">
@@ -120,7 +123,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 </p>
               </div>
               {canEditStructure && (
-                <Link to={`/procesos/${processId}/estructura`}>
+                <Link to={`/procesos/${processId}/estructura`} data-testid="process-edit-structure">
                   <Button variant="secondary">
                     <Pencil size={16} />
                     Editar estructura

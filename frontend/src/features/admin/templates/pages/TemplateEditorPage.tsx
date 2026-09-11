@@ -56,7 +56,7 @@ export function TemplateEditorPage() {
   const pageTitle = editor.isEditMode ? 'Editar plantilla' : 'Nueva plantilla';
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50" data-testid="template-editor-page">
       <Sidebar activeNav="templates" />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="border-b border-gray-200 bg-body px-8 py-4">

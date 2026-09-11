@@ -104,6 +104,7 @@ export function AddUserModalUI({
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-user-title"
+        data-testid="users-add-modal"
         className="relative z-10 w-full max-w-3xl rounded-2xl border border-gray-200 bg-body shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-8 py-5">
@@ -139,6 +140,7 @@ export function AddUserModalUI({
             <TextInput
               label="Nombre(s)"
               requiredMark
+              data-testid="users-add-first-name"
               value={form.firstName}
               onChange={(event: ChangeEvent<HTMLInputElement>) => onFirstNameChange(event.target.value)}
               error={fieldErrors.firstName}
@@ -147,6 +149,7 @@ export function AddUserModalUI({
             <TextInput
               label="Apellido(s)"
               requiredMark
+              data-testid="users-add-last-name"
               value={form.lastName}
               onChange={(event: ChangeEvent<HTMLInputElement>) => onLastNameChange(event.target.value)}
               error={fieldErrors.lastName}
@@ -156,6 +159,7 @@ export function AddUserModalUI({
               label="Correo electrónico"
               requiredMark
               type="email"
+              data-testid="users-add-email"
               placeholder="nombre@umss.edu.bo"
               value={form.email}
               onChange={(event: ChangeEvent<HTMLInputElement>) => onEmailChange(event.target.value)}
@@ -175,6 +179,7 @@ export function AddUserModalUI({
             <Select
               label="Rol"
               requiredMark
+              data-testid="users-add-role"
               value={form.role}
               onChange={(event: ChangeEvent<HTMLSelectElement>) =>
                 onRoleChange(event.target.value as BackendRoleCode | '')
@@ -250,7 +255,7 @@ export function AddUserModalUI({
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Cerrar
             </Button>
-            <Button type="submit" isLoading={isSubmitting}>
+            <Button type="submit" isLoading={isSubmitting} data-testid="users-add-submit">
               Guardar
             </Button>
           </div>

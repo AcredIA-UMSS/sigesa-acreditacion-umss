@@ -42,6 +42,7 @@ export function SubphaseEvidenceUploadSlot({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const selected = indicators.find((item) => item.indicatorId === indicatorId);
+  const slotTestId = subphaseId ? `subphase-upload-${subphaseId}` : 'subphase-upload';
   const indicatorOptions = [
     {
       value: '',
@@ -109,7 +110,10 @@ export function SubphaseEvidenceUploadSlot({
   };
 
   return (
-    <div className="mt-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-4">
+    <div
+      className="mt-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-3 py-4"
+      data-testid={slotTestId}
+    >
       <p className="text-label-md font-medium uppercase tracking-wide text-gray-600">
         Archivo de evidencia
       </p>
@@ -126,6 +130,7 @@ export function SubphaseEvidenceUploadSlot({
           )}
           <Select
             id={`${fieldId}-indicator`}
+            data-testid={`${slotTestId}-indicator`}
             label="Indicador"
             requiredMark
             options={indicatorOptions}
@@ -147,6 +152,7 @@ export function SubphaseEvidenceUploadSlot({
             </label>
             <textarea
               id={`${fieldId}-description`}
+              data-testid={`${slotTestId}-description`}
               rows={2}
               value={description}
               disabled={isSubmitting}
@@ -183,6 +189,7 @@ export function SubphaseEvidenceUploadSlot({
         <span className="mt-1 text-body-md text-gray-500">{ACCEPTED_LABEL}</span>
         <input
           id={`${fieldId}-file`}
+          data-testid={`${slotTestId}-file`}
           type="file"
           accept={ACCEPTED_EXTENSIONS}
           disabled={isSubmitting}
@@ -212,6 +219,7 @@ export function SubphaseEvidenceUploadSlot({
 
       <Button
         type="button"
+        data-testid={`${slotTestId}-submit`}
         onClick={() => void onSubmit()}
         disabled={isSubmitting}
         isLoading={isSubmitting}

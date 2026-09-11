@@ -52,19 +52,22 @@ export function LoginFormUI({
         </div>
 
         {submitError && (
-          <div className="mb-6">
+          <div className="mb-6" data-testid="login-error">
             <Alert variant="error">{submitError}</Alert>
           </div>
         )}
 
         <form
           className="space-y-5"
+          data-testid="login-form"
           onSubmit={(event) => {
             event.preventDefault();
             onSubmit();
           }}
         >
           <TextInput
+            id="login-email"
+            data-testid="login-email"
             label="Correo Institucional"
             type="email"
             autoComplete="username"
@@ -76,6 +79,8 @@ export function LoginFormUI({
           />
 
           <TextInput
+            id="login-password"
+            data-testid="login-password"
             label="Contraseña"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
@@ -86,7 +91,9 @@ export function LoginFormUI({
             suffixIcon={
               <button
                 type="button"
-                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                data-testid="login-toggle-password"
+                aria-controls="login-password"
+                aria-label={showPassword ? 'Ocultar caracteres' : 'Mostrar caracteres'}
                 onClick={() => setShowPassword((current) => !current)}
                 className="hover:text-primary-600"
               >
@@ -101,7 +108,13 @@ export function LoginFormUI({
             </span>
           </p>
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full"
+            isLoading={isSubmitting}
+            data-testid="login-submit"
+            aria-label="Iniciar sesión"
+          >
             Iniciar sesión
             <LogIn size={18} />
           </Button>

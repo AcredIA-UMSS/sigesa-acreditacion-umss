@@ -11,7 +11,7 @@ export function ProcessListView() {
   const isJd = session?.role === 'JD';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="process-list">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 className="text-heading-xl font-bold text-primary-800">Procesos de acreditación</h1>
@@ -27,6 +27,7 @@ export function ProcessListView() {
           {isJd && (
             <Link
               to="/procesos/nuevo"
+              data-testid="process-list-new"
               className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-3 text-label-md font-medium text-body transition-colors hover:bg-primary-500"
             >
               <Plus size={16} />

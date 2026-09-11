@@ -64,6 +64,7 @@ export const CareerAutocomplete: React.FC<CareerAutocompleteProps> = ({
     <div ref={containerRef} className="relative">
       <TextInput
         label="Carrera"
+        data-testid="create-process-career"
         placeholder="Buscar por nombre o código (ej. Sistemas, MED)..."
         value={inputValue}
         onChange={(event) => handleInputChange(event.target.value)}

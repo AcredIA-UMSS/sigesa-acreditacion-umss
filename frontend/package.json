@@ -8,7 +8,9 @@
     "build": "pnpm lint && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "generate:api": "orval"
+    "generate:api": "orval",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.1",

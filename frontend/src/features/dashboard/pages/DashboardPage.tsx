@@ -48,10 +48,10 @@ export function DashboardPage() {
   const hasNoData = summary && !hasCc && !hasEe && !hasTd && !hasJd;
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-primary-900/10">
+    <div className="flex h-screen bg-gray-50 dark:bg-primary-900/10" data-testid="dashboard-page">
       <Sidebar activeNav="dashboard" />
 
-      <main className="flex-1 overflow-y-auto px-8 py-8 text-primary-900 bg-gray-50/50">
+      <main className="flex-1 overflow-y-auto px-8 py-8 text-primary-900 bg-gray-50/50" data-testid="dashboard-main">
         {/* Welcome Header */}
         <header className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>

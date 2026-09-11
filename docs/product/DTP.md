@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 11/09/2026 | **E2E Playwright:** `@playwright/test` en raíz; specs en `e2e/` anclados a `data-testid` del frontend (`getByTestId`). Stub API por defecto; `E2E_LIVE=1` contra backend real. | QA E2E | N/A | — | Cursor Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
 | 12/08/2026 | **MOD-ASSISTANT agente evidence (DD-AGENT-003):** copiloto control documental (`agent=evidence`); tools `list_pending_evidences`, `get_evidence_detail`, `check_evidence_completeness`; PBAC JD/TD/CC (403 EE); UI `EvidenceCopilotPanel`; MCP `mcp/sigesa-evidence`. | FSD-UC-024 / DD-AGENT-003 | N/A | PM-013 / PR-IMPL-026 | Cursor Agent |
@@ -75,6 +76,7 @@ artefactos_vivos:
 - `lucide-react`: Adoptado como estándar para la iconografía de la interfaz.
 - `react-router-dom`: Configurado para la gestión de rutas del lado del cliente.
 - `orval`: Utilizado para la autogeneración de clientes y hooks de React Query a partir de OpenAPI (Swagger).
+- `@playwright/test` (raíz del monorepo): suite E2E en `e2e/`; locators exclusivamente `data-testid`.
 
 ### Decisiones Técnicas y Refactorización
 
@@ -328,4 +330,12 @@ El backend SIGESA en Docker usa `SIGESA_ASSISTANT_BASE_URL=http://open-webui:808
 
 El consumo de la API REST se realiza **exclusivamente** mediante hooks de React Query autogenerados por Orval (ubicados en `frontend/src/api/`). Queda prohibida la escritura de clientes HTTP (fetch/axios) manuales en la capa de UI.
 
+- **Vite:** el proxy de desarrollo apunta a `'/api/v1'` (backend `:8080`). No usar `'/api'` como prefijo de proxy: interceptaría módulos ESM en `/src/api/` (cliente Orval).
+
 - **Ciclo de vida:** Cualquier cambio en los contratos de la API (DTOs del backend) requiere ejecutar el comando `pnpm run generate:api` en el entorno frontend antes de ser consumido por las vistas (ej. `CreateProcessView`).
+
+### C.3 Playwright E2E (frontend)
+
+- **Config:** `playwright.config.ts` (Chromium, Vite en `:5174` para no chocar con `pnpm dev`).
+- **Specs:** `e2e/*.spec.ts` — locators `page.getByTestId(...)` con catálogo en `e2e/fixtures/testids.ts`.
+- **Ejecución:** `pnpm test:e2e` desde la raíz. Stub solo de `pathname /api/v1/**` (nunca `/src/api/` de Vite/Orval). Stack real: `E2E_LIVE=1 pnpm test:e2e` con backend en `:8080`.

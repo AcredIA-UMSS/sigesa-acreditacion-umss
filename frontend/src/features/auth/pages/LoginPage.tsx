@@ -22,7 +22,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen" data-testid="login-page">
       <section className="relative hidden w-[42%] overflow-hidden bg-primary-900 text-body lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute -left-10 top-20 h-72 w-72 rounded-full border border-primary-300" />

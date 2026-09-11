@@ -47,6 +47,7 @@ export const CreateProcessForm: React.FC<CreateProcessFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
+      data-testid="create-process-form"
       className="flex flex-col gap-4 rounded-lg border border-gray-300 bg-body p-6 shadow-sm"
     >
       <div>
@@ -75,6 +76,7 @@ export const CreateProcessForm: React.FC<CreateProcessFormProps> = ({
         </label>
         <select
           id="templateSelect"
+          data-testid="create-process-template"
           value={selectedTemplate}
           onChange={(event) => setSelectedTemplate(event.target.value)}
           disabled={isLoading}
@@ -93,7 +95,11 @@ export const CreateProcessForm: React.FC<CreateProcessFormProps> = ({
       </div>
 
       <div className="mt-2 flex justify-end">
-        <Button type="submit" disabled={isLoading || !selectedCareer || !selectedTemplate}>
+        <Button
+          type="submit"
+          data-testid="create-process-submit"
+          disabled={isLoading || !selectedCareer || !selectedTemplate}
+        >
           {isLoading ? 'Iniciando proceso...' : 'Iniciar Proceso'}
         </Button>
       </div>

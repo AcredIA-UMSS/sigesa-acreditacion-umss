@@ -6,6 +6,7 @@ interface AlertProps {
   variant?: AlertVariant;
   title?: string;
   children: ReactNode;
+  'data-testid'?: string;
 }
 
 const variantClasses: Record<AlertVariant, string> = {
@@ -15,9 +16,13 @@ const variantClasses: Record<AlertVariant, string> = {
   warning: 'border-warning/40 bg-warning/10 text-gray-800',
 };
 
-export function Alert({ variant = 'info', title, children }: AlertProps) {
+export function Alert({ variant = 'info', title, children, 'data-testid': testId }: AlertProps) {
   return (
-    <div className={`rounded-lg border px-4 py-3 text-body-md ${variantClasses[variant]}`} role="alert">
+    <div
+      className={`rounded-lg border px-4 py-3 text-body-md ${variantClasses[variant]}`}
+      role="alert"
+      data-testid={testId}
+    >
       {title && <p className="mb-1 text-label-md font-medium">{title}</p>}
       <div>{children}</div>
     </div>

@@ -49,7 +49,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
     return null;
   }
 
-  const panelBody = (
+  const renderPanelBody = (testIdPrefix: string) => (
     <>
       {copilot.isStatusError && (
         <div className="px-4 pt-4">
@@ -101,6 +101,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
           <div className="flex flex-col gap-2">
             <textarea
               ref={textareaRef}
+              data-testid={`${testIdPrefix}-input`}
               value={copilot.draft}
               onChange={(event) => copilot.setDraft(event.target.value)}
               onKeyDown={handleKeyDown}
@@ -118,6 +119,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
               isLoading={copilot.isSending}
               disabled={!copilot.draft.trim() || copilot.isSending}
               className="w-full"
+              data-testid={`${testIdPrefix}-send`}
             >
               <Send size={14} />
               Enviar
@@ -131,7 +133,10 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
   return (
     <>
       {/* Mobile: collapsible */}
-      <aside className="overflow-hidden rounded-xl border border-primary-200 bg-body shadow-sm xl:hidden">
+      <aside
+        className="overflow-hidden rounded-xl border border-primary-200 bg-body shadow-sm xl:hidden"
+        data-testid="phases-copilot-mobile"
+      >
         <button
           type="button"
           onClick={() => setMobileOpen((open) => !open)}
@@ -146,11 +151,14 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
           </div>
           {mobileOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
-        {mobileOpen && panelBody}
+        {mobileOpen && renderPanelBody('phases-copilot-mobile')}
       </aside>
 
       {/* Desktop: sticky sidebar */}
-      <aside className="hidden max-h-[calc(100vh-8rem)] flex-col rounded-xl border border-primary-200 bg-body shadow-sm xl:sticky xl:top-8 xl:flex">
+      <aside
+        className="hidden max-h-[calc(100vh-8rem)] flex-col rounded-xl border border-primary-200 bg-body shadow-sm xl:sticky xl:top-8 xl:flex"
+        data-testid="phases-copilot"
+      >
         <header className="border-b border-gray-200 px-4 py-4">
           <p className="text-label-md font-medium uppercase tracking-wide text-primary-600">
             Copiloto de fases
@@ -161,7 +169,7 @@ export function PhasesCopilotPanel({ process, readOnly = false }: PhasesCopilotP
             {process.careerCode} · {process.templateType}
           </p>
         </header>
-        {panelBody}
+        {renderPanelBody('phases-copilot')}
       </aside>
     </>
   );

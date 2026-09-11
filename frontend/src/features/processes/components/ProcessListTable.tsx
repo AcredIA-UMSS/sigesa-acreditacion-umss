@@ -91,6 +91,7 @@ export function ProcessListTable({ processes }: ProcessListTableProps) {
                   {process.id && (
                     <Link
                       to={`/procesos/${process.id}`}
+                      data-testid={`process-list-row-${process.id}`}
                       className="inline-flex items-center gap-1 text-label-md font-medium text-primary-600 hover:text-primary-800"
                     >
                       Ver detalle

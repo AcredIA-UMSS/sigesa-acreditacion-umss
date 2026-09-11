@@ -44,7 +44,7 @@ export function UsersTableUI({
 
   return (
     <>
-    <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
+    <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm" data-testid="users-table">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-heading-md text-primary-800">Usuarios registrados</h2>
@@ -53,7 +53,7 @@ export function UsersTableUI({
             almacenan en texto plano: solo podrá verlas al crear un usuario nuevo.
           </p>
         </div>
-        <Button type="button" onClick={onAddUser} className="shrink-0">
+        <Button type="button" onClick={onAddUser} className="shrink-0" data-testid="users-add">
           <UserPlus size={18} />
           Agregar usuario
         </Button>

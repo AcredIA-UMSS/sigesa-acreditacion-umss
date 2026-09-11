@@ -118,7 +118,7 @@ export function ProcessStructureEditorUI({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="process-structure-editor">
       {!isEditable && (
         <div className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-body-md text-gray-800">
           Este proceso no está en estado ACTIVE. La estructura es solo lectura.

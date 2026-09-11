@@ -60,7 +60,7 @@ export function AssistantChatUI({
   };
 
   return (
-    <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
+    <main className="flex flex-1 flex-col overflow-hidden bg-gray-50" data-testid="assistant-chat">
       <header className="border-b border-gray-200 bg-body px-8 py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -150,6 +150,7 @@ export function AssistantChatUI({
               <div className="flex gap-3">
                 <textarea
                   ref={textareaRef}
+                  data-testid="assistant-input"
                   value={draft}
                   onChange={(event) => onDraftChange(event.target.value)}
                   onKeyDown={handleKeyDown}
@@ -163,6 +164,7 @@ export function AssistantChatUI({
                   isLoading={isSending}
                   disabled={!draft.trim() || isSending}
                   className="self-end"
+                  data-testid="assistant-send"
                 >
                   <Send size={16} />
                   Enviar

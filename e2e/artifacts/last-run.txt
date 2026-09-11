@@ -1,0 +1,19 @@
+Fecha: 2026-09-11 15:58 (UTC-4)
+Cwd: frontend/
+Comando: PLAYWRIGHT_HTML_OPEN=never npx playwright test
+Lenguaje: TypeScript + locators en español (getByRole/getByLabel sobre copy UMSS)
+Resultado: 15 passed (7.7s) · 4 workers · chromium
+
+  ✓ evidence/unauthenticated-redirect-evidencias.spec.ts
+  ✓ evidence/cc-login-sidebar-cargar-evidencia.spec.ts
+  ✓ evidence/jd-blocked-from-evidence-module.spec.ts
+  ✓ evidence/cc-direct-url-evidencias-cargar.spec.ts
+  ✓ login.spec.ts (4 tests)
+  ✓ evidence/uploadable-indicators-show-state-and-source.spec.ts
+  ✓ navigation.spec.ts (5 tests)
+  ✓ seed.cc-evidencias.spec.ts
+
+HTML: e2e/artifacts/html-report/index.html
+Trazas: e2e/artifacts/test-results/**/trace.zip (15)
+Abrir: npx playwright show-report ../e2e/artifacts/html-report
+       npx playwright show-trace <ruta/trace.zip>

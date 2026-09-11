@@ -47,7 +47,7 @@ export function TemplatesListTableUI({
   onDelete,
 }: TemplatesListTableUIProps) {
   return (
-    <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm">
+    <section className="rounded-2xl border border-gray-100 bg-body p-8 shadow-sm" data-testid="templates-list">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h2 className="text-heading-md text-primary-800">Plantillas normativas</h2>
@@ -56,7 +56,7 @@ export function TemplatesListTableUI({
             Solo las plantillas publicadas pueden usarse al crear procesos.
           </p>
         </div>
-        <Link to="/admin/plantillas/nueva" className="shrink-0">
+        <Link to="/admin/plantillas/nueva" className="shrink-0" data-testid="templates-new">
           <Button type="button">
             <Plus size={18} />
             Nueva plantilla
