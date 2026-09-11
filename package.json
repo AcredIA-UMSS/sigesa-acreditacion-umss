@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "reporte": "playwright show-report",
+    "codegen": "playwright codegen http://127.0.0.1:8017",
+    "app": "python -m uvicorn app.servidor:app --port 8017 --reload"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "playwright": "^1.63.0"
+  }
+}

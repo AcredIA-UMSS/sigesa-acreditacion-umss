@@ -15,6 +15,7 @@ import {
   Plus,
   Layers,
   FileUp,
+  FileSearch,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -211,10 +212,18 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             icon={<FileUp size={20} />}
             label="CARGAR EVIDENCIA"
             isExpanded={isExpanded}
-            active={activeNav === 'evidence'}
+            active={location.pathname === '/evidencias/cargar'}
             to="/evidencias/cargar"
           />
         )}
+
+        <NavItem
+          icon={<FileSearch size={20} />}
+          label="BUSCAR EVIDENCIAS"
+          isExpanded={isExpanded}
+          active={location.pathname === '/evidencias/buscar' || location.pathname === '/evidencias/search'}
+          to="/evidencias/buscar"
+        />
 
         {!isExternalEvaluator && (
           <>
