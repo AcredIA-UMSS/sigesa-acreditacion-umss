@@ -4,12 +4,14 @@ Sistema de gestión de acreditación institucional de la UMSS (monorepo backend 
 
 ## Estado del proyecto (releases)
 
-| Release | Alcance | Estado |
-| ------- | ------- | ------ |
-| **2.0.0** | Jerarquía normativa **N1→N2→N3→Indicador→Evidencia**; UC-003…022; legacy Fase/Subfase retirado (M5) | **Cerrado** |
+
+| Release   | Alcance                                                                                                        | Estado                                                  |
+| --------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **2.0.0** | Jerarquía normativa **N1→N2→N3→Indicador→Evidencia**; UC-003…022; legacy Fase/Subfase retirado (M5)            | **Cerrado**                                             |
 | **2.1.0** | Workflow metodológico 7 etapas ([ADR-0005](docs/adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md)) | **En curso** — **M6 ✅** (UC-025…028); M7–M11 pendientes |
 
-**Documentación viva:** [`docs/product/FSD.md`](docs/product/FSD.md) · [`docs/product/DTP.md`](docs/product/DTP.md) · [`docs/sprints/sprint_03/PROMPT_MAPPING.md`](docs/sprints/sprint_03/PROMPT_MAPPING.md)
+
+**Documentación viva:** `[docs/product/FSD.md](docs/product/FSD.md)` · `[docs/product/DTP.md](docs/product/DTP.md)` · `[docs/sprints/sprint_03/PROMPT_MAPPING.md](docs/sprints/sprint_03/PROMPT_MAPPING.md)`
 
 ### Funcionalidades destacadas (2.1.0 / M6)
 
@@ -19,20 +21,26 @@ Sistema de gestión de acreditación institucional de la UMSS (monorepo backend 
 
 ---
 
+
+
 ## Credenciales de acceso (desarrollo local)
 
-Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automáticamente usuarios y datos de prueba. Usa estas credenciales para iniciar sesión en **http://localhost:5173**:
+Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automáticamente usuarios y datos de prueba. Usa estas credenciales para iniciar sesión en **[http://localhost:5173](http://localhost:5173)**:
 
-| Rol | Descripción | Email | Contraseña |
-| --- | ----------- | ----- | ---------- |
-| **JD** | Jefe de Departamento | `jd@umss.edu.bo` | `JefeDemo2026!` |
-| **TD** | Técnico DUEA | `td@umss.edu.bo` | `TecnicoDemo2026!` |
-| **CC** | Coordinador — Ing. Sistemas | `cc@umss.edu.bo` | `CoordDemo2026!` |
-| **CC** | Coordinador — Ing. Civil | `cc2@umss.edu.bo` | `Coord2Demo2026!` |
-| **CC** | Usuario inactivo (pruebas admin) | `pendiente@umss.edu.bo` | `PendienteDemo2026!` |
-| **EE** | Evaluador externo — Ing. Sistemas | `ee@umss.edu.bo` | `EvalDemo2026!` |
+
+| Rol    | Descripción                       | Email                   | Contraseña           |
+| ------ | --------------------------------- | ----------------------- | -------------------- |
+| **JD** | Jefe de Departamento              | `jd@umss.edu.bo`        | `JefeDemo2026!`      |
+| **TD** | Técnico DUEA                      | `td@umss.edu.bo`        | `TecnicoDemo2026!`   |
+| **CC** | Coordinador — Ing. Sistemas       | `cc@umss.edu.bo`        | `CoordDemo2026!`     |
+| **CC** | Coordinador — Ing. Civil          | `cc2@umss.edu.bo`       | `Coord2Demo2026!`    |
+| **CC** | Usuario inactivo (pruebas admin)  | `pendiente@umss.edu.bo` | `PendienteDemo2026!` |
+| **EE** | Evaluador externo — Ing. Sistemas | `ee@umss.edu.bo`        | `EvalDemo2026!`      |
+
 
 > Solo cuentas con estado **ACTIVE** pueden autenticarse. `pendiente@umss.edu.bo` sirve para probar activación desde el panel de administración.
+
+
 
 ### Datos de prueba precargados
 
@@ -40,40 +48,48 @@ Además de los usuarios, el backend inserta registros de demostración para todo
 
 **Carreras** (tabla `programs`, seed dev — 25 carreras UMSS):
 
-| ID (ejemplo) | Código | Nombre |
-| --- | ------ | ------ |
-| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas |
-| `550e8400-e29b-41d4-a716-446655440001` | ING-CIV | Ingeniería Civil |
-| `550e8400-e29b-41d4-a716-44665544000b` | MED | Medicina |
-| … | … | Ver `ProgramSeedDataLoader.java` |
+
+| ID (ejemplo)                           | Código  | Nombre                           |
+| -------------------------------------- | ------- | -------------------------------- |
+| `550e8400-e29b-41d4-a716-446655440000` | INF-SIS | Ingeniería de Sistemas           |
+| `550e8400-e29b-41d4-a716-446655440001` | ING-CIV | Ingeniería Civil                 |
+| `550e8400-e29b-41d4-a716-44665544000b` | MED     | Medicina                         |
+| …                                      | …       | Ver `ProgramSeedDataLoader.java` |
+
 
 API: `GET /api/v1/programs?q=ingen` — autocompletado por nombre o código.
 
 **Plantillas** (`templates` — solo CEUB y ARCU-SUR operativas):
 
-| ID | Validada | Taxonomía |
-| --- | -------- | --------- |
-| `850e8400-e29b-41d4-a716-446655440010` | Sí | CEUB-2026.1 |
-| `850e8400-e29b-41d4-a716-446655440011` | Sí | ARCU-SUR-2026.1 |
-| `850e8400-e29b-41d4-a716-446655440012` | No | DRAFT-0.1 |
+
+| ID                                     | Validada | Taxonomía       |
+| -------------------------------------- | -------- | --------------- |
+| `850e8400-e29b-41d4-a716-446655440010` | Sí       | CEUB-2026.1     |
+| `850e8400-e29b-41d4-a716-446655440011` | Sí       | ARCU-SUR-2026.1 |
+| `850e8400-e29b-41d4-a716-446655440012` | No       | DRAFT-0.1       |
+
 
 **Procesos de acreditación** (`accreditation_process`):
 
-| ID | Carrera | Periodo | Tipo | Estado |
-| --- | ------- | ------- | ---- | ------ |
-| `950e8400-e29b-41d4-a716-446655440020` | INF-SIS | 2026-1 | CEUB | ACTIVE |
-| `950e8400-e29b-41d4-a716-446655440021` | CEUB | 2025-2 | CEUB | CLOSED |
-| `950e8400-e29b-41d4-a716-446655440022` | ARCU-SUR | 2025-2 | ARCU_SUR | ARCHIVED |
+
+| ID                                     | Carrera  | Periodo | Tipo     | Estado   |
+| -------------------------------------- | -------- | ------- | -------- | -------- |
+| `950e8400-e29b-41d4-a716-446655440020` | INF-SIS  | 2026-1  | CEUB     | ACTIVE   |
+| `950e8400-e29b-41d4-a716-446655440021` | CEUB     | 2025-2  | CEUB     | CLOSED   |
+| `950e8400-e29b-41d4-a716-446655440022` | ARCU-SUR | 2025-2  | ARCU_SUR | ARCHIVED |
+
 
 Procesos **ACTIVE** creados tras M6 incluyen **7 etapas metodológicas** bootstrap (E1 en `IN_PROGRESS`) y columnas `operational_mode` / `current_stage_id`.
 
 **Asignaciones usuario–programa** (`user_program_assignment`):
 
-| Usuario | Carrera asignada |
-| ------- | ---------------- |
-| `cc@umss.edu.bo` | Ingeniería de Sistemas |
-| `cc2@umss.edu.bo` | Ingeniería Civil |
-| `pendiente@umss.edu.bo` | Medicina |
+
+| Usuario                 | Carrera asignada       |
+| ----------------------- | ---------------------- |
+| `cc@umss.edu.bo`        | Ingeniería de Sistemas |
+| `cc2@umss.edu.bo`       | Ingeniería Civil       |
+| `pendiente@umss.edu.bo` | Medicina               |
+
 
 Los identificadores y contraseñas están definidos en `backend/src/main/java/com/umss/sigesa/config/AuthDataLoader.java` y `DevSeedData.java`.
 
@@ -81,24 +97,34 @@ Los identificadores y contraseñas están definidos en `backend/src/main/java/co
 
 Sistema de gestión de acreditación institucional de la UMSS. El repositorio es un monorepo con dos aplicaciones independientes:
 
-| Carpeta     | Stack                                      | Puerto por defecto |
-| ----------- | ------------------------------------------ | ------------------ |
-| `backend/`  | Java 21, Spring Boot 4.x, Maven            | `8080`             |
-| `frontend/` | React 19, TypeScript, Vite, pnpm           | `5173`             |
+
+| Carpeta     | Stack                            | Puerto por defecto |
+| ----------- | -------------------------------- | ------------------ |
+| `backend/`  | Java 21, Spring Boot 4.x, Maven  | `8080`             |
+| `frontend/` | React 19, TypeScript, Vite, pnpm | `5173`             |
+
 
 ---
 
+
+
 ## Requisitos previos
 
-| Herramienta | Versión mínima | Notas |
-| ----------- | -------------- | ----- |
-| **JDK**     | 21             | Requerido para el backend |
+
+| Herramienta | Versión mínima  | Notas                               |
+| ----------- | --------------- | ----------------------------------- |
+| **JDK**     | 21              | Requerido para el backend           |
 | **Node.js** | 20.19+ o 22.12+ | Requerido para el frontend (Vite 8) |
-| **pnpm**    | 9+             | Gestor de paquetes del frontend |
+| **pnpm**    | 9+              | Gestor de paquetes del frontend     |
+
 
 > El backend incluye **Maven Wrapper** (`mvnw` / `mvnw.cmd`), por lo que no es obligatorio instalar Maven de forma global.
 
+
+
 ### Instalación de dependencias del sistema
+
+
 
 #### Linux
 
@@ -117,6 +143,8 @@ corepack enable
 corepack prepare pnpm@latest --activate
 ```
 
+
+
 #### Windows
 
 ```powershell
@@ -133,6 +161,8 @@ corepack prepare pnpm@latest --activate
 
 ---
 
+
+
 ## Arranque en desarrollo local
 
 El flujo recomendado es levantar **primero el backend** y luego el frontend. El servidor de desarrollo de Vite redirige las peticiones `/api` hacia `http://localhost:8080`.
@@ -146,16 +176,19 @@ El proyecto está completamente dockerizado utilizando construcciones multi-etap
 - [Docker Engine](https://docs.docker.com/engine/install/) ejecutándose.
 - [Docker Compose](https://docs.docker.com/compose/install/) (V2 recomendado).
 
+
+
 #### 🚀 Arranque Rápido
 
 1. Posiciónate en la raíz del proyecto (donde se encuentra el `docker-compose.yml`).
 2. Construye las imágenes y levanta los contenedores en segundo plano ejecutando:
-
-   ```bash
+  ```bash
    docker-compose up -d --build
-   ```
+  ```
 
 > Nota: Dependiendo de tu versión, el comando podría ser docker compose up -d --build).
+
+
 
 #### 🌐 Accesos y Puertos
 
@@ -196,6 +229,8 @@ Reiniciar todo desde cero (⚠️ ESTO BORRARÁ LA BASE DE DATOS LOCAL):
 docker-compose down -v
 ```
 
+
+
 #### ⚠️ Solución de Problemas Frecuentes (Troubleshooting)
 
 `Error: connect: permission denied (Linux)`: Tu usuario no tiene permisos sobre el socket de Docker. Ejecuta `sudo usermod -aG docker $USER`, luego reinicia tu terminal o ejecuta `newgrp docker`.
@@ -222,12 +257,16 @@ chmod +x mvnw
 ./mvnw spring-boot:run
 ```
 
+
+
 #### Windows (CMD o PowerShell)
 
 ```powershell
 cd backend
 mvnw.cmd spring-boot:run
 ```
+
+
 
 #### Perfil `dev` (consola H2 habilitada)
 
@@ -241,18 +280,24 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
 
 **URLs del backend:**
 
-| Recurso        | URL |
-| -------------- | --- |
-| API REST       | http://localhost:8080/api/v1/... |
-| OpenAPI (JSON) | http://localhost:8080/v3/api-docs |
-| Swagger UI     | http://localhost:8080/swagger-ui.html |
-| Consola H2     | http://localhost:8080/h2-console *(solo con perfil `dev`)* |
+
+| Recurso        | URL                                                                                              |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| API REST       | [http://localhost:8080/api/v1/](http://localhost:8080/api/v1/)...                                |
+| OpenAPI (JSON) | [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)                           |
+| Swagger UI     | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)                   |
+| Consola H2     | [http://localhost:8080/h2-console](http://localhost:8080/h2-console) *(solo con perfil* `dev`*)* |
+
 
 Ver [Credenciales de acceso](#credenciales-de-acceso-desarrollo-local) al inicio del documento.
 
 ---
 
+
+
 ### 2. Frontend
+
+
 
 #### Linux / macOS
 
@@ -262,6 +307,8 @@ pnpm install
 pnpm dev
 ```
 
+
+
 #### Windows (CMD o PowerShell)
 
 ```powershell
@@ -270,11 +317,15 @@ pnpm install
 pnpm dev
 ```
 
-Abrir en el navegador: **http://localhost:5173**
+Abrir en el navegador: **[http://localhost:5173](http://localhost:5173)**
 
 ---
 
+
+
 ## Comandos útiles
+
+
 
 ### Backend
 
@@ -291,6 +342,8 @@ mvnw.cmd verify
 mvnw.cmd package -DskipTests
 ```
 
+
+
 ### Frontend
 
 ```bash
@@ -303,16 +356,20 @@ pnpm generate:api      # Regenerar cliente Orval (requiere backend en :8080)
 
 ---
 
+
+
 ## Perfil de producción (backend)
 
 Para entornos productivos el backend usa **PostgreSQL** y **Flyway** para migraciones. Variables de entorno relevantes:
 
-| Variable | Descripción | Ejemplo |
-| -------- | ----------- | ------- |
-| `DATABASE_URL` | JDBC de PostgreSQL | `jdbc:postgresql://localhost:5432/sigesa` |
-| `DATABASE_USERNAME` | Usuario de BD | `sigesa` |
-| `DATABASE_PASSWORD` | Contraseña de BD | *(secreto)* |
-| `SIGESA_JWT_SECRET` | Clave HMAC para JWT (≥ 256 bits) | *(secreto)* |
+
+| Variable            | Descripción                      | Ejemplo                                   |
+| ------------------- | -------------------------------- | ----------------------------------------- |
+| `DATABASE_URL`      | JDBC de PostgreSQL               | `jdbc:postgresql://localhost:5432/sigesa` |
+| `DATABASE_USERNAME` | Usuario de BD                    | `sigesa`                                  |
+| `DATABASE_PASSWORD` | Contraseña de BD                 | *(secreto)*                               |
+| `SIGESA_JWT_SECRET` | Clave HMAC para JWT (≥ 256 bits) | *(secreto)*                               |
+
 
 ```bash
 # Linux / macOS
@@ -323,6 +380,8 @@ mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 ---
+
+
 
 ## Estructura del repositorio
 
@@ -338,70 +397,97 @@ sigesa-acreditacion-umss/
 └── AGENTS.md         # Contexto técnico para agentes de IA
 ```
 
+
+
 ### Trazabilidad sprint 03
 
-Registro append-only de prompts ejecutados: [`docs/sprints/sprint_03/PROMPT_MAPPING.md`](docs/sprints/sprint_03/PROMPT_MAPPING.md) (PM-001…PM-013).
+Registro append-only de prompts ejecutados: `[docs/sprints/sprint_03/PROMPT_MAPPING.md](docs/sprints/sprint_03/PROMPT_MAPPING.md)` (PM-001…PM-013).
 
 ---
+
+
 
 ## Asistente virtual y copilotos (MOD-ASSISTANT)
 
 SIGESA incluye un asistente conversacional con **tool calling** sobre datos reales del sistema. El LLM solo elige herramientas; la respuesta final la formatea siempre el backend (anti-alucinación).
 
-| Superficie | Ruta / contexto | Roles |
-|------------|-----------------|-------|
-| Asistente general | `/ayuda` | Según rol JWT |
-| Copiloto procesos | `/procesos/{id}` — `agent=phases` | JD, TD, CC (CC solo lectura) |
-| Copiloto usuarios | `/admin/users` — `agent=users` | Solo JD |
-| Copiloto evidencias | `/evidencias/cargar` — `agent=evidence` | JD, TD, CC |
+
+| Superficie          | Ruta / contexto                         | Roles                        |
+| ------------------- | --------------------------------------- | ---------------------------- |
+| Asistente general   | `/ayuda`                                | Según rol JWT                |
+| Copiloto procesos   | `/procesos/{id}` — `agent=phases`       | JD, TD, CC (CC solo lectura) |
+| Copiloto usuarios   | `/admin/users` — `agent=users`          | Solo JD                      |
+| Copiloto evidencias | `/evidencias/cargar` — `agent=evidence` | JD, TD, CC                   |
+
+
+
 
 ### Niveles de madurez demostrables
 
-| Nivel | Qué demuestra | Cómo probarlo |
-|-------|---------------|---------------|
-| 1 | Palabras clave → tool directa | Escenario demo #1 en cualquier copiloto |
-| 2 | LLM elige 1 tool | Escenario #2 (sinónimos) |
-| 3 | RAG normativo indexado | Pregunta normativa CEUB/ARCU-SUR |
-| **4** | ≥2 tools encadenadas + traza | Escenario **#5** (general/phases/users) o **#4** (evidence) |
+
+| Nivel | Qué demuestra                 | Cómo probarlo                                               |
+| ----- | ----------------------------- | ----------------------------------------------------------- |
+| 1     | Palabras clave → tool directa | Escenario demo #1 en cualquier copiloto                     |
+| 2     | LLM elige 1 tool              | Escenario #2 (sinónimos)                                    |
+| 3     | RAG normativo indexado        | Pregunta normativa CEUB/ARCU-SUR                            |
+| **4** | ≥2 tools encadenadas + traza  | Escenario **#5** (general/phases/users) o **#4** (evidence) |
+
+
+
 
 ### Variables de entorno (LLM + multi-tool)
 
-| Variable | Default | Descripción |
-|----------|---------|-------------|
-| `SIGESA_ASSISTANT_ENABLED` | `true` | Módulo activo |
-| `SIGESA_ASSISTANT_LLM_ENABLED` | `true` | Si `false`, solo camino KEYWORD |
-| `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` | `5` | Máximo de tools encadenadas por mensaje |
-| `SIGESA_ASSISTANT_RAG_ENABLED` | `true` | RAG normativo (`search_normative_docs`) |
-| `SIGESA_ASSISTANT_BASE_URL` | — | Open WebUI u Ollama |
-| `SIGESA_ASSISTANT_API_KEY` | — | API key Open WebUI (servidor) |
 
-Documentación detallada: [`docs/design/DD-SYS-002.md`](docs/design/DD-SYS-002.md) §11 · [`docs/design/assistant/TOOL-CATALOG.md`](docs/design/assistant/TOOL-CATALOG.md) · [`docs/product/DTP.md`](docs/product/DTP.md) §B.5.
+| Variable                               | Default | Descripción                             |
+| -------------------------------------- | ------- | --------------------------------------- |
+| `SIGESA_ASSISTANT_ENABLED`             | `true`  | Módulo activo                           |
+| `SIGESA_ASSISTANT_LLM_ENABLED`         | `true`  | Si `false`, solo camino KEYWORD         |
+| `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS` | `5`     | Máximo de tools encadenadas por mensaje |
+| `SIGESA_ASSISTANT_RAG_ENABLED`         | `true`  | RAG normativo (`search_normative_docs`) |
+| `SIGESA_ASSISTANT_BASE_URL`            | —       | Open WebUI u Ollama                     |
+| `SIGESA_ASSISTANT_API_KEY`             | —       | API key Open WebUI (servidor)           |
+
+
+Documentación detallada: `[docs/design/DD-SYS-002.md](docs/design/DD-SYS-002.md)` §11 · `[docs/design/assistant/TOOL-CATALOG.md](docs/design/assistant/TOOL-CATALOG.md)` · `[docs/product/DTP.md](docs/product/DTP.md)` §B.5.
 
 ---
+
+
 
 ## Panel de Control Híbrido (PBAC Dashboard)
 
 El frontend de SIGESA incluye un panel de control híbrido basado en permisos (PBAC) que adapta la interfaz de usuario dinámicamente según las autorizaciones del usuario (`READ_CC_DASHBOARD`, `READ_TD_DASHBOARD`, `READ_JD_DASHBOARD`):
+
 - **Coordinador de Carrera [CC]**: Acceso a indicadores de avance del programa académico asignado, progreso normativo (N1→Indicador), timeline metodológico, alertas de cuellos de botella y tabla de observaciones pendientes con paginación y ordenamiento.
 - **Técnico DUEA [TD]**: Visualización de evidencias pendientes de revisión y últimas evaluaciones realizadas.
 - **Jefatura DUEA [JD]**: Panel ejecutivo con semáforo de calidad de programas y KPIs agregados institucionales.
 
+
+
 ### Simulación de Roles (Entorno Local)
+
 En entorno de desarrollo (`DEV`), se despliega una barra de herramientas de simulación de rol en la cabecera del dashboard. Esta herramienta está protegida por compilación condicional (`import.meta.env.DEV`) para evitar fugas en producción.
 
 ### Exportación de Reportes
+
 Soporta exportaciones binarias robustas en formato Excel (`.xlsx`), PDF (`.pdf`), y CSV (`.csv`):
+
 - Los clientes HTTP detectan automáticamente respuestas binarias para prevenir la corrupción de datos.
 - En entorno de desarrollo con rol simulado, las descargas binarias se interceptan con un aviso y se descargan en formato CSV para inspección.
 
 ---
 
+
+
 ## Solución de problemas
 
-| Problema | Posible solución |
-| -------- | ---------------- |
-| `Permission denied` al ejecutar `./mvnw` | Ejecutar `chmod +x mvnw` dentro de `backend/` |
-| El frontend no conecta con la API | Verificar que el backend esté corriendo en el puerto `8080` |
-| `pnpm: command not found` | Instalar pnpm con `corepack enable` o `npm install -g pnpm` |
-| Error de versión de Java | Confirmar `java -version` muestra JDK 21 |
-| `pnpm generate:api` falla | Arrancar el backend antes; Orval lee `http://localhost:8080/v3/api-docs` |
+
+| Problema                                 | Posible solución                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------ |
+| `Permission denied` al ejecutar `./mvnw` | Ejecutar `chmod +x mvnw` dentro de `backend/`                            |
+| El frontend no conecta con la API        | Verificar que el backend esté corriendo en el puerto `8080`              |
+| `pnpm: command not found`                | Instalar pnpm con `corepack enable` o `npm install -g pnpm`              |
+| Error de versión de Java                 | Confirmar `java -version` muestra JDK 21                                 |
+| `pnpm generate:api` falla                | Arrancar el backend antes; Orval lee `http://localhost:8080/v3/api-docs` |
+
+

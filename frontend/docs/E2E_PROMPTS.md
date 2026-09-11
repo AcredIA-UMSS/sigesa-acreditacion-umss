@@ -69,6 +69,11 @@ No verifiques textos volátiles del asistente LLM.
 Ejecutá: pnpm test:e2e tests/agente/<archivo>.spec.ts y pegá la salida.
 ```
 
-## Script Python del lab (opcional, secundario)
+## Script Python (opcional, secundario)
 
-`tools/agente_e2e.py` sirve para entender el pipeline LLM sin navegador. Para SIGESA habría que adaptarlo a leer componentes TSX o usar MCP con app viva; no copies el flujo del lab tal cual.
+`tools/e2e-agent/agente_e2e.py` — Planner/Generator por SDK sin navegador. Lee `tools/e2e-agent/context/*.md` + seed/patrón TS. Ver `tools/e2e-agent/README.md`.
+
+```bash
+cd tools/e2e-agent && python agente_e2e.py plan ayuda
+python agente_e2e.py generar ayuda 1.2
+```

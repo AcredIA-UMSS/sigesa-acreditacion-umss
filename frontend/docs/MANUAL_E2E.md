@@ -58,7 +58,7 @@ frontend/
 └── package.json               # scripts test:e2e*
 ```
 
-**No usar como camino principal:** `tools/agente_e2e.py` (lab SoporteIA). Lee `index.html` estático (`<div id="root">` vacío) y no ve la UI React montada.
+**Camino secundario (sin MCP):** `tools/e2e-agent/agente_e2e.py` — Planner/Generator por SDK; lee contexto Markdown + seed TS (no abre navegador). Ver `tools/e2e-agent/README.md`.
 
 ---
 

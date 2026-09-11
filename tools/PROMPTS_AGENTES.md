@@ -45,16 +45,28 @@ respuestas del asistente. Corre solo tu archivo con npx playwright test <archivo
 y pega la salida.
 ```
 
-## Forma 3 · El script del lab (sin IDE)
+## Forma 3 · Script Python SIGESA (sin IDE)
+
+Adaptado al monorepo SIGESA (`tools/e2e-agent/`). **No** lee `index.html` estático; usa contexto Markdown + `tests/seed.spec.ts` + patrón TypeScript.
 
 ```bash
-cp .env.example .env              # modelo local del M6 o proveedor remoto, igual que en el LabX
-python agente_e2e.py plan         # lee app/index.html + tests/seed.spec.ts -> specs/plan_agente.md
-python agente_e2e.py generar 1.1  # toma el caso 1.1 del plan -> tests/agente/caso_1_1.spec.ts (reporta tokens)
-npx playwright test tests/agente/caso_1_1.spec.ts
+cd tools/e2e-agent
+pip install -r requirements.txt
+# LLM: .env en la raíz del repo (GROQ_API_KEY o Ollama)
+
+python agente_e2e.py plan login              # -> frontend/specs/plan_login.md
+python agente_e2e.py listar login
+python agente_e2e.py generar login 1.1       # -> frontend/tests/agente/<archivo>.spec.ts
+
+cd ../../frontend
+PW_SKIP_BACKEND=1 pnpm test:e2e tests/agente/<archivo>.spec.ts
 ```
 
-No abre el navegador (pierde la exploración en vivo), pero muestra exactamente qué hace un agente: leer archivos, armar el prompt, llamar al modelo, escribir el archivo. Y sirve para que todas las parejas tengan el mismo punto de partida aunque su IDE no tenga agentes.
+También desde `tools/`: `python agente_e2e.py plan ayuda`
+
+Documentación completa: `tools/e2e-agent/README.md`
+
+No abre el navegador (pierde exploración en vivo), pero muestra el pipeline LLM: tokens, tiempo, archivos escritos.
 
 ## Después de cada caso generado: la auditoría E2E
 
