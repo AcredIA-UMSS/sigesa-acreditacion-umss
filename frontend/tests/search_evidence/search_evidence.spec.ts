@@ -5,8 +5,8 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
   const SEARCH_ALIAS_ROUTE = '/evidencias/search';
   const API_SEARCH_URL = '**/api/v1/evidences/search*';
 
-  // Mock search results payload returned by /api/v1/evidences/search
-  const mockSearchResults = {
+  // Mock standard keyword search payload (exact text matching)
+  const mockStandardSearchResults = {
     items: [
       {
         evidenceId: 'ev-101',
@@ -25,21 +25,47 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
         uploadedBy: 'coordinador@umss.edu.bo',
         blobAvailable: true,
       },
+    ],
+    total: 1,
+    page: 0,
+    size: 20,
+  };
+
+  // Mock AI Synonym Expansion payload (returns semantically expanded hits matching synonyms like infra/labs instead of literal words)
+  const mockAiSynonymSearchResults = {
+    items: [
       {
-        evidenceId: 'ev-102',
-        subphaseId: 'sub-02',
-        subphaseName: 'Verificación Documental',
+        evidenceId: 'ev-201',
+        subphaseId: 'sub-01',
+        subphaseName: 'Infraestructura y Aulas',
         phaseId: 'phase-01',
         phaseName: 'Fase 1: Autoevaluación',
         processId: 'proc-01',
-        indicatorId: 'ind-02',
-        indicatorCode: 'IND-1.2',
-        indicatorTitle: 'Reglamento Docente',
-        version: 2,
-        description: 'Reglamento de docencia actualizado',
-        originalFilename: 'reglamento_docente.pdf',
-        uploadedAt: '2025-07-20T14:30:00Z',
+        indicatorId: 'ind-04',
+        indicatorCode: 'CRT-04',
+        indicatorTitle: 'Infraestructura Académica',
+        version: 1,
+        description: 'Planos aprobados y distribución de laboratorios de computación e infraestructura física',
+        originalFilename: 'planos_distribucion_infraestructura.pdf',
+        uploadedAt: '2025-08-05T10:00:00Z',
         uploadedBy: 'tecnico@umss.edu.bo',
+        blobAvailable: true,
+      },
+      {
+        evidenceId: 'ev-202',
+        subphaseId: 'sub-02',
+        subphaseName: 'Equipamiento',
+        phaseId: 'phase-01',
+        phaseName: 'Fase 1: Autoevaluación',
+        processId: 'proc-01',
+        indicatorId: 'ind-04',
+        indicatorCode: 'CRT-04',
+        indicatorTitle: 'Infraestructura Académica',
+        version: 2,
+        description: 'Inventario valorado de activos fijos tecnológicos y equipamiento interactivo',
+        originalFilename: 'inventario_equipos_tecnologicos.pdf',
+        uploadedAt: '2025-08-10T14:30:00Z',
+        uploadedBy: 'admin@umss.edu.bo',
         blobAvailable: true,
       },
     ],
@@ -65,7 +91,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
   });
 
   // Single-block full E2E User Journey Test
-  test('Complete E2E User Journey: Login -> Navigate via Sidebar -> Standard Search -> Toggle AI ON -> Verify AI Header -> Reset', async ({ page }) => {
+  test('Complete E2E User Journey: Login -> Navigate via Sidebar -> Standard Search -> Toggle AI ON (Synonym Expansion) -> Verify AI Header -> Reset', async ({ page }) => {
     let lastQuery = '';
     let lastAiHeader = '';
     let lastAiParam = '';
@@ -76,10 +102,14 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       lastQuery = url.searchParams.get('q') || '';
       lastAiParam = url.searchParams.get('aiEnabled') || '';
       lastAiHeader = request.headers()['x-ai-enabled'] || '';
+
+      // Return AI synonym expansion results if X-AI-Enabled header is present, else standard results
+      const responsePayload = lastAiHeader === 'true' ? mockAiSynonymSearchResults : mockStandardSearchResults;
+
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: responsePayload }),
       });
     });
 
@@ -94,7 +124,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     await expect(page).toHaveURL(new RegExp(SEARCH_ROUTE));
     await expect(page.getByRole('heading', { name: /Buscador de Evidencias/i })).toBeVisible();
 
-    // 3. Step A: Perform standard search (AI OFF)
+    // 3. Step A: Standard exact text search without AI (AI OFF)
     const searchInput = page.locator('#evidence-search-q');
     await searchInput.fill('informe');
 
@@ -105,7 +135,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     expect(lastAiHeader).toBe(''); // AI header was NOT sent
     await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
 
-    // 4. Step B: Enable AI Toggle (AI ON) and search again
+    // 4. Step B: Enable AI Toggle (AI ON) and search query "aulas de clase"
     const aiToggle = page.locator('#evidence-search-ai-toggle');
     await aiToggle.check();
     await expect(aiToggle).toBeChecked();
@@ -113,12 +143,18 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     await searchInput.fill('aulas de clase');
     await searchButton.click();
 
-    // Verification: Confirm AI WAS called via HTTP Header + Query Param + UI Badges
+    // Verification 1: Confirm X-AI-Enabled header and query param WERE sent to backend API
     expect(lastQuery).toBe('aulas de clase');
-    expect(lastAiHeader).toBe('true'); // AI header WAS sent to backend
+    expect(lastAiHeader).toBe('true');
     expect(lastAiParam).toBe('true');
+
+    // Verification 2: Confirm AI Synonym Expansion badge and result indicators in DOM
     await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
     await expect(page.getByText(/ampliados vía Asistente MCP IA/i)).toBeVisible();
+
+    // Verification 3: Confirm evidence hits containing expanded synonyms ("infraestructura", "tecnologicos") are displayed
+    await expect(page.getByText('planos_distribucion_infraestructura.pdf')).toBeVisible();
+    await expect(page.getByText('inventario_equipos_tecnologicos.pdf')).toBeVisible();
 
     // 5. Step C: Reset search
     const resetButton = page.getByRole('button', { name: /limpiar/i });
@@ -127,7 +163,73 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     await expect(aiToggle).not.toBeChecked();
   });
 
-  // Granular Modular Tests for Isolated CI Debugging
+  // Granular Spec: Verify AI Synonym Expansion Function Call
+  test('should execute AI Synonym Expansion when AI toggle is enabled', async ({ page }) => {
+    let interceptedAiHeader = '';
+    let interceptedQuery = '';
+
+    await page.route(API_SEARCH_URL, async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      interceptedQuery = url.searchParams.get('q') || '';
+      interceptedAiHeader = request.headers()['x-ai-enabled'] || '';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockAiSynonymSearchResults }),
+      });
+    });
+
+    await page.goto(SEARCH_ROUTE);
+
+    const searchInput = page.locator('#evidence-search-q');
+    await searchInput.fill('aulas de clase');
+
+    const aiToggle = page.locator('#evidence-search-ai-toggle');
+    await aiToggle.check();
+
+    const searchButton = page.getByRole('button', { name: /buscar/i });
+    await searchButton.click();
+
+    // 1. Confirm AI network protocol contract
+    expect(interceptedQuery).toBe('aulas de clase');
+    expect(interceptedAiHeader).toBe('true');
+
+    // 2. Confirm AI expanded synonym results appear in DOM (not requiring exact literal match)
+    await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
+    await expect(page.getByText('planos_distribucion_infraestructura.pdf')).toBeVisible();
+    await expect(page.getByText('inventario_equipos_tecnologicos.pdf')).toBeVisible();
+    await expect(page.getByText(/ampliados vía Asistente MCP IA/i)).toBeVisible();
+  });
+
+  // Granular Spec: Scenario 2 Preset AI MCP Button
+  test('should run Scenario 2: Multi-Token AI MCP synonym expansion via scenario demo button', async ({ page }) => {
+    let interceptedQuery = '';
+    let interceptedAiHeader = '';
+
+    await page.route(API_SEARCH_URL, async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      interceptedQuery = url.searchParams.get('q') || '';
+      interceptedAiHeader = request.headers()['x-ai-enabled'] || '';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockAiSynonymSearchResults }),
+      });
+    });
+
+    await page.goto(SEARCH_ROUTE);
+
+    const scenario2Button = page.getByRole('button', { name: /Escenario 2/i });
+    await scenario2Button.click();
+
+    expect(interceptedQuery).toBe('aulas de clase');
+    expect(interceptedAiHeader).toBe('true');
+    await expect(page.locator('#evidence-search-ai-toggle')).toBeChecked();
+    await expect(page.getByText('planos_distribucion_infraestructura.pdf')).toBeVisible();
+  });
+
   test('should navigate to production route /evidencias/buscar and verify main elements', async ({ page }) => {
     await page.goto(SEARCH_ROUTE);
 
@@ -167,7 +269,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
@@ -186,41 +288,6 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     await expect(page.getByText('Informe de autoevaluación anual 2025')).toBeVisible();
   });
 
-  test('should execute AI-assisted search when checking AI toggle in frontend UI', async ({ page }) => {
-    let interceptedAiHeader = '';
-    let interceptedAiParam = '';
-
-    await page.route(API_SEARCH_URL, async (route) => {
-      const request = route.request();
-      const url = new URL(request.url());
-      interceptedAiParam = url.searchParams.get('aiEnabled') || '';
-      interceptedAiHeader = request.headers()['x-ai-enabled'] || '';
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
-      });
-    });
-
-    await page.goto(SEARCH_ROUTE);
-
-    const searchInput = page.locator('#evidence-search-q');
-    await searchInput.fill('aulas de clase');
-
-    const aiToggle = page.locator('#evidence-search-ai-toggle');
-    await aiToggle.check();
-    await expect(aiToggle).toBeChecked();
-
-    const searchButton = page.getByRole('button', { name: /buscar/i });
-    await searchButton.click();
-
-    expect(interceptedAiHeader).toBe('true');
-    expect(interceptedAiParam).toBe('true');
-
-    await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
-    await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
-  });
-
   test('should run Scenario 1: Direct match via scenario demo button', async ({ page }) => {
     let interceptedQuery = '';
     let interceptedAiHeader = '';
@@ -233,7 +300,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
@@ -245,32 +312,6 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     expect(interceptedQuery).toBe('infraestructura');
     expect(interceptedAiHeader).toBe('');
     await expect(page.locator('#evidence-search-q')).toHaveValue('infraestructura');
-  });
-
-  test('should run Scenario 2: Multi-Token AI MCP synonym expansion via scenario demo button', async ({ page }) => {
-    let interceptedQuery = '';
-    let interceptedAiHeader = '';
-
-    await page.route(API_SEARCH_URL, async (route) => {
-      const request = route.request();
-      const url = new URL(request.url());
-      interceptedQuery = url.searchParams.get('q') || '';
-      interceptedAiHeader = request.headers()['x-ai-enabled'] || '';
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
-      });
-    });
-
-    await page.goto(SEARCH_ROUTE);
-
-    const scenario2Button = page.getByRole('button', { name: /Escenario 2/i });
-    await scenario2Button.click();
-
-    expect(interceptedQuery).toBe('aulas de clase');
-    expect(interceptedAiHeader).toBe('true');
-    await expect(page.locator('#evidence-search-ai-toggle')).toBeChecked();
   });
 
   test('should run Scenario 3: Out-of-scope query via scenario demo button', async ({ page }) => {
@@ -306,18 +347,18 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
     await page.goto(SEARCH_ROUTE);
 
     const searchInput = page.locator('#evidence-search-q');
-    await searchInput.fill('reglamento');
+    await searchInput.fill('informe');
     await searchInput.press('Enter');
 
-    expect(interceptedQuery).toBe('reglamento');
-    await expect(page.getByText('reglamento_docente.pdf')).toBeVisible();
+    expect(interceptedQuery).toBe('informe');
+    await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
   });
 
   test('should clear search filters and results when clicking reset button', async ({ page }) => {
@@ -325,7 +366,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
@@ -428,7 +469,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
@@ -459,7 +500,7 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: mockSearchResults }),
+        body: JSON.stringify({ data: mockStandardSearchResults }),
       });
     });
 
