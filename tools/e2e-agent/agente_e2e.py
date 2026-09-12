@@ -42,6 +42,12 @@ SECCIONES: dict[str, dict[str, str]] = {
         "patron": "tests/agente/ayuda-funciones-usuario-jd.spec.ts",
         "titulo": "Asistente /ayuda — agent=general",
     },
+    "procesos": {
+        "plan": "plan_procesos_dimension_jd.md",
+        "context": "procesos_dimension.md",
+        "patron": "tests/tradicional/login.spec.ts",
+        "titulo": "Procesos — JD crea dimensión normativa",
+    },
 }
 
 PLAN_FORMATO_REF = """# SIGESA <Sección> Test Plan
