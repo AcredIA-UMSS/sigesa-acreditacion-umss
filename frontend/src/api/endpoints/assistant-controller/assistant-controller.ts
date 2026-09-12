@@ -28,7 +28,7 @@ export const fetchAssistantStatus = async (
 ): Promise<AssistantStatusResponse> => {
   const response = await customFetch<FetchEnvelope<AssistantStatusResponse>>(
     getAssistantStatusUrl(agent),
-    { method: 'GET' },
+    { method: 'GET', skipUnauthorizedLogout: true },
   );
   return response.data;
 };
@@ -41,6 +41,7 @@ export const sendChatMessage = async (
     {
       method: 'POST',
       body: JSON.stringify(request),
+      skipUnauthorizedLogout: true,
     },
   );
   return response.data;
