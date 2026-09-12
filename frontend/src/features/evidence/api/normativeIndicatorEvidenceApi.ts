@@ -61,6 +61,8 @@ export async function uploadNormativeIndicatorEvidence(
   }>(`/api/v1/indicators/${encodeURIComponent(input.indicatorId)}/evidences`, {
     method: 'POST',
     body: formData,
+    // Evita logout global si el POST falla (p. ej. 401/403); la UI muestra el error.
+    skipUnauthorizedLogout: true,
   });
 
   return {

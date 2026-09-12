@@ -250,7 +250,7 @@ Todos se ejecutan desde `tools/e2e-agent/` con **`./run.sh`** (usa `.venv`).
 
 | Comando | Descripción |
 |---------|-------------|
-| `./run.sh secciones` | Lista secciones (`login`, `ayuda`) |
+| `./run.sh secciones` | Lista secciones registradas en `agente_e2e.py` |
 | `./run.sh probar` | Test de conexión al LLM |
 | `./run.sh plan <seccion>` | Genera/actualiza el plan Markdown |
 | `./run.sh listar <seccion>` | Lista casos del plan con archivo destino |
@@ -319,8 +319,30 @@ Corregí a mano lo que el modelo local no acierte (Ollama 7B es más propenso a 
 |---------|------|----------------------|
 | `login` | `frontend/specs/plan_login.md` | `tests/tradicional/login.spec.ts` |
 | `ayuda` | `frontend/specs/plan_ayuda.md` | `tests/agente/ayuda-funciones-usuario-jd.spec.ts` |
+| `procesos` | `frontend/specs/plan_procesos_dimension_jd.md` | `tests/agente/procesos-jd-crear-dimension-prueba.spec.ts` |
+| `evidencia` | `frontend/specs/plan_evidencia_cc.md` | `tests/agente/procesos-jd-crear-dimension-prueba.spec.ts` |
+| `responsable` | `frontend/specs/plan_proceso_responsable_jd.md` | idem |
+| `aprobacion` | `frontend/specs/plan_aprobacion_td.md` | idem |
+| `plantilla` | `frontend/specs/plan_plantilla_jd.md` | idem |
 
-Contexto que lee el planner: `context/base.md` + `context/<seccion>.md`.
+Contexto que lee el planner/generator: `context/base.md` + `context/<archivo>.md` (ver columna en `SECCIONES` de `agente_e2e.py`).
+
+Listar en terminal: `./run.sh secciones`.
+
+---
+
+## 10.1. Flujo recomendado (minimizar errores del LLM)
+
+1. **Plan humano primero** — Usá los `frontend/specs/plan_*.md` hechos con MCP (o `./run.sh plan <seccion>` solo para refinar). No regeneres el plan entero si ya está auditado.
+2. **Un caso por invocación** — `./run.sh generar <seccion> 1.1` (nunca pidas varios casos en un solo prompt).
+3. **Patrón vivo** — El spec `procesos-jd-crear-dimension-prueba.spec.ts` es la referencia de estilo (helpers login, un solo `test()`, comentarios `// N.`).
+4. **Precondiciones en contexto** — Si el caso depende de datos (evidencia antes de aprobar TD, CC de la misma carrera que el proceso), cumplilas o documentá `test.skip` en el spec tras la primera corrida fallida.
+5. **Correr enseguida** — Con backend + `pnpm dev` up:  
+   `cd frontend && PW_SKIP_BACKEND=1 pnpm test:e2e tests/agente/<archivo>.spec.ts`
+6. **Auditoría** — `frontend/AUDITORIA_E2E.md` (5 preguntas). Corregí a mano localizadores y seed (Ollama 7B suele fallar en selects/modales).
+7. **Orden sugerido de specs** — `login` → `plantilla` / `procesos` → `responsable` → `evidencia` → `aprobacion` (cadena de datos).
+
+Variables útiles en `.env`: modelo con buen TypeScript (p. ej. `qwen2.5-coder:7b`), `temperature=0` ya va fijo en el agente.
 
 ---
 

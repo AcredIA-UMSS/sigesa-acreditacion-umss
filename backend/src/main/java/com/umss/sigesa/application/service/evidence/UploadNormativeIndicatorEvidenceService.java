@@ -25,6 +25,9 @@ import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,6 +45,17 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "image/png",
             "image/jpeg"
+    );
+
+    private static final Map<String, String> EXTENSION_TO_CONTENT_TYPE = Map.ofEntries(
+            Map.entry(".pdf", "application/pdf"),
+            Map.entry(".doc", "application/msword"),
+            Map.entry(".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            Map.entry(".xls", "application/vnd.ms-excel"),
+            Map.entry(".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+            Map.entry(".png", "image/png"),
+            Map.entry(".jpg", "image/jpeg"),
+            Map.entry(".jpeg", "image/jpeg")
     );
 
     private final NormativeHierarchyQueryPort hierarchyQueryPort;
@@ -109,7 +123,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             hash = contentHashPort.sha256Hex(externalUrl.getBytes(StandardCharsets.UTF_8));
             storageKey = EXTERNAL_STORAGE_PREFIX + evidenceId;
         } else {
-            validatePayload(command.fileContent(), command.contentType());
+            validatePayload(command.fileContent(), command.contentType(), command.originalFilename());
             hash = contentHashPort.sha256Hex(command.fileContent());
             storageKey = blobStorage.store(
                     evidenceId, 1, command.fileContent(), command.originalFilename());
@@ -189,13 +203,38 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         }
     }
 
-    private void validatePayload(byte[] content, String contentType) {
+    private void validatePayload(byte[] content, String contentType, String originalFilename) {
         if (content.length > MAX_BYTES) {
             throw new EvidencePayloadTooLargeException(MAX_BYTES);
         }
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(normalizeContentType(contentType))) {
+        String resolved = resolveContentType(contentType, originalFilename);
+        if (!ALLOWED_CONTENT_TYPES.contains(resolved)) {
             throw new InvalidEvidenceFormatException("Unsupported content type: " + contentType);
         }
+    }
+
+    static String resolveContentType(String contentType, String originalFilename) {
+        String normalized = contentType != null ? normalizeContentType(contentType) : "";
+        if (ALLOWED_CONTENT_TYPES.contains(normalized)) {
+            return normalized;
+        }
+        if ("application/octet-stream".equals(normalized) || normalized.isEmpty()) {
+            return inferContentTypeFromFilename(originalFilename).orElse(normalized);
+        }
+        return normalized;
+    }
+
+    private static Optional<String> inferContentTypeFromFilename(String originalFilename) {
+        if (originalFilename == null || originalFilename.isBlank()) {
+            return Optional.empty();
+        }
+        String lower = originalFilename.toLowerCase(Locale.ROOT);
+        for (Map.Entry<String, String> entry : EXTENSION_TO_CONTENT_TYPE.entrySet()) {
+            if (lower.endsWith(entry.getKey())) {
+                return Optional.of(entry.getValue());
+            }
+        }
+        return Optional.empty();
     }
 
     private static String normalizeContentType(String contentType) {

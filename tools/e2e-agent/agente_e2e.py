@@ -7,8 +7,8 @@
 
     python agente_e2e.py probar                  # verifica Ollama/Open WebUI
     python agente_e2e.py plan login              -> frontend/specs/plan_login.md
-    python agente_e2e.py listar login            -> casos del plan
-    python agente_e2e.py generar login 1.1       -> frontend/tests/agente/<archivo>.spec.ts
+    python agente_e2e.py listar responsable      -> casos del plan
+    python agente_e2e.py generar plantilla 1.1     -> frontend/tests/agente/<archivo>.spec.ts
     cd ../../frontend && PW_SKIP_BACKEND=1 pnpm test:e2e tests/agente/<archivo>.spec.ts
 
 Diferencia con agentes nativos Playwright: NO abre el navegador; lee contexto Markdown +
@@ -41,6 +41,36 @@ SECCIONES: dict[str, dict[str, str]] = {
         "context": "ayuda.md",
         "patron": "tests/agente/ayuda-funciones-usuario-jd.spec.ts",
         "titulo": "Asistente /ayuda — agent=general",
+    },
+    "procesos": {
+        "plan": "plan_procesos_dimension_jd.md",
+        "context": "procesos_dimension.md",
+        "patron": "tests/agente/procesos-jd-crear-dimension-prueba.spec.ts",
+        "titulo": "Procesos — JD crea dimensión normativa",
+    },
+    "evidencia": {
+        "plan": "plan_evidencia_cc.md",
+        "context": "evidencia_cc.md",
+        "patron": "tests/agente/procesos-jd-crear-dimension-prueba.spec.ts",
+        "titulo": "Evidencia — CC carga en proceso",
+    },
+    "responsable": {
+        "plan": "plan_proceso_responsable_jd.md",
+        "context": "proceso_responsable_jd.md",
+        "patron": "tests/agente/procesos-jd-crear-dimension-prueba.spec.ts",
+        "titulo": "Proceso — JD asigna coordinador (CC)",
+    },
+    "aprobacion": {
+        "plan": "plan_aprobacion_td.md",
+        "context": "aprobacion_td.md",
+        "patron": "tests/agente/procesos-jd-crear-dimension-prueba.spec.ts",
+        "titulo": "Revisión — TD aprueba indicador / cierra dimensión",
+    },
+    "plantilla": {
+        "plan": "plan_plantilla_jd.md",
+        "context": "plantilla_jd.md",
+        "patron": "tests/agente/procesos-jd-crear-dimension-prueba.spec.ts",
+        "titulo": "Plantillas — JD crea plantilla en borrador",
     },
 }
 
