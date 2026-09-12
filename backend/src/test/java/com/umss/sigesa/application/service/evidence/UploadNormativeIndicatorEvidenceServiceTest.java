@@ -95,6 +95,30 @@ class UploadNormativeIndicatorEvidenceServiceTest {
     }
 
     @Test
+    @DisplayName("Acepta application/octet-stream si la extensión es .pdf (navegador E2E)")
+    void upload_acceptsOctetStreamWithPdfExtension() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+
+        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
+                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
+                        indicatorId, UUID.randomUUID(), programId, UUID.randomUUID(),
+                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
+        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(blobStorage.store(any(), eq(1), eq(pdf), eq("evidencia-e2e.pdf"))).thenReturn("key");
+
+        var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
+                indicatorId, "Descripción válida", pdf, "application/octet-stream", "evidencia-e2e.pdf", null, userId));
+
+        assertEquals(IndicatorState.SUBIDO, result.indicatorState());
+    }
+
+    @Test
     @DisplayName("Rechaza carga sin archivo ni enlace externo")
     void upload_rejectsMissingPayload() {
         assertThrows(EvidenceUnclassifiedException.class, () -> service.upload(

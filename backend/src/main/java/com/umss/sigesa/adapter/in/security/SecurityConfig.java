@@ -36,11 +36,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers(HttpMethod.GET, "/api/v1/indicators/uploadable").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/indicators/{indicatorId}/evidences").hasRole("CC")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/indicators/*/evidences").hasRole("CC")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/dashboards/export-jobs",
                                 "/api/v1/dashboards/coordinator/export-jobs").hasAnyRole("CC", "TD", "JD")
