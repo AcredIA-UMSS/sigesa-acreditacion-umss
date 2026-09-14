@@ -1,12 +1,18 @@
 // spec: specs/plan_evidencia_cc.md — caso 1.1
 import { test, expect } from '@playwright/test';
-import { blockAssistantApi, loginCc } from './helpers/auth';
+import {
+  blockAssistantApi,
+  fetchFirstUploadableIndicatorId,
+  loginCc,
+  stubDashboardSummary,
+} from './helpers/auth';
 import { evidencePdfUpload } from './helpers/evidenceFixture';
 
 test.describe('Evidencia CC — página Cargar evidencia', () => {
   test('CC sube evidencia en /evidencias/cargar', async ({ page }) => {
     test.setTimeout(120_000);
     await blockAssistantApi(page);
+    await stubDashboardSummary(page);
     await loginCc(page);
     await page.goto('/evidencias/cargar');
     await page.waitForResponse(
@@ -23,11 +29,12 @@ test.describe('Evidencia CC — página Cargar evidencia', () => {
     await proceso.selectOption({ index: 1 });
     const indicador = page.getByLabel('Indicador normativo');
     await expect(indicador).toBeEnabled();
-    const indicatorValues = await indicador.locator('option').evaluateAll((opts) =>
-      opts.map((o) => o.value).filter((v) => v.length > 0),
+    const uploadableId = await fetchFirstUploadableIndicatorId(page);
+    test.skip(
+      !uploadableId,
+      'Sin indicadores PENDIENTE/OBSERVADO — ejecutar tools/e2e-agent/scripts/verify-evidence-upload.sh (prepare dev)',
     );
-    test.skip(indicatorValues.length === 0, 'Proceso sin indicadores normativos v2 en seed');
-    await indicador.selectOption(indicatorValues[0]!);
+    await indicador.selectOption(uploadableId!);
 
     const desc = `E2E evidencia ${Date.now()}`;
     await page.getByLabel(/DESCRIPCIÓN/i).fill(desc);
@@ -55,6 +62,6 @@ test.describe('Evidencia CC — página Cargar evidencia', () => {
       `Upload HTTP ${response.status()} (auth sent: ${Boolean(authHeader)}): ${responseBody.slice(0, 500)}`,
     ).toBeTruthy();
     await expect(page).not.toHaveURL(/\/login/);
-    await expect(page.getByText('Carga exitosa')).toBeVisible();
+    await expect(page.getByText('Carga exitosa', { exact: true })).toBeVisible();
   });
 });

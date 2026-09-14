@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,4 +58,19 @@ public interface SpringDataNormativeIndicatorRepository extends JpaRepository<No
               )
             """)
     long countWithEvidenceByProcessId(@Param("processId") UUID processId);
+
+    @Query("""
+            SELECT i FROM NormativeIndicatorJpaEntity i
+            JOIN FETCH i.level3Node l3
+            JOIN FETCH l3.level2Node l2
+            JOIN FETCH l2.level1Node l1
+            JOIN FETCH l1.process proc
+            WHERE proc.careerId IN :programIds
+              AND proc.status = 'ACTIVE'
+              AND i.status IN :statuses
+            ORDER BY l1.order ASC, l2.order ASC, l3.order ASC, i.order ASC
+            """)
+    List<NormativeIndicatorJpaEntity> findUploadableByProgramIdsAndStatuses(
+            @Param("programIds") Collection<UUID> programIds,
+            @Param("statuses") Collection<String> statuses);
 }

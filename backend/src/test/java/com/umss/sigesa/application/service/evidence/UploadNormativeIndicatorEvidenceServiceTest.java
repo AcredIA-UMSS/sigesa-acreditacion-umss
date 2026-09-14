@@ -158,6 +158,36 @@ class UploadNormativeIndicatorEvidenceServiceTest {
     }
 
     @Test
+    @DisplayName("Permite alcance vía claim programScope del JWT si no hay fila UPA activa")
+    void upload_allowsJwtProgramScopeWhenAssignmentMissing() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+
+        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
+                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
+                        indicatorId, UUID.randomUUID(), programId, UUID.randomUUID(),
+                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
+        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
+
+        var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
+                indicatorId,
+                "Descripción válida",
+                pdf,
+                "application/pdf",
+                "doc.pdf",
+                null,
+                userId,
+                List.of(programId)));
+
+        assertEquals(IndicatorState.SUBIDO, result.indicatorState());
+    }
+
+    @Test
     @DisplayName("CC fuera de alcance de carrera")
     void upload_rejectsScope() {
         UUID indicatorId = UUID.randomUUID();

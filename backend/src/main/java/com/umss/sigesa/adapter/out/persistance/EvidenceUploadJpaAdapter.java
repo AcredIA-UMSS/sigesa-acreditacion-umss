@@ -61,8 +61,14 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
                                       IndicatorStateHistoryEntry historyEntry) {
         EvidenceEntity evidenceEntity = new EvidenceEntity();
         evidenceEntity.setId(evidence.getId());
-        evidenceEntity.setIndicatorId(evidence.getIndicatorId());
-        evidenceEntity.setNormativeIndicatorId(evidence.getNormativeIndicatorId());
+        UUID legacyIndicatorId = evidence.getIndicatorId();
+        UUID normativeIndicatorId = evidence.getNormativeIndicatorId();
+        // Postgres: indicator_id NOT NULL; cargas v2 solo traen normativeIndicatorId.
+        if (legacyIndicatorId == null && normativeIndicatorId != null) {
+            legacyIndicatorId = normativeIndicatorId;
+        }
+        evidenceEntity.setIndicatorId(legacyIndicatorId);
+        evidenceEntity.setNormativeIndicatorId(normativeIndicatorId);
         evidenceEntity.setLatestVersionId(version.getId());
         evidenceEntity.setCreatedAt(evidence.getCreatedAt());
         evidenceRepository.save(evidenceEntity);

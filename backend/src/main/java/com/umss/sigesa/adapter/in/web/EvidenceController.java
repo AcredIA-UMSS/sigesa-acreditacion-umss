@@ -19,9 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.umss.sigesa.adapter.in.security.JwtProgramScopeSupport;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,14 +51,16 @@ public class EvidenceController {
     public ResponseEntity<UploadEvidenceResponse> uploadEvidence(
             @PathVariable UUID indicatorId,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            @RequestPart(value = "externalUrl", required = false) String externalUrl,
-            @RequestPart("description") String description,
+            @RequestParam(value = "externalUrl", required = false) String externalUrl,
+            @RequestParam("description") String description,
             Authentication authentication) throws IOException {
 
         UUID uploadedBy = (UUID) authentication.getPrincipal();
         byte[] fileContent = file != null ? file.getBytes() : null;
         String contentType = file != null ? file.getContentType() : null;
         String originalFilename = file != null ? file.getOriginalFilename() : null;
+
+        List<UUID> jwtProgramScope = JwtProgramScopeSupport.programScopeFromAuthentication(authentication);
 
         NormativeIndicatorEvidenceUploadCommand command = new NormativeIndicatorEvidenceUploadCommand(
                 indicatorId,
@@ -64,7 +69,8 @@ public class EvidenceController {
                 contentType,
                 originalFilename,
                 externalUrl,
-                uploadedBy);
+                uploadedBy,
+                jwtProgramScope);
 
         NormativeIndicatorEvidenceUploadResult result = uploadUseCase.upload(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UploadEvidenceResponse(
@@ -108,4 +114,5 @@ public class EvidenceController {
                 .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
                 .toList();
     }
+
 }

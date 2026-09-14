@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { blockAssistantApi, loginCc, stubDashboardSummary } from '../agente/helpers/auth';
 
 test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar', () => {
   const SEARCH_ROUTE = '/evidencias/buscar';
@@ -88,79 +89,6 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
         })
       );
     });
-  });
-
-  // Single-block full E2E User Journey Test
-  test('Complete E2E User Journey: Login -> Navigate via Sidebar -> Standard Search -> Toggle AI ON (Synonym Expansion) -> Verify AI Header -> Reset', async ({ page }) => {
-    let lastQuery = '';
-    let lastAiHeader = '';
-    let lastAiParam = '';
-
-    await page.route(API_SEARCH_URL, async (route) => {
-      const request = route.request();
-      const url = new URL(request.url());
-      lastQuery = url.searchParams.get('q') || '';
-      lastAiParam = url.searchParams.get('aiEnabled') || '';
-      lastAiHeader = request.headers()['x-ai-enabled'] || '';
-
-      // Return AI synonym expansion results if X-AI-Enabled header is present, else standard results
-      const responsePayload = lastAiHeader === 'true' ? mockAiSynonymSearchResults : mockStandardSearchResults;
-
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ data: responsePayload }),
-      });
-    });
-
-    // 1. User starts at Dashboard
-    await page.goto('/dashboard');
-
-    // 2. Navigates via Sidebar to "BUSCAR EVIDENCIAS"
-    const searchNav = page.getByRole('link', { name: /buscar evidencias/i });
-    await expect(searchNav).toBeVisible();
-    await searchNav.click();
-
-    await expect(page).toHaveURL(new RegExp(SEARCH_ROUTE));
-    await expect(page.getByRole('heading', { name: /Buscador de Evidencias/i })).toBeVisible();
-
-    // 3. Step A: Standard exact text search without AI (AI OFF)
-    const searchInput = page.locator('#evidence-search-q');
-    await searchInput.fill('informe');
-
-    const searchButton = page.getByRole('button', { name: /buscar/i });
-    await searchButton.click();
-
-    expect(lastQuery).toBe('informe');
-    expect(lastAiHeader).toBe(''); // AI header was NOT sent
-    await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
-
-    // 4. Step B: Enable AI Toggle (AI ON) and search query "aulas de clase"
-    const aiToggle = page.locator('#evidence-search-ai-toggle');
-    await aiToggle.check();
-    await expect(aiToggle).toBeChecked();
-
-    await searchInput.fill('aulas de clase');
-    await searchButton.click();
-
-    // Verification 1: Confirm X-AI-Enabled header and query param WERE sent to backend API
-    expect(lastQuery).toBe('aulas de clase');
-    expect(lastAiHeader).toBe('true');
-    expect(lastAiParam).toBe('true');
-
-    // Verification 2: Confirm AI Synonym Expansion badge and result indicators in DOM
-    await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
-    await expect(page.getByText(/ampliados vía Asistente MCP IA/i)).toBeVisible();
-
-    // Verification 3: Confirm evidence hits containing expanded synonyms ("infraestructura", "tecnologicos") are displayed
-    await expect(page.getByText('planos_distribucion_infraestructura.pdf')).toBeVisible();
-    await expect(page.getByText('inventario_equipos_tecnologicos.pdf')).toBeVisible();
-
-    // 5. Step C: Reset search
-    const resetButton = page.getByRole('button', { name: /limpiar/i });
-    await resetButton.click();
-    await expect(searchInput).toHaveValue('');
-    await expect(aiToggle).not.toBeChecked();
   });
 
   // Granular Spec: Verify AI Synonym Expansion Function Call
@@ -511,5 +439,146 @@ test.describe('Search Evidences E2E Tests - Production Route /evidencias/buscar'
     await page.getByRole('button', { name: /buscar/i }).click();
 
     await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
+  });
+});
+
+test.describe('Search Evidences — journey con login real', () => {
+  const SEARCH_ROUTE = '/evidencias/buscar';
+  const API_SEARCH_URL = '**/api/v1/evidences/search*';
+
+  const mockStandardSearchResults = {
+    items: [
+      {
+        evidenceId: 'ev-101',
+        subphaseId: 'sub-01',
+        subphaseName: 'Recopilación de Información',
+        phaseId: 'phase-01',
+        phaseName: 'Fase 1: Autoevaluación',
+        processId: 'proc-01',
+        indicatorId: 'ind-01',
+        indicatorCode: 'IND-1.1',
+        indicatorTitle: 'Plan de Estudios',
+        version: 1,
+        description: 'Informe de autoevaluación anual 2025',
+        originalFilename: 'informe_autoevaluacion.pdf',
+        uploadedAt: '2025-06-15T10:00:00Z',
+        uploadedBy: 'coordinador@umss.edu.bo',
+        blobAvailable: true,
+      },
+    ],
+    total: 1,
+    page: 0,
+    size: 20,
+  };
+
+  const mockAiSynonymSearchResults = {
+    items: [
+      {
+        evidenceId: 'ev-201',
+        subphaseId: 'sub-01',
+        subphaseName: 'Infraestructura y Aulas',
+        phaseId: 'phase-01',
+        phaseName: 'Fase 1: Autoevaluación',
+        processId: 'proc-01',
+        indicatorId: 'ind-04',
+        indicatorCode: 'CRT-04',
+        indicatorTitle: 'Infraestructura Académica',
+        version: 1,
+        description: 'Planos aprobados y distribución de laboratorios de computación e infraestructura física',
+        originalFilename: 'planos_distribucion_infraestructura.pdf',
+        uploadedAt: '2025-08-05T10:00:00Z',
+        uploadedBy: 'tecnico@umss.edu.bo',
+        blobAvailable: true,
+      },
+      {
+        evidenceId: 'ev-202',
+        subphaseId: 'sub-02',
+        subphaseName: 'Equipamiento',
+        phaseId: 'phase-01',
+        phaseName: 'Fase 1: Autoevaluación',
+        processId: 'proc-01',
+        indicatorId: 'ind-04',
+        indicatorCode: 'CRT-04',
+        indicatorTitle: 'Infraestructura Académica',
+        version: 2,
+        description: 'Inventario valorado de activos fijos tecnológicos y equipamiento interactivo',
+        originalFilename: 'inventario_equipos_tecnologicos.pdf',
+        uploadedAt: '2025-08-10T14:30:00Z',
+        uploadedBy: 'admin@umss.edu.bo',
+        blobAvailable: true,
+      },
+    ],
+    total: 2,
+    page: 0,
+    size: 20,
+  };
+
+  test('Complete E2E User Journey: Login -> Navigate via Sidebar -> Standard Search -> Toggle AI ON (Synonym Expansion) -> Verify AI Header -> Reset', async ({
+    page,
+  }) => {
+    let lastQuery = '';
+    let lastAiHeader = '';
+    let lastAiParam = '';
+
+    await blockAssistantApi(page);
+    await stubDashboardSummary(page);
+
+    await page.route(API_SEARCH_URL, async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      lastQuery = url.searchParams.get('q') || '';
+      lastAiParam = url.searchParams.get('aiEnabled') || '';
+      lastAiHeader = request.headers()['x-ai-enabled'] || '';
+
+      const responsePayload =
+        lastAiHeader === 'true' ? mockAiSynonymSearchResults : mockStandardSearchResults;
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: responsePayload }),
+      });
+    });
+
+    await loginCc(page);
+    await page.goto('/dashboard');
+
+    const searchNav = page.getByRole('link', { name: 'BUSCAR EVIDENCIAS' });
+    await expect(searchNav).toBeVisible();
+    await searchNav.click();
+
+    await expect(page).toHaveURL(new RegExp(SEARCH_ROUTE));
+    await expect(page.getByRole('heading', { name: /Buscador de Evidencias/i })).toBeVisible();
+
+    const searchInput = page.locator('#evidence-search-q');
+    await searchInput.fill('informe');
+
+    const searchButton = page.getByRole('button', { name: /buscar/i });
+    await searchButton.click();
+
+    expect(lastQuery).toBe('informe');
+    expect(lastAiHeader).toBe('');
+    await expect(page.getByText('informe_autoevaluacion.pdf')).toBeVisible();
+
+    const aiToggle = page.locator('#evidence-search-ai-toggle');
+    await aiToggle.check();
+    await expect(aiToggle).toBeChecked();
+
+    await searchInput.fill('aulas de clase');
+    await searchButton.click();
+
+    expect(lastQuery).toBe('aulas de clase');
+    expect(lastAiHeader).toBe('true');
+    expect(lastAiParam).toBe('true');
+
+    await expect(page.getByText(/Modo IA MCP Activo/i)).toBeVisible();
+    await expect(page.getByText(/ampliados vía Asistente MCP IA/i)).toBeVisible();
+    await expect(page.getByText('planos_distribucion_infraestructura.pdf')).toBeVisible();
+    await expect(page.getByText('inventario_equipos_tecnologicos.pdf')).toBeVisible();
+
+    const resetButton = page.getByRole('button', { name: /limpiar/i });
+    await resetButton.click();
+    await expect(searchInput).toHaveValue('');
+    await expect(aiToggle).not.toBeChecked();
   });
 });
