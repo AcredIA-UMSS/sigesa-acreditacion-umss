@@ -30,18 +30,21 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                            RestAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+                                            RestAuthenticationEntryPoint authenticationEntryPoint,
+                                            RestAccessDeniedHandler accessDeniedHandler) throws Exception {
         http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/indicators/uploadable").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/indicators/*/evidences").hasRole("CC")
+                        // Indicadores uploadable / evidencias: solo anyRequest + @PreAuthorize en controllers.
+                        // Un matcher HttpMethod.POST en .../evidences provocaba 401 con JWT válido (GET OK, POST no).
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/dashboards/export-jobs",
                                 "/api/v1/dashboards/coordinator/export-jobs").hasAnyRole("CC", "TD", "JD")

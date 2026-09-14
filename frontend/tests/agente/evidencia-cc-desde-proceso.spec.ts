@@ -1,6 +1,6 @@
 // spec: specs/plan_evidencia_cc.md — caso 1.2
 import { test, expect } from '@playwright/test';
-import { blockAssistantApi, loginCc, PROCESS_INF_SIS_ACTIVE_ID } from './helpers/auth';
+import { blockAssistantApi, loginCc, PROCESS_INF_SIS_ACTIVE_ID, stubDashboardSummary } from './helpers/auth';
 import { evidencePdfUpload } from './helpers/evidenceFixture';
 
 async function expandNormativeTree(page: import('@playwright/test').Page) {
@@ -20,6 +20,7 @@ test.describe('Evidencia CC — desde detalle de proceso', () => {
   test('CC sube evidencia desde el árbol normativo', async ({ page }) => {
     test.setTimeout(120_000);
     await blockAssistantApi(page);
+    await stubDashboardSummary(page);
     await loginCc(page);
     await page.goto(`/procesos/${PROCESS_INF_SIS_ACTIVE_ID}`);
     await page.waitForResponse(
@@ -29,7 +30,16 @@ test.describe('Evidencia CC — desde detalle de proceso', () => {
     await expect(page.getByRole('heading', { name: 'Estructura del proceso' })).toBeVisible();
 
     await expandNormativeTree(page);
-    const uploadLink = page.getByRole('button', { name: 'Subir evidencia' });
+    const uploadLink = page
+      .locator('div')
+      .filter({ hasText: 'Sin evidencias cargadas.' })
+      .getByRole('button', { name: 'Subir evidencia' })
+      .first();
+    const hasEmptySlot = (await uploadLink.count()) > 0;
+    test.skip(
+      !hasEmptySlot,
+      'Sin indicador sin evidencia en el árbol — prepare dev o use otro seed',
+    );
     await expect(uploadLink).toBeVisible();
     await uploadLink.click();
 

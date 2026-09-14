@@ -25,6 +25,7 @@ import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -102,7 +103,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
                     "Hay una observación pendiente; subsane la evidencia en lugar de cargar una nueva.");
         });
 
-        assertProgramScope(command.uploadedBy(), context.careerId());
+        assertProgramScope(command.uploadedBy(), context.careerId(), command.jwtProgramScope());
 
         IndicatorState resultingState = context.status();
         if (context.status() == IndicatorState.PENDIENTE) {
@@ -241,11 +242,15 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         return contentType.split(";")[0].trim().toLowerCase();
     }
 
-    private void assertProgramScope(UUID userId, UUID programId) {
+    private void assertProgramScope(UUID userId, UUID programId, List<UUID> jwtProgramScope) {
         boolean allowed = assignmentRepository.findActiveByUserId(userId).stream()
                 .anyMatch(a -> a.getProgramId().equals(programId));
-        if (!allowed) {
-            throw new ProgramScopeDeniedException();
+        if (allowed) {
+            return;
         }
+        if (jwtProgramScope != null && jwtProgramScope.contains(programId)) {
+            return;
+        }
+        throw new ProgramScopeDeniedException();
     }
 }

@@ -29,6 +29,7 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         alignAccreditationProcessColumns();
+        alignNormativeEvidenceColumns();
     }
 
     private void alignAccreditationProcessColumns() {
@@ -53,6 +54,35 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
             log.info("Dev schema: accreditation_processes.operational_mode alineado.");
         } catch (Exception ex) {
             log.warn("No se pudo alinear operational_mode en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void alignNormativeEvidenceColumns() {
+        try {
+            jdbcTemplate.execute("""
+                    ALTER TABLE evidence_version
+                        ALTER COLUMN criterion_id DROP NOT NULL
+                    """);
+            jdbcTemplate.execute("""
+                    ALTER TABLE evidence
+                        ALTER COLUMN indicator_id DROP NOT NULL
+                    """);
+            jdbcTemplate.execute("""
+                    ALTER TABLE evidence
+                        DROP CONSTRAINT IF EXISTS evidence_indicator_id_key
+                    """);
+            jdbcTemplate.execute("""
+                    ALTER TABLE evidence
+                        DROP CONSTRAINT IF EXISTS ukeeyit5ntrv7eiun68fkooerle
+                    """);
+            jdbcTemplate.execute("""
+                    CREATE UNIQUE INDEX IF NOT EXISTS uk_evidence_normative_indicator
+                        ON evidence (normative_indicator_id)
+                        WHERE normative_indicator_id IS NOT NULL
+                    """);
+            log.info("Dev schema: evidence / evidence_version alineados para cargas normativas.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear evidence en dev: {}", ex.getMessage());
         }
     }
 }
