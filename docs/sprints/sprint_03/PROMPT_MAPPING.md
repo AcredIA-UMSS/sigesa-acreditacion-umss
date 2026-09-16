@@ -12,6 +12,7 @@
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
 | PM-008 | N/A | N/A | Tests unitarios backend (JaCoCo gate) | Completar tests unitarios de servicios de aplicación y clases del check JaCoCo |
+| PM-009 | N/A | N/A | Tests unitarios frontend (Vitest + RTL + MSW) | Infra de tests, cobertura de auth/dashboard/UI y features críticas |
 
 ---
 
@@ -632,3 +633,396 @@ Gate JaCoCo de clases existentes en verde (≥90 % línea). Cobertura global de 
 
 - [ ] Cubrir servicios de aplicación restantes (assistant, process structure, upload por subfase)
 - [ ] Decidir si eliminar o implementar `FaseServiceImpl` en el include JaCoCo del `pom.xml`
+
+## PM-009
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-009 |
+| **Fecha** | 2026-09-16 |
+| **Hora** | 17:35 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent (Grok 4.6) |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Completar tests unitarios del frontend (Vitest, RTL, MSW) |
+| **Objetivo** | Cubrir UI, auth, dashboard y features críticas sin llamadas reales a API ni backend |
+| **Contexto** | Inventario previo: 0 tests; Vitest/RTL/MSW no instalados. Usuario confirmó inventario y pidió implementar. |
+| **PR-IMPL vinculado** | N/A (prompt de testing, no feature FSD) |
+| **DD-UC vinculado** | N/A |
+| **FSD-UC vinculado** | N/A (cubre UC-001, UC-002, dashboard, WF y evidencias de forma transversal) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Actúa como un ingeniero senior de testing frontend especializado en React 19, TypeScript estricto y Vite.
+
+Repositorio:
+AcredIA-UMSS/sigesa-acreditacion-umss
+
+Objetivo:
+Implementar tests unitarios para el frontend ubicado en frontend/.
+
+Antes de modificar archivos, lee obligatoriamente:
+
+- AGENTS.md
+- README.md
+- frontend/package.json
+- frontend/tsconfig.json
+- frontend/vite.config.* 
+- frontend/src/main.tsx
+- frontend/src/App.tsx
+- Toda la estructura de frontend/src/components/
+- Toda la estructura de frontend/src/features/
+- Toda la estructura de frontend/src/lib/
+- Toda la estructura de frontend/src/api/
+- Toda la estructura de frontend/src/mocks/
+- Las reglas relevantes dentro de .cursor/rules/
+- .cursor/skills/generate-frontend-feature/SKILL.md, si existe
+
+Primero realiza un inventario y muéstrame:
+
+1. Componentes principales.
+2. Features existentes.
+3. Hooks personalizados.
+4. Providers, especialmente AuthProvider y React Query.
+5. Cliente API generado por Orval.
+6. Fixtures y mocks existentes.
+7. Tests existentes, si los hay.
+8. Archivos que necesitan tests.
+9. Dependencias de testing que faltan.
+
+No escribas tests hasta terminar este inventario.
+
+Stack obligatorio para los tests:
+
+- Vitest.
+- React Testing Library.
+- @testing-library/jest-dom.
+- @testing-library/user-event.
+- jsdom.
+- MSW para simular peticiones HTTP.
+- TypeScript estricto.
+
+Actualmente el frontend usa React 19, TypeScript, Vite, React Query y Orval. Si Vitest, React Testing Library, jsdom o MSW no están configurados, instálalos y configura el proyecto correctamente.
+
+Agrega o actualiza únicamente los scripts necesarios en frontend/package.json:
+
+- test
+- test:run
+- test:coverage
+
+Los scripts deben permitir ejecutar:
+
+pnpm test
+pnpm test:run
+pnpm test:coverage
+
+Reglas obligatorias:
+
+- No uses Jest.
+- No uses Cypress ni Playwright para estos tests unitarios.
+- No hagas llamadas reales a localhost:8080.
+- No hagas llamadas reales a internet.
+- No dependas de PostgreSQL, Docker ni del backend para ejecutar los tests unitarios.
+- Usa MSW para simular las respuestas de la API.
+- No escribas nuevas llamadas fetch o axios manuales en la aplicación.
+- Respeta el cliente API generado por Orval.
+- No uses any.
+- No desactives TypeScript estricto.
+- No borres ni sobrescribas código existente.
+- No modifiques backend/.
+- No modifiques docs/baseline/.
+- No cambies componentes productivos solo para hacerlos testeables sin explicarme primero el motivo.
+- No hagas tests frágiles basados en clases CSS o estructura interna innecesaria.
+- Prioriza queries accesibles: getByRole, getByLabelText, getByText y findByRole.
+- No uses snapshots como sustituto de assertions de comportamiento.
+
+Organización de los tests:
+
+- Coloca los tests junto al código que prueban o en una carpeta frontend/src/test/.
+- Usa nombres como:
+  - ComponentName.test.tsx
+  - hookName.test.ts
+  - featureName.test.tsx
+
+- Mantén la separación por features:
+  - frontend/src/features/auth/
+  - frontend/src/features/dashboard/
+  - frontend/src/features/processes/
+  - frontend/src/features/phases/
+  - frontend/src/features/evidence/
+  - frontend/src/features/admin/
+  - frontend/src/features/assistant/
+  - frontend/src/features/reports/
+
+Crea la infraestructura común de testing si hace falta:
+
+- frontend/src/test/setup.ts
+- frontend/src/test/test-utils.tsx
+- frontend/src/test/mocks/handlers.ts
+- frontend/src/test/mocks/server.ts
+
+La función de renderizado de tests debe incluir, cuando sea necesario:
+
+- QueryClientProvider.
+- AuthProvider.
+- Router de pruebas.
+- Configuración aislada de React Query.
+- retry: false para queries y mutations.
+
+No reutilices un QueryClient global entre tests si puede provocar contaminación entre casos.
+
+Cubre los siguientes tipos de tests.
+
+1. Componentes presentacionales
+
+Para componentes de frontend/src/components/ y componentes UI de frontend/src/features/ prueba:
+
+- Renderizado correcto.
+- Texto visible.
+- Props requeridas.
+- Estado vacío.
+- Estado de carga.
+- Estado de error.
+- Botones habilitados y deshabilitados.
+- Interacciones del usuario.
+- Formularios.
+- Validaciones.
+- Mensajes de error.
+- Modales.
+- Tablas.
+- Paginación.
+- Filtros.
+- Accesibilidad básica.
+
+Cada test debe verificar comportamiento observable por el usuario.
+
+2. Autenticación
+
+Para frontend/src/lib/auth/ y las pantallas de auth prueba:
+
+- Usuario no autenticado.
+- Usuario autenticado.
+- Login exitoso.
+- Login fallido.
+- Token ausente.
+- Token inválido o expirado.
+- Logout.
+- Redirección a login.
+- Protección de rutas.
+- Roles y permisos.
+
+Usa MSW para simular el endpoint de autenticación.
+
+3. Hooks y React Query
+
+Para frontend/src/lib/hooks/ prueba:
+
+- Estado inicial.
+- Carga.
+- Respuesta exitosa.
+- Error HTTP.
+- Mutaciones exitosas.
+- Mutaciones fallidas.
+- Invalidación de caché.
+- Reintentos deshabilitados según la configuración del proyecto.
+- Parámetros enviados a los hooks.
+- Manejo de respuestas vacías.
+
+Usa renderHook cuando sea apropiado y un QueryClient aislado por test.
+
+4. Dashboard
+
+Usa las fixtures existentes de:
+
+frontend/src/mocks/dashboardFixtures.ts
+
+Prueba:
+
+- Renderizado de indicadores.
+- Estados de carga.
+- Estados vacíos.
+- Errores de API.
+- Diferencias de permisos por rol.
+- Contenido para JD, TD y CC.
+- Tablas y alertas.
+- Filtros y paginación si existen.
+
+5. Features
+
+Revisa y crea tests para estas áreas cuando existan componentes o lógica suficiente:
+
+- auth
+- dashboard
+- processes
+- procesos
+- phases
+- subphases
+- evidence
+- admin
+- assistant
+- reports
+- accreditation-process
+
+No inventes funcionalidades que no existan en el código.
+
+6. API y Orval
+
+Para cada feature que use hooks generados por Orval:
+
+- No pruebes el código generado internamente línea por línea.
+- Prueba que el componente o hook reacciona correctamente a respuestas exitosas y fallidas.
+- Intercepta las rutas HTTP mediante MSW.
+- Verifica parámetros, método HTTP y datos relevantes enviados.
+- Verifica que los errores se muestren correctamente.
+
+7. App y routing
+
+Prueba App.tsx y las rutas principales:
+
+- Ruta pública de login.
+- Rutas protegidas.
+- Redirección de usuarios no autenticados.
+- Rutas inexistentes.
+- Renderizado según rol.
+- Provider de autenticación.
+- Integración con React Query.
+
+Proceso de implementación:
+
+1. Presenta primero el inventario solicitado.
+2. Configura Vitest y la infraestructura común.
+3. Implementa tests en grupos pequeños por feature.
+4. Después de cada grupo ejecuta:
+
+cd frontend
+pnpm test:run
+
+5. Después ejecuta:
+
+pnpm lint
+pnpm build
+pnpm test:coverage
+
+6. Corrige todos los errores encontrados.
+7. No marques la tarea como terminada si fallan los tests, el lint o el build.
+
+Criterios de calidad:
+
+- Cada test debe tener un nombre descriptivo.
+- Usa arrange, act, assert cuando sea útil.
+- Verifica resultados y comportamiento, no detalles internos.
+- Evita mocks innecesarios.
+- Evita duplicación de configuración.
+- Limpia handlers y mocks entre tests.
+- Usa userEvent en lugar de fireEvent cuando sea apropiado.
+- Usa waitFor o findBy... solo cuando exista una operación asíncrona real.
+- No agregues esperas artificiales.
+- No uses timeouts arbitrarios.
+- Verifica errores de API y estados de carga.
+- Mantén los tests independientes y deterministas.
+
+Al finalizar informa:
+
+- Dependencias instaladas.
+- Archivos de configuración creados o modificados.
+- Tests creados.
+- Componentes, hooks y features cubiertos.
+- Número total de tests.
+- Resultado de pnpm test:run.
+- Resultado de pnpm test:coverage.
+- Resultado de pnpm lint.
+- Resultado de pnpm build.
+- Porcentaje de cobertura.
+- Funcionalidades que todavía no tienen cobertura.
+- Problemas encontrados.
+- Si algún cambio productivo fue necesario, explica exactamente por qué.
+
+Empieza únicamente con el inventario. Espera mi confirmación antes de crear o modificar archivos. y guarda este prompt en @docs/PROMPT_MAPPING.md
+```
+
+### Entradas auxiliares
+
+- `frontend/package.json`
+- `frontend/vite.config.ts`
+- `docs/sprints/sprint_03/PROMPT_MAPPING.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `frontend/src/test/setup.ts` |
+| generado | `frontend/src/test/test-utils.tsx` |
+| generado | `frontend/src/test/session.ts` |
+| generado | `frontend/src/test/mocks/handlers.ts` |
+| generado | `frontend/src/test/mocks/server.ts` |
+| generado | `frontend/src/App.test.tsx` |
+| generado | `frontend/src/components/auth/ProtectedRoute.test.tsx` |
+| generado | `frontend/src/components/ui/Alert.test.tsx` |
+| generado | `frontend/src/components/ui/Button.test.tsx` |
+| generado | `frontend/src/components/ui/ConfirmDialog.test.tsx` |
+| generado | `frontend/src/components/ui/Select.test.tsx` |
+| generado | `frontend/src/components/ui/TextInput.test.tsx` |
+| generado | `frontend/src/features/admin/templates/lib/templateFormValidation.test.ts` |
+| generado | `frontend/src/features/admin/users/lib/userFormValidation.test.ts` |
+| generado | `frontend/src/features/auth/components/LoginFormUI.test.tsx` |
+| generado | `frontend/src/features/auth/pages/LoginPage.test.tsx` |
+| generado | `frontend/src/features/dashboard/api/dashboardHooks.test.tsx` |
+| generado | `frontend/src/features/dashboard/pages/DashboardPage.test.tsx` |
+| generado | `frontend/src/features/evidence/components/EvidenceUploadUI.test.tsx` |
+| generado | `frontend/src/features/phases/components/PhaseCloseAction.test.tsx` |
+| generado | `frontend/src/features/processes/components/ProcessListTable.test.tsx` |
+| generado | `frontend/src/features/processes/components/ProcessListView.test.tsx` |
+| generado | `frontend/src/features/processes/hooks/useProcessList.test.tsx` |
+| generado | `frontend/src/features/reports/components/ExecutiveReportUI.test.tsx` |
+| generado | `frontend/src/features/reports/hooks/mapReportError.test.ts` |
+| generado | `frontend/src/features/reports/lib/reportPreview.test.ts` |
+| generado | `frontend/src/features/subphases/components/SubphaseReviewActions.test.tsx` |
+| generado | `frontend/src/features/assistant/components/AssistantChatUI.test.tsx` |
+| generado | `frontend/src/lib/api/mapApiError.test.ts` |
+| generado | `frontend/src/lib/auth/AuthProvider.test.tsx` |
+| generado | `frontend/src/lib/auth/getPostLoginPath.test.ts` |
+| generado | `frontend/src/lib/auth/tokenStorage.test.ts` |
+| generado | `frontend/src/lib/hooks/useLockBodyScroll.test.ts` |
+| modificado | `frontend/package.json` |
+| modificado | `frontend/pnpm-lock.yaml` |
+| modificado | `frontend/pnpm-workspace.yaml` |
+| modificado | `frontend/vite.config.ts` |
+| modificado | `frontend/tsconfig.app.json` |
+| modificado | `frontend/.oxlintrc.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` (PM-009) |
+
+### Cambios realizados
+
+1. Infra Vitest + jsdom + RTL + user-event + MSW 2; scripts `test`, `test:run`, `test:coverage`.
+2. Handlers MSW de login, dashboard, procesos, cierre de fase y review de subfase.
+3. 86 tests unitarios colocados junto al código (auth, routing, UI, dashboard, procesos, evidencias, fases, reportes, assistant UI, validaciones admin).
+4. `cleanup()` en setup para evitar contaminación de DOM entre tests (Vitest sin globals).
+5. `allowBuilds.msw: true` en `pnpm-workspace.yaml` porque pnpm 10 ignora postinstall de MSW.
+6. Override de oxlint `react/only-export-components` solo en `src/test/**`.
+7. Sin cambios en componentes productivos.
+
+### Validación ejecutada
+
+- [x] `pnpm test:run` — 28 files, 86 tests, 0 failed
+- [x] `pnpm test:coverage` — Statements 24.64%, Branches 24.76%, Functions 20.10%, Lines 25.76%
+- [x] `pnpm lint` — oxlint exit 0
+- [x] `pnpm build` — tsc + vite build OK
+- [ ] Smoke Docker — N/A
+
+### Resultado obtenido
+
+Suite unitaria frontend en verde con MSW (sin backend/Postgres/internet). Cobertura global baja (~26 % líneas) porque quedan páginas admin, copilotos, editor de estructura y hooks de Orval sin tests.
+
+### Riesgos/observaciones
+
+- Gap de trazabilidad: no hay PR-IMPL formal; el usuario autorizó registro PM en Sprint 3.
+- pnpm 10 exige `allowBuilds.msw` o el install falla con ERR_PNPM_IGNORED_BUILDS.
+- `docker-compose.yml` tiene un cambio local de puerto Ollama (11435) no relacionado con esta tarea.
+
+### Próximos pasos
+
+- [ ] Tests de páginas admin (usuarios/plantillas) y editor de estructura de proceso
+- [ ] Hooks de evidencia upload, reportes asíncronos y copilotos de dominio
+- [ ] Subir cobertura de líneas hacia un umbral acordado
