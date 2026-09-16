@@ -30,6 +30,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -86,10 +87,11 @@ class UploadEvidenceServiceTest {
 
         assertEquals(1, result.version());
         assertEquals("abc123", result.contentHash());
-        assertEquals(IndicatorState.SUBIDO, result.currentState());
+        assertEquals(com.umss.sigesa.domain.model.SubphaseState.SUBIDO, result.currentState());
         assertEquals(UploadEvidenceService.EVENT_EVIDENCE_UPLOADED, result.event());
         verify(uploadPersistence).persistUpload(any(), any(), any());
         verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));
+        verify(uploadLock).release(indicatorId);
     }
 
     @Test
@@ -155,5 +157,129 @@ class UploadEvidenceServiceTest {
                 "application/pdf", "doc.pdf", userId)));
 
         verify(blobStorage).delete("key");
+        verify(uploadLock).release(indicatorId);
+    }
+
+    @Test
+    void shouldThrowWhenIndicatorDoesNotExist() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        when(indicatorRepository.findById(indicatorId)).thenReturn(Optional.empty());
+
+        assertThrows(com.umss.sigesa.domain.exception.IndicatorNotFoundException.class, () -> service.upload(
+                new EvidenceUploadCommand(indicatorId, criterionId, "Descripción válida", new byte[]{1},
+                        "application/pdf", "f.pdf", UUID.randomUUID())));
+        verify(blobStorage, org.mockito.Mockito.never()).store(any(), anyInt(), any(), any());
+        verify(uploadLock, org.mockito.Mockito.never()).tryAcquire(any());
+    }
+
+    @Test
+    void shouldThrowWhenDescriptionIsBlank() {
+        assertThrows(EvidenceUnclassifiedException.class, () -> service.upload(
+                new EvidenceUploadCommand(UUID.randomUUID(), UUID.randomUUID(), "  ", new byte[]{1},
+                        "application/pdf", "f.pdf", UUID.randomUUID())));
+        verify(indicatorRepository, org.mockito.Mockito.never()).findById(any());
+    }
+
+    @Test
+    void shouldThrowWhenFileIsEmpty() {
+        assertThrows(EvidenceUnclassifiedException.class, () -> service.upload(
+                new EvidenceUploadCommand(UUID.randomUUID(), UUID.randomUUID(), "desc", new byte[0],
+                        "application/pdf", "f.pdf", UUID.randomUUID())));
+        verify(indicatorRepository, org.mockito.Mockito.never()).findById(any());
+    }
+
+    @Test
+    void shouldThrowWhenContentTypeIsUnsupported() {
+        assertThrows(com.umss.sigesa.domain.exception.InvalidEvidenceFormatException.class, () -> service.upload(
+                new EvidenceUploadCommand(UUID.randomUUID(), UUID.randomUUID(), "desc", new byte[]{1},
+                        "text/plain", "f.txt", UUID.randomUUID())));
+        verify(indicatorRepository, org.mockito.Mockito.never()).findById(any());
+    }
+
+    @Test
+    void shouldThrowWhenUploadAlreadyInProgress() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, programId, criterionId, UUID.randomUUID())));
+        when(indicatorRepository.getCurrentState(indicatorId)).thenReturn(IndicatorState.PENDIENTE);
+        when(evidenceRepository.existsByIndicatorId(indicatorId)).thenReturn(false);
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(uploadLock.tryAcquire(indicatorId)).thenReturn(false);
+
+        assertThrows(com.umss.sigesa.domain.exception.UploadInProgressException.class, () -> service.upload(
+                new EvidenceUploadCommand(indicatorId, criterionId, "Descripción válida", new byte[]{1},
+                        "application/pdf", "doc.pdf", userId)));
+        verify(blobStorage, org.mockito.Mockito.never()).store(any(), anyInt(), any(), any());
+    }
+
+    @Test
+    void shouldThrowWhenEvidenceAlreadyExists() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, programId, criterionId, UUID.randomUUID())));
+        when(indicatorRepository.getCurrentState(indicatorId)).thenReturn(IndicatorState.PENDIENTE);
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(evidenceRepository.existsByIndicatorId(indicatorId)).thenReturn(true);
+
+        assertThrows(com.umss.sigesa.domain.exception.IndicatorNotUploadableException.class, () -> service.upload(
+                new EvidenceUploadCommand(indicatorId, criterionId, "Descripción válida", new byte[]{1},
+                        "application/pdf", "doc.pdf", userId)));
+        verify(uploadLock, org.mockito.Mockito.never()).tryAcquire(any());
+    }
+
+    @Test
+    void shouldThrowWhenIndicatorIsApproved() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, programId, criterionId, UUID.randomUUID())));
+        when(indicatorRepository.getCurrentState(indicatorId)).thenReturn(IndicatorState.APROBADO);
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+
+        assertThrows(com.umss.sigesa.domain.exception.IndicatorNotUploadableException.class, () -> service.upload(
+                new EvidenceUploadCommand(indicatorId, criterionId, "Descripción válida", new byte[]{1},
+                        "application/pdf", "doc.pdf", userId)));
+        verify(uploadLock, org.mockito.Mockito.never()).tryAcquire(any());
+    }
+
+    @Test
+    void shouldReleaseLockWhenBlobStoreFails() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, programId, criterionId, UUID.randomUUID())));
+        when(indicatorRepository.getCurrentState(indicatorId)).thenReturn(IndicatorState.OBSERVADO);
+        when(evidenceRepository.existsByIndicatorId(indicatorId)).thenReturn(false);
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(uploadLock.tryAcquire(indicatorId)).thenReturn(true);
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenThrow(new IllegalStateException("disk full"));
+
+        assertThrows(IllegalStateException.class, () -> service.upload(new EvidenceUploadCommand(
+                indicatorId, criterionId, "Descripción válida", pdf,
+                "application/pdf", "doc.pdf", userId)));
+
+        verify(uploadLock).release(indicatorId);
+        verify(uploadPersistence, org.mockito.Mockito.never()).persistUpload(any(), any(), any());
     }
 }

@@ -140,7 +140,8 @@ class TemplateControllerWebMvcTest {
                         {
                           "name": "Diagnóstico",
                           "order": 1,
-                          "referenceUrl": "https://duea.umss.edu.bo/guia/diagnostico"
+                          "referenceUrl": "https://duea.umss.edu.bo/guia/diagnostico",
+                          "requirements": "Adjuntar informe de autoevaluación y evidencias asociadas."
                         }
                       ]
                     }

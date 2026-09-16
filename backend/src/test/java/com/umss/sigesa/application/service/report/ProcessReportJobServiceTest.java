@@ -96,4 +96,53 @@ class ProcessReportJobServiceTest {
         assertEquals(ReportJobStatus.FAILED, job.getStatus());
         assertEquals(ProcessReportJobService.ERROR_GENERATION_FAILED, job.getErrorCode());
     }
+
+    @Test
+    void shouldThrowWhenJobDoesNotExist() {
+        UUID jobId = UUID.randomUUID();
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.empty());
+
+        org.junit.jupiter.api.Assertions.assertThrows(com.umss.sigesa.domain.exception.ReportJobNotFoundException.class,
+                () -> service.process(jobId));
+        verify(executiveDataPort, org.mockito.Mockito.never()).fetchSnapshot(any());
+        verify(pdfRendererPort, org.mockito.Mockito.never()).render(any());
+        verify(artifactStorage, org.mockito.Mockito.never()).store(any(), any());
+        verify(reportJobRepository, org.mockito.Mockito.never()).save(any());
+    }
+
+    @Test
+    void shouldNotStoreArtifactWhenRendererFails() {
+        UUID jobId = UUID.randomUUID();
+        ReportJob job = ReportJob.createPending(jobId, UUID.randomUUID(), new ExecutiveReportFilters(null, null, 2026));
+
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(executiveDataPort.fetchSnapshot(job.getFilters()))
+                .thenReturn(new ExecutiveReportSnapshot(LocalDateTime.now(), job.getFilters(), List.of()));
+        when(pdfRendererPort.render(any())).thenThrow(new ReportTemplateException("fail", null));
+        when(reportJobRepository.save(any(ReportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.process(jobId);
+
+        verify(artifactStorage, org.mockito.Mockito.never()).store(any(), any());
+        verify(reportJobRepository, org.mockito.Mockito.times(2)).save(job);
+    }
+
+    @Test
+    void shouldCompleteWithEmptySnapshot() {
+        UUID jobId = UUID.randomUUID();
+        ReportJob job = ReportJob.createPending(jobId, UUID.randomUUID(), new ExecutiveReportFilters(null, null, 2026));
+        ExecutiveReportSnapshot snapshot = new ExecutiveReportSnapshot(
+                LocalDateTime.now(), job.getFilters(), List.of());
+
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(executiveDataPort.fetchSnapshot(job.getFilters())).thenReturn(snapshot);
+        when(pdfRendererPort.render(snapshot)).thenReturn(new byte[0]);
+        when(artifactStorage.store(jobId, new byte[0])).thenReturn("empty.pdf");
+        when(reportJobRepository.save(any(ReportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.process(jobId);
+
+        assertEquals(ReportJobStatus.COMPLETED, job.getStatus());
+        assertEquals("empty.pdf", job.getArtifactKey());
+    }
 }

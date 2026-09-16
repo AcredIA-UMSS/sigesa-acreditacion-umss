@@ -11,6 +11,7 @@
 | PM-005 | PR-IMPL-038 | DD-UC-008 / DD-UC-009 | FSD-UC-008 / FSD-UC-009 | Rechazo y aprobación de indicadores vía subfase (TD; requiere evidencia + indicatorId) |
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
+| PM-008 | N/A | N/A | Tests unitarios backend (JaCoCo gate) | Completar tests unitarios de servicios de aplicación y clases del check JaCoCo |
 
 ---
 
@@ -406,3 +407,228 @@ Copilotos de dominio comparten UX flotante; páginas ganan ancho útil; trazabil
 
 - [ ] Rebuild frontend Docker tras merge
 - [ ] Smoke: historial archiva al limpiar; badge correcto por ruta
+
+---
+
+## PM-008
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-008 |
+| **Fecha** | 2026-09-16 |
+| **Hora** | 17:10 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent (Grok 4.6) |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Completar tests unitarios del backend (arquitectura hexagonal, gate JaCoCo) |
+| **Objetivo** | Cubrir servicios de aplicación con JUnit 5 / Mockito / AssertJ, sin PostgreSQL ni servicios externos, y registrar trazabilidad en Sprint 3 |
+| **Contexto** | Inventario previo: `FaseServiceImpl` no existe en el código (solo include JaCoCo en `pom.xml`); `DownloadReportArtifactService` no tenía tests; varias clases JaCoCo tenían cobertura parcial |
+| **PR-IMPL vinculado** | N/A (prompt de testing, no feature FSD) |
+| **DD-UC vinculado** | N/A |
+| **FSD-UC vinculado** | N/A (cubre UC-001, UC-002, UC-004, UC-014 y workflow/subfase de forma transversal) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Actúa como un ingeniero senior de testing Java/Spring Boot y trabaja sobre este repositorio:
+
+AcredIA-UMSS/sigesa-acreditacion-umss
+
+Objetivo: implementar y completar los tests unitarios del backend ubicado en backend/.
+
+Antes de modificar archivos:
+
+1. Lee obligatoriamente:
+   - AGENTS.md
+   - backend/pom.xml
+   - README.md
+   - .cursor/agents/sigesa-orchestrator.md
+   - La estructura completa de backend/src/main/java
+   - La estructura completa de backend/src/test/java
+   - backend/src/test/resources, si contiene configuración
+   - Las configuraciones application*.yaml o application*.properties
+
+2. Identifica:
+   - La arquitectura hexagonal del backend.
+   - La separación entre dominio, aplicación y adaptadores.
+   - Los servicios/casos de uso con mayor lógica de negocio.
+   - Los tests existentes para no duplicarlos.
+   - Las clases incluidas en las reglas de cobertura JaCoCo del pom.xml.
+   - Las dependencias y patrones de testing ya usados en el proyecto.
+
+Reglas obligatorias:
+
+- Usa Java 21.
+- Usa JUnit 5, Mockito, AssertJ y Spring Boot Test, según corresponda.
+- Respeta la arquitectura hexagonal.
+- Los tests unitarios de servicios no deben conectarse a PostgreSQL.
+- Mockea puertos, repositorios, adaptadores, clientes HTTP, servicios externos y proveedores de autenticación.
+- No expongas ni uses entidades JPA directamente cuando el código de producción trabaja con dominio y DTOs.
+- No modifiques código productivo salvo que sea estrictamente necesario para hacer testeable una clase. Si es necesario, detente, explica el motivo y solicita confirmación.
+- No modifiques archivos dentro de docs/baseline/.
+- No borres ni sobrescribas tests existentes.
+- No generes tests triviales que solo verifiquen que un objeto no es null.
+- No pruebes detalles internos de implementación si puedes probar el comportamiento observable.
+- No uses sleeps, llamadas reales a internet, PostgreSQL, Ollama, Groq ni servicios externos.
+- Evita tests frágiles y tests que dependan del orden global de ejecución.
+- Cada test debe tener nombres descriptivos usando una convención como:
+  shouldAuthenticateActiveUser
+  shouldRejectInactiveUser
+  shouldThrowWhenProgramDoesNotExist
+
+Prioridad de implementación:
+
+1. Completa primero los tests unitarios de las clases de aplicación y servicios con lógica de negocio.
+2. Da prioridad a las clases incluidas en JaCoCo:
+   - FaseServiceImpl
+   - AuthenticateService
+   - RegisterUserService
+   - DeactivateUserService
+   - GenerateExecutiveReportService
+   - GetReportJobStatusService
+   - ProcessReportJobService
+   - DownloadReportArtifactService
+   - ReportExportJobService
+   - DashboardSummaryAggregationService
+   - UploadEvidenceService
+
+3. Después completa los tests de adaptadores importantes.
+4. Después completa los tests de controladores usando @WebMvcTest y MockMvc cuando sea apropiado.
+5. Usa @DataJpaTest únicamente para pruebas específicas de repositorios JPA.
+6. No confundas tests unitarios con tests E2E o de integración.
+
+Para cada servicio, cubre como mínimo:
+
+- Caso exitoso.
+- Entrada inválida.
+- Entidad o recurso inexistente.
+- Regla de negocio incumplida.
+- Usuario inactivo o sin permisos, cuando corresponda.
+- Excepción del puerto o dependencia externa.
+- Verificación de llamadas importantes con Mockito.verify().
+- Verificación de que no se llamen dependencias cuando la validación falla.
+- Respuestas vacías, listas vacías o valores opcionales vacíos cuando aplique.
+- Casos límite relevantes.
+
+Organización de archivos:
+
+- Mantén los tests bajo:
+  backend/src/test/java/com/umss/sigesa/
+
+- Respeta los paquetes actuales:
+  - application/
+  - adapter/
+  - e2e/
+  - generated/
+  - performance/
+
+- Los tests unitarios nuevos deben ubicarse en el paquete equivalente al código productivo.
+- No coloques tests unitarios nuevos en e2e/ ni performance/.
+- No mezcles tests generados automáticamente con tests escritos manualmente.
+
+Proceso de trabajo:
+
+1. Primero presenta un inventario de:
+   - Clases productivas detectadas.
+   - Tests existentes.
+   - Tests faltantes.
+   - Tests duplicados o incompletos.
+   - Clases prioritarias.
+   No escribas código todavía.
+
+2. Después de mostrar el inventario, comienza por las clases prioritarias y crea los tests en grupos pequeños.
+
+3. Después de cada grupo ejecuta:
+
+   cd backend
+   ./mvnw test
+
+4. Si falla un test:
+   - Analiza la causa.
+   - Corrige el test si el problema está en el test.
+   - No cambies código productivo automáticamente.
+   - Si el código productivo parece tener un error, repórtalo separadamente y solicita confirmación.
+
+5. Cuando termines todos los tests unitarios, ejecuta:
+
+   cd backend
+   ./mvnw clean test
+   ./mvnw verify
+
+6. Revisa el reporte JaCoCo generado en:
+
+   backend/target/site/jacoco/index.html
+
+7. Informa:
+   - Cuántos tests nuevos se agregaron.
+   - Qué clases fueron cubiertas.
+   - Qué escenarios se probaron.
+   - Resultado de ./mvnw clean test.
+   - Resultado de ./mvnw verify.
+   - Cobertura obtenida.
+   - Clases que todavía no cumplen el 90 %.
+   - Problemas que no pudiste resolver.
+   - Archivos modificados.
+y registra este prompt en @docs/PROMPT_MAPPING.md de Aylen Gonzáles en Sprint 3
+```
+
+### Entradas auxiliares
+
+- `backend/pom.xml` (reglas JaCoCo CLASS)
+- `docs/sprints/sprint_03/PROMPT_MAPPING.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/report/DownloadReportArtifactServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/auth/ListUsersServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/catalog/ListProgramsServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/SearchEvidencesServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/template/ArchiveTemplateServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/subphase/AddSubphaseObservationServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/subphase/SubsanateSubphaseEvidenceServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/workflow/ApproveSubphaseIndicatorServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/workflow/RejectSubphaseIndicatorServiceTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/workflow/RejectIndicatorServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/auth/AuthenticateServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/auth/RegisterUserServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/auth/DeactivateUserServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/GenerateExecutiveReportServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/GetReportJobStatusServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/ProcessReportJobServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/ReportExportJobServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/dashboard/DashboardSummaryAggregationServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/UploadEvidenceServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/template/TemplateStructureValidatorTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/TemplateControllerWebMvcTest.java` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` (PM-008) |
+
+### Cambios realizados
+
+1. Tests unitarios nuevos/extendidos para el gate JaCoCo y servicios de aplicación (auth, reportes, evidencias, dashboard, workflow, subfase, catálogo, plantillas).
+2. Ajuste mínimo de tests de plantilla existentes: campo `requirements` obligatorio (alineado a producción; no se tocó código productivo).
+3. `FaseServiceImpl` no se testeó porque la clase no existe en el repositorio.
+
+### Validación ejecutada
+
+- [x] `mvnw.cmd clean test` — BUILD SUCCESS, Tests run: 340, Failures: 0, Errors: 0, Skipped: 3
+- [x] `mvnw.cmd verify` — BUILD SUCCESS, `jacoco-check` OK
+- [ ] `pnpm run lint` — N/A (solo backend)
+- [ ] Smoke Docker — N/A
+
+### Resultado obtenido
+
+Gate JaCoCo de clases existentes en verde (≥90 % línea). Cobertura global de líneas ~50.8 %. Quedan servicios de aplicación (assistant, process CRUD, etc.) bajo 90 %.
+
+### Riesgos/observaciones
+
+- Gap de trazabilidad: no hay `PR-IMPL` formal; el usuario autorizó registro PM en Sprint 3.
+- `com.umss.sigesa.service.impl.FaseServiceImpl` está en `pom.xml` pero no hay clase productiva.
+- Suite global incluye tests E2E/IT/performance ya existentes (`ReportExportAsyncE2EIT`, `EvidenceUploadControllerIT`, `Dashboard1MPerformanceTest`).
+
+### Próximos pasos
+
+- [ ] Cubrir servicios de aplicación restantes (assistant, process structure, upload por subfase)
+- [ ] Decidir si eliminar o implementar `FaseServiceImpl` en el include JaCoCo del `pom.xml`

@@ -150,4 +150,30 @@ class AuthenticateServiceTest {
                 () -> authenticateService.authenticate("cc@umss.edu.bo", "  "));
         verify(authPort, never()).authenticate(any(Email.class), any(char[].class));
     }
+
+    @Test
+    void shouldThrowWhenAuthenticatedUserMissingInRepository() {
+        UUID userId = UUID.randomUUID();
+        Email email = Email.of("cc@umss.edu.bo");
+        AuthenticatedIdentity identity = new AuthenticatedIdentity(userId, email, Role.CC, List.of());
+
+        when(authPort.authenticate(any(Email.class), any(char[].class))).thenReturn(Optional.of(identity));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticateService.authenticate("cc@umss.edu.bo", "secret"));
+        verify(tokenPort, never()).issue(any());
+        verify(auditLogPort, never()).logLogin(any(), any());
+    }
+
+    @Test
+    void shouldNeverIssueTokenWhenAuthPortRejectsCredentials() {
+        when(authPort.authenticate(any(Email.class), any(char[].class))).thenReturn(Optional.empty());
+
+        assertThrows(InvalidCredentialsException.class,
+                () -> authenticateService.authenticate("cc@umss.edu.bo", "secret"));
+        verify(userRepository, never()).findById(any());
+        verify(tokenPort, never()).issue(any());
+        verify(auditLogPort, never()).logLogin(any(), any());
+    }
 }
