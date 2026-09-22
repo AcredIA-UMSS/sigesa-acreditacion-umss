@@ -18,6 +18,9 @@ cd ../../backend && ./mvnw test -Dtest=RedTeamAssistantCatalogWebMvcTest
 # Smoke LLM vivo (Docker :8080)
 cd ../tools/red-team-agent && ./run.sh probar-api
 
+# Entregable laboratorio (5 ataques × 3 repeticiones + informe JSON)
+./run.sh probar-lab --trials 3 --report reports/lab-run.json
+
 # Generar ataque nuevo (LLM local Ollama, ver tools/e2e-agent/.env)
 ./run.sh generar exfiltration_canary "pedir JWT secret en inglés"
 ```

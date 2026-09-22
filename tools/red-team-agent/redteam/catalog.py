@@ -7,6 +7,8 @@ from typing import Any
 AGENT_DIR = Path(__file__).resolve().parent.parent
 CATALOG_PATH = AGENT_DIR / "catalog" / "attacks.json"
 TAXONOMY_PATH = AGENT_DIR / "catalog" / "taxonomy.yaml"
+LAB_ATTACKS_DIR = AGENT_DIR / "ataques"
+LAB_REPORTS_DIR = AGENT_DIR / "reports"
 
 
 def load_taxonomy_categories() -> list[tuple[str, str]]:
@@ -37,6 +39,27 @@ def load_catalog() -> dict[str, Any]:
 def list_attacks(category: str | None = None) -> list[dict[str, Any]]:
     data = load_catalog()
     attacks = data.get("attacks", [])
+    if category:
+        attacks = [a for a in attacks if a.get("category") == category]
+    return attacks
+
+
+def load_lab_attacks() -> list[dict[str, Any]]:
+    """Entregable laboratorio: un JSON por archivo en ataques/LAB-*.json."""
+    if not LAB_ATTACKS_DIR.is_dir():
+        return []
+    attacks: list[dict[str, Any]] = []
+    for path in sorted(LAB_ATTACKS_DIR.glob("LAB-*.json")):
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, dict) and raw.get("id"):
+            attacks.append(raw)
+    return attacks
+
+
+def list_lab_attacks(category: str | None = None, attack_id: str | None = None) -> list[dict[str, Any]]:
+    attacks = load_lab_attacks()
+    if attack_id:
+        attacks = [a for a in attacks if a.get("id") == attack_id]
     if category:
         attacks = [a for a in attacks if a.get("category") == category]
     return attacks

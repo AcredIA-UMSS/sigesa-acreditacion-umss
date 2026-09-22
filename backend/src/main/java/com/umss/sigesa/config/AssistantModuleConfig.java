@@ -18,6 +18,7 @@ import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.application.service.assistant.AssistantKeywordRouter;
 import com.umss.sigesa.application.port.out.AssistantToolAuditPort;
 import com.umss.sigesa.application.service.assistant.AssistantNormativeRagService;
@@ -96,6 +97,11 @@ public class AssistantModuleConfig {
     @Bean
     AssistantChatInputValidator assistantChatInputValidator() {
         return new AssistantChatInputValidator();
+    }
+
+    @Bean
+    AssistantReplyOutputGuard assistantReplyOutputGuard(AssistantProperties assistantProperties) {
+        return new AssistantReplyOutputGuard(assistantProperties.isOutputGuardEnabled());
     }
 
     @Bean

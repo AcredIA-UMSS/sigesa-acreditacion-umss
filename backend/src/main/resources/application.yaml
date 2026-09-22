@@ -62,3 +62,4 @@ sigesa:
     max-tool-iterations: ${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:5}
     rag-enabled: ${SIGESA_ASSISTANT_RAG_ENABLED:true}
     rag-max-chunks: ${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:3}
+    output-guard-enabled: ${SIGESA_ASSISTANT_OUTPUT_GUARD_ENABLED:true}
