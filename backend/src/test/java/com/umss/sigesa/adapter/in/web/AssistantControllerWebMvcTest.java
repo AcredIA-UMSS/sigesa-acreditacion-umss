@@ -13,6 +13,7 @@ import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.config.AssistantProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,6 +256,11 @@ class AssistantControllerWebMvcTest {
         @Bean
         AssistantChatInputValidator assistantChatInputValidator() {
             return new AssistantChatInputValidator();
+        }
+
+        @Bean
+        AssistantReplyOutputGuard assistantReplyOutputGuard() {
+            return new AssistantReplyOutputGuard(true);
         }
     }
 }

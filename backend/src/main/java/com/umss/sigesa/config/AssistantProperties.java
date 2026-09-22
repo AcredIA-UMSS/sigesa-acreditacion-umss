@@ -17,6 +17,7 @@ public class AssistantProperties {
     private int maxToolIterations = 3;
     private boolean ragEnabled = true;
     private int ragMaxChunks = 3;
+    private boolean outputGuardEnabled = true;
 
     public boolean isEnabled() {
         return enabled;
@@ -88,5 +89,13 @@ public class AssistantProperties {
 
     public void setRagMaxChunks(int ragMaxChunks) {
         this.ragMaxChunks = ragMaxChunks;
+    }
+
+    public boolean isOutputGuardEnabled() {
+        return outputGuardEnabled;
+    }
+
+    public void setOutputGuardEnabled(boolean outputGuardEnabled) {
+        this.outputGuardEnabled = outputGuardEnabled;
     }
 }

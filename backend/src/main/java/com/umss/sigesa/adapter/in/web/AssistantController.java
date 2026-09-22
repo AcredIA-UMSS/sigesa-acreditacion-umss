@@ -15,6 +15,7 @@ import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantCapabilitiesCatalog;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
@@ -156,17 +157,20 @@ public class AssistantController {
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
     private final AssistantChatContextFactory chatContextFactory;
     private final AssistantChatInputValidator chatInputValidator;
+    private final AssistantReplyOutputGuard replyOutputGuard;
 
     public AssistantController(SendChatMessageUseCase sendChatMessageUseCase,
                                AssistantProperties assistantProperties,
                                UserProgramAssignmentRepositoryPort assignmentRepository,
                                AssistantChatContextFactory chatContextFactory,
-                               AssistantChatInputValidator chatInputValidator) {
+                               AssistantChatInputValidator chatInputValidator,
+                               AssistantReplyOutputGuard replyOutputGuard) {
         this.sendChatMessageUseCase = sendChatMessageUseCase;
         this.assistantProperties = assistantProperties;
         this.assignmentRepository = assignmentRepository;
         this.chatContextFactory = chatContextFactory;
         this.chatInputValidator = chatInputValidator;
+        this.replyOutputGuard = replyOutputGuard;
     }
 
     @GetMapping("/status")
@@ -219,8 +223,9 @@ public class AssistantController {
         AssistantChatContext chatContext = resolveChatContext(request, authContext);
         AssistantChatResult result = sendChatMessageUseCase.send(
                 request.message(), history, authContext, chatContext);
+        String safeReply = replyOutputGuard.sanitize(result.reply());
         return ResponseEntity.ok(new SendChatMessageResponse(
-                result.reply(),
+                safeReply,
                 result.toolId(),
                 result.sourceTables(),
                 result.path().name(),

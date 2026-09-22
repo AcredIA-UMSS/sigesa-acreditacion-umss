@@ -17,6 +17,7 @@ import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.config.AssistantProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -198,6 +199,11 @@ class RedTeamAssistantCatalogWebMvcTest {
         @Bean
         AssistantChatInputValidator assistantChatInputValidator() {
             return new AssistantChatInputValidator();
+        }
+
+        @Bean
+        AssistantReplyOutputGuard assistantReplyOutputGuard() {
+            return new AssistantReplyOutputGuard(true);
         }
     }
 }
