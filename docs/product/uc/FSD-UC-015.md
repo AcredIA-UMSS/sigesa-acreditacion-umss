@@ -2,12 +2,12 @@
 id: FSD-UC-015
 nombre: Notificaciones y alertas
 estado: Pendiente
-release: v1.0
+release: v2.0
 actor_principal: Sistema (outbox → correo UMSS)
 trazabilidad_prd: PRD-US-017, PRD-US-018, PRD-US-019
 modulo: MOD-NOTIFY
 reglas: FSD-BR-13
-ultima_actualizacion: "2026-06-15"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-015 — Notificaciones y alertas
@@ -64,7 +64,7 @@ Característica: Notificaciones a [CC]
 
 @PRD-US-018 @FSD-UC-015 @TC-10b
   Escenario: Alerta de plazo próximo
-    Dado una Fase con fecha límite en 3 días y configuración de alerta activa
+    Dado un Nivel 1 con fecha límite en 3 días y configuración de alerta activa
     Cuando el job de alertas se ejecuta
     Entonces el [CC] recibe correo institucional con enlace directo al Indicador
 

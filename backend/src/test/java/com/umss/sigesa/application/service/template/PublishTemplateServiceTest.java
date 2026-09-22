@@ -1,11 +1,10 @@
 package com.umss.sigesa.application.service.template;
 
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.model.Template;
-import com.umss.sigesa.domain.model.TemplatePhase;
 import com.umss.sigesa.domain.model.TemplateStatus;
-import com.umss.sigesa.domain.model.TemplateSubphase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +18,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +29,13 @@ class PublishTemplateServiceTest {
     private TemplateManagementPort templateManagementPort;
 
     @Mock
+    private NormativeHierarchyQueryPort hierarchyQueryPort;
+
+    @Mock
     private TemplateStructureValidator validator;
+
+    @Mock
+    private TemplateNormativeStructureGuard structureGuard;
 
     @InjectMocks
     private PublishTemplateService publishTemplateService;
@@ -40,11 +46,13 @@ class PublishTemplateServiceTest {
         Template draft = draftTemplate(templateId);
 
         when(templateManagementPort.findByIdForEdit(templateId)).thenReturn(Optional.of(draft));
+        when(hierarchyQueryPort.findTemplateTree(templateId)).thenReturn(Optional.empty());
         when(templateManagementPort.save(any(Template.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Template published = publishTemplateService.publish(templateId);
 
         assertEquals(TemplateStatus.PUBLISHED, published.getStatus());
+        verify(validator).validateForPublish(eq(draft), eq(List.of()), eq(structureGuard));
         verify(templateManagementPort).save(any(Template.class));
     }
 
@@ -62,15 +70,6 @@ class PublishTemplateServiceTest {
                 .name("CEUB Piloto")
                 .type("CEUB")
                 .status(TemplateStatus.DRAFT)
-                .phases(List.of(TemplatePhase.builder()
-                        .name("Autoevaluación")
-                        .order(1)
-                        .subphases(List.of(TemplateSubphase.builder()
-                                .name("Diagnóstico")
-                                .order(1)
-                                .referenceUrl("https://duea.umss.edu.bo/guia/diagnostico")
-                                .build()))
-                        .build()))
                 .build();
     }
 }

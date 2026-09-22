@@ -1,25 +1,31 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.CareerScopeMismatchException;
+import com.umss.sigesa.domain.exception.IndicatorHasEvidenceException;
+import com.umss.sigesa.domain.exception.IndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.CcAlreadyAssignedToProcessException;
 import com.umss.sigesa.domain.exception.InvalidResponsibleUserException;
 import com.umss.sigesa.domain.exception.ProcessAlreadyActiveException;
+import com.umss.sigesa.domain.exception.ProcessHasEvidenceException;
+import com.umss.sigesa.domain.exception.ProcessNotDeletableException;
 import com.umss.sigesa.domain.exception.ProcessNotEditableException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
-import com.umss.sigesa.domain.exception.SubphaseHasEvidenceException;
-import com.umss.sigesa.domain.exception.SubphaseLinkRequiredException;
-import com.umss.sigesa.domain.exception.InvalidPhaseStateException;
-import com.umss.sigesa.domain.exception.PhaseClosureBlockedException;
-import com.umss.sigesa.domain.model.PendingSubphase;
+import com.umss.sigesa.domain.exception.InvalidLevel1StateException;
+import com.umss.sigesa.domain.exception.InvalidStageStateException;
+import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
+import com.umss.sigesa.domain.exception.StageGateBlockedException;
+import com.umss.sigesa.domain.exception.StageNotFoundException;
+import com.umss.sigesa.domain.model.PendingIndicator;
+import com.umss.sigesa.domain.exception.TemplateIndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateInUseException;
+import com.umss.sigesa.domain.exception.TemplateNotEditableException;
 import com.umss.sigesa.domain.exception.TemplateNotFoundException;
 import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.exception.TemplateOrderConflictException;
 import com.umss.sigesa.domain.exception.TemplateStructureIncompleteException;
-import com.umss.sigesa.domain.exception.TemplateSubphaseLinkRequiredException;
-import com.umss.sigesa.adapter.in.web.dto.PendingSubphaseResponseDto;
+import com.umss.sigesa.adapter.in.web.dto.PendingIndicatorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -68,21 +74,29 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(ProcessHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleProcessHasEvidence(ProcessHasEvidenceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "PROCESS_HAS_EVIDENCE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ProcessNotDeletableException.class)
+    public ResponseEntity<Map<String, String>> handleProcessNotDeletable(ProcessNotDeletableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "PROCESS_NOT_DELETABLE",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(TemplateNotPublishedException.class)
     public ResponseEntity<Map<String, String>> handleTemplateNotPublished(TemplateNotPublishedException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "error", "TEMPLATE_NOT_PUBLISHED",
-                        "message", ex.getMessage()
-                ));
-    }
-
-    @ExceptionHandler(TemplateSubphaseLinkRequiredException.class)
-    public ResponseEntity<Map<String, String>> handleTemplateSubphaseLinkRequired(
-            TemplateSubphaseLinkRequiredException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "error", "TEMPLATE_SUBPHASE_LINK_REQUIRED",
                         "message", ex.getMessage()
                 ));
     }
@@ -115,6 +129,25 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(TemplateNotEditableException.class)
+    public ResponseEntity<Map<String, String>> handleTemplateNotEditable(TemplateNotEditableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "TEMPLATE_NOT_EDITABLE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(TemplateIndicatorIncompleteException.class)
+    public ResponseEntity<Map<String, String>> handleTemplateIndicatorIncomplete(
+            TemplateIndicatorIncompleteException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "TEMPLATE_INDICATOR_INCOMPLETE",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(ProcessNotEditableException.class)
     public ResponseEntity<Map<String, String>> handleProcessNotEditable(ProcessNotEditableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -124,11 +157,20 @@ public class ProcessExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(SubphaseHasEvidenceException.class)
-    public ResponseEntity<Map<String, String>> handleSubphaseHasEvidence(SubphaseHasEvidenceException ex) {
+    @ExceptionHandler(IndicatorHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorHasEvidence(IndicatorHasEvidenceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
-                        "error", "SUBPHASE_HAS_EVIDENCE",
+                        "error", "INDICATOR_HAS_EVIDENCE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(IndicatorIncompleteException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorIncomplete(IndicatorIncompleteException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "INDICATOR_INCOMPLETE",
                         "message", ex.getMessage()
                 ));
     }
@@ -139,15 +181,6 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "error", "PROCESS_STRUCTURE_ORDER_CONFLICT",
-                        "message", ex.getMessage()
-                ));
-    }
-
-    @ExceptionHandler(SubphaseLinkRequiredException.class)
-    public ResponseEntity<Map<String, String>> handleSubphaseLinkRequired(SubphaseLinkRequiredException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "error", "SUBPHASE_LINK_REQUIRED",
                         "message", ex.getMessage()
                 ));
     }
@@ -170,25 +203,52 @@ public class ProcessExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(PhaseClosureBlockedException.class)
-    public ResponseEntity<Map<String, Object>> handlePhaseClosureBlocked(PhaseClosureBlockedException ex) {
-        List<PendingSubphaseResponseDto> pending = ex.getPendingSubphases().stream()
-                .map(ProcessExceptionHandler::toPendingDto)
-                .toList();
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "FASE_CIERRE_BLOQUEADO");
-        body.put("message", ex.getMessage());
-        body.put("pendingSubphases", pending);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-    }
-
-    @ExceptionHandler(InvalidPhaseStateException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidPhaseState(InvalidPhaseStateException ex) {
+    @ExceptionHandler(InvalidLevel1StateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidLevel1State(InvalidLevel1StateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
                         "error", "INVALID_STATE",
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(InvalidStageStateException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidStageState(InvalidStageStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "INVALID_STATE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(StageNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleStageNotFound(StageNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of(
+                        "error", "STAGE_NOT_FOUND",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(StageGateBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleStageGateBlocked(StageGateBlockedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "STAGE_GATE_BLOCKED");
+        body.put("message", ex.getMessage());
+        body.put("failedRules", ex.getFailedRules());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(Level1ClosureBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleLevel1ClosureBlocked(Level1ClosureBlockedException ex) {
+        List<PendingIndicatorResponseDto> pending = ex.getPendingIndicators().stream()
+                .map(ProcessExceptionHandler::toPendingIndicatorDto)
+                .toList();
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "NIVEL1_CIERRE_BLOQUEADO");
+        body.put("message", ex.getMessage());
+        body.put("pendingIndicators", pending);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(InvalidResponsibleUserException.class)
@@ -200,9 +260,10 @@ public class ProcessExceptionHandler {
                 ));
     }
 
-    private static PendingSubphaseResponseDto toPendingDto(PendingSubphase pending) {
-        PendingSubphaseResponseDto dto = new PendingSubphaseResponseDto();
-        dto.setSubphaseId(pending.subphaseId());
+    private static PendingIndicatorResponseDto toPendingIndicatorDto(PendingIndicator pending) {
+        PendingIndicatorResponseDto dto = new PendingIndicatorResponseDto();
+        dto.setIndicatorId(pending.indicatorId());
+        dto.setCode(pending.code());
         dto.setName(pending.name());
         dto.setStatus(pending.status().name());
         dto.setOrder(pending.order());

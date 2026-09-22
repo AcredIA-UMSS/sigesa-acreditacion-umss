@@ -15,14 +15,11 @@ public class AssistantToolRegistry {
     static final String GET_USER_DETAIL_ID = "get_user_detail";
     static final String CREATE_USER_ID = "create_user";
     static final String LIST_PROGRAMS_ID = "list_programs";
-    static final String LIST_PROCESS_PHASES_ID = "list_process_phases";
     static final String LIST_PROCESS_STRUCTURE_ID = "list_process_structure";
     static final String SET_USER_STATUS_ID = "set_user_status";
     static final String MANAGE_USER_STATUS_ID = "manage_user_status";
     static final String MANAGE_USER_ASSIGNMENT_ID = "manage_user_assignment";
     static final String LIST_ACTIVE_PROCESSES_ID = "list_active_processes";
-    static final String MANAGE_PROCESS_PHASE_ID = "manage_process_phase";
-    static final String MANAGE_PROCESS_SUBPHASE_ID = "manage_process_subphase";
     static final String LIST_PENDING_EVIDENCES_ID = "list_pending_evidences";
     static final String GET_EVIDENCE_DETAIL_ID = "get_evidence_detail";
     static final String CHECK_EVIDENCE_COMPLETENESS_ID = "check_evidence_completeness";
@@ -71,24 +68,14 @@ public class AssistantToolRegistry {
             listProgramsParameterSchema()
     );
 
-    private static final AssistantToolDefinition LIST_PROCESS_PHASES = new AssistantToolDefinition(
-            LIST_PROCESS_PHASES_ID,
-            "Lista las fases del proceso de acreditación ACTIVO de una carrera, ordenadas por campo order. "
-                    + "JD, TD y CC (solo lectura). Indica careerQuery (nombre o código). "
-                    + "Opcional templateType: CEUB o ARCU-SUR.",
-            JD_TD_AND_CC,
-            "read",
-            listProcessPhasesParameterSchema()
-    );
-
     private static final AssistantToolDefinition LIST_PROCESS_STRUCTURE = new AssistantToolDefinition(
             LIST_PROCESS_STRUCTURE_ID,
-            "Lista el árbol completo Fase → Subfase del proceso ACTIVO, incluyendo referenceUrl. "
+            "Lista el árbol normativo v2 (N1→N2→N3→Indicador) del proceso ACTIVO. "
                     + "JD, TD y CC (solo lectura). Indica careerQuery (nombre o código). "
                     + "Opcional templateType: CEUB o ARCU-SUR.",
             JD_TD_AND_CC,
             "read",
-            listProcessPhasesParameterSchema()
+            listProcessStructureParameterSchema()
     );
 
     private static final AssistantToolDefinition LIST_ACTIVE_PROCESSES = new AssistantToolDefinition(
@@ -131,28 +118,6 @@ public class AssistantToolRegistry {
             JD_ONLY,
             "write",
             manageUserAssignmentParameterSchema()
-    );
-
-    private static final AssistantToolDefinition MANAGE_PROCESS_PHASE = new AssistantToolDefinition(
-            MANAGE_PROCESS_PHASE_ID,
-            "Crea, edita, elimina u ordena fases del proceso ACTIVO de una carrera. JD y TD. "
-                    + "Acciones: CREATE, UPDATE, DELETE, REORDER. "
-                    + "Primero invoca con confirmed=false para vista previa; "
-                    + "solo ejecuta con confirmed=true tras confirmación explícita del usuario en el chat.",
-            JD_AND_TD,
-            "write",
-            manageProcessPhaseParameterSchema()
-    );
-
-    private static final AssistantToolDefinition MANAGE_PROCESS_SUBPHASE = new AssistantToolDefinition(
-            MANAGE_PROCESS_SUBPHASE_ID,
-            "Crea, edita o elimina subfases de una fase en el proceso ACTIVO. JD y TD. "
-                    + "Acciones: CREATE, UPDATE, DELETE. Requiere referenceUrl HTTPS en CREATE/UPDATE. "
-                    + "Indique la fase con phaseOrder (preferido), phaseName o phaseId UUID real (nunca placeholders). "
-                    + "Primero invoca con confirmed=false; solo ejecuta con confirmed=true tras confirmación.",
-            JD_AND_TD,
-            "write",
-            manageProcessSubphaseParameterSchema()
     );
 
     private static final AssistantToolDefinition LIST_PENDING_EVIDENCES = new AssistantToolDefinition(
@@ -198,13 +163,10 @@ public class AssistantToolRegistry {
             CREATE_USER,
             LIST_PROGRAMS,
             LIST_ACTIVE_PROCESSES,
-            LIST_PROCESS_PHASES,
             LIST_PROCESS_STRUCTURE,
             SET_USER_STATUS,
             MANAGE_USER_STATUS,
             MANAGE_USER_ASSIGNMENT,
-            MANAGE_PROCESS_PHASE,
-            MANAGE_PROCESS_SUBPHASE,
             LIST_PENDING_EVIDENCES,
             GET_EVIDENCE_DETAIL,
             CHECK_EVIDENCE_COMPLETENESS,
@@ -246,10 +208,7 @@ public class AssistantToolRegistry {
     }
 
     private static final Set<String> PHASES_AGENT_TOOL_IDS = Set.of(
-            LIST_PROCESS_PHASES_ID,
             LIST_PROCESS_STRUCTURE_ID,
-            MANAGE_PROCESS_PHASE_ID,
-            MANAGE_PROCESS_SUBPHASE_ID,
             SEARCH_NORMATIVE_DOCS_ID
     );
 
@@ -348,7 +307,7 @@ public class AssistantToolRegistry {
         return objectSchema(properties);
     }
 
-    private static Map<String, Object> listProcessPhasesParameterSchema() {
+    private static Map<String, Object> listProcessStructureParameterSchema() {
         Map<String, Object> properties = new LinkedHashMap<>();
         Map<String, Object> careerQuery = stringProperty("Nombre o código de la carrera.");
         careerQuery.put("minLength", 2);
@@ -377,45 +336,6 @@ public class AssistantToolRegistry {
         return requiredObjectSchema(properties, List.of("identifier", "action"));
     }
 
-    private static Map<String, Object> manageProcessPhaseParameterSchema() {
-        Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("action", enumProperty(
-                List.of("CREATE", "UPDATE", "DELETE", "REORDER"),
-                "Operación sobre fases."));
-        properties.put("careerQuery", stringProperty("Nombre o código de la carrera."));
-        properties.put("phaseId", stringProperty("UUID real de la fase (obtener de list_process_structure)."));
-        properties.put("phaseOrder", integerProperty("Orden numérico de la fase (1, 2, …). Preferido frente a phaseId."));
-        properties.put("phaseName", stringProperty("Nombre exacto de la fase (alternativa a phaseOrder/phaseId)."));
-        properties.put("name", stringProperty("Nombre de la fase (CREATE/UPDATE)."));
-        properties.put("order", integerProperty("Orden de la fase (CREATE/UPDATE)."));
-        properties.put("description", stringProperty("Descripción opcional (CREATE/UPDATE)."));
-        properties.put("phaseIds", arrayProperty("Lista ordenada de UUID de fases (REORDER)."));
-        properties.put("confirmed", booleanProperty(
-                "false para vista previa; true solo tras confirmación explícita del usuario."));
-        return requiredObjectSchema(properties, List.of("action", "careerQuery"));
-    }
-
-    private static Map<String, Object> manageProcessSubphaseParameterSchema() {
-        Map<String, Object> properties = new LinkedHashMap<>();
-        properties.put("action", enumProperty(
-                List.of("CREATE", "UPDATE", "DELETE"),
-                "Operación sobre subfases."));
-        properties.put("careerQuery", stringProperty("Nombre o código de la carrera."));
-        properties.put("phaseId", stringProperty("UUID real de la fase contenedora."));
-        properties.put("phaseOrder", integerProperty("Orden numérico de la fase (1, 2, …). Preferido frente a phaseId."));
-        properties.put("phaseName", stringProperty("Nombre exacto de la fase (alternativa a phaseOrder/phaseId)."));
-        properties.put("subphaseId", stringProperty("UUID de la subfase (UPDATE/DELETE)."));
-        properties.put("subphaseName", stringProperty("Nombre de la subfase (alternativa a subphaseId)."));
-        properties.put("name", stringProperty("Nombre de la subfase (CREATE/UPDATE)."));
-        properties.put("order", integerProperty("Orden de la subfase (CREATE/UPDATE)."));
-        properties.put("referenceUrl", stringProperty("Enlace HTTPS normativo (CREATE/UPDATE)."));
-        properties.put("description", stringProperty("Descripción auxiliar (CREATE/UPDATE)."));
-        properties.put("requirements", stringProperty(
-                "Requisitos de completitud (requisitos_subfase) para considerar la subfase hecha."));
-        properties.put("confirmed", booleanProperty(
-                "false para vista previa; true solo tras confirmación explícita del usuario."));
-        return requiredObjectSchema(properties, List.of("action", "careerQuery"));
-    }
 
     private static Map<String, Object> listPendingEvidencesParameterSchema() {
         Map<String, Object> properties = new LinkedHashMap<>();

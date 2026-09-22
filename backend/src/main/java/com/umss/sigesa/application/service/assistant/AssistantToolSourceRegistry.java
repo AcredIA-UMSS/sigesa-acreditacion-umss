@@ -11,20 +11,15 @@ public final class AssistantToolSourceRegistry {
             Map.entry(AssistantToolRegistry.LIST_PROGRAMS_ID, List.of("programs")),
             Map.entry(AssistantToolRegistry.LIST_ACTIVE_PROCESSES_ID, List.of(
                     "accreditation_processes", "programs", "templates", "process_responsible_assignment", "app_user")),
-            Map.entry(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, List.of(
-                    "phases", "subphases", "accreditation_processes", "programs")),
             Map.entry(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID, List.of(
-                    "phases", "subphases", "accreditation_processes", "programs")),
+                    "level1_nodes", "level2_nodes", "level3_nodes", "indicators",
+                    "accreditation_processes", "programs")),
             Map.entry(AssistantToolRegistry.SET_USER_STATUS_ID, List.of("app_user")),
             Map.entry(AssistantToolRegistry.GET_USER_DETAIL_ID, List.of("app_user", "user_program_assignment")),
             Map.entry(AssistantToolRegistry.CREATE_USER_ID, List.of("app_user", "user_program_assignment")),
             Map.entry(AssistantToolRegistry.MANAGE_USER_STATUS_ID, List.of("app_user")),
             Map.entry(AssistantToolRegistry.MANAGE_USER_ASSIGNMENT_ID, List.of(
                     "user_program_assignment", "app_user", "programs")),
-            Map.entry(AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID, List.of(
-                    "phases", "subphases", "accreditation_processes", "programs")),
-            Map.entry(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, List.of(
-                    "phases", "subphases", "accreditation_processes", "programs")),
             Map.entry(AssistantToolRegistry.LIST_PENDING_EVIDENCES_ID, List.of(
                     "evidence", "evidence_version", "indicator", "indicator_state_history")),
             Map.entry(AssistantToolRegistry.GET_EVIDENCE_DETAIL_ID, List.of(

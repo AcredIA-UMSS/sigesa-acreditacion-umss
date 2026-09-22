@@ -8,11 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -100,6 +105,38 @@ class AuthenticatedApiSmokeTest {
         mockMvc.perform(get("/api/v1/dashboards/me/summary")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Perímetro JWT: POST multipart evidencias con token CC — no 401")
+    void evidenceUploadMultipartWithCcJwtIsAuthenticated() throws Exception {
+        String token = obtainSeedCcToken();
+        UUID indicatorId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "evidencia-e2e.pdf",
+                "application/pdf",
+                "%PDF-1.4".getBytes());
+
+        var result = mockMvc.perform(multipart("/api/v1/indicators/" + indicatorId + "/evidences")
+                        .file(file)
+                        .param("description", "Smoke multipart JWT")
+                        .header("Authorization", "Bearer " + token))
+                .andReturn();
+
+        assertNotEquals(401, result.getResponse().getStatus(), result.getResponse().getContentAsString());
+    }
+
+    private String obtainSeedCcToken() throws Exception {
+        MvcResult login = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","password":"%s"}
+                                """.formatted(AuthDataLoader.SEED_CC_EMAIL, AuthDataLoader.SEED_CC_PASSWORD)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        return JsonPath.read(login.getResponse().getContentAsString(), "$.accessToken");
     }
 
     private String obtainSeedJdToken() throws Exception {

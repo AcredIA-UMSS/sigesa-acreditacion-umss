@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.process;
 
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -38,6 +39,8 @@ class ListProcessesServiceTest {
     private ProcessResponsiblePort processResponsiblePort;
     @Mock
     private UserRepositoryPort userRepositoryPort;
+    @Mock
+    private NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     private ListProcessesService service;
 
@@ -50,8 +53,17 @@ class ListProcessesServiceTest {
     @BeforeEach
     void setUp() {
         service = new ListProcessesService(
-                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+                processQueryPort,
+                programCatalogPort,
+                templatePort,
+                processResponsiblePort,
+                userRepositoryPort,
+                normativeHierarchyQueryPort);
         lenient().when(processResponsiblePort.findAllActive()).thenReturn(List.of());
+        lenient().when(normativeHierarchyQueryPort.countLevel1NodesByProcessId(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(0L);
+        lenient().when(normativeHierarchyQueryPort.countIndicatorsByProcessId(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(0L);
     }
 
     @Test
@@ -102,7 +114,7 @@ class ListProcessesServiceTest {
 
     private ProcessQueryPort.ProcessListItem listItem(UUID processId, UUID careerId) {
         return new ProcessQueryPort.ProcessListItem(
-                processId, careerId, templateId, "ACTIVE", LocalDateTime.now(), 2, 5
+                processId, careerId, templateId, "ACTIVE", LocalDateTime.now()
         );
     }
 

@@ -10,12 +10,12 @@ import {
   Settings,
   Upload,
 } from 'lucide-react';
-import type { UploadEvidenceResponse } from '../../../api/model';
+import type { EvidenceUploadResult } from '../hooks/useEvidenceUpload';
 import { Select } from '../../../components/ui/Select';
 import type {
+  IndicatorUploadOption,
   ProcessUploadOption,
-  SubphaseUploadOption,
-} from '../hooks/useSubphaseUploadTargets';
+} from '../hooks/useNormativeIndicatorUploadTargets';
 import type {
   EvidenceUploadField,
   EvidenceUploadForm,
@@ -33,11 +33,11 @@ export type EvidenceUploadUIProps = {
     value: EvidenceUploadForm[K],
   ) => void;
   processOptions: ProcessUploadOption[];
-  subphaseOptions: SubphaseUploadOption[];
+  indicatorOptions: IndicatorUploadOption[];
   targetsLoading: boolean;
   targetsError: string | null;
   targetsEmpty: boolean;
-  subphasesEmpty: boolean;
+  indicatorsEmpty: boolean;
   onReloadTargets: () => void;
   onSubmit: () => void;
   onReset: () => void;
@@ -45,7 +45,7 @@ export type EvidenceUploadUIProps = {
   isLargeFile: boolean;
   isSubmitting: boolean;
   isBlocked: boolean;
-  result: UploadEvidenceResponse | null;
+  result: EvidenceUploadResult | null;
   errorMessage: string | null;
   validationErrors: EvidenceUploadValidationErrors;
 };
@@ -54,11 +54,11 @@ export function EvidenceUploadUI({
   form,
   onFieldChange,
   processOptions,
-  subphaseOptions,
+  indicatorOptions,
   targetsLoading,
   targetsError,
   targetsEmpty,
-  subphasesEmpty,
+  indicatorsEmpty,
   onReloadTargets,
   onSubmit,
   onReset,
@@ -71,8 +71,8 @@ export function EvidenceUploadUI({
   validationErrors,
 }: EvidenceUploadUIProps) {
   const showProgress = isSubmitting || progress > 0;
-  const selectedSubphase = subphaseOptions.find(
-    (item) => item.subphaseId === form.subphaseId,
+  const selectedIndicator = indicatorOptions.find(
+    (item) => item.indicatorId === form.indicatorId,
   );
 
   const processSelectOptions = [
@@ -86,18 +86,18 @@ export function EvidenceUploadUI({
     })),
   ];
 
-  const subphaseSelectOptions = [
+  const indicatorSelectOptions = [
     {
       value: '',
       label: !form.processId
         ? 'Primero seleccione un proceso'
         : targetsLoading
-          ? 'Cargando subfases…'
-          : 'Seleccione una subfase',
+          ? 'Cargando indicadores…'
+          : 'Seleccione un indicador',
     },
-    ...subphaseOptions.map((item) => ({
-      value: item.subphaseId,
-      label: `${item.phaseName} — ${item.subphaseName}`,
+    ...indicatorOptions.map((item) => ({
+      value: item.indicatorId,
+      label: `${item.indicatorCode} · ${item.indicatorDescription} (${item.breadcrumb})`,
     })),
   ];
 
@@ -136,8 +136,8 @@ export function EvidenceUploadUI({
               Cargar Evidencia
             </h1>
             <p className="text-body-lg text-gray-600">
-              El coordinador de carrera adjunta el archivo a una subfase del proceso
-              activo. Tras una carga exitosa, la subfase pasa a estado{' '}
+              El coordinador de carrera adjunta el archivo a un indicador normativo del proceso
+              activo. Tras una carga exitosa, el indicador pasa a estado{' '}
               <strong className="font-semibold text-primary-700">SUBIDO</strong>.
             </p>
           </header>
@@ -161,7 +161,7 @@ export function EvidenceUploadUI({
                       Metadatos y archivo
                     </h2>
                     <p className="text-body-md text-gray-500">
-                      Proceso, subfase, descripción y documento de respaldo
+                      Proceso, indicador, descripción y documento de respaldo
                     </p>
                   </div>
                 </div>
@@ -196,12 +196,12 @@ export function EvidenceUploadUI({
                       </Link>
                     </div>
                   )}
-                  {subphasesEmpty && form.processId && (
+                  {indicatorsEmpty && form.processId && (
                     <div
                       className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-body-md text-gray-800"
                       role="status"
                     >
-                      El proceso seleccionado no tiene subfases configuradas.
+                      El proceso seleccionado no tiene indicadores normativos configurados.
                     </div>
                   )}
 
@@ -218,19 +218,19 @@ export function EvidenceUploadUI({
                   />
 
                   <Select
-                    id="subphase-id"
-                    label="Subfase"
+                    id="indicator-id"
+                    label="Indicador normativo"
                     requiredMark
-                    options={subphaseSelectOptions}
-                    value={form.subphaseId}
+                    options={indicatorSelectOptions}
+                    value={form.indicatorId}
                     disabled={isBlocked || targetsLoading || !form.processId}
-                    error={validationErrors.subphaseId}
+                    error={validationErrors.indicatorId}
                     helperText={
-                      selectedSubphase
-                        ? `Proceso: ${selectedSubphase.processLabel}`
-                        : 'Elija la subfase donde registrará la evidencia'
+                      selectedIndicator
+                        ? `${selectedIndicator.breadcrumb} · ${selectedIndicator.processLabel}`
+                        : 'Elija el indicador donde registrará la evidencia'
                     }
-                    onChange={(event) => onFieldChange('subphaseId', event.target.value)}
+                    onChange={(event) => onFieldChange('indicatorId', event.target.value)}
                   />
 
                   <FormField
@@ -349,7 +349,7 @@ export function EvidenceUploadUI({
                           <dd>{result.version}</dd>
                         </div>
                         <div className="flex flex-wrap gap-x-2">
-                          <dt className="font-medium">Estado subfase:</dt>
+                          <dt className="font-medium">Estado indicador:</dt>
                           <dd className="font-semibold text-primary-700">
                             {result.currentState}
                           </dd>
@@ -405,7 +405,7 @@ export function EvidenceUploadUI({
                 <ol className="space-y-4">
                   <GuideStep
                     step="01"
-                    text="Elija el proceso activo y la subfase donde corresponde la evidencia."
+                    text="Elija el proceso activo y el indicador normativo donde corresponde la evidencia."
                   />
                   <GuideStep
                     step="02"
@@ -413,7 +413,7 @@ export function EvidenceUploadUI({
                   />
                   <GuideStep
                     step="03"
-                    text="Tras la carga, la subfase queda en SUBIDO y se notifica al técnico DUEA."
+                    text="Tras la carga, el indicador queda en SUBIDO y se notifica al técnico DUEA."
                   />
                 </ol>
               </section>

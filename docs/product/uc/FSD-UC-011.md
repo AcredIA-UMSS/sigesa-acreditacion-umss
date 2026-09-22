@@ -2,12 +2,12 @@
 id: FSD-UC-011
 nombre: Dashboard [CC] y observaciones
 estado: En Curso
-release: v1.0
+release: v2.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-012, PRD-US-015
 modulo: MOD-DASH
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-011 — Dashboard [CC] y observaciones
@@ -24,7 +24,7 @@ ultima_actualizacion: "2026-08-27"
 ## Flujo principal
 
 1. [CC] abre `/coordinator/dashboard`.
-2. Sistema muestra avance por Fase **solo de su carrera**.
+2. Sistema muestra avance por **Nivel 1** (Dimensión/Área) **solo de su carrera**, desglosado por indicadores.
 3. Lista observaciones abiertas ordenadas por plazo ascendente.
 4. Acceso en ≤ **3 clics** a formulario de subsanación (BRD-REQ-026).
 
@@ -54,13 +54,13 @@ Característica: Dashboard del Coordinador de Carrera
   Escenario: Vista de carrera propia
     Dado un [CC] autenticado de la carrera X
     Cuando abre su dashboard
-    Entonces ve el avance por Fase de la carrera X
+    Entonces ve el avance por Nivel 1 de la carrera X
     Y no ve datos de otras carreras
 
   Escenario: Acceso rápido a observación
     Dado una observación abierta en el dashboard
     Cuando selecciona la observación
-    Entonces navega a la Subfase y formulario de subsanación
+    Entonces navega al Indicador y formulario de subsanación
 
 @PRD-US-015 @FSD-UC-011 @TC-09c
   Escenario: Orden por fecha límite

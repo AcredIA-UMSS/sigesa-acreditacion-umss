@@ -7,6 +7,10 @@ import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
+import com.umss.sigesa.domain.model.Level1Node;
+import com.umss.sigesa.domain.model.Level2Node;
+import com.umss.sigesa.domain.model.Level3Node;
+import com.umss.sigesa.domain.model.NormativeIndicator;
 import com.umss.sigesa.domain.model.ProcessStatus;
 
 import java.util.Comparator;
@@ -148,50 +152,85 @@ final class AssistantProcessResolver {
                 .toList();
     }
 
-    static List<Map<String, Object>> toPhasePayload(EnrichedProcessDetail detail) {
-        return detail.phases().stream()
-                .sorted(Comparator.comparing(phase -> phase.getOrder() == null ? Integer.MAX_VALUE : phase.getOrder()))
-                .map(phase -> {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("phaseId", phase.getId().toString());
-                    map.put("name", phase.getName());
-                    map.put("order", phase.getOrder());
-                    map.put("description", phase.getDescription());
-                    map.put("subphaseCount", phase.getSubphases() == null ? 0 : phase.getSubphases().size());
-                    return map;
-                })
+    static List<Map<String, Object>> toLevel1Payload(EnrichedProcessDetail detail) {
+        return detail.level1Nodes().stream()
+                .sorted(Comparator.comparing(node -> node.getOrder() == null ? Integer.MAX_VALUE : node.getOrder()))
+                .map(AssistantProcessResolver::toLevel1Map)
                 .toList();
     }
 
-    static List<Map<String, Object>> toStructurePayload(EnrichedProcessDetail detail) {
-        return detail.phases().stream()
-                .sorted(Comparator.comparing(phase -> phase.getOrder() == null ? Integer.MAX_VALUE : phase.getOrder()))
-                .map(phase -> {
-                    Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("phaseId", phase.getId().toString());
-                    map.put("name", phase.getName());
-                    map.put("order", phase.getOrder());
-                    map.put("description", phase.getDescription());
-                    List<Map<String, Object>> subphases = phase.getSubphases() == null
-                            ? List.of()
-                            : phase.getSubphases().stream()
-                                    .sorted(Comparator.comparing(sp ->
-                                            sp.getOrder() == null ? Integer.MAX_VALUE : sp.getOrder()))
-                                    .map(sp -> {
-                                        Map<String, Object> sub = new LinkedHashMap<>();
-                                        sub.put("subphaseId", sp.getId().toString());
-                                        sub.put("name", sp.getName());
-                                        sub.put("order", sp.getOrder());
-                                        sub.put("referenceUrl", sp.getReferenceUrl());
-                                        sub.put("description", sp.getDescription());
-                                        return sub;
-                                    })
-                                    .toList();
-                    map.put("subphases", subphases);
-                    map.put("subphaseCount", subphases.size());
-                    return map;
-                })
-                .toList();
+    static List<Map<String, Object>> toNormativeStructurePayload(EnrichedProcessDetail detail) {
+        return toLevel1Payload(detail);
+    }
+
+    private static Map<String, Object> toLevel1Map(Level1Node level1) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("level1Id", level1.getId().toString());
+        map.put("name", level1.getName());
+        map.put("order", level1.getOrder());
+        map.put("status", level1.getStatus() != null ? level1.getStatus().name() : null);
+        List<Map<String, Object>> level2Nodes = level1.getLevel2Nodes() == null
+                ? List.of()
+                : level1.getLevel2Nodes().stream()
+                        .sorted(Comparator.comparing(n -> n.getOrder() == null ? Integer.MAX_VALUE : n.getOrder()))
+                        .map(AssistantProcessResolver::toLevel2Map)
+                        .toList();
+        map.put("level2Nodes", level2Nodes);
+        map.put("indicatorCount", countIndicatorsInLevel1(level1));
+        return map;
+    }
+
+    private static Map<String, Object> toLevel2Map(Level2Node level2) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("level2Id", level2.getId().toString());
+        map.put("name", level2.getName());
+        map.put("order", level2.getOrder());
+        List<Map<String, Object>> level3Nodes = level2.getLevel3Nodes() == null
+                ? List.of()
+                : level2.getLevel3Nodes().stream()
+                        .sorted(Comparator.comparing(n -> n.getOrder() == null ? Integer.MAX_VALUE : n.getOrder()))
+                        .map(AssistantProcessResolver::toLevel3Map)
+                        .toList();
+        map.put("level3Nodes", level3Nodes);
+        return map;
+    }
+
+    private static Map<String, Object> toLevel3Map(Level3Node level3) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("level3Id", level3.getId().toString());
+        map.put("name", level3.getName());
+        map.put("order", level3.getOrder());
+        List<Map<String, Object>> indicators = level3.getIndicators() == null
+                ? List.of()
+                : level3.getIndicators().stream()
+                        .sorted(Comparator.comparing(i -> i.getOrder() == null ? Integer.MAX_VALUE : i.getOrder()))
+                        .map(AssistantProcessResolver::toIndicatorMap)
+                        .toList();
+        map.put("indicators", indicators);
+        return map;
+    }
+
+    private static Map<String, Object> toIndicatorMap(NormativeIndicator indicator) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("indicatorId", indicator.getId().toString());
+        map.put("code", indicator.getCode());
+        map.put("name", indicator.getCode());
+        map.put("order", indicator.getOrder());
+        map.put("status", indicator.getStatus() != null ? indicator.getStatus().name() : null);
+        map.put("referenceUrl", indicator.getReferenceUrl());
+        return map;
+    }
+
+    private static int countIndicatorsInLevel1(Level1Node level1) {
+        if (level1.getLevel2Nodes() == null) {
+            return 0;
+        }
+        return level1.getLevel2Nodes().stream()
+                .mapToInt(level2 -> level2.getLevel3Nodes() == null ? 0
+                        : level2.getLevel3Nodes().stream()
+                                .mapToInt(level3 -> level3.getIndicators() == null ? 0 : level3.getIndicators().size())
+                                .sum())
+                .sum();
     }
 
     private static Map<String, Object> toProcessMap(ProcessSummary summary) {
@@ -205,8 +244,8 @@ final class AssistantProcessResolver {
         map.put("templateType", summary.templateType());
         map.put("status", summary.status());
         map.put("startDate", summary.startDate() != null ? summary.startDate().toString() : null);
-        map.put("phaseCount", summary.phaseCount());
-        map.put("subphaseCount", summary.subphaseCount());
+        map.put("level1Count", summary.level1Count());
+        map.put("indicatorCount", summary.indicatorCount());
         if (summary.responsible() != null) {
             map.put("responsibleName", summary.responsible().fullName());
             map.put("responsibleEmail", summary.responsible().email());

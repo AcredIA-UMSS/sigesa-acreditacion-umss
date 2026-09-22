@@ -1,9 +1,11 @@
-import { resolveAccessToken } from '../auth/authBridge';
+import { notifyUnauthorized, resolveAccessToken } from '../auth/authBridge';
 import { ApiError } from './apiError';
 
 export interface CustomFetchOptions extends RequestInit {
   /** When false, Authorization header is omitted (e.g. login). Default: true. */
   auth?: boolean;
+  /** When true, a 401 response will not trigger global logout. Default: false. */
+  skipUnauthorizedLogout?: boolean;
 }
 
 function resolveHttpErrorMessage(status: number, rawBody: string | null): string {
@@ -43,7 +45,7 @@ export async function customFetch<TData>(
   url: string,
   options: CustomFetchOptions = {},
 ): Promise<TData> {
-  const { auth = true, headers: initHeaders, ...init } = options;
+  const { auth = true, headers: initHeaders, skipUnauthorizedLogout = false, ...init } = options;
   const headers = new Headers(initHeaders);
 
 
@@ -51,14 +53,10 @@ export async function customFetch<TData>(
   const baseUrl = import.meta.env.VITE_API_URL ?? '';
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
   const shouldAttachAuth = auth && !fullUrl.includes('/auth/login');
+  const accessToken = shouldAttachAuth ? resolveAccessToken() : null;
 
-  let authorizationAttached = false;
-  if (shouldAttachAuth) {
-    const accessToken = resolveAccessToken();
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`);
-      authorizationAttached = true;
-    }
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
   // FormData must set its own multipart boundary; never force JSON.
@@ -97,9 +95,20 @@ export async function customFetch<TData>(
       }
     }
 
-    if (response.status === 401 && authorizationAttached && code === 'UNAUTHORIZED') {
-      // No cerrar sesión automáticamente: evita redirección al login en errores transitorios.
-      // La UI muestra el error; el usuario puede reintentar o cerrar sesión manualmente.
+    // Global logout only when the session token is rejected (not PBAC/403 ni login).
+    const isAuthRejection =
+      response.status === 401
+      && (code === 'UNAUTHORIZED'
+        || code === 'INVALID_TOKEN'
+        || code === 'JWT_EXPIRED'
+        || code === 'UNKNOWN_ERROR');
+    if (
+      !skipUnauthorizedLogout
+      && isAuthRejection
+      && accessToken
+      && resolveAccessToken() === accessToken
+    ) {
+      notifyUnauthorized();
     }
 
     throw new ApiError(response.status, code, resolveHttpErrorMessage(response.status, rawBody));

@@ -4,12 +4,13 @@ import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
-import com.umss.sigesa.domain.model.Phase;
-import com.umss.sigesa.domain.model.Subphase;
+import com.umss.sigesa.domain.model.Level1Node;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,8 @@ class ProcessControllerQueryTest {
     @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
+    private DeleteProcessUseCase deleteProcessUseCase;
+    @Mock
     private UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
 
     private MockMvc mockMvc;
@@ -50,7 +53,9 @@ class ProcessControllerQueryTest {
                 createProcessUseCase,
                 listProcessesUseCase,
                 getProcessDetailUseCase,
-                userProgramAssignmentRepositoryPort
+                deleteProcessUseCase,
+                userProgramAssignmentRepositoryPort,
+                new NormativeStructureWebMapper()
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ProcessExceptionHandler())
@@ -65,14 +70,16 @@ class ProcessControllerQueryTest {
         when(userProgramAssignmentRepositoryPort.findActiveByUserId(any())).thenReturn(List.of());
         when(listProcessesUseCase.list(any())).thenReturn(List.of(
                 new ProcessSummary(processId, careerId, "INF-SIS", "Ingeniería de Sistemas",
-                        templateId, "CEUB 2026", "CEUB", "ACTIVE", LocalDateTime.now(), 2, 5, null)
+                        templateId, "CEUB 2026", "CEUB", "CEUB", "ACTIVE", LocalDateTime.now(),
+                        2, 5, null)
         ));
 
         mockMvc.perform(get("/api/v1/processes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(processId.toString()))
                 .andExpect(jsonPath("$[0].careerCode").value("INF-SIS"))
-                .andExpect(jsonPath("$[0].phaseCount").value(2));
+                .andExpect(jsonPath("$[0].level1Count").value(2))
+                .andExpect(jsonPath("$[0].indicatorCount").value(5));
     }
 
     @Test
@@ -88,10 +95,9 @@ class ProcessControllerQueryTest {
     }
 
     @Test
-    void getProcessDetailReturnsPhases() throws Exception {
+    void getProcessDetailReturnsNormativeTree() throws Exception {
         UUID processId = UUID.randomUUID();
-        UUID phaseId = UUID.randomUUID();
-        UUID subphaseId = UUID.randomUUID();
+        UUID level1Id = UUID.randomUUID();
         when(userProgramAssignmentRepositoryPort.findActiveByUserId(any())).thenReturn(List.of());
         when(getProcessDetailUseCase.getDetail(any(), any())).thenReturn(
                 new EnrichedProcessDetail(
@@ -102,17 +108,13 @@ class ProcessControllerQueryTest {
                         UUID.randomUUID(),
                         "CEUB 2026",
                         "CEUB",
+                        "CEUB",
                         "ACTIVE",
                         LocalDateTime.now(),
-                        List.of(Phase.builder()
-                                .id(phaseId)
-                                .name("Autoevaluación")
+                        List.of(Level1Node.builder()
+                                .id(level1Id)
+                                .name("Área académica")
                                 .order(1)
-                                .subphases(List.of(Subphase.builder()
-                                        .id(subphaseId)
-                                        .name("Diagnóstico")
-                                        .order(1)
-                                        .build()))
                                 .build()),
                         null
                 )
@@ -120,7 +122,6 @@ class ProcessControllerQueryTest {
 
         mockMvc.perform(get("/api/v1/processes/{id}", processId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.phases[0].name").value("Autoevaluación"))
-                .andExpect(jsonPath("$.phases[0].subphases[0].name").value("Diagnóstico"));
+                .andExpect(jsonPath("$.level1Nodes[0].name").value("Área académica"));
     }
 }

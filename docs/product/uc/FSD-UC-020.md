@@ -2,12 +2,12 @@
 id: FSD-UC-020
 nombre: Revisión documental evaluador externo [EE]
 estado: En Curso
-release: v1.1
+release: v2.0
 actor_principal: "[EE]"
 trazabilidad_prd: PRD-US-026
 modulo: MOD-REVIEW
 reglas: FSD-BR-09, FSD-BR-19
-ultima_actualizacion: "2026-08-03"
+ultima_actualizacion: "2026-09-08"
 design_doc: DD-UC-020
 pr_impl: PR-IMPL-014
 ---
@@ -29,7 +29,7 @@ pr_impl: PR-IMPL-014
 1. [JD] registra usuario con rol [EE] y carrera asignada (FSD-UC-002).
 2. [EE] inicia sesión con correo `@umss.edu.bo` (FSD-BR-12).
 3. Sistema emite JWT con `role=EE` y `programScope[]` de la carrera asignada.
-4. [EE] accede al panel de control de la carrera asignada: KPIs, fases, observaciones e historial documental.
+4. [EE] accede al panel de control de la carrera asignada: KPIs, árbol normativo (Nivel 1…Indicadores), observaciones e historial documental.
 5. [EE] consulta detalle de observaciones (`GET /dashboards/coordinator/details`) acotado a su carrera.
 6. Sistema registra accesos sensibles en bitácora (UC-017, stub v1.0).
 
@@ -39,7 +39,7 @@ pr_impl: PR-IMPL-014
 |----|-----------|----------------|
 | A1 | [EE] sin carrera asignada | `403 ACCESS_DENIED`; sin datos de otras carreras |
 | A2 | [EE] intenta carga/subsanación de Evidencia | `403 FORBIDDEN_ROLE` (FSD-BR-19) |
-| A3 | [EE] intenta aprobar/rechazar Subfase | `403 FORBIDDEN_ROLE` (FSD-BR-04) |
+| A3 | [EE] intenta aprobar/rechazar Indicador | `403 FORBIDDEN_ROLE` (FSD-BR-04) |
 | A4 | [EE] intenta exportar reportes o administrar usuarios | `403 FORBIDDEN_ROLE` |
 | A5 | [EE] intenta acceder a otra carrera | `403` / lista vacía por scope (FSD-BR-09) |
 
@@ -76,14 +76,14 @@ Característica: Revisión documental evaluador externo [EE]
   Escenario: Consulta solo lectura de documentación
     Dado un [EE] autenticado con carrera INF-SIS asignada
     Cuando abre el panel de control
-    Entonces ve KPIs, fases y observaciones de INF-SIS
+    Entonces ve KPIs, árbol normativo e indicadores de INF-SIS
     Y no puede cargar ni modificar Evidencias
 
   Escenario: Bloqueo de mutación por [EE]
     Dado un [EE] autenticado
-    Cuando intenta cargar Evidencia en una Subfase
+    Cuando intenta cargar Evidencia en un Indicador
     Entonces el sistema responde 403 FORBIDDEN_ROLE
-    Y no altera el estado de la Subfase
+    Y no altera el estado del Indicador
 
   Escenario: Aislamiento entre carreras
     Dado un [EE] asignado únicamente a la carrera CEUB

@@ -1,0 +1,49 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - button [ref=f1e5]
+    - generic [ref=f1e8]:
+      - img "UMSS" [ref=f1e10]
+      - generic [ref=f1e11]:
+        - heading "UMSS DUEA" [level=1] [ref=f1e12]
+        - paragraph [ref=f1e13]: PANEL ADMINISTRATIVO
+    - navigation [ref=f1e14]:
+      - link "PANEL DE CONTROL ▼" [ref=f1e15] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e16]: PANEL DE CONTROL
+        - generic [ref=f1e24]: ▼
+      - generic [ref=f1e25]:
+        - button "GESTIÓN PROCESOS" [expanded] [ref=f1e26]
+        - list [ref=f1e37]:
+          - listitem [ref=f1e38]:
+            - link "Ver procesos" [ref=f1e39] [cursor=pointer]:
+              - /url: /procesos
+          - listitem [ref=f1e42]:
+            - link "Nuevo proceso" [ref=f1e43] [cursor=pointer]:
+              - /url: /procesos/nuevo
+      - link "PLANTILLAS" [ref=f1e46] [cursor=pointer]:
+        - /url: /admin/plantillas
+      - link "GESTIÓN USUARIOS" [ref=f1e54] [cursor=pointer]:
+        - /url: /admin/users
+      - link "REPORTES" [ref=f1e63] [cursor=pointer]:
+        - /url: /reportes/ejecutivo
+      - button "HISTORIAL" [ref=f1e68]
+      - link "AYUDA" [ref=f1e76] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f1e83]:
+      - generic [ref=f1e84]:
+        - generic [ref=f1e85]: JD
+        - generic [ref=f1e88]:
+          - paragraph [ref=f1e89]: Jefatura DUEA [JD]
+          - paragraph [ref=f1e90]: SIGESA
+      - button "Cerrar sesión" [ref=f1e91]
+  - main [ref=f1e95]:
+    - generic [ref=f1e96]:
+      - generic [ref=f1e97]:
+        - generic [ref=f1e98]:
+          - heading "Procesos de acreditación" [level=1] [ref=f1e99]
+          - paragraph [ref=f1e100]: Consulta procesos CEUB / ARCU-SUR según su rol y alcance de carrera. Haga clic en una fila para ver el detalle.
+        - generic [ref=f1e101]:
+          - button "Procesando…" [disabled] [ref=f1e102]
+          - link "Nuevo proceso" [ref=f1e103] [cursor=pointer]:
+            - /url: /procesos/nuevo
+      - paragraph [ref=f1e106]: Cargando procesos…

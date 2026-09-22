@@ -107,6 +107,25 @@ public final class AssistantCapabilitiesCatalog {
         return items;
     }
 
+    public static String formatSelfIntroductionMessage(String role,
+                                                       AssistantAgentProfile agentProfile,
+                                                       String modelName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("¡Hola! Soy el asistente virtual de SIGESA (Sistema de Gestión de Acreditación UMSS).\n\n");
+        if (modelName != null && !modelName.isBlank()) {
+            sb.append("Modelo configurado: ").append(modelName.trim()).append(".\n\n");
+        }
+        sb.append("Ayudo con procesos de acreditación, evidencias, indicadores y uso del sistema, según tu rol.\n\n");
+        if (agentProfile != null && agentProfile != AssistantAgentProfile.GENERAL) {
+            sb.append("Modo activo: ").append(agentProfile.name().toLowerCase(Locale.ROOT)).append(".\n\n");
+        }
+        sb.append("Puedo ayudarte con:\n");
+        for (String capability : capabilitiesForRoleAndAgent(role, agentProfile)) {
+            sb.append("• ").append(capability).append('\n');
+        }
+        return sb.toString().trim();
+    }
+
     public static String formatOutOfScopeMessage(String role, boolean llmDisabledWithoutKeyword) {
         return formatOutOfScopeMessage(role, llmDisabledWithoutKeyword, AssistantAgentProfile.GENERAL);
     }

@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.dto.UploadableIndicatorResponse;
 import com.umss.sigesa.application.model.evidence.UploadableIndicator;
+import com.umss.sigesa.adapter.in.security.JwtProgramScopeSupport;
 import com.umss.sigesa.application.port.in.ListUploadableIndicatorsUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
@@ -45,27 +46,13 @@ public class UploadableIndicatorController {
         // Tras reinicio H2 el userId del JWT puede no coincidir con el seed nuevo;
         // el claim programScope del token sigue siendo válido (IDs de carrera estables).
         if (programScope.isEmpty()) {
-            programScope = programScopeFromJwtDetails(authentication);
+            programScope = JwtProgramScopeSupport.programScopeFromAuthentication(authentication);
         }
         List<UploadableIndicatorResponse> body = listUploadableIndicatorsUseCase.listForCoordinator(programScope)
                 .stream()
                 .map(this::toResponse)
                 .toList();
         return ResponseEntity.ok(body);
-    }
-
-    private static List<UUID> programScopeFromJwtDetails(Authentication authentication) {
-        if (authentication == null || authentication.getDetails() == null) {
-            return List.of();
-        }
-        Object details = authentication.getDetails();
-        if (details instanceof List<?> list) {
-            return list.stream()
-                    .filter(UUID.class::isInstance)
-                    .map(UUID.class::cast)
-                    .toList();
-        }
-        return List.of();
     }
 
     private UploadableIndicatorResponse toResponse(UploadableIndicator item) {

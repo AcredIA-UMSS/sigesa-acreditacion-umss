@@ -48,6 +48,12 @@ public class EvidenceVersionEntity {
     @Column(name = "observation_id")
     private UUID observationId;
 
+    @Column(name = "indicator_observation_id")
+    private UUID indicatorObservationId;
+
+    @Column(name = "external_url", length = 2048)
+    private String externalUrl;
+
     @Column(name = "supersedes_version_number")
     private Integer supersedesVersionNumber;
 

@@ -40,6 +40,12 @@ build/
 # Test generator — respuestas crudas del LLM en fallos
 tools/test-generator/.output/
 
+### Playwright E2E ###
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.cache/
+
 ### pnpm local store ###
 .pnpm-store/
 
