@@ -1,46 +1,49 @@
 package com.umss.sigesa.application.service.workflow;
 
-import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
-import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
-import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
-import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
+import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.out.SubphaseEvidenceQueryPort;
+import com.umss.sigesa.application.port.out.SubphaseObservationPort;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
-import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
+import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.JustificationRequiredException;
-import com.umss.sigesa.domain.model.IndicatorObservation;
+import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
-import com.umss.sigesa.domain.model.IndicatorObservationStatus;
-import org.junit.jupiter.api.DisplayName;
+import com.umss.sigesa.domain.model.IndicatorTransitionResult;
+import com.umss.sigesa.domain.model.Role;
+import com.umss.sigesa.domain.model.SubphaseObservation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("RejectIndicatorService — FSD-UC-008 v2")
 class RejectIndicatorServiceTest {
 
+    private static final String JUSTIFICATION = "La evidencia no cumple los requisitos minimos.";
+
     @Mock
-    private NormativeHierarchyQueryPort hierarchyQueryPort;
+    private IndicatorRepositoryPort indicatorRepository;
     @Mock
-    private NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
+    private SubphaseEvidenceQueryPort evidenceQueryPort;
     @Mock
-    private NormativeIndicatorObservationPort observationPort;
+    private SubphaseObservationPort observationPort;
     @Mock
-    private NormativeIndicatorWorkflowPort workflowPort;
+    private IndicatorTransitionHelper transitionHelper;
     @Mock
     private NotificationOutboxPort notificationOutbox;
 
@@ -48,79 +51,82 @@ class RejectIndicatorServiceTest {
     private RejectIndicatorService service;
 
     @Test
-    @DisplayName("Rechazo exitoso crea observación OPEN y transiciona a OBSERVADO")
-    void reject_success() {
+    void shouldRejectIndicatorWithoutLinkedSubphase() {
         UUID indicatorId = UUID.randomUUID();
         UUID actorId = UUID.randomUUID();
-        UUID careerId = UUID.randomUUID();
-        String justification = "La evidencia no cumple el criterio mínimo exigido.";
+        UUID programId = UUID.randomUUID();
+        Indicator indicator = new Indicator(indicatorId, programId, UUID.randomUUID(), UUID.randomUUID());
+        IndicatorTransitionResult transition = new IndicatorTransitionResult(
+                indicatorId, IndicatorState.SUBIDO, IndicatorState.OBSERVADO, UUID.randomUUID());
 
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
-                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
-                        indicatorId, UUID.randomUUID(), careerId, UUID.randomUUID(),
-                        "N1", "IND-1", "Descripción", IndicatorState.SUBIDO)));
-        when(evidenceQueryPort.hasEvidences(indicatorId)).thenReturn(true);
-        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
-        when(observationPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(indicatorRepository.findById(indicatorId)).thenReturn(Optional.of(indicator));
+        when(evidenceQueryPort.hasEvidenceForIndicator(indicatorId)).thenReturn(true);
+        when(evidenceQueryPort.findSubphaseIdsByIndicatorId(indicatorId)).thenReturn(List.of());
+        when(transitionHelper.transition(eq(indicatorId), eq(IndicatorState.OBSERVADO), eq(actorId), eq(Role.TD), any()))
+                .thenReturn(transition);
 
-        var result = service.reject(indicatorId, justification, actorId, "TD");
+        var result = service.reject(indicatorId, JUSTIFICATION, actorId, "TD");
 
-        assertEquals(IndicatorState.SUBIDO, result.previousState());
-        assertEquals(IndicatorState.OBSERVADO, result.newState());
-        assertEquals(indicatorId, result.indicatorId());
-        verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.OBSERVADO);
-        verify(observationPort).save(any(IndicatorObservation.class));
-        verify(notificationOutbox).enqueue(eq("IndicatorRejected"), eq(careerId), any());
+        assertThat(result.observationId()).isNull();
+        assertThat(result.newState()).isEqualTo(IndicatorState.OBSERVADO);
+        verify(observationPort, never()).save(any());
+        verify(notificationOutbox).enqueue(eq("IndicatorRejected"), eq(programId), any());
     }
 
     @Test
-    @DisplayName("Rechaza sin evidencia cargada")
-    void reject_requiresEvidence() {
+    void shouldCreateObservationWhenIndicatorIsLinkedToSubphase() {
         UUID indicatorId = UUID.randomUUID();
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
-                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
-                        indicatorId, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                        "N1", "IND-1", "Descripción", IndicatorState.SUBIDO)));
-        when(evidenceQueryPort.hasEvidences(indicatorId)).thenReturn(false);
+        UUID subphaseId = UUID.randomUUID();
+        UUID observationId = UUID.randomUUID();
+        UUID actorId = UUID.randomUUID();
+        Indicator indicator = new Indicator(indicatorId, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+        when(indicatorRepository.findById(indicatorId)).thenReturn(Optional.of(indicator));
+        when(evidenceQueryPort.hasEvidenceForIndicator(indicatorId)).thenReturn(true);
+        when(evidenceQueryPort.findSubphaseIdsByIndicatorId(indicatorId)).thenReturn(List.of(subphaseId));
+        when(observationPort.findLatestOpenBySubphaseId(subphaseId)).thenReturn(Optional.empty());
+        when(observationPort.save(any())).thenReturn(SubphaseObservation.builder().id(observationId).build());
+        when(transitionHelper.transition(any(), any(), any(), any(), any()))
+                .thenReturn(new IndicatorTransitionResult(
+                        indicatorId, IndicatorState.SUBIDO, IndicatorState.OBSERVADO, UUID.randomUUID()));
 
-        assertThrows(EvidenceRequiredException.class, () -> service.reject(
-                indicatorId, "Justificación válida de veinte chars", UUID.randomUUID(), "TD"));
+        var result = service.reject(indicatorId, JUSTIFICATION, actorId, "TD");
+
+        assertThat(result.observationId()).isEqualTo(observationId);
+        verify(observationPort).save(any());
     }
 
     @Test
-    @DisplayName("Rechaza con observación OPEN existente")
-    void reject_rejectsExistingOpenObservation() {
+    void shouldRejectWhenActorIsNotTechnician() {
+        assertThatThrownBy(() -> service.reject(UUID.randomUUID(), JUSTIFICATION, UUID.randomUUID(), "CC"))
+                .isInstanceOf(InvalidRoleException.class);
+        verify(indicatorRepository, never()).findById(any());
+    }
+
+    @Test
+    void shouldThrowWhenJustificationIsTooShort() {
+        assertThatThrownBy(() -> service.reject(UUID.randomUUID(), "corta", UUID.randomUUID(), "TD"))
+                .isInstanceOf(JustificationRequiredException.class);
+    }
+
+    @Test
+    void shouldThrowWhenIndicatorDoesNotExist() {
         UUID indicatorId = UUID.randomUUID();
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
-                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
-                        indicatorId, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
-                        "N1", "IND-1", "Descripción", IndicatorState.OBSERVADO)));
-        when(evidenceQueryPort.hasEvidences(indicatorId)).thenReturn(true);
-        when(observationPort.findLatestOpenByIndicatorId(indicatorId))
-                .thenReturn(Optional.of(IndicatorObservation.builder()
-                        .id(UUID.randomUUID())
-                        .indicatorId(indicatorId)
-                        .status(IndicatorObservationStatus.OPEN)
-                        .build()));
+        when(indicatorRepository.findById(indicatorId)).thenReturn(Optional.empty());
 
-        assertThrows(InvalidIndicatorStateException.class, () -> service.reject(
-                indicatorId, "Justificación válida de veinte chars", UUID.randomUUID(), "TD"));
+        assertThatThrownBy(() -> service.reject(indicatorId, JUSTIFICATION, UUID.randomUUID(), "TD"))
+                .isInstanceOf(IndicatorNotFoundException.class);
+        verify(transitionHelper, never()).transition(any(), any(), any(), any(), any());
     }
 
     @Test
-    @DisplayName("Justificación demasiado corta")
-    void reject_requiresJustification() {
-        assertThrows(JustificationRequiredException.class, () -> service.reject(
-                UUID.randomUUID(), "corta", UUID.randomUUID(), "TD"));
-    }
-
-    @Test
-    @DisplayName("Indicador inexistente")
-    void reject_indicatorNotFound() {
+    void shouldThrowWhenIndicatorHasNoEvidence() {
         UUID indicatorId = UUID.randomUUID();
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId)).thenReturn(Optional.empty());
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, UUID.randomUUID(), UUID.randomUUID(), null)));
+        when(evidenceQueryPort.hasEvidenceForIndicator(indicatorId)).thenReturn(false);
 
-        assertThrows(IndicatorNotFoundException.class, () -> service.reject(
-                indicatorId, "Justificación válida de veinte chars", UUID.randomUUID(), "TD"));
+        assertThatThrownBy(() -> service.reject(indicatorId, JUSTIFICATION, UUID.randomUUID(), "TD"))
+                .isInstanceOf(EvidenceRequiredException.class);
+        verify(transitionHelper, never()).transition(any(), any(), any(), any(), any());
     }
 }
