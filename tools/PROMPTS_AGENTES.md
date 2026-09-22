@@ -45,6 +45,17 @@ respuestas del asistente. Corre solo tu archivo con npx playwright test <archivo
 y pega la salida.
 ```
 
+## Agente Red Team (asistente GenAI)
+
+```bash
+cd tools/red-team-agent
+./setup.sh && ./run.sh listar && ./run.sh sync
+./run.sh probar-api
+# Cursor: @sigesa-red-team
+```
+
+Ver [tools/red-team-agent/README.md](./red-team-agent/README.md) — catálogo Red Team SIGESA, JUnit `RedTeamAssistantCatalogWebMvcTest`.
+
 ## Forma 3 · Script Python SIGESA (sin IDE)
 
 Adaptado al monorepo SIGESA (`tools/e2e-agent/`). **No** lee `index.html` estático; usa contexto Markdown + `tests/seed.spec.ts` + patrón TypeScript.
