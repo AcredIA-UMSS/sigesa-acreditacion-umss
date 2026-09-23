@@ -69,37 +69,6 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
             summary.setApprovedEvidences(approved);
             summary.setRejectedEvidences(rejected);
             summary.setPendingObservations(pendingObs);
-
-            if (summary.getPhases() != null) {
-                for (ProgramPhaseSummaryEntity phaseSummary : summary.getPhases()) {
-                    List<IndicatorEntity> phaseIndicators = indicatorJpaRepository.findByProgramIdAndPhaseOrder(programId, phaseSummary.getPhaseId());
-                    if (!phaseIndicators.isEmpty()) {
-                        int phaseTotal = phaseIndicators.size();
-                        int phaseApproved = 0;
-                        for (IndicatorEntity ind : phaseIndicators) {
-                            IndicatorState state = historyRepository.findTopByIndicatorIdOrderByCreatedAtDesc(ind.getId())
-                                    .map(IndicatorStateHistoryEntity::getNewState)
-                                    .orElse(IndicatorState.PENDIENTE);
-                            if (state == IndicatorState.APROBADO) {
-                                phaseApproved++;
-                            }
-                        }
-                        double phaseProgress = (phaseApproved * 100.0) / phaseTotal;
-                        phaseProgress = Math.round(phaseProgress * 100.0) / 100.0;
-                        phaseSummary.setPercentage(phaseProgress);
-                        if (phaseProgress == 100.0) {
-                            phaseSummary.setStatus("COMPLETED");
-                        } else if (phaseProgress > 0.0) {
-                            phaseSummary.setStatus("IN_PROCESO");
-                        } else {
-                            phaseSummary.setStatus("PENDIENTE");
-                        }
-                    } else {
-                        phaseSummary.setPercentage(0.0);
-                        phaseSummary.setStatus("PENDIENTE");
-                    }
-                }
-            }
         }
     }
 

@@ -40,12 +40,6 @@ public class AssistantKeywordRouter {
     private static final Pattern CONFIRMATION_PROMPT_PATTERN = Pattern.compile(
             "(?is)Responda\\s*(\\*\\*confirmo\\*\\*|«confirmo»|confirmo)\\s*para");
 
-    private static final Pattern SUBPHASE_RESUMEN_PATTERN = Pattern.compile(
-            "(?s)Resumen:\\s*«(.+?)»\\s*→\\s*orden\\s*(\\d+)\\s*en\\s*«(.+?)»");
-
-    private static final Pattern SUBPHASE_LINK_PATTERN = Pattern.compile(
-            "Enlace:\\s*(https?://\\S+)");
-
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "([a-z0-9._%+-]+@umss\\.edu\\.bo)", Pattern.CASE_INSENSITIVE);
 
@@ -116,11 +110,6 @@ public class AssistantKeywordRouter {
         Optional<AssistantToolInvocation> writeFlow = resolveWriteFlow(message, history, role, chatContext);
         if (writeFlow.isPresent()) {
             return writeFlow;
-        }
-
-        Optional<AssistantToolInvocation> phasesConfirm = resolvePhasesConfirmation(message, history, role, chatContext);
-        if (phasesConfirm.isPresent()) {
-            return phasesConfirm;
         }
 
         Optional<AssistantToolInvocation> evidenceFlow = resolveEvidenceFlow(message, role, chatContext);
@@ -259,83 +248,6 @@ public class AssistantKeywordRouter {
         return null;
     }
 
-    private Optional<AssistantToolInvocation> resolvePhasesConfirmation(String message,
-                                                                        List<ChatMessage> history,
-                                                                        String role,
-                                                                        AssistantChatContext chatContext) {
-        if (!CONFIRM_PATTERN.matcher(message).matches()) {
-            return Optional.empty();
-        }
-        if (!"JD".equals(role) && !"TD".equals(role)) {
-            return Optional.empty();
-        }
-        if (chatContext == null || !chatContext.isPhasesAgent()) {
-            return Optional.empty();
-        }
-
-        PendingSubphaseCreate pending = findPendingSubphaseCreate(history);
-        if (pending == null) {
-            return Optional.empty();
-        }
-
-        return Optional.of(buildSubphaseCreateInvocation(pending, chatContext, true));
-    }
-
-    private static PendingSubphaseCreate findPendingSubphaseCreate(List<ChatMessage> history) {
-        if (history == null || history.isEmpty()) {
-            return null;
-        }
-
-        for (int i = history.size() - 1; i >= 0; i--) {
-            ChatMessage message = history.get(i);
-            if (message.role() != ChatRole.ASSISTANT || message.content() == null) {
-                continue;
-            }
-            String content = message.content();
-            if (!CONFIRMATION_PROMPT_PATTERN.matcher(content).find()) {
-                continue;
-            }
-
-            Matcher resumen = SUBPHASE_RESUMEN_PATTERN.matcher(content);
-            if (!resumen.find()) {
-                continue;
-            }
-
-            Matcher link = SUBPHASE_LINK_PATTERN.matcher(content);
-            if (!link.find()) {
-                continue;
-            }
-
-            return new PendingSubphaseCreate(
-                    resumen.group(1).trim(),
-                    resumen.group(3).trim(),
-                    link.group(1).trim());
-        }
-        return null;
-    }
-
-    private static AssistantToolInvocation buildSubphaseCreateInvocation(PendingSubphaseCreate pending,
-                                                                           AssistantChatContext chatContext,
-                                                                           boolean confirmed) {
-        String careerQuery = chatContext.careerName();
-        if (careerQuery == null || careerQuery.isBlank()) {
-            careerQuery = chatContext.careerCode();
-        }
-        StringBuilder json = new StringBuilder("{");
-        json.append("\"action\":\"CREATE\",");
-        json.append("\"careerQuery\":\"").append(escapeJson(careerQuery)).append("\",");
-        if (chatContext.templateType() != null && !chatContext.templateType().isBlank()) {
-            json.append("\"templateType\":\"").append(escapeJson(chatContext.templateType())).append("\",");
-        }
-        json.append("\"phaseName\":\"").append(escapeJson(pending.phaseName())).append("\",");
-        json.append("\"name\":\"").append(escapeJson(pending.subphaseName())).append("\",");
-        json.append("\"referenceUrl\":\"").append(escapeJson(pending.referenceUrl())).append("\",");
-        json.append("\"requirements\":\"Documentación y criterios mínimos definidos para la subfase.\",");
-        json.append("\"confirmed\":").append(confirmed);
-        json.append("}");
-        return new AssistantToolInvocation(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID, json.toString());
-    }
-
     private Optional<AssistantToolInvocation> resolveWriteFlow(String message,
                                                                  List<ChatMessage> history,
                                                                  String role,
@@ -397,7 +309,7 @@ public class AssistantKeywordRouter {
         String args = buildJsonArgs(
                 parsed.careerQuery() != null ? parsed.careerQuery() : careerQuery,
                 parsed.templateType());
-        return new AssistantToolInvocation(AssistantToolRegistry.LIST_PROCESS_PHASES_ID, args);
+        return new AssistantToolInvocation(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID, args);
     }
 
     private AssistantToolInvocation buildPhasesInvocationFromContext(AssistantChatContext chatContext) {
@@ -407,7 +319,7 @@ public class AssistantKeywordRouter {
             careerQuery = chatContext.careerCode();
         }
         return new AssistantToolInvocation(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                 buildJsonArgs(careerQuery, templateType));
     }
 
@@ -505,8 +417,5 @@ public class AssistantKeywordRouter {
     }
 
     private record PendingWriteAction(String identifier, String action) {
-    }
-
-    private record PendingSubphaseCreate(String subphaseName, String phaseName, String referenceUrl) {
     }
 }

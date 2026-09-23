@@ -8,6 +8,7 @@ import com.umss.sigesa.adapter.out.persistance.repository.SpringDataAccreditatio
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -20,6 +21,11 @@ public class AccreditationProcessPersistenceAdapter implements AccreditationProc
     @Override
     public boolean existsActiveProcessByCareerAndTemplateType(UUID careerId, String templateType) {
         return repository.existsActiveByCareerIdAndTemplateType(careerId, templateType);
+    }
+
+    @Override
+    public Optional<AccreditationProcess> findById(UUID processId) {
+        return repository.findById(processId).map(mapper::toDomain);
     }
 
     @Override

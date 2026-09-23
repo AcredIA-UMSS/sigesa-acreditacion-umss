@@ -12,6 +12,10 @@ const statusConfig: Record<
     label: 'Activo',
     className: 'bg-primary-100 text-primary-700 border-primary-300',
   },
+  CLOSED: {
+    label: 'Cerrado',
+    className: 'bg-gray-100 text-gray-700 border-gray-300',
+  },
   COMPLETED: {
     label: 'Completado',
     className: 'bg-success/15 text-success border-success/30',
@@ -19,6 +23,10 @@ const statusConfig: Record<
   CANCELLED: {
     label: 'Cancelado',
     className: 'bg-gray-100 text-gray-700 border-gray-300',
+  },
+  ARCHIVED: {
+    label: 'Archivado',
+    className: 'bg-gray-100 text-gray-600 border-gray-300',
   },
 };
 

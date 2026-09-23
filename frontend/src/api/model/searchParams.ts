@@ -7,8 +7,7 @@
 
 export type SearchParams = {
 processId?: string;
-phaseId?: string;
-subphaseId?: string;
+level1Id?: string;
 indicatorId?: string;
 programId?: string;
 q?: string;

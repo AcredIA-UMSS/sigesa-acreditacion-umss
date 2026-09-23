@@ -7,10 +7,9 @@
 
 export interface EvidenceSearchHitResponseDto {
   evidenceId?: string;
-  subphaseId?: string;
-  subphaseName?: string;
-  phaseId?: string;
-  phaseName?: string;
+  level1Id?: string;
+  level1Name?: string;
+  level3Name?: string;
   processId?: string;
   indicatorId?: string;
   indicatorCode?: string;

@@ -36,8 +36,7 @@ public class EvidenceSearchController {
     @Operation(summary = "Buscar evidencias con filtros y paginación")
     public ResponseEntity<EvidenceSearchPageResponseDto> search(
             @RequestParam(required = false) UUID processId,
-            @RequestParam(required = false) UUID phaseId,
-            @RequestParam(required = false) UUID subphaseId,
+            @RequestParam(required = false) UUID level1Id,
             @RequestParam(required = false) UUID indicatorId,
             @RequestParam(required = false) UUID programId,
             @RequestParam(required = false, name = "q") String query,
@@ -48,8 +47,7 @@ public class EvidenceSearchController {
         UUID requesterId = (UUID) authentication.getPrincipal();
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria(
                 processId,
-                phaseId,
-                subphaseId,
+                level1Id,
                 indicatorId,
                 programId,
                 query,
@@ -73,10 +71,9 @@ public class EvidenceSearchController {
     private EvidenceSearchHitResponseDto toHitDto(EvidenceSearchHit hit) {
         EvidenceSearchHitResponseDto dto = new EvidenceSearchHitResponseDto();
         dto.setEvidenceId(hit.evidenceId());
-        dto.setSubphaseId(hit.subphaseId());
-        dto.setSubphaseName(hit.subphaseName());
-        dto.setPhaseId(hit.phaseId());
-        dto.setPhaseName(hit.phaseName());
+        dto.setLevel1Id(hit.level1Id());
+        dto.setLevel1Name(hit.level1Name());
+        dto.setLevel3Name(hit.level3Name());
         dto.setProcessId(hit.processId());
         dto.setIndicatorId(hit.indicatorId());
         dto.setIndicatorCode(hit.indicatorCode());

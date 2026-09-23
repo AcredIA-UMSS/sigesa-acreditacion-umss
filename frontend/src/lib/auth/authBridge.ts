@@ -20,13 +20,13 @@ export function registerAuthBridge(
 }
 
 export function resolveAccessToken(): string | null {
-  const fromBridge = accessTokenGetter();
-  if (fromBridge) {
-    return fromBridge;
+  // Prefer localStorage: saveSession() runs before React re-renders the auth bridge.
+  const stored = loadSession();
+  if (stored?.accessToken) {
+    return stored.accessToken;
   }
 
-  const stored = loadSession();
-  return stored?.accessToken ?? null;
+  return accessTokenGetter();
 }
 
 export function notifyUnauthorized(): void {

@@ -1,0 +1,65 @@
+- generic [ref=f1e346]:
+  - complementary [ref=f1e347]:
+    - button [ref=f1e348]
+    - generic [ref=f1e351]:
+      - img "UMSS" [ref=f1e353]
+      - generic [ref=f1e354]:
+        - heading "UMSS DUEA" [level=1] [ref=f1e355]
+        - paragraph [ref=f1e356]: PANEL ADMINISTRATIVO
+    - navigation [ref=f1e357]:
+      - link "PANEL DE CONTROL ▼" [ref=f1e358] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e359]: PANEL DE CONTROL
+        - generic [ref=f1e367]: ▼
+      - generic [ref=f1e368]:
+        - button "GESTIÓN PROCESOS" [expanded] [ref=f1e369]
+        - list [ref=f1e380]:
+          - listitem [ref=f1e381]:
+            - link "Ver procesos" [ref=f1e382] [cursor=pointer]:
+              - /url: /procesos
+          - listitem [ref=f1e385]:
+            - link "Nuevo proceso" [ref=f1e386] [cursor=pointer]:
+              - /url: /procesos/nuevo
+      - link "PLANTILLAS" [ref=f1e389] [cursor=pointer]:
+        - /url: /admin/plantillas
+      - link "GESTIÓN USUARIOS" [ref=f1e397] [cursor=pointer]:
+        - /url: /admin/users
+      - link "REPORTES" [ref=f1e406] [cursor=pointer]:
+        - /url: /reportes/ejecutivo
+      - button "HISTORIAL" [ref=f1e411]
+      - link "AYUDA" [ref=f1e419] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f1e426]:
+      - generic [ref=f1e427]:
+        - generic [ref=f1e428]: JD
+        - generic [ref=f1e431]:
+          - paragraph [ref=f1e432]: Jefatura DUEA [JD]
+          - paragraph [ref=f1e433]: SIGESA
+      - button "Cerrar sesión" [ref=f1e434]
+  - main [ref=f1e438]:
+    - generic [ref=f1e439]:
+      - generic [ref=f1e440]:
+        - link "Volver al detalle" [ref=f1e441] [cursor=pointer]:
+          - /url: /procesos/8d38cabf-02f5-4d62-86e8-4aae588c4f9c
+        - button "Actualizar" [ref=f1e444]
+      - generic [ref=f1e450]:
+        - generic [ref=f1e452]:
+          - generic [ref=f1e453]:
+            - paragraph [ref=f1e454]: Edición estructural · CEUB
+            - heading "Administración de Empresas" [level=1] [ref=f1e455]
+            - paragraph [ref=f1e456]: ADM-EMP · CEUB prueba
+          - generic [ref=f1e457]: Activo
+        - generic [ref=f1e458]:
+          - paragraph [ref=f1e459]: Solo se listan las dimensiones (nivel 1). Despliegue cada fila con ▸ para editar áreas, criterios e indicadores.
+          - button "Agregar nueva dimensión (nivel 1) Formulario de alta" [ref=f1e461]:
+            - generic [ref=f1e467]:
+              - generic [ref=f1e468]: Agregar nueva dimensión (nivel 1)
+              - generic [ref=f1e469]: Formulario de alta
+          - button "Juanot Área 1 · 1 subnivel(es) · 1 indicador(es)" [ref=f1e471]:
+            - generic [ref=f1e480]:
+              - generic [ref=f1e481]: Juanot
+              - generic [ref=f1e482]: Área 1 · 1 subnivel(es) · 1 indicador(es)
+          - button "Roman Área 2 · 0 subnivel(es) · 0 indicador(es)" [ref=f1e484]:
+            - generic [ref=f1e493]:
+              - generic [ref=f1e494]: Roman
+              - generic [ref=f1e495]: Área 2 · 0 subnivel(es) · 0 indicador(es)

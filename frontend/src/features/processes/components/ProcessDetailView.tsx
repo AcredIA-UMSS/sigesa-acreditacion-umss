@@ -1,13 +1,13 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
-import { ProcessPhaseTree } from './ProcessPhaseTree';
-import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
+import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessDetailViewProps {
@@ -32,25 +32,25 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     useProcessDetail(processId);
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
-  const canUseCopilot =
-    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
-  const copilotReadOnly = session?.role === 'CC';
   const canUploadEvidence = session?.role === 'CC';
-  const canObserveEvidence = session?.role === 'JD' || session?.role === 'TD';
   const canReviewEvidence = session?.role === 'TD';
-  const subphaseAnchorRef = useRef<HTMLDivElement>(null);
+  const structureAnchorRef = useRef<HTMLDivElement>(null);
+  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
 
-  const navigateToSubphase = useCallback((subphaseId: string) => {
-    const element = document.getElementById(`subphase-${subphaseId}`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element?.classList.add('ring-2', 'ring-primary-400');
+  const navigateToIndicator = useCallback((indicatorId: string) => {
+    setExpandToIndicatorId(indicatorId);
     window.setTimeout(() => {
-      element?.classList.remove('ring-2', 'ring-primary-400');
-    }, 2000);
+      const element = document.getElementById(`indicator-${indicatorId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element?.classList.add('ring-2', 'ring-primary-400');
+      window.setTimeout(() => {
+        element?.classList.remove('ring-2', 'ring-primary-400');
+      }, 2000);
+    }, 150);
   }, []);
 
   return (
-    <div className="space-y-6" ref={subphaseAnchorRef}>
+    <div className="space-y-6" ref={structureAnchorRef}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/procesos"
@@ -116,6 +116,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             onUpdated={refetch}
           />
 
+          <MethodologicalStageTimelineContainer processId={processId} />
+
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -123,49 +125,41 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  Fases y subfases con requisitos de completitud. En cada subfase puede
-                  cargar una o más evidencias y el equipo técnico puede registrar observaciones.
+                  Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
+                  (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
                 </p>
               </div>
               {canEditStructure && (
                 <Link to={`/procesos/${processId}/estructura`}>
                   <Button variant="secondary">
                     <Pencil size={16} />
-                    Editar estructura
+                    Editar estructura normativa
                   </Button>
                 </Link>
               )}
             </div>
+
             <ProcessEvidenceSearchPanel
               processId={processId}
               programId={process.careerId}
-              phases={process.phases ?? []}
-              onNavigateToSubphase={navigateToSubphase}
+              level1Nodes={process.level1Nodes ?? []}
+              onNavigateToIndicator={navigateToIndicator}
             />
-            <ProcessPhaseTree
-              phases={process.phases ?? []}
-              processId={processId}
-              canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canUploadEvidence}
-              canClosePhase={canReviewEvidence}
-              onStructureUpdated={refetch}
-              onNavigateToSubphase={navigateToSubphase}
-            />
-          </section>
 
-          {canUseCopilot && (
-            <PhasesCopilotPanel
-              readOnly={copilotReadOnly}
-              process={{
-                processId,
-                careerName: process.careerName ?? 'Carrera',
-                careerCode: process.careerCode ?? '—',
-                templateType: process.templateType ?? 'CEUB',
-              }}
-            />
-          )}
+            <div className="mt-6">
+              <ProcessNormativeTree
+                level1Nodes={process.level1Nodes ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                canCloseLevel1={canReviewEvidence}
+                onStructureUpdated={refetch}
+                onNavigateToIndicator={navigateToIndicator}
+                expandToIndicatorId={expandToIndicatorId}
+              />
+            </div>
+          </section>
         </div>
       )}
     </div>

@@ -1,0 +1,225 @@
+- generic [ref=e50]:
+  - complementary [ref=e51]:
+    - button [ref=e52]
+    - generic [ref=e55]:
+      - img "UMSS" [ref=e57]
+      - generic [ref=e58]:
+        - heading "UMSS DUEA" [level=1] [ref=e59]
+        - paragraph [ref=e60]: PANEL ADMINISTRATIVO
+    - navigation [ref=e61]:
+      - link "PANEL DE CONTROL ▼" [ref=e62] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e63]: PANEL DE CONTROL
+        - generic [ref=e71]: ▼
+      - button "GESTIÓN PROCESOS" [ref=e73]
+      - link "CARGAR EVIDENCIA" [ref=e84] [cursor=pointer]:
+        - /url: /evidencias/cargar
+      - link "BUSCAR EVIDENCIAS" [ref=e92] [cursor=pointer]:
+        - /url: /evidencias/buscar
+      - button "REPORTES ▼" [ref=e101]:
+        - generic [ref=e102]: REPORTES
+        - generic [ref=e106]: ▼
+      - button "HISTORIAL" [ref=e107]
+      - link "AYUDA" [ref=e115] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=e122]:
+      - generic [ref=e123]:
+        - generic [ref=e124]: CC
+        - generic [ref=e127]:
+          - paragraph [ref=e128]: Coordinador de Carrera [CC]
+          - paragraph [ref=e129]: SIGESA
+      - button "Cerrar sesión" [ref=e130]
+  - main [ref=e134]:
+    - generic [ref=e135]:
+      - generic [ref=e136]:
+        - heading "Panel de Control Acreditación" [level=1] [ref=e137]
+        - paragraph [ref=e138]: SIGESA · Gestión Integrada de Acreditación de Calidad Académica
+      - generic [ref=e139]: "ID Usuario: 702de2ff-30ea-44d9-ba02-0df406d2a682"
+    - generic [ref=e146]:
+      - generic [ref=e153]:
+        - heading "Ingeniería de Sistemas" [level=2] [ref=e154]
+        - paragraph [ref=e155]: "Programa Scope ID: 550e8400-e29b-41d4-a716-446655440000"
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - generic [ref=e158]: Indicadores
+          - generic [ref=e164]:
+            - heading "13" [level=4] [ref=e165]
+            - paragraph [ref=e166]: Total asignados
+        - generic [ref=e167]:
+          - generic [ref=e168]: Avance Global
+          - generic [ref=e174]:
+            - heading "30.77%" [level=4] [ref=e175]
+            - paragraph [ref=e176]: Progreso promedio
+        - generic [ref=e177]:
+          - generic [ref=e178]: Evidencias Aprobadas
+          - generic [ref=e184]:
+            - heading "4" [level=4] [ref=e185]
+            - paragraph [ref=e186]: Revisadas y validadas
+        - generic [ref=e187]:
+          - generic [ref=e188]: Evidencias Rechazadas
+          - generic [ref=e195]:
+            - heading "3" [level=4] [ref=e196]
+            - paragraph [ref=e197]: Requieren acción
+        - generic [ref=e198]:
+          - generic [ref=e199]: Obs. Pendientes
+          - generic [ref=e205]:
+            - heading "8" [level=4] [ref=e206]
+            - paragraph [ref=e207]: Falta subsanación
+      - generic [ref=e208]:
+        - generic [ref=e209]:
+          - heading "Progreso de Fases del Proceso" [level=3] [ref=e210]
+          - generic [ref=e211]:
+            - generic [ref=e213]:
+              - generic [ref=e214]:
+                - generic [ref=e215]: "Fase 1: Autoevaluación Inicial"
+                - generic [ref=e216]: EN_PROCESO
+              - generic [ref=e217]: 70.00%
+            - generic [ref=e221]:
+              - generic [ref=e222]:
+                - generic [ref=e223]: "Fase 2: Verificación de Evidencias"
+                - generic [ref=e224]: EN_PROCESO
+              - generic [ref=e225]: 20.00%
+        - generic [ref=e228]:
+          - heading "Alertas de Cuello de Botella" [level=3] [ref=e229]
+          - generic [ref=e234]:
+            - 'heading "Indicador: IND-102" [level=4] [ref=e235]'
+            - paragraph [ref=e236]: "Criterio: CRIT-3.1"
+            - generic [ref=e237]: Estancado por 14 días
+      - generic [ref=e239]:
+        - generic [ref=e240]:
+          - heading "Exportar Reportes del Dashboard" [level=3] [ref=e241]
+          - paragraph [ref=e242]: Descarga un reporte detallado del estado de las fases e indicadores del programa actual.
+        - generic [ref=e243]:
+          - generic [ref=e244]:
+            - button "Excel (XLSX)" [ref=e245]
+            - button "CSV" [ref=e249]
+            - button "PDF" [ref=e253]
+          - button "Descargar" [ref=e257]
+      - generic [ref=e261]:
+        - generic [ref=e262]:
+          - generic [ref=e263]:
+            - heading "Observaciones Pendientes de Subsanación" [level=3] [ref=e264]
+            - paragraph [ref=e265]: Listado detallado de las observaciones emitidas que requieren subsanación.
+          - generic [ref=e266]:
+            - combobox [ref=e270] [cursor=pointer]:
+              - option "Todas las Fases" [selected]
+              - 'option "Fase 1: Autoevaluación"'
+              - 'option "Fase 2: Verificación"'
+            - combobox [ref=e274] [cursor=pointer]:
+              - option "Todos los Estados" [selected]
+              - option "Pendiente Subsanación"
+              - option "En Revisión"
+              - option "Aprobado"
+        - table [ref=e276]:
+          - rowgroup [ref=e277]:
+            - row [ref=e278]:
+              - columnheader "Indicador" [ref=e279]
+              - columnheader "Descripción" [ref=e280]
+              - columnheader "F. Emisión" [ref=e281]
+              - columnheader "F. Límite" [ref=e282] [cursor=pointer]
+              - columnheader "Días Rest." [ref=e287]
+              - columnheader "Estado" [ref=e288]
+              - columnheader "Acción" [ref=e289]
+          - rowgroup [ref=e290]:
+            - row [ref=e291]:
+              - cell "IND-1.2.1 Perfil de Egreso Evaluado" [ref=e292]:
+                - generic [ref=e293]: IND-1.2.1
+                - generic "Perfil de Egreso Evaluado" [ref=e294]
+              - cell "Completado y validado en revisión técnica." [ref=e295]
+              - cell "2026-07-13" [ref=e296]
+              - cell "2026-08-02" [ref=e297]
+              - cell "-41 días" [ref=e298]
+              - cell "APROBADO" [ref=e300]
+              - cell [ref=e302]:
+                - link "Subsanar" [ref=e303] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-104/subsanar
+            - row [ref=e308]:
+              - cell "IND-1.2.2 Estructura Curricular" [ref=e309]:
+                - generic [ref=e310]: IND-1.2.2
+                - generic "Estructura Curricular" [ref=e311]
+              - cell "Validación aprobada por DUEA." [ref=e312]
+              - cell "2026-07-16" [ref=e313]
+              - cell "2026-08-05" [ref=e314]
+              - cell "-38 días" [ref=e315]
+              - cell "APROBADO" [ref=e317]
+              - cell [ref=e319]:
+                - link "Subsanar" [ref=e320] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-105/subsanar
+            - row [ref=e325]:
+              - cell "IND-1.3.1 Carga Horaria Docente" [ref=e326]:
+                - generic [ref=e327]: IND-1.3.1
+                - generic "Carga Horaria Docente" [ref=e328]
+              - cell "Certificado validado." [ref=e329]
+              - cell "2026-07-18" [ref=e330]
+              - cell "2026-08-06" [ref=e331]
+              - cell "-37 días" [ref=e332]
+              - cell "APROBADO" [ref=e334]
+              - cell [ref=e336]:
+                - link "Subsanar" [ref=e337] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-106/subsanar
+            - row [ref=e342]:
+              - cell "IND-1.1.1 Misión y Visión Institucional" [ref=e343]:
+                - generic [ref=e344]: IND-1.1.1
+                - generic "Misión y Visión Institucional" [ref=e345]
+              - cell "Formato PDF ilegible en la página 3." [ref=e346]
+              - cell "2026-07-30" [ref=e347]
+              - cell "2026-08-09" [ref=e348]
+              - cell "-34 días" [ref=e349]
+              - cell "EN REVISION" [ref=e351]
+              - cell [ref=e353]:
+                - link "Subsanar" [ref=e354] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-101/subsanar
+            - row [ref=e359]:
+              - cell "IND-1.1.2 Objetivos del Plan de Estudios" [ref=e360]:
+                - generic [ref=e361]: IND-1.1.2
+                - generic "Objetivos del Plan de Estudios" [ref=e362]
+              - cell "Los objetivos no concuerdan con el perfil profesional vigente." [ref=e363]
+              - cell "2026-07-24" [ref=e364]
+              - cell "2026-08-10" [ref=e365]
+              - cell "-33 días" [ref=e366]
+              - cell "PENDIENTE SUBSANACION" [ref=e368]
+              - cell [ref=e370]:
+                - link "Subsanar" [ref=e371] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-102/subsanar
+            - row [ref=e376]:
+              - cell "IND-1.1.1 Misión y Visión Institucional" [ref=e377]:
+                - generic [ref=e378]: IND-1.1.1
+                - generic "Misión y Visión Institucional" [ref=e379]
+              - cell "Falta adjuntar resolución del HCF firmada." [ref=e380]
+              - cell "2026-07-23" [ref=e381]
+              - cell "2026-08-12" [ref=e382]
+              - cell "-31 días" [ref=e383]
+              - cell "PENDIENTE SUBSANACION" [ref=e385]
+              - cell [ref=e387]:
+                - link "Subsanar" [ref=e388] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-101/subsanar
+            - row [ref=e393]:
+              - cell "IND-2.1.1 Equipamiento de Laboratorios" [ref=e394]:
+                - generic [ref=e395]: IND-2.1.1
+                - generic "Equipamiento de Laboratorios" [ref=e396]
+              - cell "Falta incluir el certificado de calibración de osciloscopios." [ref=e397]
+              - cell "2026-07-28" [ref=e398]
+              - cell "2026-08-14" [ref=e399]
+              - cell "-29 días" [ref=e400]
+              - cell "PENDIENTE SUBSANACION" [ref=e402]
+              - cell [ref=e404]:
+                - link "Subsanar" [ref=e405] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-103/subsanar
+            - row [ref=e410]:
+              - cell "IND-2.1.1 Equipamiento de Laboratorios" [ref=e411]:
+                - generic [ref=e412]: IND-2.1.1
+                - generic "Equipamiento de Laboratorios" [ref=e413]
+              - cell "Falta firma del jefe de laboratorios." [ref=e414]
+              - cell "2026-08-01" [ref=e415]
+              - cell "2026-08-17" [ref=e416]
+              - cell "-26 días" [ref=e417]
+              - cell "EN REVISION" [ref=e419]
+              - cell [ref=e421]:
+                - link "Subsanar" [ref=e422] [cursor=pointer]:
+                  - /url: /coordinator/evidences/IND-103/subsanar
+        - generic [ref=e427]:
+          - generic [ref=e428]: "Total: 8 observaciones"
+          - generic [ref=e429]:
+            - button [disabled] [ref=e430]
+            - generic [ref=e433]: Pág. 1 de 1
+            - button [disabled] [ref=e434]

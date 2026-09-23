@@ -53,4 +53,29 @@ class GenerateExecutiveReportServiceTest {
         verify(auditLogPort).logReportRequested(requesterId, jobId);
         verify(reportJobProcessor).enqueue(jobId);
     }
+
+    @Test
+    void shouldNotEnqueueWhenRepositorySaveFails() {
+        UUID requesterId = UUID.randomUUID();
+        ExecutiveReportFilters filters = new ExecutiveReportFilters(UUID.randomUUID(), UUID.randomUUID(), 2026);
+        when(reportJobRepository.save(any(ReportJob.class))).thenThrow(new IllegalStateException("db down"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                () -> service.generate(filters, requesterId));
+        verify(auditLogPort, org.mockito.Mockito.never()).logReportRequested(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        verify(reportJobProcessor, org.mockito.Mockito.never()).enqueue(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldNotEnqueueWhenAuditFails() {
+        UUID requesterId = UUID.randomUUID();
+        when(reportJobRepository.save(any(ReportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        org.mockito.Mockito.doThrow(new IllegalStateException("audit down"))
+                .when(auditLogPort).logReportRequested(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class,
+                () -> service.generate(new ExecutiveReportFilters(null, null, 2026), requesterId));
+        verify(reportJobProcessor, org.mockito.Mockito.never()).enqueue(org.mockito.ArgumentMatchers.any());
+    }
 }

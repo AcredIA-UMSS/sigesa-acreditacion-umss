@@ -7,7 +7,8 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      # Dev Docker: Hibernate crea/actualiza el esquema base; Flyway solo en prod.
+      # Dev Docker: Hibernate alinea entidades JPA; migraciones V14+ requieren backfill manual
+      # o Flyway baseline si el volumen Postgres es anterior a release 2.0.0.
       ddl-auto: update
   flyway:
     enabled: false

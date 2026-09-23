@@ -2,12 +2,12 @@
 id: FSD-UC-013
 nombre: Panel semáforo [JD]
 estado: En Curso
-release: v1.0
+release: v2.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-013
 modulo: MOD-DASH
 reglas: —
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-013 — Panel semáforo [JD]
@@ -57,6 +57,6 @@ Característica: Panel semáforo ejecutivo
 
   Escenario: Coherencia con reglas de completitud
     Dado reglas de completitud configuradas para el piloto
-    Cuando una carrera tiene subfases críticas vencidas
+    Cuando una carrera tiene indicadores críticos vencidos
     Entonces el semáforo de esa carrera es Rojo
 ```

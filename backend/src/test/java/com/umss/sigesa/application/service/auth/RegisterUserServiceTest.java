@@ -167,4 +167,36 @@ class RegisterUserServiceTest {
                 () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
                         "cc@umss.edu.bo", "  ", null, "Juan", "Pérez", "71234567", "Segura2026!".toCharArray())));
     }
+
+    @Test
+    void shouldRejectWeakPasswordWithoutPersisting() {
+        assertThrows(com.umss.sigesa.domain.exception.WeakPasswordException.class,
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "td@umss.edu.bo", "TD", null, "Ana", "López", "71234567", "short".toCharArray())));
+        verify(userRepository, never()).findByEmail(any());
+        verify(userRepository, never()).save(any(), any(char[].class));
+    }
+
+    @Test
+    void shouldRejectInvalidPhoneWithoutPersisting() {
+        assertThrows(com.umss.sigesa.domain.exception.InvalidUserProfileException.class,
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "td@umss.edu.bo", "TD", null, "Ana", "López", "123", "Segura2026!".toCharArray())));
+        verify(userRepository, never()).save(any(), any(char[].class));
+        verify(assignmentRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldNotCreateAssignmentWhenRegisteringTd() {
+        UUID userId = UUID.randomUUID();
+        AppUser saved = new AppUser(userId, Email.of("td@umss.edu.bo"), Role.TD, UserStatus.INACTIVE,
+                LocalDateTime.now(), LocalDateTime.now(), "Ana", "Técnica", "72345678");
+        when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
+
+        registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                "td@umss.edu.bo", "TD", UUID.randomUUID(), "Ana", "Técnica", "72345678", "Segura2026!".toCharArray()));
+
+        verify(assignmentRepository, never()).save(any());
+        verify(auditLogPort).logUserRegistered(userId, Email.of("td@umss.edu.bo"));
+    }
 }

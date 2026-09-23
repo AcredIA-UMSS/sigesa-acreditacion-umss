@@ -21,7 +21,7 @@ public class TemplatePersistenceAdapter implements TemplatePort {
     @Override
     @Transactional(readOnly = true)
     public Optional<Template> findById(UUID templateId) {
-        return repository.findWithPhasesById(templateId).map(mapper::toDomain);
+        return repository.findById(templateId).map(mapper::toDomain);
     }
 
     @Override

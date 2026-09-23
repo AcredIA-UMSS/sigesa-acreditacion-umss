@@ -87,6 +87,7 @@ class TemplateStructureValidatorTest {
                         .name("Subfase")
                         .order(1)
                         .referenceUrl("https://duea.umss.edu.bo/guia/test")
+                        .requirements("Adjuntar informe de autoevaluación y evidencias asociadas.")
                         .build()))
                 .build();
     }

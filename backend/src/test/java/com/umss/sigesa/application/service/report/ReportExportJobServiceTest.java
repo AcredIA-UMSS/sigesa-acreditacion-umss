@@ -141,4 +141,51 @@ class ReportExportJobServiceTest {
         assertNotNull(is);
         is.close();
     }
+
+    @Test
+    void shouldReturnJobStatusForOwner() {
+        UUID userId = UUID.randomUUID();
+        ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.CSV, null);
+        when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
+
+        ReportExportJob result = service.getJobStatus(job.getJobId(), userId);
+
+        assertEquals(JobStatus.PENDING, result.getStatus());
+        verify(repositoryPort).findById(job.getJobId());
+    }
+
+    @Test
+    void shouldThrowWhenReportHasNotBeenGeneratedYet() {
+        UUID userId = UUID.randomUUID();
+        ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.PDF, 2);
+        when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
+
+        assertThrows(InvalidJobStateException.class,
+                () -> service.getJobFileStream(job.getJobId(), userId));
+    }
+
+    @Test
+    void shouldFailWhenFormatIsUnsupported() {
+        UUID jobId = UUID.randomUUID();
+        ReportExportJob job = ReportExportJob.createNew(UUID.randomUUID(), UUID.randomUUID(), ReportFormat.PDF, 1);
+        when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
+        when(generatorPort.supports(ReportFormat.PDF)).thenReturn(false);
+
+        service.processJobAsync(jobId);
+
+        assertEquals(JobStatus.FAILED, job.getStatus());
+        assertEquals("Unsupported format: PDF", job.getErrorMessage());
+        verify(queryPort, never()).streamAllObservationsForReport(any(), any());
+    }
+
+    @Test
+    void shouldThrowWhenGeneratedFileIsMissing() {
+        UUID userId = UUID.randomUUID();
+        ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.XLSX, 1);
+        job.markCompleted("C:/tmp/does-not-exist-sigesa-export.xlsx");
+        when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
+
+        assertThrows(InvalidJobStateException.class,
+                () -> service.getJobFileStream(job.getJobId(), userId));
+    }
 }

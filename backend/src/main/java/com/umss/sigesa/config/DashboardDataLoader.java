@@ -235,50 +235,12 @@ public class DashboardDataLoader implements ApplicationRunner {
                         .templateId(DevSeedData.TEMPLATE_CEUB_2026)
                         .status("ACTIVE")
                         .startDate(LocalDateTime.now())
-                        .phases(new ArrayList<>())
                         .build();
 
-        process = entityManager.merge(process);
-
-        UUID phase1Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440004");
-        UUID phase2Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440005");
-
-        com.umss.sigesa.adapter.out.persistance.entity.PhaseJpaEntity phase1 =
-                com.umss.sigesa.adapter.out.persistance.entity.PhaseJpaEntity.builder()
-                        .id(phase1Id)
-                        .name("Fase 1: Autoevaluación")
-                        .order(1)
-                        .process(process)
-                        .build();
-        entityManager.merge(phase1);
-
-        com.umss.sigesa.adapter.out.persistance.entity.PhaseJpaEntity phase2 =
-                com.umss.sigesa.adapter.out.persistance.entity.PhaseJpaEntity.builder()
-                        .id(phase2Id)
-                        .name("Fase 2: Verificación de Evidencias")
-                        .order(2)
-                        .process(process)
-                        .build();
-        entityManager.merge(phase2);
-
-        UUID ind1Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440003");
-        UUID ind2Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440050");
-        UUID ind3Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440051");
-        UUID ind4Id = UUID.fromString("550e8400-e29b-41d4-a716-446655440052");
-
-        persistIndicator(ind1Id, DevSeedData.PROGRAM_INF_SIS, phase1Id);
-        persistIndicator(ind2Id, DevSeedData.PROGRAM_INF_SIS, phase1Id);
-        persistIndicator(ind3Id, DevSeedData.PROGRAM_INF_SIS, phase2Id);
-        persistIndicator(ind4Id, DevSeedData.PROGRAM_INF_SIS, phase2Id);
-
-        UUID actorId = UUID.randomUUID();
-        persistStateHistory(ind1Id, IndicatorState.PENDIENTE, actorId);
-        persistStateHistory(ind2Id, IndicatorState.APROBADO, actorId);
-        persistStateHistory(ind3Id, IndicatorState.OBSERVADO, actorId);
-        persistStateHistory(ind4Id, IndicatorState.PENDIENTE, actorId);
+        entityManager.merge(process);
     }
 
-    private void persistIndicator(UUID id, UUID programId, UUID phaseId) {
+    private void persistIndicatorUnused(UUID id, UUID programId, UUID phaseId) {
         if (entityManager.find(com.umss.sigesa.adapter.out.persistance.entity.IndicatorEntity.class, id) != null) {
             return;
         }

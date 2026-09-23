@@ -12,7 +12,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigesa_password}
       POSTGRES_DB: ${POSTGRES_DB:-sigesa}
     ports:
-      - "5432:5432"
+      # Host 5432 suele estar ocupado por PostgreSQL nativo; override: POSTGRES_HOST_PORT=5433 en .env
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
