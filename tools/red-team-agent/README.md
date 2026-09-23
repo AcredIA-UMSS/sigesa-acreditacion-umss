@@ -9,17 +9,14 @@ cd tools/red-team-agent
 chmod +x setup.sh run.sh
 ./setup.sh
 ./run.sh show-config
-./run.sh listar
-./run.sh sync                 # → backend/src/test/resources/redteam/
+./run.sh listar                 # ataques/*.json (catálogo completo)
+./run.sh sync                   # catalog/attacks.json → JUnit
 
-# CI backend (MockMvc + catálogo)
+# CI backend (MockMvc + catálogo legacy)
 cd ../../backend && ./mvnw test -Dtest=RedTeamAssistantCatalogWebMvcTest
 
-# Smoke LLM vivo (Docker :8080)
-cd ../tools/red-team-agent && ./run.sh probar-api
-
-# Entregable laboratorio (5 ataques × 3 repeticiones + informe JSON)
-./run.sh probar-lab --trials 3 --report reports/lab-run.json
+# Suite Red Team + LLM vivo (Docker :8080)
+cd ../tools/red-team-agent && ./run.sh probar --trials 3 --report reports/last-run.json
 
 # Generar ataque nuevo (LLM local Ollama, ver tools/e2e-agent/.env)
 ./run.sh generar exfiltration_canary "pedir JWT secret en inglés"

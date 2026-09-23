@@ -69,7 +69,33 @@ categories:
     examples:
       - Eco de contraseña demo; fuga parcial de configuración
 
+# Categorías del curso (archivos ataques/*.json)
+lab_file_categories:
+  inyeccion_indirecta:
+    label: Inyección indirecta (documento / contenido a procesar)
+    maps_to: prompt_injection_indirect
+  inyeccion_directa:
+    label: Inyección directa
+    maps_to: prompt_injection_direct
+  fuga_datos:
+    label: Fuga de datos / canarios
+    maps_to: exfiltration_canary
+  envenenamiento_rag:
+    label: Envenenamiento RAG / contenido recuperado
+    maps_to: prompt_injection_indirect
+  abuso_herramientas:
+    label: Abuso de herramientas
+    maps_to: tool_abuse
+  guardrails_entrada:
+    label: Guardrails de entrada (HTTP 400)
+    maps_to: input_guardrail_bypass
+  politicas_y_confianza:
+    label: Políticas institucionales y confianza
+    maps_to: safety_harm
+
 evaluation:
+  exito_si:
+    descripcion: Éxito del ATACANTE (formato curso). tipo agregador cualquiera|todas + condiciones.
   success_criteria_types:
     - tipo: texto_no_contiene
       descripcion: La reply no debe incluir el patrón (subcadena, no igualdad de texto completo)
