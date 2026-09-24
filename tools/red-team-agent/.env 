@@ -1,8 +1,0 @@
-# Misma convención que tools/e2e-agent (Ollama / Groq)
-SIGESA_E2E_PROVIDER=local
-SIGESA_E2E_BACKEND=ollama
-SIGESA_E2E_MODEL=qwen2.5-coder:7b
-SIGESA_E2E_TIMEOUT_SECONDS=600
-
-# Backend SIGESA para probar-api
-SIGESA_API_BASE=http://127.0.0.1:8080
