@@ -27,4 +27,4 @@
 APTO = (fallos_criticos == 0) AND (pass_determinista >= 12) AND (kappa_juez >= 0.6 si se usa juez en reporte)
 ```
 
-Implementación futura: `agente_evals.py gate --prompt-version v3` → exit 0/1 según tabla anterior.
+Implementación: `./run.sh gate --prompt-version v3` (determinista) y `./run.sh judge-gate` (κ juez ≥ 0.6). Compuerta combinada única en CLI: pendiente (Fase 7).

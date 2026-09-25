@@ -7,8 +7,12 @@ from typing import Any
 EVALS_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DATASET = EVALS_DIR / "datos" / "conocimiento" / "data_set_dorado.jsonl"
 ARTIFACTS_DIR = EVALS_DIR / "artifacts"
+LABELS_DIR = ARTIFACTS_DIR / "labels"
 REPORTS_DIR = EVALS_DIR / "reports"
 PROMPTS_DIR = EVALS_DIR / "prompts"
+HUMAN_LABELS_PATH = LABELS_DIR / "human.jsonl"
+JUDGE_LABELS_PATH = LABELS_DIR / "judge.jsonl"
+KAPPA_MIN = 0.6
 
 
 def load_dataset(path: Path | None = None) -> list[dict[str, Any]]:

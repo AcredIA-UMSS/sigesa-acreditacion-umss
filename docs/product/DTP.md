@@ -313,6 +313,8 @@ artefactos_vivos:
 | **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED`; 403 `ACCESS_DENIED` (agente users sin rol JD) |
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |
 | **Streaming** | No (`stream: false`) |
+| **Salida asistente** | `AssistantReplyOutputGuard` — refuerzo lexical cuando tool falla y el usuario pide confirmar hechos (evals v3, `SIN-CRIT-001`) |
+| **Evals offline (QA)** | [`tools/evals/`](../../tools/evals/) — dataset dorado 15 casos; compuerta `./run.sh gate --prompt-version v3` (0 críticos, ≥12/15); juez LLM calibrado (κ ≥ 0.6); informe [`INFORME_EVALS.md`](../../tools/evals/reports/INFORME_EVALS.md) |
 | **Design doc** | [`docs/design/DD-SYS-002.md`](../design/DD-SYS-002.md) §11 |
 
 ### B.6 MOD-REVIEW — evaluador externo [EE] (`DD-UC-019`)

@@ -223,7 +223,11 @@ public class AssistantController {
         AssistantChatContext chatContext = resolveChatContext(request, authContext);
         AssistantChatResult result = sendChatMessageUseCase.send(
                 request.message(), history, authContext, chatContext);
-        String safeReply = replyOutputGuard.sanitize(result.reply());
+        boolean toolLookupFailed = result.steps().stream().anyMatch(step -> !step.success());
+        boolean userAskedConfirmation =
+                AssistantReplyOutputGuard.userMessageRequestsConfirmation(request.message());
+        String safeReply = replyOutputGuard.sanitize(
+                result.reply(), toolLookupFailed, userAskedConfirmation);
         return ResponseEntity.ok(new SendChatMessageResponse(
                 safeReply,
                 result.toolId(),

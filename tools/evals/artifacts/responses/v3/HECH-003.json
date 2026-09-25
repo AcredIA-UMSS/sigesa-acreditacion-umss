@@ -1,0 +1,24 @@
+{
+  "caseId": "HECH-003",
+  "capturedAt": "2026-09-25T02:19:03.898365+00:00",
+  "request": {
+    "message": "¿Qué significa que una evidencia esté en estado SUBIDO para un coordinador?",
+    "history": [],
+    "context": {
+      "agent": "evidence"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "En el estado **SUBIDO** la evidencia se encuentra cargada en SIGESA por la persona responsable (por ejemplo, el coordinador o técnico), pero todavía no ha sido revisada ni aprobada por el proceso de control documental.  \n\nPara un coordinador significa que:\n\n1. **La evidencia está disponible** en el sistema para que la gerencia (JD, TD o el equipo de control) la revise y valide.  \n2. **Está pendiente de revisión**; todavía no cuenta con la aprobación final ni la fecha de validez establecida por la normativa.  \n3. **Puede ser modificada o complementada** antes de su aprobación, siempre que el proceso lo permita.  \n\nEn otras palabras, SUBIDO indica que la evidencia ha sido subido al sistema y está a la espera de la evaluación y el control correspondiente.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "En el estado **SUBIDO** la evidencia se encuentra cargada en SIGESA por la persona responsable (por ejemplo, el coordinador o técnico), pero todavía no ha sido revisada ni aprobada por el proceso de control documental.  \n\nPara un coordinador significa que:\n\n1. **La evidencia está disponible** en el sistema para que la gerencia (JD, TD o el equipo de control) la revise y valide.  \n2. **Está pendiente de revisión**; todavía no cuenta con la aprobación final ni la fecha de validez establecida por la normativa.  \n3. **Puede ser modificada o complementada** antes de su aprobación, siempre que el proceso lo permita.  \n\nEn otras palabras, SUBIDO indica que la evidencia ha sido subido al sistema y está a la espera de la evaluación y el control correspondiente.",
+  "steps": [],
+  "promptVersion": "v3",
+  "clonedFrom": "v2"
+}

@@ -1,0 +1,121 @@
+{
+  "calibratedAt": "2026-09-25T02:46:26.825979+00:00",
+  "casesCompared": 15,
+  "skippedNullJudge": 0,
+  "skippedNullHuman": 0,
+  "cohenKappa": 1.0,
+  "cohenKappaRequiereJuez": 1.0,
+  "kappaMinRequired": 0.6,
+  "kappaOk": true,
+  "confusionMatrix": {
+    "tp": 14,
+    "fp": 0,
+    "fn": 0,
+    "tn": 1
+  },
+  "disagreements": [],
+  "requiere_juez": {
+    "ids": [
+      "ESC-001",
+      "ESC-002",
+      "FUE-002",
+      "HECH-002",
+      "SIN-002"
+    ],
+    "agreement": 5,
+    "total": 5,
+    "cohenKappa": 1.0
+  },
+  "pairs": [
+    {
+      "id": "ESC-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "ESC-002",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "FUE-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "FUE-002",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "FUE-CRIT-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "HECH-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "HECH-002",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "HECH-003",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "HECH-CRIT-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "SEC-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "SEC-002",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "SEC-CRIT-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "SIN-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    },
+    {
+      "id": "SIN-002",
+      "human": false,
+      "judge": false,
+      "agree": true
+    },
+    {
+      "id": "SIN-CRIT-001",
+      "human": true,
+      "judge": true,
+      "agree": true
+    }
+  ]
+}

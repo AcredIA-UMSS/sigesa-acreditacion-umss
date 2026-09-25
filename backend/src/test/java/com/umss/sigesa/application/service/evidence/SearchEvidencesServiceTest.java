@@ -40,7 +40,7 @@ class SearchEvidencesServiceTest {
     void shouldSearchWithoutProgramFilterForTechnician() {
         UUID requesterId = UUID.randomUUID();
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria(
-                UUID.randomUUID(), null, null, null, null, "plan", 2026, 0, 20);
+                UUID.randomUUID(), null, null, null, "plan", 2026, 0, 20);
         EvidenceSearchPage page = new EvidenceSearchPage(List.of(), 0, 0, 20);
         when(searchQueryPort.search(criteria, null)).thenReturn(page);
 
@@ -56,7 +56,7 @@ class SearchEvidencesServiceTest {
         UUID requesterId = UUID.randomUUID();
         UUID programId = UUID.randomUUID();
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria(
-                UUID.randomUUID(), null, null, null, null, null, null, 0, 10);
+                UUID.randomUUID(), null, null, null, null, null, 0, 10);
         when(assignmentRepository.findActiveByUserId(requesterId)).thenReturn(List.of(
                 new UserProgramAssignment(UUID.randomUUID(), requesterId, programId, LocalDateTime.now(), null)));
         when(searchQueryPort.search(eq(criteria), eq(List.of(programId))))
@@ -71,7 +71,7 @@ class SearchEvidencesServiceTest {
     void shouldThrowWhenCoordinatorHasNoAssignedPrograms() {
         UUID requesterId = UUID.randomUUID();
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria(
-                UUID.randomUUID(), null, null, null, null, "q", null, 0, 10);
+                UUID.randomUUID(), null, null, null, "q", null, 0, 10);
         when(assignmentRepository.findActiveByUserId(requesterId)).thenReturn(List.of());
 
         assertThatThrownBy(() -> service.search(criteria, requesterId, List.of("CC")))
@@ -82,7 +82,7 @@ class SearchEvidencesServiceTest {
     @Test
     void shouldTreatJdAsUnrestrictedLikeTechnician() {
         EvidenceSearchCriteria criteria = new EvidenceSearchCriteria(
-                UUID.randomUUID(), null, null, null, null, "", null, 0, 5);
+                UUID.randomUUID(), null, null, null, "", null, 0, 5);
         when(searchQueryPort.search(any(), isNull())).thenReturn(new EvidenceSearchPage(List.of(), 0, 0, 20));
 
         service.search(criteria, UUID.randomUUID(), List.of("JD"));

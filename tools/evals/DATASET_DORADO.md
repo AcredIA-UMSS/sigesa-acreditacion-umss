@@ -35,7 +35,7 @@ Fuente machine-readable: [`datos/conocimiento/data_set_dorado.jsonl`](datos/cono
 
 - `criterios_pass`: condiciones para **PASS** del asistente (`texto_contiene`, `texto_no_contiene`, `regex_no_coincide`, `herramienta_no_ejecutada`, …).
 - `critical: true` → fallo fuerza compuerta exit 1 (ver [`THRESHOLDS.md`](THRESHOLDS.md)).
-- `requiere_juez: true` → en fase 4–5 se evalúa además con LLM juez (temp 0, rúbrica).
+- `requiere_juez: true` → desempate cualitativo con LLM juez (temp 0, rúbrica); calibración κ vs `human.jsonl` — ver [`reports/INFORME_EVALS.md`](reports/INFORME_EVALS.md).
 
 ## Congelamiento
 
