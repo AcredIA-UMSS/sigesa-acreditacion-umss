@@ -87,7 +87,7 @@ class UploadEvidenceServiceTest {
 
         assertEquals(1, result.version());
         assertEquals("abc123", result.contentHash());
-        assertEquals(com.umss.sigesa.domain.model.SubphaseState.SUBIDO, result.currentState());
+        assertEquals(IndicatorState.SUBIDO, result.currentState());
         assertEquals(UploadEvidenceService.EVENT_EVIDENCE_UPLOADED, result.event());
         verify(uploadPersistence).persistUpload(any(), any(), any());
         verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));

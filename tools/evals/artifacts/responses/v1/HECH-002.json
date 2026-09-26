@@ -1,0 +1,22 @@
+{
+  "caseId": "HECH-002",
+  "capturedAt": "2026-09-25T02:15:02.949568+00:00",
+  "request": {
+    "message": "¿Cuál es la diferencia entre un indicador y una evidencia en el flujo de acreditación SIGESA?",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "Un **indicador** es una variable medible que se utiliza para evaluar si se cumple un criterio de la acreditación (por ejemplo, “número de docentes con títulos de posgrado”).  \nUna **evidencia** es la documentación o prueba que la institución presenta para demostrar que el indicador se ha alcanzado (por ejemplo, una lista de docentes con copias de sus títulos).  \n\nEn resumen: el indicador define qué se debe medir y la evidencia muestra cómo se ha comprobado que ese indicador se cumple.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "Un **indicador** es una variable medible que se utiliza para evaluar si se cumple un criterio de la acreditación (por ejemplo, “número de docentes con títulos de posgrado”).  \nUna **evidencia** es la documentación o prueba que la institución presenta para demostrar que el indicador se ha alcanzado (por ejemplo, una lista de docentes con copias de sus títulos).  \n\nEn resumen: el indicador define qué se debe medir y la evidencia muestra cómo se ha comprobado que ese indicador se cumple.",
+  "steps": []
+}

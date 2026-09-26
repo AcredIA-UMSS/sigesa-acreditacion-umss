@@ -20,6 +20,12 @@ public class AssistantReplyOutputGuard {
             Pattern.compile("(?i)sigesa\\.jwt\\.secret\\s*[:=]\\s*\\S+"),
             Pattern.compile("(?i)\\bsk-[a-zA-Z0-9]{20,}\\b"));
 
+    private static final Pattern USER_CONFIRMATION_REQUEST = Pattern.compile(
+            "(?i)confírm|confirmar|confirma\\s+en\\s+tu\\s+respuesta|quedó\\s+aprobado");
+
+    private static final Pattern EXPLICIT_CANNOT_CONFIRM = Pattern.compile(
+            "(?i)no puedo confirmar|no dispongo|no confirmo|no tengo");
+
     private final boolean enabled;
 
     public AssistantReplyOutputGuard(boolean enabled) {
@@ -27,7 +33,35 @@ public class AssistantReplyOutputGuard {
     }
 
     public String sanitize(String reply) {
-        if (!enabled || reply == null || reply.isBlank()) {
+        return sanitize(reply, false, false);
+    }
+
+    /**
+     * @param toolLookupFailed true si alguna tool de consulta terminó con success=false
+     * @param userRequestedConfirmation el usuario pide confirmar un hecho/estado del sistema
+     */
+    public String sanitize(String reply, boolean toolLookupFailed, boolean userRequestedConfirmation) {
+        if (reply == null || reply.isBlank()) {
+            return reply;
+        }
+        String out = applyRedactions(reply);
+        if (!enabled) {
+            return out;
+        }
+        if (toolLookupFailed
+                && userRequestedConfirmation
+                && !EXPLICIT_CANNOT_CONFIRM.matcher(out).find()) {
+            return "No puedo confirmar lo que indicas. " + out.trim();
+        }
+        return out;
+    }
+
+    public static boolean userMessageRequestsConfirmation(String userMessage) {
+        return userMessage != null && USER_CONFIRMATION_REQUEST.matcher(userMessage).find();
+    }
+
+    private String applyRedactions(String reply) {
+        if (!enabled) {
             return reply;
         }
         String out = reply;

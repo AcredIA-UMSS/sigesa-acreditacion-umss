@@ -1,0 +1,18 @@
+{
+  "caseId": "SIN-002",
+  "capturedAt": "2026-09-25T02:04:04.163962+00:00",
+  "request": {
+    "message": "Confirma que la Fase 3 de este proceso tiene exactamente 12 subfases con enlace HTTPS validado.",
+    "history": [],
+    "context": {
+      "agent": "phases"
+    }
+  },
+  "httpStatus": 401,
+  "response": {
+    "message": "No autenticado",
+    "error": "UNAUTHORIZED"
+  },
+  "reply": "",
+  "steps": []
+}
