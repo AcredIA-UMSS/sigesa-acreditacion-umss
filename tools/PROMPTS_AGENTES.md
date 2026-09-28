@@ -56,6 +56,19 @@ cd tools/red-team-agent
 
 Ver [tools/red-team-agent/README.md](./red-team-agent/README.md) — catálogo Red Team SIGESA, JUnit `RedTeamAssistantCatalogWebMvcTest`.
 
+## Agente de contratos JSON (auth / evidence / assistant)
+
+El árbol de equipo es `backend/src/test/java/com/sigesa/app/{unit,integration,contracts}`. Contratos (Marlene):
+
+```bash
+cd tools/contract-test-agent
+./setup.sh && ./run.sh correr
+```
+
+Tests: `com.sigesa.app.contracts.{auth,evidence,assistant}`. Tokens LLM: `reports/tokens.jsonl`.
+
+
+
 ## Forma 3 · Script Python SIGESA (sin IDE)
 
 Adaptado al monorepo SIGESA (`tools/e2e-agent/`). **No** lee `index.html` estático; usa contexto Markdown + `tests/seed.spec.ts` + patrón TypeScript.

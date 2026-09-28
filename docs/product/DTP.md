@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 23/09/2026 | **QA contract tests JSON:** `backend/src/test/java/com/sigesa/app/contracts/{auth,evidence,assistant}` (Lic. Marlene; `unit/` Aylen, `integration/` Alex). Forma Jackson de DTOs web; agente `tools/contract-test-agent/`. | QA AcredIA / FSD-UC-001+004+assistant | — | local | Marlen |
 | 09/09/2026 | **MOD-WORKFLOW metodológico (M6):** Flyway V17 (`methodological_stages`, `stage_deliverables`, `stage_gate_evaluations`, `primary_survey_batches`; `operational_mode`, `current_stage_id` en procesos); bootstrap 7 etapas + E1/E2 en `CreateProcessUseCaseImpl`; API-WF-04…08 (`StageWorkflowController`); `EvaluationMetricsPort`; UI `MethodologicalStageTimeline`; docs sync FSD/DTP/ADR. | FSD-UC-025…028 / DD-UC-025 | ADR-0005 | PM-010 / PR-IMPL-M6-025 | Boris Anthony Angulo Urquieta |
 | 09/09/2026 | **Reconciliación documental v2.0:** índice FSD UC-004…010, UC-019 → Implementado v2; T-003/T-004 cerrados. | FSD sync | ADR-0004 | docs sync | Cursor Agent |
 | 08/09/2026 | **MOD-PROCESS (FSD-UC-003 v2):** `CreateProcessUseCaseImpl` clona árbol normativo N1→N2→N3→Indicador vía `ProcessNormativeTreeCloner`; validación A4 `TEMPLATE_STRUCTURE_INCOMPLETE`; coexistencia clonado legacy Fase/Subfase. | FSD-UC-003 / DD-UC-003 | ADR-0004 | PM-009 / PR-IMPL-003 | Boris Anthony Angulo Urquieta |
