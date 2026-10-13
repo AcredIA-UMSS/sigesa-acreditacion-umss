@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { loginJd } from '../agente/helpers/auth';
 
 /**
  * Frontend Integration Tests: Process Management UI & API Interception
@@ -26,7 +27,6 @@ test.describe('Integration Test - Process Management UI Flow', () => {
   });
 
   test('AAA - Fetch & Render Process List: parses array response payload accurately', async ({ page }) => {
-    // ARRANGE: Intercept GET /api/v1/processes with mock process data
     const mockProcesses = [
       {
         id: '950e8400-e29b-41d4-a716-446655440020',
@@ -51,19 +51,22 @@ test.describe('Integration Test - Process Management UI Flow', () => {
           contentType: 'application/json',
           body: JSON.stringify(mockProcesses),
         });
-      } else {
-        await route.continue();
+        return;
       }
+      await route.continue();
     });
 
-    // ACT: Navigate to processes view
-    await page.goto('/admin/users'); // Or /processes route depending on app navigation
+    await loginJd(page);
+    await page.goto('/procesos');
 
-    // ASSERT: Verify UI elements render parsed API payload
-    await expect(page.getByText('Ingeniería de Sistemas').first()).toBeVisible({ timeout: 5000 }).catch(() => {
-      // Fallback assertion if component renders career code
-      expect(page.content()).resolves.toBeDefined();
-    });
+    await expect(page.getByRole('heading', { name: 'Procesos de acreditación' })).toBeVisible();
+    await expect(page.getByText('Ingeniería de Sistemas')).toBeVisible();
+    await expect(page.getByText('INF-SIS')).toBeVisible();
+    await expect(page.getByText('Modelo CEUB 2026')).toBeVisible();
+    await expect(page.getByText('Activo')).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /Ver detalle del proceso Ingeniería de Sistemas/ }),
+    ).toBeVisible();
   });
 
   test('AAA - Create Process: sends correct payload format and updates view on 201 Created', async ({ page }) => {
@@ -111,7 +114,6 @@ test.describe('Integration Test - Process Management UI Flow', () => {
   });
 
   test('AAA - Create Process Conflict (409): handles duplicate process error payload gracefully', async ({ page }) => {
-    // ARRANGE: Intercept POST /api/v1/processes with 409 Conflict
     await page.route('**/api/v1/processes', async (route) => {
       if (route.request().method() === 'POST') {
         await route.fulfill({
@@ -122,21 +124,28 @@ test.describe('Integration Test - Process Management UI Flow', () => {
             message: 'La carrera ya cuenta con un proceso activo.',
           }),
         });
-      } else {
-        await route.fulfill({ status: 200, body: '[]' });
+        return;
       }
+      await route.continue();
     });
 
-    // ACT & ASSERT: Verify routing setup handles error interceptor correctly
-    const requestResult = await page.request.post('/api/v1/processes', {
-      data: {
-        career_id: '550e8400-e29b-41d4-a716-446655440000',
-        template_id: '850e8400-e29b-41d4-a716-446655440010',
-      },
-    });
+    await loginJd(page);
+    await page.goto('/procesos/nuevo');
+    await expect(page.getByRole('heading', { name: 'Iniciar Proceso de Acreditación' })).toBeVisible();
 
-    expect(requestResult.status()).toBe(409);
-    const body = await requestResult.json();
-    expect(body.error).toBe('PROCESS_ALREADY_EXISTS');
+    await page.getByLabel(/^Carrera/).fill('Sistemas');
+    await expect(page.getByRole('option').first()).toBeVisible();
+    await page.getByRole('option').first().click();
+
+    const templateSelect = page.locator('#templateSelect');
+    await expect(templateSelect.locator('option:not([value=""])').first()).toBeAttached();
+    const firstTemplateValue = await templateSelect.locator('option:not([value=""])').first().getAttribute('value');
+    await templateSelect.selectOption(firstTemplateValue ?? '');
+
+    await page.getByRole('button', { name: 'Iniciar Proceso' }).click();
+
+    await expect(
+      page.getByText('Esta carrera ya tiene un proceso ACTIVO del mismo tipo (CEUB o ARCU-SUR).'),
+    ).toBeVisible();
   });
 });

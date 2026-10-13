@@ -19,7 +19,7 @@ test.describe('Plantillas normativas — JD crea plantilla en borrador', () => {
 
     await page.getByRole('button', { name: 'Guardar' }).click();
     await expect(page).toHaveURL(/\/admin\/plantillas\/[0-9a-f-]{36}/i);
-    await expect(page.getByText('Borrador')).toBeVisible();
+    await expect(page.getByText('Borrador').first()).toBeVisible();
 
     await page.goto('/admin/plantillas');
     await expect(page.getByText(uniqueName)).toBeVisible();

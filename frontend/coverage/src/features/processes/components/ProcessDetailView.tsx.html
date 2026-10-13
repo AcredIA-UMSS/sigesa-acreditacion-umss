@@ -32,14 +32,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/49</span>
+                <span class='fraction'>0/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
@@ -230,13 +230,7 @@
 <a name='L165'></a><a href='#L165'>165</a>
 <a name='L166'></a><a href='#L166'>166</a>
 <a name='L167'></a><a href='#L167'>167</a>
-<a name='L168'></a><a href='#L168'>168</a>
-<a name='L169'></a><a href='#L169'>169</a>
-<a name='L170'></a><a href='#L170'>170</a>
-<a name='L171'></a><a href='#L171'>171</a>
-<a name='L172'></a><a href='#L172'>172</a>
-<a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L168'></a><a href='#L168'>168</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -270,6 +264,10 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -277,13 +275,9 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -403,22 +397,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useCallback, useRef } from 'react';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
-import { ProcessPhaseTree } from './ProcessPhaseTree';
-import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
+import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 &nbsp;
 interface ProcessDetailViewProps {
@@ -443,25 +431,25 @@ export function <span class="fstat-no" title="function not covered" >ProcessDeta
 <span class="cstat-no" title="statement not covered" >    useProcessDetail(processId);</span>
   const <span class="cstat-no" title="statement not covered" >canEditStructure =</span>
     (session?.role === 'JD' || session?.role === 'TD') &amp;&amp; process?.status === 'ACTIVE';
-  const canUseCopilot =
-<span class="cstat-no" title="statement not covered" >    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';</span>
-  const copilotReadOnly = <span class="cstat-no" title="statement not covered" >session?.role === 'CC';</span>
   const canUploadEvidence = <span class="cstat-no" title="statement not covered" >session?.role === 'CC';</span>
-  const canObserveEvidence = <span class="cstat-no" title="statement not covered" >session?.role === 'JD' || session?.role === 'TD';</span>
   const canReviewEvidence = <span class="cstat-no" title="statement not covered" >session?.role === 'TD';</span>
-  const subphaseAnchorRef = <span class="cstat-no" title="statement not covered" >useRef&lt;HTMLDivElement&gt;(null);</span>
+  const structureAnchorRef = <span class="cstat-no" title="statement not covered" >useRef&lt;HTMLDivElement&gt;(null);</span>
+  const [expandToIndicatorId, setExpandToIndicatorId] = <span class="cstat-no" title="statement not covered" >useState&lt;string | undefined&gt;()</span>;
 &nbsp;
-  const navigateToSubphase = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useCallback((s</span>ubphaseId: string) =&gt; {</span>
-    const element = <span class="cstat-no" title="statement not covered" >document.getElementById(`subphase-${subphaseId}`);</span>
-<span class="cstat-no" title="statement not covered" >    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });</span>
-<span class="cstat-no" title="statement not covered" >    element?.classList.add('ring-2', 'ring-primary-400');</span>
+  const navigateToIndicator = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useCallback((i</span>ndicatorId: string) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setExpandToIndicatorId(indicatorId);</span>
 <span class="cstat-no" title="statement not covered" >    window.<span class="fstat-no" title="function not covered" >setTimeout(() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >      element?.classList.remove('ring-2', 'ring-primary-400');</span>
-    }, 2000);
+      const element = <span class="cstat-no" title="statement not covered" >document.getElementById(`indicator-${indicatorId}`);</span>
+<span class="cstat-no" title="statement not covered" >      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });</span>
+<span class="cstat-no" title="statement not covered" >      element?.classList.add('ring-2', 'ring-primary-400');</span>
+<span class="cstat-no" title="statement not covered" >      window.<span class="fstat-no" title="function not covered" >setTimeout(() =&gt; {</span></span>
+<span class="cstat-no" title="statement not covered" >        element?.classList.remove('ring-2', 'ring-primary-400');</span>
+      }, 2000);
+    }, 150);
   }, []);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
-    &lt;div className="space-y-6" ref={subphaseAnchorRef}&gt;
+    &lt;div className="space-y-6" ref={structureAnchorRef}&gt;
       &lt;div className="flex flex-wrap items-center justify-between gap-4"&gt;
         &lt;Link
           to="/procesos"
@@ -527,6 +515,8 @@ export function <span class="fstat-no" title="function not covered" >ProcessDeta
             onUpdated={refetch}
           /&gt;
 &nbsp;
+          &lt;MethodologicalStageTimelineContainer processId={processId} /&gt;
+&nbsp;
           &lt;section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm"&gt;
             &lt;div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"&gt;
               &lt;div&gt;
@@ -534,49 +524,41 @@ export function <span class="fstat-no" title="function not covered" >ProcessDeta
                   Estructura del proceso
                 &lt;/h2&gt;
                 &lt;p className="mt-1 text-body-md text-gray-600"&gt;
-                  Fases y subfases con requisitos de completitud. En cada subfase puede
-                  cargar una o más evidencias y el equipo técnico puede registrar observaciones.
+                  Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
+                  (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
                 &lt;/p&gt;
               &lt;/div&gt;
               {canEditStructure &amp;&amp; (
                 &lt;Link to={`/procesos/${processId}/estructura`}&gt;
                   &lt;Button variant="secondary"&gt;
                     &lt;Pencil size={16} /&gt;
-                    Editar estructura
+                    Editar estructura normativa
                   &lt;/Button&gt;
                 &lt;/Link&gt;
               )}
             &lt;/div&gt;
+&nbsp;
             &lt;ProcessEvidenceSearchPanel
               processId={processId}
               programId={process.careerId}
-              phases={process.phases ?? []}
-              onNavigateToSubphase={navigateToSubphase}
+              level1Nodes={process.level1Nodes ?? []}
+              onNavigateToIndicator={navigateToIndicator}
             /&gt;
-            &lt;ProcessPhaseTree
-              phases={process.phases ?? []}
-              processId={processId}
-              canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canUploadEvidence}
-              canClosePhase={canReviewEvidence}
-              onStructureUpdated={refetch}
-              onNavigateToSubphase={navigateToSubphase}
-            /&gt;
-          &lt;/section&gt;
 &nbsp;
-          {canUseCopilot &amp;&amp; (
-            &lt;PhasesCopilotPanel
-              readOnly={copilotReadOnly}
-              process={{
-                processId,
-                careerName: process.careerName ?? 'Carrera',
-                careerCode: process.careerCode ?? '—',
-                templateType: process.templateType ?? 'CEUB',
-              }}
-            /&gt;
-          )}
+            &lt;div className="mt-6"&gt;
+              &lt;ProcessNormativeTree
+                level1Nodes={process.level1Nodes ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                canCloseLevel1={canReviewEvidence}
+                onStructureUpdated={refetch}
+                onNavigateToIndicator={navigateToIndicator}
+                expandToIndicatorId={expandToIndicatorId}
+              /&gt;
+            &lt;/div&gt;
+          &lt;/section&gt;
         &lt;/div&gt;
       )}
     &lt;/div&gt;
@@ -589,7 +571,7 @@ export function <span class="fstat-no" title="function not covered" >ProcessDeta
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-09-16T21:34:49.795Z
+                at 2026-10-02T23:45:31.536Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
+import com.umss.sigesa.adapter.in.security.RestAccessDeniedHandler;
 import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AssistantExceptionHandler;
@@ -45,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         SecurityConfig.class,
         JwtAuthenticationFilter.class,
         RestAuthenticationEntryPoint.class,
+        RestAccessDeniedHandler.class,
         AuthExceptionHandler.class,
         AssistantExceptionHandler.class,
         AssistantControllerWebMvcTest.TestConfig.class

@@ -6,7 +6,7 @@ import { EvidenceUploadUI, type EvidenceUploadUIProps } from './EvidenceUploadUI
 
 const emptyForm = {
   processId: '',
-  subphaseId: '',
+  indicatorId: '',
   description: '',
   file: null,
 };
@@ -16,11 +16,11 @@ function renderUpload(overrides: Partial<EvidenceUploadUIProps> = {}) {
     form: emptyForm,
     onFieldChange: vi.fn(),
     processOptions: [],
-    subphaseOptions: [],
+    indicatorOptions: [],
     targetsLoading: false,
     targetsError: null,
     targetsEmpty: false,
-    subphasesEmpty: false,
+    indicatorsEmpty: false,
     onReloadTargets: vi.fn(),
     onSubmit: vi.fn(),
     onReset: vi.fn(),

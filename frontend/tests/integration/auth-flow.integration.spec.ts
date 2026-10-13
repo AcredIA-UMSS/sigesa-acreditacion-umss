@@ -50,9 +50,10 @@ test.describe('Integration Test - Auth UI Flow & API Interception', () => {
   });
 
   test('AAA - Async Loading State: verifies submit button loading state during pending API request', async ({ page }) => {
-    // ARRANGE: Delay API response by 1000ms to test loading state
     await page.route('**/api/v1/auth/login', async (route) => {
-      await page.waitForTimeout(1000);
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2500);
+      });
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -60,17 +61,16 @@ test.describe('Integration Test - Auth UI Flow & API Interception', () => {
           accessToken: 'mock-token',
           role: 'JD',
           email: 'jd@umss.edu.bo',
+          userId: 'a0000000-0000-4000-8000-000000000001',
         }),
       });
     });
 
-    // ACT: Submit credentials
     await page.getByLabel(/Correo Institucional/i).fill('jd@umss.edu.bo');
     await page.getByRole('textbox', { name: /Contraseña/i }).fill('JefeDemo2026!');
     await page.getByRole('button', { name: /Iniciar sesión/i }).click();
 
-    // ASSERT: Verify loading state (disabled button / spinner) while request is pending
-    const loginButton = page.getByRole('button', { name: /Iniciar sesión|Cargando/i });
+    const loginButton = page.getByRole('button', { name: /Procesando/i });
     await expect(loginButton).toBeDisabled();
   });
 

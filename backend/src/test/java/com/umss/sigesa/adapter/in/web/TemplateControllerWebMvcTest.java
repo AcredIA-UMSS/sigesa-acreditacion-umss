@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
+import com.umss.sigesa.adapter.in.security.RestAccessDeniedHandler;
 import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
@@ -41,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = TemplateController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, RestAuthenticationEntryPoint.class, ProcessExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, RestAuthenticationEntryPoint.class, RestAccessDeniedHandler.class, ProcessExceptionHandler.class})
 @TestPropertySource(properties = {
         "sigesa.jwt.secret=sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256",
         "sigesa.jwt.expiration-seconds=3600"

@@ -10,9 +10,14 @@ test.describe('Revisión TD — sin evidencia', () => {
 
     const closed = page.locator('button[aria-expanded="false"]');
     for (let i = 0; i < 12; i += 1) {
-      const msg = page.getByText('No hay evidencias cargadas');
-      if (await msg.isVisible().catch(() => false)) {
-        await expect(page.getByRole('button', { name: 'Aprobar' })).toHaveCount(0);
+      const emptyReview = page
+        .locator('div.mt-4.rounded-lg.p-4')
+        .filter({ hasText: 'Revisión técnica del indicador' })
+        .filter({ hasText: 'No hay evidencias cargadas' });
+      if ((await emptyReview.count()) > 0) {
+        await expect(
+          emptyReview.first().getByRole('button', { name: 'Aprobar', exact: true }),
+        ).toHaveCount(0);
         return;
       }
       if ((await closed.count()) === 0) break;

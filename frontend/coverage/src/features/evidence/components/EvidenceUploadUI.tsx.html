@@ -1073,12 +1073,12 @@ import {
   Settings,
   Upload,
 } from 'lucide-react';
-import type { UploadEvidenceResponse } from '../../../api/model';
+import type { EvidenceUploadResult } from '../hooks/useEvidenceUpload';
 import { Select } from '../../../components/ui/Select';
 import type {
+  IndicatorUploadOption,
   ProcessUploadOption,
-  SubphaseUploadOption,
-} from '../hooks/useSubphaseUploadTargets';
+} from '../hooks/useNormativeIndicatorUploadTargets';
 import type {
   EvidenceUploadField,
   EvidenceUploadForm,
@@ -1096,11 +1096,11 @@ export type EvidenceUploadUIProps = {
     value: EvidenceUploadForm[K],
   ) =&gt; void;
   processOptions: ProcessUploadOption[];
-  subphaseOptions: SubphaseUploadOption[];
+  indicatorOptions: IndicatorUploadOption[];
   targetsLoading: boolean;
   targetsError: string | null;
   targetsEmpty: boolean;
-  subphasesEmpty: boolean;
+  indicatorsEmpty: boolean;
   onReloadTargets: () =&gt; void;
   onSubmit: () =&gt; void;
   onReset: () =&gt; void;
@@ -1108,7 +1108,7 @@ export type EvidenceUploadUIProps = {
   isLargeFile: boolean;
   isSubmitting: boolean;
   isBlocked: boolean;
-  result: UploadEvidenceResponse | null;
+  result: EvidenceUploadResult | null;
   errorMessage: string | null;
   validationErrors: EvidenceUploadValidationErrors;
 };
@@ -1117,11 +1117,11 @@ export function EvidenceUploadUI({
   form,
   onFieldChange,
   processOptions,
-  subphaseOptions,
+  indicatorOptions,
   targetsLoading,
   targetsError,
   targetsEmpty,
-  subphasesEmpty,
+  indicatorsEmpty,
   onReloadTargets,
   onSubmit,
   onReset,
@@ -1134,8 +1134,8 @@ export function EvidenceUploadUI({
   validationErrors,
 }: EvidenceUploadUIProps) {
   const showProgress = isSubmitting || progress &gt; 0;
-  const selectedSubphase = subphaseOptions.<span class="fstat-no" title="function not covered" >find(</span>
-    (item) =&gt; <span class="cstat-no" title="statement not covered" >item.subphaseId === form.subphaseId,</span>
+  const selectedIndicator = indicatorOptions.<span class="fstat-no" title="function not covered" >find(</span>
+    (item) =&gt; <span class="cstat-no" title="statement not covered" >item.indicatorId === form.indicatorId,</span>
   );
 &nbsp;
   const processSelectOptions = [
@@ -1149,18 +1149,18 @@ export function EvidenceUploadUI({
     })),
   ];
 &nbsp;
-  const subphaseSelectOptions = [
+  const indicatorSelectOptions = [
     {
       value: '',
       label: !form.processId
         ? 'Primero seleccione un proceso'
         : <span class="branch-1 cbranch-no" title="branch not covered" >targetsLoading</span>
-          ? 'Cargando subfases…'
-          : 'Seleccione una subfase',
+          ? 'Cargando indicadores…'
+          : 'Seleccione un indicador',
     },
-    ...subphaseOptions.<span class="fstat-no" title="function not covered" >map((i</span>tem) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
-      value: item.subphaseId,
-      label: `${item.phaseName} — ${item.subphaseName}`,
+    ...indicatorOptions.<span class="fstat-no" title="function not covered" >map((i</span>tem) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+      value: item.indicatorId,
+      label: `${item.indicatorCode} · ${item.indicatorDescription} (${item.breadcrumb})`,
     })),
   ];
 &nbsp;
@@ -1199,8 +1199,8 @@ export function EvidenceUploadUI({
               Cargar Evidencia
             &lt;/h1&gt;
             &lt;p className="text-body-lg text-gray-600"&gt;
-              El coordinador de carrera adjunta el archivo a una subfase del proceso
-              activo. Tras una carga exitosa, la subfase pasa a estado{' '}
+              El coordinador de carrera adjunta el archivo a un indicador normativo del proceso
+              activo. Tras una carga exitosa, el indicador pasa a estado{' '}
               &lt;strong className="font-semibold text-primary-700"&gt;SUBIDO&lt;/strong&gt;.
             &lt;/p&gt;
           &lt;/header&gt;
@@ -1224,7 +1224,7 @@ export function EvidenceUploadUI({
                       Metadatos y archivo
                     &lt;/h2&gt;
                     &lt;p className="text-body-md text-gray-500"&gt;
-                      Proceso, subfase, descripción y documento de respaldo
+                      Proceso, indicador, descripción y documento de respaldo
                     &lt;/p&gt;
                   &lt;/div&gt;
                 &lt;/div&gt;
@@ -1259,12 +1259,12 @@ export function EvidenceUploadUI({
                       &lt;/Link&gt;
                     &lt;/div&gt;
                   )}
-                  {subphasesEmpty &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >form.processId &amp;&amp; (</span>
+                  {indicatorsEmpty &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >form.processId &amp;&amp; (</span>
 <span class="branch-2 cbranch-no" title="branch not covered" >                    &lt;div</span>
                       className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-body-md text-gray-800"
                       role="status"
                     &gt;
-                      El proceso seleccionado no tiene subfases configuradas.
+                      El proceso seleccionado no tiene indicadores normativos configurados.
                     &lt;/div&gt;
                   )}
 &nbsp;
@@ -1281,19 +1281,19 @@ export function EvidenceUploadUI({
                   /&gt;
 &nbsp;
                   &lt;Select
-                    id="subphase-id"
-                    label="Subfase"
+                    id="indicator-id"
+                    label="Indicador normativo"
                     requiredMark
-                    options={subphaseSelectOptions}
-                    value={form.subphaseId}
+                    options={indicatorSelectOptions}
+                    value={form.indicatorId}
                     disabled={isBlocked || targetsLoading || !form.processId}
-                    error={validationErrors.subphaseId}
+                    error={validationErrors.indicatorId}
                     helperText={
-                      selectedSubphase
-                        ? <span class="branch-0 cbranch-no" title="branch not covered" >`Proceso: ${selectedSubphase.processLabel}`</span>
-                        : 'Elija la subfase donde registrará la evidencia'
+                      selectedIndicator
+                        ? <span class="branch-0 cbranch-no" title="branch not covered" >`${selectedIndicator.breadcrumb} · ${selectedIndicator.processLabel}`</span>
+                        : 'Elija el indicador donde registrará la evidencia'
                     }
-<span class="fstat-no" title="function not covered" >                    onChange={(e</span>vent) =&gt; <span class="cstat-no" title="statement not covered" >onFieldChange('subphaseId', event.target.value)}</span>
+<span class="fstat-no" title="function not covered" >                    onChange={(e</span>vent) =&gt; <span class="cstat-no" title="statement not covered" >onFieldChange('indicatorId', event.target.value)}</span>
                   /&gt;
 &nbsp;
                   &lt;FormField
@@ -1412,7 +1412,7 @@ export function EvidenceUploadUI({
                           &lt;dd&gt;{result.version}&lt;/dd&gt;
                         &lt;/div&gt;
                         &lt;div className="flex flex-wrap gap-x-2"&gt;
-                          &lt;dt className="font-medium"&gt;Estado subfase:&lt;/dt&gt;
+                          &lt;dt className="font-medium"&gt;Estado indicador:&lt;/dt&gt;
                           &lt;dd className="font-semibold text-primary-700"&gt;
                             {result.currentState}
                           &lt;/dd&gt;
@@ -1468,7 +1468,7 @@ export function EvidenceUploadUI({
                 &lt;ol className="space-y-4"&gt;
                   &lt;GuideStep
                     step="01"
-                    text="Elija el proceso activo y la subfase donde corresponde la evidencia."
+                    text="Elija el proceso activo y el indicador normativo donde corresponde la evidencia."
                   /&gt;
                   &lt;GuideStep
                     step="02"
@@ -1476,7 +1476,7 @@ export function EvidenceUploadUI({
                   /&gt;
                   &lt;GuideStep
                     step="03"
-                    text="Tras la carga, la subfase queda en SUBIDO y se notifica al técnico DUEA."
+                    text="Tras la carga, el indicador queda en SUBIDO y se notifica al técnico DUEA."
                   /&gt;
                 &lt;/ol&gt;
               &lt;/section&gt;
@@ -1567,7 +1567,7 @@ function GuideStep({ step, text }: { step: string; text: string }) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-09-16T21:34:49.795Z
+                at 2026-10-02T23:45:31.536Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

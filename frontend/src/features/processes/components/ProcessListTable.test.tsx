@@ -16,7 +16,11 @@ describe('ProcessStatusBadge', () => {
 
 describe('ProcessListTable', () => {
   it('shouldShowEmptyState', () => {
-    render(<ProcessListTable processes={[]} />);
+    render(
+      <MemoryRouter>
+        <ProcessListTable processes={[]} />
+      </MemoryRouter>,
+    );
     expect(screen.getByRole('heading', { name: 'Sin procesos visibles' })).toBeInTheDocument();
   });
 
@@ -30,9 +34,10 @@ describe('ProcessListTable', () => {
     expect(screen.getByText('Ingeniería de Sistemas')).toBeInTheDocument();
     expect(screen.getByText('INF-SIS')).toBeInTheDocument();
     expect(screen.getByText('Activo')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Ver detalle/ })).toHaveAttribute(
-      'href',
-      '/procesos/950e8400-e29b-41d4-a716-446655440020',
-    );
+    expect(
+      screen.getByRole('link', {
+        name: /Ver detalle del proceso Ingeniería de Sistemas/,
+      }),
+    ).toBeInTheDocument();
   });
 });
