@@ -4,10 +4,13 @@ import com.umss.sigesa.adapter.out.persistance.entity.PrimarySurveyBatchJpaEntit
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface SpringDataPrimarySurveyBatchRepository extends JpaRepository<PrimarySurveyBatchJpaEntity, UUID> {
 
     long countByProcessId(UUID processId);
+
+    List<PrimarySurveyBatchJpaEntity> findByProcessIdOrderByRegisteredAtDesc(UUID processId);
 }

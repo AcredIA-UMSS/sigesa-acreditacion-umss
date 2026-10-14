@@ -69,8 +69,8 @@ public class ProcessController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('JD','TD','CC')")
-    @Operation(summary = "Listar procesos de acreditación", description = "JD/TD ven todos; CC solo procesos de su carrera asignada (FSD-UC-019).")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE','CAE_MEMBER')")
+    @Operation(summary = "Listar procesos de acreditación", description = "JD/TD ven todos; CC/EE/CAE solo procesos de su carrera asignada (FSD-UC-019/020).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Listado de procesos"),
             @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content),
@@ -85,7 +85,7 @@ public class ProcessController {
     }
 
     @GetMapping("/{processId}")
-    @PreAuthorize("hasAnyRole('JD','TD','CC')")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE','CAE_MEMBER')")
     @Operation(summary = "Detalle de proceso", description = "Incluye árbol normativo v2 (N1→N2→N3→Indicador).")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Detalle del proceso"),
@@ -136,6 +136,12 @@ public class ProcessController {
         }
         if (containsRole(authorities, "CC")) {
             return "CC";
+        }
+        if (containsRole(authorities, "EE")) {
+            return "EE";
+        }
+        if (containsRole(authorities, "CAE_MEMBER")) {
+            return "CAE_MEMBER";
         }
         return "";
     }
@@ -196,6 +202,7 @@ public class ProcessController {
                 .templateType(detail.templateType())
                 .evaluatorModel(detail.evaluatorModel())
                 .status(detail.status())
+                .operationalMode(detail.operationalMode())
                 .startDate(detail.startDate())
                 .level1Nodes(normativeStructureWebMapper.toLevel1DtoList(
                         detail.level1Nodes(), detail.evaluatorModel()))

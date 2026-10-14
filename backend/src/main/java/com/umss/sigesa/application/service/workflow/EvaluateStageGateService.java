@@ -17,15 +17,21 @@ public class EvaluateStageGateService implements EvaluateStageGateUseCase {
 
     private final MethodologicalStagePort stagePort;
     private final StageGateEvaluator gateEvaluator;
+    private final MethodologicalStageBootstrapper stageBootstrapper;
 
-    public EvaluateStageGateService(MethodologicalStagePort stagePort, StageGateEvaluator gateEvaluator) {
+    public EvaluateStageGateService(MethodologicalStagePort stagePort,
+                                    StageGateEvaluator gateEvaluator,
+                                    MethodologicalStageBootstrapper stageBootstrapper) {
         this.stagePort = stagePort;
         this.gateEvaluator = gateEvaluator;
+        this.stageBootstrapper = stageBootstrapper;
     }
 
     @Override
     public StageGateResult evaluate(UUID processId, UUID stageId, UUID actorId, String actorRole) {
         assertRole(actorRole);
+
+        stageBootstrapper.ensureMissingDeliverables(processId);
 
         MethodologicalStage stage = stagePort.findByIdAndProcessId(stageId, processId)
                 .orElseThrow(() -> new StageNotFoundException("Etapa no encontrada en el proceso."));

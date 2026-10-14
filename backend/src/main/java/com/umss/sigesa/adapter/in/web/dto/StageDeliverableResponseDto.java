@@ -13,6 +13,8 @@ public class StageDeliverableResponseDto {
     private UUID stageId;
     private String deliverableCode;
     private String approvalStatus;
+    private UUID documentAssetId;
+    private String folioCode;
     private UUID approvedBy;
     private String technicalObservations;
     private LocalDateTime approvedAt;

@@ -1,15 +1,15 @@
 ---
 id: FSD-UC-005
 nombre: Versionado y bloqueo de borrado
-estado: Implementado
-release: v2.0
+estado: Hecho (M7 DocumentAsset)
+release: v2.1
 actor_principal: "[CC], [TD] (consulta); cualquier rol (intento DELETE)"
 trazabilidad_prd: PRD-US-007, PRD-US-008
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-02, FSD-BR-15
-design_doc: DD-UC-005
-pr_impl: PR-IMPL-035
-ultima_actualizacion: "2026-09-08"
+design_doc: DD-UC-004-M7
+pr_impl: PR-IMPL-M7-004
+ultima_actualizacion: "2026-10-13"
 ---
 
 # FSD-UC-005 — Versionado y bloqueo de borrado
@@ -19,13 +19,15 @@ ultima_actualizacion: "2026-09-08"
 | Campo | Valor |
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-006, 007 · PRD-US-007, 008 · BRD-CST-01 |
-| **Invariante** | Append-only: sin `DELETE` físico en Evidencia aprobada |
+| **Invariante** | Append-only: sin `DELETE` físico en Evidencia aprobada ni en `DocumentAsset` compartido |
 
 ## Flujo principal (consulta)
 
 1. Usuario abre historial de versiones de una Evidencia.
 2. Sistema lista versiones ordenadas; deriva la vigente por `version DESC` y `supersedesId`.
-3. Versiones anteriores en **solo lectura**.
+3. Cada versión expone `documentAssetId` / `folioCode` (M7); si varias evidencias comparten asset, el folio es el mismo.
+4. Versiones anteriores en **solo lectura**.
+5. Un `DocumentAsset` con más de un `IndicatorEvidenceLink` **no** se borra al inmutabilizar una evidencia; solo se niega DELETE de cada `Evidence`.
 
 ## Excepciones y flujos alternos
 

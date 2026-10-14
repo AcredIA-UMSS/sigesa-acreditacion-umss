@@ -18,6 +18,7 @@ import com.umss.sigesa.domain.model.MethodologicalStageStatus;
 import com.umss.sigesa.domain.model.OperationalMode;
 import com.umss.sigesa.domain.model.StageDeliverable;
 import com.umss.sigesa.domain.model.StageDeliverableApprovalStatus;
+import com.umss.sigesa.domain.model.StageDeliverableCode;
 import com.umss.sigesa.domain.model.StageGateResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -148,6 +149,15 @@ public class MethodologicalStageJpaAdapter implements MethodologicalStagePort {
     }
 
     @Override
+    @Transactional
+    public void updateProcessOperationalMode(UUID processId, OperationalMode operationalMode) {
+        AccreditationProcessJpaEntity process = processRepository.findById(processId)
+                .orElseThrow(() -> new IllegalStateException("Proceso no encontrado: " + processId));
+        process.setOperationalMode(operationalMode.name());
+        processRepository.save(process);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<StageDeliverable> findDeliverableById(UUID deliverableId) {
         return deliverableRepository.findWithStageById(deliverableId).map(mapper::toDeliverableDomain);
@@ -197,6 +207,35 @@ public class MethodologicalStageJpaAdapter implements MethodologicalStagePort {
     @Transactional(readOnly = true)
     public long countPrimarySurveyBatches(UUID processId) {
         return surveyBatchRepository.countByProcessId(processId);
+    }
+
+    @Override
+    @Transactional
+    public void addDeliverableIfAbsent(UUID stageId, StageDeliverableCode deliverableCode) {
+        if (deliverableRepository.existsByStage_IdAndDeliverableCode(stageId, deliverableCode.name())) {
+            return;
+        }
+        MethodologicalStageJpaEntity stage = stageRepository.findById(stageId)
+                .orElseThrow(() -> new IllegalStateException("Etapa no encontrada: " + stageId));
+        LocalDateTime now = LocalDateTime.now();
+        StageDeliverableJpaEntity entity = StageDeliverableJpaEntity.builder()
+                .stage(stage)
+                .deliverableCode(deliverableCode.name())
+                .approvalStatus(StageDeliverableApprovalStatus.PENDING.name())
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        deliverableRepository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public void updateDeliverableDocumentAsset(UUID deliverableId, UUID documentAssetId) {
+        StageDeliverableJpaEntity entity = deliverableRepository.findById(deliverableId)
+                .orElseThrow(() -> new IllegalStateException("Entregable no encontrado: " + deliverableId));
+        entity.setDocumentAssetId(documentAssetId);
+        entity.setUpdatedAt(LocalDateTime.now());
+        deliverableRepository.save(entity);
     }
 
     private Map<String, Object> parseSnapshot(String rulesSnapshotJson) {

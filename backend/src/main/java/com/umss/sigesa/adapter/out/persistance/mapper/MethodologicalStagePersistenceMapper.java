@@ -39,6 +39,7 @@ public class MethodologicalStagePersistenceMapper {
                 .stageId(entity.getStage().getId())
                 .deliverableCode(StageDeliverableCode.valueOf(entity.getDeliverableCode()))
                 .approvalStatus(StageDeliverableApprovalStatus.valueOf(entity.getApprovalStatus()))
+                .documentAssetId(entity.getDocumentAssetId())
                 .approvedBy(entity.getApprovedBy())
                 .technicalObservations(entity.getTechnicalObservations())
                 .approvedAt(entity.getApprovedAt())

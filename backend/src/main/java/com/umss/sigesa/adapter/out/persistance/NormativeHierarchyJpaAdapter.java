@@ -124,6 +124,20 @@ public class NormativeHierarchyJpaAdapter implements NormativeHierarchyQueryPort
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<IndicatorAncestry> findIndicatorAncestry(UUID indicatorId) {
+        return indicatorRepository.findWithProcessById(indicatorId).map(entity -> {
+            var level2 = entity.getLevel3Node().getLevel2Node();
+            var level1 = level2.getLevel1Node();
+            return new IndicatorAncestry(
+                    entity.getId(),
+                    level1.getProcess().getId(),
+                    level1.getId(),
+                    level2.getId());
+        });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Level1Context> findLevel1Context(UUID level1Id) {
         return level1NodeRepository.findWithProcessById(level1Id).map(entity -> new Level1Context(
                 entity.getId(),

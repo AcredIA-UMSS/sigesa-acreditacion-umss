@@ -18,4 +18,6 @@ public class NormativeIndicatorEvidenceResponseDto {
     private String externalUrl;
     private LocalDateTime uploadedAt;
     private UUID uploadedBy;
+    private UUID documentAssetId;
+    private String folioCode;
 }

@@ -8,13 +8,13 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-09-09"
+ultima_actualizacion: "2026-10-13"
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
 
 > **Qué es:** Índice ágil de requerimientos funcionales durante la implementación.  
 > **Modelo v2.0 (release 2.0.0):** **Modelo evaluador (CEUB  ARCU-SUR) → Nivel 1 → Nivel 2 → Nivel 3 → Indicador → Evidencia**, instanciado en un **Proceso** de acreditación por carrera. Ver `[glosario.md](glosario.md)` §2.  
-> **Modelo v2.1 (ADR-0005):** **Workflow metodológico (7 etapas)** desacoplado del árbol normativo; evaluación **transversal** al ciclo. **M6 implementado** (UC-025…028); M7–M11 planificados. Ver §8–§10.  
+> **Modelo v2.1 (ADR-0005):** **Workflow metodológico (7 etapas)** desacoplado del árbol normativo; evaluación **transversal** al ciclo. **M6–M11 + CAE implementados**. Ver §8–§10.  
 > **Legacy v1.x:** Fase/Subfase — **retirado** (M5, Flyway V16). Ver §11.  
 > **Atención agentes IA:** Para implementar un feature, naveguen al `FSD-UC-NNN` enlazado en la tabla inferior.  
 > **Baseline congelado (no editar):** `[docs/baseline/04_fsd/FSD.md](../baseline/04_fsd/FSD.md)` · Dorada v1.0 · 2026-05-16
@@ -52,8 +52,8 @@ ultima_actualizacion: "2026-09-09"
 | `FSD-UC-001` | Autenticación y sesión                                         | Interno          | v1.0    | **Hecho**                                          | [Ver detalle](uc/FSD-UC-001.md) | `[DD-UC-001](../design/DD-UC-001.md)`                 | `[PR-IMPL-001](../prompts/impl/PR-IMPL-001.md)`       |
 | `FSD-UC-002` | Gestión de usuarios [JD]                                       | [JD]             | v1.0    | **Hecho**                                          | [Ver detalle](uc/FSD-UC-002.md) | `[DD-UC-002](../design/DD-UC-002.md)`                 | `[PR-IMPL-002](../prompts/impl/PR-IMPL-002.md)`       |
 | `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR                             | [JD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-003.md) | `[DD-UC-003](../design/DD-UC-003.md)`                 | `[PR-IMPL-003](../prompts/impl/PR-IMPL-003.md)`       |
-| `FSD-UC-004` | Cargar Evidencia en Indicador                                  | [CC]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-004.md) | `[DD-UC-004](../design/DD-UC-004.md)`                 | `[PR-IMPL-006](../prompts/impl/PR-IMPL-006.md)`       |
-| `FSD-UC-005` | Versionado y bloqueo de borrado                                | [CC], [TD]       | v2.0    | **Implementado** *(evidencia por indicador en v2)* | [Ver detalle](uc/FSD-UC-005.md) | `[DD-UC-005](../design/DD-UC-005.md)`                 | `[PR-IMPL-035](../prompts/impl/PR-IMPL-035.md)`       |
+| `FSD-UC-004` | Cargar Evidencia en Indicador                                  | [CC]             | v2.1    | **Hecho (M7 DocumentAsset)**                       | [Ver detalle](uc/FSD-UC-004.md) | `[DD-UC-004-M7](../design/DD-UC-004-M7.md)`           | `[PR-IMPL-M7-004](../prompts/impl/PR-IMPL-M7-004.md)` |
+| `FSD-UC-005` | Versionado y bloqueo de borrado                                | [CC], [TD]       | v2.1    | **Hecho (M7 DocumentAsset)**                       | [Ver detalle](uc/FSD-UC-005.md) | `[DD-UC-004-M7](../design/DD-UC-004-M7.md)`           | `[PR-IMPL-M7-004](../prompts/impl/PR-IMPL-M7-004.md)` |
 | `FSD-UC-006` | Subsanar Evidencia                                             | [CC]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-006.md) | `[DD-UC-006](../design/DD-UC-006.md)`                 | `[PR-IMPL-036](../prompts/impl/PR-IMPL-036.md)`       |
 | `FSD-UC-007` | Buscar Evidencia                                               | [CC], [TD]       | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-007.md) | `[DD-UC-007](../design/DD-UC-007.md)`                 | `[PR-IMPL-037](../prompts/impl/PR-IMPL-037.md)`       |
 | `FSD-UC-008` | Rechazar Indicador                                             | [TD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-008.md) | `[DD-UC-008](../design/DD-UC-008.md)`                 | `[PR-IMPL-038](../prompts/impl/PR-IMPL-038.md)`       |
@@ -68,7 +68,7 @@ ultima_actualizacion: "2026-09-09"
 | `FSD-UC-017` | Bitácora de auditoría                                          | [JD]             | v1.0    | Pendiente                                          | [Ver detalle](uc/FSD-UC-017.md) | —                                                     | —                                                     |
 | `FSD-UC-018` | Importación masiva                                             | [CC]             | v1.1    | Pendiente                                          | [Ver detalle](uc/FSD-UC-018.md) | —                                                     | —                                                     |
 | `FSD-UC-019` | Consulta de procesos de acreditación                           | [JD], [TD], [CC] | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-019.md) | `[DD-UC-019](../design/DD-UC-019.md)`                 | `[PR-IMPL-019](../prompts/impl/PR-IMPL-019.md)`       |
-| `FSD-UC-020` | Revisión documental [EE]                                       | [EE]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-020.md) | `[DD-UC-020](../design/DD-UC-020.md)`                 | `[PR-IMPL-014](../prompts/impl/PR-IMPL-014.md)`       |
+| `FSD-UC-020` | Revisión documental [EE]                                       | [EE]             | v2.1    | **Hecho (M10)**                                    | [Ver detalle](uc/FSD-UC-020.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
 | `FSD-UC-021` | Gestión de plantillas normativas (jerarquía N1–N3 + Indicador) | [JD]             | v2.0    | **Hecho (Full-Stack v2)**                          | [Ver detalle](uc/FSD-UC-021.md) | `[DD-UC-021](../design/DD-UC-021.md)`                 | `[PR-IMPL-021](../prompts/impl/PR-IMPL-021.md)`       |
 | `FSD-UC-022` | Gestión de estructura normativa en proceso                     | [JD], [TD]       | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-022.md) | `[DD-UC-022](../design/DD-UC-022.md)`                 | `[PR-IMPL-022](../prompts/impl/PR-IMPL-022.md)`       |
 | `FSD-UC-023` | Asignación de responsable [CC] a proceso                       | [JD]             | v1.0    | **Hecho (Full-Stack)**                             | [Ver detalle](uc/FSD-UC-023.md) | `[DD-UC-023](../design/DD-UC-023.md)`                 | `[PR-IMPL-023](../prompts/impl/PR-IMPL-023.md)`       |
@@ -76,15 +76,15 @@ ultima_actualizacion: "2026-09-09"
 | `FSD-UC-025` | Timeline etapas metodológicas                                  | [CC], [TD], [JD] | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-025.md) | `[DD-UC-025](../design/DD-UC-025.md)`                 | `[PR-IMPL-M6-025](../prompts/impl/PR-IMPL-M6-025.md)` |
 | `FSD-UC-026` | Enviar etapa a revisión [CC]                                   | [CC]             | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-025.md) | `[DD-UC-025](../design/DD-UC-025.md)`                 | `[PR-IMPL-M6-025](../prompts/impl/PR-IMPL-M6-025.md)` |
 | `FSD-UC-027` | Aprobar/rechazar etapa metodológica                            | [TD], [JD]       | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-025.md) | `[DD-UC-025](../design/DD-UC-025.md)`                 | `[PR-IMPL-M6-025](../prompts/impl/PR-IMPL-M6-025.md)` |
-| `FSD-UC-028` | Compuertas de avance (gate preview)                            | [TD]             | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-025.md) | `[DD-UC-025](../design/DD-UC-025.md)`                 | `[PR-IMPL-M6-025](../prompts/impl/PR-IMPL-M6-025.md)` |
-| `FSD-UC-029` | Métricas completitud evaluación                                | [CC], [TD], [JD] | v2.1    | **Planificado**                                    | —                               | —                                                     | —                                                     |
-| `FSD-UC-030` | Congelamiento / Sala de Pares                                  | [TD], [EE]       | v2.1    | **Planificado**                                    | —                               | —                                                     | —                                                     |
-| `FSD-UC-031` | Plan de Mejoras post-acreditación                              | [CC], [TD]       | v2.1    | **Planificado**                                    | —                               | —                                                     | —                                                     |
+| `FSD-UC-028` | Compuertas de avance (gate preview)                            | [TD]             | v2.1    | **Hecho (M10–M11 E5–E7)**                          | [Ver detalle](uc/FSD-UC-028.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
+| `FSD-UC-029` | Métricas completitud evaluación y FODA                         | [CC], [TD], [JD] | v2.1    | **Hecho (M8)**                                     | [Ver detalle](uc/FSD-UC-029.md) | `[DD-UC-029](../design/DD-UC-029.md)`                 | `[PR-IMPL-M8-029](../prompts/impl/PR-IMPL-M8-029.md)` |
+| `FSD-UC-030` | Congelamiento / Sala de Pares                                  | [TD], [EE]       | v2.1    | **Hecho (M10)**                                    | [Ver detalle](uc/FSD-UC-030.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
+| `FSD-UC-031` | Plan de Mejoras y documentos E4 / ciclo E7                     | [CC], [TD]       | v2.1    | **Hecho (M9+M11)**                                 | [Ver detalle](uc/FSD-UC-031.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
 
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-09-09):** Release **2.0.0** cerrado (M5 legacy retirado; UC-004…010 v2 operativos). Release **2.1.0** en curso — **M6** (UC-025…028) implementado; M7–M11 pendientes.
+**Snapshot (2026-10-13):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅ (`DD-UC-030` / `PR-IMPL-M10-030` / PM-018).
 
 ---
 
@@ -112,7 +112,7 @@ ultima_actualizacion: "2026-09-09"
 | Técnico DUEA / ODE      | [TD]                         | Aprueba/rechaza indicadores; cierra N1; aprueba entregables de etapa; compuertas     |
 | Jefatura DUEA           | [JD]                         | Usuarios, plantillas, semáforo, PDF; autoriza paso formal entre etapas               |
 | Evaluador externo / Par | [EE]                         | Solo lectura en modo auditoría (Sala de Pares, simulación)                           |
-| Miembro CAE / auxiliar  | `CAE_MEMBER` *(planificado)* | Carga evidencias y FODA en ámbito delegado                                           |
+| Miembro CAE / auxiliar  | `CAE_MEMBER` *(M10)*         | Carga evidencias y FODA en ámbito delegado                                           |
 | Público                 | [P]                          | Consulta portal (solo publicados)                                                    |
 
 
@@ -181,7 +181,7 @@ Cadena obligatoria (ver `[MODELO_DOCUMENTAL_IMPLEMENTACION.md](../MODELO_DOCUMEN
 | T-011 | ❌ Pendiente (v1.1)                                                                 |
 | T-012 | ❌ Pendiente (v1.1)                                                                 |
 | T-013 | ✅ Cerrado (UC-024 + copilotos MOD-ASSISTANT)                                       |
-| T-014 | ⚠️ Parcial — **M6** ✅ (UC-025…028); M7–M11 pendientes                              |
+| T-014 | ✅ **M6–M11 + CAE** (UC-030/020/028/031, DD-UC-030, PM-018) |
 
 
 ---
@@ -195,8 +195,8 @@ SIGESA separa dos bounded contexts (ADR-0005):
 
 | Módulo                    | Eje                     | Responsabilidad                                  | Estado código                                       |
 | ------------------------- | ----------------------- | ------------------------------------------------ | --------------------------------------------------- |
-| **Evaluación normativa**  | Transversal (taxonomía) | Árbol CEUB/ARCU, evidencias, FODA, métricas      | ✅ v2.0 (UC-003…010)                                 |
-| **Workflow metodológico** | Temporal (metodología)  | 7 etapas, entregables, compuertas, congelamiento | ⚠️ v2.1 **M6** (E1–E2 + timeline); M7–M11 pendiente |
+| **Evaluación normativa**  | Transversal (taxonomía) | Árbol CEUB/ARCU, evidencias, FODA, métricas      | ✅ v2.0 (UC-003…010) + M8 FODA/métricas (En Curso)   |
+| **Workflow metodológico** | Temporal (metodología)  | 7 etapas, entregables, compuertas, congelamiento | ⚠️ v2.1 **M6–M7** ✅; **M8** En Curso (E2→E3 / E3)   |
 
 
 **Principio:** N1 (Dimensión/Área) **≠** Etapa metodológica. Confundirlos fue el error del modelo v1.x (Fase/Subfase).
@@ -273,11 +273,11 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 | Milestone | Entregable                               | UC                                                  |
 | --------- | ---------------------------------------- | --------------------------------------------------- |
 | **M6**    | Etapas + entregables E1–E2 + UI timeline | UC-025, UC-026, UC-027, UC-028 — **✅ implementado** |
-| **M7**    | `DocumentAsset` + enlace M:N indicadores | UC-004 ext.                                         |
-| **M8**    | FODA + compuerta E2→E3 + delegación CAE  | UC-028, UC-029                                      |
-| **M9**    | Generación informes E4 + Plan Mejoras    | UC-031                                              |
-| **M10**   | Congelamiento + Sala de Pares + [EE]     | UC-030, UC-020                                      |
-| **M11**   | Post-acreditación cíclica                | UC-031                                              |
+| **M7**    | `DocumentAsset` + enlace M:N indicadores | UC-004, UC-005 — **✅ implementado** (`DD-UC-004-M7`, PM-015) |
+| **M8**    | FODA + compuerta E2→E3 + métricas        | UC-028, UC-029 — **✅ implementado** (`DD-UC-029`, PM-016) |
+| **M9**    | Generación informes E4 + Plan Mejoras    | UC-031 — **✅ implementado** (`DD-UC-031`, `PR-IMPL-M9-031`, PM-017) |
+| **M10**   | Congelamiento + Sala de Pares + [EE]     | UC-030, UC-020 — **✅ implementado** (`DD-UC-030`, PM-018) |
+| **M11**   | Post-acreditación cíclica + CAE          | UC-031 + `CAE_MEMBER` — **✅ implementado** (`PR-IMPL-M10-030`, PM-018) |
 
 
 **Requisitos transversales planificados:**
@@ -321,6 +321,10 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 | 2026-09-09 | **Reconciliación índice v2.0:** UC-004…010, UC-019 → **Implementado v2** (alineado a atom UC y código post-M5)                                                                                                                                                                |
 | 2026-09-09 | **UI árbol normativo:** capas desplegables N1→Indicador (`NormativeCollapsibleLayer`); PM-011 sprint 3                                                                                                                                                                        |
 | 2026-09-09 | **README + PM sprint 03:** releases 2.0.0/2.1.0; PM-011…013 (UI capas, fix login, sync docs)                                                                                                                                                                                  |
+| 2026-10-13 | **M10–M11 + CAE Hecho:** UC-030/020/028/031; V22 freeze/checklist/delegations; API-WF-18…23; `CAE_MEMBER`; PM-018 |
+| 2026-10-13 | **M9 Plan de Mejoras / E4:** UC-031/028 Hecho; `DD-UC-031` + `PR-IMPL-M9-031` + PM-017; V21 `improvement_plan_items`; API-WF-13…17; PDF borrador E4; gate DRAFTING |
+| 2026-10-13 | **M8 FODA / E2→E3:** UC-028/029 Hecho; `DD-UC-029` + `PR-IMPL-M8-029` + PM-016; `IndicatorAnalysis` + métricas + lotes encuesta; CAE_MEMBER diferido |
+| 2026-10-13 | **M7 DocumentAsset:** UC-004/005 Hecho; `DD-UC-004-M7` + `PR-IMPL-M7-004` + PM-015; un blob → N indicadores (`folioCode`, `IndicatorEvidenceLink`); Flyway **V19** |
 | 2026-08-27 | **Pivot modelo v1.1:** Proceso→Fase→Subfase→Evidencia *(supersedido por v2.0)*                                                                                                                                                                                                |
 
 
@@ -335,12 +339,12 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 | --------------------------- | --------------------------- | ------------------------------- |
 | FSD / glosario              | ✅ Actualizado               | §8–§10 workflow (ADR-0005)      |
 | ADR-0004                    | ✅ Aceptada e implementada   | —                               |
-| ADR-0005                    | ✅ Aceptada                  | M6 ✅ (V17); M7–M11 pendientes   |
-| `modelo_datos.md`           | ✅ v2.1                      | V17 aplicado (M6); V18+ en M7+  |
+| ADR-0005                    | ✅ Aceptada                  | M6–M11 + CAE ✅   |
+| `modelo_datos.md`           | ✅ v2.1                      | V17–V21; **V22 freeze / E7 / CAE** |
 | Backend legacy Fase/Subfase | ✅ Retirado M5               | —                               |
 | Frontend legacy             | ✅ Retirado M5               | —                               |
 | Diagramas `.mmd`            | ✅ MAR-ER-001 v2, MAR-ER-003 | Secuencia etapas (opcional M8+) |
-| Workflow UI timeline        | ✅ M6                        | Entregables E3–E7 en M8–M11     |
+| Workflow UI timeline        | ✅ M6–M11                    | Freeze, checklist, E7, CAE      |
 
 
 **Mapeo histórico v1.x:** Fase → N1 · Subfase → Indicador · evidencia: `subphase_id` → `normative_indicator_id`.

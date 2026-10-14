@@ -13,6 +13,11 @@ public class StageGateBlockedException extends RuntimeException {
         this.failedRules = gateResult.failedRules();
     }
 
+    public StageGateBlockedException(String message, List<String> failedRules) {
+        super(message);
+        this.failedRules = failedRules;
+    }
+
     public List<String> getFailedRules() {
         return failedRules;
     }

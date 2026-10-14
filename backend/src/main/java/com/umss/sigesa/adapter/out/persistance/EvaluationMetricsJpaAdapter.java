@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataIndicatorAnalysisRepository;
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeIndicatorRepository;
 import com.umss.sigesa.application.port.out.EvaluationMetricsPort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
@@ -15,6 +16,7 @@ public class EvaluationMetricsJpaAdapter implements EvaluationMetricsPort {
 
     private final NormativeHierarchyQueryPort hierarchyQueryPort;
     private final SpringDataNormativeIndicatorRepository indicatorRepository;
+    private final SpringDataIndicatorAnalysisRepository analysisRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -26,6 +28,12 @@ public class EvaluationMetricsJpaAdapter implements EvaluationMetricsPort {
     @Transactional(readOnly = true)
     public long countIndicatorsWithEvidenceByProcessId(UUID processId) {
         return indicatorRepository.countWithEvidenceByProcessId(processId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countFodaCompleteByProcessId(UUID processId) {
+        return analysisRepository.countCompleteByProcessId(processId);
     }
 
     @Override

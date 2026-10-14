@@ -14,12 +14,14 @@ import {
   findNormativeIndicatorPath,
   sortByOrder,
 } from '../lib/normativeTreeUtils';
+import { IndicatorFodaSection } from './IndicatorFodaSection';
 import { NormativeIndicatorCollaborationSection } from './NormativeIndicatorCollaborationSection';
 
 interface ProcessNormativeTreeProps {
   level1Nodes: NormativeLevel1NodeDto[];
   processId: string;
   canUploadEvidence?: boolean;
+  canEditFoda?: boolean;
   canReviewEvidence?: boolean;
   canSubsanateEvidence?: boolean;
   canCloseLevel1?: boolean;
@@ -33,6 +35,7 @@ export function ProcessNormativeTree({
   level1Nodes,
   processId,
   canUploadEvidence = false,
+  canEditFoda = false,
   canReviewEvidence = false,
   canSubsanateEvidence = false,
   canCloseLevel1 = false,
@@ -125,7 +128,9 @@ export function ProcessNormativeTree({
                   onOpenIndicatorChange={(indicatorId, open) =>
                     setOpenIndicators((prev) => ({ ...prev, [indicatorId]: open }))
                   }
+                  processId={processId}
                   canUploadEvidence={canUploadEvidence}
+                  canEditFoda={canEditFoda}
                   canReviewEvidence={canReviewEvidence}
                   canSubsanateEvidence={canSubsanateEvidence}
                   onNavigateToIndicator={onNavigateToIndicator}
@@ -155,6 +160,7 @@ export function ProcessNormativeTree({
 
 function Level2Section({
   node,
+  processId,
   level1Name,
   open,
   onOpenChange,
@@ -163,11 +169,13 @@ function Level2Section({
   openIndicators,
   onOpenIndicatorChange,
   canUploadEvidence,
+  canEditFoda,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
 }: {
   node: NormativeLevel2NodeDto;
+  processId: string;
   level1Name: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -176,6 +184,7 @@ function Level2Section({
   openIndicators: Record<string, boolean>;
   onOpenIndicatorChange: (indicatorId: string, open: boolean) => void;
   canUploadEvidence: boolean;
+  canEditFoda: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -206,7 +215,9 @@ function Level2Section({
             }}
             openIndicators={openIndicators}
             onOpenIndicatorChange={onOpenIndicatorChange}
+            processId={processId}
             canUploadEvidence={canUploadEvidence}
+            canEditFoda={canEditFoda}
             canReviewEvidence={canReviewEvidence}
             canSubsanateEvidence={canSubsanateEvidence}
             onNavigateToIndicator={onNavigateToIndicator}
@@ -222,6 +233,7 @@ function Level2Section({
 
 function Level3Section({
   node,
+  processId,
   level1Name,
   level2Name,
   open,
@@ -229,11 +241,13 @@ function Level3Section({
   openIndicators,
   onOpenIndicatorChange,
   canUploadEvidence,
+  canEditFoda,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
 }: {
   node: NormativeLevel3NodeDto;
+  processId: string;
   level1Name: string;
   level2Name: string;
   open: boolean;
@@ -241,6 +255,7 @@ function Level3Section({
   openIndicators: Record<string, boolean>;
   onOpenIndicatorChange: (indicatorId: string, open: boolean) => void;
   canUploadEvidence: boolean;
+  canEditFoda: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -269,7 +284,9 @@ function Level3Section({
               if (!indicator.id) return;
               onOpenIndicatorChange(indicator.id, next);
             }}
+            processId={processId}
             canUploadEvidence={canUploadEvidence}
+            canEditFoda={canEditFoda}
             canReviewEvidence={canReviewEvidence}
             canSubsanateEvidence={canSubsanateEvidence}
             onNavigateToIndicator={onNavigateToIndicator}
@@ -285,23 +302,27 @@ function Level3Section({
 
 function IndicatorRow({
   indicator,
+  processId,
   level1Name,
   level2Name,
   level3Name,
   open,
   onOpenChange,
   canUploadEvidence,
+  canEditFoda,
   canReviewEvidence,
   canSubsanateEvidence,
   onNavigateToIndicator,
 }: {
   indicator: NormativeIndicatorDto;
+  processId: string;
   level1Name: string;
   level2Name: string;
   level3Name: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   canUploadEvidence: boolean;
+  canEditFoda: boolean;
   canReviewEvidence: boolean;
   canSubsanateEvidence: boolean;
   onNavigateToIndicator?: (indicatorId: string) => void;
@@ -348,6 +369,7 @@ function IndicatorRow({
           )}
           {indicator.id && (
             <NormativeIndicatorCollaborationSection
+              processId={processId}
               indicatorId={indicator.id}
               indicatorLabel={indicator.code ?? indicator.description ?? 'Indicador'}
               indicatorStatus={indicator.status}
@@ -355,6 +377,14 @@ function IndicatorRow({
               canUpload={canUploadEvidence}
               canSubsanate={canSubsanateEvidence}
               canReview={canReviewEvidence}
+            />
+          )}
+          {indicator.id && (
+            <IndicatorFodaSection
+              processId={processId}
+              indicatorId={indicator.id}
+              canEdit={canEditFoda}
+              enabled={open}
             />
           )}
           {onNavigateToIndicator && indicator.id && (

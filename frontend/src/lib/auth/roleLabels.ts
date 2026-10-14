@@ -1,4 +1,4 @@
-export const BACKEND_ROLES = ['JD', 'CC', 'TD', 'EE'] as const;
+export const BACKEND_ROLES = ['JD', 'CC', 'TD', 'EE', 'CAE_MEMBER'] as const;
 
 export type BackendRoleCode = (typeof BACKEND_ROLES)[number];
 
@@ -7,16 +7,18 @@ export const ROLE_LABELS: Record<BackendRoleCode, string> = {
   CC: 'Coordinador de Carrera [CC]',
   TD: 'Técnico DUEA [TD]',
   EE: 'Evaluador externo [EE]',
+  CAE_MEMBER: 'Miembro CAE [CAE]',
 };
 
 /** Roles assignable in user registration (excludes public/unauthenticated access). */
-export const ASSIGNABLE_ROLES: BackendRoleCode[] = ['JD', 'CC', 'TD', 'EE'];
+export const ASSIGNABLE_ROLES: BackendRoleCode[] = ['JD', 'CC', 'TD', 'EE', 'CAE_MEMBER'];
 
 export const ROLE_REQUIRES_PROGRAM: Record<BackendRoleCode, boolean> = {
   JD: false,
   CC: true,
   TD: false,
   EE: true,
+  CAE_MEMBER: true,
 };
 
 export function isBackendRoleCode(value: string): value is BackendRoleCode {

@@ -13,17 +13,21 @@ public class ListProcessStagesService implements ListProcessStagesUseCase {
 
     private final ProcessQueryPort processQueryPort;
     private final MethodologicalStagePort stagePort;
+    private final MethodologicalStageBootstrapper stageBootstrapper;
 
     public ListProcessStagesService(ProcessQueryPort processQueryPort,
-                                    MethodologicalStagePort stagePort) {
+                                    MethodologicalStagePort stagePort,
+                                    MethodologicalStageBootstrapper stageBootstrapper) {
         this.processQueryPort = processQueryPort;
         this.stagePort = stagePort;
+        this.stageBootstrapper = stageBootstrapper;
     }
 
     @Override
     public List<MethodologicalStage> listStages(UUID processId) {
         processQueryPort.findDetailById(processId)
                 .orElseThrow(() -> new ProcessNotFoundException("Proceso no encontrado: " + processId));
+        stageBootstrapper.bootstrapForProcess(processId);
         return stagePort.findByProcessIdOrderByOrder(processId);
     }
 }

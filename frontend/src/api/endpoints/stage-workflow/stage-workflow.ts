@@ -24,10 +24,15 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GenerateDeliverableResponseDto,
+  LiftFreezeRequestDto,
   MethodologicalStageResponseDto,
   ObserveStageRequestDto,
+  PeerRoomChecklistItemDto,
+  ProcessFreezeResponseDto,
   StageDeliverableResponseDto,
-  StageGateEvaluationResponseDto
+  StageGateEvaluationResponseDto,
+  UpdatePeerRoomChecklistRequestDto
 } from '../../model';
 
 import { customFetch } from '../../../lib/api/customFetch.ts';
@@ -52,7 +57,202 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type submitStageResponse200 = {
+export type getPeerRoomChecklistResponse200 = {
+  data: PeerRoomChecklistItemDto[]
+  status: 200
+}
+
+export type getPeerRoomChecklistResponseSuccess = (getPeerRoomChecklistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPeerRoomChecklistResponse = (getPeerRoomChecklistResponseSuccess)
+
+export const getGetPeerRoomChecklistUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/peer-room-checklist`
+}
+
+/**
+ * @summary Consultar checklist Sala de Pares
+ */
+export const getPeerRoomChecklist = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getPeerRoomChecklistResponse> => {
+
+  return customFetch<getPeerRoomChecklistResponse>(getGetPeerRoomChecklistUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPeerRoomChecklistQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/peer-room-checklist`
+    ] as const;
+    }
+
+
+export const getGetPeerRoomChecklistQueryOptions = <TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPeerRoomChecklistQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPeerRoomChecklist>>> = ({ signal }) => getPeerRoomChecklist(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPeerRoomChecklistQueryResult = NonNullable<Awaited<ReturnType<typeof getPeerRoomChecklist>>>
+export type GetPeerRoomChecklistQueryError = unknown
+
+
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Consultar checklist Sala de Pares
+ */
+
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPeerRoomChecklistQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type updatePeerRoomChecklistResponse200 = {
+  data: PeerRoomChecklistItemDto[]
+  status: 200
+}
+
+export type updatePeerRoomChecklistResponseSuccess = (updatePeerRoomChecklistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type updatePeerRoomChecklistResponse = (updatePeerRoomChecklistResponseSuccess)
+
+export const getUpdatePeerRoomChecklistUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/peer-room-checklist`
+}
+
+/**
+ * @summary Actualizar ítems del checklist Sala de Pares
+ */
+export const updatePeerRoomChecklist = async (processId: string,
+    updatePeerRoomChecklistRequestDto: UpdatePeerRoomChecklistRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updatePeerRoomChecklistResponse> => {
+
+  return customFetch<updatePeerRoomChecklistResponse>(getUpdatePeerRoomChecklistUrl(processId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updatePeerRoomChecklistRequestDto)
+  }
+);}
+
+
+
+
+
+export const getUpdatePeerRoomChecklistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext> => {
+
+const mutationKey = ['updatePeerRoomChecklist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, {processId: string;data: UpdatePeerRoomChecklistRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  updatePeerRoomChecklist(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePeerRoomChecklistMutationResult = NonNullable<Awaited<ReturnType<typeof updatePeerRoomChecklist>>>
+    export type UpdatePeerRoomChecklistMutationBody = UpdatePeerRoomChecklistRequestDto
+    export type UpdatePeerRoomChecklistMutationError = unknown
+
+    /**
+ * @summary Actualizar ítems del checklist Sala de Pares
+ */
+export const useUpdatePeerRoomChecklist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePeerRoomChecklist>>,
+        TError,
+        {processId: string;data: UpdatePeerRoomChecklistRequestDto},
+        TContext
+      > => {
+      return useMutation(getUpdatePeerRoomChecklistMutationOptions(options), queryClient);
+    }
+    export type submitStageResponse200 = {
   data: MethodologicalStageResponseDto
   status: 200
 }
@@ -220,6 +420,92 @@ export const useObserveStage = <TError = unknown,
         TContext
       > => {
       return useMutation(getObserveStageMutationOptions(options), queryClient);
+    }
+    export type generateStageDeliverableResponse200 = {
+  data: GenerateDeliverableResponseDto
+  status: 200
+}
+
+export type generateStageDeliverableResponseSuccess = (generateStageDeliverableResponse200) & {
+  headers: Headers;
+};
+;
+
+export type generateStageDeliverableResponse = (generateStageDeliverableResponseSuccess)
+
+export const getGenerateStageDeliverableUrl = (processId: string,
+    stageId: string,
+    deliverableId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/deliverables/${deliverableId}/generate`
+}
+
+/**
+ * @summary Generar borrador PDF institucional del entregable E4
+ */
+export const generateStageDeliverable = async (processId: string,
+    stageId: string,
+    deliverableId: string, options?: Parameters<typeof customFetch>[1]): Promise<generateStageDeliverableResponse> => {
+
+  return customFetch<generateStageDeliverableResponse>(getGenerateStageDeliverableUrl(processId,stageId,deliverableId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateStageDeliverableMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext> => {
+
+const mutationKey = ['generateStageDeliverable'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateStageDeliverable>>, {processId: string;stageId: string;deliverableId: string}> = (props) => {
+          const {processId,stageId,deliverableId} = props ?? {};
+
+          return  generateStageDeliverable(processId,stageId,deliverableId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateStageDeliverableMutationResult = NonNullable<Awaited<ReturnType<typeof generateStageDeliverable>>>
+
+    export type GenerateStageDeliverableMutationError = unknown
+
+    /**
+ * @summary Generar borrador PDF institucional del entregable E4
+ */
+export const useGenerateStageDeliverable = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof generateStageDeliverable>>,
+        TError,
+        {processId: string;stageId: string;deliverableId: string},
+        TContext
+      > => {
+      return useMutation(getGenerateStageDeliverableMutationOptions(options), queryClient);
     }
     export type approveDeliverableResponse200 = {
   data: StageDeliverableResponseDto
@@ -390,6 +676,283 @@ export const useApproveStage = <TError = unknown,
         TContext
       > => {
       return useMutation(getApproveStageMutationOptions(options), queryClient);
+    }
+    export type getProcessFreezeResponse200 = {
+  data: ProcessFreezeResponseDto
+  status: 200
+}
+
+export type getProcessFreezeResponseSuccess = (getProcessFreezeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getProcessFreezeResponse = (getProcessFreezeResponseSuccess)
+
+export const getGetProcessFreezeUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/freeze`
+}
+
+/**
+ * @summary Consultar freeze del proceso
+ */
+export const getProcessFreeze = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getProcessFreezeResponse> => {
+
+  return customFetch<getProcessFreezeResponse>(getGetProcessFreezeUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProcessFreezeQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/freeze`
+    ] as const;
+    }
+
+
+export const getGetProcessFreezeQueryOptions = <TData = Awaited<ReturnType<typeof getProcessFreeze>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProcessFreezeQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProcessFreeze>>> = ({ signal }) => getProcessFreeze(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetProcessFreezeQueryResult = NonNullable<Awaited<ReturnType<typeof getProcessFreeze>>>
+export type GetProcessFreezeQueryError = unknown
+
+
+export function useGetProcessFreeze<TData = Awaited<ReturnType<typeof getProcessFreeze>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProcessFreeze>>,
+          TError,
+          Awaited<ReturnType<typeof getProcessFreeze>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProcessFreeze<TData = Awaited<ReturnType<typeof getProcessFreeze>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProcessFreeze>>,
+          TError,
+          Awaited<ReturnType<typeof getProcessFreeze>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProcessFreeze<TData = Awaited<ReturnType<typeof getProcessFreeze>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Consultar freeze del proceso
+ */
+
+export function useGetProcessFreeze<TData = Awaited<ReturnType<typeof getProcessFreeze>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProcessFreeze>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetProcessFreezeQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type freezeProcessResponse200 = {
+  data: ProcessFreezeResponseDto
+  status: 200
+}
+
+export type freezeProcessResponseSuccess = (freezeProcessResponse200) & {
+  headers: Headers;
+};
+;
+
+export type freezeProcessResponse = (freezeProcessResponseSuccess)
+
+export const getFreezeProcessUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/freeze`
+}
+
+/**
+ * @summary Congelar proceso en AUDIT_READONLY
+ */
+export const freezeProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<freezeProcessResponse> => {
+
+  return customFetch<freezeProcessResponse>(getFreezeProcessUrl(processId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getFreezeProcessMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof freezeProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof freezeProcess>>, TError,{processId: string}, TContext> => {
+
+const mutationKey = ['freezeProcess'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof freezeProcess>>, {processId: string}> = (props) => {
+          const {processId} = props ?? {};
+
+          return  freezeProcess(processId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FreezeProcessMutationResult = NonNullable<Awaited<ReturnType<typeof freezeProcess>>>
+
+    export type FreezeProcessMutationError = unknown
+
+    /**
+ * @summary Congelar proceso en AUDIT_READONLY
+ */
+export const useFreezeProcess = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof freezeProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof freezeProcess>>,
+        TError,
+        {processId: string},
+        TContext
+      > => {
+      return useMutation(getFreezeProcessMutationOptions(options), queryClient);
+    }
+    export type liftProcessFreezeResponse200 = {
+  data: ProcessFreezeResponseDto
+  status: 200
+}
+
+export type liftProcessFreezeResponseSuccess = (liftProcessFreezeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type liftProcessFreezeResponse = (liftProcessFreezeResponseSuccess)
+
+export const getLiftProcessFreezeUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/freeze/lift`
+}
+
+/**
+ * @summary Levantar freeze hacia ACTIVE o IMPROVEMENT_MONITORING
+ */
+export const liftProcessFreeze = async (processId: string,
+    liftFreezeRequestDto: LiftFreezeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<liftProcessFreezeResponse> => {
+
+  return customFetch<liftProcessFreezeResponse>(getLiftProcessFreezeUrl(processId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(liftFreezeRequestDto)
+  }
+);}
+
+
+
+
+
+export const getLiftProcessFreezeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof liftProcessFreeze>>, TError,{processId: string;data: LiftFreezeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof liftProcessFreeze>>, TError,{processId: string;data: LiftFreezeRequestDto}, TContext> => {
+
+const mutationKey = ['liftProcessFreeze'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof liftProcessFreeze>>, {processId: string;data: LiftFreezeRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  liftProcessFreeze(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LiftProcessFreezeMutationResult = NonNullable<Awaited<ReturnType<typeof liftProcessFreeze>>>
+    export type LiftProcessFreezeMutationBody = LiftFreezeRequestDto
+    export type LiftProcessFreezeMutationError = unknown
+
+    /**
+ * @summary Levantar freeze hacia ACTIVE o IMPROVEMENT_MONITORING
+ */
+export const useLiftProcessFreeze = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof liftProcessFreeze>>, TError,{processId: string;data: LiftFreezeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof liftProcessFreeze>>,
+        TError,
+        {processId: string;data: LiftFreezeRequestDto},
+        TContext
+      > => {
+      return useMutation(getLiftProcessFreezeMutationOptions(options), queryClient);
     }
     export type listStagesResponse200 = {
   data: MethodologicalStageResponseDto[]

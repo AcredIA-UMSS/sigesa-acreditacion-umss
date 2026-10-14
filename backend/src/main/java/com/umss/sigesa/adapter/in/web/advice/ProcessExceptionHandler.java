@@ -1,6 +1,12 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.AlreadyFrozenException;
 import com.umss.sigesa.domain.exception.CareerScopeMismatchException;
+import com.umss.sigesa.domain.exception.DelegationDeniedException;
+import com.umss.sigesa.domain.exception.DelegationNotFoundException;
+import com.umss.sigesa.domain.exception.FreezeNotFoundException;
+import com.umss.sigesa.domain.exception.InvalidCaeUserException;
+import com.umss.sigesa.domain.exception.ProcessFrozenException;
 import com.umss.sigesa.domain.exception.IndicatorHasEvidenceException;
 import com.umss.sigesa.domain.exception.IndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.CcAlreadyAssignedToProcessException;
@@ -13,6 +19,9 @@ import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.exception.ProcessStructureOrderConflictException;
 import com.umss.sigesa.domain.exception.ProgramNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidLevel1StateException;
+import com.umss.sigesa.domain.exception.DeliverableImmutableException;
+import com.umss.sigesa.domain.exception.DeliverableWithoutDocumentException;
+import com.umss.sigesa.domain.exception.InvalidDeliverableStageException;
 import com.umss.sigesa.domain.exception.InvalidStageStateException;
 import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
 import com.umss.sigesa.domain.exception.StageGateBlockedException;
@@ -221,6 +230,33 @@ public class ProcessExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(InvalidDeliverableStageException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDeliverableStage(InvalidDeliverableStageException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "INVALID_STAGE_STATE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(DeliverableImmutableException.class)
+    public ResponseEntity<Map<String, String>> handleDeliverableImmutable(DeliverableImmutableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "DELIVERABLE_IMMUTABLE",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(DeliverableWithoutDocumentException.class)
+    public ResponseEntity<Map<String, String>> handleDeliverableWithoutDocument(DeliverableWithoutDocumentException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "DELIVERABLE_WITHOUT_DOCUMENT",
+                        "message", ex.getMessage()
+                ));
+    }
+
     @ExceptionHandler(StageNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleStageNotFound(StageNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -249,6 +285,42 @@ public class ProcessExceptionHandler {
         body.put("message", ex.getMessage());
         body.put("pendingIndicators", pending);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(ProcessFrozenException.class)
+    public ResponseEntity<Map<String, String>> handleProcessFrozen(ProcessFrozenException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "PROCESS_FROZEN", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyFrozenException.class)
+    public ResponseEntity<Map<String, String>> handleAlreadyFrozen(AlreadyFrozenException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "ALREADY_FROZEN", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FreezeNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleFreezeNotFound(FreezeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "FREEZE_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DelegationDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleDelegationDenied(DelegationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "DELEGATION_DENIED", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DelegationNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDelegationNotFound(DelegationNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "DELEGATION_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCaeUserException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCaeUser(InvalidCaeUserException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "VALIDATION_ERROR", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidResponsibleUserException.class)

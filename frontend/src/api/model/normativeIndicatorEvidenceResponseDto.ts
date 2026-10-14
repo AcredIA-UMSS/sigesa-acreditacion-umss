@@ -15,4 +15,6 @@ export interface NormativeIndicatorEvidenceResponseDto {
   externalUrl?: string;
   uploadedAt?: string;
   uploadedBy?: string;
+  documentAssetId?: string;
+  folioCode?: string;
 }

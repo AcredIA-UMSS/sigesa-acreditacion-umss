@@ -7,6 +7,17 @@ public record NormativeIndicatorEvidenceUploadResult(
         int version,
         String contentHash,
         String event,
-        IndicatorState indicatorState
+        IndicatorState indicatorState,
+        UUID documentAssetId,
+        String folioCode,
+        boolean reusedAsset
 ) {
+    public NormativeIndicatorEvidenceUploadResult(
+            UUID evidenceId,
+            int version,
+            String contentHash,
+            String event,
+            IndicatorState indicatorState) {
+        this(evidenceId, version, contentHash, event, indicatorState, null, null, false);
+    }
 }

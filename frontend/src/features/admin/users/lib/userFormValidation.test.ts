@@ -50,6 +50,21 @@ describe('userFormValidation', () => {
     expect(errors.programId).toBe('Seleccione la carrera asignada.');
   });
 
+  it('shouldAcceptCaeMemberWhenProgramAssigned', () => {
+    const errors = validateUserForm({
+      firstName: 'Lucía',
+      lastName: 'Cae',
+      email: 'lucia@umss.edu.bo',
+      phoneNumber: '75678901',
+      role: 'CAE_MEMBER',
+      programId: 'prog-1',
+      password: 'Segura2026!',
+      confirmPassword: 'Segura2026!',
+      requiresProgram: true,
+    });
+    expect(errors).toEqual({});
+  });
+
   it('shouldRejectInvalidPhoneNumbers', () => {
     expect(validatePhone('123')).toContain('8 dígitos');
   });

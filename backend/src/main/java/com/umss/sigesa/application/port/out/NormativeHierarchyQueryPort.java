@@ -34,6 +34,13 @@ public interface NormativeHierarchyQueryPort {
             IndicatorState status) {
     }
 
+    record IndicatorAncestry(
+            UUID indicatorId,
+            UUID processId,
+            UUID level1Id,
+            UUID level2Id) {
+    }
+
     record Level1Context(
             UUID level1Id,
             UUID processId,
@@ -71,6 +78,8 @@ public interface NormativeHierarchyQueryPort {
     Optional<TemplateNormativeIndicator> findTemplateIndicatorById(UUID indicatorId);
 
     Optional<NormativeIndicatorContext> findIndicatorContext(UUID indicatorId);
+
+    Optional<IndicatorAncestry> findIndicatorAncestry(UUID indicatorId);
 
     Optional<Level1Context> findLevel1Context(UUID level1Id);
 

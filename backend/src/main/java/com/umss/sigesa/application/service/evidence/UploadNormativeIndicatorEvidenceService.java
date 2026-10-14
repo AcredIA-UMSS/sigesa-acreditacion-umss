@@ -3,21 +3,28 @@ package com.umss.sigesa.application.service.evidence;
 import com.umss.sigesa.application.port.in.UploadNormativeIndicatorEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
+import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
+import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidEvidenceFormatException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.SubsanationNotAllowedException;
+import com.umss.sigesa.domain.model.DocumentAsset;
 import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.EvidenceVersion;
+import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadCommand;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
@@ -68,6 +75,10 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
     private final NotificationOutboxPort notificationOutbox;
     private final AuditLogPort auditLogPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
+    private final DocumentAssetPort documentAssetPort;
+    private final NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
+    private final ProcessFreezeGuard freezeGuard;
+    private final CaeDelegationGuard caeDelegationGuard;
 
     public UploadNormativeIndicatorEvidenceService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
@@ -78,7 +89,11 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             ContentHashPort contentHashPort,
             NotificationOutboxPort notificationOutbox,
             AuditLogPort auditLogPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            DocumentAssetPort documentAssetPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            ProcessFreezeGuard freezeGuard,
+            CaeDelegationGuard caeDelegationGuard) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
@@ -88,6 +103,10 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         this.notificationOutbox = notificationOutbox;
         this.auditLogPort = auditLogPort;
         this.assignmentRepository = assignmentRepository;
+        this.documentAssetPort = documentAssetPort;
+        this.evidenceQueryPort = evidenceQueryPort;
+        this.freezeGuard = freezeGuard;
+        this.caeDelegationGuard = caeDelegationGuard;
     }
 
     @Override
@@ -104,6 +123,12 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         });
 
         assertProgramScope(command.uploadedBy(), context.careerId(), command.jwtProgramScope());
+        freezeGuard.assertWritable(context.processId());
+        caeDelegationGuard.assertCanWrite(command.uploadedBy(), context.processId(), command.indicatorId());
+
+        if (evidenceQueryPort.hasEvidences(command.indicatorId())) {
+            throw new IndicatorAlreadyHasEvidenceException(command.indicatorId());
+        }
 
         IndicatorState resultingState = context.status();
         if (context.status() == IndicatorState.PENDIENTE) {
@@ -117,17 +142,48 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
 
         boolean externalOnly = isExternalOnlyUpload(command);
         String hash;
-        String storageKey;
         String externalUrl = normalizeExternalUrl(command.externalUrl());
 
         if (externalOnly) {
             hash = contentHashPort.sha256Hex(externalUrl.getBytes(StandardCharsets.UTF_8));
-            storageKey = EXTERNAL_STORAGE_PREFIX + evidenceId;
         } else {
             validatePayload(command.fileContent(), command.contentType(), command.originalFilename());
             hash = contentHashPort.sha256Hex(command.fileContent());
+        }
+
+        Optional<DocumentAsset> existingAsset = documentAssetPort.findByHashInProcess(context.processId(), hash);
+        boolean reusedAsset = existingAsset.isPresent();
+        DocumentAsset asset;
+        String storageKey;
+        boolean persistNewAsset;
+        String storedBlobKey = null;
+
+        if (reusedAsset) {
+            asset = existingAsset.get();
+            storageKey = asset.getStorageKey();
+            persistNewAsset = false;
+        } else if (externalOnly) {
+            asset = DocumentAsset.create(
+                    context.processId(),
+                    titleFor(command),
+                    EXTERNAL_STORAGE_PREFIX + UUID.randomUUID(),
+                    hash,
+                    command.uploadedBy(),
+                    now);
+            storageKey = asset.getStorageKey();
+            persistNewAsset = true;
+        } else {
             storageKey = blobStorage.store(
                     evidenceId, 1, command.fileContent(), command.originalFilename());
+            storedBlobKey = storageKey;
+            asset = DocumentAsset.create(
+                    context.processId(),
+                    titleFor(command),
+                    storageKey,
+                    hash,
+                    command.uploadedBy(),
+                    now);
+            persistNewAsset = true;
         }
 
         try {
@@ -142,8 +198,11 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
                     storageKey,
                     command.uploadedBy(),
                     now);
+            IndicatorEvidenceLink link = IndicatorEvidenceLink.primary(
+                    command.indicatorId(), asset.getId(), evidenceId, now);
 
-            uploadPersistence.persistNormativeIndicatorUpload(evidence, version, externalUrl);
+            uploadPersistence.persistNormativeIndicatorUpload(
+                    evidence, version, externalUrl, asset, persistNewAsset, link);
 
             notificationOutbox.enqueueEvidenceUploaded(
                     command.indicatorId(), evidenceId, context.careerId());
@@ -154,13 +213,26 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
                     1,
                     hash,
                     EVENT_EVIDENCE_UPLOADED,
-                    resultingState);
+                    resultingState,
+                    asset.getId(),
+                    asset.getFolioCode(),
+                    reusedAsset);
         } catch (RuntimeException ex) {
-            if (!externalOnly) {
-                blobStorage.delete(storageKey);
+            if (storedBlobKey != null) {
+                blobStorage.delete(storedBlobKey);
             }
             throw ex;
         }
+    }
+
+    private static String titleFor(NormativeIndicatorEvidenceUploadCommand command) {
+        if (command.originalFilename() != null && !command.originalFilename().isBlank()) {
+            return command.originalFilename().trim();
+        }
+        if (command.externalUrl() != null && !command.externalUrl().isBlank()) {
+            return command.externalUrl().trim();
+        }
+        return command.description();
     }
 
     private void validateMetadata(NormativeIndicatorEvidenceUploadCommand command) {

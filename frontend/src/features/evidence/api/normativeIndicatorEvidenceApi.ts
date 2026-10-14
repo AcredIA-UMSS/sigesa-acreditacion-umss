@@ -1,13 +1,17 @@
+import { listByProcess } from '../../../api/endpoints/document-assets/document-assets';
+import { linkDocumentAsset, listEvidences, uploadEvidence } from '../../../api/endpoints/evidence/evidence';
+import type { DocumentAssetResponseDto } from '../../../api/model/documentAssetResponseDto';
+import type { NormativeIndicatorEvidenceResponseDto } from '../../../api/model/normativeIndicatorEvidenceResponseDto';
+import type { UploadEvidenceResponse } from '../../../api/model/uploadEvidenceResponse';
 import { customFetch } from '../../../lib/api/customFetch';
 
-export type NormativeIndicatorEvidenceItem = {
+export type NormativeIndicatorEvidenceItem = NormativeIndicatorEvidenceResponseDto & {
   evidenceId: string;
   indicatorId: string;
   version: number;
   description: string;
   contentHash: string;
   originalFilename: string;
-  externalUrl?: string;
   uploadedAt: string;
   uploadedBy: string;
 };
@@ -19,13 +23,9 @@ export type UploadNormativeIndicatorEvidenceInput = {
   externalUrl?: string;
 };
 
-export type NormativeIndicatorUploadResult = {
-  evidenceId: string;
-  version: number;
-  contentHash: string;
-  event?: string;
-  currentState: string;
-};
+export type NormativeIndicatorUploadResult = UploadEvidenceResponse;
+
+export type ProcessDocumentAsset = DocumentAssetResponseDto;
 
 export type NormativeIndicatorSubsanationEligibility = {
   canSubsanate: boolean;
@@ -36,42 +36,52 @@ export type NormativeIndicatorSubsanationEligibility = {
 export async function fetchNormativeIndicatorEvidences(
   indicatorId: string,
 ): Promise<NormativeIndicatorEvidenceItem[]> {
-  const response = await customFetch<{ data: NormativeIndicatorEvidenceItem[] }>(
-    `/api/v1/indicators/${encodeURIComponent(indicatorId)}/evidences`,
-    { skipUnauthorizedLogout: true },
-  );
-  return response.data;
+  const response = await listEvidences(indicatorId, { skipUnauthorizedLogout: true });
+  return (response.data ?? []).map((item) => ({
+    ...item,
+    evidenceId: item.evidenceId ?? '',
+    indicatorId: item.indicatorId ?? '',
+    version: item.version ?? 0,
+    description: item.description ?? '',
+    contentHash: item.contentHash ?? '',
+    originalFilename: item.originalFilename ?? 'evidencia',
+    uploadedAt: item.uploadedAt ?? '',
+    uploadedBy: item.uploadedBy ?? '',
+  }));
 }
 
 export async function uploadNormativeIndicatorEvidence(
   input: UploadNormativeIndicatorEvidenceInput,
 ): Promise<NormativeIndicatorUploadResult> {
-  const formData = new FormData();
-  if (input.file) {
-    formData.append('file', input.file);
-  }
-  if (input.externalUrl?.trim()) {
-    formData.append('externalUrl', input.externalUrl.trim());
-  }
-  formData.append('description', input.description);
+  const response = await uploadEvidence(
+    input.indicatorId,
+    {
+      description: input.description,
+      externalUrl: input.externalUrl,
+    },
+    input.file ? { file: input.file } : undefined,
+    { skipUnauthorizedLogout: true },
+  );
+  return response.data;
+}
 
-  const response = await customFetch<{
-    data: NormativeIndicatorUploadResult;
-    status: number;
-  }>(`/api/v1/indicators/${encodeURIComponent(input.indicatorId)}/evidences`, {
-    method: 'POST',
-    body: formData,
-    // Evita logout global si el POST falla (p. ej. 401/403); la UI muestra el error.
-    skipUnauthorizedLogout: true,
-  });
+export async function fetchProcessDocumentAssets(
+  processId: string,
+): Promise<ProcessDocumentAsset[]> {
+  const response = await listByProcess({ processId }, { skipUnauthorizedLogout: true });
+  return response.data ?? [];
+}
 
-  return {
-    evidenceId: response.data.evidenceId,
-    version: response.data.version,
-    contentHash: response.data.contentHash,
-    event: response.data.event,
-    currentState: response.data.currentState,
-  };
+export async function linkDocumentAssetToIndicator(input: {
+  indicatorId: string;
+  documentAssetId: string;
+}): Promise<NormativeIndicatorUploadResult> {
+  const response = await linkDocumentAsset(
+    input.indicatorId,
+    { documentAssetId: input.documentAssetId },
+    { skipUnauthorizedLogout: true },
+  );
+  return { ...response.data, reusedAsset: response.data.reusedAsset ?? true };
 }
 
 export async function fetchNormativeIndicatorSubsanationEligibility(

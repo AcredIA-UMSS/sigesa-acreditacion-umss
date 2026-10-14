@@ -16,6 +16,7 @@ public record EnrichedProcessDetail(
         String templateType,
         String evaluatorModel,
         String status,
+        String operationalMode,
         LocalDateTime startDate,
         List<Level1Node> level1Nodes,
         ProcessResponsibleInfo responsible
