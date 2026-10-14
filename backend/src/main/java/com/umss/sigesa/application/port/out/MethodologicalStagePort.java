@@ -4,6 +4,7 @@ import com.umss.sigesa.domain.model.MethodologicalStage;
 import com.umss.sigesa.domain.model.OperationalMode;
 import com.umss.sigesa.domain.model.StageDeliverable;
 import com.umss.sigesa.domain.model.StageDeliverableApprovalStatus;
+import com.umss.sigesa.domain.model.StageDeliverableCode;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,4 +43,6 @@ public interface MethodologicalStagePort {
             String rulesSnapshotJson);
 
     long countPrimarySurveyBatches(UUID processId);
+
+    void addDeliverableIfAbsent(UUID stageId, StageDeliverableCode deliverableCode);
 }

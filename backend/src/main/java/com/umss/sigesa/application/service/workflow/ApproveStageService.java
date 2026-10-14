@@ -21,15 +21,21 @@ public class ApproveStageService implements ApproveStageUseCase {
 
     private final MethodologicalStagePort stagePort;
     private final StageGateEvaluator gateEvaluator;
+    private final MethodologicalStageBootstrapper stageBootstrapper;
 
-    public ApproveStageService(MethodologicalStagePort stagePort, StageGateEvaluator gateEvaluator) {
+    public ApproveStageService(MethodologicalStagePort stagePort,
+                               StageGateEvaluator gateEvaluator,
+                               MethodologicalStageBootstrapper stageBootstrapper) {
         this.stagePort = stagePort;
         this.gateEvaluator = gateEvaluator;
+        this.stageBootstrapper = stageBootstrapper;
     }
 
     @Override
     public MethodologicalStage approve(UUID processId, UUID stageId, UUID actorId, String actorRole) {
         assertRole(actorRole);
+
+        stageBootstrapper.ensureMissingDeliverables(processId);
 
         MethodologicalStage stage = stagePort.findByIdAndProcessId(stageId, processId)
                 .orElseThrow(() -> new StageNotFoundException("Etapa no encontrada en el proceso."));

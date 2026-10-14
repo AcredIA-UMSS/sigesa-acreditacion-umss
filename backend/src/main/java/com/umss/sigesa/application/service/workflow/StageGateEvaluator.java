@@ -28,6 +28,7 @@ public class StageGateEvaluator {
         return switch (stage.getCode()) {
             case PREPARATORY -> evaluatePreparatory(stage);
             case COLLECTION -> evaluateCollection(stage);
+            case SYSTEMATIZATION -> evaluateSystematization(stage);
             default -> StageGateResult.pass("Compuerta no configurada para etapa " + stage.getCode());
         };
     }
@@ -82,6 +83,33 @@ public class StageGateEvaluator {
             return StageGateResult.pass("Compuerta E2 satisfecha: evidencias y encuestas completas.");
         }
         return StageGateResult.block(failed, "Compuerta E2 bloqueada.");
+    }
+
+    private StageGateResult evaluateSystematization(MethodologicalStage stage) {
+        List<String> failed = new ArrayList<>();
+        UUID processId = stage.getProcessId();
+
+        long totalIndicators = evaluationMetricsPort.countIndicatorsByProcessId(processId);
+        long fodaComplete = evaluationMetricsPort.countFodaCompleteByProcessId(processId);
+
+        if (totalIndicators == 0 || fodaComplete < totalIndicators) {
+            failed.add(String.format(
+                    "Completitud FODA: %d/%d indicadores",
+                    fodaComplete,
+                    totalIndicators));
+        }
+
+        for (StageDeliverableCode code : StageDeliverableCode.forStage(MethodologicalStageCode.SYSTEMATIZATION)) {
+            StageDeliverable deliverable = findDeliverable(stage, code);
+            if (deliverable == null || deliverable.getApprovalStatus() != StageDeliverableApprovalStatus.APPROVED) {
+                failed.add("Entregable obligatorio pendiente: " + code.name());
+            }
+        }
+
+        if (failed.isEmpty()) {
+            return StageGateResult.pass("Compuerta E3 satisfecha: FODA y entregables completos.");
+        }
+        return StageGateResult.block(failed, "Compuerta E3 bloqueada.");
     }
 
     private static StageDeliverable findDeliverable(MethodologicalStage stage, StageDeliverableCode code) {

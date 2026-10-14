@@ -2,17 +2,21 @@ package com.umss.sigesa.application.service.evidence;
 
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
+import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
+import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.SubsanationNotAllowedException;
+import com.umss.sigesa.domain.model.DocumentAsset;
 import com.umss.sigesa.domain.model.IndicatorObservation;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadCommand;
@@ -31,15 +35,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("UploadNormativeIndicatorEvidenceService — FSD-UC-004 v2")
+@DisplayName("UploadNormativeIndicatorEvidenceService — FSD-UC-004 v2 / M7")
 class UploadNormativeIndicatorEvidenceServiceTest {
 
     @Mock
@@ -60,6 +69,10 @@ class UploadNormativeIndicatorEvidenceServiceTest {
     private AuditLogPort auditLogPort;
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
+    @Mock
+    private DocumentAssetPort documentAssetPort;
+    @Mock
+    private NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
 
     @InjectMocks
     private UploadNormativeIndicatorEvidenceService service;
@@ -72,26 +85,69 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         UUID userId = UUID.randomUUID();
         byte[] pdf = "%PDF-1.4".getBytes();
 
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
-                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
-                        indicatorId, UUID.randomUUID(), programId, UUID.randomUUID(),
-                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
-        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
-        when(assignmentRepository.findActiveByUserId(userId))
-                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
-        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        stubUploadable(indicatorId, programId, userId);
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc12345deadbeef");
+        when(documentAssetPort.findByHashInProcess(any(), eq("abc12345deadbeef"))).thenReturn(Optional.empty());
         when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
 
         var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
                 indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId));
 
         assertEquals(1, result.version());
-        assertEquals("abc123", result.contentHash());
+        assertEquals("abc12345deadbeef", result.contentHash());
         assertEquals(IndicatorState.SUBIDO, result.indicatorState());
         assertEquals(UploadNormativeIndicatorEvidenceService.EVENT_EVIDENCE_UPLOADED, result.event());
+        assertFalse(result.reusedAsset());
+        assertTrue(result.folioCode().startsWith("SIGESA-"));
         verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.SUBIDO);
-        verify(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), eq(null));
+        verify(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), eq(null), any(), eq(true), any());
         verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));
+    }
+
+    @Test
+    @DisplayName("Mismo hash reutiliza DocumentAsset y no almacena blob")
+    void upload_reusesExistingAsset() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID processId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+        DocumentAsset existing = DocumentAsset.create(
+                processId, "doc.pdf", "existing-key", "abc12345deadbeef", userId, LocalDateTime.now());
+
+        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
+                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
+                        indicatorId, processId, programId, UUID.randomUUID(),
+                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
+        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc12345deadbeef");
+        when(documentAssetPort.findByHashInProcess(processId, "abc12345deadbeef")).thenReturn(Optional.of(existing));
+
+        var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
+                indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId));
+
+        assertTrue(result.reusedAsset());
+        assertEquals(existing.getId(), result.documentAssetId());
+        assertEquals(existing.getFolioCode(), result.folioCode());
+        verify(blobStorage, never()).store(any(), anyInt(), any(), any());
+        verify(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), eq(null), eq(existing), eq(false), any());
+    }
+
+    @Test
+    @DisplayName("Indicador con evidencia vigente → 409")
+    void upload_rejectsWhenIndicatorAlreadyHasEvidence() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        stubUploadable(indicatorId, programId, userId);
+        when(evidenceQueryPort.hasEvidences(indicatorId)).thenReturn(true);
+
+        assertThrows(IndicatorAlreadyHasEvidenceException.class, () -> service.upload(
+                new NormativeIndicatorEvidenceUploadCommand(
+                        indicatorId, "desc", new byte[]{1}, "application/pdf", "f.pdf", null, userId)));
+        verify(blobStorage, never()).store(any(), anyInt(), any(), any());
     }
 
     @Test
@@ -102,14 +158,9 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         UUID userId = UUID.randomUUID();
         byte[] pdf = "%PDF-1.4".getBytes();
 
-        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
-                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
-                        indicatorId, UUID.randomUUID(), programId, UUID.randomUUID(),
-                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
-        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
-        when(assignmentRepository.findActiveByUserId(userId))
-                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        stubUploadable(indicatorId, programId, userId);
         when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(documentAssetPort.findByHashInProcess(any(), eq("abc123"))).thenReturn(Optional.empty());
         when(blobStorage.store(any(), eq(1), eq(pdf), eq("evidencia-e2e.pdf"))).thenReturn("key");
 
         var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
@@ -172,6 +223,7 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
         when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of());
         when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(documentAssetPort.findByHashInProcess(any(), eq("abc123"))).thenReturn(Optional.empty());
         when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
 
         var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
@@ -212,6 +264,20 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         UUID userId = UUID.randomUUID();
         byte[] pdf = "%PDF-1.4".getBytes();
 
+        stubUploadable(indicatorId, programId, userId);
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(documentAssetPort.findByHashInProcess(any(), eq("abc123"))).thenReturn(Optional.empty());
+        when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
+        doThrow(new RuntimeException("db down"))
+                .when(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), any(), any(), anyBoolean(), any());
+
+        assertThrows(RuntimeException.class, () -> service.upload(new NormativeIndicatorEvidenceUploadCommand(
+                indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId)));
+
+        verify(blobStorage).delete("key");
+    }
+
+    private void stubUploadable(UUID indicatorId, UUID programId, UUID userId) {
         when(hierarchyQueryPort.findIndicatorContext(indicatorId))
                 .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
                         indicatorId, UUID.randomUUID(), programId, UUID.randomUUID(),
@@ -219,14 +285,5 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
         when(assignmentRepository.findActiveByUserId(userId))
                 .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
-        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
-        when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
-        doThrow(new RuntimeException("db down"))
-                .when(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), any());
-
-        assertThrows(RuntimeException.class, () -> service.upload(new NormativeIndicatorEvidenceUploadCommand(
-                indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId)));
-
-        verify(blobStorage).delete("key");
     }
 }

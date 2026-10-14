@@ -1,6 +1,7 @@
 import { CheckCircle2, Circle, Clock, Eye, Send } from 'lucide-react';
-import type { MethodologicalStageResponseDto } from '../../../api/model';
+import type { MethodologicalStageResponseDto, PrimarySurveyBatchResponseDto } from '../../../api/model';
 import { Button } from '../../../components/ui/Button';
+import { CollectionSurveyBatchForm } from './CollectionSurveyBatchForm';
 
 export type StageStatus =
   | 'PENDING'
@@ -26,6 +27,12 @@ interface MethodologicalStageTimelineProps {
   onApproveStage: (stageId: string) => void;
   onApproveDeliverable: (stageId: string, deliverableId: string) => void;
   onRefresh: () => void;
+  canRegisterSurvey: boolean;
+  surveyBatches: PrimarySurveyBatchResponseDto[];
+  isRegisteringSurvey: boolean;
+  surveyErrorMessage?: string;
+  surveySuccessMessage?: string;
+  onRegisterSurvey: (values: { audience: string; responsesCount: number }) => void;
 }
 
 const stageStatusConfig: Record<string, { label: string; className: string }> = {
@@ -82,6 +89,12 @@ export function MethodologicalStageTimeline({
   onApproveStage,
   onApproveDeliverable,
   onRefresh,
+  canRegisterSurvey,
+  surveyBatches,
+  isRegisteringSurvey,
+  surveyErrorMessage,
+  surveySuccessMessage,
+  onRegisterSurvey,
 }: MethodologicalStageTimelineProps) {
   if (isLoading) {
     return (
@@ -185,6 +198,17 @@ export function MethodologicalStageTimeline({
               )}
             </div>
           </div>
+
+          {activeStage.code === 'COLLECTION' && (
+            <CollectionSurveyBatchForm
+              canRegister={canRegisterSurvey}
+              batches={surveyBatches}
+              isSaving={isRegisteringSurvey}
+              errorMessage={surveyErrorMessage}
+              successMessage={surveySuccessMessage}
+              onRegister={onRegisterSurvey}
+            />
+          )}
 
           {(activeStage.deliverables?.length ?? 0) > 0 && (
             <ul className="mt-4 space-y-2">

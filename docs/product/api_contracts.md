@@ -324,10 +324,39 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | **x-allowed-roles** | `[CC]` |
 | **Content-Type** | `multipart/form-data` |
 | **Body** | `file?`, `externalUrl?`, `description` (al menos file o externalUrl) |
-| **201** | `{ evidenceId, version: 1, contentHash?, event: "EvidenceUploaded", indicatorState: "SUBIDO" }` |
+| **201** | `{ evidenceId, version: 1, contentHash, event: "EvidenceUploaded", currentState: "SUBIDO", documentAssetId, folioCode, reusedAsset }` |
 | **400** | `EVIDENCE_UNCLASSIFIED` |
 | **403** | `PROGRAM_SCOPE_DENIED` |
-| **409** | `SUBSANATION_NOT_ALLOWED` |
+| **409** | `SUBSANATION_NOT_ALLOWED`, **`INDICATOR_ALREADY_HAS_EVIDENCE`** (M7) |
+
+Si el SHA-256 ya existe en `document_assets` del **mismo proceso**, no se duplica el blob (`reusedAsset: true`).
+
+`GET /indicators/{indicatorId}/evidences` incluye `documentAssetId` y `folioCode` por ítem.
+
+### API-EVD-06 — `POST /indicators/{indicatorId}/evidences/link`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-004 (M7) |
+| **x-allowed-roles** | `[CC]` |
+| **Content-Type** | `application/json` |
+| **Body** | `{ "documentAssetId": uuid }` |
+| **201** | mismo shape que API-EVD-01, `reusedAsset: true` |
+| **403** | `PROGRAM_SCOPE_DENIED` (asset de otro proceso) |
+| **404** | `DOCUMENT_ASSET_NOT_FOUND`, `INDICATOR_NOT_FOUND` |
+| **409** | `INDICATOR_ALREADY_HAS_EVIDENCE`, `SUBSANATION_NOT_ALLOWED` |
+
+### API-EVD-07 — `GET /document-assets/{documentAssetId}`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-004 / FSD-UC-005 (M7) |
+| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` |
+| **200** | `{ id, folioCode, title, contentHash, processId, linkedIndicatorIds[], createdAt }` |
+| **403** | `PROGRAM_SCOPE_DENIED` |
+| **404** | `DOCUMENT_ASSET_NOT_FOUND` |
+
+Listado para el selector UI: `GET /document-assets?processId={uuid}` (mismo DTO en array).
 
 ### API-EVD-02 — `GET /evidences/search`
 
@@ -437,6 +466,7 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | **Ruta** | `GET /processes/{processId}/stages/{stageId}/gate` |
 | **x-allowed-roles** | `[TD]` |
 | **200** | `{ pass, failedRules[], summary }` |
+| **M8** | `COLLECTION` y `SYSTEMATIZATION` evaluadas; ver nota tras API-WF-12 |
 
 ### API-WF-08 — Aprobar entregable
 
@@ -445,6 +475,55 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | **UC** | FSD-UC-025 ext. |
 | **Ruta** | `POST /processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/approve` |
 | **x-allowed-roles** | `[TD]` |
+
+### API-WF-09 — Métricas de evaluación (M8)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-029 |
+| **Ruta** | `GET /processes/{processId}/evaluation-metrics` |
+| **x-allowed-roles** | `[CC, TD, JD]` |
+| **200** | `{ processId, totalIndicators, indicatorsWithEvidence, evidenceCompletenessRatio, fodaComplete, fodaCompletenessRatio, primarySurveyBatchCount }` |
+| **404** | `PROCESS_NOT_FOUND` (proceso inexistente o fuera de alcance CC) |
+
+### API-WF-10 — Análisis FODA por indicador (M8)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-029 |
+| **Rutas** | `GET /indicators/{indicatorId}/analysis` · `PUT /indicators/{indicatorId}/analysis` |
+| **x-allowed-roles GET** | `[CC, TD, JD]` |
+| **x-allowed-roles PUT** | `[CC]` |
+| **PUT body** | `{ fodaQuadrant: STRENGTH\|WEAKNESS\|OPPORTUNITY\|THREAT, compliance: COMPLIES\|PARTIAL\|DOES_NOT_COMPLY, synthesis }` |
+| **200 GET/PUT** | `{ id, indicatorId, processId, fodaQuadrant, compliance, synthesis, authorId, createdAt, updatedAt }` |
+| **400** | `VALIDATION_ERROR` (`synthesis` en blanco; enum inválido) |
+| **403 PUT** | `ACCESS_DENIED` (rol distinto de CC, vía `@PreAuthorize`) |
+| **404 GET** | `ANALYSIS_NOT_FOUND` (indicador sin fila) · `INDICATOR_NOT_FOUND` |
+| **404 PUT** | `INDICATOR_NOT_FOUND` |
+
+### API-WF-11 — Registrar lote de encuesta primaria (M8)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-029 / FSD-UC-028 (compuerta E2) |
+| **Ruta** | `POST /processes/{processId}/survey-batches` |
+| **x-allowed-roles** | `[CC]` |
+| **201 body** | `{ audience (1–32), responsesCount (>=1), documentAssetId? }` |
+| **201** | `{ id, processId, audience, responsesCount, documentAssetId, registeredAt }` |
+| **400** | `VALIDATION_ERROR` (`audience` vacío/>32; `responsesCount < 1`) |
+| **403** | `PROGRAM_SCOPE_DENIED` (`documentAssetId` de otro proceso) |
+| **404** | `PROCESS_NOT_FOUND` · `DOCUMENT_ASSET_NOT_FOUND` |
+
+### API-WF-12 — Listar lotes de encuesta (M8)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-029 |
+| **Ruta** | `GET /processes/{processId}/survey-batches` |
+| **x-allowed-roles** | `[CC, TD, JD]` |
+| **200** | `PrimarySurveyBatchResponseDto[]` ordenado por `registeredAt` desc |
+
+**Compuerta M8 (API-WF-07 sin cambio de ruta):** `COLLECTION` (E2→E3) = 100% evidencia + ≥1 survey batch + entregables E2 `APPROVED`. `SYSTEMATIZATION` (cerrar E3) = 100% FODA complete (`totalIndicators==0` → BLOCK) + entregables E3 (`FODA_FORMS_COMPLETE`, `SYNTHESIS_MATRIX`) `APPROVED`. E4+ sigue PASS informativo.
 
 ---
 
@@ -495,6 +574,8 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | Endpoint | CC | TD | JD | EE | P |
 |----------|:--:|:--:|:--:|:--:|:--:|
 | POST /indicators/{id}/evidences | ✓ | | | | |
+| POST /indicators/{id}/evidences/link | ✓ | | | | |
+| GET /document-assets/{id} | ✓ | ✓ | ✓ | | |
 | POST /indicators/{id}/reject | | ✓ | | | |
 | POST /indicators/{id}/approve | | ✓ | | | |
 | POST /level1-nodes/{id}/complete | | ✓ | | | |
@@ -555,6 +636,7 @@ Sin cambio de rutas (`/assistant/status`, `/assistant/chat`). Tools v2.0 objetiv
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.1 | 2026-10-13 | M7: API-EVD-01 ext (`documentAssetId`, `folioCode`, `reusedAsset`); API-EVD-06 link; API-EVD-07 GET asset |
 | v2.0 | 2026-09-08 | Release 2.0.0: contratos N1→N2→N3→Indicador→Evidencia; API-STR/WF/EVD/TPL v2; §12 legacy; ADR-0004 |
 | v1.8 | 2026-08-27 | API-EVD-LEGACY 410 Gone; pivot subfase |
 | v1.5 | 2026-08-03 | API-CAT-01 programs |

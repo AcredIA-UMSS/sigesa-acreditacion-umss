@@ -49,7 +49,16 @@ class EvidenceJsonContractTest {
                 "abc123hash",
                 "EvidenceUploaded",
                 "SUBIDO"));
-        JsonContracts.assertObjectFields(json, "evidenceId", "version", "contentHash", "event", "currentState");
+        JsonContracts.assertObjectFields(
+                json,
+                "evidenceId",
+                "version",
+                "contentHash",
+                "event",
+                "currentState",
+                "documentAssetId",
+                "folioCode",
+                "reusedAsset");
         assertThat(json.get("evidenceId").asText()).isEqualTo(evidenceId.toString());
         assertThat(json.get("version").asInt()).isEqualTo(1);
         assertThat(json.get("contentHash").isTextual()).isTrue();

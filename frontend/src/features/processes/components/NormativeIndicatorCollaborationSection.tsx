@@ -6,6 +6,7 @@ import { NormativeIndicatorReviewActions } from '../components/NormativeIndicato
 import { NormativeIndicatorSubsanationModal } from '../../evidence/components/NormativeIndicatorSubsanationModal';
 
 export type NormativeIndicatorCollaborationSectionProps = {
+  processId: string;
   indicatorId: string;
   indicatorLabel: string;
   indicatorStatus?: string;
@@ -47,6 +48,7 @@ function NormativeIndicatorEvidenceList({
               <p className="text-body-md text-gray-600">{item.description}</p>
               <p className="mt-1 text-label-md text-gray-500">
                 v{item.version}
+                {item.folioCode ? ` · Folio ${item.folioCode}` : ''}
                 {item.externalUrl ? ` · ${item.externalUrl}` : ''}
               </p>
               {canSubsanate && onSubsanate && (
@@ -67,6 +69,7 @@ function NormativeIndicatorEvidenceList({
 }
 
 export function NormativeIndicatorCollaborationSection({
+  processId,
   indicatorId,
   indicatorLabel,
   indicatorStatus,
@@ -111,6 +114,7 @@ export function NormativeIndicatorCollaborationSection({
       />
 
       <NormativeIndicatorEvidenceUploadSlot
+        processId={processId}
         indicatorId={indicatorId}
         indicatorLabel={indicatorLabel}
         breadcrumb={breadcrumb}

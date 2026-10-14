@@ -24,11 +24,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  LinkDocumentAssetRequestDto,
   NormativeIndicatorEvidenceResponseDto,
   NormativeIndicatorSubsanationEligibilityResponseDto,
   SubsanateEvidenceBody,
   SubsanateNormativeIndicatorEvidenceResponseDto,
   UploadEvidenceBody,
+  UploadEvidenceParams,
   UploadEvidenceResponse,
   UploadableIndicatorResponse
 } from '../../model';
@@ -179,31 +181,34 @@ export type uploadEvidenceResponseSuccess = (uploadEvidenceResponse200) & {
 
 export type uploadEvidenceResponse = (uploadEvidenceResponseSuccess)
 
-export const getUploadEvidenceUrl = (indicatorId: string,) => {
+export const getUploadEvidenceUrl = (indicatorId: string,
+    params: UploadEvidenceParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/v1/indicators/${indicatorId}/evidences`
+  return stringifiedParams.length > 0 ? `/api/v1/indicators/${indicatorId}/evidences?${stringifiedParams}` : `/api/v1/indicators/${indicatorId}/evidences`
 }
 
 /**
  * @summary Cargar evidencia en indicador normativo (API-EVD-01)
  */
 export const uploadEvidence = async (indicatorId: string,
+    params: UploadEvidenceParams,
     uploadEvidenceBody?: UploadEvidenceBody, options?: Parameters<typeof customFetch>[1]): Promise<uploadEvidenceResponse> => {
     const formData = new FormData();
 if(uploadEvidenceBody?.file !== undefined) {
  formData.append(`file`, uploadEvidenceBody.file);
  }
-if(uploadEvidenceBody?.externalUrl !== undefined) {
- formData.append(`externalUrl`, uploadEvidenceBody.externalUrl);
- }
-if(uploadEvidenceBody?.description !== undefined) {
- formData.append(`description`, uploadEvidenceBody.description);
- }
 
-  return customFetch<uploadEvidenceResponse>(getUploadEvidenceUrl(indicatorId),
+  return customFetch<uploadEvidenceResponse>(getUploadEvidenceUrl(indicatorId,params),
   {
     ...options,
     method: 'POST'
@@ -217,8 +222,8 @@ if(uploadEvidenceBody?.description !== undefined) {
 
 
 export const getUploadEvidenceMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;params: UploadEvidenceParams;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;params: UploadEvidenceParams;data?: UploadEvidenceBody}, TContext> => {
 
 const mutationKey = ['uploadEvidence'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -230,10 +235,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadEvidence>>, {indicatorId: string;data?: UploadEvidenceBody}> = (props) => {
-          const {indicatorId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadEvidence>>, {indicatorId: string;params: UploadEvidenceParams;data?: UploadEvidenceBody}> = (props) => {
+          const {indicatorId,params,data} = props ?? {};
 
-          return  uploadEvidence(indicatorId,data,requestOptions)
+          return  uploadEvidence(indicatorId,params,data,requestOptions)
         }
 
 
@@ -251,11 +256,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * @summary Cargar evidencia en indicador normativo (API-EVD-01)
  */
 export const useUploadEvidence = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadEvidence>>, TError,{indicatorId: string;params: UploadEvidenceParams;data?: UploadEvidenceBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof uploadEvidence>>,
         TError,
-        {indicatorId: string;data?: UploadEvidenceBody},
+        {indicatorId: string;params: UploadEvidenceParams;data?: UploadEvidenceBody},
         TContext
       > => {
       return useMutation(getUploadEvidenceMutationOptions(options), queryClient);
@@ -354,6 +359,89 @@ export const useSubsanateEvidence = <TError = unknown,
         TContext
       > => {
       return useMutation(getSubsanateEvidenceMutationOptions(options), queryClient);
+    }
+    export type linkDocumentAssetResponse200 = {
+  data: UploadEvidenceResponse
+  status: 200
+}
+
+export type linkDocumentAssetResponseSuccess = (linkDocumentAssetResponse200) & {
+  headers: Headers;
+};
+;
+
+export type linkDocumentAssetResponse = (linkDocumentAssetResponseSuccess)
+
+export const getLinkDocumentAssetUrl = (indicatorId: string,) => {
+
+
+
+
+  return `/api/v1/indicators/${indicatorId}/evidences/link`
+}
+
+/**
+ * @summary Vincular DocumentAsset existente al indicador (API-EVD-06)
+ */
+export const linkDocumentAsset = async (indicatorId: string,
+    linkDocumentAssetRequestDto: LinkDocumentAssetRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<linkDocumentAssetResponse> => {
+
+  return customFetch<linkDocumentAssetResponse>(getLinkDocumentAssetUrl(indicatorId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(linkDocumentAssetRequestDto)
+  }
+);}
+
+
+
+
+
+export const getLinkDocumentAssetMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkDocumentAsset>>, TError,{indicatorId: string;data: LinkDocumentAssetRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof linkDocumentAsset>>, TError,{indicatorId: string;data: LinkDocumentAssetRequestDto}, TContext> => {
+
+const mutationKey = ['linkDocumentAsset'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkDocumentAsset>>, {indicatorId: string;data: LinkDocumentAssetRequestDto}> = (props) => {
+          const {indicatorId,data} = props ?? {};
+
+          return  linkDocumentAsset(indicatorId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LinkDocumentAssetMutationResult = NonNullable<Awaited<ReturnType<typeof linkDocumentAsset>>>
+    export type LinkDocumentAssetMutationBody = LinkDocumentAssetRequestDto
+    export type LinkDocumentAssetMutationError = unknown
+
+    /**
+ * @summary Vincular DocumentAsset existente al indicador (API-EVD-06)
+ */
+export const useLinkDocumentAsset = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkDocumentAsset>>, TError,{indicatorId: string;data: LinkDocumentAssetRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof linkDocumentAsset>>,
+        TError,
+        {indicatorId: string;data: LinkDocumentAssetRequestDto},
+        TContext
+      > => {
+      return useMutation(getLinkDocumentAssetMutationOptions(options), queryClient);
     }
     export type subsanationEligibilityResponse200 = {
   data: NormativeIndicatorSubsanationEligibilityResponseDto

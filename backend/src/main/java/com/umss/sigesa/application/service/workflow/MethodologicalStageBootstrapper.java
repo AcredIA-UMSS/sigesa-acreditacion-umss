@@ -7,14 +7,14 @@ import com.umss.sigesa.domain.model.MethodologicalStageStatus;
 import com.umss.sigesa.domain.model.StageDeliverable;
 import com.umss.sigesa.domain.model.StageDeliverableApprovalStatus;
 import com.umss.sigesa.domain.model.StageDeliverableCode;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Component
 public class MethodologicalStageBootstrapper {
 
     private final MethodologicalStagePort stagePort;
@@ -26,6 +26,7 @@ public class MethodologicalStageBootstrapper {
     public void bootstrapForProcess(UUID processId) {
         List<MethodologicalStage> existing = stagePort.findByProcessIdOrderByOrder(processId);
         if (!existing.isEmpty()) {
+            ensureMissingDeliverables(existing);
             return;
         }
 
@@ -55,5 +56,25 @@ public class MethodologicalStageBootstrapper {
         }
 
         stagePort.saveStages(stages);
+    }
+
+    public void ensureMissingDeliverables(UUID processId) {
+        ensureMissingDeliverables(stagePort.findByProcessIdOrderByOrder(processId));
+    }
+
+    void ensureMissingDeliverables(List<MethodologicalStage> stages) {
+        for (MethodologicalStage stage : stages) {
+            if (stage.getId() == null) {
+                continue;
+            }
+            Set<StageDeliverableCode> existingCodes = stage.getDeliverables().stream()
+                    .map(StageDeliverable::getDeliverableCode)
+                    .collect(Collectors.toSet());
+            for (StageDeliverableCode required : StageDeliverableCode.forStage(stage.getCode())) {
+                if (!existingCodes.contains(required)) {
+                    stagePort.addDeliverableIfAbsent(stage.getId(), required);
+                }
+            }
+        }
     }
 }

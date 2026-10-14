@@ -18,4 +18,6 @@ public interface SpringDataStageDeliverableRepository extends JpaRepository<Stag
             WHERE d.id = :id
             """)
     Optional<StageDeliverableJpaEntity> findWithStageById(@Param("id") UUID id);
+
+    boolean existsByStage_IdAndDeliverableCode(UUID stageId, String deliverableCode);
 }

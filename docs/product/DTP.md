@@ -47,6 +47,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 13/10/2026 | **MOD-EVALUATION M8 FODA + métricas + E2→E3:** Flyway **V20** (`indicator_analysis` + CHECKs + backfill E3 `FODA_FORMS_COMPLETE`/`SYNTHESIS_MATRIX`); API-WF-09…12; gate SYSTEMATIZATION; bootstrap ensure en procesos viejos; panel métricas + form FODA + lote encuesta; Orval. | FSD-UC-029 / FSD-UC-028 / DD-UC-029 | ADR-0005 | PM-016 / PR-IMPL-M8-029 | Boris Anthony Angulo Urquieta |
+| 13/10/2026 | **MOD-EVIDENCE M7 DocumentAsset M:N:** Flyway **V19** (`document_assets`, `indicator_evidence_links` + backfill); deduplicación SHA-256 por proceso; API-EVD-01 ext + EVD-06 link + EVD-07 GET asset; UI modal «usar documento existente» + folio; Orval regenerado. | FSD-UC-004 / FSD-UC-005 / DD-UC-004-M7 | ADR-0005 | PM-015 / PR-IMPL-M7-004 | Boris Anthony Angulo Urquieta |
 | 23/09/2026 | **QA contract tests JSON:** `backend/src/test/java/com/sigesa/app/contracts/{auth,evidence,assistant}` (Lic. Marlene; `unit/` Aylen, `integration/` Alex). Forma Jackson de DTOs web; agente `tools/contract-test-agent/`. | QA AcredIA / FSD-UC-001+004+assistant | — | local | Marlen |
 | 09/09/2026 | **MOD-WORKFLOW metodológico (M6):** Flyway V17 (`methodological_stages`, `stage_deliverables`, `stage_gate_evaluations`, `primary_survey_batches`; `operational_mode`, `current_stage_id` en procesos); bootstrap 7 etapas + E1/E2 en `CreateProcessUseCaseImpl`; API-WF-04…08 (`StageWorkflowController`); `EvaluationMetricsPort`; UI `MethodologicalStageTimeline`; docs sync FSD/DTP/ADR. | FSD-UC-025…028 / DD-UC-025 | ADR-0005 | PM-010 / PR-IMPL-M6-025 | Boris Anthony Angulo Urquieta |
 | 09/09/2026 | **Reconciliación documental v2.0:** índice FSD UC-004…010, UC-019 → Implementado v2; T-003/T-004 cerrados. | FSD sync | ADR-0004 | docs sync | Cursor Agent |
@@ -135,8 +137,8 @@ artefactos_vivos:
 | `FSD-UC-019` | `DD-UC-019` | **hecho v2** | `2.0.0` | GET devuelve `level1Nodes[]` + timeline M6 | `PR-IMPL-019` | |
 | `FSD-UC-021` | `DD-UC-021` | **hecho (Full-Stack v2)** | `2.0.0` | API-TPL-08 + WebMvc; UI `/admin/plantillas`; publish BR-24 | `PR-IMPL-021` | Duplicate v2; legacy tabs coexisten |
 | `FSD-UC-022` | `DD-UC-022` | **hecho v2** | `2.0.0` | API-STR-01…05 + UI estructura v2 | `PR-IMPL-022` | |
-| `FSD-UC-004` | `DD-UC-004` | **hecho v2** | `2.0.0` | `POST/GET /indicators/{id}/evidences` | `PR-IMPL-006` | |
-| `FSD-UC-005` | `DD-UC-005` | **hecho** | `2.0.0` | Append-only sin cambio de contrato | `PR-IMPL-035` | |
+| `FSD-UC-004` | `DD-UC-004-M7` | **hecho (M7)** | `2.1.0` | EVD-01 ext + EVD-06 link + EVD-07 asset | `PR-IMPL-M7-004` | PM-015 |
+| `FSD-UC-005` | `DD-UC-005` / `DD-UC-004-M7` | **hecho (M7)** | `2.1.0` | Append-only vigente; folio/link no borra DocumentAsset | `PR-IMPL-035` / `PR-IMPL-M7-004` | PM-015 |
 | `FSD-UC-006` | `DD-UC-006` | **hecho v2** | `2.0.0` | Subsanación por indicador API-EVD-05 | `PR-IMPL-036` | |
 | `FSD-UC-007` | `DD-UC-007` | **hecho v2** | `2.0.0` | API-EVD-02 filtros `level1Id`, `indicatorId` | `PR-IMPL-037` | |
 | `FSD-UC-008` | `DD-UC-008` | **hecho v2** | `2.0.0` | API-WF-01 reject indicador | `PR-IMPL-038` | |
@@ -145,7 +147,8 @@ artefactos_vivos:
 | `FSD-UC-025` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | API-WF-04…08; bootstrap etapas | `PR-IMPL-M6-025` | UC-026…028 mismo contrato |
 | `FSD-UC-026` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST submit etapa | `PR-IMPL-M6-025` | |
 | `FSD-UC-027` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST approve/observe etapa | `PR-IMPL-M6-025` | |
-| `FSD-UC-028` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | GET gate preview | `PR-IMPL-M6-025` | |
+| `FSD-UC-028` | `DD-UC-025` / `DD-UC-029` | **hecho (M8)** | `2.1.0` | Gate E2 operativo + E3 FODA 100% | `PR-IMPL-M6-025` / `PR-IMPL-M8-029` | PM-016 |
+| `FSD-UC-029` | `DD-UC-029` | **hecho (M8)** | `2.1.0` | API-WF-09…12; V20; UI FODA/métricas/encuesta | `PR-IMPL-M8-029` | PM-016 |
 | `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `2.0.0` | Sin cambio contrato | `PR-IMPL-023` | Responsable [CC] — independiente del árbol |
 | `FSD-UC-011` | `DD-UC-011` | hecho / **v2.0 filtros pendientes** | `2.0.0` | PBAC summary/details | `PR-IMPL-011` | Migrar filtros a level1Id/indicatorStatus |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
@@ -275,7 +278,37 @@ artefactos_vivos:
 | **Estado workflow** | Derivado en `subphases.status` | Derivado en `indicators.status` |
 | **Búsqueda** | API-EVD-02 filtros `phaseId`, `subphaseId` | `level1Id`, `indicatorId`, `normativePath` |
 | **RBAC** | `[CC]` alcance carrera | Sin cambio |
-| **Hash / storage** | SHA-256, `./data/evidences` | Sin cambio |
+| **Hash / storage** | SHA-256, `./data/evidences` | M7: blob en `DocumentAsset`; unique `(process_id, content_hash)` |
+
+#### B.4.2 MOD-EVIDENCE — DocumentAsset M:N (`DD-UC-004-M7`, M7 / v2.1)
+
+**Implementación:** Sprint 03 PM-015 · **Prompt:** `PR-IMPL-M7-004` · **FSD:** UC-004/005 · **ADR:** ADR-0005
+
+| Área | Detalle vigente (M7) |
+| --- | --- |
+| **Endpoints** | API-EVD-01 201 + `documentAssetId`/`folioCode`/`reusedAsset`; EVD-06 `POST .../evidences/link`; EVD-07 `GET /document-assets/{id}` (+ list `?processId=`) |
+| **Dominio** | `DocumentAsset`, `IndicatorEvidenceLink`; `Evidence` sigue 1:1 indicador (`uk_evidence_normative_indicator`) |
+| **Puertos** | OUT `DocumentAssetPort`; IN `LinkDocumentAssetToIndicatorUseCase`, `GetDocumentAssetUseCase` |
+| **Migración Flyway** | `V19__document_assets_indicator_links.sql` (prod); Docker dev: Hibernate `ddl-auto: update` + backfill en `DevWorkflowSchemaAlignmentRunner` |
+| **Errores clave** | 409 `INDICATOR_ALREADY_HAS_EVIDENCE`; 404 `DOCUMENT_ASSET_NOT_FOUND`; 403 `PROGRAM_SCOPE_DENIED` (asset de otro proceso) |
+| **Frontend** | Modal carga: checkbox vincular asset del proceso; folio en lista de evidencias; wrapper Orval |
+| **Pendiente** | N documentos por el mismo indicador (post-M7); M9 Plan de Mejoras |
+
+#### B.4.3 MOD-EVALUATION — FODA, métricas y encuestas (`DD-UC-029`, M8 / v2.1)
+
+**Implementación:** Sprint 03 PM-016 · **Prompt:** `PR-IMPL-M8-029` · **FSD:** UC-029 / UC-028 · **ADR:** ADR-0005
+
+| Área | Detalle vigente (M8) |
+| --- | --- |
+| **Endpoints** | API-WF-09 `GET …/evaluation-metrics`; WF-10 GET/PUT `…/indicators/{id}/analysis`; WF-11/12 POST/GET `…/survey-batches`; WF-07 preview E2/E3 sin cambio de ruta |
+| **Dominio** | `IndicatorAnalysis`, `FodaQuadrant`, `ComplianceJudgment`, `PrimarySurveyBatch`, `EvaluationMetrics` (puro; sin Spring/JPA) |
+| **Puertos** | OUT `IndicatorAnalysisPort`, `PrimarySurveyBatchPort`; `EvaluationMetricsPort.countFodaCompleteByProcessId`; IN upsert/get analysis, metrics, register/list survey |
+| **Compuertas** | E2 `COLLECTION`: 100% evidencia + ≥1 lote + entregables E2 APPROVED. E3 `SYSTEMATIZATION`: 100% FODA (`totalIndicators==0` → BLOCK) + `FODA_FORMS_COMPLETE`/`SYNTHESIS_MATRIX` APPROVED. E4+ PASS informativo |
+| **Bootstrap** | `MethodologicalStageBootstrapper` asegura entregables faltantes; `GET …/stages` llama `bootstrapForProcess` (crea E1–E7 si el proceso no tenía etapas) |
+| **Migración Flyway** | `V20__indicator_analysis_e3_deliverables.sql` (prod); Docker dev: Hibernate + `DevWorkflowSchemaAlignmentRunner` (audience 1–32 + backfill E3) |
+| **Errores clave** | 404 `ANALYSIS_NOT_FOUND` / `INDICATOR_NOT_FOUND`; 400 `VALIDATION_ERROR`; 403 `PROGRAM_SCOPE_DENIED` (asset de otro proceso); PUT FODA no-CC → 403 `ACCESS_DENIED` |
+| **Frontend** | Panel métricas en detalle; form FODA en árbol (edita CC, lectura TD/JD); registro lote en timeline E2; hooks Orval `evaluation` |
+| **Pendiente** | M9 `ImprovementPlanItem`; CAE_MEMBER / `IndicatorDelegation`; M10–M11 |
 
 #### B.4.1 MOD-WORKFLOW — indicador y cierre Nivel 1 (DD-UC-008, 009, 010)
 

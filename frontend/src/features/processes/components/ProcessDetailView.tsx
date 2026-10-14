@@ -8,6 +8,7 @@ import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvi
 import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
+import { EvaluationMetricsPanelContainer } from './EvaluationMetricsPanelContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 
 interface ProcessDetailViewProps {
@@ -33,6 +34,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
   const canUploadEvidence = session?.role === 'CC';
+  const canEditFoda = session?.role === 'CC';
   const canReviewEvidence = session?.role === 'TD';
   const structureAnchorRef = useRef<HTMLDivElement>(null);
   const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
@@ -116,6 +118,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             onUpdated={refetch}
           />
 
+          <EvaluationMetricsPanelContainer processId={processId} />
+
           <MethodologicalStageTimelineContainer processId={processId} />
 
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
@@ -151,6 +155,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 level1Nodes={process.level1Nodes ?? []}
                 processId={processId}
                 canUploadEvidence={canUploadEvidence}
+                canEditFoda={canEditFoda}
                 canReviewEvidence={canReviewEvidence}
                 canSubsanateEvidence={canUploadEvidence}
                 canCloseLevel1={canReviewEvidence}

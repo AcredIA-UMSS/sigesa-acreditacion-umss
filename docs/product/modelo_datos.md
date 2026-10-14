@@ -270,13 +270,13 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 | `DocumentAsset` | `folioCode`, `title`, `storageKey`, `contentHash`, `isInstitutional`, `uploadedBy` | **Un blob** por documento físico |
 | `IndicatorEvidenceLink` | `indicatorId`, `documentAssetId`, `evidenceId`, `isPrimaryReference` | Enlace lógico; evita duplicar PDF en MinIO/disco |
 
-**Migración M7:** `Evidence` conserva metadatos por indicador; `EvidenceVersion.contentHash` apunta al mismo `DocumentAsset` cuando es referencia compartida.
+**Migración M7 (Flyway V19):** backfill `document_assets` desde `evidence_version` (hash + `storage_key`); `indicator_evidence_links` 1:1 inicial; `Evidence` sigue 1 cabecera por indicador (`uk_evidence_normative_indicator`). `EvidenceVersion.contentHash` coincide con `DocumentAsset.contentHash` cuando hay archivo.
 
 ### 11.2 Análisis FODA
 
 | Entidad | Atributos clave | Notas |
 |---------|-----------------|-------|
-| `IndicatorAnalysis` | `indicatorId`, `fodaQuadrant`, `compliance`, `synthesis`, `authorId` | Etapa 3; alimenta Plan de Mejoras |
+| `IndicatorAnalysis` | `indicatorId`, `processId`, `fodaQuadrant`, `compliance`, `synthesis`, `authorId` | **M8 / V20**; un análisis por indicador; alimenta Plan de Mejoras (M9) |
 
 ### 11.3 Plan de Mejoras y encuestas
 
@@ -299,9 +299,9 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 | `StageDeliverable` | `stage_deliverables` | M6 |
 | `StageGateEvaluation` | `stage_gate_evaluations` | M6 |
 | `ProcessFreeze` | `process_freeze` | M10 |
-| `DocumentAsset` | `document_assets` | M7 |
+| `DocumentAsset` | `document_assets` | M7 · **V19** |
 | `IndicatorEvidenceLink` | `indicator_evidence_links` | M7 |
-| `IndicatorAnalysis` | `indicator_analysis` | M8 |
+| `IndicatorAnalysis` | `indicator_analysis` | M8 · **V20** |
 | `ImprovementPlanItem` | `improvement_plan_items` | M9 |
 | `PrimarySurveyBatch` | `primary_survey_batches` | M6 |
 | `IndicatorDelegation` | `indicator_delegations` | M8 |
@@ -312,6 +312,7 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.1 | 2026-10-13 | M7: `document_assets` / `indicator_evidence_links` → Flyway **V19** (V18 ya usado por evidencia nullable) |
 | v2.1 | 2026-09-08 | ADR-0005: workflow metodológico, entidades planificadas, MAR-ER-003; MAR-ER-001 actualizado v2.0; M5 reflejado en §6 |
 | v2.0 | 2026-09-08 | Jerarquía N1→N2→N3→Indicador→Evidencia; ADR-0004 |
 | v1.1 | 2026-08-27 | Pivot Proceso→Fase→Subfase *(supersedido)* |

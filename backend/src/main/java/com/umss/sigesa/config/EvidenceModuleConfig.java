@@ -12,9 +12,12 @@ import com.umss.sigesa.application.port.in.SearchEvidencesUseCase;
 import com.umss.sigesa.application.port.out.EvidenceSearchQueryPort;
 import com.umss.sigesa.application.port.in.SubsanateNormativeIndicatorEvidenceUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
+import com.umss.sigesa.application.port.in.GetDocumentAssetUseCase;
+import com.umss.sigesa.application.port.in.LinkDocumentAssetToIndicatorUseCase;
 import com.umss.sigesa.application.port.in.UploadNormativeIndicatorEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
+import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.EvidenceControlQueryPort;
 import com.umss.sigesa.application.port.out.EvidenceLifecycleQueryPort;
@@ -27,11 +30,14 @@ import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evidence.AttemptDeleteEvidenceService;
 import com.umss.sigesa.application.service.evidence.CheckEvidenceCompletenessService;
 import com.umss.sigesa.application.service.evidence.GetNormativeIndicatorSubsanationEligibilityService;
+import com.umss.sigesa.application.service.evidence.GetDocumentAssetService;
 import com.umss.sigesa.application.service.evidence.GetEvidenceDetailService;
+import com.umss.sigesa.application.service.evidence.LinkDocumentAssetToIndicatorService;
 import com.umss.sigesa.application.service.evidence.ListEvidenceVersionsService;
 import com.umss.sigesa.application.service.evidence.ListNormativeIndicatorEvidencesService;
 import com.umss.sigesa.application.service.evidence.ListPendingEvidencesService;
@@ -80,7 +86,9 @@ public class EvidenceModuleConfig {
             ContentHashPort contentHashPort,
             NotificationOutboxPort notificationOutbox,
             AuditLogPort auditLogPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            DocumentAssetPort documentAssetPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort) {
         return new UploadNormativeIndicatorEvidenceService(
                 hierarchyQueryPort,
                 observationPort,
@@ -90,7 +98,40 @@ public class EvidenceModuleConfig {
                 contentHashPort,
                 notificationOutbox,
                 auditLogPort,
-                assignmentRepository);
+                assignmentRepository,
+                documentAssetPort,
+                evidenceQueryPort);
+    }
+
+    @Bean
+    LinkDocumentAssetToIndicatorUseCase linkDocumentAssetToIndicatorUseCase(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorObservationPort observationPort,
+            NormativeIndicatorWorkflowPort workflowPort,
+            EvidenceUploadPersistencePort uploadPersistence,
+            NotificationOutboxPort notificationOutbox,
+            AuditLogPort auditLogPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            DocumentAssetPort documentAssetPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort) {
+        return new LinkDocumentAssetToIndicatorService(
+                hierarchyQueryPort,
+                observationPort,
+                workflowPort,
+                uploadPersistence,
+                notificationOutbox,
+                auditLogPort,
+                assignmentRepository,
+                documentAssetPort,
+                evidenceQueryPort);
+    }
+
+    @Bean
+    GetDocumentAssetUseCase getDocumentAssetUseCase(
+            DocumentAssetPort documentAssetPort,
+            ProcessQueryPort processQueryPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new GetDocumentAssetService(documentAssetPort, processQueryPort, assignmentRepository);
     }
 
     @Bean

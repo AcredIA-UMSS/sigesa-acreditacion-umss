@@ -68,10 +68,11 @@ Ver [`api_contracts.md`](../api_contracts.md) § API-WF-04…08.
 
 ## Fuera de alcance (M6)
 
-- Métricas completitud global (UC-029).
+- Métricas completitud global y FODA (UC-029 / M8).
+- Compuerta E3 y entregables E3 (UC-028 M8).
 - Congelamiento / Sala de Pares (UC-030).
 - Plan de Mejoras post-acreditación (UC-031).
-- Entregables E3–E7 (M8–M11).
+- Entregables E4–E7 (M9–M11).
 
 ## Escenarios Gherkin
 

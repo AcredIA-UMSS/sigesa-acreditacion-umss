@@ -12,6 +12,8 @@ const ERROR_LABELS: Record<string, string> = {
     'Hay una observación pendiente. Debe subsanar la evidencia existente antes de cargar una nueva.',
   INVALID_STATE: 'Operación no permitida en el estado actual.',
   PAYLOAD_TOO_LARGE: 'El archivo supera el tamaño máximo permitido (50 MB).',
+  INDICATOR_ALREADY_HAS_EVIDENCE: 'Este indicador ya tiene evidencia vigente.',
+  DOCUMENT_ASSET_NOT_FOUND: 'El documento seleccionado no existe.',
 };
 
 export function mapUploadError(error: Error | null): string | null {

@@ -231,8 +231,9 @@ export const getCompositeSummary = async ( options?: Parameters<typeof customFet
   return customFetch<getCompositeSummaryResponse>(getGetCompositeSummaryUrl(),
   {
     ...options,
-    method: 'GET',
-    skipUnauthorizedLogout: true,
+    method: 'GET'
+
+
   }
 );}
 

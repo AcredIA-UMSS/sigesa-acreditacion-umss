@@ -8,5 +8,7 @@ public interface EvaluationMetricsPort {
 
     long countIndicatorsWithEvidenceByProcessId(UUID processId);
 
+    long countFodaCompleteByProcessId(UUID processId);
+
     double evidenceCompletenessRatio(UUID processId);
 }

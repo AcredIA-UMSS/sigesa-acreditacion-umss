@@ -1,14 +1,20 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.persistance.entity.DocumentAssetEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
+import com.umss.sigesa.adapter.out.persistance.entity.IndicatorEvidenceLinkEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorObservationJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataDocumentAssetRepository;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataIndicatorEvidenceLinkRepository;
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataIndicatorObservationRepository;
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeIndicatorRepository;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
+import com.umss.sigesa.domain.model.DocumentAsset;
 import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.EvidenceVersion;
+import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import com.umss.sigesa.domain.model.IndicatorObservationStatus;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 import org.springframework.stereotype.Repository;
@@ -25,17 +31,23 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
     private final IndicatorStateHistoryJpaRepository historyRepository;
     private final SpringDataIndicatorObservationRepository indicatorObservationRepository;
     private final SpringDataNormativeIndicatorRepository normativeIndicatorRepository;
+    private final SpringDataDocumentAssetRepository documentAssetRepository;
+    private final SpringDataIndicatorEvidenceLinkRepository linkRepository;
 
     public EvidenceUploadJpaAdapter(EvidenceJpaRepository evidenceRepository,
                                     EvidenceVersionJpaRepository versionRepository,
                                     IndicatorStateHistoryJpaRepository historyRepository,
                                     SpringDataIndicatorObservationRepository indicatorObservationRepository,
-                                    SpringDataNormativeIndicatorRepository normativeIndicatorRepository) {
+                                    SpringDataNormativeIndicatorRepository normativeIndicatorRepository,
+                                    SpringDataDocumentAssetRepository documentAssetRepository,
+                                    SpringDataIndicatorEvidenceLinkRepository linkRepository) {
         this.evidenceRepository = evidenceRepository;
         this.versionRepository = versionRepository;
         this.historyRepository = historyRepository;
         this.indicatorObservationRepository = indicatorObservationRepository;
         this.normativeIndicatorRepository = normativeIndicatorRepository;
+        this.documentAssetRepository = documentAssetRepository;
+        this.linkRepository = linkRepository;
     }
 
     @Override
@@ -47,12 +59,30 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
     @Override
     @Transactional
     public void persistNormativeIndicatorUpload(Evidence evidence, EvidenceVersion version, String externalUrl) {
+        persistNormativeIndicatorUpload(evidence, version, externalUrl, null, false, null);
+    }
+
+    @Override
+    @Transactional
+    public void persistNormativeIndicatorUpload(
+            Evidence evidence,
+            EvidenceVersion version,
+            String externalUrl,
+            DocumentAsset documentAsset,
+            boolean persistNewAsset,
+            IndicatorEvidenceLink link) {
         persistEvidenceUpload(evidence, version, null);
         if (externalUrl != null && !externalUrl.isBlank()) {
             EvidenceVersionEntity versionEntity = versionRepository.findById(version.getId())
                     .orElseThrow(() -> new IllegalStateException("Version not found: " + version.getId()));
             versionEntity.setExternalUrl(externalUrl);
             versionRepository.save(versionEntity);
+        }
+        if (persistNewAsset && documentAsset != null) {
+            documentAssetRepository.save(toAssetEntity(documentAsset));
+        }
+        if (link != null) {
+            linkRepository.save(toLinkEntity(link));
         }
     }
 
@@ -143,6 +173,31 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
         indicatorObservationRepository.save(observation);
 
         return superseded.getStorageKey();
+    }
+
+    private static DocumentAssetEntity toAssetEntity(DocumentAsset asset) {
+        DocumentAssetEntity entity = new DocumentAssetEntity();
+        entity.setId(asset.getId());
+        entity.setProcessId(asset.getProcessId());
+        entity.setFolioCode(asset.getFolioCode());
+        entity.setTitle(asset.getTitle());
+        entity.setStorageKey(asset.getStorageKey());
+        entity.setContentHash(asset.getContentHash());
+        entity.setInstitutional(asset.isInstitutional());
+        entity.setUploadedBy(asset.getUploadedBy());
+        entity.setCreatedAt(asset.getCreatedAt());
+        return entity;
+    }
+
+    private static IndicatorEvidenceLinkEntity toLinkEntity(IndicatorEvidenceLink link) {
+        IndicatorEvidenceLinkEntity entity = new IndicatorEvidenceLinkEntity();
+        entity.setId(link.getId());
+        entity.setIndicatorId(link.getIndicatorId());
+        entity.setDocumentAssetId(link.getDocumentAssetId());
+        entity.setEvidenceId(link.getEvidenceId());
+        entity.setPrimaryReference(link.isPrimaryReference());
+        entity.setCreatedAt(link.getCreatedAt());
+        return entity;
     }
 
     private static String extractFilename(String storageKey) {

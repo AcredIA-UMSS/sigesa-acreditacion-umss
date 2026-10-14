@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NormativeIndicatorEvidenceUploadModal } from '../../evidence/components/NormativeIndicatorEvidenceUploadModal';
 
 export type NormativeIndicatorEvidenceUploadSlotProps = {
+  processId: string;
   indicatorId: string;
   indicatorLabel: string;
   breadcrumb: string;
@@ -10,6 +11,7 @@ export type NormativeIndicatorEvidenceUploadSlotProps = {
 };
 
 export function NormativeIndicatorEvidenceUploadSlot({
+  processId,
   indicatorId,
   indicatorLabel,
   breadcrumb,
@@ -35,6 +37,7 @@ export function NormativeIndicatorEvidenceUploadSlot({
       <NormativeIndicatorEvidenceUploadModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        processId={processId}
         indicatorId={indicatorId}
         indicatorLabel={indicatorLabel}
         breadcrumb={breadcrumb}

@@ -56,8 +56,9 @@ public class WorkflowModuleConfig {
     @Bean
     ListProcessStagesUseCase listProcessStagesUseCase(
             ProcessQueryPort processQueryPort,
-            MethodologicalStagePort stagePort) {
-        return new ListProcessStagesService(processQueryPort, stagePort);
+            MethodologicalStagePort stagePort,
+            MethodologicalStageBootstrapper stageBootstrapper) {
+        return new ListProcessStagesService(processQueryPort, stagePort, stageBootstrapper);
     }
 
     @Bean
@@ -68,8 +69,9 @@ public class WorkflowModuleConfig {
     @Bean
     ApproveStageUseCase approveStageUseCase(
             MethodologicalStagePort stagePort,
-            StageGateEvaluator stageGateEvaluator) {
-        return new ApproveStageService(stagePort, stageGateEvaluator);
+            StageGateEvaluator stageGateEvaluator,
+            MethodologicalStageBootstrapper stageBootstrapper) {
+        return new ApproveStageService(stagePort, stageGateEvaluator, stageBootstrapper);
     }
 
     @Bean
@@ -80,8 +82,9 @@ public class WorkflowModuleConfig {
     @Bean
     EvaluateStageGateUseCase evaluateStageGateUseCase(
             MethodologicalStagePort stagePort,
-            StageGateEvaluator stageGateEvaluator) {
-        return new EvaluateStageGateService(stagePort, stageGateEvaluator);
+            StageGateEvaluator stageGateEvaluator,
+            MethodologicalStageBootstrapper stageBootstrapper) {
+        return new EvaluateStageGateService(stagePort, stageGateEvaluator, stageBootstrapper);
     }
 
     @Bean

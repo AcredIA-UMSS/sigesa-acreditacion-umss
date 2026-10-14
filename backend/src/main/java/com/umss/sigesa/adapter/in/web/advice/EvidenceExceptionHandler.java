@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
 import com.umss.sigesa.domain.exception.EvidenceImmutableException;
+import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.EvidenceNotFoundException;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
@@ -27,6 +29,19 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class EvidenceExceptionHandler {
+
+    @ExceptionHandler(DocumentAssetNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDocumentAssetNotFound(DocumentAssetNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "DOCUMENT_ASSET_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IndicatorAlreadyHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorAlreadyHasEvidence(
+            IndicatorAlreadyHasEvidenceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "INDICATOR_ALREADY_HAS_EVIDENCE", "message", ex.getMessage()));
+    }
 
     @ExceptionHandler(EvidenceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEvidenceNotFound(EvidenceNotFoundException ex) {
@@ -126,6 +141,13 @@ public class EvidenceExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String detail = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (detail != null && detail.contains("uk_evidence_normative_indicator")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of(
+                            "error", "INDICATOR_ALREADY_HAS_EVIDENCE",
+                            "message", "El indicador ya tiene evidencia vigente."));
+        }
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of(
                         "error", "DATA_INTEGRITY_VIOLATION",

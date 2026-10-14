@@ -2,12 +2,19 @@ import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../lib/auth/useAuth';
 import {
+  getGetEvaluationMetricsQueryKey,
+  getListSurveyBatchesQueryKey,
+  useListSurveyBatches,
+  useRegisterSurveyBatch,
+} from '../../../api/endpoints/evaluation/evaluation';
+import {
   getListStagesQueryKey,
   useApproveDeliverable,
   useApproveStage,
   useListStages,
   useSubmitStage,
 } from '../../../api/endpoints/stage-workflow/stage-workflow';
+import { isApiError } from '../../../lib/api/apiError';
 import { MethodologicalStageTimeline } from './MethodologicalStageTimeline';
 
 interface MethodologicalStageTimelineContainerProps {
@@ -68,9 +75,24 @@ export function MethodologicalStageTimelineContainer({
       || stage.status === 'SUBMITTED_FOR_REVIEW',
   )?.id;
 
+  const surveyQuery = useListSurveyBatches(processId, {
+    query: { enabled: Boolean(processId) },
+  });
+  const registerSurveyMutation = useRegisterSurveyBatch({
+    mutation: {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: getListSurveyBatchesQueryKey(processId) });
+        void queryClient.invalidateQueries({ queryKey: getGetEvaluationMetricsQueryKey(processId) });
+        void queryClient.invalidateQueries({ queryKey: getListStagesQueryKey(processId) });
+      },
+    },
+  });
+
   const canSubmitStage = session?.role === 'CC';
+  const canRegisterSurvey = session?.role === 'CC';
   const canApproveStage = session?.role === 'TD' || session?.role === 'JD';
   const canApproveDeliverable = session?.role === 'TD';
+  const surveyBatches = surveyQuery.data?.status === 200 ? surveyQuery.data.data : [];
 
   const handleSubmitStage = useCallback(
     (stageId: string) => {
@@ -92,6 +114,19 @@ export function MethodologicalStageTimelineContainer({
       approveDeliverableMutation.mutate({ processId, stageId, deliverableId });
     },
     [approveDeliverableMutation, processId],
+  );
+
+  const handleRegisterSurvey = useCallback(
+    (values: { audience: string; responsesCount: number }) => {
+      registerSurveyMutation.mutate({
+        processId,
+        data: {
+          audience: values.audience,
+          responsesCount: values.responsesCount,
+        },
+      });
+    },
+    [processId, registerSurveyMutation],
   );
 
   const mutationError =
@@ -120,6 +155,18 @@ export function MethodologicalStageTimelineContainer({
       onApproveStage={handleApproveStage}
       onApproveDeliverable={handleApproveDeliverable}
       onRefresh={() => void stagesQuery.refetch()}
+      canRegisterSurvey={canRegisterSurvey}
+      surveyBatches={surveyBatches}
+      isRegisteringSurvey={registerSurveyMutation.isPending}
+      surveyErrorMessage={
+        registerSurveyMutation.error
+          ? isApiError(registerSurveyMutation.error)
+            ? registerSurveyMutation.error.message
+            : extractErrorMessage(registerSurveyMutation.error)
+          : undefined
+      }
+      surveySuccessMessage={registerSurveyMutation.isSuccess ? 'Lote de encuesta registrado.' : undefined}
+      onRegisterSurvey={handleRegisterSurvey}
     />
   );
 }

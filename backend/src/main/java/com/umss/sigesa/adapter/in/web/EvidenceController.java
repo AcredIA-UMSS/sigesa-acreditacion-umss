@@ -1,9 +1,12 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.web.dto.LinkDocumentAssetRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.NormativeIndicatorEvidenceResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.UploadEvidenceResponse;
+import com.umss.sigesa.application.port.in.LinkDocumentAssetToIndicatorUseCase;
 import com.umss.sigesa.application.port.in.ListNormativeIndicatorEvidencesUseCase;
 import com.umss.sigesa.application.port.in.UploadNormativeIndicatorEvidenceUseCase;
+import com.umss.sigesa.domain.model.LinkDocumentAssetToIndicatorCommand;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceItem;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadCommand;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
@@ -18,6 +21,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -32,16 +36,19 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/indicators/{indicatorId}/evidences")
-@Tag(name = "Evidence", description = "Carga y consulta de evidencias por indicador normativo v2 (API-EVD-01)")
+@Tag(name = "Evidence", description = "Carga y consulta de evidencias por indicador normativo v2 (API-EVD-01 / EVD-06)")
 public class EvidenceController {
 
     private final UploadNormativeIndicatorEvidenceUseCase uploadUseCase;
+    private final LinkDocumentAssetToIndicatorUseCase linkUseCase;
     private final ListNormativeIndicatorEvidencesUseCase listUseCase;
 
     public EvidenceController(
             UploadNormativeIndicatorEvidenceUseCase uploadUseCase,
+            LinkDocumentAssetToIndicatorUseCase linkUseCase,
             ListNormativeIndicatorEvidencesUseCase listUseCase) {
         this.uploadUseCase = uploadUseCase;
+        this.linkUseCase = linkUseCase;
         this.listUseCase = listUseCase;
     }
 
@@ -72,13 +79,25 @@ public class EvidenceController {
                 uploadedBy,
                 jwtProgramScope);
 
-        NormativeIndicatorEvidenceUploadResult result = uploadUseCase.upload(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UploadEvidenceResponse(
-                result.evidenceId(),
-                result.version(),
-                result.contentHash(),
-                result.event(),
-                result.indicatorState().name()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toUploadResponse(uploadUseCase.upload(command)));
+    }
+
+    @PostMapping(value = "/link", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('CC')")
+    @Operation(summary = "Vincular DocumentAsset existente al indicador (API-EVD-06)")
+    public ResponseEntity<UploadEvidenceResponse> linkDocumentAsset(
+            @PathVariable UUID indicatorId,
+            @RequestBody LinkDocumentAssetRequestDto request,
+            Authentication authentication) {
+        UUID uploadedBy = (UUID) authentication.getPrincipal();
+        List<UUID> jwtProgramScope = JwtProgramScopeSupport.programScopeFromAuthentication(authentication);
+        NormativeIndicatorEvidenceUploadResult result = linkUseCase.link(
+                new LinkDocumentAssetToIndicatorCommand(
+                        indicatorId,
+                        request.documentAssetId(),
+                        uploadedBy,
+                        jwtProgramScope));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toUploadResponse(result));
     }
 
     @GetMapping
@@ -94,6 +113,18 @@ public class EvidenceController {
         return ResponseEntity.ok(items);
     }
 
+    private static UploadEvidenceResponse toUploadResponse(NormativeIndicatorEvidenceUploadResult result) {
+        return new UploadEvidenceResponse(
+                result.evidenceId(),
+                result.version(),
+                result.contentHash(),
+                result.event(),
+                result.indicatorState().name(),
+                result.documentAssetId(),
+                result.folioCode(),
+                result.reusedAsset());
+    }
+
     private NormativeIndicatorEvidenceResponseDto toDto(NormativeIndicatorEvidenceItem item) {
         NormativeIndicatorEvidenceResponseDto dto = new NormativeIndicatorEvidenceResponseDto();
         dto.setEvidenceId(item.evidenceId());
@@ -105,6 +136,8 @@ public class EvidenceController {
         dto.setExternalUrl(item.externalUrl());
         dto.setUploadedAt(item.uploadedAt());
         dto.setUploadedBy(item.uploadedBy());
+        dto.setDocumentAssetId(item.documentAssetId());
+        dto.setFolioCode(item.folioCode());
         return dto;
     }
 

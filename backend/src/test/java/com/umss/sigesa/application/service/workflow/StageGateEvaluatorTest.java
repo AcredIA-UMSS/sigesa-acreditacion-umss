@@ -64,6 +64,78 @@ class StageGateEvaluatorTest {
         assertFalse(result.pass());
     }
 
+    @Test
+    void collectionGateBlocksWithoutSurveyBatch() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = collectionStage(processId, true);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(10L);
+        when(evaluationMetricsPort.countIndicatorsWithEvidenceByProcessId(processId)).thenReturn(10L);
+        when(stagePort.countPrimarySurveyBatches(processId)).thenReturn(0L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertFalse(result.pass());
+        assertTrue(result.failedRules().stream().anyMatch(rule -> rule.toLowerCase().contains("encuesta")));
+    }
+
+    @Test
+    void collectionGatePassesWhenEvidenceSurveyAndDeliverablesComplete() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = collectionStage(processId, true);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(4L);
+        when(evaluationMetricsPort.countIndicatorsWithEvidenceByProcessId(processId)).thenReturn(4L);
+        when(stagePort.countPrimarySurveyBatches(processId)).thenReturn(1L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertTrue(result.pass());
+    }
+
+    @Test
+    void systematizationGateBlocksWhenFodaIncomplete() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = systematizationStage(processId, true);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(3L);
+        when(evaluationMetricsPort.countFodaCompleteByProcessId(processId)).thenReturn(2L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertFalse(result.pass());
+        assertTrue(result.failedRules().stream().anyMatch(rule -> rule.contains("FODA")));
+    }
+
+    @Test
+    void systematizationGateBlocksWhenNoIndicators() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = systematizationStage(processId, true);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(0L);
+        when(evaluationMetricsPort.countFodaCompleteByProcessId(processId)).thenReturn(0L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertFalse(result.pass());
+    }
+
+    @Test
+    void systematizationGateBlocksWhenE3DeliverablePending() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = systematizationStage(processId, false);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(2L);
+        when(evaluationMetricsPort.countFodaCompleteByProcessId(processId)).thenReturn(2L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertFalse(result.pass());
+        assertTrue(result.failedRules().stream().anyMatch(rule -> rule.contains("FODA_FORMS_COMPLETE")
+                || rule.contains("SYNTHESIS_MATRIX")));
+    }
+
+    @Test
+    void systematizationGatePassesWhenFodaAndDeliverablesComplete() {
+        UUID processId = UUID.randomUUID();
+        MethodologicalStage stage = systematizationStage(processId, true);
+        when(evaluationMetricsPort.countIndicatorsByProcessId(processId)).thenReturn(2L);
+        when(evaluationMetricsPort.countFodaCompleteByProcessId(processId)).thenReturn(2L);
+
+        StageGateResult result = evaluator.evaluate(stage);
+        assertTrue(result.pass());
+    }
+
     private static MethodologicalStage preparatoryStage(boolean allApproved) {
         List<StageDeliverable> deliverables = StageDeliverableCode.forStage(MethodologicalStageCode.PREPARATORY)
                 .stream()
@@ -96,6 +168,25 @@ class StageGateEvaluatorTest {
         return MethodologicalStage.builder()
                 .processId(processId)
                 .code(MethodologicalStageCode.COLLECTION)
+                .status(MethodologicalStageStatus.SUBMITTED_FOR_REVIEW)
+                .deliverables(deliverables)
+                .build();
+    }
+
+    private static MethodologicalStage systematizationStage(UUID processId, boolean deliverablesApproved) {
+        List<StageDeliverable> deliverables = StageDeliverableCode.forStage(MethodologicalStageCode.SYSTEMATIZATION)
+                .stream()
+                .map(code -> StageDeliverable.builder()
+                        .deliverableCode(code)
+                        .approvalStatus(deliverablesApproved
+                                ? StageDeliverableApprovalStatus.APPROVED
+                                : StageDeliverableApprovalStatus.PENDING)
+                        .build())
+                .toList();
+
+        return MethodologicalStage.builder()
+                .processId(processId)
+                .code(MethodologicalStageCode.SYSTEMATIZATION)
                 .status(MethodologicalStageStatus.SUBMITTED_FOR_REVIEW)
                 .deliverables(deliverables)
                 .build();

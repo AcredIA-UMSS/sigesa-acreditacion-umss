@@ -10,7 +10,9 @@ public enum StageDeliverableCode {
     BUDGET_FORECAST,
     SECONDARY_EVIDENCE_COMPLETE,
     PRIMARY_SURVEY_REPORT,
-    COLLECTION_GAP_REPORT;
+    COLLECTION_GAP_REPORT,
+    FODA_FORMS_COMPLETE,
+    SYNTHESIS_MATRIX;
 
     public static Set<StageDeliverableCode> forStage(MethodologicalStageCode stageCode) {
         return switch (stageCode) {
@@ -23,6 +25,9 @@ public enum StageDeliverableCode {
                     SECONDARY_EVIDENCE_COMPLETE,
                     PRIMARY_SURVEY_REPORT,
                     COLLECTION_GAP_REPORT);
+            case SYSTEMATIZATION -> EnumSet.of(
+                    FODA_FORMS_COMPLETE,
+                    SYNTHESIS_MATRIX);
             default -> EnumSet.noneOf(StageDeliverableCode.class);
         };
     }
