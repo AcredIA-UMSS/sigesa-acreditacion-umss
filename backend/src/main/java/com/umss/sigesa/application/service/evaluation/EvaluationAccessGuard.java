@@ -7,12 +7,12 @@ import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import java.util.List;
 import java.util.UUID;
 
-final class EvaluationAccessGuard {
+public final class EvaluationAccessGuard {
 
     private EvaluationAccessGuard() {
     }
 
-    static void assertProcessVisible(
+    public static void assertProcessVisible(
             UUID processId,
             UUID careerId,
             UUID requesterId,
@@ -23,7 +23,8 @@ final class EvaluationAccessGuard {
         if (ProcessAccessPolicy.canAccess(role, careerId, jwtProgramScope)) {
             return;
         }
-        if ("CC".equals(role) && hasAssignment(requesterId, careerId, assignmentRepository)) {
+        if (("CC".equals(role) || "EE".equals(role) || "CAE_MEMBER".equals(role))
+                && hasAssignment(requesterId, careerId, assignmentRepository)) {
             return;
         }
         throw new ProcessNotFoundException(processId);

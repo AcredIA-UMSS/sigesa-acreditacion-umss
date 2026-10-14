@@ -523,7 +523,127 @@ Listado para el selector UI: `GET /document-assets?processId={uuid}` (mismo DTO 
 | **x-allowed-roles** | `[CC, TD, JD]` |
 | **200** | `PrimarySurveyBatchResponseDto[]` ordenado por `registeredAt` desc |
 
-**Compuerta M8 (API-WF-07 sin cambio de ruta):** `COLLECTION` (E2→E3) = 100% evidencia + ≥1 survey batch + entregables E2 `APPROVED`. `SYSTEMATIZATION` (cerrar E3) = 100% FODA complete (`totalIndicators==0` → BLOCK) + entregables E3 (`FODA_FORMS_COMPLETE`, `SYNTHESIS_MATRIX`) `APPROVED`. E4+ sigue PASS informativo.
+**Compuerta M8 (API-WF-07 sin cambio de ruta):** `COLLECTION` (E2→E3) = 100% evidencia + ≥1 survey batch + entregables E2 `APPROVED`. `SYSTEMATIZATION` (cerrar E3) = 100% FODA complete (`totalIndicators==0` → BLOCK) + entregables E3 (`FODA_FORMS_COMPLETE`, `SYNTHESIS_MATRIX`) `APPROVED`.
+
+### API-WF-13 — Listar Plan de Mejoras (M9)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-031 |
+| **Ruta** | `GET /processes/{processId}/improvement-plan` |
+| **x-allowed-roles** | `[CC, TD, JD, EE]` |
+| **200** | `ImprovementPlanItemResponseDto[]` `{ id, processId, sourceIndicatorId, objective, activity, responsibleId, deadline, progress, justification, progressEvidenceAssetId, createdAt, updatedAt }` |
+| **404** | `PROCESS_NOT_FOUND` |
+
+### API-WF-14 — Crear ítem de Plan de Mejoras (M9)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-031 |
+| **Ruta** | `POST /processes/{processId}/improvement-plan` |
+| **x-allowed-roles** | `[CC]` |
+| **Body** | `{ objective, activity?, responsibleId?, deadline?, progress? }` (`progress` default 0) |
+| **201** | `ImprovementPlanItemResponseDto` |
+| **400** | `VALIDATION_ERROR` (objetivo vacío; `progress` fuera 0–100) |
+| **403** | `ACCESS_DENIED` (rol distinto de CC) |
+| **404** | `PROCESS_NOT_FOUND` |
+
+### API-WF-15 — Importar Plan de Mejoras desde FODA (M9)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-031 |
+| **Ruta** | `POST /processes/{processId}/improvement-plan/import-from-foda` |
+| **x-allowed-roles** | `[CC]` |
+| **200** | `{ importedCount, skippedCount, items[] }` — solo `FodaQuadrant.WEAKNESS`; skip si ya existe ítem para ese indicador (idempotente) |
+| **403** | `ACCESS_DENIED` |
+| **404** | `PROCESS_NOT_FOUND` |
+
+### API-WF-16 — Actualizar ítem de Plan de Mejoras (M9)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-031 |
+| **Ruta** | `PUT /processes/{processId}/improvement-plan/{itemId}` |
+| **x-allowed-roles** | `[CC]` |
+| **Body** | `{ objective, activity?, responsibleId?, deadline?, progress?, justification?, progressEvidenceAssetId? }` — no cambia `sourceIndicatorId`. En `IMPROVEMENT_MONITORING` solo avance/justificación. |
+| **200** | `ImprovementPlanItemResponseDto` |
+| **400** | `VALIDATION_ERROR` |
+| **404** | `IMPROVEMENT_ITEM_NOT_FOUND` · `PROCESS_NOT_FOUND` |
+
+### API-WF-17 — Generar borrador E4 (M9)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-031 / FSD-UC-028 |
+| **Ruta** | `POST /processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/generate` |
+| **x-allowed-roles** | `[CC]` |
+| **201** | `{ deliverableId, documentAssetId, folioCode, title }` |
+| **409** | `INVALID_STAGE_STATE` (etapa ≠ `DRAFTING`/`POST_ACCREDITATION` o código no-E4/E7) · `DELIVERABLE_IMMUTABLE` (entregable `APPROVED`) · `PROCESS_FROZEN` (generate E4 con freeze activo) |
+| **GET stages** | `StageDeliverableResponseDto` expone `documentAssetId` y `folioCode` |
+
+**Compuerta M9 (API-WF-07 / API-WF-08):** `DRAFTING` (E4→E5) = cada código E4 (`SELF_ASSESSMENT_REPORT`, `OFFICIAL_DATA_FORM`, `IMPROVEMENT_PLAN`, `ACADEMIC_DEV_PLAN`) existe, tiene `documentAssetId` y está `APPROVED`. Aprobar E4/E7 sin asset → `409 DELIVERABLE_WITHOUT_DOCUMENT`.
+
+**Compuertas M10–M11:** `PRESENTATION` = E5 `APPROVED` + freeze `AUDIT_READONLY` activo. `EXTERNAL_PREP` = freeze activo + E6 `APPROVED` + checklist 100%. `POST_ACCREDITATION` = ítems vencidos (`deadline < today` y `progress < 100`) con `justification` no vacía + E7 asset+`APPROVED`. Aprobar `PEER_ROOM_CHECKLIST` con checklist incompleto → `409 STAGE_GATE_BLOCKED`.
+
+### API-WF-18 — Congelar proceso (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-030 |
+| **Ruta** | `POST /processes/{processId}/freeze` |
+| **x-allowed-roles** | `[TD]` |
+| **201** | `ProcessFreezeResponseDto` `{ id, processId, mode: AUDIT_READONLY, active: true, frozenAt, frozenBy }` |
+| **409** | `ALREADY_FROZEN` |
+
+### API-WF-19 — Levantar freeze (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-030 |
+| **Ruta** | `POST /processes/{processId}/freeze/lift` |
+| **x-allowed-roles** | `[TD]` |
+| **Body** | `{ targetMode: ACTIVE \| IMPROVEMENT_MONITORING }` |
+| **200** | `ProcessFreezeResponseDto` (`active=false`; si monitoreo, `mode=IMPROVEMENT_PARTIAL`) |
+
+### API-WF-20 — Consultar freeze (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-030 |
+| **Ruta** | `GET /processes/{processId}/freeze` |
+| **x-allowed-roles** | `[CC, TD, JD, EE, CAE_MEMBER]` |
+| **200** | `ProcessFreezeResponseDto` |
+| **404** | `FREEZE_NOT_FOUND` |
+
+### API-WF-21 — Checklist Sala de Pares (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-030 / FSD-UC-020 |
+| **Ruta** | `GET /processes/{processId}/peer-room-checklist` · `PUT` mismo path |
+| **GET roles** | `[CC, TD, JD, EE]` |
+| **PUT roles** | `[TD, EE]` |
+| **PUT body** | `{ items: [{ itemCode, checked }] }` |
+| **200** | `PeerRoomChecklistItemDto[]` |
+
+### API-WF-22 — Delegaciones CAE (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-004 / FSD-UC-029 |
+| **Ruta** | `GET/POST /processes/{processId}/delegations` · `DELETE .../delegations/{id}` · `GET .../delegations/cae-candidates` |
+| **x-allowed-roles** | `[CC, JD]` |
+| **POST body** | `{ userId, level1Id? \| level2Id? \| indicatorId? }` — exactamente un alcance; usuario debe ser `CAE_MEMBER` |
+| **403** | `DELEGATION_DENIED` (CAE sin alcance al mutar evidencia/FODA) · `INVALID_CAE_USER` |
+
+### API-WF-23 — Escritura congelada (M10)
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-030 |
+| **Efecto** | Upload/link evidencia, PUT analysis, POST survey, POST/PUT/import plan, generate E4 → `409 PROCESS_FROZEN` si freeze `AUDIT_READONLY` activo |
+| **Excepción** | `IMPROVEMENT_MONITORING`: PUT plan (avance/justificación) y generate E7 permitidos |
 
 ---
 

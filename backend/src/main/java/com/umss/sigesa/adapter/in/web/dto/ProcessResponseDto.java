@@ -18,6 +18,7 @@ public class ProcessResponseDto {
     private String templateType;
     private String evaluatorModel;
     private String status;
+    private String operationalMode;
     private LocalDateTime startDate;
     private List<NormativeLevel1NodeDto> level1Nodes;
     private ProcessResponsibleDto responsible;

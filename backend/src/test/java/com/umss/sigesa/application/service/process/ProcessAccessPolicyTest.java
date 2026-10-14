@@ -37,4 +37,16 @@ class ProcessAccessPolicyTest {
     void ccWithEmptyScopeCannotAccess() {
         assertFalse(ProcessAccessPolicy.canAccess("CC", careerA, List.of()));
     }
+
+    @Test
+    void eeCanAccessAssignedCareer() {
+        assertTrue(ProcessAccessPolicy.canAccess("EE", careerA, List.of(careerA)));
+        assertFalse(ProcessAccessPolicy.canAccess("EE", careerB, List.of(careerA)));
+    }
+
+    @Test
+    void caeMemberCanAccessAssignedCareer() {
+        assertTrue(ProcessAccessPolicy.canAccess("CAE_MEMBER", careerA, List.of(careerA)));
+        assertFalse(ProcessAccessPolicy.canAccess("CAE_MEMBER", careerB, List.of(careerA)));
+    }
 }

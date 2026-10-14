@@ -19,6 +19,8 @@ public class StageDeliverable {
     private UUID stageId;
     private StageDeliverableCode deliverableCode;
     private StageDeliverableApprovalStatus approvalStatus;
+    private UUID documentAssetId;
+    private String folioCode;
     private UUID approvedBy;
     private String technicalObservations;
     private LocalDateTime approvedAt;

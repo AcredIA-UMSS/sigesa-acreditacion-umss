@@ -282,7 +282,7 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 
 | Entidad | Atributos clave | Notas |
 |---------|-----------------|-------|
-| `ImprovementPlanItem` | `processId`, `sourceIndicatorId`, `objective`, `activity`, `responsibleId`, `deadline`, `progress` | Auto-import desde debilidades FODA (M9) |
+| `ImprovementPlanItem` | `processId`, `sourceIndicatorId`, `objective`, `activity`, `responsibleId`, `deadline`, `progress` | **M9 / V21**; auto-import FODA `WEAKNESS`; UNIQUE parcial por indicador origen |
 | `PrimarySurveyBatch` | `processId`, `audience`, `responsesCount`, `documentAssetId` | Registro agregado encuestas Etapa 2 |
 
 ### 11.4 Delegación CAE
@@ -298,13 +298,13 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 | `MethodologicalStage` | `methodological_stages` | M6 |
 | `StageDeliverable` | `stage_deliverables` | M6 |
 | `StageGateEvaluation` | `stage_gate_evaluations` | M6 |
-| `ProcessFreeze` | `process_freeze` | M10 |
+| `ProcessFreeze` | `process_freeze` | M10 · **V22** |
 | `DocumentAsset` | `document_assets` | M7 · **V19** |
 | `IndicatorEvidenceLink` | `indicator_evidence_links` | M7 |
 | `IndicatorAnalysis` | `indicator_analysis` | M8 · **V20** |
-| `ImprovementPlanItem` | `improvement_plan_items` | M9 |
+| `ImprovementPlanItem` | `improvement_plan_items` | M9 · **V21** |
 | `PrimarySurveyBatch` | `primary_survey_batches` | M6 |
-| `IndicatorDelegation` | `indicator_delegations` | M8 |
+| `IndicatorDelegation` | `indicator_delegations` | M10 · **V22** (CAE) |
 
 ---
 

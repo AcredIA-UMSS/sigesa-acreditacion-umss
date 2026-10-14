@@ -26,6 +26,14 @@ public class IndicatorAnalysisJpaAdapter implements IndicatorAnalysisPort {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public java.util.List<IndicatorAnalysis> findByProcessId(UUID processId) {
+        return repository.findByProcessId(processId).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public IndicatorAnalysis save(IndicatorAnalysis analysis) {
         IndicatorAnalysisEntity entity = repository.findByIndicatorId(analysis.getIndicatorId())

@@ -24,10 +24,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CaeCandidateResponseDto,
+  CreateDelegationRequestDto,
+  CreateImprovementPlanItemRequestDto,
   EvaluationMetricsResponseDto,
+  ImportImprovementPlanResponseDto,
+  ImprovementPlanItemResponseDto,
   IndicatorAnalysisResponseDto,
+  IndicatorDelegationResponseDto,
   PrimarySurveyBatchResponseDto,
   RegisterSurveyBatchRequestDto,
+  UpdateImprovementPlanItemRequestDto,
   UpsertIndicatorAnalysisRequestDto
 } from '../../model';
 
@@ -53,7 +60,92 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type getIndicatorAnalysisResponse200 = {
+export type updateImprovementPlanItemResponse200 = {
+  data: ImprovementPlanItemResponseDto
+  status: 200
+}
+
+export type updateImprovementPlanItemResponseSuccess = (updateImprovementPlanItemResponse200) & {
+  headers: Headers;
+};
+;
+
+export type updateImprovementPlanItemResponse = (updateImprovementPlanItemResponseSuccess)
+
+export const getUpdateImprovementPlanItemUrl = (processId: string,
+    itemId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/improvement-plan/${itemId}`
+}
+
+/**
+ * @summary Actualizar ítem del Plan de Mejoras
+ */
+export const updateImprovementPlanItem = async (processId: string,
+    itemId: string,
+    updateImprovementPlanItemRequestDto: UpdateImprovementPlanItemRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateImprovementPlanItemResponse> => {
+
+  return customFetch<updateImprovementPlanItemResponse>(getUpdateImprovementPlanItemUrl(processId,itemId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateImprovementPlanItemRequestDto)
+  }
+);}
+
+
+
+
+
+export const getUpdateImprovementPlanItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateImprovementPlanItem>>, TError,{processId: string;itemId: string;data: UpdateImprovementPlanItemRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateImprovementPlanItem>>, TError,{processId: string;itemId: string;data: UpdateImprovementPlanItemRequestDto}, TContext> => {
+
+const mutationKey = ['updateImprovementPlanItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateImprovementPlanItem>>, {processId: string;itemId: string;data: UpdateImprovementPlanItemRequestDto}> = (props) => {
+          const {processId,itemId,data} = props ?? {};
+
+          return  updateImprovementPlanItem(processId,itemId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateImprovementPlanItemMutationResult = NonNullable<Awaited<ReturnType<typeof updateImprovementPlanItem>>>
+    export type UpdateImprovementPlanItemMutationBody = UpdateImprovementPlanItemRequestDto
+    export type UpdateImprovementPlanItemMutationError = unknown
+
+    /**
+ * @summary Actualizar ítem del Plan de Mejoras
+ */
+export const useUpdateImprovementPlanItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateImprovementPlanItem>>, TError,{processId: string;itemId: string;data: UpdateImprovementPlanItemRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateImprovementPlanItem>>,
+        TError,
+        {processId: string;itemId: string;data: UpdateImprovementPlanItemRequestDto},
+        TContext
+      > => {
+      return useMutation(getUpdateImprovementPlanItemMutationOptions(options), queryClient);
+    }
+    export type getIndicatorAnalysisResponse200 = {
   data: IndicatorAnalysisResponseDto
   status: 200
 }
@@ -443,6 +535,478 @@ export const useRegisterSurveyBatch = <TError = unknown,
       > => {
       return useMutation(getRegisterSurveyBatchMutationOptions(options), queryClient);
     }
+    export type listImprovementPlanResponse200 = {
+  data: ImprovementPlanItemResponseDto[]
+  status: 200
+}
+
+export type listImprovementPlanResponseSuccess = (listImprovementPlanResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listImprovementPlanResponse = (listImprovementPlanResponseSuccess)
+
+export const getListImprovementPlanUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/improvement-plan`
+}
+
+/**
+ * @summary Listar Plan de Mejoras del proceso
+ */
+export const listImprovementPlan = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<listImprovementPlanResponse> => {
+
+  return customFetch<listImprovementPlanResponse>(getListImprovementPlanUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListImprovementPlanQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/improvement-plan`
+    ] as const;
+    }
+
+
+export const getListImprovementPlanQueryOptions = <TData = Awaited<ReturnType<typeof listImprovementPlan>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListImprovementPlanQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listImprovementPlan>>> = ({ signal }) => listImprovementPlan(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListImprovementPlanQueryResult = NonNullable<Awaited<ReturnType<typeof listImprovementPlan>>>
+export type ListImprovementPlanQueryError = unknown
+
+
+export function useListImprovementPlan<TData = Awaited<ReturnType<typeof listImprovementPlan>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listImprovementPlan>>,
+          TError,
+          Awaited<ReturnType<typeof listImprovementPlan>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListImprovementPlan<TData = Awaited<ReturnType<typeof listImprovementPlan>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listImprovementPlan>>,
+          TError,
+          Awaited<ReturnType<typeof listImprovementPlan>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListImprovementPlan<TData = Awaited<ReturnType<typeof listImprovementPlan>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar Plan de Mejoras del proceso
+ */
+
+export function useListImprovementPlan<TData = Awaited<ReturnType<typeof listImprovementPlan>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listImprovementPlan>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListImprovementPlanQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type createImprovementPlanItemResponse200 = {
+  data: ImprovementPlanItemResponseDto
+  status: 200
+}
+
+export type createImprovementPlanItemResponseSuccess = (createImprovementPlanItemResponse200) & {
+  headers: Headers;
+};
+;
+
+export type createImprovementPlanItemResponse = (createImprovementPlanItemResponseSuccess)
+
+export const getCreateImprovementPlanItemUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/improvement-plan`
+}
+
+/**
+ * @summary Crear ítem manual del Plan de Mejoras
+ */
+export const createImprovementPlanItem = async (processId: string,
+    createImprovementPlanItemRequestDto: CreateImprovementPlanItemRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<createImprovementPlanItemResponse> => {
+
+  return customFetch<createImprovementPlanItemResponse>(getCreateImprovementPlanItemUrl(processId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createImprovementPlanItemRequestDto)
+  }
+);}
+
+
+
+
+
+export const getCreateImprovementPlanItemMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createImprovementPlanItem>>, TError,{processId: string;data: CreateImprovementPlanItemRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createImprovementPlanItem>>, TError,{processId: string;data: CreateImprovementPlanItemRequestDto}, TContext> => {
+
+const mutationKey = ['createImprovementPlanItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createImprovementPlanItem>>, {processId: string;data: CreateImprovementPlanItemRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  createImprovementPlanItem(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateImprovementPlanItemMutationResult = NonNullable<Awaited<ReturnType<typeof createImprovementPlanItem>>>
+    export type CreateImprovementPlanItemMutationBody = CreateImprovementPlanItemRequestDto
+    export type CreateImprovementPlanItemMutationError = unknown
+
+    /**
+ * @summary Crear ítem manual del Plan de Mejoras
+ */
+export const useCreateImprovementPlanItem = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createImprovementPlanItem>>, TError,{processId: string;data: CreateImprovementPlanItemRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createImprovementPlanItem>>,
+        TError,
+        {processId: string;data: CreateImprovementPlanItemRequestDto},
+        TContext
+      > => {
+      return useMutation(getCreateImprovementPlanItemMutationOptions(options), queryClient);
+    }
+    export type importImprovementPlanFromFodaResponse200 = {
+  data: ImportImprovementPlanResponseDto
+  status: 200
+}
+
+export type importImprovementPlanFromFodaResponseSuccess = (importImprovementPlanFromFodaResponse200) & {
+  headers: Headers;
+};
+;
+
+export type importImprovementPlanFromFodaResponse = (importImprovementPlanFromFodaResponseSuccess)
+
+export const getImportImprovementPlanFromFodaUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/improvement-plan/import-from-foda`
+}
+
+/**
+ * @summary Importar debilidades FODA al Plan de Mejoras
+ */
+export const importImprovementPlanFromFoda = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<importImprovementPlanFromFodaResponse> => {
+
+  return customFetch<importImprovementPlanFromFodaResponse>(getImportImprovementPlanFromFodaUrl(processId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getImportImprovementPlanFromFodaMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importImprovementPlanFromFoda>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importImprovementPlanFromFoda>>, TError,{processId: string}, TContext> => {
+
+const mutationKey = ['importImprovementPlanFromFoda'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importImprovementPlanFromFoda>>, {processId: string}> = (props) => {
+          const {processId} = props ?? {};
+
+          return  importImprovementPlanFromFoda(processId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportImprovementPlanFromFodaMutationResult = NonNullable<Awaited<ReturnType<typeof importImprovementPlanFromFoda>>>
+
+    export type ImportImprovementPlanFromFodaMutationError = unknown
+
+    /**
+ * @summary Importar debilidades FODA al Plan de Mejoras
+ */
+export const useImportImprovementPlanFromFoda = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importImprovementPlanFromFoda>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof importImprovementPlanFromFoda>>,
+        TError,
+        {processId: string},
+        TContext
+      > => {
+      return useMutation(getImportImprovementPlanFromFodaMutationOptions(options), queryClient);
+    }
+    export type listDelegationsResponse200 = {
+  data: IndicatorDelegationResponseDto[]
+  status: 200
+}
+
+export type listDelegationsResponseSuccess = (listDelegationsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listDelegationsResponse = (listDelegationsResponseSuccess)
+
+export const getListDelegationsUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/delegations`
+}
+
+/**
+ * @summary Listar delegaciones CAE del proceso
+ */
+export const listDelegations = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<listDelegationsResponse> => {
+
+  return customFetch<listDelegationsResponse>(getListDelegationsUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDelegationsQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/delegations`
+    ] as const;
+    }
+
+
+export const getListDelegationsQueryOptions = <TData = Awaited<ReturnType<typeof listDelegations>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDelegationsQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDelegations>>> = ({ signal }) => listDelegations(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListDelegationsQueryResult = NonNullable<Awaited<ReturnType<typeof listDelegations>>>
+export type ListDelegationsQueryError = unknown
+
+
+export function useListDelegations<TData = Awaited<ReturnType<typeof listDelegations>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listDelegations>>,
+          TError,
+          Awaited<ReturnType<typeof listDelegations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListDelegations<TData = Awaited<ReturnType<typeof listDelegations>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listDelegations>>,
+          TError,
+          Awaited<ReturnType<typeof listDelegations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListDelegations<TData = Awaited<ReturnType<typeof listDelegations>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar delegaciones CAE del proceso
+ */
+
+export function useListDelegations<TData = Awaited<ReturnType<typeof listDelegations>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listDelegations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListDelegationsQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type createDelegationResponse200 = {
+  data: IndicatorDelegationResponseDto
+  status: 200
+}
+
+export type createDelegationResponseSuccess = (createDelegationResponse200) & {
+  headers: Headers;
+};
+;
+
+export type createDelegationResponse = (createDelegationResponseSuccess)
+
+export const getCreateDelegationUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/delegations`
+}
+
+/**
+ * @summary Crear delegación CAE (exactamente un alcance)
+ */
+export const createDelegation = async (processId: string,
+    createDelegationRequestDto: CreateDelegationRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<createDelegationResponse> => {
+
+  return customFetch<createDelegationResponse>(getCreateDelegationUrl(processId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createDelegationRequestDto)
+  }
+);}
+
+
+
+
+
+export const getCreateDelegationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDelegation>>, TError,{processId: string;data: CreateDelegationRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createDelegation>>, TError,{processId: string;data: CreateDelegationRequestDto}, TContext> => {
+
+const mutationKey = ['createDelegation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDelegation>>, {processId: string;data: CreateDelegationRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  createDelegation(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateDelegationMutationResult = NonNullable<Awaited<ReturnType<typeof createDelegation>>>
+    export type CreateDelegationMutationBody = CreateDelegationRequestDto
+    export type CreateDelegationMutationError = unknown
+
+    /**
+ * @summary Crear delegación CAE (exactamente un alcance)
+ */
+export const useCreateDelegation = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDelegation>>, TError,{processId: string;data: CreateDelegationRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createDelegation>>,
+        TError,
+        {processId: string;data: CreateDelegationRequestDto},
+        TContext
+      > => {
+      return useMutation(getCreateDelegationMutationOptions(options), queryClient);
+    }
     export type getEvaluationMetricsResponse200 = {
   data: EvaluationMetricsResponseDto
   status: 200
@@ -555,3 +1119,199 @@ export function useGetEvaluationMetrics<TData = Awaited<ReturnType<typeof getEva
 
 
 
+export type listCaeCandidatesResponse200 = {
+  data: CaeCandidateResponseDto[]
+  status: 200
+}
+
+export type listCaeCandidatesResponseSuccess = (listCaeCandidatesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listCaeCandidatesResponse = (listCaeCandidatesResponseSuccess)
+
+export const getListCaeCandidatesUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/delegations/cae-candidates`
+}
+
+/**
+ * @summary Listar usuarios CAE_MEMBER de la carrera del proceso
+ */
+export const listCaeCandidates = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<listCaeCandidatesResponse> => {
+
+  return customFetch<listCaeCandidatesResponse>(getListCaeCandidatesUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCaeCandidatesQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/delegations/cae-candidates`
+    ] as const;
+    }
+
+
+export const getListCaeCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof listCaeCandidates>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCaeCandidatesQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCaeCandidates>>> = ({ signal }) => listCaeCandidates(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCaeCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof listCaeCandidates>>>
+export type ListCaeCandidatesQueryError = unknown
+
+
+export function useListCaeCandidates<TData = Awaited<ReturnType<typeof listCaeCandidates>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCaeCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof listCaeCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCaeCandidates<TData = Awaited<ReturnType<typeof listCaeCandidates>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCaeCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof listCaeCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCaeCandidates<TData = Awaited<ReturnType<typeof listCaeCandidates>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar usuarios CAE_MEMBER de la carrera del proceso
+ */
+
+export function useListCaeCandidates<TData = Awaited<ReturnType<typeof listCaeCandidates>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCaeCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCaeCandidatesQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type deleteDelegationResponse200 = {
+  data: void
+  status: 200
+}
+
+export type deleteDelegationResponseSuccess = (deleteDelegationResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteDelegationResponse = (deleteDelegationResponseSuccess)
+
+export const getDeleteDelegationUrl = (processId: string,
+    delegationId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/delegations/${delegationId}`
+}
+
+/**
+ * @summary Revocar delegación CAE
+ */
+export const deleteDelegation = async (processId: string,
+    delegationId: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteDelegationResponse> => {
+
+  return customFetch<deleteDelegationResponse>(getDeleteDelegationUrl(processId,delegationId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteDelegationMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDelegation>>, TError,{processId: string;delegationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDelegation>>, TError,{processId: string;delegationId: string}, TContext> => {
+
+const mutationKey = ['deleteDelegation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDelegation>>, {processId: string;delegationId: string}> = (props) => {
+          const {processId,delegationId} = props ?? {};
+
+          return  deleteDelegation(processId,delegationId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDelegationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDelegation>>>
+
+    export type DeleteDelegationMutationError = unknown
+
+    /**
+ * @summary Revocar delegación CAE
+ */
+export const useDeleteDelegation = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDelegation>>, TError,{processId: string;delegationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDelegation>>,
+        TError,
+        {processId: string;delegationId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteDelegationMutationOptions(options), queryClient);
+    }

@@ -53,7 +53,7 @@ public class EvidenceController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('CC')")
+    @PreAuthorize("hasAnyRole('CC','CAE_MEMBER')")
     @Operation(summary = "Cargar evidencia en indicador normativo (API-EVD-01)")
     public ResponseEntity<UploadEvidenceResponse> uploadEvidence(
             @PathVariable UUID indicatorId,
@@ -83,7 +83,7 @@ public class EvidenceController {
     }
 
     @PostMapping(value = "/link", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('CC')")
+    @PreAuthorize("hasAnyRole('CC','CAE_MEMBER')")
     @Operation(summary = "Vincular DocumentAsset existente al indicador (API-EVD-06)")
     public ResponseEntity<UploadEvidenceResponse> linkDocumentAsset(
             @PathVariable UUID indicatorId,
@@ -101,6 +101,7 @@ public class EvidenceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE','CAE_MEMBER')")
     @Operation(summary = "Listar evidencias cargadas en el indicador normativo")
     public ResponseEntity<List<NormativeIndicatorEvidenceResponseDto>> listEvidences(
             @PathVariable UUID indicatorId,

@@ -77,4 +77,25 @@ class MethodologicalStageBootstrapperTest {
         verify(stagePort, never()).addDeliverableIfAbsent(eq(stageId), eq(StageDeliverableCode.FODA_FORMS_COMPLETE));
         verify(stagePort).addDeliverableIfAbsent(stageId, StageDeliverableCode.SYNTHESIS_MATRIX);
     }
+
+    @Test
+    void existingDraftingStagesReceiveMissingE4Deliverables() {
+        UUID processId = UUID.randomUUID();
+        UUID stageId = UUID.randomUUID();
+        MethodologicalStage drafting = MethodologicalStage.builder()
+                .id(stageId)
+                .processId(processId)
+                .code(MethodologicalStageCode.DRAFTING)
+                .status(MethodologicalStageStatus.PENDING)
+                .deliverables(new ArrayList<>())
+                .build();
+        when(stagePort.findByProcessIdOrderByOrder(processId)).thenReturn(List.of(drafting));
+
+        bootstrapper.ensureMissingDeliverables(processId);
+
+        verify(stagePort).addDeliverableIfAbsent(stageId, StageDeliverableCode.SELF_ASSESSMENT_REPORT);
+        verify(stagePort).addDeliverableIfAbsent(stageId, StageDeliverableCode.OFFICIAL_DATA_FORM);
+        verify(stagePort).addDeliverableIfAbsent(stageId, StageDeliverableCode.IMPROVEMENT_PLAN);
+        verify(stagePort).addDeliverableIfAbsent(stageId, StageDeliverableCode.ACADEMIC_DEV_PLAN);
+    }
 }

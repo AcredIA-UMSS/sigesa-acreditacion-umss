@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import java.util.UUID;
 public interface SpringDataIndicatorAnalysisRepository extends JpaRepository<IndicatorAnalysisEntity, UUID> {
 
     Optional<IndicatorAnalysisEntity> findByIndicatorId(UUID indicatorId);
+
+    List<IndicatorAnalysisEntity> findByProcessId(UUID processId);
 
     @Query("""
             SELECT COUNT(a) FROM IndicatorAnalysisEntity a

@@ -20,6 +20,8 @@ public class AccreditationProcess {
     private UUID templateId;
     private String status;
     private LocalDateTime startDate;
+    @Builder.Default
+    private OperationalMode operationalMode = OperationalMode.ACTIVE;
 
     public static AccreditationProcess createFromTemplate(UUID careerId, Template template) {
         return AccreditationProcess.builder()

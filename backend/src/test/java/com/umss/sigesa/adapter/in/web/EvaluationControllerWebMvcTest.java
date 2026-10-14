@@ -68,6 +68,7 @@ class EvaluationControllerWebMvcTest {
 
     private static final UUID CC_USER_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID TD_USER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID EE_USER_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
     @Autowired
     private MockMvc mockMvc;
@@ -122,6 +123,37 @@ class EvaluationControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fodaQuadrant").value("WEAKNESS"))
                 .andExpect(jsonPath("$.compliance").value("PARTIAL"));
+    }
+
+    @Test
+    void getAnalysis_eeAllowed() throws Exception {
+        UUID indicatorId = UUID.randomUUID();
+        when(getIndicatorAnalysisUseCase.get(eq(indicatorId), eq(EE_USER_ID), any(), any()))
+                .thenReturn(IndicatorAnalysis.builder()
+                        .id(UUID.randomUUID())
+                        .indicatorId(indicatorId)
+                        .processId(UUID.randomUUID())
+                        .fodaQuadrant(FodaQuadrant.STRENGTH)
+                        .compliance(ComplianceJudgment.COMPLIES)
+                        .synthesis("Lectura EE")
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build());
+
+        mockMvc.perform(get("/api/v1/indicators/{indicatorId}/analysis", indicatorId).with(eeAuth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fodaQuadrant").value("STRENGTH"));
+    }
+
+    @Test
+    void putAnalysis_eeForbidden() throws Exception {
+        mockMvc.perform(put("/api/v1/indicators/{indicatorId}/analysis", UUID.randomUUID())
+                        .with(eeAuth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"fodaQuadrant":"WEAKNESS","compliance":"PARTIAL","synthesis":"Síntesis"}
+                                """))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -191,5 +223,10 @@ class EvaluationControllerWebMvcTest {
     private static RequestPostProcessor tdAuth() {
         return authentication(new UsernamePasswordAuthenticationToken(
                 TD_USER_ID, null, List.of(new SimpleGrantedAuthority("ROLE_TD"))));
+    }
+
+    private static RequestPostProcessor eeAuth() {
+        return authentication(new UsernamePasswordAuthenticationToken(
+                EE_USER_ID, null, List.of(new SimpleGrantedAuthority("ROLE_EE"))));
     }
 }

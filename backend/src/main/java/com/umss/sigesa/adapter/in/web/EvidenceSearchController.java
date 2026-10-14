@@ -32,7 +32,7 @@ public class EvidenceSearchController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('CC','TD','JD')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
     @Operation(summary = "Buscar evidencias con filtros y paginación")
     public ResponseEntity<EvidenceSearchPageResponseDto> search(
             @RequestParam(required = false) UUID processId,

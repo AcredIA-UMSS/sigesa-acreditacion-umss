@@ -17,6 +17,7 @@ export interface ProcessResponseDto {
   templateType?: string;
   evaluatorModel?: string;
   status?: string;
+  operationalMode?: string;
   startDate?: string;
   level1Nodes?: NormativeLevel1NodeDto[];
   responsible?: ProcessResponsibleDto;

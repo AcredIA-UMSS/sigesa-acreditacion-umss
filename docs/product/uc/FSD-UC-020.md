@@ -1,15 +1,15 @@
 ---
 id: FSD-UC-020
 nombre: Revisión documental evaluador externo [EE]
-estado: En Curso
+estado: Hecho
 release: v2.0
 actor_principal: "[EE]"
 trazabilidad_prd: PRD-US-026
 modulo: MOD-REVIEW
 reglas: FSD-BR-09, FSD-BR-19
 ultima_actualizacion: "2026-09-08"
-design_doc: DD-UC-020
-pr_impl: PR-IMPL-014
+design_doc: DD-UC-030
+pr_impl: PR-IMPL-M10-030
 ---
 
 # FSD-UC-020 — Revisión documental evaluador externo [EE]

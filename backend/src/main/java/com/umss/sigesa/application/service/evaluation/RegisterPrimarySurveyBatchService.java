@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.PrimarySurveyBatchPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
@@ -22,16 +23,19 @@ public class RegisterPrimarySurveyBatchService implements RegisterPrimarySurveyB
     private final PrimarySurveyBatchPort surveyBatchPort;
     private final DocumentAssetPort documentAssetPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
+    private final ProcessFreezeGuard freezeGuard;
 
     public RegisterPrimarySurveyBatchService(
             ProcessQueryPort processQueryPort,
             PrimarySurveyBatchPort surveyBatchPort,
             DocumentAssetPort documentAssetPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            ProcessFreezeGuard freezeGuard) {
         this.processQueryPort = processQueryPort;
         this.surveyBatchPort = surveyBatchPort;
         this.documentAssetPort = documentAssetPort;
         this.assignmentRepository = assignmentRepository;
+        this.freezeGuard = freezeGuard;
     }
 
     @Override
@@ -45,6 +49,7 @@ public class RegisterPrimarySurveyBatchService implements RegisterPrimarySurveyB
                 command.roles(),
                 command.jwtProgramScope(),
                 assignmentRepository);
+        freezeGuard.assertWritable(command.processId());
 
         String audience = command.audience() == null ? "" : command.audience().trim();
         if (audience.isEmpty() || audience.length() > 32) {

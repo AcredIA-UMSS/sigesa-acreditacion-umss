@@ -110,6 +110,7 @@ class ProcessControllerQueryTest {
                         "CEUB",
                         "CEUB",
                         "ACTIVE",
+                        "ACTIVE",
                         LocalDateTime.now(),
                         List.of(Level1Node.builder()
                                 .id(level1Id)

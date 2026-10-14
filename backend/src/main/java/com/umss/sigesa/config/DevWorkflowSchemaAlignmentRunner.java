@@ -33,6 +33,11 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
         backfillDocumentAssets();
         alignSurveyAudienceConstraint();
         backfillSystematizationDeliverables();
+        backfillDraftingDeliverables();
+        alignImprovementPlanUniqueIndex();
+        alignCaeRoleColumn();
+        alignImprovementPlanM11Columns();
+        backfillE5E6E7Deliverables();
     }
 
     private void alignAccreditationProcessColumns() {
@@ -255,6 +260,125 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
             log.info("Dev schema: entregables E3 (FODA_FORMS_COMPLETE, SYNTHESIS_MATRIX) asegurados.");
         } catch (Exception ex) {
             log.warn("No se pudo backfillear entregables E3 en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void backfillDraftingDeliverables() {
+        try {
+            Integer tables = jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*) FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = 'stage_deliverables'
+                    """,
+                    Integer.class);
+            if (tables == null || tables == 0) {
+                return;
+            }
+            jdbcTemplate.execute("""
+                    INSERT INTO stage_deliverables (id, stage_id, deliverable_code, approval_status, created_at, updated_at)
+                    SELECT gen_random_uuid(), ms.id, e4.code, 'PENDING', now(), now()
+                    FROM methodological_stages ms
+                    CROSS JOIN (VALUES
+                        ('SELF_ASSESSMENT_REPORT'),
+                        ('OFFICIAL_DATA_FORM'),
+                        ('IMPROVEMENT_PLAN'),
+                        ('ACADEMIC_DEV_PLAN')
+                    ) AS e4(code)
+                    WHERE ms.code = 'DRAFTING'
+                      AND NOT EXISTS (
+                          SELECT 1 FROM stage_deliverables sd
+                          WHERE sd.stage_id = ms.id AND sd.deliverable_code = e4.code
+                      )
+                    """);
+            log.info("Dev schema: entregables E4 (informe, ficha, plan mejoras, plan académico) asegurados.");
+        } catch (Exception ex) {
+            log.warn("No se pudo backfillear entregables E4 en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void alignImprovementPlanUniqueIndex() {
+        try {
+            Integer tables = jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*) FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = 'improvement_plan_items'
+                    """,
+                    Integer.class);
+            if (tables == null || tables == 0) {
+                return;
+            }
+            jdbcTemplate.execute("""
+                    CREATE UNIQUE INDEX IF NOT EXISTS uk_improvement_plan_items_process_source
+                        ON improvement_plan_items (process_id, source_indicator_id)
+                        WHERE source_indicator_id IS NOT NULL
+                    """);
+            log.info("Dev schema: índice único parcial de Plan de Mejoras asegurado.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear índice único de Plan de Mejoras en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void alignCaeRoleColumn() {
+        try {
+            jdbcTemplate.execute("ALTER TABLE app_user ALTER COLUMN role TYPE VARCHAR(20)");
+            jdbcTemplate.execute("ALTER TABLE app_user DROP CONSTRAINT IF EXISTS app_user_role_check");
+            jdbcTemplate.execute("""
+                    ALTER TABLE app_user ADD CONSTRAINT app_user_role_check
+                        CHECK (role IN ('CC', 'TD', 'JD', 'EE', 'CAE_MEMBER'))
+                    """);
+            log.info("Dev schema: app_user.role alineado a VARCHAR(20) con CAE_MEMBER.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear role CAE_MEMBER en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void alignImprovementPlanM11Columns() {
+        try {
+            jdbcTemplate.execute("""
+                    ALTER TABLE improvement_plan_items
+                        ADD COLUMN IF NOT EXISTS justification TEXT
+                    """);
+            jdbcTemplate.execute("""
+                    ALTER TABLE improvement_plan_items
+                        ADD COLUMN IF NOT EXISTS progress_evidence_asset_id UUID
+                    """);
+            log.info("Dev schema: columnas M11 de Plan de Mejoras alineadas.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear columnas M11 del plan en dev: {}", ex.getMessage());
+        }
+    }
+
+    private void backfillE5E6E7Deliverables() {
+        try {
+            Integer tables = jdbcTemplate.queryForObject(
+                    """
+                    SELECT COUNT(*) FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = 'stage_deliverables'
+                    """,
+                    Integer.class);
+            if (tables == null || tables == 0) {
+                return;
+            }
+            jdbcTemplate.execute("""
+                    INSERT INTO stage_deliverables (id, stage_id, deliverable_code, approval_status, created_at, updated_at)
+                    SELECT gen_random_uuid(), ms.id, extra.code, 'PENDING', now(), now()
+                    FROM methodological_stages ms
+                    CROSS JOIN (VALUES
+                        ('PRESENTATION', 'COMMUNITY_VALIDATION_MINUTES'),
+                        ('PRESENTATION', 'FORMAL_SUBMISSION_PACKAGE'),
+                        ('EXTERNAL_PREP', 'SIMULATION_REPORT'),
+                        ('EXTERNAL_PREP', 'PEER_ROOM_CHECKLIST'),
+                        ('POST_ACCREDITATION', 'IMPROVEMENT_PROGRESS_REPORT')
+                    ) AS extra(stage_code, code)
+                    WHERE ms.code = extra.stage_code
+                      AND NOT EXISTS (
+                          SELECT 1 FROM stage_deliverables sd
+                          WHERE sd.stage_id = ms.id AND sd.deliverable_code = extra.code
+                      )
+                    """);
+            log.info("Dev schema: entregables E5/E6/E7 asegurados.");
+        } catch (Exception ex) {
+            log.warn("No se pudo backfillear entregables E5–E7 en dev: {}", ex.getMessage());
         }
     }
 }

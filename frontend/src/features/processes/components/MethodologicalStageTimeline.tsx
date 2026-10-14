@@ -3,6 +3,21 @@ import type { MethodologicalStageResponseDto, PrimarySurveyBatchResponseDto } fr
 import { Button } from '../../../components/ui/Button';
 import { CollectionSurveyBatchForm } from './CollectionSurveyBatchForm';
 
+const E4_DELIVERABLE_CODES = new Set([
+  'SELF_ASSESSMENT_REPORT',
+  'OFFICIAL_DATA_FORM',
+  'IMPROVEMENT_PLAN',
+  'ACADEMIC_DEV_PLAN',
+]);
+
+function isE4Deliverable(code?: string): boolean {
+  return code != null && E4_DELIVERABLE_CODES.has(code);
+}
+
+function isE7Deliverable(code?: string): boolean {
+  return code === 'IMPROVEMENT_PROGRESS_REPORT';
+}
+
 export type StageStatus =
   | 'PENDING'
   | 'IN_PROGRESS'
@@ -33,6 +48,9 @@ interface MethodologicalStageTimelineProps {
   surveyErrorMessage?: string;
   surveySuccessMessage?: string;
   onRegisterSurvey: (values: { audience: string; responsesCount: number }) => void;
+  canGenerateDeliverable?: boolean;
+  generatingDeliverableId?: string;
+  onGenerateDeliverable?: (stageId: string, deliverableId: string) => void;
 }
 
 const stageStatusConfig: Record<string, { label: string; className: string }> = {
@@ -95,6 +113,9 @@ export function MethodologicalStageTimeline({
   surveyErrorMessage,
   surveySuccessMessage,
   onRegisterSurvey,
+  canGenerateDeliverable = false,
+  generatingDeliverableId,
+  onGenerateDeliverable,
 }: MethodologicalStageTimelineProps) {
   if (isLoading) {
     return (
@@ -224,20 +245,45 @@ export function MethodologicalStageTimeline({
                     <p className="text-label-md text-gray-500">
                       Estado: {deliverable.approvalStatus ?? 'PENDING'}
                     </p>
+                    {(deliverable.folioCode || deliverable.documentAssetId) && (
+                      <p className="text-label-md text-primary-700">
+                        Folio: {deliverable.folioCode ?? deliverable.documentAssetId}
+                      </p>
+                    )}
                   </div>
-                  {canApproveDeliverable
-                    && deliverable.id
-                    && activeStage.id
-                    && deliverable.approvalStatus !== 'APPROVED' && (
-                    <Button
-                      variant="ghost"
-                      isLoading={approvingDeliverableId === deliverable.id}
-                      onClick={() =>
-                        onApproveDeliverable(activeStage.id!, deliverable.id!)}
-                    >
-                      Aprobar entregable
-                    </Button>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {canGenerateDeliverable
+                      && ((isE4Deliverable(deliverable.deliverableCode)
+                        && activeStage.code === 'DRAFTING')
+                        || (isE7Deliverable(deliverable.deliverableCode)
+                          && activeStage.code === 'POST_ACCREDITATION'))
+                      && deliverable.id
+                      && activeStage.id
+                      && deliverable.approvalStatus !== 'APPROVED'
+                      && onGenerateDeliverable && (
+                      <Button
+                        variant="secondary"
+                        isLoading={generatingDeliverableId === deliverable.id}
+                        onClick={() =>
+                          onGenerateDeliverable(activeStage.id!, deliverable.id!)}
+                      >
+                        Generar borrador
+                      </Button>
+                    )}
+                    {canApproveDeliverable
+                      && deliverable.id
+                      && activeStage.id
+                      && deliverable.approvalStatus !== 'APPROVED' && (
+                      <Button
+                        variant="ghost"
+                        isLoading={approvingDeliverableId === deliverable.id}
+                        onClick={() =>
+                          onApproveDeliverable(activeStage.id!, deliverable.id!)}
+                      >
+                        Aprobar entregable
+                      </Button>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

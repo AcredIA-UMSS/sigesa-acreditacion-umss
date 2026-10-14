@@ -30,7 +30,7 @@ public class EvaluationMetricsController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('CC','TD','JD')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
     @Operation(operationId = "getEvaluationMetrics", summary = "Consultar métricas de evidencia, FODA y encuestas del proceso")
     public ResponseEntity<EvaluationMetricsResponseDto> getMetrics(
             @PathVariable UUID processId,

@@ -80,6 +80,7 @@ public final class ProcessEnrichmentHelper {
                 templateType,
                 evaluatorModel,
                 process.getStatus(),
+                process.getOperationalMode() != null ? process.getOperationalMode().name() : "ACTIVE",
                 process.getStartDate(),
                 level1Nodes,
                 null

@@ -32,6 +32,8 @@ import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.application.service.evidence.AttemptDeleteEvidenceService;
 import com.umss.sigesa.application.service.evidence.CheckEvidenceCompletenessService;
 import com.umss.sigesa.application.service.evidence.GetNormativeIndicatorSubsanationEligibilityService;
@@ -88,7 +90,9 @@ public class EvidenceModuleConfig {
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
-            NormativeIndicatorEvidenceQueryPort evidenceQueryPort) {
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            ProcessFreezeGuard freezeGuard,
+            CaeDelegationGuard caeDelegationGuard) {
         return new UploadNormativeIndicatorEvidenceService(
                 hierarchyQueryPort,
                 observationPort,
@@ -100,7 +104,9 @@ public class EvidenceModuleConfig {
                 auditLogPort,
                 assignmentRepository,
                 documentAssetPort,
-                evidenceQueryPort);
+                evidenceQueryPort,
+                freezeGuard,
+                caeDelegationGuard);
     }
 
     @Bean
@@ -113,7 +119,9 @@ public class EvidenceModuleConfig {
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
-            NormativeIndicatorEvidenceQueryPort evidenceQueryPort) {
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            ProcessFreezeGuard freezeGuard,
+            CaeDelegationGuard caeDelegationGuard) {
         return new LinkDocumentAssetToIndicatorService(
                 hierarchyQueryPort,
                 observationPort,
@@ -123,7 +131,9 @@ public class EvidenceModuleConfig {
                 auditLogPort,
                 assignmentRepository,
                 documentAssetPort,
-                evidenceQueryPort);
+                evidenceQueryPort,
+                freezeGuard,
+                caeDelegationGuard);
     }
 
     @Bean

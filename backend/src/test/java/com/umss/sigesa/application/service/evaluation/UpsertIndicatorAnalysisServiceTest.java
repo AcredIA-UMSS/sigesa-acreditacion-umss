@@ -41,12 +41,17 @@ class UpsertIndicatorAnalysisServiceTest {
     private IndicatorAnalysisPort analysisPort;
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
+    @Mock
+    private com.umss.sigesa.application.service.workflow.ProcessFreezeGuard freezeGuard;
+    @Mock
+    private CaeDelegationGuard caeDelegationGuard;
 
     private UpsertIndicatorAnalysisService service;
 
     @BeforeEach
     void setUp() {
-        service = new UpsertIndicatorAnalysisService(hierarchyQueryPort, analysisPort, assignmentRepository);
+        service = new UpsertIndicatorAnalysisService(
+                hierarchyQueryPort, analysisPort, assignmentRepository, freezeGuard, caeDelegationGuard);
     }
 
     @Test
@@ -124,6 +129,23 @@ class UpsertIndicatorAnalysisServiceTest {
         when(hierarchyQueryPort.findIndicatorContext(indicatorId)).thenReturn(Optional.empty());
         assertThrows(IndicatorNotFoundException.class, () -> service.upsert(
                 command(indicatorId, UUID.randomUUID(), List.of("CC"), "STRENGTH", "COMPLIES", "Texto")));
+    }
+
+    @Test
+    @DisplayName("Freeze activo → PROCESS_FROZEN")
+    void upsert_rejectsWhenProcessFrozen() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID processId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        stubIndicator(indicatorId, processId, careerId);
+        when(assignmentRepository.findActiveByUserId(userId)).thenReturn(List.of(
+                new UserProgramAssignment(UUID.randomUUID(), userId, careerId, LocalDateTime.now(), null)));
+        org.mockito.Mockito.doThrow(new com.umss.sigesa.domain.exception.ProcessFrozenException())
+                .when(freezeGuard).assertWritable(processId);
+
+        assertThrows(com.umss.sigesa.domain.exception.ProcessFrozenException.class, () -> service.upsert(
+                command(indicatorId, userId, List.of("CC"), "STRENGTH", "COMPLIES", "Texto")));
     }
 
     @Test

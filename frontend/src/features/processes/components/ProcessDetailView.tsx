@@ -9,7 +9,12 @@ import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
 import { EvaluationMetricsPanelContainer } from './EvaluationMetricsPanelContainer';
+import { ImprovementPlanPanelContainer } from './ImprovementPlanPanelContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
+import { ProcessOperationalModeBadge } from './ProcessOperationalModeBadge';
+import { ProcessFreezePanelContainer } from './ProcessFreezePanelContainer';
+import { PeerRoomChecklistPanelContainer } from './PeerRoomChecklistPanelContainer';
+import { DelegationsPanelContainer } from './DelegationsPanelContainer';
 
 interface ProcessDetailViewProps {
   processId: string;
@@ -31,10 +36,15 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const { session } = useAuth();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const operationalMode = process?.operationalMode ?? 'ACTIVE';
+  const isAuditFrozen = operationalMode === 'AUDIT_READONLY';
+  const isMonitoring = operationalMode === 'IMPROVEMENT_MONITORING';
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
-  const canUploadEvidence = session?.role === 'CC';
-  const canEditFoda = session?.role === 'CC';
+  const canUploadEvidence =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
+  const canEditFoda =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
   const canReviewEvidence = session?.role === 'TD';
   const structureAnchorRef = useRef<HTMLDivElement>(null);
   const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
@@ -105,7 +115,10 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   {process.careerCode ?? '—'} · {process.templateName ?? '—'}
                 </p>
               </div>
-              <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+                <ProcessOperationalModeBadge mode={process.operationalMode} />
+              </div>
             </div>
             <p className="mt-4 text-body-md text-primary-100">
               Inicio: {formatDate(process.startDate)}
@@ -120,7 +133,30 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
 
           <EvaluationMetricsPanelContainer processId={processId} />
 
-          <MethodologicalStageTimelineContainer processId={processId} />
+          <ProcessFreezePanelContainer processId={processId} />
+
+          {session?.role !== 'CAE_MEMBER' && (
+            <PeerRoomChecklistPanelContainer processId={processId} />
+          )}
+
+          {(session?.role === 'CC' || session?.role === 'JD') && (
+            <DelegationsPanelContainer
+              processId={processId}
+              level1Nodes={process.level1Nodes ?? []}
+            />
+          )}
+
+          <ImprovementPlanPanelContainer
+            processId={processId}
+            operationalMode={operationalMode}
+            frozen={isAuditFrozen}
+          />
+
+          <MethodologicalStageTimelineContainer
+            processId={processId}
+            frozen={isAuditFrozen}
+            monitoring={isMonitoring}
+          />
 
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

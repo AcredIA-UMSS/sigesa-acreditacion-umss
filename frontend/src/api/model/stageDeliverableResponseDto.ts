@@ -10,6 +10,8 @@ export interface StageDeliverableResponseDto {
   stageId?: string;
   deliverableCode?: string;
   approvalStatus?: string;
+  documentAssetId?: string;
+  folioCode?: string;
   approvedBy?: string;
   technicalObservations?: string;
   approvedAt?: string;

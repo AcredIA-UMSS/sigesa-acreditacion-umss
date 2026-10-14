@@ -293,7 +293,7 @@ export const getListProcessesUrl = () => {
 }
 
 /**
- * JD/TD ven todos; CC solo procesos de su carrera asignada (FSD-UC-019).
+ * JD/TD ven todos; CC/EE/CAE solo procesos de su carrera asignada (FSD-UC-019/020).
  * @summary Listar procesos de acreditación
  */
 export const listProcesses = async ( options?: Parameters<typeof customFetch>[1]): Promise<listProcessesResponse> => {

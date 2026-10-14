@@ -12,6 +12,8 @@ import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
@@ -75,6 +77,8 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
     private final DocumentAssetPort documentAssetPort;
     private final NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
+    private final ProcessFreezeGuard freezeGuard;
+    private final CaeDelegationGuard caeDelegationGuard;
 
     public UploadNormativeIndicatorEvidenceService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
@@ -87,7 +91,9 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
-            NormativeIndicatorEvidenceQueryPort evidenceQueryPort) {
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            ProcessFreezeGuard freezeGuard,
+            CaeDelegationGuard caeDelegationGuard) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
@@ -99,6 +105,8 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         this.assignmentRepository = assignmentRepository;
         this.documentAssetPort = documentAssetPort;
         this.evidenceQueryPort = evidenceQueryPort;
+        this.freezeGuard = freezeGuard;
+        this.caeDelegationGuard = caeDelegationGuard;
     }
 
     @Override
@@ -115,6 +123,8 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         });
 
         assertProgramScope(command.uploadedBy(), context.careerId(), command.jwtProgramScope());
+        freezeGuard.assertWritable(context.processId());
+        caeDelegationGuard.assertCanWrite(command.uploadedBy(), context.processId(), command.indicatorId());
 
         if (evidenceQueryPort.hasEvidences(command.indicatorId())) {
             throw new IndicatorAlreadyHasEvidenceException(command.indicatorId());

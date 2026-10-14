@@ -28,6 +28,8 @@ public interface MethodologicalStagePort {
 
     void updateProcessCurrentStage(UUID processId, UUID stageId, OperationalMode operationalMode);
 
+    void updateProcessOperationalMode(UUID processId, OperationalMode operationalMode);
+
     Optional<StageDeliverable> findDeliverableById(UUID deliverableId);
 
     void updateDeliverableApproval(
@@ -45,4 +47,6 @@ public interface MethodologicalStagePort {
     long countPrimarySurveyBatches(UUID processId);
 
     void addDeliverableIfAbsent(UUID stageId, StageDeliverableCode deliverableCode);
+
+    void updateDeliverableDocumentAsset(UUID deliverableId, UUID documentAssetId);
 }

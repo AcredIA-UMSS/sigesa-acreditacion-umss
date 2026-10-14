@@ -40,12 +40,12 @@ public class ListProcessesService implements ListProcessesUseCase {
 
     @Override
     public List<ProcessSummary> list(ProcessQueryContext ctx) {
-        if ("CC".equals(ctx.role()) && (ctx.programScope() == null || ctx.programScope().isEmpty())) {
+        if (isCareerScoped(ctx.role()) && (ctx.programScope() == null || ctx.programScope().isEmpty())) {
             return List.of();
         }
 
         List<ProcessQueryPort.ProcessListItem> items;
-        if ("CC".equals(ctx.role())) {
+        if (isCareerScoped(ctx.role())) {
             items = processQueryPort.findSummaryItemsByCareerIds(ctx.programScope());
         } else {
             items = processQueryPort.findAllSummaryItems();
@@ -77,5 +77,9 @@ public class ListProcessesService implements ListProcessesUseCase {
                         responsibles.get(summary.id())
                 ))
                 .toList();
+    }
+
+    private static boolean isCareerScoped(String role) {
+        return "CC".equals(role) || "EE".equals(role) || "CAE_MEMBER".equals(role);
     }
 }

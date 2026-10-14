@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.PrimarySurveyBatchPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.ValidationException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
@@ -40,13 +41,15 @@ class RegisterPrimarySurveyBatchServiceTest {
     private DocumentAssetPort documentAssetPort;
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
+    @Mock
+    private ProcessFreezeGuard freezeGuard;
 
     private RegisterPrimarySurveyBatchService service;
 
     @BeforeEach
     void setUp() {
         service = new RegisterPrimarySurveyBatchService(
-                processQueryPort, surveyBatchPort, documentAssetPort, assignmentRepository);
+                processQueryPort, surveyBatchPort, documentAssetPort, assignmentRepository, freezeGuard);
     }
 
     @Test

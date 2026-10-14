@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.ImprovementItemNotFoundException;
 import com.umss.sigesa.domain.exception.IndicatorAnalysisNotFoundException;
 import com.umss.sigesa.domain.exception.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,12 @@ public class EvaluationExceptionHandler {
     public ResponseEntity<Map<String, String>> handleAnalysisNotFound(IndicatorAnalysisNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "ANALYSIS_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ImprovementItemNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleImprovementItemNotFound(ImprovementItemNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "IMPROVEMENT_ITEM_NOT_FOUND", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(ValidationException.class)

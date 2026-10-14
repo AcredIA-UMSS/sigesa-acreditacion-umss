@@ -1,7 +1,7 @@
 # PROMPT_MAPPING — Sprint 03
 
 > Registro PM del sprint 03. Trazabilidad: `Código → PR-IMPL → DD-UC-NNN → FSD-UC-NNN → DTP`.  
-> **Índice:** PM-001…PM-016 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA).
+> **Índice:** PM-001…PM-018 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA → M9 Plan Mejoras/E4 → M10 freeze/Pares + M11 E7 + CAE).
 
 | ID Mapeo | PR-IMPL | Design Doc | FSD / PRD | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
@@ -23,6 +23,8 @@
 | PM-014 | PR-IMPL-037 | DD-UC-007 | FSD-UC-007 | Buscador de evidencias E2E Playwright + Modo IA MCP (header `X-AI-Enabled`, toggle UI, preset escenarios demo 1-3) |
 | PM-015 | PR-IMPL-M7-004 | DD-UC-004-M7 | FSD-UC-004 / FSD-UC-005 | M7 DocumentAsset M:N (V19, link API, folio, UI vincular existente) |
 | PM-016 | PR-IMPL-M8-029 | DD-UC-029 | FSD-UC-029 / FSD-UC-028 | M8 FODA + métricas + encuesta + compuerta E2→E3 / E3 |
+| PM-017 | PR-IMPL-M9-031 | DD-UC-031 | FSD-UC-031 / FSD-UC-028 | M9 Plan de Mejoras + documentos E4 + compuerta E4→E5 |
+| PM-018 | PR-IMPL-M10-030 | DD-UC-030 | FSD-UC-030 / 020 / 028 / 031 | Cierre 2.1: freeze/Sala de Pares, ciclo E7, CAE_MEMBER |
 
 ---
 
@@ -1032,3 +1034,224 @@ M8 operativo: FODA 1:1 por indicador, métricas, lotes de encuesta y preview de 
 - [ ] M9 Plan de Mejoras (`ImprovementPlanItem`)
 - [ ] N documentos por el mismo indicador
 - [ ] Commit/PR M7+M8 cuando el usuario lo pida
+
+---
+
+## PM-017
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-017 |
+| **Fecha** | 2026-10-13 |
+| **Hora** | 20:26 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | sigesa-orchestrator · Cursor Grok 4.6 · Docker Compose `:3000`/`:8080` |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar M9 full-stack: Plan de Mejoras, documentos E4 (PDF borrador) y compuerta E4→E5 |
+| **Objetivo** | Operativizar FSD-UC-031 + FSD-UC-028 (M9 DRAFTING) sin reabrir M6–M8 salvo dependencias (FODA, DocumentAsset, ensure deliverables) |
+| **Contexto** | Pasos 0–2 ya aprobados (FSD, DD-UC-031, PR-IMPL-M9-031). Pipeline continuo 3a→3b→3c→4→5. Sin commits. |
+| **PR-IMPL vinculado** | PR-IMPL-M9-031 |
+| **DD-UC vinculado** | DD-UC-031 |
+| **FSD-UC vinculado** | FSD-UC-031 · FSD-UC-028 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Implementa full-stack SIGESA 2.1 **M9** (Plan de Mejoras + documentos E4 + compuerta E4→E5). El usuario aprobó el pipeline completo (igual que M7/M8). **No pauses** pidiendo confirmación DD/PR-IMPL: ya existen. Ejecuta Pasos 3a → 3b → 3c → 4 → 5.
+
+Repo: `/home/boris/Projects/sigesa-acreditacion-umss`
+
+## Trazabilidad
+FSD-UC-031 → DD-UC-031 → PR-IMPL-M9-031 (también FSD-UC-028 M9 E4).
+
+Pasos 0–2 ya hechos. No reescribas FSD salvo sync post-código (Hecho + api_contracts + DTP).
+
+## Paso 5
+@dtp-sync fsd=FSD-UC-031
+@save-prompt-mapping sprint=03 fsd=FSD-UC-031 solicitante="Boris Anthony Angulo Urquieta" estado=completado
+Siguiente PM = **PM-017** (PM-016 fue M8).
+```
+
+### Entradas auxiliares
+
+- `docs/product/uc/FSD-UC-031.md`
+- `docs/product/uc/FSD-UC-028.md`
+- `docs/design/DD-UC-031.md`
+- `docs/prompts/impl/PR-IMPL-M9-031.md`
+- `docs/adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V21__improvement_plan_e4_deliverables.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/model/ImprovementPlanItem.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/evaluation/ImportImprovementPlanFromFodaService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/GenerateStageDeliverableDocumentService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/OpenPdfDraftingDocumentRendererAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ImprovementPlanController.java` |
+| generado | `frontend/src/features/processes/components/ImprovementPlanPanel.tsx` |
+| generado | `frontend/src/features/processes/components/ImprovementPlanPanelContainer.tsx` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/StageDeliverableCode.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/StageGateEvaluator.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/ApproveStageDeliverableService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/StageWorkflowController.java` |
+| modificado | `frontend/src/features/processes/components/MethodologicalStageTimeline.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-031.md` |
+| modificado | `docs/product/uc/FSD-UC-028.md` |
+
+(Lista completa en `git status --short` de esta sesión: dominio/puertos/servicios/DTOs/tests M9 + Orval `evaluation`/`stage-workflow` + `modelo_datos.md` V21.)
+
+### Cambios realizados
+
+1. **V21** `improvement_plan_items` + backfill E4; Hibernate/dev: `DevWorkflowSchemaAlignmentRunner` + UNIQUE parcial PostgreSQL.
+2. **Dominio/servicios:** CRUD + import FODA solo `WEAKNESS` (idempotente); `GenerateStageDeliverableDocument` vía `DraftingDocumentRendererPort` (OpenPDF, no `PdfRendererPort`); `documentAssetId` en `StageDeliverable`/DTO timeline.
+3. **Gate:** `evaluateDrafting` exige 4 E4 con asset + APPROVED; aprobar E4 sin PDF → `409 DELIVERABLE_WITHOUT_DOCUMENT`.
+4. **REST:** API-WF-13…17; generate 201 `{deliverableId, documentAssetId, folioCode, title}`.
+5. **Frontend Orval:** sección Plan de Mejoras (tabla, import, alta/edición CC); botón «Generar borrador» en E4 de DRAFTING.
+6. **Docs:** API-WF-13…17; DTP A.1/A.3/B.4.4; FSD-UC-031/028 **Hecho (M9)**.
+
+### Validación ejecutada
+
+- [x] `cd backend && JAVA_HOME=<jdk21> ./mvnw test` — verde (suite completa post-fix PDF; 0 failures)
+- [x] `pnpm --dir frontend test:run` — 89 passed (31 files)
+- [x] `pnpm --dir frontend` oxlint + `tsc -b` — OK
+- [x] `pnpm --dir frontend generate:api` — Orval OK (`listImprovementPlan`, `generateStageDeliverable`)
+- [x] Smoke Docker `:8080` proceso `950e8400-e29b-41d4-a716-446655440020`:
+  - GET `/improvement-plan` 200 `[]` luego 1 ítem
+  - POST import-from-foda 200 `{importedCount:0, skippedCount:0}` (seed sin WEAKNESS)
+  - POST item 201 `Smoke M9 mejorar laboratorios`
+  - POST generate IMPROVEMENT_PLAN 201 folio `SIGESA-20261014-ea7f3a48`
+  - GET gate DRAFTING 200 `pass:false` (BLOCK; faltan 3 PDF + 4 APPROVED)
+- [x] Smoke UI `:3000` CC: detalle proceso → sección «Plan de Mejoras» + Importar/Editar/Añadir; timeline E1 activa (Generar borrador solo visible cuando DRAFTING es etapa activa).
+
+### Resultado obtenido
+
+M9 operativo: plan persistido, import FODA idempotente, PDF E4 institucional con folio, timeline con `documentAssetId`/`folioCode`, compuerta DRAFTING BLOCK/PASS según reglas. `docs/baseline/` intacto.
+
+### Riesgos/observaciones
+
+- Unicidad `(process_id, source_indicator_id)` parcial: índice PostgreSQL; H2/tests validan duplicado en servicio.
+- Generate no exige `IN_PROGRESS` (solo `stage.code==DRAFTING` + código E4), alineado al contrato.
+- Import 0 en seed: no hay análisis `WEAKNESS`; cubierto por test unitario de import.
+- `StageWorkflowController` consulta `DocumentAssetPort` para folio en GET stages (enriquecimiento de presentación).
+
+### Próximos pasos
+
+- [ ] M10 freeze / Sala de Pares
+- [ ] M11 ciclo E7 / `IMPROVEMENT_MONITORING`
+- [ ] Commit/PR M9 cuando el usuario lo pida
+
+---
+
+## PM-018
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-018 |
+| **Fecha** | 2026-10-13 |
+| **Hora** | 21:10 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — sigesa-orchestrator |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Cierre SIGESA 2.1: M10 freeze/Sala de Pares, M11 ciclo E7, CAE_MEMBER |
+| **Objetivo** | Congelar expediente AUDIT_READONLY, checklist Sala de Pares, gates E5–E7, justificación de plan, rol CAE con delegaciones, UI + Orval + Docker smoke |
+| **Contexto** | Pipeline aprobado 3a→3b→3c→4→5 sin pausas. V21 existía; un solo Flyway `V22`. Ancla FSD-UC-030 / DD-UC-030 / PR-IMPL-M10-030 (también UC-020, UC-028, UC-031, CAE sobre UC-004/029). |
+| **PR-IMPL vinculado** | [PR-IMPL-M10-030](../../prompts/impl/PR-IMPL-M10-030.md) |
+| **DD-UC vinculado** | [DD-UC-030](../../design/DD-UC-030.md) |
+| **FSD-UC vinculado** | FSD-UC-030 · FSD-UC-020 · FSD-UC-028 · FSD-UC-031 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Implementa full-stack el **cierre SIGESA 2.1**: M10 freeze/Sala de Pares, M11 ciclo E7, y CAE_MEMBER. Usuario aprobó pipeline completo. **No pauses** por DD/PR-IMPL. Pasos 3a→3b→3c→4→5.
+
+Repo: `/home/boris/Projects/sigesa-acreditacion-umss`
+
+## Trazabilidad
+FSD-UC-030 → DD-UC-030 → PR-IMPL-M10-030 (también FSD-UC-020, FSD-UC-031 M11, FSD-UC-028 E5–E7, CAE sobre UC-004/029).
+
+Lee: `docs/design/DD-UC-030.md`, `docs/prompts/impl/PR-IMPL-M10-030.md`, `docs/product/uc/FSD-UC-030.md`, `AGENTS.md`, skills generate-frontend-feature, code-reviewer, dtp-sync, save-prompt-mapping.
+**Nunca** `docs/baseline/`.
+
+Listar Flyway: siguiente **V22** (V21 existe). Un solo archivo `V22__freeze_peer_room_e7_cae.sql`.
+…
+Paso 5
+@dtp-sync fsd=FSD-UC-030
+@save-prompt-mapping sprint=03 fsd=FSD-UC-030 solicitante="Boris Anthony Angulo Urquieta" estado=completado
+**PM-018** (017 fue M9). Marcar FSD UC-030/020/028/031 Hecho M10/M11. CAE ya no planificado.
+**No commit.**
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-030.md`
+- `docs/prompts/impl/PR-IMPL-M10-030.md`
+- `docs/product/uc/FSD-UC-030.md` · `FSD-UC-020.md` · `FSD-UC-028.md` · `FSD-UC-031.md`
+- `docs/adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V22__freeze_peer_room_e7_cae.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessFreezeController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PeerRoomChecklistController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/IndicatorDelegationController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/ProcessFreezeGuard.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/evaluation/CaeDelegationGuard.java` |
+| generado | `frontend/src/features/processes/components/ProcessFreezePanel.tsx` |
+| generado | `frontend/src/features/processes/components/PeerRoomChecklistPanel.tsx` |
+| generado | `frontend/src/features/processes/components/DelegationsPanel.tsx` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/Role.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/StageGateEvaluator.java` |
+| modificado | `frontend/src/lib/auth/roleLabels.ts` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `docs/product/FSD.md` · `DTP.md` · `api_contracts.md` |
+
+(Lista completa: `git status --short` de esta sesión — ~208 rutas; incluye V21/M9 residual + Orval.)
+
+### Cambios realizados
+
+1. **V22** `process_freeze`, `peer_room_checklist_items`, `indicator_delegations`, `app_user.role` VARCHAR(20)+`CAE_MEMBER`, columnas M11 del plan, backfill E5–E7. Dev: Hibernate + `DevWorkflowSchemaAlignmentRunner`.
+2. **Freeze:** POST TD upsert `AUDIT_READONLY`; lift `ACTIVE`/`IMPROVEMENT_MONITORING`; activo = `lifted_at IS NULL && mode==AUDIT_READONLY`. `ProcessFreezeGuard` 409 `PROCESS_FROZEN` en escrituras eval; monitoreo permite PUT plan + generate E7.
+3. **Gates:** PRESENTATION = E5 APPROVED + freeze activo; EXTERNAL_PREP = freeze + E6 APPROVED + checklist; POST_ACCREDITATION = justificación de vencidos + E7 asset+APPROVED. Aprobar `PEER_ROOM_CHECKLIST` incompleto → 409.
+4. **CAE:** `Role.CAE_MEMBER` con `programId`; delegaciones N1/N2/indicador; `CaeDelegationGuard` 403 `DELEGATION_DENIED`. EE/CAE leen proceso como CC; EE GET ok, PUT eval 403.
+5. **Frontend Orval:** badge `operationalMode`; freeze/lift TD; checklist EE/TD; delegaciones CC; justificación de plan; mutate oculto en freeze salvo monitoreo.
+6. **Docs:** UC-030/020/028/031 Hecho M10/M11; API-WF-18…23; CAE ya no planificado.
+
+### Validación ejecutada
+
+- [x] `cd backend && ./mvnw test` — verde (suite completa; fallos iniciales de stubbing/generate corregidos)
+- [x] `pnpm --dir frontend test:run` — 98 passed (35 files)
+- [x] `pnpm --dir frontend` oxlint + `tsc -b` — OK
+- [x] `pnpm --dir frontend generate:api` — Orval OK (`useFreezeProcess`, `useGetPeerRoomChecklist`, `useListDelegations`, …)
+- [x] Smoke Docker `:8080` proceso `950e8400-e29b-41d4-a716-446655440020`:
+  - POST freeze TD → **201** `AUDIT_READONLY` `active:true`
+  - GET freeze TD/EE → **200**
+  - PUT FODA CC → **409 PROCESS_FROZEN**
+  - GET analysis EE → **200**; PUT analysis EE → **403**
+  - GET plan/checklist EE → **200** (4 ítems seed)
+- [x] Smoke UI `:3000` CC: badge/estado «Freeze AUDIT_READONLY activo»; checklist 4 ítems disabled; panel Delegaciones CAE; Plan sin importar; timeline E1–E7.
+
+### Resultado obtenido
+
+Cierre 2.1 operativo: freeze bloquea escritura, EE lee, checklist se siembra al congelar, gates E5–E7 implementados, CAE con alcance delegado, UI y contratos alineados. `docs/baseline/` intacto.
+
+### Riesgos/observaciones
+
+- GET freeze sin fila → 404 `FREEZE_NOT_FOUND` (UI trata 404 como «sin freeze»).
+- No hay usuario seed `CAE_MEMBER`; smoke CAE 403/200 por delegación no ejecutado en Docker (cubierto por `CaeDelegationGuardTest` / `CreateDelegationServiceTest` / `RegisterUserServiceTest`).
+- Proceso INF-SIS quedó **congelado** tras el smoke; TD puede levantar con `POST .../freeze/lift`.
+- Checklist GET no incluye CAE (403); panel oculto para ese rol.
+
+### Próximos pasos
+
+- [ ] Commit/PR cuando el usuario lo pida (no commit en esta sesión)
+- [ ] Seed opcional `CAE_MEMBER` para demo UI de delegación

@@ -40,7 +40,7 @@ public class IndicatorAnalysisController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('CC','TD','JD')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE','CAE_MEMBER')")
     @Operation(operationId = "getIndicatorAnalysis", summary = "Obtener análisis FODA del indicador")
     public ResponseEntity<IndicatorAnalysisResponseDto> getAnalysis(
             @PathVariable UUID indicatorId,
@@ -54,7 +54,7 @@ public class IndicatorAnalysisController {
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('CC')")
+    @PreAuthorize("hasAnyRole('CC','CAE_MEMBER')")
     @Operation(operationId = "upsertIndicatorAnalysis", summary = "Crear o actualizar análisis FODA del indicador")
     public ResponseEntity<IndicatorAnalysisResponseDto> upsertAnalysis(
             @PathVariable UUID indicatorId,

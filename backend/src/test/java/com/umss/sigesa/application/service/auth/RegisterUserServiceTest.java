@@ -187,6 +187,30 @@ class RegisterUserServiceTest {
     }
 
     @Test
+    @DisplayName("Alta [CAE_MEMBER] — INACTIVE + assignment a carrera")
+    void altaCae_inactivoConAssignment() {
+        UUID userId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        AppUser saved = new AppUser(userId, Email.of("cae@umss.edu.bo"), Role.CAE_MEMBER, UserStatus.INACTIVE,
+                LocalDateTime.now(), LocalDateTime.now(), "Lucía", "Cae", "75678901");
+        when(userRepository.save(any(), any(char[].class))).thenReturn(saved);
+
+        var result = registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                "cae@umss.edu.bo", "CAE_MEMBER", programId, "Lucía", "Cae", "75678901", "Segura2026!".toCharArray()));
+
+        assertEquals(UserStatus.INACTIVE, result.status());
+        verify(assignmentRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("[CAE_MEMBER] sin programId — error de dominio")
+    void caeSinProgramId_rechazado() {
+        assertThrows(InvalidScopeException.class,
+                () -> registerUserService.register(new RegisterUserUseCase.RegisterUserCommand(
+                        "cae@umss.edu.bo", "CAE_MEMBER", null, "Lucía", "Cae", "75678901", "Segura2026!".toCharArray())));
+    }
+
+    @Test
     void shouldNotCreateAssignmentWhenRegisteringTd() {
         UUID userId = UUID.randomUUID();
         AppUser saved = new AppUser(userId, Email.of("td@umss.edu.bo"), Role.TD, UserStatus.INACTIVE,

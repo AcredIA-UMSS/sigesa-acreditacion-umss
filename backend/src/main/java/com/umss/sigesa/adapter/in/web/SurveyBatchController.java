@@ -59,7 +59,7 @@ public class SurveyBatchController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('CC','TD','JD')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
     @Operation(operationId = "listSurveyBatches", summary = "Listar lotes de encuesta primaria del proceso")
     public ResponseEntity<List<PrimarySurveyBatchResponseDto>> list(
             @PathVariable UUID processId,

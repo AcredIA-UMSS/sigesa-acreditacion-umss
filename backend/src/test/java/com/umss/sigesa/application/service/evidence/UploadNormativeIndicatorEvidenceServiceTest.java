@@ -11,6 +11,8 @@ import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
+import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
@@ -73,6 +75,10 @@ class UploadNormativeIndicatorEvidenceServiceTest {
     private DocumentAssetPort documentAssetPort;
     @Mock
     private NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
+    @Mock
+    private ProcessFreezeGuard freezeGuard;
+    @Mock
+    private CaeDelegationGuard caeDelegationGuard;
 
     @InjectMocks
     private UploadNormativeIndicatorEvidenceService service;

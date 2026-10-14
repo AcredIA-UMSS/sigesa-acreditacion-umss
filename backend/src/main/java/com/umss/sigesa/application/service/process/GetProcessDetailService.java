@@ -61,6 +61,7 @@ public class GetProcessDetailService implements GetProcessDetailUseCase {
                 detail.templateType(),
                 detail.evaluatorModel(),
                 detail.status(),
+                detail.operationalMode(),
                 detail.startDate(),
                 detail.level1Nodes(),
                 responsible
