@@ -201,6 +201,8 @@
 
 ## 5. Hallazgos priorizados
 
+> **Nota:** «ticket» / «issue técnico» en esta ficha **no es un módulo de SIGESA**. Es el nombre que usa la plantilla de la materia para una **tarea de corrección** (qué habría que cambiar después). En el código del producto no existe un sistema de tickets.
+
 | # | Comprobación | Severidad (alta / media / baja) | Qué falla | Corrección propuesta | Responsable | ¿Antes de contenedorizar (S07)? |
 |---|--------------|---------------------------------|-----------|----------------------|-------------|---------------------------------|
 | 1 | F12-02 | alta | JWT y password de BD con default en YAML/Compose; passwords demo en `AuthDataLoader` | Issue: perfiles `dev` vs `prod`; **sin fallback** para `JWT_SECRET` y `SPRING_DATASOURCE_PASSWORD` en prod/staging | Boris Anthony Angulo Urquieta | Sí |

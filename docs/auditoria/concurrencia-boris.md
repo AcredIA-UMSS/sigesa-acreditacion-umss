@@ -6,7 +6,7 @@
 ## Cómo se usa (para el grupo)
 
 1. Copien este archivo a su repositorio como `docs/auditoria/concurrencia.md`.
-2. Trabajen sobre el mismo commit que la parte 1 (`release/8.0.0`).
+2. Trabajen sobre el mismo commit que la parte 1 (`release/8.0.0` de la materia). **Baseline de producto en este informe: rama `release/2.0.0`.**
 3. Abran su asistente con acceso al repositorio y escríbanle:
    > Sigue las instrucciones de la sección 0 de `docs/auditoria/concurrencia.md` y rellena ese archivo.
 4. Respondan las preguntas que el asistente les haga al final de cada oleada. Aquí habrá más preguntas que en la parte 1, porque varios datos (cuántas réplicas corren, cuánto tarda la IA, cuánto tráfico esperan) no están en el código.
@@ -56,7 +56,7 @@
 ## 1. Datos del repositorio (oleada 0)
 
 - **Grupo:** AcredIA-UMSS
-- **Commit auditado (`release/8.0.0`):** etiqueta ausente; mismo `HEAD` que la parte 1: `ace8fd141f0d229b0cc33940ea52439f15cd866d` (rama `auditoria/boris`).
+- **Commit auditado:** rama de producto **`origin/release/2.0.0`** = `ace8fd141f0d229b0cc33940ea52439f15cd866d` (`ace8fd1 Merge pull request #48`). La etiqueta de la materia `release/8.0.0` no existe en el remoto; el código de concurrencia (Tomcat, Hikari, LLM, reportes) se tomó de `release/2.0.0`.
 - **Fecha de la auditoría:** 2026-10-15
 - **Servicios y runtime:**
   - **api** · Java 21 + Spring Boot 4.1.0 Web MVC (Tomcat embebido, hilos de plataforma; **no** hay `spring.threads.virtual.enabled`). Entrada: `backend/Dockerfile:20` `java -jar app.jar`.
@@ -109,7 +109,7 @@
   - LLM síncrono en el hilo de la petición: `OpenWebUiChatAdapter.java:39-42,61-72` (`HttpClient.send`, timeout 120 s). Invocado desde `SendChatMessageService` (sin `@Async`).
   - Escritura de blob en el hilo del request: `LocalFileEvidenceBlobStorageAdapter.java:29` (`Files.write`).
   - `synchronized` solo en seed: `DashboardDataLoader.java:56` (arranque, no request path de usuario).
-  - PDF de entregables E4/E7: generación síncrona + `Files.write` en el flujo generate.
+  - Generación de PDF de reportes/entregables en el hilo de petición o del job: `Files.write` / `FileOutputStream` (p. ej. `ReportExportJobService`, adapters OpenPDF/POI; también generate de entregables de etapa en el mismo commit de `release/2.0.0`).
   - MCP: `fetch` async en event loop (`mcp/sigesa-evidence/src/index.js:24`); no se vio `readFileSync` en ese servidor.
 - **Estado:** `PARCIAL`
 - **Observación:** En servlet MVC, `send()` y `Files.write` no “congelan un event loop”, pero **ocupan un worker Tomcat** hasta 120 s por chat LLM (y el proxy nginx espera hasta 300 s: `frontend/nginx.conf:16-18`). Varios chats en paralelo agotan hilos mucho antes que el CPU. JDK 21 podría usar hilos virtuales; **no están activados**. Deuda de laboratorio aceptable con pocos usuarios; riesgo real en demo con varios copilotos a la vez. **Ticket:** `spring.threads.virtual.enabled=true` o offload del LLM a `@Async` + 202/polling; no retener el worker HTTP.
@@ -178,6 +178,8 @@
 | P6 | Datos | Nombres de integrantes para commits individuales. | Boris Anthony Angulo Urquieta | respondida |
 
 ## 5. Hallazgos priorizados
+
+> **Nota:** «ticket» / «issue técnico» en esta ficha **no es un módulo de SIGESA**. Es el nombre que usa la plantilla de la materia para una **tarea de corrección** (qué habría que cambiar después). En el código del producto no existe un sistema de tickets.
 
 | # | Comprobación | Severidad (alta / media / baja) | Qué falla | Corrección propuesta | Responsable |
 |---|--------------|---------------------------------|-----------|----------------------|-------------|
