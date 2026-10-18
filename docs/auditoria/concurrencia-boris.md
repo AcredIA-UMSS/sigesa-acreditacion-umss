@@ -113,6 +113,7 @@
   - MCP: `fetch` async en event loop (`mcp/sigesa-evidence/src/index.js:24`); no se vio `readFileSync` en ese servidor.
 - **Estado:** `PARCIAL`
 - **Observación:** En servlet MVC, `send()` y `Files.write` no “congelan un event loop”, pero **ocupan un worker Tomcat** hasta 120 s por chat LLM (y el proxy nginx espera hasta 300 s: `frontend/nginx.conf:16-18`). Varios chats en paralelo agotan hilos mucho antes que el CPU. JDK 21 podría usar hilos virtuales; **no están activados**. Deuda de laboratorio aceptable con pocos usuarios; riesgo real en demo con varios copilotos a la vez. **Ticket:** `spring.threads.virtual.enabled=true` o offload del LLM a `@Async` + 202/polling; no retener el worker HTTP.
+- **Remediación 8.1.0 (no cambia el veredicto):** GitHub [#52](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/52) / `PR-IMPL-042` / rama `feat/52-llm-timeout-async`. Timeout 10 s + 504; hilos virtuales/`sendAsync`. Contrato REST sin 202/polling.
 - **Auditó:** Asistente de auditoría (Cursor)
 
 ### CON-03 · Pool de conexiones a la base de datos
@@ -157,6 +158,7 @@
   - Chat completion **fuera** de `@Transactional` (CON-03): no retiene pool Hikari durante los 120 s.
 - **Estado:** `PARCIAL`
 - **Observación:** Hay timeout en el único cliente LLM del backend (bien). Faltan: (1) límite de chats simultáneos, (2) backoff+jitter solo en errores transitorios e idempotentes, (3) timeout en `fetch` del SPA y del MCP, (4) timeout más estricto configurable por env. 120 s × N peticiones = N workers ocupados. **Ticket:** `SIGESA_ASSISTANT_TIMEOUT_MS`; `Semaphore` (p. ej. 2–4 in-flight); retry 1–2 veces con jitter solo en 429/503 GET-equivalentes; `AbortSignal.timeout` en `customFetch` y MCP.
+- **Remediación 8.1.0 (parcial, no cambia el veredicto):** [#52](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/52) cubre (4) timeout 10 s + 504. SPA/MCP AbortSignal y retry/Semaphore **siguen fuera de alcance**.
 - **Auditó:** Asistente de auditoría (Cursor)
 
 ### CON-05 · Hipótesis de cuello de botella
@@ -164,6 +166,7 @@
 - **Qué se busca:** una frase que diga **qué recurso se saturará primero** cuando crezca el tráfico y por qué, basada en CON-01 a CON-04. Se comprobará con la primera prueba de carga con k6 (S04).
 - **Formato:** "Bajo carga, se saturará primero <recurso> en <endpoint o flujo>, porque <motivo basado en CON-0x>."
 - **Hipótesis:** Bajo carga, se saturará primero el **pool de hilos de Tomcat (workers HTTP)** en `POST /api/v1/assistant/chat` (y copilotos que lo reutilizan), porque CON-02 muestra `HttpClient.send` síncrono de hasta **120 s** en el hilo de la petición, CON-01 documenta \(N=1\) MVC sin hilos virtuales ni cola de LLM, y CON-04 no pone bulkhead. **Matiz:** si **10 usuarios** consultan a la vez `/assistant/chat`, Tomcat retiene 10 workers durante hasta 120 s cada uno y el resto de la API (login, evidencias) queda en cola (el default de ~200 hilos aguanta ese pico corto, pero la latencia cruzada es inmediata). El **pool Hikari (10)** es el segundo límite si hay I/O dentro de `@Transactional` (CON-03), no durante el wait del LLM. **Issue:** llamadas asíncronas (`CompletableFuture` / hilos virtuales) o worker/cola para inferencia.
+- **Remediación 8.1.0 (no cambia el veredicto):** [#52](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/52) / `PR-IMPL-042` — timeout 10 s y desacople de workers de plataforma; la hipótesis (120 s) permanece como registro de auditoría.
 - **Estado:** `OK`
 - **Auditó:** Asistente de auditoría (Cursor)
 

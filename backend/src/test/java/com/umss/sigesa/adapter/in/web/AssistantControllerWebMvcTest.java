@@ -11,6 +11,7 @@ import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolStep;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
+import com.umss.sigesa.domain.exception.AssistantGatewayTimeoutException;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
@@ -230,6 +231,24 @@ class AssistantControllerWebMvcTest {
                                 """))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.error").value("ASSISTANT_UNAVAILABLE"));
+    }
+
+    @Test
+    void chat_whenLlmTimesOut_returns504() throws Exception {
+        stubAssistantEnabled();
+        when(assignmentRepository.findActiveByUserId(JD_USER_ID)).thenReturn(List.of());
+        when(sendChatMessageUseCase.send(any(), any(), any(), any()))
+                .thenThrow(new AssistantGatewayTimeoutException());
+
+        mockMvc.perform(post("/api/v1/assistant/chat")
+                        .with(jdAuth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"message":"Lista las fases de Ingeniería de Sistemas CEUB"}
+                                """))
+                .andExpect(status().isGatewayTimeout())
+                .andExpect(jsonPath("$.error").value("ASSISTANT_GATEWAY_TIMEOUT"))
+                .andExpect(jsonPath("$.message").value(AssistantGatewayTimeoutException.FRIENDLY_MESSAGE));
     }
 
     private static RequestPostProcessor jdAuth() {

@@ -84,7 +84,7 @@ ultima_actualizacion: "2026-10-17"
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-10-17):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅. Hardening **8.1.0:** FEAT-01 (#50) mergeado; FEAT-02 (#51 / `PR-IMPL-041`) S3 + lock BD; Compose object storage **Silo** (`pgsty/silo`) por retiro de imágenes públicas MinIO.
+**Snapshot (2026-10-17):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅. Hardening **8.1.0:** FEAT-01 (#50) y FEAT-02 (#51) mergeados; FEAT-03 (#52 / `PR-IMPL-042`) timeout LLM 10 s + 504.
 
 ---
 

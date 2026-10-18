@@ -1,4 +1,7 @@
 spring:
+  threads:
+    virtual:
+      enabled: true
   application:
     name: sigesa
   devtools:
@@ -87,3 +90,4 @@ sigesa:
     rag-enabled: ${SIGESA_ASSISTANT_RAG_ENABLED:true}
     rag-max-chunks: ${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:3}
     output-guard-enabled: ${SIGESA_ASSISTANT_OUTPUT_GUARD_ENABLED:true}
+    timeout-ms: ${SIGESA_ASSISTANT_TIMEOUT_MS:10000}
