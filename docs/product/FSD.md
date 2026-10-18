@@ -52,7 +52,7 @@ ultima_actualizacion: "2026-10-17"
 | `FSD-UC-001` | Autenticación y sesión                                         | Interno          | v1.0    | **Hecho**                                          | [Ver detalle](uc/FSD-UC-001.md) | `[DD-UC-001](../design/DD-UC-001.md)`                 | `[PR-IMPL-001](../prompts/impl/PR-IMPL-001.md)`       |
 | `FSD-UC-002` | Gestión de usuarios [JD]                                       | [JD]             | v1.0    | **Hecho**                                          | [Ver detalle](uc/FSD-UC-002.md) | `[DD-UC-002](../design/DD-UC-002.md)`                 | `[PR-IMPL-002](../prompts/impl/PR-IMPL-002.md)`       |
 | `FSD-UC-003` | Plantillas y Proceso CEUB/ARCU-SUR                             | [JD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-003.md) | `[DD-UC-003](../design/DD-UC-003.md)`                 | `[PR-IMPL-003](../prompts/impl/PR-IMPL-003.md)`       |
-| `FSD-UC-004` | Cargar Evidencia en Indicador                                  | [CC]             | v2.1    | **Hecho (M7 DocumentAsset)**                       | [Ver detalle](uc/FSD-UC-004.md) | `[DD-UC-004-M7](../design/DD-UC-004-M7.md)`           | `[PR-IMPL-M7-004](../prompts/impl/PR-IMPL-M7-004.md)` |
+| `FSD-UC-004` | Cargar Evidencia en Indicador                                  | [CC]             | v2.1    | **Hecho (M7 + FEAT-02 S3/lock `PR-IMPL-041`)**     | [Ver detalle](uc/FSD-UC-004.md) | `[DD-UC-004-M7](../design/DD-UC-004-M7.md)`           | `[PR-IMPL-M7-004](../prompts/impl/PR-IMPL-M7-004.md)` · `[PR-IMPL-041](../prompts/impl/PR-IMPL-041.md)` |
 | `FSD-UC-005` | Versionado y bloqueo de borrado                                | [CC], [TD]       | v2.1    | **Hecho (M7 DocumentAsset)**                       | [Ver detalle](uc/FSD-UC-005.md) | `[DD-UC-004-M7](../design/DD-UC-004-M7.md)`           | `[PR-IMPL-M7-004](../prompts/impl/PR-IMPL-M7-004.md)` |
 | `FSD-UC-006` | Subsanar Evidencia                                             | [CC]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-006.md) | `[DD-UC-006](../design/DD-UC-006.md)`                 | `[PR-IMPL-036](../prompts/impl/PR-IMPL-036.md)`       |
 | `FSD-UC-007` | Buscar Evidencia                                               | [CC], [TD]       | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-007.md) | `[DD-UC-007](../design/DD-UC-007.md)`                 | `[PR-IMPL-037](../prompts/impl/PR-IMPL-037.md)`       |
@@ -84,7 +84,7 @@ ultima_actualizacion: "2026-10-17"
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-10-17):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅. Hardening **8.1.0 FEAT-01** (#50 / `PR-IMPL-040`) en curso en `feat/50-hikari-report-io`.
+**Snapshot (2026-10-17):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅. Hardening **8.1.0:** FEAT-01 (#50) mergeado; FEAT-02 (#51 / `PR-IMPL-041`) S3 + lock BD; Compose object storage **Silo** (`pgsty/silo`) por retiro de imágenes públicas MinIO.
 
 ---
 

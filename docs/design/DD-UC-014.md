@@ -136,7 +136,7 @@ Tabla `report_job`:
 | created_at | TIMESTAMP | |
 | completed_at | TIMESTAMP nullable | |
 
-Artefactos PDF en `sigesa.report.storage-path` (default `./data/reports`), TTL gestionado en v1.1.
+Artefactos PDF vía `ReportArtifactStoragePort`: local (`sigesa.report.storage-path`) si `SIGESA_EVIDENCE_STORAGE=local`; object key `reports/{jobId}.pdf` en MinIO/S3 si `s3`. TTL gestionado en v1.1.
 
 ---
 

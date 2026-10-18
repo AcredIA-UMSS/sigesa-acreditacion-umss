@@ -3,6 +3,7 @@ package com.umss.sigesa.application.service.report;
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
 import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
+import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
 import com.umss.sigesa.application.port.out.TransactionRunnerPort;
@@ -14,10 +15,10 @@ import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
 import org.springframework.scheduling.annotation.Async;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -28,15 +29,18 @@ public class ReportExportJobService implements ExportReportJobUseCase, GetExport
     private final DashboardQueryPort queryPort;
     private final List<ReportGeneratorPort> reportGenerators;
     private final TransactionRunnerPort transactions;
+    private final EvidenceBlobStoragePort blobStorage;
 
     public ReportExportJobService(ReportExportJobRepositoryPort repositoryPort,
                                   DashboardQueryPort queryPort,
                                   List<ReportGeneratorPort> reportGenerators,
-                                  TransactionRunnerPort transactions) {
+                                  TransactionRunnerPort transactions,
+                                  EvidenceBlobStoragePort blobStorage) {
         this.repositoryPort = repositoryPort;
         this.queryPort = queryPort;
         this.reportGenerators = reportGenerators;
         this.transactions = transactions;
+        this.blobStorage = blobStorage;
     }
 
     @Override
@@ -78,8 +82,11 @@ public class ReportExportJobService implements ExportReportJobUseCase, GetExport
             });
 
             File file = generator.generateReport(rows.stream(), job.getFormat());
+            byte[] content = Files.readAllBytes(file.toPath());
+            String storageKey = blobStorage.store(job.getJobId(), 1, content, file.getName());
+            Files.deleteIfExists(file.toPath());
             transactions.required(() -> {
-                job.markCompleted(file.getAbsolutePath());
+                job.markCompleted(storageKey);
                 repositoryPort.save(job);
             });
         } catch (Exception ex) {
@@ -103,16 +110,9 @@ public class ReportExportJobService implements ExportReportJobUseCase, GetExport
             throw new InvalidJobStateException("The report has not been generated yet.");
         }
 
-        File file = new File(job.getFilePath());
-        if (!file.exists()) {
-            throw new InvalidJobStateException("The generated file was not found on the server.");
-        }
-
-        try {
-            return new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            throw new InvalidJobStateException("Could not read export file.");
-        }
+        byte[] content = blobStorage.retrieve(job.getFilePath())
+                .orElseThrow(() -> new InvalidJobStateException("The generated file was not found on the server."));
+        return new ByteArrayInputStream(content);
     }
 
     private ReportExportJob loadOwnedJob(UUID jobId, UUID requestingUserId) {

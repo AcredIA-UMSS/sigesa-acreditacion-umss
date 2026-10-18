@@ -29,6 +29,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,6 +88,20 @@ class DocumentAssetControllerWebMvcTest {
         mockMvc.perform(get("/api/v1/document-assets/{id}", assetId).with(tdAuth()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("DOCUMENT_ASSET_NOT_FOUND"));
+    }
+
+    @Test
+    void download_returnsBytes() throws Exception {
+        UUID assetId = UUID.randomUUID();
+        when(getDocumentAssetUseCase.download(eq(assetId), eq(TD_USER_ID), any()))
+                .thenReturn(new GetDocumentAssetUseCase.DocumentAssetBinary(
+                        "%PDF".getBytes(), "acta.pdf", "application/pdf"));
+
+        mockMvc.perform(get("/api/v1/document-assets/{id}/content", assetId).with(tdAuth()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/pdf"))
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("acta.pdf")))
+                .andExpect(content().bytes("%PDF".getBytes()));
     }
 
     private static RequestPostProcessor tdAuth() {

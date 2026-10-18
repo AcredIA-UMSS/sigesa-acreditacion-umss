@@ -10,4 +10,8 @@ public interface GetDocumentAssetUseCase {
     DocumentAssetView get(UUID documentAssetId, UUID requesterId, List<String> roles);
 
     List<DocumentAssetView> listByProcess(UUID processId, UUID requesterId, List<String> roles);
+
+    DocumentAssetBinary download(UUID documentAssetId, UUID requesterId, List<String> roles);
+
+    record DocumentAssetBinary(byte[] content, String filename, String mediaType) {}
 }

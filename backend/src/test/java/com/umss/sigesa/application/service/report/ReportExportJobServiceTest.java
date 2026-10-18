@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.report;
 
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
 import com.umss.sigesa.application.port.out.DirectTransactionRunner;
+import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
 import com.umss.sigesa.application.port.out.TransactionRunnerPort;
@@ -41,6 +42,8 @@ class ReportExportJobServiceTest {
     private DashboardQueryPort queryPort;
     @Mock
     private ReportGeneratorPort generatorPort;
+    @Mock
+    private EvidenceBlobStoragePort blobStorage;
 
     private ReportExportJobService service;
     private RecordingTransactionRunner transactions;
@@ -48,7 +51,8 @@ class ReportExportJobServiceTest {
     @BeforeEach
     void setUp() {
         transactions = new RecordingTransactionRunner();
-        service = new ReportExportJobService(repositoryPort, queryPort, List.of(generatorPort), transactions);
+        service = new ReportExportJobService(
+                repositoryPort, queryPort, List.of(generatorPort), transactions, blobStorage);
     }
 
     @Test
@@ -81,10 +85,12 @@ class ReportExportJobServiceTest {
         when(generatorPort.supports(ReportFormat.XLSX)).thenReturn(true);
         when(queryPort.streamAllObservationsForReport(any(), any())).thenReturn(Stream.empty());
         when(generatorPort.generateReport(any(), any())).thenReturn(tempFile);
+        when(blobStorage.store(any(), eq(1), any(), any())).thenReturn("reports/job.xlsx");
 
         service.processJobAsync(jobId);
 
         assertEquals(JobStatus.COMPLETED, job.getStatus());
+        assertEquals("reports/job.xlsx", job.getFilePath());
         assertEquals(100, job.getProgressPercentage());
     }
 
@@ -105,6 +111,7 @@ class ReportExportJobServiceTest {
                     "I/O de archivo no debe retener TX required (Hikari)");
             return tempFile;
         });
+        when(blobStorage.store(any(), eq(1), any(), any())).thenReturn("reports/job.xlsx");
 
         service.processJobAsync(jobId);
 
@@ -163,13 +170,12 @@ class ReportExportJobServiceTest {
     @DisplayName("getJobFileStream: Retorna InputStream cuando el trabajo esta completado")
     void getJobFileStream_exitoso() throws IOException {
         UUID userId = UUID.randomUUID();
-        File tempFile = File.createTempFile("test_done_", ".xlsx");
-        tempFile.deleteOnExit();
 
         ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.XLSX, 1);
-        job.markCompleted(tempFile.getAbsolutePath());
+        job.markCompleted("reports/job.xlsx");
 
         when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
+        when(blobStorage.retrieve("reports/job.xlsx")).thenReturn(Optional.of(new byte[]{1, 2}));
 
         InputStream is = service.getJobFileStream(job.getJobId(), userId);
         assertNotNull(is);
@@ -218,8 +224,9 @@ class ReportExportJobServiceTest {
     void shouldThrowWhenGeneratedFileIsMissing() {
         UUID userId = UUID.randomUUID();
         ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.XLSX, 1);
-        job.markCompleted("C:/tmp/does-not-exist-sigesa-export.xlsx");
+        job.markCompleted("reports/missing.xlsx");
         when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
+        when(blobStorage.retrieve("reports/missing.xlsx")).thenReturn(Optional.empty());
 
         assertThrows(InvalidJobStateException.class,
                 () -> service.getJobFileStream(job.getJobId(), userId));

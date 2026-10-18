@@ -38,6 +38,21 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
         alignCaeRoleColumn();
         alignImprovementPlanM11Columns();
         backfillE5E6E7Deliverables();
+        alignEvidenceUploadLockTable();
+    }
+
+    private void alignEvidenceUploadLockTable() {
+        try {
+            jdbcTemplate.execute("""
+                    CREATE TABLE IF NOT EXISTS evidence_upload_lock (
+                        indicator_id UUID PRIMARY KEY,
+                        acquired_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+                    )
+                    """);
+            log.info("Dev schema: evidence_upload_lock alineado.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear evidence_upload_lock en dev: {}", ex.getMessage());
+        }
     }
 
     private void alignAccreditationProcessColumns() {

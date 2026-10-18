@@ -47,7 +47,15 @@ sigesa:
   report:
     storage-path: ${SIGESA_REPORT_STORAGE_PATH:./data/reports}
   evidence:
+    storage: ${SIGESA_EVIDENCE_STORAGE:local}
     storage-path: ${SIGESA_EVIDENCE_STORAGE_PATH:./data/evidences}
+    s3:
+      endpoint: ${SIGESA_S3_ENDPOINT:}
+      region: ${SIGESA_S3_REGION:us-east-1}
+      bucket: ${SIGESA_S3_BUCKET:sigesa-evidences}
+      access-key: ${SIGESA_S3_ACCESS_KEY:}
+      secret-key: ${SIGESA_S3_SECRET_KEY:}
+      path-style: ${SIGESA_S3_PATH_STYLE:true}
     async-threshold-bytes: ${SIGESA_EVIDENCE_ASYNC_THRESHOLD:5242880}
   assistant:
     enabled: ${SIGESA_ASSISTANT_ENABLED:true}
