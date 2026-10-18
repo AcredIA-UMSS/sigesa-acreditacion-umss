@@ -5,6 +5,9 @@ import com.umss.sigesa.application.port.in.GetDocumentAssetUseCase;
 import com.umss.sigesa.domain.model.DocumentAssetView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,7 +33,7 @@ public class DocumentAssetController {
     }
 
     @GetMapping("/{documentAssetId}")
-    @PreAuthorize("hasAnyRole('CC','TD','JD')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
     @Operation(summary = "Obtener metadatos de un DocumentAsset")
     public ResponseEntity<DocumentAssetResponseDto> getDocumentAsset(
             @PathVariable UUID documentAssetId,
@@ -38,6 +41,24 @@ public class DocumentAssetController {
         UUID userId = (UUID) authentication.getPrincipal();
         DocumentAssetView view = getDocumentAssetUseCase.get(documentAssetId, userId, extractRoles(authentication));
         return ResponseEntity.ok(toDto(view));
+    }
+
+    @GetMapping("/{documentAssetId}/content")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
+    @Operation(summary = "Descargar blob del DocumentAsset (API-EVD-07b)")
+    public ResponseEntity<byte[]> downloadContent(
+            @PathVariable UUID documentAssetId,
+            Authentication authentication) {
+        UUID userId = (UUID) authentication.getPrincipal();
+        GetDocumentAssetUseCase.DocumentAssetBinary binary =
+                getDocumentAssetUseCase.download(documentAssetId, userId, extractRoles(authentication));
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename(binary.filename())
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .contentType(MediaType.parseMediaType(binary.mediaType()))
+                .body(binary.content());
     }
 
     @GetMapping

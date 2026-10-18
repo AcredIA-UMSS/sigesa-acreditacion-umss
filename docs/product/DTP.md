@@ -47,6 +47,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 17/10/2026 | **Compose object storage:** imagen `docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (API S3/MinIO). `minio/minio` y `quay.io/minio/minio` ya no son pullables anónimamente. Servicio Compose sigue `minio` + `MINIO_*` + volumen `minio_data`. | FSD-UC-004 / DD-UC-004-M7 | — | PM-022 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |
+| 17/10/2026 | **MOD-EVIDENCE FEAT-02 (#51):** blobs S3/MinIO (`EvidenceBlobStoragePort`); lock `evidence_upload_lock` (V23); Compose servicio `minio` + volumen. Endpoint/credenciales por env (S3 remoto futuro). | FSD-UC-004 / DD-UC-004-M7 | — | PM-020 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **MOD-REPORT FEAT-01 (#50):** I/O de PDF/XLSX/CSV fuera de TX write (`TransactionRunnerPort`); Hikari explícito (pool 10, acquire 30s, leak 20s). Remedia CON-03 (veredicto de auditoría histórico intacto). | FSD-UC-011 / FSD-UC-014 / DD-UC-011 / DD-UC-014 | — | PM-019 / PR-IMPL-040 / #50 | Boris Anthony Angulo Urquieta |
 | 13/10/2026 | **Cierre SIGESA 2.1 M10/M11 + CAE:** Flyway **V22** (`process_freeze`, `peer_room_checklist_items`, `indicator_delegations`, `app_user.role` VARCHAR(20)+`CAE_MEMBER`, columnas plan M11, backfill E5–E7); API-WF-18…23; gates PRESENTATION/EXTERNAL_PREP/POST_ACCREDITATION; UI freeze/checklist/delegaciones/justificación; Orval. | FSD-UC-030 / 020 / 028 / 031 / DD-UC-030 | ADR-0005 | PM-018 / PR-IMPL-M10-030 | Boris Anthony Angulo Urquieta |
 | 13/10/2026 | **MOD-EVALUATION M9 Plan de Mejoras + E4:** Flyway **V21** (`improvement_plan_items` + UNIQUE parcial source + backfill E4); API-WF-13…17; `evaluateDrafting`; generate PDF borrador (`DraftingDocumentRendererPort`); UI plan + botón generar; Orval. | FSD-UC-031 / FSD-UC-028 / DD-UC-031 | ADR-0005 | PM-017 / PR-IMPL-M9-031 | Boris Anthony Angulo Urquieta |
@@ -263,7 +265,7 @@ artefactos_vivos:
 | **Endpoints** | `POST /api/v1/reports/executive/pdf` → **202** `{ jobId }`; `GET .../pdf/{jobId}` → estado; `GET .../pdf/{jobId}/download` → `application/pdf` |
 | **RBAC** | Solo `[JD]` — `SecurityConfig` + FSD-BR-14 |
 | **Tabla JPA** | `report_job` (`id`, `requester_id`, filtros, `status`, `artifact_key`, `error_code`, timestamps) |
-| **Storage artefactos** | Filesystem local `sigesa.report.storage-path` (default `./data/reports`) |
+| **Storage artefactos** | `ReportArtifactStoragePort`: local si `SIGESA_EVIDENCE_STORAGE=local`; S3/MinIO keys `reports/{jobId}.pdf` si `s3` |
 | **Job async** | `@Async("reportJobExecutor")` — `ReportJobAsyncDispatcher` |
 | **TX vs I/O (FEAT-01)** | `TransactionRunnerPort`: persistir estado en TX cortas; `render`/`store`/`generateReport` fuera de TX write |
 | **HikariCP** | `spring.datasource.hikari` en YAML — `maximum-pool-size=10`, `connection-timeout=30000`, `leak-detection-threshold=20000` (`SIGESA_HIKARI_*`) |
@@ -285,18 +287,20 @@ artefactos_vivos:
 | **Estado workflow** | Derivado en `subphases.status` | Derivado en `indicators.status` |
 | **Búsqueda** | API-EVD-02 filtros `phaseId`, `subphaseId` | `level1Id`, `indicatorId`, `normativePath` |
 | **RBAC** | `[CC]` alcance carrera | Sin cambio |
-| **Hash / storage** | SHA-256, `./data/evidences` | M7: blob en `DocumentAsset`; unique `(process_id, content_hash)` |
+| **Hash / storage** | SHA-256, `./data/evidences` | M7: blob en `DocumentAsset`; unique `(process_id, content_hash)`. **8.1.0 FEAT-02:** `SIGESA_EVIDENCE_STORAGE=s3` (MinIO/S3) o `local` (tests); lock `evidence_upload_lock`; `GET /document-assets/{id}/content` (API-EVD-07b) |
 
 #### B.4.2 MOD-EVIDENCE — DocumentAsset M:N (`DD-UC-004-M7`, M7 / v2.1)
 
-**Implementación:** Sprint 03 PM-015 · **Prompt:** `PR-IMPL-M7-004` · **FSD:** UC-004/005 · **ADR:** ADR-0005
+**Implementación:** Sprint 03 PM-015 · **Prompt:** `PR-IMPL-M7-004` · **Hardening 8.1.0:** `PR-IMPL-041` (#51) · **FSD:** UC-004/005 · **ADR:** ADR-0005
 
 | Área | Detalle vigente (M7) |
 | --- | --- |
 | **Endpoints** | API-EVD-01 201 + `documentAssetId`/`folioCode`/`reusedAsset`; EVD-06 `POST .../evidences/link`; EVD-07 `GET /document-assets/{id}` (+ list `?processId=`) |
 | **Dominio** | `DocumentAsset`, `IndicatorEvidenceLink`; `Evidence` sigue 1:1 indicador (`uk_evidence_normative_indicator`) |
 | **Puertos** | OUT `DocumentAssetPort`; IN `LinkDocumentAssetToIndicatorUseCase`, `GetDocumentAssetUseCase` |
-| **Migración Flyway** | `V19__document_assets_indicator_links.sql` (prod); Docker dev: Hibernate `ddl-auto: update` + backfill en `DevWorkflowSchemaAlignmentRunner` |
+| **Migración Flyway** | `V19` DocumentAsset; **`V23__evidence_upload_lock.sql`** (FEAT-02); Docker: Hibernate + `DevWorkflowSchemaAlignmentRunner` |
+| **Object storage** | `S3EvidenceBlobStorageAdapter` si `sigesa.evidence.storage=s3`; Compose `minio` = `pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (`:9000` API / `:9001` consola); keys `evidences/{id}/v{n}/…` |
+| **Upload lock** | `JdbcEvidenceUploadLockAdapter` — PK `indicator_id`; sin `ConcurrentHashMap` |
 | **Errores clave** | 409 `INDICATOR_ALREADY_HAS_EVIDENCE`; 404 `DOCUMENT_ASSET_NOT_FOUND`; 403 `PROGRAM_SCOPE_DENIED` (asset de otro proceso) |
 | **Frontend** | Modal carga: checkbox vincular asset del proceso; folio en lista de evidencias; wrapper Orval |
 | **Pendiente** | N documentos por el mismo indicador (post-M7) |

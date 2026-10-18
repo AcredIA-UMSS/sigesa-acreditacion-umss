@@ -40,6 +40,12 @@ Al arrancar el backend en modo desarrollo (H2 en memoria), se cargan automática
 
 > Solo cuentas con estado **ACTIVE** pueden autenticarse. `pendiente@umss.edu.bo` sirve para probar activación desde el panel de administración.
 
+### Object storage (Compose / FEAT-02)
+
+Docker levanta object storage S3-compatible (**Silo**, fork de MinIO; `pgsty/silo:RELEASE.2026-10-15T00-00-00Z`, `:9000` API, `:9001` consola). Las imágenes oficiales `minio/minio` y `quay.io/minio/minio` ya no se pueden pullar anónimamente. El backend usa `SIGESA_EVIDENCE_STORAGE=s3`. Volumen `minio_data` sobrevive a recrear `sigesa-backend`. Descarga: `GET /api/v1/document-assets/{id}/content`. Para un S3 remoto, cambiar `SIGESA_S3_ENDPOINT` / keys en `.env`.
+
+Credenciales demo MinIO: usuario `sigesa` / `sigesaMinioDev1`.
+
 
 
 ### Datos de prueba precargados

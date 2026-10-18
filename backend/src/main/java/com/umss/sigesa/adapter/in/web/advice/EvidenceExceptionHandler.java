@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
+import com.umss.sigesa.domain.exception.EvidenceBlobNotFoundException;
 import com.umss.sigesa.domain.exception.EvidenceImmutableException;
 import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.EvidenceNotFoundException;
@@ -34,6 +35,12 @@ public class EvidenceExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDocumentAssetNotFound(DocumentAssetNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "DOCUMENT_ASSET_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EvidenceBlobNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEvidenceBlobNotFound(EvidenceBlobNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "EVIDENCE_BLOB_NOT_FOUND", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(IndicatorAlreadyHasEvidenceException.class)

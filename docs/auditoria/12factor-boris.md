@@ -130,6 +130,7 @@
   - No hay `express-session` / `MemoryStore` (no es Node en el API).
 - **Estado:** `FALLA`
 - **Observación:** La autenticación sí es stateless (JWT) y el estado de negocio está en PostgreSQL. **Matiz (FALLA crítica para escalado):** guardar PDFs/evidencias en el disco del contenedor y manejar el lock con `ConcurrentHashMap` rompe el Factor VI e **impide escalar horizontalmente a más de 1 réplica**. Con \(N=1\) (Compose mononodo, P1) es tolerable en demo; un `docker compose up --scale` o una segunda JVM perdería blobs y no coordinaría uploads. **Issue técnico (candidato a feature individual del sprint):** *Migrar almacenamiento de evidencias a MinIO/S3 (blob storage intercambiable) y sustituir lock en memoria por lock distribuido (Redis/DB lock) o atomicidad en base de datos*. No persistir `file.getAbsolutePath()` como contrato de descarga.
+- **Remediación 8.1.0 (no cambia el veredicto):** GitHub [#51](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/51) / `PR-IMPL-041` / rama `feat/51-s3-evidence-lock`. Evidencias y reportes → S3-compatible (Compose: `pgsty/silo`; imágenes oficiales MinIO Hub/Quay no públicas); lock → `evidence_upload_lock`; descarga `GET /document-assets/{id}/content`.
 - **Auditó:** Asistente de auditoría (Cursor)
 
 ### F12-04 · Logs a la salida estándar (factor XI)

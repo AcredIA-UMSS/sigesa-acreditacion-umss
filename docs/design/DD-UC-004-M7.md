@@ -12,6 +12,7 @@ adrs:
   - "ADR-0005"
 prompts:
   - "PR-IMPL-M7-004"
+  - "PR-IMPL-041"
 release: "2.1.0"
 status: aprobado
 fecha: "13/10/2026"
@@ -32,6 +33,13 @@ Un PDF institucional no debe duplicarse en disco/MinIO cuando alimenta **varios 
 **Dentro:** persistencia V19, deduplicación por SHA-256, API link + GET asset, UI modal (vincular existente), backfill, tests.
 
 **Fuera:** FODA (M8), congelamiento (M10), foliado institucional DUEA oficial, N documentos por el mismo indicador, UC-015 SMTP real.
+
+### Object storage y lock (FEAT-02 / `PR-IMPL-041`, 2026-10-17)
+
+- `DocumentAsset.storageKey` es una **clave opaca** (`evidences/{id}/v{n}/{file}`), nunca `file.getAbsolutePath()`.
+- Runtime Docker: `sigesa.evidence.storage=s3` → Silo (`pgsty/silo:RELEASE.2026-10-15T00-00-00Z`, API S3/MinIO, `SIGESA_S3_ENDPOINT=http://minio:9000`). H2/tests: `local`. Imágenes oficiales MinIO (Hub/Quay) no se usan: pull anónimo 401/denied.
+- Cambio a S3 remoto: mismas variables, otro endpoint. Un solo `EvidenceBlobStoragePort`.
+- Upload concurrente: `evidence_upload_lock` (PK `indicator_id`, `INSERT` atómico; TTL 5 min). No `ConcurrentHashMap`. Flyway **V23**.
 
 ## 2. Diseño
 

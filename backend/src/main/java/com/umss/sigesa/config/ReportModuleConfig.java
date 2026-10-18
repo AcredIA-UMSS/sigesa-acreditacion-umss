@@ -6,6 +6,7 @@ import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ProcessReportJobUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
+import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ExecutiveDataPort;
 import com.umss.sigesa.application.port.out.PdfRendererPort;
 import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
@@ -63,7 +64,8 @@ public class ReportModuleConfig {
             ReportExportJobRepositoryPort repositoryPort,
             DashboardQueryPort queryPort,
             List<ReportGeneratorPort> reportGenerators,
-            TransactionRunnerPort transactions) {
-        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators, transactions);
+            TransactionRunnerPort transactions,
+            EvidenceBlobStoragePort blobStorage) {
+        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators, transactions, blobStorage);
     }
 }

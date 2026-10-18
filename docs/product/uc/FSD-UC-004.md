@@ -9,8 +9,8 @@ modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
 design_doc: DD-UC-004-M7
 pr_impl: PR-IMPL-M7-004
-ultima_actualizacion: "2026-10-13"
-nota_implementacion: "M7: blob físico en DocumentAsset; Evidence sigue 1:1 por indicador; redireccionamiento M:N vía IndicatorEvidenceLink."
+ultima_actualizacion: "2026-10-17"
+nota_implementacion: "M7: blob físico en DocumentAsset; Evidence 1:1 por indicador. FEAT-02 (#51): blobs S3-compatible (Compose: Silo `pgsty/silo`, API MinIO) o local (H2); lock evidence_upload_lock."
 ---
 
 # FSD-UC-004 — Cargar Evidencia en Indicador
@@ -21,7 +21,7 @@ nota_implementacion: "M7: blob físico en DocumentAsset; Evidence sigue 1:1 por 
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-005, 022 · PRD-US-005, 025 |
 | **Design Doc** | [`DD-UC-004-M7`](../../design/DD-UC-004-M7.md) |
-| **Prompt impl** | [`PR-IMPL-M7-004`](../../prompts/impl/PR-IMPL-M7-004.md) |
+| **Prompt impl** | [`PR-IMPL-M7-004`](../../prompts/impl/PR-IMPL-M7-004.md) · [`PR-IMPL-041`](../../prompts/impl/PR-IMPL-041.md) (#51) |
 | **ADR** | [ADR-0005](../../adr/ADR-0005-workflow-metodologico-evaluacion-transversal.md) § entidades DocumentAsset |
 | **Precondiciones** | Indicador en proceso ACTIVE; [CC] con alcance sobre la carrera; sin observación OPEN; el indicador **no** tiene evidencia vigente |
 
@@ -64,7 +64,7 @@ nota_implementacion: "M7: blob físico en DocumentAsset; Evidence sigue 1:1 por 
 | `indicatorId`, `file` (opc.), `externalUrl` (opc.), `description` | `evidenceId`, `version`, `documentAssetId`, `folioCode`, `contentHash`, `reusedAsset` |
 | Link: `indicatorId`, `documentAssetId` | igual, `reusedAsset: true` |
 
-**API v2.1 (M7):** `POST /indicators/{id}/evidences` (multipart, reutiliza por hash) · `POST /indicators/{id}/evidences/link` · `GET /document-assets/{id}`.
+**API v2.1 (M7):** `POST /indicators/{id}/evidences` (multipart, reutiliza por hash) · `POST /indicators/{id}/evidences/link` · `GET /document-assets/{id}` · `GET /document-assets/{id}/content` (API-EVD-07b, blob MinIO/S3).
 
 **API v2.0 (sigue válido):** `POST/GET /indicators/{indicatorId}/evidences`.
 

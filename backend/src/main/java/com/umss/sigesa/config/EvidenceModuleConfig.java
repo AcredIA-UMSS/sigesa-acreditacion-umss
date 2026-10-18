@@ -140,8 +140,10 @@ public class EvidenceModuleConfig {
     GetDocumentAssetUseCase getDocumentAssetUseCase(
             DocumentAssetPort documentAssetPort,
             ProcessQueryPort processQueryPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
-        return new GetDocumentAssetService(documentAssetPort, processQueryPort, assignmentRepository);
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            EvidenceBlobStoragePort blobStorage) {
+        return new GetDocumentAssetService(
+                documentAssetPort, processQueryPort, assignmentRepository, blobStorage);
     }
 
     @Bean

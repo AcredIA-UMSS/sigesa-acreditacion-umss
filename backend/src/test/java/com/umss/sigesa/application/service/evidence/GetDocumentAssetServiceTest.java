@@ -1,7 +1,9 @@
 package com.umss.sigesa.application.service.evidence;
 
 import com.umss.sigesa.application.port.out.DocumentAssetPort;
+import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.domain.exception.EvidenceBlobNotFoundException;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
@@ -34,6 +36,8 @@ class GetDocumentAssetServiceTest {
     private ProcessQueryPort processQueryPort;
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
+    @Mock
+    private EvidenceBlobStoragePort blobStorage;
 
     @InjectMocks
     private GetDocumentAssetService service;
@@ -85,5 +89,45 @@ class GetDocumentAssetServiceTest {
 
         assertThrows(ProgramScopeDeniedException.class,
                 () -> service.get(asset.getId(), userId, List.of("CC")));
+    }
+
+    @Test
+    @DisplayName("download: lee bytes del object storage")
+    void download_success() {
+        UUID userId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        UUID processId = UUID.randomUUID();
+        DocumentAsset asset = DocumentAsset.create(
+                processId, "doc.pdf", "evidences/id/v1/doc.pdf", "abcd1234ffff", userId, LocalDateTime.now());
+        when(documentAssetPort.findById(asset.getId())).thenReturn(Optional.of(asset));
+        when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(
+                AccreditationProcess.builder().id(processId).careerId(careerId).status("ACTIVE").build()));
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, careerId, LocalDateTime.now(), null)));
+        when(blobStorage.retrieve("evidences/id/v1/doc.pdf")).thenReturn(Optional.of("%PDF".getBytes()));
+
+        var binary = service.download(asset.getId(), userId, List.of("CC"));
+        assertEquals("doc.pdf", binary.filename());
+        assertEquals("application/pdf", binary.mediaType());
+        assertEquals("%PDF", new String(binary.content()));
+    }
+
+    @Test
+    @DisplayName("download: blob ausente")
+    void download_blobMissing() {
+        UUID userId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        UUID processId = UUID.randomUUID();
+        DocumentAsset asset = DocumentAsset.create(
+                processId, "doc.pdf", "evidences/id/v1/doc.pdf", "abcd1234ffff", userId, LocalDateTime.now());
+        when(documentAssetPort.findById(asset.getId())).thenReturn(Optional.of(asset));
+        when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(
+                AccreditationProcess.builder().id(processId).careerId(careerId).status("ACTIVE").build()));
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, careerId, LocalDateTime.now(), null)));
+        when(blobStorage.retrieve("evidences/id/v1/doc.pdf")).thenReturn(Optional.empty());
+
+        assertThrows(EvidenceBlobNotFoundException.class,
+                () -> service.download(asset.getId(), userId, List.of("CC")));
     }
 }

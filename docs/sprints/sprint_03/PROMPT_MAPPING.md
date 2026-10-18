@@ -26,6 +26,9 @@
 | PM-017 | PR-IMPL-M9-031 | DD-UC-031 | FSD-UC-031 / FSD-UC-028 | M9 Plan de Mejoras + documentos E4 + compuerta E4→E5 |
 | PM-018 | PR-IMPL-M10-030 | DD-UC-030 | FSD-UC-030 / 020 / 028 / 031 | Cierre 2.1: freeze/Sala de Pares, ciclo E7, CAE_MEMBER |
 | PM-019 | PR-IMPL-040 | DD-UC-011 / DD-UC-014 | FSD-UC-011 / FSD-UC-014 | FEAT-01 #50: I/O reportes fuera de TX + Hikari explícito |
+| PM-020 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 / FSD-UC-005 | FEAT-02 #51: MinIO/S3 evidencias + lock BD |
+| PM-021 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 / FSD-UC-014 | FEAT-02 cierre: GET blob + reportes S3 + imagen quay.io MinIO |
+| PM-022 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Compose: Silo (`pgsty/silo`) reemplaza imagen MinIO Hub/Quay |
 
 ---
 
@@ -1346,4 +1349,198 @@ Issue #50 implementado en `feat/50-hikari-report-io`. Contratos REST sin cambio.
 
 - [ ] Commit/PR `Fixes #50` cuando el usuario lo pida
 - [ ] FEAT-02 (#51) MinIO y FEAT-03 (#52) LLM en ramas separadas
+
+---
+
+## PM-020
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-020 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 21:10 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar GitHub #51 FEAT-02 (S3/MinIO + lock upload en BD) en `feat/51-s3-evidence-lock` |
+| **Objetivo** | Blobs de evidencia fuera del disco del contenedor; lock de upload atómico y visible a N réplicas |
+| **Contexto** | Auditoría F12-03 FALLA; issue https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/51; release 8.1.0 Demo 1 |
+| **PR-IMPL vinculado** | [PR-IMPL-041](../../prompts/impl/PR-IMPL-041.md) |
+| **DD-UC vinculado** | [DD-UC-004-M7](../../design/DD-UC-004-M7.md) |
+| **FSD-UC vinculado** | FSD-UC-004 · FSD-UC-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+implementemos la issue 51, crea la rama a partir de release/2.0.0 que ya esta actualiZada, y una vez hecho documenta todo los cambios donde sean necesarios
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-041.md`
+- `docs/auditoria/12factor-boris.md` (F12-03)
+- GitHub issue #51
+
+### Archivos generados o modificados
+
+Ver `git status` de esta sesión (S3 adapter, lock JDBC, V23, Compose MinIO, docs vivos).
+
+### Cambios realizados
+
+1. `S3EvidenceBlobStorageAdapter` + MinIO en Compose; `SIGESA_S3_*` para endpoint remoto futuro.
+2. `JdbcEvidenceUploadLockAdapter` + tabla `evidence_upload_lock` (V23 / Hibernate / runner dev).
+3. `InMemoryEvidenceUploadLockAdapter` ya no es bean de Spring.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=S3EvidenceBlobStorageAdapterTest,JdbcEvidenceUploadLockAdapterIT,UploadEvidenceServiceTest,UploadNormativeIndicatorEvidenceServiceTest test` — verde
+- [ ] `pnpm run lint` — N/A (backend + compose)
+
+### Resultado obtenido
+
+Issue #51 implementado en `feat/51-s3-evidence-lock`. Veredicto F12-03 histórico `FALLA` intacto.
+
+### Próximos pasos
+
+- [ ] Commit/PR `Fixes #51` cuando el usuario lo pida
+- [ ] FEAT-03 (#52) LLM
+
+---
+
+## PM-021
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-021 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 21:28 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Cerrar huecos FEAT-02 #51: reportes en object storage + GET blob + imagen MinIO |
+| **Objetivo** | PDF/Excel no viven en disco del API; descarga de evidencia desde MinIO/S3; pull de imagen viable |
+| **Contexto** | Tras PM-020 el usuario pidió no dejar reportes en `LocalFileReportArtifactStorageAdapter` ni omitir GET de blob. Compose fallaba con `minio/minio` (Docker Hub deny). |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 / DD-UC-014 |
+| **FSD-UC vinculado** | FSD-UC-004 / FSD-UC-014 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+No es del issue (no lo dejes para “cerrar #51”)
+
+Reportes PDF/Excel siguen en disco (LocalFileReportArtifactStorageAdapter) — lo excluimos a propósito.
+No hay GET de descarga del blob: SIGESA ya solo guardaba la key; recrear el API no borra el archivo en MinIO ni la referencia en Postgres.
+
+Esto corrigelo
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-041.md`
+- `docs/design/DD-UC-004-M7.md`
+- `docs/design/DD-UC-014.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/S3ReportArtifactStorageAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/exception/EvidenceBlobNotFoundException.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/DocumentAssetController.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/in/GetDocumentAssetUseCase.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/GetDocumentAssetService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/EvidenceBlobStoragePort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/report/ReportExportJobService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/LocalFileReportArtifactStorageAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/S3EvidenceStorageConfig.java` |
+| modificado | `docker-compose.yml` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/prompts/impl/PR-IMPL-041.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `README.md` |
+
+### Cambios realizados
+
+1. `S3ReportArtifactStorageAdapter` + export dashboard vía `EvidenceBlobStoragePort.store/retrieve` (key opaca, no path absoluto).
+2. `GET /api/v1/document-assets/{id}/content` (API-EVD-07b).
+3. Imagen Compose `quay.io/minio/minio:latest`.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=S3EvidenceBlobStorageAdapterTest,GetDocumentAssetServiceTest,DocumentAssetControllerWebMvcTest,ReportExportJobServiceTest,DownloadReportArtifactServiceTest test` — verde
+- [ ] `pnpm run lint` — N/A (sin cambio FE)
+
+### Resultado obtenido
+
+Huecos de #51 cerrados en `feat/51-s3-evidence-lock`. Orval pendiente de `generate:api` con backend arriba.
+
+### Próximos pasos
+
+- [ ] Reintentar `docker compose up --build`
+- [ ] Commit/PR cuando el usuario lo pida
+
+---
+
+## PM-022
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-022 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 21:42 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Documentar y fijar imagen Compose tras 401 Quay MinIO |
+| **Objetivo** | Compose pullable; docs vivos alineadas (no `docs/baseline/`) |
+| **Contexto** | Hub `minio/minio` deny; `quay.io/minio/minio:latest` 401 UNAUTHORIZED (imágenes MinIO ya no públicas). |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 |
+| **FSD-UC vinculado** | FSD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+hiciste los cambios respectivos en la documentaicon del cambio?
+```
+
+(disparado por el 401 de `quay.io/minio/minio:latest` en `docker compose up --build`)
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `docker-compose.yml` |
+| modificado | `README.md` |
+| modificado | `docs/prompts/impl/PR-IMPL-041.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-004.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/design/DD-UC-004-M7.md` |
+| modificado | `docs/auditoria/12factor-boris.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Imagen `docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (API S3/MinIO).
+- Changelog DTP A.1 + B.4 object storage; FSD/DD/contratos/auditoría.
+
+### Validación ejecutada
+
+- [x] `docker pull docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` — OK
+- [ ] `pnpm run lint` — N/A
+
+### Resultado obtenido
+
+Documentación viva sincronizada con el reemplazo de imagen. `docs/baseline/` intacto.
+
+### Próximos pasos
+
+- [ ] Commit/PR cuando el usuario lo pida
+
 

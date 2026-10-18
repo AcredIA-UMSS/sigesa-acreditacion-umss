@@ -71,6 +71,8 @@ services:
         condition: service_started
       open-webui:
         condition: service_started
+      minio:
+        condition: service_started
     environment:
       - SIGESA_IN_DOCKER=true
       - SPRING_PROFILES_ACTIVE=dev
@@ -91,9 +93,30 @@ services:
       - SIGESA_ASSISTANT_RAG_ENABLED=${SIGESA_ASSISTANT_RAG_ENABLED:-true}
       - SIGESA_ASSISTANT_RAG_MAX_CHUNKS=${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:-3}
       - SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS=${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:-5}
+      - SIGESA_EVIDENCE_STORAGE=s3
+      - SIGESA_S3_ENDPOINT=http://minio:9000
+      - SIGESA_S3_BUCKET=${SIGESA_S3_BUCKET:-sigesa-evidences}
+      - SIGESA_S3_ACCESS_KEY=${SIGESA_S3_ACCESS_KEY:-sigesa}
+      - SIGESA_S3_SECRET_KEY=${SIGESA_S3_SECRET_KEY:-sigesaMinioDev1}
+      - SIGESA_S3_REGION=${SIGESA_S3_REGION:-us-east-1}
+      - SIGESA_S3_PATH_STYLE=true
 
     ports:
       - "8080:8080"
+
+  minio:
+    image: docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z
+    container_name: sigesa-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${SIGESA_S3_ACCESS_KEY:-sigesa}
+      MINIO_ROOT_PASSWORD: ${SIGESA_S3_SECRET_KEY:-sigesaMinioDev1}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
 
   frontend:
     build:
@@ -138,3 +161,4 @@ volumes:
   postgres_data:
   open-webui:
   ollama_state:
+  minio_data:

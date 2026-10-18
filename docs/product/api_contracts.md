@@ -351,12 +351,23 @@ Si el SHA-256 ya existe en `document_assets` del **mismo proceso**, no se duplic
 | Campo | Valor |
 |-------|-------|
 | **UC** | FSD-UC-004 / FSD-UC-005 (M7) |
-| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]` |
+| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]`, `[EE]` |
 | **200** | `{ id, folioCode, title, contentHash, processId, linkedIndicatorIds[], createdAt }` |
 | **403** | `PROGRAM_SCOPE_DENIED` |
 | **404** | `DOCUMENT_ASSET_NOT_FOUND` |
 
 Listado para el selector UI: `GET /document-assets?processId={uuid}` (mismo DTO en array).
+
+### API-EVD-07b — `GET /document-assets/{documentAssetId}/content`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-004 / FEAT-02 (#51) |
+| **x-allowed-roles** | `[CC]`, `[TD]`, `[JD]`, `[EE]` |
+| **200** | bytes del blob (`Content-Disposition: attachment`; `Content-Type` según extensión) |
+| **404** | `DOCUMENT_ASSET_NOT_FOUND`, `EVIDENCE_BLOB_NOT_FOUND` |
+
+El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo `pgsty/silo`). Recrear el contenedor API no invalida esta descarga.
 
 ### API-EVD-02 — `GET /evidences/search`
 
