@@ -136,6 +136,7 @@
   - Postgres Alpine en Compose **sin** `max_connections` custom (`docker-compose.yml:4-19`).
 - **Estado:** `FALLA`
 - **Observación:** El pool existe solo por default de Hikari (10; acquire 30 s), no está dimensionado a propósito ni hay 503 al agotarse. **Matiz (FALLA crítica):** un método `@Transactional` que escribe a disco retiene una conexión Hikari **durante todo el I/O**. Por \(L=\lambda\cdot W\), con el pico de 10 req/s eso agota las 10 conexiones en segundos (no en la demo de 1–2 req/s con \(W_{db}\) de decenas de ms). El chat LLM no está en transacción (bien). **Issue técnico:** refactorizar `processJobAsync`: leer/persistir estado **dentro** de la transacción, **cerrarla**, y escribir el archivo/reporte **fuera** del contexto transaccional. Complemento: declarar Hikari en YAML y mapear pool exhausted a 503.
+- **Remediación 8.1.0 (no cambia el veredicto):** GitHub [#50](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/50) / `PR-IMPL-040` / rama `feat/50-hikari-report-io`. I/O fuera de TX write + Hikari en YAML. 503 por pool exhausted **sigue fuera de alcance**.
 - **Auditó:** Asistente de auditoría (Cursor)
 
 ### CON-04 · Timeouts y reintentos en llamadas externas (incluida la IA)

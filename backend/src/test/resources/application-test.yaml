@@ -4,6 +4,12 @@ spring:
       on-profile: test
   datasource:
     url: jdbc:h2:mem:sigesa-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    hikari:
+      pool-name: sigesa-hikari-test
+      maximum-pool-size: 10
+      minimum-idle: 1
+      connection-timeout: 30000
+      leak-detection-threshold: 20000
   jpa:
     hibernate:
       ddl-auto: create-drop

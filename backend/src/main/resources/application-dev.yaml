@@ -4,6 +4,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:sigesa_user}
     password: ${SPRING_DATASOURCE_PASSWORD:sigesa_password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: sigesa-hikari
+      maximum-pool-size: ${SIGESA_HIKARI_MAX_POOL:10}
+      minimum-idle: ${SIGESA_HIKARI_MIN_IDLE:2}
+      connection-timeout: ${SIGESA_HIKARI_CONNECTION_TIMEOUT_MS:30000}
+      leak-detection-threshold: ${SIGESA_HIKARI_LEAK_DETECTION_MS:20000}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

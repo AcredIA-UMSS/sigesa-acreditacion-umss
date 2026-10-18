@@ -7,7 +7,7 @@ actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-012, PRD-US-015
 modulo: MOD-DASH
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-09-08"
+ultima_actualizacion: "2026-10-17"
 ---
 
 # FSD-UC-011 — Dashboard [CC] y observaciones
@@ -20,6 +20,7 @@ ultima_actualizacion: "2026-09-08"
 | **Pantalla** | `/dashboard` (Shell Híbrido PBAC) / `/coordinator/dashboard` |
 | **API** | Suite Híbrida: `GET /api/v1/dashboards/me/summary` (KPIs PBAC), `GET /api/v1/dashboards/coordinator/details`, `GET /api/v1/dashboards/coordinator/export` |
 | **Nota implementación viva (2026-08-27)** | KPIs CC, tabla observaciones y export operativos en `/dashboard` con datos reales (PM-003). **Pendiente:** enlace «Subsanar» hasta UC-006; ruta dedicada `/coordinator/dashboard` unificada en shell híbrido. |
+| **Hardening 8.1.0 (2026-10-17)** | FEAT-01 / GitHub #50 / `PR-IMPL-040`: export async sin I/O de archivo dentro de TX write; Hikari explícito. T-007 dashboards dedicados sigue parcial. |
 
 ## Flujo principal
 

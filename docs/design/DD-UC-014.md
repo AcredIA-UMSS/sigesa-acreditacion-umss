@@ -15,6 +15,7 @@ prd_refs:
   - PRD-REQ-014
 prompts:
   - PR-IMPL-005
+  - PR-IMPL-040
 release: v1.0
 ---
 
@@ -80,6 +81,10 @@ sequenceDiagram
     WRK->>PDF: render(snapshot)
     WRK-->>JD: GET /reports/executive/pdf/{jobId}
 ```
+
+### Límite transaccional (FEAT-01 / `PR-IMPL-040`, 2026-10-17)
+
+`ProcessReportJobService.process`: TX write (`IN_PROGRESS`) → TX read (`fetchSnapshot`) → **sin TX** `pdfRendererPort.render` + `artifactStorage.store` → TX write (`COMPLETED`/`FAILED`). Pool Hikari declarado en YAML. Issue GitHub #50.
 
 ---
 

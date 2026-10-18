@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 17/10/2026 | **MOD-REPORT FEAT-01 (#50):** I/O de PDF/XLSX/CSV fuera de TX write (`TransactionRunnerPort`); Hikari explícito (pool 10, acquire 30s, leak 20s). Remedia CON-03 (veredicto de auditoría histórico intacto). | FSD-UC-011 / FSD-UC-014 / DD-UC-011 / DD-UC-014 | — | PM-019 / PR-IMPL-040 / #50 | Boris Anthony Angulo Urquieta |
 | 13/10/2026 | **Cierre SIGESA 2.1 M10/M11 + CAE:** Flyway **V22** (`process_freeze`, `peer_room_checklist_items`, `indicator_delegations`, `app_user.role` VARCHAR(20)+`CAE_MEMBER`, columnas plan M11, backfill E5–E7); API-WF-18…23; gates PRESENTATION/EXTERNAL_PREP/POST_ACCREDITATION; UI freeze/checklist/delegaciones/justificación; Orval. | FSD-UC-030 / 020 / 028 / 031 / DD-UC-030 | ADR-0005 | PM-018 / PR-IMPL-M10-030 | Boris Anthony Angulo Urquieta |
 | 13/10/2026 | **MOD-EVALUATION M9 Plan de Mejoras + E4:** Flyway **V21** (`improvement_plan_items` + UNIQUE parcial source + backfill E4); API-WF-13…17; `evaluateDrafting`; generate PDF borrador (`DraftingDocumentRendererPort`); UI plan + botón generar; Orval. | FSD-UC-031 / FSD-UC-028 / DD-UC-031 | ADR-0005 | PM-017 / PR-IMPL-M9-031 | Boris Anthony Angulo Urquieta |
 | 13/10/2026 | **MOD-EVALUATION M8 FODA + métricas + E2→E3:** Flyway **V20** (`indicator_analysis` + CHECKs + backfill E3 `FODA_FORMS_COMPLETE`/`SYNTHESIS_MATRIX`); API-WF-09…12; gate SYSTEMATIZATION; bootstrap ensure en procesos viejos; panel métricas + form FODA + lote encuesta; Orval. | FSD-UC-029 / FSD-UC-028 / DD-UC-029 | ADR-0005 | PM-016 / PR-IMPL-M8-029 | Boris Anthony Angulo Urquieta |
@@ -254,7 +255,7 @@ artefactos_vivos:
 
 ### B.3 MOD-REPORT — contrato técnico vigente (DD-UC-014)
 
-**Implementación:** PM-010 · **Prompts:** `PR-IMPL-005` · **FSD:** FSD-UC-014
+**Implementación:** PM-010 · **Prompts:** `PR-IMPL-005` · **Hardening 8.1.0:** `PR-IMPL-040` (issue #50) · **FSD:** FSD-UC-014
 
 | Área | Detalle vigente |
 |---|---|
@@ -264,6 +265,8 @@ artefactos_vivos:
 | **Tabla JPA** | `report_job` (`id`, `requester_id`, filtros, `status`, `artifact_key`, `error_code`, timestamps) |
 | **Storage artefactos** | Filesystem local `sigesa.report.storage-path` (default `./data/reports`) |
 | **Job async** | `@Async("reportJobExecutor")` — `ReportJobAsyncDispatcher` |
+| **TX vs I/O (FEAT-01)** | `TransactionRunnerPort`: persistir estado en TX cortas; `render`/`store`/`generateReport` fuera de TX write |
+| **HikariCP** | `spring.datasource.hikari` en YAML — `maximum-pool-size=10`, `connection-timeout=30000`, `leak-detection-threshold=20000` (`SIGESA_HIKARI_*`) |
 | **Estados job** | `PENDING` → `IN_PROGRESS` → `COMPLETED` \| `FAILED` |
 | **Errores job** | `REPORT_TEMPLATE`, `REPORT_GENERATION_FAILED` |
 | **Datos PDF** | v1.0: `ExecutiveDataStubAdapter`; post UC-013: `ExecutiveDashboardQueryPort` + `ExecutiveDataDashboardAdapter` (@Primary) |

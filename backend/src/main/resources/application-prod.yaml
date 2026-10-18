@@ -7,6 +7,14 @@ spring:
     username: ${DATABASE_USERNAME:sigesa}
     password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: sigesa-hikari
+      maximum-pool-size: ${SIGESA_HIKARI_MAX_POOL:10}
+      minimum-idle: ${SIGESA_HIKARI_MIN_IDLE:2}
+      connection-timeout: ${SIGESA_HIKARI_CONNECTION_TIMEOUT_MS:30000}
+      idle-timeout: ${SIGESA_HIKARI_IDLE_TIMEOUT_MS:600000}
+      max-lifetime: ${SIGESA_HIKARI_MAX_LIFETIME_MS:1800000}
+      leak-detection-threshold: ${SIGESA_HIKARI_LEAK_DETECTION_MS:20000}
   jpa:
     hibernate:
       ddl-auto: validate
