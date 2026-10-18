@@ -11,6 +11,7 @@ import com.umss.sigesa.application.model.assistant.ToolCall;
 import com.umss.sigesa.application.port.out.ChatCompletionPort;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantCompletionException;
+import com.umss.sigesa.domain.exception.AssistantGatewayTimeoutException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
@@ -21,24 +22,38 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class OpenWebUiChatAdapter implements ChatCompletionPort {
-
-    private static final Duration TIMEOUT = Duration.ofSeconds(120);
 
     private final AssistantProperties properties;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
 
     public OpenWebUiChatAdapter(AssistantProperties properties) {
+        this(properties, defaultHttpClient(properties.requestTimeout()));
+    }
+
+    OpenWebUiChatAdapter(AssistantProperties properties, HttpClient httpClient) {
         this.properties = properties;
-        this.httpClient = HttpClient.newBuilder()
+        this.httpClient = httpClient;
+    }
+
+    static HttpClient defaultHttpClient(Duration timeout) {
+        return HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(TIMEOUT)
+                .connectTimeout(timeout)
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
                 .build();
     }
 
@@ -54,13 +69,14 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
             }
         }
 
+        Duration timeout = properties.requestTimeout();
         try {
             String requestBody = buildRequestBody(request);
             String endpoint = normalizeBaseUrl(properties.getBaseUrl()) + "/v1/chat/completions";
 
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(endpoint))
-                    .timeout(TIMEOUT)
+                    .timeout(timeout)
                     .header("Content-Type", "application/json");
             if (properties.getApiKey() != null && !properties.getApiKey().isBlank()) {
                 requestBuilder.header("Authorization", "Bearer " + properties.getApiKey());
@@ -69,7 +85,7 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = sendWithTimeout(httpRequest, timeout);
 
             if (response.statusCode() == 401 || response.statusCode() == 403) {
                 throw new AssistantUnavailableException(
@@ -82,15 +98,54 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
             }
 
             return extractCompletionResult(response.body());
-        } catch (AssistantUnavailableException | AssistantCompletionException ex) {
+        } catch (AssistantUnavailableException | AssistantCompletionException | AssistantGatewayTimeoutException ex) {
             throw ex;
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new AssistantCompletionException("La solicitud al asistente fue interrumpida.", ex);
         } catch (Exception ex) {
+            if (isTimeout(ex)) {
+                throw new AssistantGatewayTimeoutException(ex);
+            }
             throw new AssistantCompletionException(
                     "No se pudo conectar con Open WebUI. Verifique que el servicio esté activo.", ex);
         }
+    }
+
+    private HttpResponse<String> sendWithTimeout(HttpRequest httpRequest, Duration timeout)
+            throws InterruptedException {
+        CompletableFuture<HttpResponse<String>> future =
+                httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
+        try {
+            return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException | CancellationException ex) {
+            future.cancel(true);
+            throw new AssistantGatewayTimeoutException(ex);
+        } catch (ExecutionException ex) {
+            Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+            if (isTimeout(cause)) {
+                future.cancel(true);
+                throw new AssistantGatewayTimeoutException(cause);
+            }
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new AssistantCompletionException(
+                    "No se pudo conectar con Open WebUI. Verifique que el servicio esté activo.", cause);
+        }
+    }
+
+    static boolean isTimeout(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof HttpTimeoutException
+                    || current instanceof TimeoutException
+                    || current instanceof CancellationException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private String buildRequestBody(ChatCompletionRequest request) throws Exception {

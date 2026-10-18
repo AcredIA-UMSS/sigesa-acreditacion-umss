@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 17/10/2026 | **MOD-ASSISTANT FEAT-03 (#52):** timeout LLM 10 s (`SIGESA_ASSISTANT_TIMEOUT_MS`); `sendAsync` + hilos virtuales; 504 `ASSISTANT_GATEWAY_TIMEOUT`. Contrato `PR-IMPL-042`. | FSD-UC-024 / DD-SYS-002 | — | PM-023 / PM-024 / PR-IMPL-042 / #52 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **Compose object storage:** imagen `docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (API S3/MinIO). `minio/minio` y `quay.io/minio/minio` ya no son pullables anónimamente. Servicio Compose sigue `minio` + `MINIO_*` + volumen `minio_data`. | FSD-UC-004 / DD-UC-004-M7 | — | PM-022 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **MOD-EVIDENCE FEAT-02 (#51):** blobs S3/MinIO (`EvidenceBlobStoragePort`); lock `evidence_upload_lock` (V23); Compose servicio `minio` + volumen. Endpoint/credenciales por env (S3 remoto futuro). | FSD-UC-004 / DD-UC-004-M7 | — | PM-020 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **MOD-REPORT FEAT-01 (#50):** I/O de PDF/XLSX/CSV fuera de TX write (`TransactionRunnerPort`); Hikari explícito (pool 10, acquire 30s, leak 20s). Remedia CON-03 (veredicto de auditoría histórico intacto). | FSD-UC-011 / FSD-UC-014 / DD-UC-011 / DD-UC-014 | — | PM-019 / PR-IMPL-040 / #50 | Boris Anthony Angulo Urquieta |
@@ -359,20 +360,20 @@ artefactos_vivos:
 | **RBAC tools** | Registro dinámico por rol JWT + subset agente en executor — matriz [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) §1.2.1 |
 | **Auditoría tools** | `AssistantToolAuditPort` → SLF4J `AUDIT_ASSISTANT_TOOL` (userId, role, agent, tool, outcome) |
 | **RBAC tools (resumen)** | Usuarios → **solo JD**; fases de proceso → **JD + TD**; CC/EE sin tools administrativas |
-| **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1) |
+| **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1). **FEAT-03:** timeout 10 s; hilos virtuales/`sendAsync`; 504 `ASSISTANT_GATEWAY_TIMEOUT` |
 | **Tool calling** | Loop multi-tool en `SendChatMessageService` (max **5** iter. default); una tool/iteración; `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
 | **Nivel 4 (multi-tool)** | LLM encadena tools secuenciales; respuesta combinada por `AssistantResponseFormatter`; traza `steps[]` en API y UI |
 | **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; config `rag-enabled`, `rag-max-chunks` |
 | **Tools vigentes** | Catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) — read + write con confirmación en chat |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
-| **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks` |
-| **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS` |
+| **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks`; **8.1.0 FEAT-03:** `timeout` default 10 s |
+| **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS`; **FEAT-03:** `SIGESA_ASSISTANT_TIMEOUT_MS` (default `10000`) |
 | **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
 | **Frontend** | `/ayuda` (`AssistantChatUI` — diseño página completa); copilotos dominio vía **`DomainCopilotFloatingChat`** ([DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md)): `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; historial conversaciones `sessionStorage`; metadata + traza vía `CopilotAssistantMetadata` |
 | **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence`; **shell UI compartido** [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md) |
 | **Respuesta chat** | `{ reply, toolId, sourceTables, path, llmInvoked, steps[] }` |
-| **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED`; 403 `ACCESS_DENIED` (agente users sin rol JD) |
+| **Errores API** | 503 `ASSISTANT_UNAVAILABLE`; 502 `ASSISTANT_COMPLETION_FAILED`; **504 `ASSISTANT_GATEWAY_TIMEOUT` (FEAT-03 / #52)**; 403 `ACCESS_DENIED` (agente users sin rol JD) |
 | **Persistencia chats** | Ninguna (historial en memoria del navegador) |
 | **Streaming** | No (`stream: false`) |
 | **Salida asistente** | `AssistantReplyOutputGuard` — refuerzo lexical cuando tool falla y el usuario pide confirmar hechos (evals v3, `SIN-CRIT-001`) |

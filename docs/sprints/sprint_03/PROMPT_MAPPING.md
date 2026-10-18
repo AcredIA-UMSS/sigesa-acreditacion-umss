@@ -29,6 +29,8 @@
 | PM-020 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 / FSD-UC-005 | FEAT-02 #51: MinIO/S3 evidencias + lock BD |
 | PM-021 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 / FSD-UC-014 | FEAT-02 cierre: GET blob + reportes S3 + imagen quay.io MinIO |
 | PM-022 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Compose: Silo (`pgsty/silo`) reemplaza imagen MinIO Hub/Quay |
+| PM-023 | PR-IMPL-042 | DD-SYS-002 | FSD-UC-024 | FEAT-03 #52 spec: timeout LLM 10 s + 504 + hilos virtuales |
+| PM-024 | PR-IMPL-042 | DD-SYS-002 | FSD-UC-024 | FEAT-03 #52 código: sendAsync, timeout 10 s, 504 |
 
 ---
 
@@ -1542,5 +1544,130 @@ Documentación viva sincronizada con el reemplazo de imagen. `docs/baseline/` in
 ### Próximos pasos
 
 - [ ] Commit/PR cuando el usuario lo pida
+
+---
+
+## PM-023
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-023 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 21:59 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Documentar FEAT-03 (#52) y crear rama desde release/2.0.0 |
+| **Objetivo** | Contrato PR-IMPL-042 + FSD/DD/DTP/auditoría/API; mapping sprint 03. Sin código Java en este prompt. |
+| **Contexto** | Auditoría CON-02/CON-05: `HttpClient.send` 120 s en worker Tomcat. Issue #52: timeout 10 s + no bloquear plataforma + 504. |
+| **PR-IMPL vinculado** | PR-IMPL-042 |
+| **DD-UC vinculado** | DD-SYS-002 |
+| **FSD-UC vinculado** | FSD-UC-024 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Bien, ahora pasemos al issue #52, crea la rama a partir de release 2.0.0 y genera la documentacion necesaria guardando tambien el prompt mapping en sprint 3
+```
+
+### Entradas auxiliares
+
+- `https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/52`
+- `docs/auditoria/concurrencia-boris.md`
+- `docs/design/DD-SYS-002.md`
+- `docs/prompts/impl/PR-IMPL-040.md` (plantilla de contrato 8.1.0)
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/prompts/impl/PR-IMPL-042.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-024.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/design/DD-SYS-002.md` |
+| modificado | `docs/auditoria/concurrencia-boris.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+1. Rama `feat/52-llm-timeout-async` desde `origin/release/2.0.0` (incluye #51 mergeado).
+2. Contrato `PR-IMPL-042`: timeout 10 s, HTTP/1.1, 504, virtual threads/`sendAsync`; fuera MCP/retry/202.
+3. Docs vivos alineados; veredictos de auditoría históricos intactos.
+
+### Validación ejecutada
+
+- [ ] `mvn test` — N/A (solo documentación)
+- [ ] `pnpm run lint` — N/A
+
+### Resultado obtenido
+
+Spec FEAT-03 lista para implementación. Código Java **no** tocado.
+
+### Próximos pasos
+
+- [ ] Implementar `OpenWebUiChatAdapter` + handler 504 según `PR-IMPL-042`
+- [ ] Commit/PR `Fixes #52` cuando el usuario lo pida
+
+---
+
+## PM-024
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-024 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 22:03 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FEAT-03 (#52) y abrir PR |
+| **Objetivo** | Timeout LLM 10 s, sendAsync + hilos virtuales, 504 amigable |
+| **Contexto** | Spec PM-023 / PR-IMPL-042. |
+| **PR-IMPL vinculado** | PR-IMPL-042 |
+| **DD-UC vinculado** | DD-SYS-002 |
+| **FSD-UC vinculado** | FSD-UC-024 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+implementa y luego haz el commit y pr
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/domain/exception/AssistantGatewayTimeoutException.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/out/assistant/OpenWebUiChatAdapterTest.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/assistant/OpenWebUiChatAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/AssistantExceptionHandler.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/AssistantProperties.java` |
+| modificado | `backend/src/main/resources/application.yaml` |
+| modificado | `backend/src/main/resources/application-dev.yaml` |
+| modificado | `backend/src/main/resources/application-prod.yaml` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/AssistantControllerWebMvcTest.java` |
+
+### Cambios realizados
+
+1. `sendAsync` + `future.get(timeout)` con `cancel(true)` al vencer.
+2. `ASSISTANT_GATEWAY_TIMEOUT` → HTTP 504.
+3. `spring.threads.virtual.enabled=true`; `SIGESA_ASSISTANT_TIMEOUT_MS` default 10000.
+
+### Validación ejecutada
+
+- [x] tests adapter + WebMvc 504 (Maven)
+- [ ] `pnpm run lint` — N/A
+
+### Resultado obtenido
+
+FEAT-03 implementado en `feat/52-llm-timeout-async`.
+
+### Próximos pasos
+
+- [ ] PR `Fixes #52` contra `release/2.0.0`
 
 

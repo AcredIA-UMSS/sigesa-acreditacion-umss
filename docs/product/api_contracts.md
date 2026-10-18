@@ -737,6 +737,12 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 
 Sin cambio de rutas (`/assistant/status`, `/assistant/chat`). Tools v2.0 objetivo: referencias a **indicador** y ruta normativa — migración en PR post-M3.
 
+| Código | HTTP | Cuándo |
+|--------|------|--------|
+| `ASSISTANT_UNAVAILABLE` | 503 | Asistente deshabilitado o API key ausente/inválida |
+| `ASSISTANT_COMPLETION_FAILED` | 502 | Open WebUI/Ollama respondió error de inferencia |
+| `ASSISTANT_GATEWAY_TIMEOUT` | 504 | Timeout de conexión/lectura LLM (FEAT-03, default 10 s). Mensaje amigable; request HTTP cancelado. |
+
 ---
 
 ## 12. Legacy v1.x — Fase/Subfase *(implementado en `main`; deprecación M3–M5)*
@@ -767,6 +773,7 @@ Sin cambio de rutas (`/assistant/status`, `/assistant/chat`). Tools v2.0 objetiv
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.2 | 2026-10-17 | FEAT-03: 504 `ASSISTANT_GATEWAY_TIMEOUT` en `POST /assistant/chat` |
 | v2.1.1 | 2026-10-13 | M7: API-EVD-01 ext (`documentAssetId`, `folioCode`, `reusedAsset`); API-EVD-06 link; API-EVD-07 GET asset |
 | v2.0 | 2026-09-08 | Release 2.0.0: contratos N1→N2→N3→Indicador→Evidencia; API-STR/WF/EVD/TPL v2; §12 legacy; ADR-0004 |
 | v1.8 | 2026-08-27 | API-EVD-LEGACY 410 Gone; pivot subfase |

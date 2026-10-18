@@ -9,8 +9,8 @@ modulo: MOD-ASSISTANT / MOD-EVIDENCE
 reglas: FSD-BR-03, FSD-BR-09, FSD-BR-14
 design_doc: DD-AGENT-003
 pr_impl: PR-IMPL-026
-ultima_actualizacion: "2026-09-08"
-nota_implementacion: "Tools MVP referencian subfase; migrar a indicador en v2.0"
+ultima_actualizacion: "2026-10-17"
+nota_implementacion: "Tools MVP referencian subfase; migrar a indicador en v2.0. FEAT-03 (#52 / PR-IMPL-042): timeout LLM 10 s y 504 ASSISTANT_GATEWAY_TIMEOUT; no cambia el contrato de chat."
 ---
 
 # FSD-UC-024 — Copiloto de control documental
