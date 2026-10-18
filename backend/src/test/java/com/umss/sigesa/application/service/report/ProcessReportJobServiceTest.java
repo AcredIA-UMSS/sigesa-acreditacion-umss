@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.report;
 
+import com.umss.sigesa.application.port.out.DirectTransactionRunner;
 import com.umss.sigesa.application.port.out.ExecutiveDataPort;
 import com.umss.sigesa.application.port.out.PdfRendererPort;
 import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
@@ -12,7 +13,6 @@ import com.umss.sigesa.domain.model.ReportJobStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,8 +40,17 @@ class ProcessReportJobServiceTest {
     @Mock
     private ReportArtifactStoragePort artifactStorage;
 
-    @InjectMocks
     private ProcessReportJobService service;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        service = new ProcessReportJobService(
+                reportJobRepository,
+                executiveDataPort,
+                pdfRendererPort,
+                artifactStorage,
+                new DirectTransactionRunner());
+    }
 
     @Test
     @DisplayName("Escenario: Job completado produce artefacto PDF")
@@ -144,5 +154,34 @@ class ProcessReportJobServiceTest {
 
         assertEquals(ReportJobStatus.COMPLETED, job.getStatus());
         assertEquals("empty.pdf", job.getArtifactKey());
+    }
+
+    @Test
+    @DisplayName("render/store PDF ocurren fuera de TX required (CON-03)")
+    void process_rendersPdfOutsideWriteTransaction() {
+        UUID jobId = UUID.randomUUID();
+        ReportJob job = ReportJob.createPending(jobId, UUID.randomUUID(), new ExecutiveReportFilters(null, null, 2026));
+        ExecutiveReportSnapshot snapshot = new ExecutiveReportSnapshot(
+                LocalDateTime.now(), job.getFilters(), List.of());
+        var recording = new ReportExportJobServiceTest.RecordingTransactionRunner();
+        service = new ProcessReportJobService(
+                reportJobRepository, executiveDataPort, pdfRendererPort, artifactStorage, recording);
+
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(executiveDataPort.fetchSnapshot(job.getFilters())).thenReturn(snapshot);
+        when(pdfRendererPort.render(snapshot)).thenAnswer(invocation -> {
+            org.junit.jupiter.api.Assertions.assertEquals(0, recording.requiredDepth.get());
+            return new byte[]{9};
+        });
+        when(artifactStorage.store(jobId, new byte[]{9})).thenAnswer(invocation -> {
+            org.junit.jupiter.api.Assertions.assertEquals(0, recording.requiredDepth.get());
+            return "out.pdf";
+        });
+        when(reportJobRepository.save(any(ReportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.process(jobId);
+
+        assertEquals(ReportJobStatus.COMPLETED, job.getStatus());
+        assertTrue(recording.requiredCalls >= 2);
     }
 }

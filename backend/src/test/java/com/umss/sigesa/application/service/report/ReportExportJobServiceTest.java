@@ -1,12 +1,13 @@
 package com.umss.sigesa.application.service.report;
 
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
+import com.umss.sigesa.application.port.out.DirectTransactionRunner;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
+import com.umss.sigesa.application.port.out.TransactionRunnerPort;
 import com.umss.sigesa.domain.exception.InvalidJobStateException;
 import com.umss.sigesa.domain.exception.JobNotFoundException;
 import com.umss.sigesa.domain.model.JobStatus;
-import com.umss.sigesa.domain.model.ObservationSummary;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ReportExportJobService — PR-IMPL-011 / DD-UC-011")
+@DisplayName("ReportExportJobService — PR-IMPL-011 / PR-IMPL-040")
 class ReportExportJobServiceTest {
 
     @Mock
@@ -40,10 +43,12 @@ class ReportExportJobServiceTest {
     private ReportGeneratorPort generatorPort;
 
     private ReportExportJobService service;
+    private RecordingTransactionRunner transactions;
 
     @BeforeEach
     void setUp() {
-        service = new ReportExportJobService(repositoryPort, queryPort, List.of(generatorPort));
+        transactions = new RecordingTransactionRunner();
+        service = new ReportExportJobService(repositoryPort, queryPort, List.of(generatorPort), transactions);
     }
 
     @Test
@@ -60,6 +65,7 @@ class ReportExportJobServiceTest {
         assertEquals(programId, job.getProgramId());
         assertEquals(JobStatus.PENDING, job.getStatus());
         verify(repositoryPort).save(any(ReportExportJob.class));
+        assertTrue(transactions.requiredCalls >= 1);
     }
 
     @Test
@@ -71,6 +77,7 @@ class ReportExportJobServiceTest {
         tempFile.deleteOnExit();
 
         when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
+        when(repositoryPort.save(any(ReportExportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(generatorPort.supports(ReportFormat.XLSX)).thenReturn(true);
         when(queryPort.streamAllObservationsForReport(any(), any())).thenReturn(Stream.empty());
         when(generatorPort.generateReport(any(), any())).thenReturn(tempFile);
@@ -79,6 +86,32 @@ class ReportExportJobServiceTest {
 
         assertEquals(JobStatus.COMPLETED, job.getStatus());
         assertEquals(100, job.getProgressPercentage());
+    }
+
+    @Test
+    @DisplayName("processJobAsync: generateReport se ejecuta fuera de TX required (CON-03)")
+    void processJobAsync_generatesFileOutsideWriteTransaction() throws IOException {
+        UUID jobId = UUID.randomUUID();
+        ReportExportJob job = ReportExportJob.createNew(UUID.randomUUID(), UUID.randomUUID(), ReportFormat.XLSX, 1);
+        File tempFile = File.createTempFile("test_tx_", ".xlsx");
+        tempFile.deleteOnExit();
+
+        when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
+        when(repositoryPort.save(any(ReportExportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(generatorPort.supports(ReportFormat.XLSX)).thenReturn(true);
+        when(queryPort.streamAllObservationsForReport(any(), any())).thenReturn(Stream.empty());
+        when(generatorPort.generateReport(any(), any())).thenAnswer(invocation -> {
+            assertEquals(0, transactions.requiredDepth.get(),
+                    "I/O de archivo no debe retener TX required (Hikari)");
+            return tempFile;
+        });
+
+        service.processJobAsync(jobId);
+
+        assertEquals(JobStatus.COMPLETED, job.getStatus());
+        verify(generatorPort).generateReport(any(), eq(ReportFormat.XLSX));
+        assertTrue(transactions.requiredCalls >= 2);
+        assertTrue(transactions.readOnlyCalls >= 1);
     }
 
     @Test
@@ -97,6 +130,7 @@ class ReportExportJobServiceTest {
         ReportExportJob job = ReportExportJob.createNew(UUID.randomUUID(), UUID.randomUUID(), ReportFormat.XLSX, 1);
 
         when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
+        when(repositoryPort.save(any(ReportExportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(generatorPort.supports(ReportFormat.XLSX)).thenReturn(true);
         when(queryPort.streamAllObservationsForReport(any(), any())).thenThrow(new RuntimeException("DB error"));
 
@@ -140,6 +174,7 @@ class ReportExportJobServiceTest {
         InputStream is = service.getJobFileStream(job.getJobId(), userId);
         assertNotNull(is);
         is.close();
+        assertEquals(0, transactions.requiredDepth.get());
     }
 
     @Test
@@ -169,6 +204,7 @@ class ReportExportJobServiceTest {
         UUID jobId = UUID.randomUUID();
         ReportExportJob job = ReportExportJob.createNew(UUID.randomUUID(), UUID.randomUUID(), ReportFormat.PDF, 1);
         when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
+        when(repositoryPort.save(any(ReportExportJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(generatorPort.supports(ReportFormat.PDF)).thenReturn(false);
 
         service.processJobAsync(jobId);
@@ -187,5 +223,43 @@ class ReportExportJobServiceTest {
 
         assertThrows(InvalidJobStateException.class,
                 () -> service.getJobFileStream(job.getJobId(), userId));
+    }
+
+    /**
+     * Cuenta profundidad de TX write para demostrar que el I/O no ocurre dentro de {@code required}.
+     */
+    static final class RecordingTransactionRunner implements TransactionRunnerPort {
+        final AtomicInteger requiredDepth = new AtomicInteger();
+        int requiredCalls;
+        int readOnlyCalls;
+        private final DirectTransactionRunner delegate = new DirectTransactionRunner();
+
+        @Override
+        public <T> T required(Supplier<T> action) {
+            requiredCalls++;
+            requiredDepth.incrementAndGet();
+            try {
+                return delegate.required(action);
+            } finally {
+                requiredDepth.decrementAndGet();
+            }
+        }
+
+        @Override
+        public void required(Runnable action) {
+            requiredCalls++;
+            requiredDepth.incrementAndGet();
+            try {
+                delegate.required(action);
+            } finally {
+                requiredDepth.decrementAndGet();
+            }
+        }
+
+        @Override
+        public <T> T readOnly(Supplier<T> action) {
+            readOnlyCalls++;
+            return delegate.readOnly(action);
+        }
     }
 }

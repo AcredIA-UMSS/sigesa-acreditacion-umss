@@ -25,6 +25,7 @@
 | PM-016 | PR-IMPL-M8-029 | DD-UC-029 | FSD-UC-029 / FSD-UC-028 | M8 FODA + métricas + encuesta + compuerta E2→E3 / E3 |
 | PM-017 | PR-IMPL-M9-031 | DD-UC-031 | FSD-UC-031 / FSD-UC-028 | M9 Plan de Mejoras + documentos E4 + compuerta E4→E5 |
 | PM-018 | PR-IMPL-M10-030 | DD-UC-030 | FSD-UC-030 / 020 / 028 / 031 | Cierre 2.1: freeze/Sala de Pares, ciclo E7, CAE_MEMBER |
+| PM-019 | PR-IMPL-040 | DD-UC-011 / DD-UC-014 | FSD-UC-011 / FSD-UC-014 | FEAT-01 #50: I/O reportes fuera de TX + Hikari explícito |
 
 ---
 
@@ -1255,3 +1256,94 @@ Cierre 2.1 operativo: freeze bloquea escritura, EE lee, checklist se siembra al 
 
 - [ ] Commit/PR cuando el usuario lo pida (no commit en esta sesión)
 - [ ] Seed opcional `CAE_MEMBER` para demo UI de delegación
+
+---
+
+## PM-019
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-019 |
+| **Fecha** | 2026-10-17 |
+| **Hora** | 20:46 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar GitHub #50 FEAT-01 (desacople I/O reportes + Hikari) en `feat/50-hikari-report-io` |
+| **Objetivo** | Liberar conexiones Hikari antes de generar/escribir PDF/XLSX/CSV; declarar pool en YAML; tests de frontera TX |
+| **Contexto** | Auditoría CON-03 FALLA; issue https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/50; release 8.1.0 Demo 1 |
+| **PR-IMPL vinculado** | [PR-IMPL-040](../../prompts/impl/PR-IMPL-040.md) |
+| **DD-UC vinculado** | [DD-UC-011](../../design/DD-UC-011.md) · [DD-UC-014](../../design/DD-UC-014.md) |
+| **FSD-UC vinculado** | FSD-UC-011 · FSD-UC-014 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+implementa #50 en feat/50-hikari-report-io” documenta todo el proceso donde sea necesario y que tenga coherencia con la documentacion actual, registra los prompts, agrega los cambios a sprint_03
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-040.md`
+- `docs/design/DD-UC-011.md`
+- `docs/design/DD-UC-014.md`
+- `docs/auditoria/concurrencia-boris.md` (CON-03)
+- GitHub issue #50
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+| --- | --- |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/TransactionRunnerPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/SpringTransactionRunnerAdapter.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/port/out/DirectTransactionRunner.java` |
+| generado | `docs/prompts/impl/PR-IMPL-040.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/report/ReportExportJobService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/report/ProcessReportJobService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/ReportModuleConfig.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/JpaReportExportJobAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/ReportJobJpaAdapter.java` |
+| modificado | `backend/src/main/resources/application.yaml` |
+| modificado | `backend/src/main/resources/application-dev.yaml` |
+| modificado | `backend/src/main/resources/application-prod.yaml` |
+| modificado | `backend/src/test/resources/application-test.yaml` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/ReportExportJobServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/report/ProcessReportJobServiceTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/e2e/ReportExportAsyncE2EIT.java` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-011.md` |
+| modificado | `docs/product/uc/FSD-UC-014.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/design/DD-UC-011.md` |
+| modificado | `docs/design/DD-UC-014.md` |
+| modificado | `docs/auditoria/concurrencia-boris.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+1. TX cortas vía `TransactionRunnerPort` / `SpringTransactionRunnerAdapter`; `generateReport`, `render` y `store` fuera de TX write.
+2. Hikari explícito (pool 10, timeout 30s, leak 20s) en YAML default/dev/prod/test; log E2E muestra `sigesa-hikari - Starting`.
+3. Tests de frontera TX + E2E sin `@Transactional` de clase; persistencia de job terminal.
+4. Docs vivos + `PR-IMPL-040`; veredicto CON-03 histórico `FALLA` intacto, nota de remediación 8.1.0.
+
+### Validación ejecutada
+
+- [x] `cd backend && ./mvnw -Dtest=ReportExportJobServiceTest,ProcessReportJobServiceTest,ReportExportAsyncE2EIT test` — verde (exit 0)
+- [ ] `pnpm run lint` — N/A (solo backend)
+
+### Resultado obtenido
+
+Issue #50 implementado en `feat/50-hikari-report-io`. Contratos REST sin cambio. Hexágono: I/O no retiene Hikari; stream JPA se consume en TX read-only.
+
+### Riesgos/observaciones
+
+- El stream de observaciones se materializa a `List` en TX read (trade-off vs 1M streaming de DD-UC-011; volumen demo 8.1.0).
+- `@Async` permanece en `ReportExportJobService` (Spring en aplicación; mismo patrón previo).
+- 503 por pool exhausted no implementado (fuera de #50).
+
+### Próximos pasos
+
+- [ ] Commit/PR `Fixes #50` cuando el usuario lo pida
+- [ ] FEAT-02 (#51) MinIO y FEAT-03 (#52) LLM en ramas separadas
+

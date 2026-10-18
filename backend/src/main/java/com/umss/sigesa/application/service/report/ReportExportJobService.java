@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.in.GetExportReportJobStatusUseCase;
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
+import com.umss.sigesa.application.port.out.TransactionRunnerPort;
 import com.umss.sigesa.domain.exception.InvalidJobStateException;
 import com.umss.sigesa.domain.exception.JobNotFoundException;
 import com.umss.sigesa.domain.model.JobStatus;
@@ -12,7 +13,6 @@ import com.umss.sigesa.domain.model.ObservationSummary;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,67 +27,75 @@ public class ReportExportJobService implements ExportReportJobUseCase, GetExport
     private final ReportExportJobRepositoryPort repositoryPort;
     private final DashboardQueryPort queryPort;
     private final List<ReportGeneratorPort> reportGenerators;
+    private final TransactionRunnerPort transactions;
 
     public ReportExportJobService(ReportExportJobRepositoryPort repositoryPort,
                                   DashboardQueryPort queryPort,
-                                  List<ReportGeneratorPort> reportGenerators) {
+                                  List<ReportGeneratorPort> reportGenerators,
+                                  TransactionRunnerPort transactions) {
         this.repositoryPort = repositoryPort;
         this.queryPort = queryPort;
         this.reportGenerators = reportGenerators;
+        this.transactions = transactions;
     }
 
     @Override
-    @Transactional
     public ReportExportJob enqueueJob(UUID userId, UUID programId, ReportFormat format, Integer phaseId) {
         ReportExportJob job = ReportExportJob.createNew(userId, programId, format, phaseId);
-        return repositoryPort.save(job);
+        return transactions.required(() -> repositoryPort.save(job));
     }
 
+    /**
+     * CON-03 / FEAT-01: persistir estado en TX cortas; generar el archivo fuera de TX
+     * para no retener conexiones Hikari durante I/O.
+     */
     @Override
     @Async
-    @Transactional
     public void processJobAsync(UUID jobId) {
-        ReportExportJob job = repositoryPort.findById(jobId).orElse(null);
+        ReportExportJob job = transactions.required(() -> {
+            ReportExportJob found = repositoryPort.findById(jobId).orElse(null);
+            if (found == null) {
+                return null;
+            }
+            found.markProcessing();
+            return repositoryPort.save(found);
+        });
         if (job == null) {
             return;
         }
 
         try {
-            job.markProcessing();
-            repositoryPort.save(job);
-
             ReportGeneratorPort generator = reportGenerators.stream()
                     .filter(g -> g.supports(job.getFormat()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unsupported format: " + job.getFormat()));
 
-            try (Stream<ObservationSummary> dataStream = queryPort.streamAllObservationsForReport(job.getProgramId(), job.getPhaseId())) {
-                File file = generator.generateReport(dataStream, job.getFormat());
+            List<ObservationSummary> rows = transactions.readOnly(() -> {
+                try (Stream<ObservationSummary> dataStream =
+                             queryPort.streamAllObservationsForReport(job.getProgramId(), job.getPhaseId())) {
+                    return dataStream.toList();
+                }
+            });
+
+            File file = generator.generateReport(rows.stream(), job.getFormat());
+            transactions.required(() -> {
                 job.markCompleted(file.getAbsolutePath());
-            }
-
-            repositoryPort.save(job);
+                repositoryPort.save(job);
+            });
         } catch (Exception ex) {
-            job.markFailed(ex.getMessage());
-            repositoryPort.save(job);
+            transactions.required(() -> {
+                job.markFailed(ex.getMessage());
+                repositoryPort.save(job);
+            });
         }
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ReportExportJob getJobStatus(UUID jobId, UUID requestingUserId) {
-        ReportExportJob job = repositoryPort.findById(jobId)
-                .orElseThrow(() -> new JobNotFoundException(jobId));
-
-        if (!job.getUserId().equals(requestingUserId)) {
-            throw new InvalidJobStateException("Access denied to requested job");
-        }
-
-        return job;
+        return transactions.readOnly(() -> loadOwnedJob(jobId, requestingUserId));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public InputStream getJobFileStream(UUID jobId, UUID requestingUserId) {
         ReportExportJob job = getJobStatus(jobId, requestingUserId);
 
@@ -105,5 +113,15 @@ public class ReportExportJobService implements ExportReportJobUseCase, GetExport
         } catch (FileNotFoundException e) {
             throw new InvalidJobStateException("Could not read export file.");
         }
+    }
+
+    private ReportExportJob loadOwnedJob(UUID jobId, UUID requestingUserId) {
+        ReportExportJob job = repositoryPort.findById(jobId)
+                .orElseThrow(() -> new JobNotFoundException(jobId));
+
+        if (!job.getUserId().equals(requestingUserId)) {
+            throw new InvalidJobStateException("Access denied to requested job");
+        }
+        return job;
     }
 }

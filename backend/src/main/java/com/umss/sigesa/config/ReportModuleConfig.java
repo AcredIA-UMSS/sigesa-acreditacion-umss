@@ -12,6 +12,7 @@ import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
 import com.umss.sigesa.application.port.out.ReportJobRepositoryPort;
+import com.umss.sigesa.application.port.out.TransactionRunnerPort;
 import com.umss.sigesa.application.service.report.DownloadReportArtifactService;
 import com.umss.sigesa.application.service.report.GenerateExecutiveReportService;
 import com.umss.sigesa.application.service.report.GetReportJobStatusService;
@@ -44,9 +45,10 @@ public class ReportModuleConfig {
             ReportJobRepositoryPort reportJobRepository,
             ExecutiveDataPort executiveDataPort,
             PdfRendererPort pdfRendererPort,
-            ReportArtifactStoragePort artifactStorage) {
+            ReportArtifactStoragePort artifactStorage,
+            TransactionRunnerPort transactions) {
         return new ProcessReportJobService(
-                reportJobRepository, executiveDataPort, pdfRendererPort, artifactStorage);
+                reportJobRepository, executiveDataPort, pdfRendererPort, artifactStorage, transactions);
     }
 
     @Bean
@@ -60,7 +62,8 @@ public class ReportModuleConfig {
     ReportExportJobService reportExportJobService(
             ReportExportJobRepositoryPort repositoryPort,
             DashboardQueryPort queryPort,
-            List<ReportGeneratorPort> reportGenerators) {
-        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators);
+            List<ReportGeneratorPort> reportGenerators,
+            TransactionRunnerPort transactions) {
+        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators, transactions);
     }
 }

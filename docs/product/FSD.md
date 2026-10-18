@@ -8,7 +8,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-10-13"
+ultima_actualizacion: "2026-10-17"
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
 
@@ -59,10 +59,10 @@ ultima_actualizacion: "2026-10-13"
 | `FSD-UC-008` | Rechazar Indicador                                             | [TD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-008.md) | `[DD-UC-008](../design/DD-UC-008.md)`                 | `[PR-IMPL-038](../prompts/impl/PR-IMPL-038.md)`       |
 | `FSD-UC-009` | Aprobar Indicador                                              | [TD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-009.md) | `[DD-UC-009](../design/DD-UC-009.md)`                 | `[PR-IMPL-038](../prompts/impl/PR-IMPL-038.md)`       |
 | `FSD-UC-010` | Cerrar Nivel 1 (Dimensión/Área)                                | [TD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-010.md) | `[DD-UC-010](../design/DD-UC-010.md)`                 | `[PR-IMPL-039](../prompts/impl/PR-IMPL-039.md)`       |
-| `FSD-UC-011` | Dashboard [CC] y observaciones                                 | [CC]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-011.md) | `[DD-UC-011](../design/DD-UC-011.md)`                 | `[PR-IMPL-011](../prompts/impl/PR-IMPL-011.md)`       |
+| `FSD-UC-011` | Dashboard [CC] y observaciones                                 | [CC]             | v2.0    | **En Curso** (+ FEAT-01 Hikari/I/O `PR-IMPL-040`) | [Ver detalle](uc/FSD-UC-011.md) | `[DD-UC-011](../design/DD-UC-011.md)`                 | `[PR-IMPL-011](../prompts/impl/PR-IMPL-011.md)` · `[PR-IMPL-040](../prompts/impl/PR-IMPL-040.md)` |
 | `FSD-UC-012` | Bandeja auditoría [TD]                                         | [TD]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-012.md) | —                                                     | —                                                     |
 | `FSD-UC-013` | Panel semáforo [JD]                                            | [JD]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-013.md) | —                                                     | —                                                     |
-| `FSD-UC-014` | Reporte ejecutivo PDF                                          | [JD]             | v1.0    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-014.md) | `[DD-UC-014](../design/DD-UC-014.md)`                 | `[PR-IMPL-005](../prompts/impl/PR-IMPL-005.md)`       |
+| `FSD-UC-014` | Reporte ejecutivo PDF                                          | [JD]             | v1.0    | **Implementado** (+ FEAT-01 `PR-IMPL-040`)         | [Ver detalle](uc/FSD-UC-014.md) | `[DD-UC-014](../design/DD-UC-014.md)`                 | `[PR-IMPL-005](../prompts/impl/PR-IMPL-005.md)` · `[PR-IMPL-040](../prompts/impl/PR-IMPL-040.md)` |
 | `FSD-UC-015` | Notificaciones y alertas                                       | Sistema          | v2.0    | Pendiente                                          | [Ver detalle](uc/FSD-UC-015.md) | —                                                     | —                                                     |
 | `FSD-UC-016` | Portal público                                                 | [P]              | v1.1    | Pendiente                                          | [Ver detalle](uc/FSD-UC-016.md) | —                                                     | —                                                     |
 | `FSD-UC-017` | Bitácora de auditoría                                          | [JD]             | v1.0    | Pendiente                                          | [Ver detalle](uc/FSD-UC-017.md) | —                                                     | —                                                     |
@@ -84,7 +84,7 @@ ultima_actualizacion: "2026-10-13"
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
 
-**Snapshot (2026-10-13):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅ (`DD-UC-030` / `PR-IMPL-M10-030` / PM-018).
+**Snapshot (2026-10-17):** Release **2.0.0** cerrado. Release **2.1.0** — **M6–M11 + CAE** ✅. Hardening **8.1.0 FEAT-01** (#50 / `PR-IMPL-040`) en curso en `feat/50-hikari-report-io`.
 
 ---
 

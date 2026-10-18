@@ -5,6 +5,7 @@ import com.umss.sigesa.application.port.out.ReportJobRepositoryPort;
 import com.umss.sigesa.domain.model.ExecutiveReportFilters;
 import com.umss.sigesa.domain.model.ReportJob;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,11 +20,13 @@ public class ReportJobJpaAdapter implements ReportJobRepositoryPort {
     }
 
     @Override
+    @Transactional
     public ReportJob save(ReportJob job) {
         return toDomain(repository.save(toEntity(job)));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<ReportJob> findById(UUID id) {
         return repository.findById(id).map(this::toDomain);
     }
