@@ -6,6 +6,7 @@ import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
+import { HomePage } from './features/home';
 import { CreateProcessPage } from './features/accreditation-process';
 import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
@@ -205,7 +206,7 @@ function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
