@@ -15,7 +15,7 @@ describe('DashboardPage', () => {
     seedSession('CC');
     renderWithProviders(<DashboardPage />, { route: '/dashboard' });
 
-    expect(await screen.findByText('Ingeniería de Sistemas')).toBeInTheDocument();
+    expect((await screen.findAllByText('Ingeniería de Sistemas')).length).toBeGreaterThan(0);
     expect(screen.getByText('Indicadores')).toBeInTheDocument();
     expect(screen.getByText('48')).toBeInTheDocument();
     expect(screen.getByText('Progreso de Fases del Proceso')).toBeInTheDocument();
@@ -44,6 +44,7 @@ describe('DashboardPage', () => {
       await screen.findByRole('heading', { name: 'Panel de Acreditación Ejecutiva' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Generar reporte PDF/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /Generar reporte/ }).length).toBeGreaterThan(0);
   });
 
   it('shouldShowApiErrorAndAllowRetry', async () => {

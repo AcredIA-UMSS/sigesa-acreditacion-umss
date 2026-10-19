@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../../lib/auth/useAuth';
+import { QuickActions } from '../../../components/QuickActions';
+import { RecentActivity } from '../../../components/RecentActivity';
 
 export function DashboardPage() {
   const { session } = useAuth();
@@ -78,6 +80,11 @@ export function DashboardPage() {
             )}
           </div>
         </header>
+
+        <div className="mb-8 space-y-8">
+          <QuickActions />
+          <RecentActivity />
+        </div>
 
         {/* Loading State Skeleton */}
         {isLoading && <DashboardSkeleton />}
