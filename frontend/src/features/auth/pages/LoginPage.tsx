@@ -77,6 +77,7 @@ export function LoginPage() {
           onEmailChange={loginForm.setEmail}
           onPasswordChange={loginForm.setPassword}
           onSubmit={loginForm.handleSubmit}
+          onBack={() => navigate('/')}
         />
       </section>
     </div>
