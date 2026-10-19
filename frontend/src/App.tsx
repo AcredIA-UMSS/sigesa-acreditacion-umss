@@ -13,6 +13,8 @@ import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
+import { TechnicianInboxPage } from './features/dashboard/pages/TechnicianInboxPage';
+import { AuditLogPage } from './features/admin/audit/pages/AuditLogPage';
 
 function App() {
   return (
@@ -25,6 +27,48 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/technician/inbox"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <TechnicianInboxPage />
+              </JdOrTdRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/technician/inbox"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <TechnicianInboxPage />
+              </JdOrTdRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/auditoria"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <AuditLogPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <AuditLogPage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />

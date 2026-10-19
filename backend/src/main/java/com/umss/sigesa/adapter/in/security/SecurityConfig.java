@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
+                        .requestMatchers("/api/v1/audit/logs", "/api/v1/audit/logs/**").hasRole("JD")
+                        .requestMatchers("/api/v1/dashboards/technician/**").hasAnyRole("TD", "JD")
                         // Indicadores uploadable / evidencias: solo anyRequest + @PreAuthorize en controllers.
                         // Un matcher HttpMethod.POST en .../evidences provocaba 401 con JWT válido (GET OK, POST no).
                         .requestMatchers(HttpMethod.POST,

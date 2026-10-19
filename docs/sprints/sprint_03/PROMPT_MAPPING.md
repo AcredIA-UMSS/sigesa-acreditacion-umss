@@ -31,6 +31,8 @@
 | PM-022 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Compose: Silo (`pgsty/silo`) reemplaza imagen MinIO Hub/Quay |
 | PM-023 | PR-IMPL-042 | DD-SYS-002 | FSD-UC-024 | FEAT-03 #52 spec: timeout LLM 10 s + 504 + hilos virtuales |
 | PM-024 | PR-IMPL-042 | DD-SYS-002 | FSD-UC-024 | FEAT-03 #52 código: sendAsync, timeout 10 s, 504 |
+| PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
+| PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
 
 ---
 
@@ -1669,5 +1671,40 @@ FEAT-03 implementado en `feat/52-llm-timeout-async`.
 ### Próximos pasos
 
 - [ ] PR `Fixes #52` contra `release/2.0.0`
+
+---
+
+## PM-025
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-025 |
+| **Fecha** | 2026-10-18 |
+| **Solicitante** | Alexander Alvarez |
+| **Agente/Entorno** | Antigravity AI |
+| **Tarea** | Marco de evaluación offline de la IA (Módulo 7) |
+| **Objetivo** | Dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
+| **PR-IMPL vinculado** | PR-IMPL-043 |
+| **DD-UC vinculado** | DD-EVALS-OFFLINE |
+| **FSD-UC vinculado** | Módulo 7 (Evals) |
+| **Estado** | completado |
+
+---
+
+## PM-026
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-026 |
+| **Fecha** | 2026-10-19 |
+| **Solicitante** | Alexander Alvarez |
+| **Agente/Entorno** | Antigravity AI |
+| **Tarea** | Implementación integral Módulo 8 (Issues #53, #54, #55, #56) |
+| **Objetivo** | Fail-fast de configuración por entorno, notificaciones outbox, bandeja dictamen técnico y bitácora inmutable append-only |
+| **PR-IMPL vinculado** | PR-IMPL-044 |
+| **DD-UC vinculado** | DD-MOD8-ISSUES |
+| **FSD-UC vinculado** | FSD-UC-012 / FSD-UC-015 / FSD-UC-017 |
+| **Estado** | completado |
+
 
 

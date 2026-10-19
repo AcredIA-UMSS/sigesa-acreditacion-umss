@@ -16,6 +16,7 @@ import {
   Layers,
   FileUp,
   FileSearch,
+  FileCheck,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -244,12 +245,31 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 active={activeNav === 'reports'}
               />
             )}
-            <NavItem
-              icon={<History size={20} />}
-              label="HISTORIAL"
-              isExpanded={isExpanded}
-              active={activeNav === 'history'}
-            />
+            {(isJd || session?.role === 'TD') && (
+              <NavItem
+                icon={<FileCheck size={20} />}
+                label="BANDEJA DICTAMEN"
+                isExpanded={isExpanded}
+                active={location.pathname.startsWith('/technician/inbox') || location.pathname.startsWith('/dashboard/technician/inbox')}
+                to="/technician/inbox"
+              />
+            )}
+            {isJd ? (
+              <NavItem
+                icon={<History size={20} />}
+                label="HISTORIAL AUDITORÍA"
+                isExpanded={isExpanded}
+                active={activeNav === 'history' || location.pathname.startsWith('/admin/auditoria') || location.pathname.startsWith('/admin/audit')}
+                to="/admin/auditoria"
+              />
+            ) : (
+              <NavItem
+                icon={<History size={20} />}
+                label="HISTORIAL"
+                isExpanded={isExpanded}
+                active={activeNav === 'history'}
+              />
+            )}
           </>
         )}
 

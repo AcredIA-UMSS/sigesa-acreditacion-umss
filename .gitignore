@@ -49,6 +49,27 @@ frontend/.cache/
 ### pnpm local store ###
 .pnpm-store/
 
-### MCP local deps ###
+### MCP local deps & build ###
 mcp/**/node_modules/
 mcp/**/pnpm-lock.yaml
+mcp/**/dist/
+
+### Python bytecode & cache ###
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+tools/evals/evidencia/*.log
+tools/evals/evidencia/compuerta_*.log
+
+### Runtime Local Data & Evidence Blobs ###
+backend/data/evidences/
+backend/data/reports/
+data/evidences/
+data/reports/
+
+### Temporary Delivery Packages & Zips ###
+*.zip
+M7_Evals_EquipoSIGESA.zip
+M7_Evals_EquipoSIGESA/

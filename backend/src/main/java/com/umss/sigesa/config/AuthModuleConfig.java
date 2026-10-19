@@ -72,4 +72,10 @@ public class AuthModuleConfig {
         return new ManageUserProgramAssignmentService(
                 userRepository, assignmentRepository, programCatalogPort);
     }
+
+    @Bean
+    com.umss.sigesa.application.port.in.GetAuditLogsUseCase getAuditLogsUseCase(
+            com.umss.sigesa.application.port.out.AuditLogQueryPort auditLogQueryPort) {
+        return new com.umss.sigesa.application.service.audit.GetAuditLogsService(auditLogQueryPort);
+    }
 }
