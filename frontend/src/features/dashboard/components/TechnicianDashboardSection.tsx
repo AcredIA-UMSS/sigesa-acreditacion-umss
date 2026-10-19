@@ -105,7 +105,7 @@ export function TechnicianDashboardSection({ section }: TechnicianDashboardSecti
           </div>
           <div className="space-y-3">
             <a
-              href="/procesos/evaluacion"
+              href="/technician/inbox"
               className="flex items-center justify-between rounded-xl bg-primary-600 hover:bg-primary-700 text-body p-4 text-label-md font-semibold transition-all hover:translate-x-1"
             >
               <span>Ir a Bandeja de Revisión</span>
