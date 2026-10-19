@@ -33,6 +33,7 @@
 | PM-024 | PR-IMPL-042 | DD-SYS-002 | FSD-UC-024 | FEAT-03 #52 código: sendAsync, timeout 10 s, 504 |
 | PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
 | PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
+| PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
 
 ---
 
@@ -1705,6 +1706,89 @@ FEAT-03 implementado en `feat/52-llm-timeout-async`.
 | **DD-UC vinculado** | DD-MOD8-ISSUES |
 | **FSD-UC vinculado** | FSD-UC-012 / FSD-UC-015 / FSD-UC-017 |
 | **Estado** | completado |
+
+---
+
+## PM-027
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-027 |
+| **Fecha** | 2026-10-19 |
+| **Hora** | 19:15 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | FEAT-10 botón flotante de asistencia (#57) |
+| **Objetivo** | FAB inferior derecha en el dashboard/panel autenticado que abre un modal accesible con el copiloto general |
+| **Contexto** | No hay `DD-UC-*`; se creó `DD-FEAT-10` bajo MOD-ASSISTANT. Rama `feat/57-floating-assistant` desde `origin/release/2.0.0`. |
+| **PR-IMPL vinculado** | PR-IMPL-045 |
+| **DD-UC vinculado** | DD-FEAT-10 (no DD-UC; GitHub #57) |
+| **FSD-UC vinculado** | FSD-UC-024 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Actúa como un Senior Frontend Engineer con experiencia en React 19 + TypeScript + Vite, siguiendo la arquitectura del proyecto y respetando las restricciones de este repositorio.
+
+Objetivo:
+Implementar un botón flotante de asistencia visible en el dashboard, en la esquina inferior derecha, que al pulsarlo abra un modal accesible con el copiloto. El flujo debe ser funcional y no intrusivo.
+
+Historia de usuario:
+“Añadir botón flotante de asistencia que abre el copiloto en un modal desde cualquier página del dashboard. El botón debe ser accesible y no intrusivo.”
+
+Importante:
+No hagas cambios en archivos fuera del alcance de este feature. Prioriza la solución mínima viable.
+
+haz ahora este que es el issue de la ventana flotante
+crea la rama correspondiente a partir de release/2.0.0
+```
+
+### Entradas auxiliares
+
+- `docs/design/assistant/DD-FEAT-10.md`
+- `docs/design/assistant/DD-AGENT-UI-SHELL.md`
+- `docs/prompts/impl/PR-IMPL-045.md`
+- GitHub issue #57
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/assistant/DD-FEAT-10.md` |
+| generado | `docs/prompts/impl/PR-IMPL-045.md` |
+| generado | `frontend/src/components/FloatingAssistantButton.tsx` |
+| generado | `frontend/src/components/FloatingAssistantButton.test.tsx` |
+| modificado | `frontend/src/components/auth/ProtectedRoute.tsx` |
+| modificado | `frontend/src/features/assistant/components/AssistantChatUI.tsx` |
+| modificado | `docs/design/assistant/DD-AGENT-UI-SHELL.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-024.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- FAB `CircleHelp` en `ProtectedRoute` (todas las páginas autenticadas excepto `/ayuda`).
+- Modal a11y (`role=dialog`, ESC, overlay, foco de retorno, scroll lock).
+- Chat via `useAssistantChat` + `AssistantChatUI compact` (sin `AssistantPage`/`Sidebar`).
+- Offset `bottom-24` para no tapar el FAB de copilotos de dominio.
+
+### Validación ejecutada
+
+- [x] `pnpm exec vitest run` FloatingAssistantButton + ProtectedRoute — 8 passed
+- [x] `pnpm exec tsc -b` — ok
+- [x] `pnpm exec oxlint` archivos tocados — ok
+
+### Resultado obtenido
+
+FEAT-10 implementado en `feat/57-floating-assistant`.
+
+### Próximos pasos
+
+- [ ] PR `Fixes #57` contra `release/2.0.0`
+
 
 
 
