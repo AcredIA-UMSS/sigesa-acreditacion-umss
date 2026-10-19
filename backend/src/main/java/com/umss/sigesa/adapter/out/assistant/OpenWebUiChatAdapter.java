@@ -16,6 +16,7 @@ import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import com.umss.sigesa.domain.model.ChatMessage;
 import com.umss.sigesa.domain.model.ChatRole;
 import com.umss.sigesa.domain.model.ChatToolCall;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -40,6 +41,7 @@ public class OpenWebUiChatAdapter implements ChatCompletionPort {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
 
+    @Autowired
     public OpenWebUiChatAdapter(AssistantProperties properties) {
         this(properties, defaultHttpClient(properties.requestTimeout()));
     }
