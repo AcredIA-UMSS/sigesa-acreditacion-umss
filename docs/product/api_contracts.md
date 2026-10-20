@@ -169,6 +169,18 @@ security:
 | **200** | `[ProcessSummaryResponseDto]` — `evaluatorModel`, `level1Count`, `indicatorCount`, estado |
 | **Filtrado [CC]** | Solo `career_id ∈ JWT.programScope` |
 
+### API-PROC-03b — `GET /processes/stats`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-019 |
+| **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]`, `[EE]`, `[CAE_MEMBER]` |
+| **200** | `{ total, byStatus, byOperationalMode, frozenCount }` — mismos filtros de visibilidad que API-PROC-03 |
+| **401** | sin JWT |
+| **403** | rol no autorizado |
+| **Filtrado [CC]/[EE]/[CAE]** | Solo `career_id ∈ programScope`; scope vacío → `total=0` |
+| **frozenCount** | procesos con `operationalMode=AUDIT_READONLY` |
+
 ### API-PROC-04 — `GET /processes/{processId}`
 
 | Campo | Valor |

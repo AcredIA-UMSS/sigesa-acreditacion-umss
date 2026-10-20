@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
+import com.umss.sigesa.application.model.process.ProcessStats;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
@@ -18,6 +20,7 @@ import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponsibleDto;
+import com.umss.sigesa.adapter.in.web.dto.ProcessStatsResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponseDto;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
@@ -48,6 +51,7 @@ public class ProcessController {
 
     private final CreateProcessUseCase createProcessUseCase;
     private final ListProcessesUseCase listProcessesUseCase;
+    private final GetProcessStatsUseCase getProcessStatsUseCase;
     private final GetProcessDetailUseCase getProcessDetailUseCase;
     private final DeleteProcessUseCase deleteProcessUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
@@ -82,6 +86,25 @@ public class ProcessController {
                 .map(this::mapSummaryToDto)
                 .toList();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE','CAE_MEMBER')")
+    @Operation(summary = "Resumen estadístico de procesos",
+            description = "Conteos por estado y modo operativo. JD/TD ven todos; CC/EE/CAE solo su carrera (FSD-UC-019).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resumen de procesos visibles"),
+            @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Rol no autorizado", content = @Content)
+    })
+    public ResponseEntity<ProcessStatsResponseDto> getProcessStats() {
+        ProcessStats stats = getProcessStatsUseCase.stats(buildQueryContext());
+        return ResponseEntity.ok(ProcessStatsResponseDto.builder()
+                .total(stats.total())
+                .byStatus(stats.byStatus())
+                .byOperationalMode(stats.byOperationalMode())
+                .frozenCount(stats.frozenCount())
+                .build());
     }
 
     @GetMapping("/{processId}")

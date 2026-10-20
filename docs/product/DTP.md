@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 20/10/2026 | **MOD-PROCESS:** `GET /api/v1/processes/stats` (API-PROC-03b) — conteos por status/operationalMode + `frozenCount`; mismo PBAC que el listado. | FSD-UC-019 / DD-UC-019 | — | PR-IMPL-046 | Boris Anthony Angulo Urquieta |
 | 19/10/2026 | **MOD-ASSISTANT FEAT-10 (#57):** FAB global en panel autenticado (`FloatingAssistantButton`) abre modal a11y con copiloto general; `/ayuda` y copilotos de dominio sin cambios. Offset `bottom-24` para no solapar el FAB de dominio. | FSD-UC-024 / DD-FEAT-10 | — | PM-027 / PR-IMPL-045 / #57 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **MOD-ASSISTANT FEAT-03 (#52):** timeout LLM 10 s (`SIGESA_ASSISTANT_TIMEOUT_MS`); `sendAsync` + hilos virtuales; 504 `ASSISTANT_GATEWAY_TIMEOUT`. Contrato `PR-IMPL-042`. | FSD-UC-024 / DD-SYS-002 | — | PM-023 / PM-024 / PR-IMPL-042 / #52 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **Compose object storage:** imagen `docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (API S3/MinIO). `minio/minio` y `quay.io/minio/minio` ya no son pullables anónimamente. Servicio Compose sigue `minio` + `MINIO_*` + volumen `minio_data`. | FSD-UC-004 / DD-UC-004-M7 | — | PM-022 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |

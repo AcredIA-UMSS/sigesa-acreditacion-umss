@@ -34,6 +34,7 @@
 | PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
 | PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
 | PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
+| PM-028 | PR-IMPL-046 | DD-UC-019 | FSD-UC-019 | GET /processes/stats (práctica sin AI-DLC AWS) |
 
 ---
 
@@ -1788,6 +1789,34 @@ FEAT-10 implementado en `feat/57-floating-assistant`.
 ### Próximos pasos
 
 - [ ] PR `Fixes #57` contra `release/2.0.0`
+
+---
+
+## PM-028
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-028 |
+| **Fecha** | 2026-10-20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Tarea** | GET /api/v1/processes/stats (práctica sin AI-DLC AWS) |
+| **Objetivo** | Resumen de procesos visibles: total, byStatus, byOperationalMode, frozenCount |
+| **PR-IMPL vinculado** | PR-IMPL-046 |
+| **DD-UC vinculado** | DD-UC-019 |
+| **FSD-UC vinculado** | FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+bien trabajemos ese, primero trabajemos la version sin AI-DLC, crea la rama y empieza a trabajar con el flujo de trabajao actual
+```
+
+### Resultado obtenido
+
+Rama `feature-sinaidlc-boris`. Endpoint + tests hexagonales. Sin artefactos `aidlc/`.
+
 
 
 

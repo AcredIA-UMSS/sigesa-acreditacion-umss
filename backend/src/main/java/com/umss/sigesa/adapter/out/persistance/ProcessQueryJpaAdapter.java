@@ -51,7 +51,8 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
                 entity.getCareerId(),
                 entity.getTemplateId(),
                 entity.getStatus(),
-                entity.getStartDate()
+                entity.getStartDate(),
+                entity.getOperationalMode()
         );
     }
 }

@@ -114,7 +114,7 @@ class ListProcessesServiceTest {
 
     private ProcessQueryPort.ProcessListItem listItem(UUID processId, UUID careerId) {
         return new ProcessQueryPort.ProcessListItem(
-                processId, careerId, templateId, "ACTIVE", LocalDateTime.now()
+                processId, careerId, templateId, "ACTIVE", LocalDateTime.now(), "ACTIVE"
         );
     }
 

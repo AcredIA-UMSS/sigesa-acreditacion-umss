@@ -10,7 +10,7 @@ reglas: FSD-BR-09, FSD-BR-17
 ultima_actualizacion: "2026-09-09"
 design_doc: DD-UC-019
 pr_impl: PR-IMPL-019
-nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desplegable N1→Indicador; timeline metodológico M6 en detalle."
+nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desplegable N1→Indicador; timeline metodológico M6 en detalle. GET /processes/stats (API-PROC-03b / PR-IMPL-046): resumen por estado y modo operativo."
 ---
 
 # FSD-UC-019 — Consulta de procesos de acreditación
@@ -23,7 +23,7 @@ nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desp
 | **Relación** | Complementa [FSD-UC-003](FSD-UC-003.md) (creación de proceso). No reemplaza [FSD-UC-011](FSD-UC-011.md) (dashboard KPIs/observaciones). |
 | **Precondiciones** | Usuario autenticado con JWT válido; existe al menos un `AccreditationProcess` en el sistema |
 | **Pantallas** | `/procesos` (listado) · `/procesos/{processId}` (detalle) |
-| **API propuesta** | `GET /api/v1/processes` · `GET /api/v1/processes/{processId}` |
+| **API propuesta** | `GET /api/v1/processes` · `GET /api/v1/processes/stats` · `GET /api/v1/processes/{processId}` |
 
 Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucional (CEUB / ARCU-SUR) con visibilidad acotada por rol. En el **detalle**, el usuario ve el árbol normativo completo **Nivel 1 → Nivel 2 → Nivel 3 → Indicador** clonado al crear el proceso (taxonomía de FSD-UC-003). La UI debe mostrar la **nomenclatura del modelo evaluador** (Dimensión/Área, etc.) según [`glosario.md`](../glosario.md) §2.2.
 

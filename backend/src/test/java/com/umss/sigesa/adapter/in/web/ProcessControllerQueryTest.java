@@ -5,7 +5,9 @@ import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
+import com.umss.sigesa.application.model.process.ProcessStats;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +42,8 @@ class ProcessControllerQueryTest {
     @Mock
     private ListProcessesUseCase listProcessesUseCase;
     @Mock
+    private GetProcessStatsUseCase getProcessStatsUseCase;
+    @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
     private DeleteProcessUseCase deleteProcessUseCase;
@@ -52,6 +57,7 @@ class ProcessControllerQueryTest {
         ProcessController controller = new ProcessController(
                 createProcessUseCase,
                 listProcessesUseCase,
+                getProcessStatsUseCase,
                 getProcessDetailUseCase,
                 deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,
@@ -80,6 +86,24 @@ class ProcessControllerQueryTest {
                 .andExpect(jsonPath("$[0].careerCode").value("INF-SIS"))
                 .andExpect(jsonPath("$[0].level1Count").value(2))
                 .andExpect(jsonPath("$[0].indicatorCount").value(5));
+    }
+
+    @Test
+    void statsReturns200() throws Exception {
+        when(userProgramAssignmentRepositoryPort.findActiveByUserId(any())).thenReturn(List.of());
+        when(getProcessStatsUseCase.stats(any())).thenReturn(new ProcessStats(
+                2,
+                Map.of("ACTIVE", 1L, "CLOSED", 1L),
+                Map.of("ACTIVE", 1L, "AUDIT_READONLY", 1L),
+                1
+        ));
+
+        mockMvc.perform(get("/api/v1/processes/stats"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.byStatus.ACTIVE").value(1))
+                .andExpect(jsonPath("$.byOperationalMode.AUDIT_READONLY").value(1))
+                .andExpect(jsonPath("$.frozenCount").value(1));
     }
 
     @Test
