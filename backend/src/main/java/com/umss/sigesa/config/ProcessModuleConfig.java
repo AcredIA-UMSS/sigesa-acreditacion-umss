@@ -7,6 +7,7 @@ import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
 import com.umss.sigesa.application.port.in.GetNormativeIndicatorUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.NormativeStructureUseCases;
 import com.umss.sigesa.application.port.in.TemplateNormativeStructureUseCases;
 import com.umss.sigesa.application.port.in.GetTemplateUseCase;
@@ -33,6 +34,7 @@ import com.umss.sigesa.application.service.process.AssignProcessResponsibleServi
 import com.umss.sigesa.application.service.process.DeleteProcessService;
 import com.umss.sigesa.application.service.process.GetNormativeIndicatorService;
 import com.umss.sigesa.application.service.process.GetProcessDetailService;
+import com.umss.sigesa.application.service.process.GetProcessStatsService;
 import com.umss.sigesa.application.service.process.NormativeStructureCommandService;
 import com.umss.sigesa.application.service.process.NormativeStructureGuard;
 import com.umss.sigesa.application.service.process.ProcessNormativeTreeCloner;
@@ -141,6 +143,11 @@ public class ProcessModuleConfig {
     @Bean
     ProcessNormativeTreeCloner processNormativeTreeCloner(NormativeStructurePort normativeStructurePort) {
         return new ProcessNormativeTreeCloner(normativeStructurePort);
+    }
+
+    @Bean
+    GetProcessStatsUseCase getProcessStatsUseCase(ProcessQueryPort processQueryPort) {
+        return new GetProcessStatsService(processQueryPort);
     }
 
     @Bean

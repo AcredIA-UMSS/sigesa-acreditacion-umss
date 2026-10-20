@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
+import com.umss.sigesa.application.model.process.ProcessStats;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
@@ -18,6 +20,7 @@ import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponsibleDto;
+import com.umss.sigesa.adapter.in.web.dto.ProcessStatsResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponseDto;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +52,7 @@ public class ProcessController {
 
     private final CreateProcessUseCase createProcessUseCase;
     private final ListProcessesUseCase listProcessesUseCase;
+    private final GetProcessStatsUseCase getProcessStatsUseCase;
     private final GetProcessDetailUseCase getProcessDetailUseCase;
     private final DeleteProcessUseCase deleteProcessUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
@@ -82,6 +87,20 @@ public class ProcessController {
                 .map(this::mapSummaryToDto)
                 .toList();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE','CAE_MEMBER')")
+    @Operation(summary = "Resumen de procesos de acreditación", description = "Conteos de procesos no archivados visibles al usuario: total, por estado, por modo operativo y congelados en auditoría.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Resumen de procesos"),
+            @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Rol no autorizado", content = @Content)
+    })
+    public ResponseEntity<ProcessStatsResponseDto> getProcessStats() {
+        ProcessQueryContext ctx = buildQueryContext();
+        ProcessStats stats = getProcessStatsUseCase.getStats(ctx);
+        return ResponseEntity.ok(mapStatsToDto(stats));
     }
 
     @GetMapping("/{processId}")
@@ -171,6 +190,15 @@ public class ProcessController {
         } catch (Exception e) {
             return List.of();
         }
+    }
+
+    private ProcessStatsResponseDto mapStatsToDto(ProcessStats stats) {
+        return ProcessStatsResponseDto.builder()
+                .total(stats.total())
+                .byStatus(new LinkedHashMap<>(stats.byStatus()))
+                .byOperationalMode(new LinkedHashMap<>(stats.byOperationalMode()))
+                .frozenCount(stats.frozenCount())
+                .build();
     }
 
     private ProcessSummaryResponseDto mapSummaryToDto(ProcessSummary summary) {

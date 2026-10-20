@@ -17,9 +17,16 @@ public interface ProcessQueryPort {
     ) {
     }
 
+    record ProcessStatsRow(String status, String operationalMode) {
+    }
+
     List<ProcessListItem> findAllSummaryItems();
 
     List<ProcessListItem> findSummaryItemsByCareerIds(List<UUID> careerIds);
+
+    List<ProcessStatsRow> findAllStatsRows();
+
+    List<ProcessStatsRow> findStatsRowsByCareerIds(List<UUID> careerIds);
 
     Optional<AccreditationProcess> findDetailById(UUID id);
 }

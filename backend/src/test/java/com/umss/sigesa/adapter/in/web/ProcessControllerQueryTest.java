@@ -6,6 +6,7 @@ import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
@@ -39,6 +40,8 @@ class ProcessControllerQueryTest {
     @Mock
     private ListProcessesUseCase listProcessesUseCase;
     @Mock
+    private GetProcessStatsUseCase getProcessStatsUseCase;
+    @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
     private DeleteProcessUseCase deleteProcessUseCase;
@@ -52,6 +55,7 @@ class ProcessControllerQueryTest {
         ProcessController controller = new ProcessController(
                 createProcessUseCase,
                 listProcessesUseCase,
+                getProcessStatsUseCase,
                 getProcessDetailUseCase,
                 deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,

@@ -41,8 +41,31 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
     }
 
     @Override
+    public List<ProcessStatsRow> findAllStatsRows() {
+        return repository.findAllByOrderByStartDateDesc().stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
+                .map(this::toStatsRow)
+                .toList();
+    }
+
+    @Override
+    public List<ProcessStatsRow> findStatsRowsByCareerIds(List<UUID> careerIds) {
+        if (careerIds == null || careerIds.isEmpty()) {
+            return List.of();
+        }
+        return repository.findByCareerIdInOrderByStartDateDesc(careerIds).stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
+                .map(this::toStatsRow)
+                .toList();
+    }
+
+    @Override
     public Optional<AccreditationProcess> findDetailById(UUID id) {
         return repository.findById(id).map(mapper::toDomain);
+    }
+
+    private ProcessStatsRow toStatsRow(AccreditationProcessJpaEntity entity) {
+        return new ProcessStatsRow(entity.getStatus(), entity.getOperationalMode());
     }
 
     private ProcessListItem toListItem(AccreditationProcessJpaEntity entity) {
