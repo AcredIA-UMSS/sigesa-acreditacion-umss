@@ -10,6 +10,7 @@ export type UserFormField =
 
 export type UserFormErrors = Partial<Record<UserFormField, string>>;
 
+const NAME_MAX_LENGTH = 100;
 const NAME_PATTERN = /^(?=.*[\p{L}])[\p{L}\s'.-]+$/u;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UMSS_EMAIL_PATTERN = /^[^\s@]+@umss\.edu\.bo$/i;
@@ -20,6 +21,9 @@ export function validatePersonName(value: string, label: string): string | undef
   const trimmed = value.trim();
   if (!trimmed) {
     return `${label} es obligatorio.`;
+  }
+  if (trimmed.length > NAME_MAX_LENGTH) {
+    return `${label} no puede superar 100 caracteres.`;
   }
   if (!NAME_PATTERN.test(trimmed)) {
     return `${label} debe contener al menos una letra y no puede ser solo números o símbolos.`;

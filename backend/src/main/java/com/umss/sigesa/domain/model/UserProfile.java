@@ -17,11 +17,16 @@ public final class UserProfile {
     private UserProfile() {
     }
 
+    public static final int NAME_MAX_LENGTH = 100;
+
     public static String normalizeName(String value, String fieldLabel) {
         if (value == null || value.isBlank()) {
             throw new InvalidUserProfileException(fieldLabel + " es obligatorio.");
         }
         String trimmed = value.trim().replaceAll("\\s+", " ");
+        if (trimmed.length() > NAME_MAX_LENGTH) {
+            throw new InvalidUserProfileException(fieldLabel + " no puede superar 100 caracteres.");
+        }
         if (!NAME_PATTERN.matcher(trimmed).matches()) {
             throw new InvalidUserProfileException(
                     fieldLabel + " debe contener al menos una letra y no puede ser solo números o símbolos.");

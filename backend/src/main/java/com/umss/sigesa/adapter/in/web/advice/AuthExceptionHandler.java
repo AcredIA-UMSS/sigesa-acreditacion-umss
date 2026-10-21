@@ -93,11 +93,12 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
+        var fieldError = ex.getBindingResult().getFieldErrors().stream().findFirst();
+        String message = fieldError
                 .map(error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Solicitud inválida.")
                 .orElse("Solicitud inválida.");
+        String field = fieldError.map(error -> error.getField()).orElse("");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "VALIDATION_ERROR", "message", message));
+                .body(Map.of("error", "VALIDATION_ERROR", "message", message, "field", field));
     }
 }
