@@ -1,14 +1,18 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.dto.PhaseCompleteResponseDto;
+import com.umss.sigesa.adapter.in.web.dto.PhaseProgressResponseDto;
 import com.umss.sigesa.application.port.in.ClosePhaseUseCase;
+import com.umss.sigesa.application.port.in.GetPhaseProgressUseCase;
 import com.umss.sigesa.domain.model.PhaseCompleteResult;
+import com.umss.sigesa.domain.model.PhaseProgressResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +27,21 @@ import java.util.UUID;
 public class PhaseWorkflowController {
 
     private final ClosePhaseUseCase closePhaseUseCase;
+    private final GetPhaseProgressUseCase getPhaseProgressUseCase;
 
-    public PhaseWorkflowController(ClosePhaseUseCase closePhaseUseCase) {
+    public PhaseWorkflowController(ClosePhaseUseCase closePhaseUseCase,
+                                   GetPhaseProgressUseCase getPhaseProgressUseCase) {
         this.closePhaseUseCase = closePhaseUseCase;
+        this.getPhaseProgressUseCase = getPhaseProgressUseCase;
+    }
+
+    @GetMapping("/progress")
+    @PreAuthorize("hasAnyRole('JD','TD','CC')")
+    @Operation(summary = "Consultar progreso de fase según sus subfases")
+    public ResponseEntity<PhaseProgressResponseDto> getPhaseProgress(
+            @PathVariable UUID processId,
+            @PathVariable UUID phaseId) {
+        return ResponseEntity.ok(toProgressDto(getPhaseProgressUseCase.getProgress(processId, phaseId)));
     }
 
     @PostMapping("/complete")
@@ -50,6 +66,17 @@ public class PhaseWorkflowController {
         dto.setPreviousState(result.previousState().name());
         dto.setNewState(result.newState().name());
         dto.setEvent(result.event());
+        return dto;
+    }
+
+    private static PhaseProgressResponseDto toProgressDto(PhaseProgressResult result) {
+        PhaseProgressResponseDto dto = new PhaseProgressResponseDto();
+        dto.setPhaseId(result.phaseId());
+        dto.setTotalSubphases(result.totalSubphases());
+        dto.setApprovedSubphases(result.approvedSubphases());
+        dto.setPendingSubphases(result.pendingSubphases());
+        dto.setProgressPercent(result.progressPercent());
+        dto.setState(result.state().name());
         return dto;
     }
 

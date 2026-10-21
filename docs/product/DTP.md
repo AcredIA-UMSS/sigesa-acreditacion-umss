@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 20/10/2026 | **MOD-WORKFLOW:** API-WF-04 `GET /processes/{processId}/phases/{phaseId}/progress`; progreso desde `SubphaseState.APROBADO`, sin cambios de esquema. | FSD-UC-010 / DD-UC-010 | N/A | PM-008 / PR-IMPL-040 | Copilot |
 | 02/09/2026 | **MOD-ASSISTANT UI shell:** copilotos `phases`/`evidence`/`users` unificados en ventana flotante inferior derecha (`DomainCopilotFloatingChat`); historial de conversaciones en `sessionStorage`; layouts sin columna 340px; `/ayuda` sin cambios. | DD-AGENT-UI-SHELL / DD-AGENT-001…003 | N/A | PM-007 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-WORKFLOW UC-010:** cierre de fase TD (`PhaseState` ABIERTA/COMPLETADA, Flyway V13); API-WF-03 `POST /processes/{id}/phases/{id}/complete`; `409 FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]`; evento outbox `PhaseCompleted`; UI «Cerrar fase» en detalle proceso. | FSD-UC-010 / DD-UC-010 | N/A | PM-006 / PR-IMPL-039 | Boris Anthony Angulo Urquieta |
 | 27/08/2026 | **MOD-EVIDENCE:** deprecación `POST /indicators/{id}/evidences` → **410 Gone** (`ENDPOINT_DEPRECATED`); sucesor `POST /subphases/{id}/evidences`; Orval `DeprecatedEndpointResponseDto`; UI UC-004 migrada a selector proceso/subfase. | FSD-UC-004 / api_contracts API-EVD-LEGACY | N/A | docs + Orval sync | Cursor Agent |

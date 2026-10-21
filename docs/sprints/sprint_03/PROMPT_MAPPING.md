@@ -11,6 +11,35 @@
 | PM-005 | PR-IMPL-038 | DD-UC-008 / DD-UC-009 | FSD-UC-008 / FSD-UC-009 | Rechazo y aprobación de indicadores vía subfase (TD; requiere evidencia + indicatorId) |
 | PM-006 | PR-IMPL-039 | DD-UC-010 | FSD-UC-010 | Cierre de fase TD cuando todas las subfases APROBADO (API-WF-03) |
 | PM-007 | N/A | DD-AGENT-UI-SHELL | MOD-ASSISTANT (FSD-UC-024 / agentes 001–003) | Shell flotante unificado copilotos fases/evidencias/usuarios + historial conversaciones |
+| PM-008 | PR-IMPL-040 | DD-UC-010 | FSD-UC-010 | Consulta de progreso de fase según sus subfases (API-WF-04) |
+
+## PM-008
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-008 |
+| **Fecha** | 2026-10-20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | GitHub Copilot — Agent |
+| **Tarea** | Consulta del progreso de fase (API-WF-04) |
+| **Objetivo** | Exponer conteos de subfases aprobadas/pendientes, porcentaje y estado de fase |
+| **Contexto** | Se reutilizan las entidades y puerto del workflow existente; no se agregan tablas ni dependencias |
+| **PR-IMPL vinculado** | [PR-IMPL-040](../../prompts/impl/PR-IMPL-040.md) |
+| **DD vinculado** | [DD-UC-010](../../design/DD-UC-010.md) |
+| **FSD vinculado** | FSD-UC-010 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+GET /api/v1/processes/{processId}/phases/{phaseId}/progress: devolver progreso de la fase con totalSubphases, approvedSubphases, pendingSubphases, progressPercent con un decimal y estado PhaseState. Solo SubphaseState.APROBADO cuenta como aprobado; para fases vacías usar 0.0. UUID inválidos retornan 400; proceso/fase inexistente o fase de otro proceso retorna 404. Implementar pruebas para progreso parcial, todas aprobadas, sin subfases, UUID inválido y 404. Reutilizar entidades actuales; no crear tablas ni dependencias.
+```
+
+### Archivos generados o modificados
+
+- Backend: puerto IN, servicio, resultado de dominio, DTO, controller y configuración de workflow.
+- Pruebas: `GetPhaseProgressServiceTest` y `PhaseWorkflowControllerTest`.
+- Documentación: `api_contracts.md`, `DTP.md`, este PM-008 y `PR-IMPL-040.md`.
 
 ---
 

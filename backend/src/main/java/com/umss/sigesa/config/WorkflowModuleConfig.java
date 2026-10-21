@@ -17,7 +17,9 @@ import com.umss.sigesa.application.service.workflow.IndicatorTransitionHelper;
 import com.umss.sigesa.application.service.workflow.RejectIndicatorService;
 import com.umss.sigesa.application.service.workflow.SubphaseTransitionHelper;
 import com.umss.sigesa.application.port.in.ClosePhaseUseCase;
+import com.umss.sigesa.application.port.in.GetPhaseProgressUseCase;
 import com.umss.sigesa.application.service.workflow.ClosePhaseService;
+import com.umss.sigesa.application.service.workflow.GetPhaseProgressService;
 import com.umss.sigesa.application.service.workflow.RejectSubphaseIndicatorService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,11 @@ public class WorkflowModuleConfig {
     ClosePhaseUseCase closePhaseUseCase(PhaseWorkflowPort phaseWorkflowPort,
                                         NotificationOutboxPort notificationOutbox) {
         return new ClosePhaseService(phaseWorkflowPort, notificationOutbox);
+    }
+
+    @Bean
+    GetPhaseProgressUseCase getPhaseProgressUseCase(PhaseWorkflowPort phaseWorkflowPort) {
+        return new GetPhaseProgressService(phaseWorkflowPort);
     }
 
     @Bean
