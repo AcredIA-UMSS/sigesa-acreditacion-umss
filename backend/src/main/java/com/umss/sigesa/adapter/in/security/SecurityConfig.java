@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
@@ -59,6 +60,7 @@ public class SecurityConfig {
     SecurityFilterChain h2ConsoleSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/h2-console/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         return http.build();
