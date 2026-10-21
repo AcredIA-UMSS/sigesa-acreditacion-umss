@@ -1,7 +1,7 @@
 # PROMPT_MAPPING — Sprint 03
 
 > Registro PM del sprint 03. Trazabilidad: `Código → PR-IMPL → DD-UC-NNN → FSD-UC-NNN → DTP`.  
-> **Índice:** PM-001…PM-018 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA → M9 Plan Mejoras/E4 → M10 freeze/Pares + M11 E7 + CAE).
+> **Índice:** PM-001…PM-029 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA → M9 Plan Mejoras/E4 → M10 freeze/Pares + M11 E7 + CAE → progreso de fase).
 
 | ID Mapeo | PR-IMPL | Design Doc | FSD / PRD | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
@@ -34,6 +34,7 @@
 | PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
 | PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
 | PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
+| PM-029 | PR-IMPL-047 | DD-UC-019 / DD-UC-010 | FSD-UC-019 | API-PROC-12: progreso por fase sobre Level1Node e indicadores aprobados; tests backend |
 
 ---
 
@@ -1789,6 +1790,46 @@ FEAT-10 implementado en `feat/57-floating-assistant`.
 
 - [ ] PR `Fixes #57` contra `release/2.0.0`
 
+---
 
+## PM-029
 
+| Campo | Valor |
+|---|---|
+| **ID** | PM-029 |
+| **Fecha** | 2026-10-20 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | GitHub Copilot CLI |
+| **Tarea** | Consulta del progreso de una fase del proceso |
+| **Objetivo** | Exponer el avance agregado de indicadores aprobados para una fase, con validación de relación proceso-fase. |
+| **Contexto** | API-PROC-12; el usuario confirmó usar `Level1Node` como fase y `NormativeIndicator` como unidad hija contable en la jerarquía v2 vigente. |
+| **PR-IMPL vinculado** | PR-IMPL-047 |
+| **DD-UC vinculado** | DD-UC-019 (consulta) / DD-UC-010 (referencia de estados) |
+| **FSD-UC vinculado** | FSD-UC-019 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+/aidlc express Implementa el siguiente feature:
+
+GET /api/v1/processes/{processId}/phases/{phaseId}/progress
+
+- Devuelve el progreso de una fase según el estado de sus subfases, usando las entidades existentes (Phase, Subphase, PhaseState, SubphaseState). Sin tablas ni dependencias nuevas.
+- Entrada: processId y phaseId (UUID) en la ruta.
+- Salida 200 OK: { "phaseId": "...", "totalSubphases": 5, "approvedSubphases": 3, "pendingSubphases": 2, "progressPercent": 60.0, "state": "ABIERTA" }.
+- Error 400: processId o phaseId no son UUID válidos.
+- Error 404: processId o phaseId no existen, o la fase no pertenece al proceso.
+- Reglas: approvedSubphases cuenta las subfases en SubphaseState.APROBADO; pendingSubphases = total - approved; progressPercent = approved/total*100 con 1 decimal; si no hay subfases, total = 0 y progressPercent = 0.0.
+
+Pruebas requeridas: 200 con progreso parcial, 200 con todas aprobadas, 200 sin subfases, 400 con UUID inválido, 404 con proceso/fase inexistente o fase de otro proceso.
+
+Restricciones: sigue el estilo y la arquitectura del código existente. No agregues dependencias ni tablas nuevas. Mantén los cambios mínimos. Si algo no coincide con el código existente, no lo inventes: pregúntame.
+```
+
+### Cambios y validación
+
+- Implementación en puertos/adaptadores hexagonales, DTO web independiente y reutilización de `NormativeHierarchyQueryPort`.
+- Sin tablas, dependencias, ni modificaciones en `docs/baseline/`.
+- Pruebas unitarias del servicio y pruebas web para respuesta, UUID inválidos y 404.
 

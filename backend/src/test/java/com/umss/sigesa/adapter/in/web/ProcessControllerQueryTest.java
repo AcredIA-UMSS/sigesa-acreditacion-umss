@@ -5,6 +5,7 @@ import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
+import com.umss.sigesa.application.port.in.GetPhaseProgressUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
@@ -12,6 +13,8 @@ import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.Level1Node;
+import com.umss.sigesa.application.model.process.PhaseProgress;
+import com.umss.sigesa.domain.model.PhaseState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,8 @@ class ProcessControllerQueryTest {
     @Mock
     private GetProcessStatsUseCase getProcessStatsUseCase;
     @Mock
+    private GetPhaseProgressUseCase getPhaseProgressUseCase;
+    @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
     private DeleteProcessUseCase deleteProcessUseCase;
@@ -57,6 +62,7 @@ class ProcessControllerQueryTest {
                 listProcessesUseCase,
                 getProcessStatsUseCase,
                 getProcessDetailUseCase,
+                getPhaseProgressUseCase,
                 deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,
                 new NormativeStructureWebMapper()
@@ -128,5 +134,74 @@ class ProcessControllerQueryTest {
         mockMvc.perform(get("/api/v1/processes/{id}", processId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.level1Nodes[0].name").value("Área académica"));
+    }
+
+    @Test
+    void getPhaseProgressReturnsAggregate() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID phaseId = UUID.randomUUID();
+        when(getPhaseProgressUseCase.getProgress(processId, phaseId)).thenReturn(
+                new PhaseProgress(phaseId, 5, 3, 2, 60.0, PhaseState.ABIERTA));
+
+        mockMvc.perform(get("/api/v1/processes/{processId}/phases/{phaseId}/progress", processId, phaseId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phaseId").value(phaseId.toString()))
+                .andExpect(jsonPath("$.totalSubphases").value(5))
+                .andExpect(jsonPath("$.approvedSubphases").value(3))
+                .andExpect(jsonPath("$.pendingSubphases").value(2))
+                .andExpect(jsonPath("$.progressPercent").value(60.0))
+                .andExpect(jsonPath("$.state").value("ABIERTA"));
+    }
+
+    @Test
+    void getPhaseProgressWhenAllSubphasesAreApprovedReturns100Percent() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID phaseId = UUID.randomUUID();
+        when(getPhaseProgressUseCase.getProgress(processId, phaseId)).thenReturn(
+                new PhaseProgress(phaseId, 2, 2, 0, 100.0, PhaseState.COMPLETADA));
+
+        mockMvc.perform(get("/api/v1/processes/{processId}/phases/{phaseId}/progress", processId, phaseId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSubphases").value(2))
+                .andExpect(jsonPath("$.approvedSubphases").value(2))
+                .andExpect(jsonPath("$.pendingSubphases").value(0))
+                .andExpect(jsonPath("$.progressPercent").value(100.0))
+                .andExpect(jsonPath("$.state").value("COMPLETADA"));
+    }
+
+    @Test
+    void getPhaseProgressWithoutSubphasesReturnsZeroPercent() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID phaseId = UUID.randomUUID();
+        when(getPhaseProgressUseCase.getProgress(processId, phaseId)).thenReturn(
+                new PhaseProgress(phaseId, 0, 0, 0, 0.0, PhaseState.ABIERTA));
+
+        mockMvc.perform(get("/api/v1/processes/{processId}/phases/{phaseId}/progress", processId, phaseId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalSubphases").value(0))
+                .andExpect(jsonPath("$.approvedSubphases").value(0))
+                .andExpect(jsonPath("$.pendingSubphases").value(0))
+                .andExpect(jsonPath("$.progressPercent").value(0.0));
+    }
+
+    @Test
+    void getPhaseProgressWithInvalidUuidReturns400() throws Exception {
+        mockMvc.perform(get("/api/v1/processes/not-a-uuid/phases/{phaseId}/progress", UUID.randomUUID()))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/v1/processes/{processId}/phases/not-a-uuid/progress", UUID.randomUUID()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getPhaseProgressNotFoundReturns404() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID phaseId = UUID.randomUUID();
+        when(getPhaseProgressUseCase.getProgress(processId, phaseId))
+                .thenThrow(new ProcessNotFoundException(processId));
+
+        mockMvc.perform(get("/api/v1/processes/{processId}/phases/{phaseId}/progress", processId, phaseId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("PROCESS_NOT_FOUND"));
     }
 }

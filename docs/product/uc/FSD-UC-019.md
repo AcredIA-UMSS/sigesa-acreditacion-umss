@@ -7,10 +7,10 @@ actor_principal: "[JD], [TD], [CC]"
 trazabilidad_prd: PRD-US-023, PRD-US-012
 modulo: MOD-PROCESS
 reglas: FSD-BR-09, FSD-BR-17
-ultima_actualizacion: "2026-09-09"
+ultima_actualizacion: "2026-10-20"
 design_doc: DD-UC-019
 pr_impl: PR-IMPL-019
-nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desplegable N1→Indicador; timeline metodológico M6 en detalle."
+nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desplegable N1→Indicador; timeline metodológico M6 en detalle; API-PROC-12 consulta progreso por fase."
 ---
 
 # FSD-UC-019 — Consulta de procesos de acreditación
@@ -23,7 +23,7 @@ nota_implementacion: "GET /processes/{id} devuelve level1Nodes[] v2; árbol desp
 | **Relación** | Complementa [FSD-UC-003](FSD-UC-003.md) (creación de proceso). No reemplaza [FSD-UC-011](FSD-UC-011.md) (dashboard KPIs/observaciones). |
 | **Precondiciones** | Usuario autenticado con JWT válido; existe al menos un `AccreditationProcess` en el sistema |
 | **Pantallas** | `/procesos` (listado) · `/procesos/{processId}` (detalle) |
-| **API propuesta** | `GET /api/v1/processes` · `GET /api/v1/processes/{processId}` |
+| **API propuesta** | `GET /api/v1/processes` · `GET /api/v1/processes/{processId}` · `GET /api/v1/processes/{processId}/phases/{phaseId}/progress` |
 
 Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucional (CEUB / ARCU-SUR) con visibilidad acotada por rol. En el **detalle**, el usuario ve el árbol normativo completo **Nivel 1 → Nivel 2 → Nivel 3 → Indicador** clonado al crear el proceso (taxonomía de FSD-UC-003). La UI debe mostrar la **nomenclatura del modelo evaluador** (Dimensión/Área, etc.) según [`glosario.md`](../glosario.md) §2.2.
 
@@ -58,6 +58,15 @@ Permite a **JD**, **TD** y **CC** consultar procesos de acreditación institucio
    - **Nivel 3** por Nivel 2
    - **Indicadores** por Nivel 3 (`code`, `description`, `weight`, `status`, `order`)
 5. UI renderiza árbol jerárquico (acordeón o árbol expandible); en cada **indicador**, acción **Subir evidencia** (UC-004) y badge de estado de workflow.
+
+## Flujo principal — Progreso de fase
+
+1. Usuario solicita `GET /api/v1/processes/{processId}/phases/{phaseId}/progress`.
+2. Backend confirma que el `Level1Node` identificado por `phaseId` pertenece al `processId`.
+3. En la jerarquía v2 vigente, cada `NormativeIndicator` bajo el nivel 1 se cuenta como una unidad hija para este resumen; `APROBADO` incrementa `approvedSubphases`.
+4. `pendingSubphases` es `totalSubphases - approvedSubphases`; `progressPercent` es el porcentaje aprobado redondeado a un decimal, o `0.0` si no hay indicadores. `state` es el estado del `Level1Node`.
+
+UUID inválido → `400`; proceso/fase inexistente o fase de otro proceso → `404`.
 
 ## Modelo de respuesta (referencia)
 
@@ -122,6 +131,8 @@ Alineado al DTO existente `ProcessResponseDto` (POST create) extendido con datos
 | A3 | `processId` inexistente | `404 PROCESS_NOT_FOUND` |
 | A4 | [CC] sin asignación de carrera activa | `200` con lista vacía / mensaje en UI |
 | A5 | Sin procesos en el sistema | `200` con `[]` |
+| A6 | `processId` o `phaseId` no es UUID válido | `400` |
+| A7 | Proceso/fase inexistente o fase ajena al proceso | `404 PROCESS_NOT_FOUND` |
 
 ## Postcondiciones
 
@@ -183,6 +194,22 @@ Característica: Consulta de procesos de acreditación
     Entonces la respuesta incluye el árbol N1→N2→N3 ordenado por "order"
     Y cada Nivel 3 incluye sus indicadores con code, weight y status
 
+  Escenario: Consulta progreso parcial de una fase
+    Dado una fase del proceso con 5 indicadores, 3 en estado APROBADO
+    Cuando solicita GET /api/v1/processes/{processId}/phases/{phaseId}/progress
+    Entonces recibe totalSubphases 5, approvedSubphases 3 y pendingSubphases 2
+    Y progressPercent es 60.0
+
+  Escenario: Consulta progreso de una fase sin indicadores
+    Dado una fase válida sin indicadores
+    Cuando solicita GET /api/v1/processes/{processId}/phases/{phaseId}/progress
+    Entonces recibe totalSubphases 0 y progressPercent 0.0
+
+  Escenario: Rechaza fase perteneciente a otro proceso
+    Dado una fase existente que pertenece a otro proceso
+    Cuando solicita su progreso con un processId distinto
+    Entonces recibe 404 PROCESS_NOT_FOUND
+
   Escenario: Listado vacío para [CC] sin proceso en su carrera
     Dado un [CC] autenticado asignado a una carrera sin proceso activo
     Cuando solicita GET /api/v1/processes
@@ -195,6 +222,6 @@ Característica: Consulta de procesos de acreditación
 |-----------|--------|--------|
 | `DD-UC-019` | Borrador | [`docs/design/DD-UC-019.md`](../../design/DD-UC-019.md) |
 | `PR-IMPL-019` | Aprobado (backend Spring Boot) | [`docs/prompts/impl/PR-IMPL-019.md`](../../prompts/impl/PR-IMPL-019.md) |
-| `api_contracts.md` | Pendiente (post-impl) | API-PROC-03, API-PROC-04 |
+| `api_contracts.md` | Implementado | API-PROC-03, API-PROC-04, API-PROC-12 |
 | Frontend | Legacy v1.x | Feature `processes/` — migrar a árbol normativo v2.0 |
 | Tests | Pendiente (post-impl) | Aislamiento [CC] carrera A vs B; JD/TD ven todos |
