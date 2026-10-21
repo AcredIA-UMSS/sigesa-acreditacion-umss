@@ -16,6 +16,7 @@ import {
   Layers,
   FileUp,
   FileSearch,
+  Bell,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -24,6 +25,7 @@ type SidebarNavKey =
   | 'dashboard'
   | 'processes'
   | 'evidence'
+  | 'notifications'
   | 'users'
   | 'templates'
   | 'reports'
@@ -214,6 +216,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             isExpanded={isExpanded}
             active={location.pathname === '/evidencias/cargar'}
             to="/evidencias/cargar"
+          />
+        )}
+
+        {(session?.role === 'CC' || session?.role === 'CAE_MEMBER') && (
+          <NavItem
+            icon={<Bell size={20} />}
+            label="NOTIFICACIONES"
+            isExpanded={isExpanded}
+            active={activeNav === 'notifications' || location.pathname === '/notificaciones'}
+            to="/notificaciones"
           />
         )}
 

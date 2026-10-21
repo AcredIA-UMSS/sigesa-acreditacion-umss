@@ -11,11 +11,14 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../../lib/auth/useAuth';
+import { NotificationBell } from '../../notifications/components/NotificationBell';
 
 export function DashboardPage() {
   const { session } = useAuth();
   const { summary, isLoading, error, refetch } = useDashboardSummary();
   const [activeTab, setActiveTab] = useState<'cc' | 'td' | 'jd' | null>(null);
+
+  const isNotificationRole = session?.role === 'CC' || session?.role === 'CAE_MEMBER';
 
   const permissions = (summary?.grantedPermissions as string[]) ?? [];
   const hasCc = (permissions.includes('READ_CC_DASHBOARD') || permissions.includes('ROLE_CC') || permissions.includes('CC')) && summary?.coordinatorSection != null;
@@ -67,6 +70,7 @@ export function DashboardPage() {
 
           <div className="flex flex-wrap items-center gap-3">
 
+            {isNotificationRole && <NotificationBell />}
 
             {summary && (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary-200/40 bg-primary-100/35 px-4 py-2.5 text-primary-600 shadow-sm backdrop-blur-sm">

@@ -10,6 +10,7 @@ import {
 import type { CoordinatorSection } from '../types';
 import { ReportExportBar } from './ReportExportBar';
 import { CoordinatorObservationsTable } from './CoordinatorObservationsTable';
+import { CoordinatorAlertsPanel } from '../../notifications/components/CoordinatorAlertsPanel';
 
 interface CoordinatorDashboardSectionProps {
   section: CoordinatorSection;
@@ -69,6 +70,9 @@ export function CoordinatorDashboardSection({ section, readOnly = false }: Coord
           icon={<Clock className="text-warning" size={24} />}
         />
       </div>
+
+      {/* CC unread alerts (notifications center FSD-UC-015); hidden in EE read-only review */}
+      {!readOnly && <CoordinatorAlertsPanel />}
 
       {/* Phases and Bottlenecks Row */}
       <div className="grid gap-6 lg:grid-cols-3">

@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { CompositeDashboardSummary } from '../../api/model/compositeDashboardSummary';
 import type { ProcessSummaryResponseDto } from '../../api/model/processSummaryResponseDto';
+import type { NotificationItemDto, PaginatedNotificationResponse } from '../../features/notifications/api/notificationsApi';
 
 export const dashboardSummaryCc: CompositeDashboardSummary = {
   userId: 'usr-cc-sistemas-01',
@@ -134,4 +135,68 @@ export const handlers = [
       },
     });
   }),
+
+  // --- Notifications (FSD-UC-015): defaults are an empty inbox ---
+  http.get('/api/v1/notifications/me', () => {
+    const emptyPage: PaginatedNotificationResponse = {
+      content: [],
+      totalElements: 0,
+      totalPages: 1,
+      size: 20,
+      number: 0,
+    };
+    return HttpResponse.json(emptyPage);
+  }),
+
+  http.get('/api/v1/notifications/unread-count', () => {
+    return HttpResponse.json({ unreadCount: 0 });
+  }),
+
+  http.patch('/api/v1/notifications/:id/read', () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  http.post('/api/v1/notifications/mark-all-read', () => {
+    return new HttpResponse(null, { status: 204 });
+  }),
 ];
+
+export const notificationFixtureRejected: NotificationItemDto = {
+  id: 'notif-rejected-1',
+  eventType: 'IndicatorRejected',
+  recipientId: 'usr-cc-sistemas-01',
+  recipientEmail: 'cc.sistemas@umss.edu.bo',
+  subject: 'Indicador 1.2 con observaciones',
+  body: 'El TD asignado rechazó la evidencia. Se requiere subsanación.',
+  deepLink: '/procesos/p-1?indicadorId=i-1',
+  status: 'SENT',
+  createdAt: '2026-10-20T10:00:00',
+  readAt: null,
+};
+
+export const notificationFixtureDeadline: NotificationItemDto = {
+  id: 'notif-deadline-1',
+  eventType: 'DeadlineApproaching',
+  recipientId: 'usr-cc-sistemas-01',
+  recipientEmail: 'cc.sistemas@umss.edu.bo',
+  subject: 'Plazo próximo para Nivel 1',
+  body: 'La fecha límite del Nivel 1 vence en 3 días.',
+  deepLink: '/procesos/p-1',
+  status: 'SENT',
+  createdAt: '2026-10-19T08:00:00',
+  readAt: '2026-10-19T09:00:00',
+};
+
+export function buildNotificationsPage(
+  content: NotificationItemDto[],
+  overrides: Partial<PaginatedNotificationResponse> = {},
+): PaginatedNotificationResponse {
+  return {
+    content,
+    totalElements: content.length,
+    totalPages: 1,
+    size: 20,
+    number: 0,
+    ...overrides,
+  };
+}

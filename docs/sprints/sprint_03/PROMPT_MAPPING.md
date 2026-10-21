@@ -1,7 +1,7 @@
 # PROMPT_MAPPING — Sprint 03
 
 > Registro PM del sprint 03. Trazabilidad: `Código → PR-IMPL → DD-UC-NNN → FSD-UC-NNN → DTP`.  
-> **Índice:** PM-001…PM-018 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA → M9 Plan Mejoras/E4 → M10 freeze/Pares + M11 E7 + CAE).
+> **Índice:** PM-001…PM-019 (evidencia/subfases v1 → v2 normativo → M6 workflow → UX/docs → E2E Buscador Evidencias IA → M7 DocumentAsset → M8 FODA → M9 Plan Mejoras/E4 → M10 freeze/Pares + M11 E7 + CAE → notificaciones in-app [CC]).
 
 | ID Mapeo | PR-IMPL | Design Doc | FSD / PRD | Descripción de la Tarea |
 | :--- | :--- | :--- | :--- | :--- |
@@ -25,6 +25,7 @@
 | PM-016 | PR-IMPL-M8-029 | DD-UC-029 | FSD-UC-029 / FSD-UC-028 | M8 FODA + métricas + encuesta + compuerta E2→E3 / E3 |
 | PM-017 | PR-IMPL-M9-031 | DD-UC-031 | FSD-UC-031 / FSD-UC-028 | M9 Plan de Mejoras + documentos E4 + compuerta E4→E5 |
 | PM-018 | PR-IMPL-M10-030 | DD-UC-030 | FSD-UC-030 / 020 / 028 / 031 | Cierre 2.1: freeze/Sala de Pares, ciclo E7, CAE_MEMBER |
+| PM-019 | PR-IMPL-045 | DD-UC-015 | FSD-UC-015 / PRD-US-017–019 | Centro de notificaciones in-app [CC]: campana + panel de alertas + página `/notificaciones` (frontend) |
 
 ---
 
@@ -1255,3 +1256,47 @@ Cierre 2.1 operativo: freeze bloquea escritura, EE lee, checklist se siembra al 
 
 - [ ] Commit/PR cuando el usuario lo pida (no commit en esta sesión)
 - [ ] Seed opcional `CAE_MEMBER` para demo UI de delegación
+
+---
+
+## PM-019 · Centro de notificaciones in-app (FSD-UC-015, CC)
+
+| Campo | Valor |
+| :--- | :--- |
+| **PR-IMPL** | [PR-IMPL-045](../../prompts/impl/PR-IMPL-045.md) |
+| **Design Doc** | [DD-UC-015](../../design/DD-UC-015.md) |
+| **FSD / PRD** | FSD-UC-015 · PRD-US-017 / 018 / 019 · PRD-NFR-004 |
+| **Alcance** | frontend |
+| **Fecha** | 2026-10-20 |
+
+### Resultado obtenido
+
+Centro de notificaciones in-app para [CC] sobre `GET/PATCH/POST /api/v1/notifications`:
+campana con badge + dropdown y enlace «Ver todas» en el panel, panel de alertas
+críticas en `CoordinatorDashboardSection` (oculto para EE en modo lectura), y página
+`/notificaciones` con filtro «solo no leídas», paginación (20/pág.), marcar todas y
+deep link por notificación. Ruta protegida con `CcOnlyRoute` y entrada de sidebar
+CC/CAE. Verificación: **160 tests OK (41 archivos)**, de los cuales **62** cubren la
+feature (API, hook, componentes, página e integración) con **100 % statements/líneas**
+y **97.4 % ramas** sobre `src/features/notifications/**`; oxlint y `tsc -b` sin
+hallazgos. Sin dependencias nuevas (`DTP.md` sin cambios) y `docs/baseline/` intacto.
+
+### Riesgos/observaciones
+
+- `NotificationQueryJpaAdapter` depende de `NotificationOutboxJpaEntity` /
+  `NotificationOutboxJpaRepository`, presentes solo en
+  `alex/feature/notifications/adhoc_aidlc` (commit `6ef989d`, con `V24__create_notification_outbox.sql`
+  y el worker SMTP). Sin integrar esa rama el back-end **no compila** y el endpoint no responde.
+- El puerto de escritura de esta rama es `NoOpNotificationOutboxAdapter` (solo log):
+  no se persisten filas en `notification_outbox`, la bandeja queda vacía en runtime.
+- Cliente de notificaciones escrito con `customFetch` (no Orval) porque el contrato no
+  está en el `api-docs` del back-end de esta rama; mismo patrón que `features/evidence/api/*`.
+- Sin smoke E2E Docker por el bloqueante de compilación; cobertura vía tests con MSW.
+
+### Próximos pasos
+
+- [ ] Integrar `alex/feature/notifications/adhoc_aidlc` (entidad + repositorio + V24 + worker) para que el endpoint sirva datos reales
+- [ ] Regenerar Orval (`pnpm generate:api`) cuando el contrato sea publicable y migrar `notificationsApi.ts` si aplica
+- [ ] Smoke E2E Docker con usuario CC (campana, deep link a `/procesos/...`, marcar todas)
+- [ ] Commit/PR cuando el usuario lo pida (no commit en esta sesión)
+

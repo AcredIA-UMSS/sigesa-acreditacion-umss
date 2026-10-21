@@ -13,6 +13,7 @@ import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
+import { NotificationsPage } from './features/notifications/pages/NotificationsPage';
 
 function App() {
   return (
@@ -129,6 +130,17 @@ function App() {
           element={
             <ProtectedRoute>
               <EvidenceSearchPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/notificaciones"
+          element={
+            <ProtectedRoute>
+              <CcOnlyRoute>
+                <NotificationsPage />
+              </CcOnlyRoute>
             </ProtectedRoute>
           }
         />
