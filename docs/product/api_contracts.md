@@ -487,6 +487,30 @@ security:
 | **409** | `FASE_CIERRE_BLOQUEADO` + `pendingSubphases[]` |
 | **403** | `FORBIDDEN_ROLE` si [CC] |
 
+### API-WF-04 — Progreso de fase
+
+| Campo | Valor |
+|-------|-------|
+| **Método / Ruta** | `GET /api/v1/processes/{processId}/phases/{phaseId}/progress` |
+| **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]` |
+| **200** | `{ "phaseId", "totalSubphases", "approvedSubphases", "pendingSubphases", "progressPercent", "state" }` |
+| **Cálculo** | Solo `SubphaseState.APROBADO` cuenta como aprobado; progreso con 1 decimal; fase vacía → `0.0` |
+| **400** | `processId` o `phaseId` no es UUID válido |
+| **404** | Proceso/fase inexistente o fase no perteneciente al proceso |
+
+Ejemplo `200 OK`:
+
+```json
+{
+  "phaseId": "00000000-0000-0000-0000-000000000001",
+  "totalSubphases": 5,
+  "approvedSubphases": 3,
+  "pendingSubphases": 2,
+  "progressPercent": 60.0,
+  "state": "ABIERTA"
+}
+```
+
 ---
 
 ## 7. MOD-DASH
