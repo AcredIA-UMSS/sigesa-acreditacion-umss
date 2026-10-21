@@ -1,0 +1,7 @@
+- Hace: PATCH /api/v1/processes/{processId}/phases/{phaseId}/state para actualizar el estado de la fase usando las entidades existentes Phase/Process y el enum PhaseState (ABIERTA/COMPLETADA).
+- Entrada: ruta processId y phaseId; body JSON { "state": "COMPLETADA" }.
+- Salida: 200 OK con { "phaseId": "...", "previousState": "ABIERTA", "newState": "COMPLETADA", "event": "PHASE_COMPLETED" }.
+- Error 400: body vacío, state nulo o no pertenece a PhaseState, o JSON mal formado.
+- Error 404: processId o phaseId no existen.
+- Error 409: la fase ya está COMPLETADA o la transición no es válida (p. ej., subfases sin aprobar).
+- Criterio de aceptación: solo permite ABIERTA -> COMPLETADA; valida que todas las subfases estén APROBADO; devuelve el estado actualizado; pruebas: transición válida, estado inválido, proceso/fase inexistente y conflicto de negocio.
