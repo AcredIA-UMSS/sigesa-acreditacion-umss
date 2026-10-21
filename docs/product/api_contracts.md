@@ -212,6 +212,33 @@ security:
 }
 ```
 
+### API-PROC-12 — `GET /processes/{processId}/phases/{phaseId}/progress`
+
+| Campo | Valor |
+|-------|-------|
+| **UC** | FSD-UC-019 (consulta de procesos; estados según workflow FSD-UC-010) |
+| **x-allowed-roles** | `[JD]`, `[TD]`, `[CC]`, `[EE]`, `[CAE_MEMBER]` |
+| **200** | `PhaseProgressResponseDto` |
+| **400** | `processId` o `phaseId` no es UUID válido |
+| **404** | Proceso/fase inexistente o fase no perteneciente al proceso |
+
+En la jerarquía v2, `phaseId` identifica un `Level1Node`; para este resumen, cada
+`NormativeIndicator` asociado es una subfase contable. `approvedSubphases` cuenta
+los indicadores `APROBADO`; `pendingSubphases` es el total restante. El porcentaje
+es `approvedSubphases / totalSubphases * 100`, redondeado a un decimal; sin
+indicadores, es `0.0`. `state` contiene el estado del `Level1Node`.
+
+```json
+{
+  "phaseId": "uuid",
+  "totalSubphases": 5,
+  "approvedSubphases": 3,
+  "pendingSubphases": 2,
+  "progressPercent": 60.0,
+  "state": "ABIERTA"
+}
+```
+
 ### API-PROC-09…11 — Responsable [CC]
 
 > Sin cambios v2.0. Ver legacy implementado: `PUT/DELETE /processes/{id}/responsible`, `GET …/candidates` (FSD-UC-023).
@@ -773,6 +800,7 @@ Sin cambio de rutas (`/assistant/status`, `/assistant/chat`). Tools v2.0 objetiv
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.3 | 2026-10-20 | API-PROC-12: consulta de progreso por fase sobre la jerarquía normativa vigente |
 | v2.1.2 | 2026-10-17 | FEAT-03: 504 `ASSISTANT_GATEWAY_TIMEOUT` en `POST /assistant/chat` |
 | v2.1.1 | 2026-10-13 | M7: API-EVD-01 ext (`documentAssetId`, `folioCode`, `reusedAsset`); API-EVD-06 link; API-EVD-07 GET asset |
 | v2.0 | 2026-09-08 | Release 2.0.0: contratos N1→N2→N3→Indicador→Evidencia; API-STR/WF/EVD/TPL v2; §12 legacy; ADR-0004 |

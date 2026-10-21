@@ -11,6 +11,7 @@ import com.umss.sigesa.application.model.process.ProcessStats;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
+import com.umss.sigesa.application.port.in.GetPhaseProgressUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessStatsUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
@@ -22,6 +23,7 @@ import com.umss.sigesa.adapter.in.web.dto.ProcessResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessResponsibleDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessStatsResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ProcessSummaryResponseDto;
+import com.umss.sigesa.adapter.in.web.dto.PhaseProgressResponseDto;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import jakarta.validation.Valid;
@@ -54,6 +56,7 @@ public class ProcessController {
     private final ListProcessesUseCase listProcessesUseCase;
     private final GetProcessStatsUseCase getProcessStatsUseCase;
     private final GetProcessDetailUseCase getProcessDetailUseCase;
+    private final GetPhaseProgressUseCase getPhaseProgressUseCase;
     private final DeleteProcessUseCase deleteProcessUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
     private final NormativeStructureWebMapper normativeStructureWebMapper;
@@ -101,6 +104,27 @@ public class ProcessController {
         ProcessQueryContext ctx = buildQueryContext();
         ProcessStats stats = getProcessStatsUseCase.getStats(ctx);
         return ResponseEntity.ok(mapStatsToDto(stats));
+    }
+
+    @GetMapping("/{processId}/phases/{phaseId}/progress")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE','CAE_MEMBER')")
+    @Operation(summary = "Consultar progreso de una fase", description = "Agrega el estado de los indicadores de la fase.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Progreso de la fase"),
+            @ApiResponse(responseCode = "400", description = "UUID inválido", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Proceso o fase no encontrados", content = @Content)
+    })
+    public ResponseEntity<PhaseProgressResponseDto> getPhaseProgress(
+            @PathVariable UUID processId,
+            @PathVariable UUID phaseId) {
+        var progress = getPhaseProgressUseCase.getProgress(processId, phaseId);
+        return ResponseEntity.ok(new PhaseProgressResponseDto(
+                progress.phaseId(),
+                progress.totalSubphases(),
+                progress.approvedSubphases(),
+                progress.pendingSubphases(),
+                progress.progressPercent(),
+                progress.state()));
     }
 
     @GetMapping("/{processId}")
