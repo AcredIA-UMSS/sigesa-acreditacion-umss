@@ -9,8 +9,8 @@ modulo: MOD-EVIDENCE
 reglas: FSD-BR-01, FSD-BR-03, FSD-BR-18
 design_doc: DD-UC-004-M7
 pr_impl: PR-IMPL-M7-004
-ultima_actualizacion: "2026-10-17"
-nota_implementacion: "M7: blob físico en DocumentAsset; Evidence 1:1 por indicador. FEAT-02 (#51): blobs S3-compatible (Compose: Silo `pgsty/silo`, API MinIO) o local (H2); lock evidence_upload_lock."
+ultima_actualizacion: "2026-10-22"
+nota_implementacion: "M7: blob físico en DocumentAsset; Evidence 1:1 por indicador. FEAT-02 (#51): blobs S3-compatible. 8.2.0: UI Ver/descargar vía API-EVD-07b."
 ---
 
 # FSD-UC-004 — Cargar Evidencia en Indicador
@@ -34,6 +34,7 @@ nota_implementacion: "M7: blob físico en DocumentAsset; Evidence 1:1 por indica
 5. Si el hash es nuevo, persiste `DocumentAsset` (`folioCode`, `storageKey`, `contentHash`) y luego `Evidence` v1 + link primario.
 6. **Indicador** transiciona a `SUBIDO`.
 7. Notification Service notifica al [TD] (UC-015 — stub vigente).
+8. [CC]/[TD] visualiza la evidencia en el detalle del indicador (`GET /indicators/{id}/evidences`) y abre o descarga el blob (`GET /document-assets/{id}/content`).
 
 ## Flujo alterno — redireccionamiento (M:N)
 
@@ -88,6 +89,12 @@ Característica: Carga de Evidencia en indicador
     Entonces reusedAsset es verdadero
     Y no se crea un segundo objeto en almacenamiento
     Y ambos indicadores quedan SUBIDO
+
+  Escenario: Visualizar evidencia cargada
+    Dado un indicador con Evidencia y DocumentAsset
+    Cuando el [CC] o [TD] abre el detalle del indicador
+    Entonces ve el nombre, folio y versión
+    Y puede descargar o previsualizar el blob vía GET /document-assets/{id}/content
 
   Escenario: Vincular documento existente
     Dado un DocumentAsset del proceso P

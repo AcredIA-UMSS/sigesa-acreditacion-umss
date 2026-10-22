@@ -1,4 +1,4 @@
-import { listByProcess } from '../../../api/endpoints/document-assets/document-assets';
+import { downloadContent, listByProcess } from '../../../api/endpoints/document-assets/document-assets';
 import { linkDocumentAsset, listEvidences, uploadEvidence } from '../../../api/endpoints/evidence/evidence';
 import type { DocumentAssetResponseDto } from '../../../api/model/documentAssetResponseDto';
 import type { NormativeIndicatorEvidenceResponseDto } from '../../../api/model/normativeIndicatorEvidenceResponseDto';
@@ -63,6 +63,39 @@ export async function uploadNormativeIndicatorEvidence(
     { skipUnauthorizedLogout: true },
   );
   return response.data;
+}
+
+export async function downloadDocumentAssetContent(
+  documentAssetId: string,
+): Promise<{ blob: Blob; filename: string }> {
+  const response = await downloadContent(documentAssetId, { skipUnauthorizedLogout: true });
+  const fileData = response.data as unknown;
+  if (response.status !== 200 || !(fileData instanceof Blob)) {
+    throw new Error('No se pudo descargar la evidencia.');
+  }
+  return {
+    blob: fileData,
+    filename: filenameFromContentDisposition(
+      response.headers.get('Content-Disposition'),
+      'evidencia',
+    ),
+  };
+}
+
+function filenameFromContentDisposition(header: string | null, fallback: string): string {
+  if (!header) {
+    return fallback;
+  }
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf8?.[1]) {
+    try {
+      return decodeURIComponent(utf8[1]);
+    } catch {
+      return utf8[1];
+    }
+  }
+  const ascii = /filename="?([^"]+)"?/i.exec(header);
+  return ascii?.[1] ?? fallback;
 }
 
 export async function fetchProcessDocumentAssets(

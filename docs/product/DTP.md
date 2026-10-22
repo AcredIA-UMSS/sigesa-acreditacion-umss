@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **Demo 2:** `openapi.json` generado desde springdoc; CI drift + Spectral (`.github/workflows/openapi.yml`). Registro `docs/demos/demo-2.md` y `8.2.0-aportes.md`. | FSD-UC-004 / FSD-UC-005 | — | PM-029 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE UC-005:** `DELETE /evidences/{id}` retira evidencia si el indicador no está `APROBADO` (CC/CAE, 204 + blob/asset exclusivo); `409 EVIDENCE_IMMUTABLE` si aprobado. UI «Quitar / reemplazar». | FSD-UC-005 / DD-UC-005 | ADR-0001 | PM-028 | Boris Anthony Angulo Urquieta |

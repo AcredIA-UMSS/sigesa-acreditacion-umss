@@ -15,6 +15,8 @@ vi.mock('../../evidence/hooks/useNormativeIndicatorCollaboration', () => ({
         description: 'Acta',
         contentHash: 'abc',
         originalFilename: 'acta.pdf',
+        documentAssetId: 'asset-1',
+        folioCode: 'SIGESA-20261022-abcd1234',
         uploadedAt: '2026-10-22T00:00:00',
         uploadedBy: 'cc-1',
       },
@@ -88,5 +90,23 @@ describe('NormativeIndicatorCollaborationSection', () => {
     );
 
     expect(screen.queryByRole('button', { name: /Quitar \/ reemplazar/i })).not.toBeInTheDocument();
+  });
+
+  it('permite visualizar la evidencia cargada', () => {
+    renderWithClient(
+      <NormativeIndicatorCollaborationSection
+        processId="proc-1"
+        indicatorId="ind-1"
+        indicatorLabel="I-01"
+        indicatorStatus="SUBIDO"
+        breadcrumb="N1 › N2 › N3"
+        canUpload
+        canSubsanate={false}
+        canReview={false}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /Ver evidencia/i })).toBeInTheDocument();
+    expect(screen.getByText(/Folio SIGESA-20261022-abcd1234/)).toBeInTheDocument();
   });
 });

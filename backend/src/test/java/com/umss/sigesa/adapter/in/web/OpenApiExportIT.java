@@ -56,6 +56,8 @@ class OpenApiExportIT {
                 "Falta DELETE /api/v1/evidences/{evidenceId}");
         assertTrue(paths.get("/api/v1/evidences/{evidenceId}").has("delete"),
                 "El path de evidencia no declara DELETE");
+        assertTrue(paths.has("/api/v1/document-assets/{documentAssetId}/content"),
+                "Falta GET /api/v1/document-assets/{documentAssetId}/content");
 
         Path committed = Path.of("..", "openapi.json").toAbsolutePath().normalize();
         Path generated = Path.of("target", "openapi.json").toAbsolutePath().normalize();

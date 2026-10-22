@@ -4,6 +4,8 @@ import { FileText } from 'lucide-react';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { getGetProcessQueryKey } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
 import { deleteNormativeIndicatorEvidence } from '../../evidence/api/normativeIndicatorEvidenceApi';
+import { EvidencePreviewDialog } from '../../evidence/components/EvidencePreviewDialog';
+import { useEvidencePreview } from '../../evidence/hooks/useEvidencePreview';
 import { useNormativeIndicatorCollaboration } from '../../evidence/hooks/useNormativeIndicatorCollaboration';
 import { NormativeIndicatorEvidenceUploadSlot } from '../components/NormativeIndicatorEvidenceUploadSlot';
 import { NormativeIndicatorReviewActions } from '../components/NormativeIndicatorReviewActions';
@@ -29,6 +31,7 @@ function NormativeIndicatorEvidenceList({
   retractError,
   onSubsanate,
   onRetract,
+  onView,
 }: {
   evidences: ReturnType<typeof useNormativeIndicatorCollaboration>['evidences'];
   isLoading: boolean;
@@ -38,6 +41,7 @@ function NormativeIndicatorEvidenceList({
   retractError: string | null;
   onSubsanate?: (evidenceId: string, filename: string) => void;
   onRetract?: (evidenceId: string, filename: string) => void;
+  onView?: (documentAssetId: string, filename: string) => void;
 }) {
   return (
     <div className="rounded-lg border border-primary-100 bg-primary-50/40 p-3">
@@ -63,25 +67,54 @@ function NormativeIndicatorEvidenceList({
                 {item.folioCode ? ` · Folio ${item.folioCode}` : ''}
                 {item.externalUrl ? ` · ${item.externalUrl}` : ''}
               </p>
-              {canSubsanate && onSubsanate && (
-                <button
-                  type="button"
-                  className="mt-2 mr-3 text-body-md font-medium text-secondary-600 underline decoration-secondary-400 underline-offset-2 transition-colors hover:text-secondary-800"
-                  onClick={() => onSubsanate(item.evidenceId, item.originalFilename)}
-                >
-                  Subsanar evidencia
-                </button>
-              )}
-              {canRetract && onRetract && (
-                <button
-                  type="button"
-                  disabled={retractingId === item.evidenceId}
-                  className="mt-2 text-body-md font-medium text-danger underline decoration-danger/40 underline-offset-2 transition-colors hover:text-secondary-800 disabled:opacity-60"
-                  onClick={() => onRetract(item.evidenceId, item.originalFilename)}
-                >
-                  {retractingId === item.evidenceId ? 'Quitando…' : 'Quitar / reemplazar'}
-                </button>
-              )}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {item.documentAssetId && onView && (
+                  <button
+                    type="button"
+                    title="Ver evidencia"
+                    aria-label="Ver evidencia"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors hover:bg-primary-50"
+                    onClick={() => onView(item.documentAssetId ?? '', item.originalFilename)}
+                  >
+                    👁️
+                  </button>
+                )}
+                {item.externalUrl && (
+                  <a
+                    href={item.externalUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Abrir enlace"
+                    aria-label="Abrir enlace"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors hover:bg-primary-50"
+                  >
+                    🔗
+                  </a>
+                )}
+                {canSubsanate && onSubsanate && (
+                  <button
+                    type="button"
+                    title="Subsanar evidencia"
+                    aria-label="Subsanar evidencia"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors hover:bg-secondary-50"
+                    onClick={() => onSubsanate(item.evidenceId, item.originalFilename)}
+                  >
+                    ✏️
+                  </button>
+                )}
+                {canRetract && onRetract && (
+                  <button
+                    type="button"
+                    title="Quitar / reemplazar"
+                    aria-label="Quitar / reemplazar"
+                    disabled={retractingId === item.evidenceId}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-body-lg transition-colors hover:bg-danger/10 disabled:opacity-60"
+                    onClick={() => onRetract(item.evidenceId, item.originalFilename)}
+                  >
+                    {retractingId === item.evidenceId ? '⏳' : '🗑️'}
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -108,6 +141,7 @@ export function NormativeIndicatorCollaborationSection({
   const queryClient = useQueryClient();
   const { evidences, eligibility, hasOpenObservation, isLoading, error, reload } =
     useNormativeIndicatorCollaboration(indicatorId, canSubsanate);
+  const preview = useEvidencePreview();
 
   const [subsanationTarget, setSubsanationTarget] = useState<{
     evidenceId: string;
@@ -151,6 +185,7 @@ export function NormativeIndicatorCollaborationSection({
         retractError={retractError}
         onSubsanate={(evidenceId, filename) => setSubsanationTarget({ evidenceId, filename })}
         onRetract={(evidenceId, filename) => setRetractTarget({ evidenceId, filename })}
+        onView={(documentAssetId, filename) => preview.open(documentAssetId, filename)}
       />
 
       <NormativeIndicatorEvidenceUploadSlot
@@ -211,6 +246,17 @@ export function NormativeIndicatorCollaborationSection({
             })
             .finally(() => setRetractingId(null));
         }}
+      />
+
+      <EvidencePreviewDialog
+        isOpen={preview.isOpen}
+        title={preview.title}
+        objectUrl={preview.objectUrl}
+        contentType={preview.contentType}
+        isLoading={preview.isLoading}
+        error={preview.error}
+        onClose={preview.close}
+        onDownload={preview.download}
       />
 
       {subsanationTarget && openObservationId && (

@@ -37,6 +37,7 @@
 | PM-028 | PR-IMPL-035 | DD-UC-005 | FSD-UC-005 | DELETE evidencia no aprobada (CC/CAE 204) + UI quitar/reemplazar |
 | PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
+| PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
 
 ---
 
@@ -2007,4 +2008,81 @@ Metadatos en BD ya no quedan huérfanos si se vuelve a subir el mismo archivo tr
 
 - [ ] Rebuild del backend (`docker compose up --build`)
 - [ ] Re-subir el mismo PDF a un indicador sin evidencia vigente para restaurar el objeto en Silo
+
+---
+
+## PM-031
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-031 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 17:28 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Visualizar evidencias subidas + registrar Demo 2 (OpenAPI/CI) |
+| **Objetivo** | Que [CC]/[TD] vean y descarguen el blob desde el detalle del indicador; documentar el parámetro 2 de Classroom |
+| **Contexto** | FSD-UC-004 API-EVD-07b ya existía; el listado no abría el archivo. Demo 2 exige contrato generado + drift/Spectral. |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 |
+| **FSD-UC vinculado** | FSD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Perfecto, ahora hagamos otro feature, donde pueda visualizar las evidencias subidas desde el frontend, marca el UC, 
+y llena los parametros de la tarea:
+2. Contrato OpenAPI y su flujo de validación
+...
+3. Qué registrar
+- En docs/demos/demo-2.md y aquí en Classroom...
+tambien llena los docs que se deben llenar en el repo como al sprint 3
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-004-M7.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/prompts/impl/PR-IMPL-041.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/features/evidence/components/EvidencePreviewDialog.tsx` |
+| generado | `frontend/src/features/evidence/components/EvidencePreviewDialog.test.tsx` |
+| generado | `frontend/src/features/evidence/hooks/useEvidencePreview.ts` |
+| modificado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.tsx` |
+| modificado | `frontend/src/features/evidence/api/normativeIndicatorEvidenceApi.ts` |
+| modificado | `frontend/src/api/endpoints/document-assets/document-assets.ts` |
+| modificado | `frontend/src/lib/api/customFetch.ts` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/DocumentAssetController.java` |
+| modificado | `docs/demos/demo-2.md` |
+| modificado | `8.2.0-aportes.md` |
+| modificado | `docs/product/uc/FSD-UC-004.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Botón «Ver evidencia» + diálogo de preview/descarga (`GET /document-assets/{id}/content`).
+- Registro Classroom: tabla integrantes, contrato OpenAPI (drift + Spectral), UC marcado.
+
+### Validación ejecutada
+
+- [x] `OPENAPI_WRITE=true ./mvnw -Dtest=OpenApiExportIT,DocumentAssetControllerWebMvcTest test` — OK
+- [x] `vitest` CollaborationSection + EvidencePreviewDialog — 5 passed
+- [x] oxlint sobre archivos del visor — OK
+
+### Resultado obtenido
+
+FSD-UC-004 cubre carga + visualización; Demo 2 documentada para Boris.
+
+### Próximos pasos
+
+- [ ] Rebuild frontend Docker para ver el visor
+- [ ] Push a `release/8.2.0` cuando se pida
 

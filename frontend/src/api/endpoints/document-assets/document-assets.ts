@@ -272,6 +272,35 @@ export function useGetDocumentAsset<TData = Awaited<ReturnType<typeof getDocumen
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type downloadContentResponse200 = {
+  data: Blob
+  status: 200
+}
+
+export type downloadContentResponseSuccess = (downloadContentResponse200) & {
+  headers: Headers;
+};
+
+export type downloadContentResponse = (downloadContentResponseSuccess)
+
+export const getDownloadContentUrl = (documentAssetId: string) => {
+  return `/api/v1/document-assets/${documentAssetId}/content`
+}
+
+/**
+ * @summary Descargar blob del DocumentAsset (API-EVD-07b)
+ */
+export const downloadContent = async (
+  documentAssetId: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<downloadContentResponse> => {
+  return customFetch<downloadContentResponse>(getDownloadContentUrl(documentAssetId), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+
 
 
 

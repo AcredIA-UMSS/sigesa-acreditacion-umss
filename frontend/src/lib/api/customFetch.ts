@@ -119,9 +119,14 @@ export async function customFetch<TData>(
   }
 
   const contentType = response.headers.get('Content-Type') || '';
+  const disposition = (response.headers.get('Content-Disposition') || '').toLowerCase();
   const isBinary = contentType.includes('application/pdf') ||
                    contentType.includes('spreadsheetml') ||
-                   contentType.includes('octet-stream');
+                   contentType.includes('octet-stream') ||
+                   contentType.includes('officedocument') ||
+                   contentType.includes('msword') ||
+                   contentType.startsWith('image/') ||
+                   disposition.includes('attachment');
 
   let data: any;
   if (isBinary) {

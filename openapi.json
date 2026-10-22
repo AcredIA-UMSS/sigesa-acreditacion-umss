@@ -3000,14 +3000,14 @@
         "responses" : {
           "200" : {
             "content" : {
-              "*/*" : {
+              "application/octet-stream" : {
                 "schema" : {
-                  "format" : "byte",
+                  "format" : "binary",
                   "type" : "string"
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Bytes del documento almacenado (MinIO/S3)"
           }
         },
         "summary" : "Descargar blob del DocumentAsset (API-EVD-07b)",
