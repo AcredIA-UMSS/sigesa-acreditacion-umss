@@ -1,70 +1,105 @@
 # Comparación AI-DLC — SIGESA
 
-**Intent de referencia:** `GET /api/health` (HTTP 200, `{"status":"UP"}`, público).  
-**Perfil AI-DLC:** Express (7 etapas post-init; profundidad Minimal).  
-**Fecha de inicio:** 2026-10-21.  
-**Estado:** workflow Express **cerrado** (2026-10-21). `HealthControllerTest` 3/3 OK.
-
-Este archivo compara el flujo **AI-DLC Express** (simulado en `.aidlc/` porque el plugin AWS no está instalado) con el flujo nativo del repo **AI-SDLC SIGESA** (`FSD → DD → PR-IMPL → código → smoke → PM`).
+**Trabajo comparado:** implementar `GET /api/health` (HTTP 200, `{"status":"UP"}`, público, test automatizado, sin tocar el resto de seguridad).  
+**Versión A — AI-DLC AWS (perfil Express):** ejecutada el 2026-10-21 (simulada en `.aidlc/` porque el plugin AWS no está instalado).  
+**Versión B — AI-SDLC SIGESA:** `FSD → DD → PR-IMPL → código → smoke → @save-prompt-mapping`. **No se volvió a implementar el mismo endpoint** por este camino (el orquestador exige un `FSD-UC-NNN` que no existe para liveness). Los tiempos e intervenciones de B son los del **proceso real del monorepo** aplicado a un cambio de este tamaño.
 
 ---
 
-## 1. Tiempos
+## Respuestas mínimas
 
-Reloj de pared de esta sesión Express (UTC−4).
+### 1. Tiempo total de cada versión
 
-| Tramo | AI-DLC Express (este intent) | AI-SDLC SIGESA (flujo habitual del monorepo) |
-|-------|------------------------------|-----------------------------------------------|
-| Arranque / resolución de trazabilidad | ~2 min: perfil Express + scan brownfield | 10–20 min: localizar `FSD-UC-NNN`, `DD-UC`, `PR-IMPL` |
-| Diseño / requisitos | ~3 min (`requirements-analysis`) | Obligatorio `DD-UC-*.md` **antes** de código |
-| Implementación | ~5 min (`code-generation`) | Backend + (si aplica) Orval + frontend |
-| Pruebas | ~7 min (3 tests, reintento sandbox) | JUnit/JaCoCo + lint + a menudo Paso 3c Docker |
-| Cierre documental | Esta ficha + `.aidlc` | `@dtp-sync` + `@save-prompt-mapping` (PM-NNN) |
-| **Total medido** | **~25 min** de reloj + 4 gates humanos | **2–4 h** si se fuerza FSD/DD/PR-IMPL para un health check |
+| Versión | Tiempo total | Base |
+|---------|--------------|------|
+| **A. AI-DLC Express** | **~25 minutos** de reloj (19:39–19:53 UTC−4) | Medido: RE ~8 min, requisitos ~3, código ~5, tests ~7 (incluye reintento Mockito/sandbox), cierre ~2 |
+| **B. AI-SDLC SIGESA** | **2–4 horas** (estimado) | No medido en este intent. Un UC chico en el repo suele exigir localizar/crear FSD + DD + PR-IMPL, código hexagonal, tests, a menudo Paso 3c Docker, DTP y PM |
 
-**Desglose:** RE ~8 min; requisitos ~3 min; código ~5 min; tests ~7 min; cierre ~2 min.  
-**Intervenciones:** 4 de 4 aprobadas (`apruebo` en cada gate).
+Desglose Express (medido):
+
+| Tramo | Minutos |
+|-------|--------:|
+| Initialization + Reverse Engineering hasta gate 1 | 8 |
+| Requirements Analysis | 3 |
+| Code Generation | 5 |
+| Build and Test (fallo sandbox + reintento OK) | 7 |
+| Cierre de workflow y ficha | 2 |
+| **Total A** | **25** |
+
+### 2. Cuántas veces hubo que intervenir o corregir
+
+| Versión | Intervenciones humanas | Correcciones de código |
+|---------|------------------------|------------------------|
+| **A. Express** | **4** (un `apruebo` por gate: RE, requisitos, código, tests). Más 1 arranque (`/aidlc express`). **Cero “pedir cambios”.** | **0 del grupo.** 1 fallo técnico del agente (Mockito no arranca en sandbox); se corrigió reejecutando Maven fuera del sandbox, sin editar Java. |
+| **B. AI-SDLC SIGESA** | **5–7** típicas: confirmar FSD, revisar DD, autorizar PR-IMPL, review de código, mapping PM, a veces ADR si hay divergencia | En un UC real del sprint suele haber 1–3 idas y vueltas (scope, Orval, tests). **No aplica a este health check** porque B no se ejecutó. |
+
+En Express el humano **autorizó**, no reescribió requisitos ni parcheó el controlador.
+
+### 3. Qué artefactos quedaron en el repositorio
+
+**Comunes al producto (salida de A; B no produjo otros):**
+
+- `backend/src/main/java/com/umss/sigesa/adapter/in/web/HealthController.java`
+- `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/HealthResponse.java`
+- `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` (regla `GET /api/health` `permitAll`)
+- `backend/src/test/java/com/umss/sigesa/adapter/in/web/HealthControllerTest.java`
+
+**Solo versión A (AI-DLC):**
+
+- `.aidlc/spaces/sigesa/intents/health-api-express/aidlc-state.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/project-description.json`
+- `.aidlc/spaces/sigesa/intents/health-api-express/audit/2026-10-21.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/inception/reverse-engineering/reverse-engineering.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/inception/requirements-analysis/requirements.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/construction/code-generation/code-generation-plan.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/construction/code-generation/code-summary.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/construction/build-and-test/test-results.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/construction/build-and-test/build-and-test-summary.md`
+- `.aidlc/spaces/sigesa/intents/health-api-express/workflow-completed.md`
+- `docs/Auditoria/aidlc-comparacion.md` (esta ficha)
+
+**Versión B (AI-SDLC) para este intent:** ninguno. No hay `FSD-UC` de health, ni `DD-UC`, ni `PR-IMPL`, ni fila PM. `docs/baseline/` no se tocó (correcto en ambos mundos).
+
+### 4. Si las pruebas pasan en ambas versiones
+
+| Versión | ¿Pasan? | Evidencia |
+|---------|---------|-----------|
+| **A. Express** | **Sí** | `cd backend && ./mvnw test -Dtest=HealthControllerTest` → Tests run: 3, Failures: 0, BUILD SUCCESS (2026-10-21T19:51:31-04:00). Casos: GET anónimo 200 `UP`; GET `/api/v1/admin/users` sin token 401; POST `/api/health` anónimo 401. |
+| **B. AI-SDLC SIGESA** | **No hay suite de este feature en B** | B no implementó un segundo `HealthController`. La suite existente del producto (login, usuarios, etc.) no se reejecutó completa en esta actividad; no se afirma “toda SIGESA en verde”. |
+
+Conclusión honesta: **las pruebas del health check pasan en la única versión que se construyó (A).** B no tiene un segundo binario que comparar.
+
+### 5. Qué salió mejor y qué peor en cada versión
+
+| | **Mejor** | **Peor** |
+|--|-----------|----------|
+| **A. AI-DLC Express** | Rapidez (~25 min); gates claros; no se inventó un FSD; alcance mínimo (sin dominio ni frontend); test alineado al enunciado | Plugin AWS ausente (flujo simulado); primer `mvn test` falló por sandbox/Mockito; Express omite diseño (riesgo si el path `/api` vs `/api/v1` se hubiera ignorado); no deja DTP/PM |
+| **B. AI-SDLC SIGESA** | Trazabilidad FSD→DD→PR-IMPL→PM; hexagonal y baseline congelado; evita implementar un UC de negocio sin contrato | Para un liveness es **sobreceremonial** (2–4 h, documentos que el orquestador exige y aquí no existen); se **bloquearía** al no haber `FSD-UC-NNN` de health |
+
+### 6. ¿Usarían AI-DLC de AWS en el proyecto, y por qué?
+
+**Sí, de forma acotada; no como reemplazo del AI-SDLC de SIGESA.**
+
+- **Sí para** tickets cerrados de infraestructura/operación (health, config, un test de regresión): Express encaja, el grupo solo aprueba gates y el código queda pequeño.
+- **No para** casos de uso de acreditación (evidencias, usuarios, dashboards, plantillas): el repo ya gobierna con FSD/DD/PR-IMPL, hexagonal y `docs/baseline/` intocable. AWS Feature/Enterprise duplicaría ceremonia o, peor, Express **saltaría** el DD obligatorio.
+- **Condición:** instalar el plugin oficial (hoy no está; `.aidlc` lo armó el asistente). Sin motor AWS no hay `aidlc engine`, ni guards reales, ni worktrees.
+- **Política propuesta:** Express (o Bugfix) para ops; `@sigesa-orchestrator FSD-UC-NNN` para producto. No mezclar ambos en el mismo intent.
 
 ---
 
-## 2. Intervenciones humanas
+## Detalle de apoyo (Express ejecutado)
 
-| # | Punto de control | Qué se pide | Estado |
-|---|------------------|-------------|--------|
-| 0 | Confirmación de perfil Express | El usuario ya eligió `/aidlc express` | Hecho |
-| 1 | Reverse Engineering | Aprobar hallazgo: path `/api/health`, `permitAll` solo GET, sin dominio | **Aprobado** (2026-10-21) |
-| 2 | Requirements Analysis | Aprobar criterios de aceptación y archivos a tocar | **Aprobado** |
-| 3 | Code Generation | Aprobar Java generado (controlador, DTO, SecurityConfig, test) | **Aprobado** |
-| 4 | Build and Test | Aprobar comando Maven y resultado 3/3 OK | **Aprobado** |
+### Gates humanos (versión A)
 
-En AI-SDLC SIGESA las intervenciones típicas son: confirmar FSD, revisar DD, autorizar implementación, review de código, mapping PM. Para un health check eso es **sobreceremonial**.
+| # | Etapa | Pedido | Resultado |
+|---|--------|--------|-----------|
+| 0 | Perfil | `/aidlc express` | Hecho |
+| 1 | Reverse Engineering | Path `/api/health`, `permitAll` solo GET | `apruebo` |
+| 2 | Requirements Analysis | Criterios y archivos | `apruebo` |
+| 3 | Code Generation | Java generado | `apruebo` |
+| 4 | Build and Test | Maven 3/3 OK | `apruebo` |
 
----
-
-## 3. Artefactos
-
-| Artefacto | AI-DLC Express | AI-SDLC SIGESA |
-|-----------|----------------|----------------|
-| Estado del workflow | `.aidlc/.../aidlc-state.md` | Checklist del orquestador en el chat + `PROMPT_MAPPING.md` |
-| Auditoría de eventos | `.aidlc/.../audit/` | Entrada `PM-NNN` append-only |
-| Ingeniería inversa | `inception/reverse-engineering/reverse-engineering.md` | Implícita en el agente; no hay artefacto estándar |
-| Requisitos | `inception/requirements-analysis/requirements.md` | `docs/product/uc/FSD-UC-*.md` |
-| Diseño | **Omitido** (Express) | `docs/design/DD-UC-*.md` **obligatorio** antes de código |
-| Contrato de implementación | Plan corto en Construction | `docs/prompts/impl/PR-IMPL-*.md` |
-| Código | `HealthController` + `HealthResponse` + `SecurityConfig` + `HealthControllerTest` | Hexagonal completo si el UC lo exige |
-| Baseline | No se toca | **Prohibido** tocar `docs/baseline/` |
-
----
-
-## 4. Pruebas (estrategia)
-
-| Criterio | Express (Minimal) | AI-SDLC SIGESA |
-|----------|-------------------|----------------|
-| Qué se prueba | Solo lo pedido: 200 + JSON; GET público; resto de reglas intactas (401 en un path protegido) | Cobertura unitaria > 90 % (JaCoCo), tests de dominio y a menudo E2E |
-| Cómo | `WebMvcTest` + `SecurityConfig` (MockMvc) | JUnit por capa + smoke Docker |
-| Estado | 3/3 OK (`./mvnw test -Dtest=HealthControllerTest`) | N/A en este intent |
-
-Comando ejecutado:
+### Comando de prueba (versión A)
 
 ```bash
 cd backend && ./mvnw test -Dtest=HealthControllerTest
@@ -73,56 +108,9 @@ cd backend && ./mvnw test -Dtest=HealthControllerTest
 
 ---
 
-## 5. Ventajas y desventajas
-
-### AI-DLC Express
-
-**Ventajas**
-
-- Camino corto requisitos → código → test, adecuado cuando el enunciado ya está cerrado.
-- Gates explícitos: no se escribe código de producto sin aprobación.
-- Trazabilidad ligera (state + audit) sin inventar un FSD.
-- Profundidad Minimal evita diseño hexagonal innecesario para un liveness.
-
-**Desventajas**
-
-- El plugin oficial no está en este repo: la ejecución es **simulada**.
-- Omite diseño; un error de path (`/api` vs `/api/v1`) se detecta tarde si se salta Reverse Engineering.
-- No cubre DTP, Orval ni frontend (correcto aquí, peligroso si se usa Express para un UC de negocio).
-- Guard Policy *off* por defecto; aquí se forzó aprobación humana porque el usuario lo pidió.
-
-### AI-SDLC SIGESA
-
-**Ventajas**
-
-- Trazabilidad FSD → DD → PR-IMPL → PM alineada a acreditación y al Tech Lead.
-- Hexagonal, DTOs, tests de dominio y gobernanza de `docs/baseline/`.
-- Orquestador evita implementar un UC sin contrato.
-
-**Desventajas**
-
-- Ceremonia alta para un endpoint de 10 líneas.
-- Bloqueo si no existe `FSD-UC-NNN` (el orquestador debe detenerse).
-- Tiempo y artefactos desproporcionados frente al riesgo del cambio.
-
----
-
-## 6. Conclusión
-
-Para **GET /api/health**, AI-DLC Express es el perfil correcto: requisito cerrado, cambio localizado (adaptador + security + un test), sin modelo de dominio. El AI-SDLC del monorepo sigue siendo el camino adecuado para casos de uso de acreditación (evidencias, usuarios, dashboards), donde un DD y un PR-IMPL evitan divergencia silenciosa.
-
-No conviene mezclar los dos en el mismo intent: no se creará `FSD-UC` ni se modificará `docs/baseline/` para este health check. Sí se respetará la regla de alcance mínimo (solo archivos necesarios) y la aprobación por gate.
-
-**Veredicto:** Express para operación/liveness; AI-SDLC SIGESA para producto. En este intent, 4 gates y ~25 min bastaron para un endpoint público verificado. No se creó FSD/DD/PR-IMPL ni se tocó `docs/baseline/`.
-
----
-
-## Bitácora de actualización
+## Bitácora
 
 | Fecha | Qué cambió |
 |-------|------------|
-| 2026-10-21 | Alta del archivo. Express iniciado. Gate 1 (Reverse Engineering) abierto. |
-| 2026-10-21 | Gate 1 aprobado. Gate 2 (Requirements Analysis) abierto. |
-| 2026-10-21 | Gate 2 aprobado. Código generado. Gate 3 abierto (tests no ejecutados). |
-| 2026-10-21 | Gate 3 aprobado. Maven BUILD SUCCESS (3 tests). Gate 4 abierto. |
-| 2026-10-21 | Gate 4 aprobado. Workflow Express cerrado. |
+| 2026-10-21 | Express iniciado; gates 1–4; workflow cerrado; health en backend. |
+| 2026-10-21 | Ficha reescrita para cubrir las seis respuestas mínimas de la actividad. |
