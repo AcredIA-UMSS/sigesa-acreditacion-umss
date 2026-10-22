@@ -218,8 +218,19 @@ public class EvidenceModuleConfig {
     AttemptDeleteEvidenceUseCase attemptDeleteEvidenceUseCase(
             EvidenceLifecycleQueryPort lifecycleQueryPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
-            AuditLogPort auditLogPort) {
-        return new AttemptDeleteEvidenceService(lifecycleQueryPort, assignmentRepository, auditLogPort);
+            AuditLogPort auditLogPort,
+            EvidenceUploadPersistencePort uploadPersistence,
+            EvidenceBlobStoragePort blobStorage,
+            ProcessFreezeGuard freezeGuard,
+            CaeDelegationGuard caeDelegationGuard) {
+        return new AttemptDeleteEvidenceService(
+                lifecycleQueryPort,
+                assignmentRepository,
+                auditLogPort,
+                uploadPersistence,
+                blobStorage,
+                freezeGuard,
+                caeDelegationGuard);
     }
 
     @Bean

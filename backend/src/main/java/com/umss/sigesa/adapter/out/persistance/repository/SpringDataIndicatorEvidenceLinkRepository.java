@@ -15,5 +15,9 @@ public interface SpringDataIndicatorEvidenceLinkRepository extends JpaRepository
 
     Optional<IndicatorEvidenceLinkEntity> findFirstByEvidenceId(UUID evidenceId);
 
+    List<IndicatorEvidenceLinkEntity> findByEvidenceId(UUID evidenceId);
+
+    void deleteByEvidenceId(UUID evidenceId);
+
     Optional<IndicatorEvidenceLinkEntity> findFirstByIndicatorId(UUID indicatorId);
 }

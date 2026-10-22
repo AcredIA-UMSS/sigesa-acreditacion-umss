@@ -26,12 +26,29 @@ final class EvidenceLifecycleAccessGuard {
         if (roles.contains(Role.JD.name()) || roles.contains(Role.TD.name())) {
             return;
         }
-        if (roles.contains(Role.CC.name())) {
+        if (roles.contains(Role.CC.name()) || roles.contains(Role.CAE_MEMBER.name())) {
             boolean allowed = assignmentRepository.findActiveByUserId(userId).stream()
                     .anyMatch(a -> a.getProgramId().equals(programId));
             if (!allowed) {
                 throw new ProgramScopeDeniedException();
             }
+            return;
+        }
+        throw new ProgramScopeDeniedException();
+    }
+
+    static void assertWriteAccess(UUID userId, List<String> roles, UUID programId,
+                                    List<UUID> jwtProgramScope,
+                                    UserProgramAssignmentRepositoryPort assignmentRepository) {
+        if (!roles.contains(Role.CC.name()) && !roles.contains(Role.CAE_MEMBER.name())) {
+            throw new ProgramScopeDeniedException();
+        }
+        boolean assigned = assignmentRepository.findActiveByUserId(userId).stream()
+                .anyMatch(a -> a.getProgramId().equals(programId));
+        if (assigned) {
+            return;
+        }
+        if (jwtProgramScope != null && jwtProgramScope.contains(programId)) {
             return;
         }
         throw new ProgramScopeDeniedException();

@@ -29,7 +29,7 @@ Consultar el **historial append-only** de versiones de una evidencia y **rechaza
 | Método | Ruta | Roles | Respuesta |
 |--------|------|-------|-----------|
 | GET | `/api/v1/evidences/{evidenceId}/versions` | CC, TD, JD | **200** lista ordenada DESC |
-| DELETE | `/api/v1/evidences/{evidenceId}` | cualquier autenticado | **409** `EVIDENCE_IMMUTABLE` |
+| DELETE | `/api/v1/evidences/{evidenceId}` | CC, CAE_MEMBER (no APROBADO) | **204**; si APROBADO o legacy: **409** `EVIDENCE_IMMUTABLE` |
 
 **200 item:** `{ versionId, version, supersedesVersion?, observationId?, description, contentHash, createdAt, createdBy, current }`
 

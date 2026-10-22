@@ -98,6 +98,16 @@ public class JpaAuditLogAdapter implements AuditLogPort, AuditLogQueryPort {
                 "Intento de eliminación física denegado por invariante append-only", null);
     }
 
+    @Override
+    @Transactional
+    public void logEvidenceRetracted(UUID actorId, UUID evidenceId, UUID indicatorId) {
+        String email = resolveUserEmail(actorId);
+        String role = resolveUserRole(actorId, "CC");
+        saveEntry(actorId, email, role,
+                "EVIDENCE_RETRACTED", "EVIDENCE", evidenceId.toString(),
+                "Retiro de evidencia no aprobada indicador=" + indicatorId, null);
+    }
+
     private String resolveUserEmail(UUID userId) {
         if (userId == null) {
             return "system@umss.edu.bo";

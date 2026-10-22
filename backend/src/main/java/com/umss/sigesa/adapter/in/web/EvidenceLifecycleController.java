@@ -1,10 +1,13 @@
 package com.umss.sigesa.adapter.in.web;
 
+import com.umss.sigesa.adapter.in.security.JwtProgramScopeSupport;
 import com.umss.sigesa.adapter.in.web.dto.EvidenceVersionHistoryResponseDto;
 import com.umss.sigesa.application.port.in.AttemptDeleteEvidenceUseCase;
 import com.umss.sigesa.application.port.in.ListEvidenceVersionsUseCase;
 import com.umss.sigesa.domain.model.EvidenceVersionHistoryItem;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -47,12 +50,20 @@ public class EvidenceLifecycleController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Intento de borrado (siempre rechazado si existe — append-only)")
+    @Operation(summary = "Retira evidencia si el indicador no está APROBADO; 409 EVIDENCE_IMMUTABLE si aprobado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Evidencia retirada; el indicador vuelve a PENDIENTE"),
+            @ApiResponse(responseCode = "409", description = "EVIDENCE_IMMUTABLE: el indicador está APROBADO")
+    })
     public ResponseEntity<Void> delete(
             @PathVariable UUID evidenceId,
             Authentication authentication) {
         UUID actorId = (UUID) authentication.getPrincipal();
-        attemptDeleteEvidenceUseCase.attemptDelete(evidenceId, actorId, extractRoles(authentication));
+        attemptDeleteEvidenceUseCase.attemptDelete(
+                evidenceId,
+                actorId,
+                extractRoles(authentication),
+                JwtProgramScopeSupport.programScopeFromAuthentication(authentication));
         return ResponseEntity.noContent().build();
     }
 

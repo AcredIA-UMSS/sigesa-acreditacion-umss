@@ -384,7 +384,7 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 
 ### API-EVD-04 — `DELETE /evidences/{id}`
 
-| **UC** | FSD-UC-005 · **409** `EVIDENCE_IMMUTABLE` siempre si aprobado |
+| **UC** | FSD-UC-005 · **204** si indicador no `APROBADO` ([CC]/[CAE]); **409** `EVIDENCE_IMMUTABLE` si aprobado |
 
 ### API-EVD-05 — Subsanación por indicador
 

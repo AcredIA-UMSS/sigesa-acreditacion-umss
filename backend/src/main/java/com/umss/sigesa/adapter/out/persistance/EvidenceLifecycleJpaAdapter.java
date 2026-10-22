@@ -44,6 +44,19 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     }
 
     private Optional<EvidenceContext> toContext(EvidenceEntity evidence) {
+        if (evidence.getNormativeIndicatorId() != null) {
+            return normativeIndicatorRepository.findWithProcessById(evidence.getNormativeIndicatorId())
+                    .map(indicator -> {
+                        var process = indicator.getLevel3Node().getLevel2Node().getLevel1Node().getProcess();
+                        return new EvidenceContext(
+                                evidence.getId(),
+                                process.getCareerId(),
+                                evidence.getLatestVersionId(),
+                                process.getId(),
+                                indicator.getId(),
+                                indicator.getStatus());
+                    });
+        }
         UUID programId = resolveProgramId(evidence);
         if (programId == null) {
             return Optional.empty();

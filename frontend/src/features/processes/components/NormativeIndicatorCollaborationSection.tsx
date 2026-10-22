@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
+import { getGetProcessQueryKey } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
+import { deleteNormativeIndicatorEvidence } from '../../evidence/api/normativeIndicatorEvidenceApi';
 import { useNormativeIndicatorCollaboration } from '../../evidence/hooks/useNormativeIndicatorCollaboration';
 import { NormativeIndicatorEvidenceUploadSlot } from '../components/NormativeIndicatorEvidenceUploadSlot';
 import { NormativeIndicatorReviewActions } from '../components/NormativeIndicatorReviewActions';
@@ -20,12 +23,20 @@ function NormativeIndicatorEvidenceList({
   evidences,
   isLoading,
   canSubsanate,
+  canRetract,
+  retractingId,
+  retractError,
   onSubsanate,
+  onRetract,
 }: {
   evidences: ReturnType<typeof useNormativeIndicatorCollaboration>['evidences'];
   isLoading: boolean;
   canSubsanate: boolean;
+  canRetract: boolean;
+  retractingId: string | null;
+  retractError: string | null;
   onSubsanate?: (evidenceId: string, filename: string) => void;
+  onRetract?: (evidenceId: string, filename: string) => void;
 }) {
   return (
     <div className="rounded-lg border border-primary-100 bg-primary-50/40 p-3">
@@ -54,15 +65,30 @@ function NormativeIndicatorEvidenceList({
               {canSubsanate && onSubsanate && (
                 <button
                   type="button"
-                  className="mt-2 text-body-md font-medium text-secondary-600 underline decoration-secondary-400 underline-offset-2 transition-colors hover:text-secondary-800"
+                  className="mt-2 mr-3 text-body-md font-medium text-secondary-600 underline decoration-secondary-400 underline-offset-2 transition-colors hover:text-secondary-800"
                   onClick={() => onSubsanate(item.evidenceId, item.originalFilename)}
                 >
                   Subsanar evidencia
                 </button>
               )}
+              {canRetract && onRetract && (
+                <button
+                  type="button"
+                  disabled={retractingId === item.evidenceId}
+                  className="mt-2 text-body-md font-medium text-danger underline decoration-danger/40 underline-offset-2 transition-colors hover:text-secondary-800 disabled:opacity-60"
+                  onClick={() => onRetract(item.evidenceId, item.originalFilename)}
+                >
+                  {retractingId === item.evidenceId ? 'Quitando…' : 'Quitar / reemplazar'}
+                </button>
+              )}
             </li>
           ))}
         </ul>
+      )}
+      {retractError && (
+        <p className="mt-2 text-body-md text-danger" role="alert">
+          {retractError}
+        </p>
       )}
     </div>
   );
@@ -78,6 +104,7 @@ export function NormativeIndicatorCollaborationSection({
   canSubsanate,
   canReview,
 }: NormativeIndicatorCollaborationSectionProps) {
+  const queryClient = useQueryClient();
   const { evidences, eligibility, hasOpenObservation, isLoading, error, reload } =
     useNormativeIndicatorCollaboration(indicatorId, canSubsanate);
 
@@ -85,10 +112,14 @@ export function NormativeIndicatorCollaborationSection({
     evidenceId: string;
     filename: string;
   } | null>(null);
+  const [retractingId, setRetractingId] = useState<string | null>(null);
+  const [retractError, setRetractError] = useState<string | null>(null);
 
   const effectiveHasOpenObservation =
     hasOpenObservation || indicatorStatus === 'OBSERVADO';
-  const effectiveCanUpload = canUpload && !effectiveHasOpenObservation;
+  const canRetract = canUpload && indicatorStatus !== 'APROBADO';
+  const effectiveCanUpload =
+    canUpload && !effectiveHasOpenObservation && evidences.length === 0;
   const openObservationId = eligibility?.openObservationId;
 
   return (
@@ -110,7 +141,33 @@ export function NormativeIndicatorCollaborationSection({
         evidences={evidences}
         isLoading={isLoading}
         canSubsanate={Boolean(eligibility?.canSubsanate && openObservationId)}
+        canRetract={canRetract}
+        retractingId={retractingId}
+        retractError={retractError}
         onSubsanate={(evidenceId, filename) => setSubsanationTarget({ evidenceId, filename })}
+        onRetract={(evidenceId, filename) => {
+          const confirmed = window.confirm(
+            `¿Quitar «${filename}»? Podrá cargar otra evidencia mientras el indicador no esté APROBADO.`,
+          );
+          if (!confirmed) {
+            return;
+          }
+          setRetractError(null);
+          setRetractingId(evidenceId);
+          void deleteNormativeIndicatorEvidence(evidenceId)
+            .then(async () => {
+              await Promise.all([
+                reload(),
+                queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) }),
+              ]);
+            })
+            .catch((err: unknown) => {
+              setRetractError(
+                err instanceof Error ? err.message : 'No se pudo quitar la evidencia.',
+              );
+            })
+            .finally(() => setRetractingId(null));
+        }}
       />
 
       <NormativeIndicatorEvidenceUploadSlot

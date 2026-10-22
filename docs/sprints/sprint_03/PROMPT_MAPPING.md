@@ -34,6 +34,8 @@
 | PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
 | PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
 | PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
+| PM-028 | PR-IMPL-035 | DD-UC-005 | FSD-UC-005 | DELETE evidencia no aprobada (CC/CAE 204) + UI quitar/reemplazar |
+| PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
 
 ---
 
@@ -1789,6 +1791,151 @@ FEAT-10 implementado en `feat/57-floating-assistant`.
 
 - [ ] PR `Fixes #57` contra `release/2.0.0`
 
+---
 
+## PM-028
 
+| Campo | Valor |
+|---|---|
+| **ID** | PM-028 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 16:35 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | grok-4.6 |
+| **Tarea** | Permitir modificar/eliminar evidencia si el indicador no está aprobado |
+| **Objetivo** | `DELETE /api/v1/evidences/{id}` 204 cuando el indicador no es `APROBADO`; 409 `EVIDENCE_IMMUTABLE` si está aprobado; UI de retiro/reemplazo para CC |
+| **Contexto** | Tras cargar evidencia el coordinador no podía reemplazarla (`INDICATOR_ALREADY_HAS_EVIDENCE` + DELETE siempre 409) |
+| **PR-IMPL vinculado** | PR-IMPL-035 |
+| **DD-UC vinculado** | DD-UC-005 |
+| **FSD-UC vinculado** | FSD-UC-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pero, me deberia permitir modificar/eliminar la evidencia si es que el indicador no esta aprobado
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-005.md`
+- `docs/product/uc/FSD-UC-005.md`
+- `docs/prompts/impl/PR-IMPL-035.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.test.tsx` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/AttemptDeleteEvidenceService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/EvidenceUploadJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/EvidenceLifecycleController.java` |
+| modificado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.tsx` |
+| modificado | `frontend/src/features/evidence/api/normativeIndicatorEvidenceApi.ts` |
+| modificado | `docs/product/uc/FSD-UC-005.md` |
+| modificado | `docs/design/DD-UC-005.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- DELETE retira evidencia normativa no `APROBADO` (CC/CAE), resetea indicador a `PENDIENTE`, borra blob/asset exclusivo.
+- APROBADO y evidencia legacy siguen `409 EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED`.
+- UI: botón «Quitar / reemplazar» y volver a «Subir evidencia».
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=EvidenceLifecycleServiceTest,JpaAuditLogAdapterTest test` — OK
+- [x] `pnpm test:run NormativeIndicatorCollaborationSection.test.tsx` — 2 passed
+
+### Resultado obtenido
+
+Coordinador puede quitar y volver a cargar evidencia mientras el indicador no esté aprobado.
+
+### Próximos pasos
+
+- [ ] Rebuild Docker (`docker compose up --build`) para que el API nuevo quede en el contenedor
+
+---
+
+## PM-029
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-029 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 16:43 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | grok-4.6 |
+| **Tarea** | Registrar Demo 2: OpenAPI + CI y aportes 8.2.0 (cargar/eliminar evidencias) |
+| **Objetivo** | Contrato `openapi.json` desde springdoc, workflow drift+Spectral, `docs/demos/demo-2.md` y `8.2.0-aportes.md` |
+| **Contexto** | Entrega Classroom Demo 2 sobre `release/8.2.0` |
+| **PR-IMPL vinculado** | N/A (registro Demo 2 + contrato) |
+| **DD-UC vinculado** | DD-UC-005 |
+| **FSD-UC vinculado** | FSD-UC-004 / FSD-UC-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+2. Contrato OpenAPI y su flujo de validación
+- Contrato generado desde el código: el backend genera su contrato con decoradores (NestJS), anotaciones (Spring) o modelos (FastAPI). Un comando lo exporta a openapi.json y el archivo se sube al repositorio. Debe incluir los endpoints de las funcionalidades que se presentan.
+- Flujo de CI: un workflow en .github/workflows/ que, en cada pull request, compruebe que el archivo coincide con lo que genera el código (drift) y que pasa Spectral (lint). oasdiff y Schemathesis son opcionales y suman.
+
+El grupo decide si esta parte la hace una persona o varias. Cuenta como una de las funcionalidades de quien la haga.
+
+El ejemplo completo está en la sesión 5 (partes B y C) y en sus diapositivas.
+
+3. Qué registrar
+- En docs/demos/demo-2.md y aquí en Classroom: una tabla con cada integrante, sus funcionalidades. mas el link de su repositorio esto de forma individual.
+- El plazo para acordar esto lo maneja cada grupo; lo registrado debe estar en el release antes de la demo.
+- release/8.2.0 creado antes de la demo, con 8.2.0-aportes.md en la raíz. El release es el entregable del grupo: reúne las funcionalidades de todos sus integrantes.
+
+Puedes registrar estas cosas para este feature que vendria a ser cargar/eliminar evidencias
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-005.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/product/uc/FSD-UC-005.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `openapi.json` |
+| generado | `.spectral.yml` |
+| generado | `.github/workflows/openapi.yml` |
+| generado | `scripts/export-openapi.sh` |
+| generado | `docs/demos/demo-2.md` |
+| generado | `8.2.0-aportes.md` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/OpenApiExportIT.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/config/OpenApiConfig.java` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Exportación springdoc a `openapi.json` (incluye POST evidencias y DELETE).
+- CI: drift + Spectral.
+- Registro individual Demo 2 para Boris (cargar/eliminar evidencias + OpenAPI).
+
+### Validación ejecutada
+
+- [x] `OPENAPI_WRITE=true ./mvnw -Dtest=OpenApiExportIT test` — OK
+- [x] Spectral lint `openapi.json` — sin errores
+
+### Resultado obtenido
+
+Artefactos Demo 2 listos en `release/8.2.0`.
+
+### Próximos pasos
+
+- [ ] Completar filas de los demás integrantes en `8.2.0-aportes.md`
+- [ ] Push de `release/8.2.0` cuando el grupo lo pida
 

@@ -28,6 +28,8 @@ import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadCommand;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -40,6 +42,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public class UploadNormativeIndicatorEvidenceService implements UploadNormativeIndicatorEvidenceUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadNormativeIndicatorEvidenceService.class);
 
     public static final String EVENT_EVIDENCE_UPLOADED = "EvidenceUploaded";
     private static final long MAX_BYTES = 50L * 1024 * 1024;
@@ -204,9 +208,14 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             uploadPersistence.persistNormativeIndicatorUpload(
                     evidence, version, externalUrl, asset, persistNewAsset, link);
 
-            notificationOutbox.enqueueEvidenceUploaded(
-                    command.indicatorId(), evidenceId, context.careerId());
-            auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
+            try {
+                notificationOutbox.enqueueEvidenceUploaded(
+                        command.indicatorId(), evidenceId, context.careerId());
+                auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
+            } catch (RuntimeException notifyEx) {
+                log.warn("Evidencia persistida y blob en object storage; outbox/auditoría falló: {}",
+                        notifyEx.getMessage());
+            }
 
             return new NormativeIndicatorEvidenceUploadResult(
                     evidenceId,

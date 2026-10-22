@@ -321,6 +321,7 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 | 2026-09-09 | **Reconciliación índice v2.0:** UC-004…010, UC-019 → **Implementado v2** (alineado a atom UC y código post-M5)                                                                                                                                                                |
 | 2026-09-09 | **UI árbol normativo:** capas desplegables N1→Indicador (`NormativeCollapsibleLayer`); PM-011 sprint 3                                                                                                                                                                        |
 | 2026-09-09 | **README + PM sprint 03:** releases 2.0.0/2.1.0; PM-011…013 (UI capas, fix login, sync docs)                                                                                                                                                                                  |
+| 2026-10-22 | **FSD-UC-005:** DELETE evidencia no aprobada (CC/CAE → 204, indicador a PENDIENTE); APROBADO sigue `409 EVIDENCE_IMMUTABLE` |
 | 2026-10-19 | **FEAT-10 (#57):** FAB + modal del asistente general en el panel (`DD-FEAT-10`, `PR-IMPL-045`); `/ayuda` intacta |
 | 2026-10-13 | **M10–M11 + CAE Hecho:** UC-030/020/028/031; V22 freeze/checklist/delegations; API-WF-18…23; `CAE_MEMBER`; PM-018 |
 | 2026-10-13 | **M9 Plan de Mejoras / E4:** UC-031/028 Hecho; `DD-UC-031` + `PR-IMPL-M9-031` + PM-017; V21 `improvement_plan_items`; API-WF-13…17; PDF borrador E4; gate DRAFTING |

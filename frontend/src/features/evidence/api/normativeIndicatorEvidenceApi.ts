@@ -84,6 +84,13 @@ export async function linkDocumentAssetToIndicator(input: {
   return { ...response.data, reusedAsset: response.data.reusedAsset ?? true };
 }
 
+export async function deleteNormativeIndicatorEvidence(evidenceId: string): Promise<void> {
+  await customFetch(`/api/v1/evidences/${encodeURIComponent(evidenceId)}`, {
+    method: 'DELETE',
+    skipUnauthorizedLogout: true,
+  });
+}
+
 export async function fetchNormativeIndicatorSubsanationEligibility(
   indicatorId: string,
 ): Promise<NormativeIndicatorSubsanationEligibility> {

@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public interface AttemptDeleteEvidenceUseCase {
 
-    void attemptDelete(UUID evidenceId, UUID actorId, List<String> roles);
+    void attemptDelete(UUID evidenceId, UUID actorId, List<String> roles, List<UUID> jwtProgramScope);
 }

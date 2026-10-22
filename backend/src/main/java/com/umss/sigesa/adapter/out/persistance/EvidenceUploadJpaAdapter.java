@@ -16,12 +16,16 @@ import com.umss.sigesa.domain.model.Evidence;
 import com.umss.sigesa.domain.model.EvidenceVersion;
 import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import com.umss.sigesa.domain.model.IndicatorObservationStatus;
+import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
@@ -173,6 +177,88 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
         indicatorObservationRepository.save(observation);
 
         return superseded.getStorageKey();
+    }
+
+    @Override
+    @Transactional
+    public List<String> retractNormativeEvidence(UUID evidenceId) {
+        EvidenceEntity evidence = evidenceRepository.findById(evidenceId)
+                .orElseThrow(() -> new IllegalStateException("Evidence not found: " + evidenceId));
+
+        List<EvidenceVersionEntity> versions =
+                versionRepository.findByEvidenceIdOrderByVersionNumberDesc(evidenceId);
+        Set<UUID> versionIds = versions.stream()
+                .map(EvidenceVersionEntity::getId)
+                .collect(Collectors.toSet());
+        List<String> candidateKeys = versions.stream()
+                .map(EvidenceVersionEntity::getStorageKey)
+                .filter(key -> key != null && !key.isBlank() && !key.startsWith("external-url:"))
+                .distinct()
+                .toList();
+
+        UUID indicatorId = evidence.getNormativeIndicatorId();
+        if (indicatorId != null) {
+            List<IndicatorObservationJpaEntity> observations =
+                    indicatorObservationRepository.findByIndicator_Id(indicatorId);
+            LocalDateTime now = LocalDateTime.now();
+            for (IndicatorObservationJpaEntity observation : observations) {
+                if (observation.getResolvedVersionId() != null
+                        && versionIds.contains(observation.getResolvedVersionId())) {
+                    observation.setResolvedVersionId(null);
+                }
+                if ("OPEN".equals(observation.getStatus())) {
+                    observation.setStatus(IndicatorObservationStatus.RESOLVED.name());
+                    observation.setResolvedAt(now);
+                }
+                observation.setUpdatedAt(now);
+            }
+            indicatorObservationRepository.saveAll(observations);
+        }
+
+        for (EvidenceVersionEntity version : versions) {
+            version.setIndicatorObservationId(null);
+        }
+        versionRepository.saveAll(versions);
+
+        evidence.setLatestVersionId(null);
+        evidenceRepository.save(evidence);
+
+        List<IndicatorEvidenceLinkEntity> links = linkRepository.findByEvidenceId(evidenceId);
+        Set<UUID> assetIds = links.stream()
+                .map(IndicatorEvidenceLinkEntity::getDocumentAssetId)
+                .collect(Collectors.toSet());
+        linkRepository.deleteByEvidenceId(evidenceId);
+
+        boolean deletedExclusiveAsset = false;
+        for (UUID assetId : assetIds) {
+            if (linkRepository.findByDocumentAssetId(assetId).isEmpty()) {
+                var asset = documentAssetRepository.findById(assetId);
+                if (asset.isPresent()) {
+                    documentAssetRepository.delete(asset.get());
+                    deletedExclusiveAsset = true;
+                }
+            }
+        }
+
+        versionRepository.deleteByEvidenceId(evidenceId);
+        evidenceRepository.delete(evidence);
+
+        if (indicatorId != null) {
+            normativeIndicatorRepository.findById(indicatorId).ifPresent(indicator -> {
+                indicator.setStatus(IndicatorState.PENDIENTE.name());
+                indicator.setUpdatedAt(LocalDateTime.now());
+                normativeIndicatorRepository.save(indicator);
+            });
+        }
+
+        boolean keepBlobs = !assetIds.isEmpty() && !deletedExclusiveAsset;
+        if (keepBlobs) {
+            return List.of();
+        }
+        return candidateKeys.stream()
+                .filter(key -> !versionRepository.existsByStorageKey(key)
+                        && !documentAssetRepository.existsByStorageKey(key))
+                .toList();
     }
 
     private static DocumentAssetEntity toAssetEntity(DocumentAsset asset) {

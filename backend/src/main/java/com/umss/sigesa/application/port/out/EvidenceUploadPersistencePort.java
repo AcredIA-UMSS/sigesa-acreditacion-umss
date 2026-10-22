@@ -6,6 +6,7 @@ import com.umss.sigesa.domain.model.EvidenceVersion;
 import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -31,4 +32,10 @@ public interface EvidenceUploadPersistencePort {
             UUID observationId,
             int supersedesVersionNumber,
             UUID supersededVersionId);
+
+    /**
+     * Retira evidencia normativa no aprobada (filas + asset si no está compartido).
+     * @return claves de blob a borrar en object storage (no compartidas).
+     */
+    List<String> retractNormativeEvidence(UUID evidenceId);
 }

@@ -46,6 +46,11 @@ public class RecordingAuditLogPort implements AuditLogPort {
         events.add("DELETE_DENIED:" + actorId + ":" + evidenceId);
     }
 
+    @Override
+    public void logEvidenceRetracted(UUID actorId, UUID evidenceId, UUID indicatorId) {
+        events.add("EVIDENCE_RETRACTED:" + actorId + ":" + evidenceId + ":" + indicatorId);
+    }
+
     public List<String> events() {
         return List.copyOf(events);
     }

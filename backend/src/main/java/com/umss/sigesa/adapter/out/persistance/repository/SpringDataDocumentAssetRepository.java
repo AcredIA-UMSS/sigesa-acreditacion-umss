@@ -14,4 +14,6 @@ public interface SpringDataDocumentAssetRepository extends JpaRepository<Documen
     Optional<DocumentAssetEntity> findByProcessIdAndContentHash(UUID processId, String contentHash);
 
     List<DocumentAssetEntity> findByProcessIdOrderByCreatedAtDesc(UUID processId);
+
+    boolean existsByStorageKey(String storageKey);
 }
