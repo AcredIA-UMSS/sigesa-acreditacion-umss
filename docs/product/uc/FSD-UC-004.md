@@ -30,7 +30,7 @@ nota_implementacion: "M7: blob físico en DocumentAsset; Evidence 1:1 por indica
 1. [CC] abre detalle del proceso y **Subir evidencia** en el indicador.
 2. Adjunta archivo y/o enlace externo y descripción; `POST /api/v1/indicators/{indicatorId}/evidences`.
 3. Sistema valida tipo/tamaño; calcula SHA-256 (archivos).
-4. Si el hash ya existe en `DocumentAsset`, **reutiliza** el blob (no duplica almacenamiento) y crea `Evidence` + `IndicatorEvidenceLink` para este indicador.
+4. Si el hash ya existe en `DocumentAsset`, **reutiliza** el blob (no duplica almacenamiento) y crea `Evidence` + `IndicatorEvidenceLink` para este indicador. Si la clave reutilizada no existe en object storage (p. ej. purga previa errónea), **reescribe** el objeto en la misma `storageKey`.
 5. Si el hash es nuevo, persiste `DocumentAsset` (`folioCode`, `storageKey`, `contentHash`) y luego `Evidence` v1 + link primario.
 6. **Indicador** transiciona a `SUBIDO`.
 7. Notification Service notifica al [TD] (UC-015 — stub vigente).

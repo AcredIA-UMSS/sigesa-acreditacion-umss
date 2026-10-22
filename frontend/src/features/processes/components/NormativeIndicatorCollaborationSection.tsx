@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { getGetProcessQueryKey } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
 import { deleteNormativeIndicatorEvidence } from '../../evidence/api/normativeIndicatorEvidenceApi';
 import { useNormativeIndicatorCollaboration } from '../../evidence/hooks/useNormativeIndicatorCollaboration';
@@ -114,6 +115,10 @@ export function NormativeIndicatorCollaborationSection({
   } | null>(null);
   const [retractingId, setRetractingId] = useState<string | null>(null);
   const [retractError, setRetractError] = useState<string | null>(null);
+  const [retractTarget, setRetractTarget] = useState<{
+    evidenceId: string;
+    filename: string;
+  } | null>(null);
 
   const effectiveHasOpenObservation =
     hasOpenObservation || indicatorStatus === 'OBSERVADO';
@@ -145,29 +150,7 @@ export function NormativeIndicatorCollaborationSection({
         retractingId={retractingId}
         retractError={retractError}
         onSubsanate={(evidenceId, filename) => setSubsanationTarget({ evidenceId, filename })}
-        onRetract={(evidenceId, filename) => {
-          const confirmed = window.confirm(
-            `¿Quitar «${filename}»? Podrá cargar otra evidencia mientras el indicador no esté APROBADO.`,
-          );
-          if (!confirmed) {
-            return;
-          }
-          setRetractError(null);
-          setRetractingId(evidenceId);
-          void deleteNormativeIndicatorEvidence(evidenceId)
-            .then(async () => {
-              await Promise.all([
-                reload(),
-                queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) }),
-              ]);
-            })
-            .catch((err: unknown) => {
-              setRetractError(
-                err instanceof Error ? err.message : 'No se pudo quitar la evidencia.',
-              );
-            })
-            .finally(() => setRetractingId(null));
-        }}
+        onRetract={(evidenceId, filename) => setRetractTarget({ evidenceId, filename })}
       />
 
       <NormativeIndicatorEvidenceUploadSlot
@@ -188,6 +171,47 @@ export function NormativeIndicatorCollaborationSection({
           onCompleted={() => void reload()}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={retractTarget !== null}
+        title="Quitar evidencia"
+        description={
+          retractTarget
+            ? `¿Quitar «${retractTarget.filename}»? Podrá cargar otra evidencia mientras el indicador no esté APROBADO.`
+            : ''
+        }
+        confirmLabel="Quitar evidencia"
+        cancelLabel="Cancelar"
+        confirmVariant="danger"
+        isLoading={retractingId !== null}
+        onClose={() => {
+          if (retractingId === null) {
+            setRetractTarget(null);
+          }
+        }}
+        onConfirm={() => {
+          if (!retractTarget) {
+            return;
+          }
+          const evidenceId = retractTarget.evidenceId;
+          setRetractError(null);
+          setRetractingId(evidenceId);
+          void deleteNormativeIndicatorEvidence(evidenceId)
+            .then(async () => {
+              setRetractTarget(null);
+              await Promise.all([
+                reload(),
+                queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) }),
+              ]);
+            })
+            .catch((err: unknown) => {
+              setRetractError(
+                err instanceof Error ? err.message : 'No se pudo quitar la evidencia.',
+              );
+            })
+            .finally(() => setRetractingId(null));
+        }}
+      />
 
       {subsanationTarget && openObservationId && (
         <NormativeIndicatorSubsanationModal

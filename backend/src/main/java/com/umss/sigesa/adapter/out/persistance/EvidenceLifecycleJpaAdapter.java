@@ -108,6 +108,10 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
         if (storageKey == null || storageKey.isBlank()) {
             return "evidencia";
         }
+        int slash = storageKey.lastIndexOf('/');
+        if (slash >= 0 && slash < storageKey.length() - 1) {
+            return storageKey.substring(slash + 1);
+        }
         int lastUnderscore = storageKey.lastIndexOf('_');
         if (lastUnderscore >= 0 && lastUnderscore < storageKey.length() - 1) {
             return storageKey.substring(lastUnderscore + 1);

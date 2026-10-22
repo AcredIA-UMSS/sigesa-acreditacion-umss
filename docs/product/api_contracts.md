@@ -329,7 +329,7 @@ Rutas análogas a API-STR-01…04 bajo prefijo `/templates/{templateId}/…`.
 | **403** | `PROGRAM_SCOPE_DENIED` |
 | **409** | `SUBSANATION_NOT_ALLOWED`, **`INDICATOR_ALREADY_HAS_EVIDENCE`** (M7) |
 
-Si el SHA-256 ya existe en `document_assets` del **mismo proceso**, no se duplica el blob (`reusedAsset: true`).
+Si el SHA-256 ya existe en `document_assets` del **mismo proceso**, no se duplica el blob (`reusedAsset: true`). Si el objeto ya no está en S3/MinIO, se restaura en la `storageKey` existente.
 
 `GET /indicators/{indicatorId}/evidences` incluye `documentAssetId` y `folioCode` por ítem.
 

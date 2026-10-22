@@ -36,6 +36,7 @@
 | PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
 | PM-028 | PR-IMPL-035 | DD-UC-005 | FSD-UC-005 | DELETE evidencia no aprobada (CC/CAE 204) + UI quitar/reemplazar |
 | PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
+| PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 
 ---
 
@@ -1938,4 +1939,72 @@ Artefactos Demo 2 listos en `release/8.2.0`.
 
 - [ ] Completar filas de los demás integrantes en `8.2.0-aportes.md`
 - [ ] Push de `release/8.2.0` cuando el grupo lo pida
+
+---
+
+## PM-030
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-030 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 17:12 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Restaurar blob S3/MinIO al reutilizar DocumentAsset huérfano |
+| **Objetivo** | Que una evidencia visible en el frontend exista también en Silo cuando el SHA-256 coincide con un asset cuyo objeto ya fue borrado |
+| **Contexto** | Upload inicial escribió Postgres y luego el catch de outbox borró el objeto. Re-subidas del mismo PDF (`00gjDPSka5p6EK8DSX9A_guia_bash_mouredev_pro.pdf`, folio `SIGESA-20261022-0a01fdbf`) reutilizaron `storageKey` sin PUT. |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 |
+| **FSD-UC vinculado** | FSD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+00gjDPSka5p6EK8DSX9A_guia_bash_mouredev_pro.pdf
+subi esta evidencia pero no hay ene el silo, sale que esta subido en el fronten pero no hay en el servidor S3
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-004-M7.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/prompts/impl/PR-IMPL-041.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/EvidenceBlobStoragePort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/S3EvidenceBlobStorageAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/LocalFileEvidenceBlobStorageAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/UploadNormativeIndicatorEvidenceService.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/out/evidence/S3EvidenceBlobStorageAdapterTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/UploadNormativeIndicatorEvidenceServiceTest.java` |
+| modificado | `docs/product/uc/FSD-UC-004.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Puerto `restore(storageKey, content)` + adaptadores S3 y filesystem local.
+- Al reutilizar `DocumentAsset`, si `retrieve` está vacío se reescribe el objeto en la misma clave.
+- Tests de reuso con blob presente/ausente.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=UploadNormativeIndicatorEvidenceServiceTest,S3EvidenceBlobStorageAdapterTest test` — BUILD SUCCESS
+- [ ] `pnpm run lint` — N/A (sin cambios FE)
+
+### Resultado obtenido
+
+Metadatos en BD ya no quedan huérfanos si se vuelve a subir el mismo archivo tras rebuild.
+
+### Próximos pasos
+
+- [ ] Rebuild del backend (`docker compose up --build`)
+- [ ] Re-subir el mismo PDF a un indicador sin evidencia vigente para restaurar el objeto en Silo
 

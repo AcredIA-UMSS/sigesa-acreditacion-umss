@@ -290,6 +290,10 @@ public class EvidenceUploadJpaAdapter implements EvidenceUploadPersistencePort {
         if (storageKey == null || storageKey.isBlank()) {
             return "evidencia";
         }
+        int slash = storageKey.lastIndexOf('/');
+        if (slash >= 0 && slash < storageKey.length() - 1) {
+            return storageKey.substring(slash + 1);
+        }
         int underscore = storageKey.indexOf("_v");
         int lastUnderscore = storageKey.lastIndexOf('_');
         if (underscore >= 0 && lastUnderscore > underscore + 2) {

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { NormativeIndicatorCollaborationSection } from './NormativeIndicatorCollaborationSection';
@@ -50,6 +51,26 @@ describe('NormativeIndicatorCollaborationSection', () => {
 
     expect(screen.getByRole('button', { name: /Quitar \/ reemplazar/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Subir evidencia/i })).not.toBeInTheDocument();
+  });
+
+  it('abre un modal de confirmación al quitar evidencia', async () => {
+    const user = userEvent.setup();
+    renderWithClient(
+      <NormativeIndicatorCollaborationSection
+        processId="proc-1"
+        indicatorId="ind-1"
+        indicatorLabel="I-01"
+        indicatorStatus="SUBIDO"
+        breadcrumb="N1 › N2 › N3"
+        canUpload
+        canSubsanate={false}
+        canReview={false}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /Quitar \/ reemplazar/i }));
+    expect(screen.getByRole('alertdialog', { name: 'Quitar evidencia' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Quitar evidencia' })).toBeInTheDocument();
   });
 
   it('no ofrece quitar si el indicador está aprobado', () => {

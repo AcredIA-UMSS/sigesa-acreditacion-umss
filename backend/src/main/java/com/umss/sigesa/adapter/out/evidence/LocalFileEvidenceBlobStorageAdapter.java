@@ -37,6 +37,26 @@ public class LocalFileEvidenceBlobStorageAdapter implements EvidenceBlobStorageP
     }
 
     @Override
+    public void restore(String storageKey, byte[] content) {
+        if (storageKey == null || storageKey.isBlank() || storageKey.contains("..")) {
+            throw new IllegalArgumentException("Invalid storageKey");
+        }
+        Path target = storageRoot.resolve(storageKey).normalize();
+        if (!target.startsWith(storageRoot.normalize())) {
+            throw new IllegalArgumentException("Invalid storageKey");
+        }
+        try {
+            Path parent = target.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.write(target, content == null ? new byte[0] : content);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to restore evidence blob", ex);
+        }
+    }
+
+    @Override
     public void delete(String storageKey) {
         if (storageKey == null) {
             return;

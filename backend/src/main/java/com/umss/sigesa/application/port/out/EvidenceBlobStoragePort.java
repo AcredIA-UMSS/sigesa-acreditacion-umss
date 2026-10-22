@@ -11,6 +11,12 @@ public interface EvidenceBlobStoragePort {
      */
     String store(UUID evidenceId, int version, byte[] content, String originalFilename);
 
+    /**
+     * Reescribe el objeto en una clave ya conocida (p. ej. reutilizar {@code DocumentAsset}
+     * cuyo blob fue purgado por error).
+     */
+    void restore(String storageKey, byte[] content);
+
     void delete(String storageKey);
 
     Optional<byte[]> retrieve(String storageKey);

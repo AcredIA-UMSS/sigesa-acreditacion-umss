@@ -85,7 +85,9 @@ public class NormativeIndicatorEvidenceJpaAdapter implements NormativeIndicatorE
 
     private static String extractFilename(EvidenceVersionEntity version) {
         if (version.getOriginalFilename() != null && !version.getOriginalFilename().isBlank()) {
-            return version.getOriginalFilename();
+            String stored = version.getOriginalFilename();
+            int slash = stored.lastIndexOf('/');
+            return slash >= 0 ? stored.substring(slash + 1) : stored;
         }
         if (version.getExternalUrl() != null && !version.getExternalUrl().isBlank()) {
             return version.getExternalUrl();

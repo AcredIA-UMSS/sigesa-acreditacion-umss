@@ -3,6 +3,8 @@ package com.umss.sigesa.adapter.in.web;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +47,7 @@ class OpenApiExportIT {
                 .getResponse()
                 .getContentAsString(StandardCharsets.UTF_8);
 
-        JsonNode root = MAPPER.readTree(raw);
+        JsonNode root = sortKeys(MAPPER.readTree(raw));
         JsonNode paths = root.get("paths");
         assertNotNull(paths, "OpenAPI sin paths");
         assertTrue(paths.has("/api/v1/indicators/{indicatorId}/evidences"),
@@ -61,5 +66,29 @@ class OpenApiExportIT {
         if (Boolean.parseBoolean(System.getenv().getOrDefault("OPENAPI_WRITE", "false"))) {
             Files.writeString(committed, pretty, StandardCharsets.UTF_8);
         }
+    }
+
+    private static JsonNode sortKeys(JsonNode node) {
+        if (node == null || node.isNull() || node.isMissingNode()) {
+            return node;
+        }
+        if (node.isObject()) {
+            ObjectNode sorted = MAPPER.createObjectNode();
+            List<String> names = new ArrayList<>();
+            node.fieldNames().forEachRemaining(names::add);
+            Collections.sort(names);
+            for (String name : names) {
+                sorted.set(name, sortKeys(node.get(name)));
+            }
+            return sorted;
+        }
+        if (node.isArray()) {
+            ArrayNode sorted = MAPPER.createArrayNode();
+            for (JsonNode child : node) {
+                sorted.add(sortKeys(child));
+            }
+            return sorted;
+        }
+        return node;
     }
 }

@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **Demo 2:** `openapi.json` generado desde springdoc; CI drift + Spectral (`.github/workflows/openapi.yml`). Registro `docs/demos/demo-2.md` y `8.2.0-aportes.md`. | FSD-UC-004 / FSD-UC-005 | — | PM-029 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE UC-005:** `DELETE /evidences/{id}` retira evidencia si el indicador no está `APROBADO` (CC/CAE, 204 + blob/asset exclusivo); `409 EVIDENCE_IMMUTABLE` si aprobado. UI «Quitar / reemplazar». | FSD-UC-005 / DD-UC-005 | ADR-0001 | PM-028 | Boris Anthony Angulo Urquieta |
 | 19/10/2026 | **MOD-ASSISTANT FEAT-10 (#57):** FAB global en panel autenticado (`FloatingAssistantButton`) abre modal a11y con copiloto general; `/ayuda` y copilotos de dominio sin cambios. Offset `bottom-24` para no solapar el FAB de dominio. | FSD-UC-024 / DD-FEAT-10 | — | PM-027 / PR-IMPL-045 / #57 | Boris Anthony Angulo Urquieta |
@@ -303,7 +304,7 @@ artefactos_vivos:
 | **Dominio** | `DocumentAsset`, `IndicatorEvidenceLink`; `Evidence` sigue 1:1 indicador (`uk_evidence_normative_indicator`) |
 | **Puertos** | OUT `DocumentAssetPort`; IN `LinkDocumentAssetToIndicatorUseCase`, `GetDocumentAssetUseCase` |
 | **Migración Flyway** | `V19` DocumentAsset; **`V23__evidence_upload_lock.sql`** (FEAT-02); Docker: Hibernate + `DevWorkflowSchemaAlignmentRunner` |
-| **Object storage** | `S3EvidenceBlobStorageAdapter` si `sigesa.evidence.storage=s3`; Compose `minio` = `pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (`:9000` API / `:9001` consola); keys `evidences/{id}/v{n}/…` |
+| **Object storage** | `S3EvidenceBlobStorageAdapter` si `sigesa.evidence.storage=s3`; Compose `minio` = `pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (`:9000` API / `:9001` consola); keys `evidences/{id}/v{n}/…`. Reuso por SHA-256: `restore` si el objeto falta. |
 | **Upload lock** | `JdbcEvidenceUploadLockAdapter` — PK `indicator_id`; sin `ConcurrentHashMap` |
 | **Errores clave** | 409 `INDICATOR_ALREADY_HAS_EVIDENCE`; 404 `DOCUMENT_ASSET_NOT_FOUND`; 403 `PROGRAM_SCOPE_DENIED` (asset de otro proceso) |
 | **Frontend** | Modal carga: checkbox vincular asset del proceso; folio en lista de evidencias; wrapper Orval |

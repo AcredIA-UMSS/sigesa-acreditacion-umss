@@ -44,6 +44,20 @@ class S3EvidenceBlobStorageAdapterTest {
     }
 
     @Test
+    @DisplayName("restore: PUT object en storageKey existente")
+    void restore_putsObjectAtExistingKey() {
+        S3EvidenceBlobStorageAdapter adapter = new S3EvidenceBlobStorageAdapter(s3Client, "sigesa-evidences");
+        when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(null);
+
+        adapter.restore("evidences/id/v1/guia.pdf", "%PDF".getBytes());
+
+        ArgumentCaptor<PutObjectRequest> captor = ArgumentCaptor.forClass(PutObjectRequest.class);
+        verify(s3Client).putObject(captor.capture(), any(RequestBody.class));
+        assertEquals("sigesa-evidences", captor.getValue().bucket());
+        assertEquals("evidences/id/v1/guia.pdf", captor.getValue().key());
+    }
+
+    @Test
     @DisplayName("delete: DELETE object por storageKey")
     void delete_removesObject() {
         S3EvidenceBlobStorageAdapter adapter = new S3EvidenceBlobStorageAdapter(s3Client, "sigesa-evidences");

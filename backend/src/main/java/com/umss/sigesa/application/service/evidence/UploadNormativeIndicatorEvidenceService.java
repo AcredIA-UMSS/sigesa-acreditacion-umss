@@ -166,6 +166,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             asset = existingAsset.get();
             storageKey = asset.getStorageKey();
             persistNewAsset = false;
+            restoreMissingBlobIfNeeded(storageKey, command);
         } else if (externalOnly) {
             asset = DocumentAsset.create(
                     context.processId(),
@@ -232,6 +233,20 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             }
             throw ex;
         }
+    }
+
+    private void restoreMissingBlobIfNeeded(String storageKey, NormativeIndicatorEvidenceUploadCommand command) {
+        if (storageKey == null || storageKey.isBlank() || storageKey.startsWith(EXTERNAL_STORAGE_PREFIX)) {
+            return;
+        }
+        if (command.fileContent() == null || command.fileContent().length == 0) {
+            return;
+        }
+        if (blobStorage.retrieve(storageKey).isPresent()) {
+            return;
+        }
+        blobStorage.restore(storageKey, command.fileContent());
+        log.warn("Restauró blob ausente en object storage key={}", storageKey);
     }
 
     private static String titleFor(NormativeIndicatorEvidenceUploadCommand command) {
