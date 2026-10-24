@@ -38,6 +38,8 @@
 | PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 | PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
+| PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+
 
 ---
 
@@ -2085,4 +2087,78 @@ FSD-UC-004 cubre carga + visualización; Demo 2 documentada para Boris.
 
 - [ ] Rebuild frontend Docker para ver el visor
 - [ ] Push a `release/8.2.0` cuando se pida
+
+---
+
+## PM-032
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-032 |
+| **Fecha** | 2026-10-23 |
+| **Solicitante** | Alexander Alvarez (`Alex553-bot`) |
+| **Rol** | Fullstack Dev / Tech Lead |
+| **Sprint** | 03 |
+| **PR-IMPL** | PR-IMPL-046 |
+| **Design Doc** | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
+| **FSD / PRD** | `FSD-UC-032` / Transversal §10 |
+| **Rama** | `feat/73-dossier-zip-export` |
+| **Issue GitHub** | [#73](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/73) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+check the new feature implemented, there are some tests that are failing in the backend and the frontend as well
+coudl u pls fil the database to showcase this new feature ?
+commit all the changes
+```
+
+### Entradas auxiliares
+
+- `docs/features/FEAT-11-exportacion-dossier-digital-zip.md`
+- `docs/prompts/impl/PR-IMPL-046.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/InMemoryDossierExportJobTrackerAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/ExportProcessDossierUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/GetProcessDossierExportJobStatusUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/DossierExportPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/dossier/DossierExportService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/config/DossierDemoDataLoader.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ProcessDossierExportControllerTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapterTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/dossier/DossierExportServiceTest.java` |
+| generado | `frontend/src/features/processes/hooks/useDossierExport.ts` |
+| generado | `frontend/src/features/processes/hooks/useDossierExport.test.ts` |
+| generado | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
+| generado | `docs/prompts/impl/PR-IMPL-046.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessController.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/DocumentAssetJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/DocumentAssetPort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/ReportModuleConfig.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/ReportFormat.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/security/JwtAuthenticationFilterTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ProcessControllerQueryTest.java` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `.gitignore` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Implementación del pipeline asíncrono para exportación de Dossier Digital (ZIP Jerárquico y Foliado).
+- Corrección de pruebas en backend con `JwtTokenAdapter` mock y perfiles aislados.
+- Tipado estricto y migración a `customFetch` en `useDossierExport.ts` con cobertura de pruebas unitarias Vitest.
+- Seeder de demostración `DossierDemoDataLoader` con árbol CEUB de 4 niveles, 6 PDFs binarios reales y metadatos foliados.
+
+### Validación ejecutada
+
+- [x] Backend: `./mvnw test` — 564 pruebas pasadas, 0 fallos, 0 errores.
+- [x] Frontend: `npm run test:run` — 44 suites, 119 pruebas pasadas.
+- [x] Calidad Frontend: `npx oxlint` (0 errores) y `npx tsc -b` (0 errores).
+
 

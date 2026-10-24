@@ -3,7 +3,8 @@ package com.umss.sigesa.domain.model;
 public enum ReportFormat {
     XLSX,
     CSV,
-    PDF;
+    PDF,
+    ZIP;
 
     public static ReportFormat fromString(String value) {
         if (value == null) return XLSX;

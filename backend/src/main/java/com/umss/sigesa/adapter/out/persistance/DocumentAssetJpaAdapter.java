@@ -10,6 +10,7 @@ import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,6 +78,27 @@ public class DocumentAssetJpaAdapter implements DocumentAssetPort {
                 .map(IndicatorEvidenceLinkEntity::getIndicatorId)
                 .distinct()
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.umss.sigesa.domain.model.IndicatorEvidenceLink> findLinksByDocumentAssetId(UUID documentAssetId) {
+        return linkRepository.findByDocumentAssetId(documentAssetId).stream()
+                .map(DocumentAssetJpaAdapter::toLinkDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.umss.sigesa.domain.model.IndicatorEvidenceLink> findAllLinksByProcessId(UUID processId) {
+        List<DocumentAssetEntity> assets = assetRepository.findByProcessIdOrderByCreatedAtDesc(processId);
+        List<com.umss.sigesa.domain.model.IndicatorEvidenceLink> result = new ArrayList<>();
+        for (DocumentAssetEntity asset : assets) {
+            result.addAll(linkRepository.findByDocumentAssetId(asset.getId()).stream()
+                    .map(DocumentAssetJpaAdapter::toLinkDomain)
+                    .toList());
+        }
+        return result;
     }
 
     private DocumentAsset toDomain(DocumentAssetEntity entity) {
