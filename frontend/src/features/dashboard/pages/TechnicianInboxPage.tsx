@@ -13,6 +13,7 @@ const STATUS_FILTERS: { id: string; label: string }[] = [
   { id: 'SUBIDO', label: 'Nuevas' },
   { id: 'SUBSANADO', label: 'Subsanadas' },
   { id: 'OBSERVADO', label: 'Observadas' },
+  { id: 'APROBADO', label: 'Aprobados' },
 ];
 
 function canDictate(status: string) {
@@ -147,7 +148,12 @@ export function TechnicianInboxPage() {
       await approveIndicator(selectedItem.indicatorId);
       setIsApproveModalOpen(false);
       setActionSuccessMessage(`Indicador ${selectedItem.indicatorCode} aprobado exitosamente.`);
-      void loadInbox();
+      setPage(0);
+      if (statusFilter === 'APROBADO') {
+        void loadInbox();
+      } else {
+        setStatusFilter('APROBADO');
+      }
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Error al aprobar el indicador.');
     } finally {
@@ -257,7 +263,11 @@ export function TechnicianInboxPage() {
                   setPage(0);
                 }}
                 className={`rounded-full px-3 py-1.5 text-label-md font-medium ${
-                  active ? 'bg-primary text-body' : 'bg-body text-gray-800 ring-1 ring-gray-300'
+                  active
+                    ? filter.id === 'APROBADO'
+                      ? 'bg-success text-body'
+                      : 'bg-primary text-body'
+                    : 'bg-body text-gray-800 ring-1 ring-gray-300'
                 }`}
               >
                 {filter.label}
@@ -273,7 +283,9 @@ export function TechnicianInboxPage() {
             <div className="px-6 py-16 text-center">
               <p className="text-heading-sm font-semibold text-primary-800">Sin indicadores en esta vista</p>
               <p className="mt-2 text-body-md text-gray-700">
-                Amplíe la carrera o el estado para ver más evidencias.
+                {statusFilter === 'APROBADO'
+                  ? 'Todavía no hay dictámenes aprobados.'
+                  : 'Amplíe la carrera o el estado para ver más evidencias.'}
               </p>
             </div>
           ) : (
@@ -323,6 +335,8 @@ export function TechnicianInboxPage() {
                               Observar
                             </button>
                           </div>
+                        ) : item.status === 'APROBADO' ? (
+                          <span className="text-label-md font-semibold text-success">Aprobado</span>
                         ) : (
                           <span className="text-label-md text-gray-600">En corrección</span>
                         )}

@@ -66,14 +66,16 @@ public class TechnicianInboxDataLoader implements ApplicationRunner {
                 new InboxIndicator("IND-M-01", "Plan de estudios vigente", IndicatorState.SUBIDO, "plan_estudios_mecanica.pdf", 1),
                 new InboxIndicator("IND-M-02", "Inventario de laboratorios", IndicatorState.SUBIDO, "inventario_laboratorios.pdf", 2),
                 new InboxIndicator("IND-M-03", "Sílabos de asignaturas troncales", IndicatorState.SUBSANADO, "silabos_mecanica_v2.pdf", 3),
-                new InboxIndicator("IND-M-04", "Convenios de práctica industrial", IndicatorState.OBSERVADO, "convenio_practica.pdf", 4));
+                new InboxIndicator("IND-M-04", "Convenios de práctica industrial", IndicatorState.OBSERVADO, "convenio_practica.pdf", 4),
+                new InboxIndicator("IND-M-05", "Reglamento de evaluación", IndicatorState.APROBADO, "reglamento_evaluacion.pdf", 5));
         seedCareer(
                 DevSeedData.PROGRAM_CONTADURIA,
                 "Gestión académica",
                 now,
                 new InboxIndicator("IND-C-01", "Malla curricular auditada", IndicatorState.SUBIDO, "malla_contaduria.pdf", 1),
                 new InboxIndicator("IND-C-02", "Informe de prácticas profesionales", IndicatorState.SUBSANADO, "practicas_contaduria.pdf", 2),
-                new InboxIndicator("IND-C-03", "Planta docente a tiempo completo", IndicatorState.SUBIDO, "planta_docente.pdf", 3));
+                new InboxIndicator("IND-C-03", "Planta docente a tiempo completo", IndicatorState.SUBIDO, "planta_docente.pdf", 3),
+                new InboxIndicator("IND-C-04", "Estados financieros auditados", IndicatorState.APROBADO, "estados_financieros.pdf", 4));
     }
 
     private void seedCareer(UUID careerId, String dimension, LocalDateTime now, InboxIndicator... indicators) {
