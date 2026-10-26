@@ -4110,6 +4110,117 @@
         "tags" : [ "Evaluation" ]
       }
     },
+    "/api/v1/processes/{processId}/dossier/export" : {
+      "post" : {
+        "description" : "Encola la exportación asíncrona del dossier completo del proceso.",
+        "operationId" : "exportDossier",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ExportJobResponse"
+                }
+              }
+            },
+            "description" : "Exportación encolada"
+          },
+          "401" : {
+            "description" : "No autenticado"
+          },
+          "403" : {
+            "description" : "No autorizado"
+          },
+          "404" : {
+            "description" : "Proceso no encontrado"
+          }
+        },
+        "summary" : "Exportar dossier digital en ZIP",
+        "tags" : [ "Procesos de Acreditación" ]
+      }
+    },
+    "/api/v1/processes/{processId}/dossier/export-jobs/{jobId}" : {
+      "get" : {
+        "operationId" : "getDossierExportJobStatus",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "jobId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JobStatusResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Estado del job de exportación de dossier",
+        "tags" : [ "Procesos de Acreditación" ]
+      }
+    },
+    "/api/v1/processes/{processId}/dossier/export-jobs/{jobId}/download" : {
+      "get" : {
+        "operationId" : "downloadDossier",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "jobId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Descargar ZIP del dossier exportado",
+        "tags" : [ "Procesos de Acreditación" ]
+      }
+    },
     "/api/v1/processes/{processId}/evaluation-metrics" : {
       "get" : {
         "operationId" : "getEvaluationMetrics",
