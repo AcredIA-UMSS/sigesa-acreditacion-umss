@@ -31,7 +31,8 @@ type SidebarNavKey =
   | 'reports'
   | 'history'
   | 'help'
-  | 'semaphore';
+  | 'semaphore'
+  | 'inbox';
 
 
 interface SidebarProps {

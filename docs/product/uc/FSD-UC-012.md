@@ -19,7 +19,7 @@ ultima_actualizacion: "2026-09-08"
 | **Trazabilidad** | PRD-REQ-012 · PRD-US-014 |
 | **Pantalla** | `/technician/inbox` |
 | **API** | `GET /api/v1/dashboards/me/summary` (sección `technicianSection`) |
-| **Nota implementación viva (2026-08-27)** | Sección TD en `/dashboard` con KPIs y últimas evaluaciones. **Pendiente:** ruta `/technician/inbox`, filtros avanzados y acciones UC-008/UC-009. |
+| **Nota implementación viva (2026-10-26)** | Ruta `/technician/inbox` para [TD] y [JD]. `GET /api/v1/dashboards/technician/inbox` filtra por carrera y estado (`SUBIDO`, `SUBSANADO`, `OBSERVADO`). Aprobar y observar se hacen en modal (`POST /api/v1/indicators/{id}/approve` y `/reject`), solo [TD]. |
 
 ## Flujo principal
 

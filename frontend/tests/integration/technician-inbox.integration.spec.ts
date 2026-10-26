@@ -65,7 +65,7 @@ test.describe('E2E - Technician Review Inbox Flow', () => {
     await page.goto('/dashboard/technician/inbox');
 
     // Verify indicator card / table row renders
-    await expect(page.getByText('Bandeja Centralizada de Auditoría [TD]')).toBeVisible();
+    await expect(page.getByText('Bandeja de dictamen')).toBeVisible();
     await expect(page.getByText('IND-3.2.1')).toBeVisible();
     await expect(page.getByText('inventario_equipos_2026.pdf')).toBeVisible();
     await expect(page.getByText('Infraestructura > Laboratorios > Capacidad Instalada')).toBeVisible();

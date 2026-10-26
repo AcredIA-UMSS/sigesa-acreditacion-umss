@@ -45,7 +45,7 @@ describe('TechnicianInboxPage', () => {
     renderWithProviders(<TechnicianInboxPage />, { route: '/technician/inbox' });
 
     expect(
-      await screen.findByText('Bandeja Centralizada de Auditoría [TD]'),
+      await screen.findByText('Bandeja de dictamen'),
     ).toBeInTheDocument();
     expect(await screen.findByText('IND-1.1.2')).toBeInTheDocument();
     expect(screen.getByText('reglamento_docencia_2026.pdf')).toBeInTheDocument();
