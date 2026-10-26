@@ -689,6 +689,14 @@
         "required" : [ "managementYear" ],
         "type" : "object"
       },
+      "HealthResponse" : {
+        "properties" : {
+          "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ImportImprovementPlanResponseDto" : {
         "description" : "Resultado de importación FODA → Plan de Mejoras (API-WF-15)",
         "properties" : {
@@ -2414,6 +2422,25 @@
   },
   "openapi" : "3.1.0",
   "paths" : {
+    "/api/health" : {
+      "get" : {
+        "operationId" : "health",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Liveness: HTTP 200 con {\"status\":\"UP\"} sin autenticación",
+        "tags" : [ "Health" ]
+      }
+    },
     "/api/v1/admin/users" : {
       "get" : {
         "operationId" : "list",
@@ -5908,6 +5935,9 @@
   }, {
     "description" : "Bitácora inmutable de auditoría append-only para acreditación (FSD-UC-017)",
     "name" : "Audit Log"
+  }, {
+    "description" : "Liveness del proceso Spring (público, sin JWT)",
+    "name" : "Health"
   }, {
     "description" : "Análisis FODA por indicador (API-WF-10 / FSD-UC-029)",
     "name" : "Evaluation"
