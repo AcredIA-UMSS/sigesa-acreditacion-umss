@@ -17,6 +17,7 @@ import {
   FileUp,
   FileSearch,
   FileCheck,
+  Gauge,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -29,7 +30,8 @@ type SidebarNavKey =
   | 'templates'
   | 'reports'
   | 'history'
-  | 'help';
+  | 'help'
+  | 'semaphore';
 
 
 interface SidebarProps {
@@ -110,6 +112,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           active={activeNav === 'dashboard'}
           to="/dashboard"
         />
+
+        {isJd && (
+          <NavItem
+            icon={<Gauge size={20} />}
+            label="SEMÁFORO"
+            isExpanded={isExpanded}
+            active={activeNav === 'semaphore' || location.pathname.startsWith('/executive/semaphore')}
+            to="/executive/semaphore"
+          />
+        )}
 
         {!isExternalEvaluator && (
           <div>

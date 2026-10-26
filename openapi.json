@@ -1724,9 +1724,16 @@
       },
       "ProgramTrafficLight" : {
         "properties" : {
+          "completionPercentage" : {
+            "format" : "double",
+            "type" : "number"
+          },
           "criticalObservations" : {
             "format" : "int32",
             "type" : "integer"
+          },
+          "faculty" : {
+            "type" : "string"
           },
           "name" : {
             "type" : "string"

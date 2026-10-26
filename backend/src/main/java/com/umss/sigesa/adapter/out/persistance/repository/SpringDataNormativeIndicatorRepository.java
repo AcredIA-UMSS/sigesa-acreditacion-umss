@@ -73,4 +73,16 @@ public interface SpringDataNormativeIndicatorRepository extends JpaRepository<No
     List<NormativeIndicatorJpaEntity> findUploadableByProgramIdsAndStatuses(
             @Param("programIds") Collection<UUID> programIds,
             @Param("statuses") Collection<String> statuses);
+
+    @Query("""
+            SELECT proc.careerId, i.status, COUNT(i)
+            FROM NormativeIndicatorJpaEntity i
+            JOIN i.level3Node l3
+            JOIN l3.level2Node l2
+            JOIN l2.level1Node l1
+            JOIN l1.process proc
+            WHERE proc.status = 'ACTIVE'
+            GROUP BY proc.careerId, i.status
+            """)
+    List<Object[]> countActiveByCareerAndStatus();
 }
