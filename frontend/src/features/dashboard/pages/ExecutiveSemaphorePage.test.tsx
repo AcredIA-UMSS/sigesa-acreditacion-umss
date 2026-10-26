@@ -44,7 +44,8 @@ describe('ExecutiveSemaphorePage', () => {
     renderWithProviders(<ExecutiveSemaphorePage />, { route: '/executive/semaphore' });
 
     expect(await screen.findByRole('heading', { name: 'Semáforo institucional' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'FCT' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Buscar carrera o facultad')).toBeInTheDocument();
+    expect(screen.getByText('Facultad de Ciencias y Tecnología')).toBeInTheDocument();
     expect(screen.getByText('Ingeniería de Sistemas')).toBeInTheDocument();
     expect(screen.getByText('Ingeniería Civil')).toBeInTheDocument();
     expect(screen.getAllByText('Crítico').length).toBeGreaterThan(0);

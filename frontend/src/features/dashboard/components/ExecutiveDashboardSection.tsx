@@ -47,6 +47,20 @@ function semaphorePresentation(estado: SemaphoreProgram['estado']) {
   }
 }
 
+const FACULTY_LABELS: Record<string, string> = {
+  FCT: 'Facultad de Ciencias y Tecnología',
+  FAU: 'Facultad de Arquitectura',
+  FCMM: 'Facultad de Medicina',
+  CCJJ: 'Facultad de Ciencias Jurídicas',
+  FACSO: 'Facultad de Ciencias Sociales',
+  FCyt: 'Facultad de Ciencias y Tecnología (FCyt)',
+  FAFCYT: 'Facultad de Agronomía',
+};
+
+function facultyLabel(code: string) {
+  return FACULTY_LABELS[code] ?? code;
+}
+
 function groupByFaculty(programs: SemaphoreProgram[]) {
   const groups = new Map<string, SemaphoreProgram[]>();
   for (const program of programs) {
@@ -176,7 +190,7 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
           <div className="space-y-8">
             {facultyGroups.map(([faculty, facultyPrograms]) => (
               <div key={faculty}>
-                <h4 className="mb-3 text-heading-sm font-semibold text-primary-800">{faculty}</h4>
+                <h4 className="mb-3 text-heading-sm font-semibold text-primary-800">{facultyLabel(faculty)}</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-body-md">
                     <thead>

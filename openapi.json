@@ -2891,6 +2891,37 @@
         "tags" : [ "dashboard-composite-controller" ]
       }
     },
+    "/api/v1/dashboards/executive/observations" : {
+      "get" : {
+        "operationId" : "listExecutiveObservations",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "programId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ObservationSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Observaciones abiertas de una carrera para el semáforo de jefatura",
+        "tags" : [ "dashboard-composite-controller" ]
+      }
+    },
     "/api/v1/dashboards/me/summary" : {
       "get" : {
         "operationId" : "getCompositeSummary",

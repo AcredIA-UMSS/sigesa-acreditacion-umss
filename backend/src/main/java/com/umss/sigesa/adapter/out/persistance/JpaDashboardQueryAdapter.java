@@ -226,7 +226,6 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                 pending = observed;
             }
         } else if (summary != null) {
-            updateSummaryDynamically(summary);
             total = summary.getTotalIndicators();
             progress = summary.getOverallProgressPercentage();
             if (pending == 0) {
@@ -250,6 +249,13 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                 progress,
                 pending,
                 overdue);
+    }
+
+    @Override
+    public List<ObservationSummary> findObservationsByProgram(UUID programId) {
+        return observationRepository.findByProgramIdOrderByDueDateAsc(programId).stream()
+                .map(this::toObservationSummary)
+                .toList();
     }
 
     @Override

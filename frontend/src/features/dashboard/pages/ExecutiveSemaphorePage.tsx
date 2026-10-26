@@ -1,7 +1,7 @@
 import { AlertTriangle, XCircle } from 'lucide-react';
 import { Sidebar } from '../../../components/layout/Sidebar';
 import { useDashboardSummary } from '../api/dashboardHooks';
-import { ExecutiveDashboardSection } from '../components/ExecutiveDashboardSection';
+import { SemaphoreBoard } from '../components/SemaphoreBoard';
 
 export function ExecutiveSemaphorePage() {
   const { summary, isLoading, error, refetch } = useDashboardSummary();
@@ -46,7 +46,7 @@ export function ExecutiveSemaphorePage() {
           </div>
         )}
 
-        {!isLoading && !error && section && <ExecutiveDashboardSection section={section} />}
+        {!isLoading && !error && section && <SemaphoreBoard section={section} />}
       </main>
     </div>
   );

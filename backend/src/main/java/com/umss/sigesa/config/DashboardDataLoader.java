@@ -57,6 +57,10 @@ public class DashboardDataLoader implements ApplicationRunner {
             try {
                 transactionTemplate.execute(status -> {
                     seedSummaries();
+                    seedSemaphoreDemo();
+                    return null;
+                });
+                transactionTemplate.execute(status -> {
                     seedRealProcessAndIndicators();
                     seedObservations();
                     return null;
@@ -124,6 +128,108 @@ public class DashboardDataLoader implements ApplicationRunner {
         arcusurSummary.setPhases(arcusurPhases);
 
         summaryRepository.save(arcusurSummary);
+    }
+
+    /**
+     * Avance de demostración para el semáforo de jefatura (FSD-UC-013).
+     * Algunas carreras quedan sin fila a propósito: en el panel salen en gris.
+     */
+    private void seedSemaphoreDemo() {
+        upsertSummary(DevSeedData.PROGRAM_INF_SIS, "Ingeniería de Sistemas", 40, 92.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_ING_CIVIL, "Ingeniería Civil", 36, 68.0, 2);
+        upsertSummary(DevSeedData.PROGRAM_ING_QUIMICA, "Ingeniería Química", 30, 42.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_INDUSTRIAL, "Ingeniería Industrial", 28, 88.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_ELECTRONICA, "Ingeniería Electrónica", 24, 95.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_AMBIENTAL, "Ingeniería Ambiental", 22, 84.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_ING_PETROLEO, "Ingeniería de Petróleo y Gas Natural", 20, 57.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_MINAS, "Ingeniería en Minas", 18, 31.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_TELECOM, "Ingeniería de Telecomunicaciones", 16, 100.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_ARQUITECTURA, "Arquitectura", 20, 74.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_MEDICINA, "Medicina", 48, 46.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ENFERMERIA, "Enfermería", 18, 91.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_DERECHO, "Derecho", 26, 63.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ADM_EMPRESAS, "Administración de Empresas", 14, 90.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_PSICOLOGIA, "Psicología", 12, 86.0, 0);
+        upsertSummary(DevSeedData.PROGRAM_BIOLOGIA, "Biología", 16, 35.0, 1);
+        upsertSummary(DevSeedData.PROGRAM_ING_AGRONOMICA, "Ingeniería Agronómica", 15, 79.0, 0);
+        ensureOverdueObservation();
+        ensureDemoObservations();
+    }
+
+    private void ensureDemoObservations() {
+        demoObservation("OBS-DEMO-CIV-1", DevSeedData.PROGRAM_ING_CIVIL, "IND-CIV-1", "IND-2.1",
+                "Planos de laboratorios", "Falta el plano actualizado del laboratorio de hidráulica.", 12);
+        demoObservation("OBS-DEMO-CIV-2", DevSeedData.PROGRAM_ING_CIVIL, "IND-CIV-2", "IND-2.4",
+                "Convenios de pasantía", "Dos convenios vencieron y no tienen adenda.", 20);
+        demoObservation("OBS-DEMO-IND-1", DevSeedData.PROGRAM_ING_INDUSTRIAL, "IND-IND-1", "IND-3.1",
+                "Indicadores de empleabilidad", "La cohorte 2024 no tiene seguimiento de egresados.", 8);
+        demoObservation("OBS-DEMO-ARQ-1", DevSeedData.PROGRAM_ARQUITECTURA, "IND-ARQ-1", "IND-1.3",
+                "Talleres de diseño", "El inventario de mesas de dibujo está incompleto.", 15);
+        demoObservation("OBS-DEMO-DER-1", DevSeedData.PROGRAM_DERECHO, "IND-DER-1", "IND-5.2",
+                "Clínica jurídica", "No se adjuntó el informe del segundo semestre.", 6);
+        demoObservation("OBS-DEMO-PET-1", DevSeedData.PROGRAM_ING_PETROLEO, "IND-PET-1", "IND-4.1",
+                "Prácticas de campo", "Falta el seguro de los estudiantes del último viaje.", 9);
+        demoObservation("OBS-DEMO-QUI-1", DevSeedData.PROGRAM_ING_QUIMICA, "IND-QUI-1", "IND-6.1",
+                "Manejo de reactivos", "El inventario de reactivos no cuadra con el almacén.", -4);
+        demoObservation("OBS-DEMO-MIN-1", DevSeedData.PROGRAM_ING_MINAS, "IND-MIN-1", "IND-7.2",
+                "Seguridad en mina escuela", "El simulacro de evacuación está fuera de plazo.", -10);
+        demoObservation("OBS-DEMO-MED-1", DevSeedData.PROGRAM_MEDICINA, "IND-MED-1", "IND-8.1",
+                "Campos clínicos", "Dos hospitales no renovaron el convenio docente.", -6);
+        demoObservation("OBS-DEMO-BIO-1", DevSeedData.PROGRAM_BIOLOGIA, "IND-BIO-1", "IND-3.4",
+                "Colección biológica", "El registro de especímenes no está actualizado.", -2);
+    }
+
+    private void demoObservation(String id, UUID programId, String indicatorId, String code,
+                                 String title, String description, int dueInDays) {
+        if (observationRepository.existsById(id)) {
+            return;
+        }
+        createObservation(
+                id,
+                programId,
+                indicatorId,
+                code,
+                title,
+                description,
+                LocalDate.now().minusDays(15),
+                LocalDate.now().plusDays(dueInDays),
+                1,
+                "PENDIENTE_SUBSANACION",
+                "/executive/semaphore"
+        );
+    }
+
+    private void upsertSummary(UUID programId, String name, int total, double progress, int pending) {
+        ProgramDashboardSummaryEntity summary = summaryRepository.findById(programId)
+                .orElseGet(ProgramDashboardSummaryEntity::new);
+        summary.setProgramId(programId);
+        summary.setProgramName(name);
+        summary.setTotalIndicators(total);
+        summary.setOverallProgressPercentage(progress);
+        summary.setApprovedEvidences((int) Math.round(total * progress / 100.0));
+        summary.setRejectedEvidences(Math.max(0, pending));
+        summary.setPendingObservations(pending);
+        summary.setUpdatedAt(Instant.now());
+        summaryRepository.save(summary);
+    }
+
+    private void ensureOverdueObservation() {
+        if (observationRepository.existsById("OBS-DEMO-VENCIDA-ELE")) {
+            return;
+        }
+        createObservation(
+                "OBS-DEMO-VENCIDA-ELE",
+                DevSeedData.PROGRAM_ING_ELECTRONICA,
+                "IND-ELE-01",
+                "IND-4.2.1",
+                "Laboratorios de electrónica",
+                "Observación vencida de demostración para el semáforo rojo.",
+                LocalDate.now().minusDays(20),
+                LocalDate.now().minusDays(3),
+                1,
+                "PENDIENTE_SUBSANACION",
+                "/executive/semaphore"
+        );
     }
 
     private ProgramPhaseSummaryEntity createPhaseSummary(ProgramDashboardSummaryEntity programSummary,
