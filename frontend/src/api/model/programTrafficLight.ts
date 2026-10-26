@@ -10,4 +10,6 @@ export interface ProgramTrafficLight {
   name?: string;
   status?: string;
   criticalObservations?: number;
+  faculty?: string;
+  completionPercentage?: number;
 }

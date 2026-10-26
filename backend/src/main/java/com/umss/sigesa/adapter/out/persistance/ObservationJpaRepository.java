@@ -30,6 +30,8 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
 
     long countByStatus(String status);
 
+    List<ObservationEntity> findByProgramIdOrderByDueDateAsc(UUID programId);
+
     long countByProgramIdAndStatusNot(UUID programId, String status);
 
     long countByProgramIdAndStatus(UUID programId, String status);

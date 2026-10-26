@@ -14,8 +14,67 @@ interface ExecutiveDashboardSectionProps {
   section: ExecutiveSection;
 }
 
+type SemaphoreProgram = NonNullable<ExecutiveSection['semaforoProgramas']>[number];
+
+const SEMAPHORE_ORDER = ['ROJO', 'AMARILLO', 'VERDE', 'SIN_DATO'] as const;
+
+function semaphorePresentation(estado: SemaphoreProgram['estado']) {
+  switch (estado) {
+    case 'VERDE':
+      return {
+        badgeColor: 'bg-success/10 text-success border border-success/20',
+        trafficLightColor: 'bg-success',
+        label: 'Saludable',
+      };
+    case 'AMARILLO':
+      return {
+        badgeColor: 'bg-warning/10 text-warning border border-warning/20',
+        trafficLightColor: 'bg-warning',
+        label: 'En alerta',
+      };
+    case 'ROJO':
+      return {
+        badgeColor: 'bg-secondary/10 text-secondary border border-secondary/20',
+        trafficLightColor: 'bg-secondary',
+        label: 'Crítico',
+      };
+    default:
+      return {
+        badgeColor: 'bg-gray-100 text-gray-700 border border-gray-300',
+        trafficLightColor: 'bg-gray-400',
+        label: 'Sin dato',
+      };
+  }
+}
+
+const FACULTY_LABELS: Record<string, string> = {
+  FCT: 'Facultad de Ciencias y Tecnología',
+  FAU: 'Facultad de Arquitectura',
+  FCMM: 'Facultad de Medicina',
+  CCJJ: 'Facultad de Ciencias Jurídicas',
+  FACSO: 'Facultad de Ciencias Sociales',
+  FCyt: 'Facultad de Ciencias y Tecnología (FCyt)',
+  FAFCYT: 'Facultad de Agronomía',
+};
+
+function facultyLabel(code: string) {
+  return FACULTY_LABELS[code] ?? code;
+}
+
+function groupByFaculty(programs: SemaphoreProgram[]) {
+  const groups = new Map<string, SemaphoreProgram[]>();
+  for (const program of programs) {
+    const faculty = program.facultad?.trim() ? program.facultad : 'Sin facultad';
+    const current = groups.get(faculty) ?? [];
+    current.push(program);
+    groups.set(faculty, current);
+  }
+  return [...groups.entries()];
+}
+
 export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSectionProps) {
   const programs = section.semaforoProgramas ?? [];
+  const facultyGroups = groupByFaculty(programs);
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -77,7 +136,7 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
         <div className="rounded-2xl border border-primary-200/40 bg-body p-5 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
           <div>
             <span className="text-label-md font-semibold text-gray-700 uppercase">Observaciones Críticas</span>
-            <h4 className="text-display-lg font-bold leading-none text-secondary-650 mt-2">
+            <h4 className="text-display-lg font-bold leading-none text-secondary mt-2">
               {section.criticalObservations ?? 0}
             </h4>
             <p className="mt-2 text-xs text-gray-600">Observaciones pendientes en toda la institución</p>
@@ -107,83 +166,80 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
         <div className="mb-6">
           <h3 className="text-heading-sm font-bold text-primary-800">Semáforo de Calidad de Programas</h3>
           <p className="text-body-md text-gray-600 mt-1">
-            Visualización del estado de acreditación de carreras y alertas críticas para toma de decisiones ejecutivas.
+            Rojo si hay observaciones vencidas o el avance es bajo. Gris si la carrera todavía no tiene indicadores.
           </p>
+          <ul className="mt-3 flex flex-wrap gap-3 text-label-md text-gray-700">
+            {SEMAPHORE_ORDER.map((tone) => {
+              const presentation = semaphorePresentation(tone);
+              return (
+                <li key={tone} className="inline-flex items-center gap-2">
+                  <span className={`h-3 w-3 rounded-full ${presentation.trafficLightColor}`} />
+                  {presentation.label}
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         {programs.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center text-gray-500">
-            <CheckCircle2 className="text-success mb-2" size={36} />
-            <span className="text-body-md">Todos los programas se encuentran en orden</span>
+            <CheckCircle2 className="text-gray-400 mb-2" size={36} />
+            <span className="text-body-md">No hay carreras en el catálogo</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-body-md">
-              <thead>
-                <tr className="border-b border-gray-100 text-label-sm uppercase font-semibold text-gray-600">
-                  <th className="pb-3">Carrera / Programa</th>
-                  <th className="pb-3">Estado Acreditación</th>
-                  <th className="pb-3">Obs. Críticas</th>
-                  <th className="pb-3 text-right">Semáforo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {programs.map((prog) => {
-                  let badgeColor = '';
-                  let trafficLightColor = '';
-                  let label = '';
-
-                  switch (prog.estado) {
-                    case 'VERDE':
-                      badgeColor = 'bg-success/10 text-success border border-success/20';
-                      trafficLightColor = 'bg-success shadow-success-glow';
-                      label = 'Saludable';
-                      break;
-                    case 'AMARILLO':
-                      badgeColor = 'bg-warning/10 text-warning border border-warning/20';
-                      trafficLightColor = 'bg-warning shadow-warning-glow';
-                      label = 'En Alerta';
-                      break;
-                    case 'ROJO':
-                      badgeColor = 'bg-secondary/10 text-secondary border border-secondary/20';
-                      trafficLightColor = 'bg-secondary shadow-secondary-glow';
-                      label = 'Crítico';
-                      break;
-                    default:
-                      badgeColor = 'bg-gray-100 text-gray-500 border border-gray-200';
-                      trafficLightColor = 'bg-gray-400';
-                      label = 'Indefinido';
-                  }
-
-                  return (
-                    <tr key={prog.programaId} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4">
-                        <div className="font-semibold text-primary-800">{prog.nombre}</div>
-                        <div className="text-xs text-gray-500">ID: {prog.programaId}</div>
-                      </td>
-                      <td className="py-4">
-                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${badgeColor}`}>
-                          {prog.estado === 'VERDE' && <CheckCircle2 size={12} />}
-                          {prog.estado === 'AMARILLO' && <AlertTriangle size={12} />}
-                          {prog.estado === 'ROJO' && <AlertOctagon size={12} />}
-                          {label}
-                        </span>
-                      </td>
-                      <td className="py-4">
-                        <span className={`text-label-md font-bold ${prog.observacionesCriticas > 0 ? 'text-secondary font-extrabold' : 'text-gray-500'}`}>
-                          {prog.observacionesCriticas} observaciones
-                        </span>
-                      </td>
-                      <td className="py-4 text-right">
-                        <div className="inline-flex items-center justify-end">
-                          <div className={`h-4 w-4 rounded-full ${trafficLightColor}`} title={`Estado: ${prog.estado}`} />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-8">
+            {facultyGroups.map(([faculty, facultyPrograms]) => (
+              <div key={faculty}>
+                <h4 className="mb-3 text-heading-sm font-semibold text-primary-800">{facultyLabel(faculty)}</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-body-md">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-label-md uppercase font-semibold text-gray-600">
+                        <th className="pb-3">Carrera</th>
+                        <th className="pb-3">Estado</th>
+                        <th className="pb-3">Avance</th>
+                        <th className="pb-3">Obs. abiertas</th>
+                        <th className="pb-3 text-right">Semáforo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {facultyPrograms.map((prog) => {
+                        const presentation = semaphorePresentation(prog.estado);
+                        return (
+                          <tr key={prog.programaId} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-4">
+                              <div className="font-semibold text-primary-800">{prog.nombre}</div>
+                            </td>
+                            <td className="py-4">
+                              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-label-md font-semibold ${presentation.badgeColor}`}>
+                                {prog.estado === 'VERDE' && <CheckCircle2 size={12} />}
+                                {prog.estado === 'AMARILLO' && <AlertTriangle size={12} />}
+                                {prog.estado === 'ROJO' && <AlertOctagon size={12} />}
+                                {presentation.label}
+                              </span>
+                            </td>
+                            <td className="py-4 text-body-md text-gray-700">
+                              {prog.avance == null ? '—' : `${prog.avance.toFixed(0)}%`}
+                            </td>
+                            <td className="py-4">
+                              <span className={`text-label-md font-bold ${prog.observacionesCriticas > 0 ? 'text-secondary' : 'text-gray-500'}`}>
+                                {prog.observacionesCriticas}
+                              </span>
+                            </td>
+                            <td className="py-4 text-right">
+                              <div
+                                className={`ml-auto h-4 w-4 rounded-full ${presentation.trafficLightColor}`}
+                                title={presentation.label}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

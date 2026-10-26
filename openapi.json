@@ -1724,9 +1724,16 @@
       },
       "ProgramTrafficLight" : {
         "properties" : {
+          "completionPercentage" : {
+            "format" : "double",
+            "type" : "number"
+          },
           "criticalObservations" : {
             "format" : "int32",
             "type" : "integer"
+          },
+          "faculty" : {
+            "type" : "string"
           },
           "name" : {
             "type" : "string"
@@ -2881,6 +2888,37 @@
             "description" : "OK"
           }
         },
+        "tags" : [ "dashboard-composite-controller" ]
+      }
+    },
+    "/api/v1/dashboards/executive/observations" : {
+      "get" : {
+        "operationId" : "listExecutiveObservations",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "programId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ObservationSummary"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Observaciones abiertas de una carrera para el semáforo de jefatura",
         "tags" : [ "dashboard-composite-controller" ]
       }
     },

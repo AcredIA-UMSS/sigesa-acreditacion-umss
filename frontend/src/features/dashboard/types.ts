@@ -53,8 +53,10 @@ export interface ExecutiveSection {
   semaforoProgramas?: Array<{
     programaId: string;
     nombre: string;
-    estado: 'VERDE' | 'AMARILLO' | 'ROJO';
+    facultad?: string;
+    estado: 'VERDE' | 'AMARILLO' | 'ROJO' | 'SIN_DATO';
     observacionesCriticas: number;
+    avance?: number | null;
   }>;
 }
 

@@ -15,6 +15,7 @@ import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
 import { TechnicianInboxPage } from './features/dashboard/pages/TechnicianInboxPage';
+import { ExecutiveSemaphorePage } from './features/dashboard/pages/ExecutiveSemaphorePage';
 import { AuditLogPage } from './features/admin/audit/pages/AuditLogPage';
 
 function App() {
@@ -182,6 +183,17 @@ function App() {
           element={
             <ProtectedRoute>
               <EvidenceSearchPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/executive/semaphore"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <ExecutiveSemaphorePage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />

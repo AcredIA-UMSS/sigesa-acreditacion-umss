@@ -19,7 +19,7 @@ ultima_actualizacion: "2026-09-08"
 | **Trazabilidad** | PRD-REQ-011 · PRD-US-013 |
 | **Pantalla** | `/executive/semaphore` |
 | **API** | `GET /api/v1/dashboards/me/summary` (sección `executiveSection`) |
-| **Nota implementación viva (2026-08-27)** | Semáforo por programa y KPIs ejecutivos en pestaña JD de `/dashboard`. **Pendiente:** ruta dedicada `/executive/semaphore` si se exige literal del FSD baseline. |
+| **Nota implementación viva (2026-10-26)** | Ruta `/executive/semaphore` (solo [JD]) y pestaña del panel. `executiveSection` de `GET /api/v1/dashboards/me/summary`. Rojo si hay observación vencida, avance &lt; 50% o más de 10 observaciones abiertas. Sin indicadores: `SIN_DATO` (gris), agrupado por facultad. |
 
 ## Flujo principal
 
