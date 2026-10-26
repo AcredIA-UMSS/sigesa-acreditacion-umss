@@ -11,7 +11,7 @@ Registro de funcionalidades por integrante (Classroom + entrega del grupo). El r
 |---|---|---|
 | Boris Anthony Angulo Urquieta | Cargar evidencia (FSD-UC-004), visualizar/descargar blob (API-EVD-07b), eliminar/reemplazar si no APROBADO (FSD-UC-005). Contrato OpenAPI (`openapi.json`) + CI drift y Spectral. | [AcredIA-UMSS/sigesa-acreditacion-umss](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss) (`release/8.2.0`) |
 | Alexander Alvarez | Por registrar en esta rama | [AcredIA-UMSS/sigesa-acreditacion-umss](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss) |
-| Aylen Gonzáles | Por registrar en esta rama | [AcredIA-UMSS/sigesa-acreditacion-umss](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss) |
+| Aylen Gonzáles | Semáforo de jefatura (FSD-UC-013): panel `/executive/semaphore` con colores por carrera. Bandeja de dictamen (FSD-UC-012): `/technician/inbox`, filtros y aprobar u observar en modal. | [AcredIA-UMSS/sigesa-acreditacion-umss](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss) (`release/8.2.0`) |
 | Marlene | Validación de formularios de registro (FSD-UC-002). Login institucional (FSD-UC-001). Liveness `GET /api/health`. | [AcredIA-UMSS/sigesa-acreditacion-umss](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss) (`release/8.2.0`) |
 
 ## Cumplimiento de requisitos (contrato + CI)
