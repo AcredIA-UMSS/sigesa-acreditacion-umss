@@ -228,16 +228,17 @@ public class DashboardDataLoader implements ApplicationRunner {
 
         UUID processId = DevSeedData.PROCESS_INF_SIS_CEUB_ACTIVE;
 
-        com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity process =
-                com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity.builder()
-                        .id(processId)
-                        .careerId(DevSeedData.PROGRAM_INF_SIS)
-                        .templateId(DevSeedData.TEMPLATE_CEUB_2026)
-                        .status("ACTIVE")
-                        .startDate(LocalDateTime.now())
-                        .build();
-
-        entityManager.merge(process);
+        entityManager.createNativeQuery("""
+                INSERT INTO accreditation_processes (id, career_id, template_id, status, start_date, operational_mode)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """)
+                .setParameter(1, processId)
+                .setParameter(2, DevSeedData.PROGRAM_INF_SIS)
+                .setParameter(3, DevSeedData.TEMPLATE_CEUB_2026)
+                .setParameter(4, "ACTIVE")
+                .setParameter(5, LocalDateTime.now())
+                .setParameter(6, "ACTIVE")
+                .executeUpdate();
     }
 
     private void persistIndicatorUnused(UUID id, UUID programId, UUID phaseId) {
