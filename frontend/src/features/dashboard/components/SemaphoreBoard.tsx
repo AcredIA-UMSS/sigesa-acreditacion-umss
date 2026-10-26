@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { loadSession } from '../../../lib/auth/tokenStorage';
 import type { ExecutiveSection } from '../types';
@@ -98,6 +98,15 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
   const [observationsError, setObservationsError] = useState<string | null>(null);
   const [loadingObservations, setLoadingObservations] = useState(false);
 
+  useEffect(() => {
+    if (!selected) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSelected(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selected]);
+
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return programs.filter((program) => {
@@ -112,9 +121,6 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
     setSelected(program);
     setObservations([]);
     setObservationsError(null);
-    if ((program.observacionesCriticas ?? 0) === 0) {
-      return;
-    }
     setLoadingObservations(true);
     try {
       setObservations(await fetchProgramObservations(program.programaId));
@@ -217,7 +223,7 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
                           onClick={() => openObservations(program)}
                           className="text-body-md font-semibold text-primary underline-offset-2 hover:underline"
                         >
-                          {program.observacionesCriticas ?? 0} · Ver
+                          Ver
                         </button>
                       </td>
                       <td className="px-4 py-3 align-middle">
@@ -236,50 +242,61 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
       </section>
 
       {selected && (
-        <section className="rounded-2xl border border-gray-200 bg-body p-5 shadow-sm">
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-heading-sm font-semibold text-primary-900">
-                Observaciones · {selected.nombre}
-              </h2>
-              <p className="mt-1 text-body-md text-gray-600">{facultyLabel(selected.facultad)}</p>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-primary-900/40 p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="semaphore-observations-title"
+            className="max-h-[70vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-gray-200 bg-body p-5 shadow-md"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h2 id="semaphore-observations-title" className="text-heading-sm font-semibold text-primary-900">
+                  {selected.nombre}
+                </h2>
+                <p className="mt-1 text-body-md text-gray-600">{facultyLabel(selected.facultad)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelected(null)}
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-label-md text-gray-700 hover:bg-gray-100"
+              >
+                <X size={16} />
+                Cerrar
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setSelected(null)}
-              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-label-md text-gray-700 hover:bg-gray-100"
-            >
-              <X size={16} />
-              Cerrar
-            </button>
-          </div>
 
-          {loadingObservations && <p className="text-body-md text-gray-600">Cargando observaciones…</p>}
-          {observationsError && <p className="text-body-md text-secondary">{observationsError}</p>}
-          {!loadingObservations && !observationsError && observations.length === 0 && (
-            <p className="text-body-md text-gray-600">Esta carrera no tiene observaciones registradas.</p>
-          )}
-          {!loadingObservations && observations.length > 0 && (
-            <ul className="divide-y divide-gray-100">
-              {observations.map((item) => {
-                const overdue = isOverdue(item.dueDate);
-                return (
-                  <li key={item.observationId} className="py-3">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <p className="text-body-md font-semibold text-primary-900">
-                        {item.indicatorCode} · {item.indicatorTitle}
-                      </p>
-                      <p className={`text-label-md font-semibold ${overdue ? 'text-secondary' : 'text-gray-600'}`}>
-                        {overdue ? 'Vencida' : 'En plazo'} · {item.dueDate}
-                      </p>
-                    </div>
-                    <p className="mt-1 text-body-md text-gray-700">{item.description}</p>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </section>
+            {loadingObservations && <p className="text-body-md text-gray-600">Cargando observaciones…</p>}
+            {observationsError && <p className="text-body-md text-secondary">{observationsError}</p>}
+            {!loadingObservations && !observationsError && observations.length === 0 && (
+              <p className="text-body-md text-gray-600">Esta carrera no tiene observaciones registradas.</p>
+            )}
+            {!loadingObservations && observations.length > 0 && (
+              <ul className="divide-y divide-gray-100">
+                {observations.map((item) => {
+                  const overdue = isOverdue(item.dueDate);
+                  return (
+                    <li key={item.observationId} className="py-3">
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <p className="text-body-md font-semibold text-primary-900">
+                          {item.indicatorCode} · {item.indicatorTitle}
+                        </p>
+                        <p className={`text-label-md font-semibold ${overdue ? 'text-secondary' : 'text-gray-600'}`}>
+                          {overdue ? 'Vencida' : 'En plazo'} · {item.dueDate}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-body-md text-gray-700">{item.description}</p>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
