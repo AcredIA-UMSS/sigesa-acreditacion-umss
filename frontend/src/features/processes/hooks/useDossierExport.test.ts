@@ -32,28 +32,40 @@ describe('useDossierExport', () => {
 
     // POST enqueues job
     mockCustomFetch.mockResolvedValueOnce({
-      jobId,
-      status: 'PENDING',
-      message: 'Started',
-      statusUrl: `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}`,
+      data: {
+        jobId,
+        status: 'PENDING',
+        message: 'Started',
+        statusUrl: `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}`,
+      },
+      status: 202,
+      headers: new Headers(),
     });
 
     // First status poll: PROCESSING at 50%
     mockCustomFetch.mockResolvedValueOnce({
-      jobId,
-      status: 'PROCESSING',
-      progressPercentage: 50,
-      downloadUrl: null,
-      errorMessage: null,
+      data: {
+        jobId,
+        status: 'PROCESSING',
+        progressPercentage: 50,
+        downloadUrl: null,
+        errorMessage: null,
+      },
+      status: 200,
+      headers: new Headers(),
     });
 
     // Second status poll: COMPLETED at 100%
     mockCustomFetch.mockResolvedValueOnce({
-      jobId,
-      status: 'COMPLETED',
-      progressPercentage: 100,
-      downloadUrl: `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}/download`,
-      errorMessage: null,
+      data: {
+        jobId,
+        status: 'COMPLETED',
+        progressPercentage: 100,
+        downloadUrl: `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}/download`,
+        errorMessage: null,
+      },
+      status: 200,
+      headers: new Headers(),
     });
 
     // Mock fetch for file download
@@ -95,18 +107,26 @@ describe('useDossierExport', () => {
     const mockCustomFetch = vi.mocked(customFetchModule.customFetch);
 
     mockCustomFetch.mockResolvedValueOnce({
-      jobId,
-      status: 'PENDING',
-      message: 'Started',
-      statusUrl: '',
+      data: {
+        jobId,
+        status: 'PENDING',
+        message: 'Started',
+        statusUrl: '',
+      },
+      status: 202,
+      headers: new Headers(),
     });
 
     mockCustomFetch.mockResolvedValueOnce({
-      jobId,
-      status: 'FAILED',
-      progressPercentage: 20,
-      downloadUrl: null,
-      errorMessage: 'Fallo al comprimir archivos en S3',
+      data: {
+        jobId,
+        status: 'FAILED',
+        progressPercentage: 20,
+        downloadUrl: null,
+        errorMessage: 'Fallo al comprimir archivos en S3',
+      },
+      status: 200,
+      headers: new Headers(),
     });
 
     const { result } = renderHook(() => useDossierExport(processId));

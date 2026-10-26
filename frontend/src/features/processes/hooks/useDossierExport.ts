@@ -61,28 +61,28 @@ export function useDossierExport(processId: string) {
     setError(null);
 
     try {
-      const data = await customFetch<ExportJobResponse>(`/api/v1/processes/${processId}/dossier/export`, {
+      const { data: jobData } = await customFetch<{ data: ExportJobResponse }>(`/api/v1/processes/${processId}/dossier/export`, {
         method: 'POST',
       });
-      const jobId = data?.jobId;
+      const jobId = jobData?.jobId;
       if (!jobId) throw new Error('No se recibió el ID de la exportación.');
 
-      let jobStatus = 'PENDING';
+      let jobStatus: JobStatusResponse['status'] = 'PENDING';
       let attempts = 0;
       const maxAttempts = 300;
 
-      while (jobStatus === 'PENDING' || jobStatus === 'PROCESSING' || jobStatus === 'RUNNING') {
+      while (jobStatus === 'PENDING' || jobStatus === 'PROCESSING') {
         if (attempts >= maxAttempts) {
           throw new Error('La generación del dossier excedió el límite de tiempo.');
         }
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        const statusData = await customFetch<JobStatusResponse>(
+        const { data: statusData } = await customFetch<{ data: JobStatusResponse }>(
           `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}`,
         );
-        jobStatus = statusData.status ?? 'PENDING';
-        setProgress(statusData.progressPercentage ?? 0);
+        jobStatus = statusData?.status ?? 'PENDING';
+        setProgress(statusData?.progressPercentage ?? 0);
         if (jobStatus === 'FAILED') {
-          throw new Error(statusData.errorMessage ?? 'Error al procesar el dossier.');
+          throw new Error(statusData?.errorMessage ?? 'Error al procesar el dossier.');
         }
         attempts++;
       }

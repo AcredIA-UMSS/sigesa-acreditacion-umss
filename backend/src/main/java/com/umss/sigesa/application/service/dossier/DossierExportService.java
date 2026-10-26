@@ -11,6 +11,8 @@ import com.umss.sigesa.domain.exception.JobNotFoundException;
 import com.umss.sigesa.domain.model.JobStatus;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import com.umss.sigesa.domain.model.ReportFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 
 import java.io.ByteArrayInputStream;
@@ -20,6 +22,8 @@ import java.nio.file.Files;
 import java.util.UUID;
 
 public class DossierExportService implements ExportProcessDossierUseCase, GetProcessDossierExportJobStatusUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(DossierExportService.class);
 
     private final ReportExportJobRepositoryPort repositoryPort;
     private final TransactionRunnerPort transactions;
@@ -55,20 +59,23 @@ public class DossierExportService implements ExportProcessDossierUseCase, GetPro
     }
 
     @Override
+    @Async("reportJobExecutor")
     public void processJobAsync(UUID jobId) {
-        ReportExportJob job = transactions.required(() -> {
-            ReportExportJob found = repositoryPort.findById(jobId).orElse(null);
-            if (found == null) {
-                return null;
-            }
-            found.markProcessing();
-            return repositoryPort.save(found);
-        });
-        if (job == null) {
-            return;
-        }
-
         try {
+            ReportExportJob job = transactions.required(() -> {
+                ReportExportJob found = repositoryPort.findById(jobId).orElse(null);
+                if (found == null) {
+                    log.warn("[processJobAsync] Job {} no encontrado, abortando", jobId);
+                    return null;
+                }
+                found.markProcessing();
+                return repositoryPort.save(found);
+            });
+            if (job == null) {
+                return;
+            }
+
+            log.info("[processJobAsync] Iniciando generación de ZIP para job {}", jobId);
             File file = dossierExportPort.generateDossierZip(job.getProgramId(), job.getJobId().toString());
             byte[] content = Files.readAllBytes(file.toPath());
             String storageKey = blobStorage.store(job.getJobId(), 1, content, file.getName());
@@ -79,13 +86,20 @@ public class DossierExportService implements ExportProcessDossierUseCase, GetPro
                 repositoryPort.save(completedJob);
                 return null;
             });
+            log.info("[processJobAsync] Job {} completado y almacenado en {}", jobId, storageKey);
         } catch (Exception ex) {
-            ReportExportJob failedJob = job;
-            transactions.required(() -> {
-                failedJob.markFailed(ex.getMessage());
-                repositoryPort.save(failedJob);
-                return null;
-            });
+            log.error("[processJobAsync] Error procesando job {}: {}", jobId, ex.getMessage(), ex);
+            try {
+                transactions.required(() -> {
+                    ReportExportJob failedJob = repositoryPort.findById(jobId)
+                            .orElseThrow(() -> new JobNotFoundException(jobId));
+                    failedJob.markFailed(ex.getMessage());
+                    repositoryPort.save(failedJob);
+                    return null;
+                });
+            } catch (Exception updateEx) {
+                log.error("[processJobAsync] No se pudo marcar como FAILED el job {}: {}", jobId, updateEx.getMessage(), updateEx);
+            }
         }
     }
 
