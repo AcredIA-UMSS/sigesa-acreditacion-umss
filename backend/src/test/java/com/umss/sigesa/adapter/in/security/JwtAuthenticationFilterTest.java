@@ -1,6 +1,5 @@
 package com.umss.sigesa.adapter.in.security;
 
-import com.umss.sigesa.adapter.in.web.ProcessController;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import org.junit.jupiter.api.Test;

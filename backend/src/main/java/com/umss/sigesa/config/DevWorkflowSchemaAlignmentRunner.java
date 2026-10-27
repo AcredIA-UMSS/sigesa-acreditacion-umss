@@ -39,6 +39,20 @@ public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
         alignImprovementPlanM11Columns();
         backfillE5E6E7Deliverables();
         alignEvidenceUploadLockTable();
+        alignReportExportJobFormatConstraint();
+    }
+
+    private void alignReportExportJobFormatConstraint() {
+        try {
+            jdbcTemplate.execute("""
+                    ALTER TABLE tb_report_export_job DROP CONSTRAINT IF EXISTS tb_report_export_job_format_check;
+                    ALTER TABLE tb_report_export_job ADD CONSTRAINT tb_report_export_job_format_check
+                        CHECK (format::text = ANY (ARRAY['XLSX'::character varying, 'CSV'::character varying, 'PDF'::character varying, 'ZIP'::character varying]::text[]));
+                    """);
+            log.info("Dev schema: tb_report_export_job_format_check alineado con ZIP.");
+        } catch (Exception ex) {
+            log.warn("No se pudo alinear tb_report_export_job_format_check en dev: {}", ex.getMessage());
+        }
     }
 
     private void alignEvidenceUploadLockTable() {
