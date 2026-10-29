@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -47,10 +48,29 @@ public class S3EvidenceStorageConfig {
     }
 
     @Bean
+    S3Presigner s3Presigner(
+            @Value("${sigesa.evidence.s3.endpoint}") String endpoint,
+            @Value("${sigesa.evidence.s3.region:us-east-1}") String region,
+            @Value("${sigesa.evidence.s3.access-key}") String accessKey,
+            @Value("${sigesa.evidence.s3.secret-key}") String secretKey,
+            @Value("${sigesa.evidence.s3.path-style:true}") boolean pathStyle) {
+        return S3Presigner.builder()
+                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)))
+                .serviceConfiguration(S3Configuration.builder()
+                        .pathStyleAccessEnabled(pathStyle)
+                        .build())
+                .build();
+    }
+
+    @Bean
     EvidenceBlobStoragePort evidenceBlobStoragePort(
             S3Client evidenceS3Client,
+            S3Presigner s3Presigner,
             @Value("${sigesa.evidence.s3.bucket}") String bucket) {
-        return new S3EvidenceBlobStorageAdapter(evidenceS3Client, bucket);
+        return new S3EvidenceBlobStorageAdapter(evidenceS3Client, s3Presigner, bucket);
     }
 
     @Bean

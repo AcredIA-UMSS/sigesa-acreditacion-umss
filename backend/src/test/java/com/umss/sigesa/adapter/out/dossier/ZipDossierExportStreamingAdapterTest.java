@@ -17,9 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +29,7 @@ import java.util.zip.ZipInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class ZipDossierExportStreamingAdapterTest {
 
@@ -46,7 +46,7 @@ class ZipDossierExportStreamingAdapterTest {
     private EvidenceBlobStoragePort blobStorage;
 
     @Test
-    @DisplayName("Genera ZIP con estructura jerárquica e índice maestro")
+    @DisplayName("Genera ZIP con estructura jerárquica e índice maestro en streaming")
     void generatesZipWithHierarchyAndIndex() throws Exception {
         UUID processId = UUID.randomUUID();
         ZipDossierExportStreamingAdapter adapter = new ZipDossierExportStreamingAdapter(
@@ -82,12 +82,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of("PDFDATA".getBytes()));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(storageKey.startsWith("dossier-exports/"));
+        assertTrue(outputStream.size() > 0);
 
         List<String> entries = new ArrayList<>();
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 entries.add(entry.getName());
@@ -135,9 +139,12 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("missing/key")).thenReturn(Optional.empty());
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
     }
 
     @Test
@@ -179,13 +186,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of(fileContent));
 
-        File zip = adapter.generateDossierZip(processId, jobId);
-        assertNotNull(zip);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, jobId);
+        assertNotNull(storageKey);
 
         // Verificar que el manifiest existe dentro del ZIP
         boolean manifestFound = false;
         String manifestContent = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().contains("00_Manifiest_Checksums.txt")) {
@@ -247,10 +257,12 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/informe.pdf")).thenReturn(Optional.of(fileContent));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
-        // Si llegamos aquí, la verificación de integridad pasó (no lanzó excepción)
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
     }
 
     @Test
@@ -290,12 +302,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of("PDFDATA".getBytes()));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
 
         // Extraer el HTML del índice y verificar contenido
         String indexContent = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().contains("00_Indice_Maestro_Cumplimiento.html")) {

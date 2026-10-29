@@ -9,6 +9,7 @@ import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDossierExportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
+import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
@@ -47,6 +48,8 @@ class ProcessControllerQueryTest {
     @Mock
     private UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
     @Mock
+    private ProcessQueryPort processQueryPort;
+    @Mock
     private ExportProcessDossierUseCase exportProcessDossierUseCase;
     @Mock
     private GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
@@ -61,6 +64,7 @@ class ProcessControllerQueryTest {
                 getProcessDetailUseCase,
                 deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,
+                processQueryPort,
                 new NormativeStructureWebMapper(),
                 exportProcessDossierUseCase,
                 getProcessDossierExportJobStatusUseCase
