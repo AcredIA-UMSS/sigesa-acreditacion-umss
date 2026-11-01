@@ -88,7 +88,7 @@ erDiagram
 | `EvidenceVersion` | `evidenceId`, `versionNumber`, `contentHash`, `observationId`, `supersedesVersion` | Append-only |
 | `Observation` | `indicatorId`, `justification`, `createdBy`, `createdAt` | Origen de subsanación |
 | `IndicatorStateHistory` | `indicatorId`, `previousState`, `newState`, `actorId`, `role`, `createdAt` | Historial append-only de transiciones |
-| `AuditLog` | `action`, `actorId`, `entityType`, `entityId`, `payload` | Login, DELETE denegado, etc. |
+| `AuditLog` | `action`, `actorId`, `actorEmail`, `entityType`, `entityId`, `result`, `occurredAt`, `payload` | Login éxito/fallo, carga de evidencia, alta y reporte. Sin secretos. |
 | `NotificationOutbox` | `eventType`, `recipientId`, `payload`, `sentAt` | Patrón outbox |
 | `PublicationSnapshot` | `programId`, `publishedAt`, `publishedBy` | Portal [P] |
 
@@ -121,7 +121,8 @@ Transiciones válidas: ver [`FSD.md`](FSD.md) §4.1 y `team/alexAlvarez/docs/con
 | `AppUser` | `role` | enum | sí | `CC`, `TD`, `JD` (un rol por usuario) |
 | `AppUser` | `status` | enum | sí | `INACTIVE`, `ACTIVE`, `DEACTIVATED` |
 | `UserProgramAssignment` | `revokedAt` | timestamp | no | `null` = asignación activa; índice único parcial activas |
-| `AuditLog` | `action` | string | sí | Catálogo cerrado (`AUDIT_LOGIN`, `AUDIT_DELETE_DENIED`, …) |
+| `AuditLog` | `action` | string | sí | Catálogo (`LOGIN`, `EVIDENCE_UPLOADED`, `EVIDENCE_REPLACED`, `EVIDENCE_DELETED`, `EVIDENCE_UPDATED`, …) |
+| `AuditLog` | `result` | enum | sí | `SUCCESS` \| `FAILURE` |
 
 **Prohibido:** `isDeleted` / `deletedAt` en `Evidence` o `EvidenceVersion` aprobados, y `UPDATE` destructivo para transiciones de estado de `Indicator`.
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -15,9 +15,15 @@ import {
   Plus,
   Layers,
   FileUp,
+  ScrollText,
+  LogIn,
+  Files,
+  UserCog,
+  UserSearch,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
+import { AUDIT_HISTORY_VIEWS } from '../../features/audit/historyRoutes';
 
 type SidebarNavKey =
   | 'dashboard'
@@ -42,13 +48,28 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
 
   const isExternalEvaluator = session?.role === 'EE';
   const isProcessRoute = location.pathname.startsWith('/procesos');
+  const isHistoryRoute = location.pathname.startsWith('/admin/historico');
   const [processesOpen, setProcessesOpen] = useState(isProcessRoute);
+  const [historyOpen, setHistoryOpen] = useState(isHistoryRoute);
+  const historyListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (isProcessRoute) {
       setProcessesOpen(true);
     }
   }, [isProcessRoute]);
+
+  useEffect(() => {
+    if (isHistoryRoute) {
+      setHistoryOpen(true);
+    }
+  }, [isHistoryRoute]);
+
+  useEffect(() => {
+    if (historyOpen && isExpanded) {
+      historyListRef.current?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [historyOpen, isExpanded]);
 
   const initials = session?.role ?? 'U';
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
@@ -67,6 +88,23 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       return;
     }
     setProcessesOpen((prev) => !prev);
+  };
+
+  const toggleHistory = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      setHistoryOpen(true);
+      return;
+    }
+    setHistoryOpen((prev) => !prev);
+  };
+
+  const historyIcons: Record<(typeof AUDIT_HISTORY_VIEWS)[number]['id'], React.ReactNode> = {
+    general: <ScrollText size={16} />,
+    access: <LogIn size={16} />,
+    evidence: <Files size={16} />,
+    accounts: <UserCog size={16} />,
+    user: <UserSearch size={16} />,
   };
 
   return (
@@ -249,14 +287,78 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 testId="sidebar-nav-reports"
               />
             )}
-            <NavItem
-              icon={<History size={20} />}
-              label="HISTORIAL"
-              isExpanded={isExpanded}
-              active={activeNav === 'history'}
-              testId="sidebar-nav-history"
-            />
           </>
+        )}
+
+        {isJd && (
+          <div>
+            <button
+              type="button"
+              data-testid="sidebar-nav-history"
+              onClick={toggleHistory}
+              className={`flex w-full items-center rounded-lg p-3 transition-colors ${
+                isExpanded ? 'justify-between' : 'justify-center'
+              } ${
+                activeNav === 'history' || isHistoryRoute
+                  ? 'border-l-4 border-secondary bg-primary-800 text-body'
+                  : 'text-primary-200 hover:bg-primary-800 hover:text-body'
+              }`}
+              title={!isExpanded ? 'Histórico' : undefined}
+              aria-expanded={historyOpen}
+              aria-label="HISTÓRICO"
+            >
+              <div className="flex items-center gap-3">
+                <div className="min-w-[20px]">
+                  <History size={20} />
+                </div>
+                {isExpanded && (
+                  <span className="overflow-hidden whitespace-nowrap text-left text-label-md">
+                    HISTÓRICO
+                  </span>
+                )}
+              </div>
+              {isExpanded && (
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${historyOpen ? 'rotate-180' : ''}`}
+                />
+              )}
+            </button>
+
+            {isExpanded && historyOpen && (
+              <ul
+                ref={historyListRef}
+                className="mt-1 ml-5 space-y-1 border-l border-primary-700 pl-4"
+              >
+                {AUDIT_HISTORY_VIEWS.map((view) => (
+                  <SubNavItem
+                    key={view.id}
+                    icon={historyIcons[view.id]}
+                    label={view.menuLabel}
+                    to={view.path}
+                    testId={view.testId}
+                    active={location.pathname === view.path}
+                  />
+                ))}
+              </ul>
+            )}
+
+            {!isExpanded && isHistoryRoute && (
+              <ul className="mt-1 space-y-1">
+                {AUDIT_HISTORY_VIEWS.map((view) => (
+                  <SubNavItem
+                    key={view.id}
+                    icon={historyIcons[view.id]}
+                    label={view.menuLabel}
+                    to={view.path}
+                    testId={view.testId}
+                    active={location.pathname === view.path}
+                    compact
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
         )}
 
         <NavItem

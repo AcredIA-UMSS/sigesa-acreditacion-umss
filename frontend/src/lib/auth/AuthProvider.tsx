@@ -3,6 +3,7 @@ import type { LoginResponse } from '../../api/model';
 import { registerAuthBridge } from './authBridge';
 import { AuthContext, type AuthContextValue } from './auth-context';
 import { isBackendRoleCode } from './roleLabels';
+import { logout as logoutRequest } from '../../api/endpoints/auth-controller/auth-controller';
 import { clearSession, loadSession, saveSession } from './tokenStorage';
 import type { AuthSession } from './types';
 
@@ -35,6 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logout = useCallback(() => {
+    if (isSessionActive(loadSession())) {
+      void logoutRequest().catch(() => undefined);
+    }
     clearSession();
     setSession(null);
   }, []);

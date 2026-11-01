@@ -72,7 +72,7 @@ public class RegisterUserService implements RegisterUserUseCase {
             assignmentRepository.save(assignment);
         }
 
-        auditLogPort.logUserRegistered(saved.getId(), saved.getEmail());
+        auditLogPort.logUserRegistered(saved.getId(), saved.getEmail(), saved.getRole());
         return new RegisterResult(saved.getId(), saved.getStatus());
     }
 

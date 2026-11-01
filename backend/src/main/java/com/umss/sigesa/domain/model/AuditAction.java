@@ -1,0 +1,15 @@
+package com.umss.sigesa.domain.model;
+
+public enum AuditAction {
+    LOGIN,
+    LOGOUT,
+    SESSION_EXPIRED,
+    USER_REGISTERED,
+    USER_ACTIVATED,
+    USER_DEACTIVATED,
+    EVIDENCE_UPLOADED,
+    EVIDENCE_REPLACED,
+    EVIDENCE_DELETED,
+    EVIDENCE_UPDATED,
+    REPORT_REQUESTED
+}

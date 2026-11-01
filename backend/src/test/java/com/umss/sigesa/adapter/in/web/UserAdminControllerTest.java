@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
@@ -51,6 +52,9 @@ class UserAdminControllerTest {
     private ListUsersUseCase listUsersUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     void register_withoutAuthenticationReturns401() throws Exception {

@@ -46,6 +46,26 @@ export const getLoginUrl = () => {
   return `/api/v1/auth/login`
 }
 
+export type logoutResponse204 = {
+  data: undefined
+  status: 204
+}
+
+export type logoutResponse = logoutResponse204 & {
+  headers: Headers
+}
+
+export const getLogoutUrl = () => {
+  return `/api/v1/auth/logout`
+}
+
+export const logout = async (options?: Parameters<typeof customFetch>[1]): Promise<logoutResponse> => {
+  return customFetch<logoutResponse>(getLogoutUrl(), {
+    ...options,
+    method: 'POST',
+  })
+}
+
 export const login = async (loginRequest: LoginRequest, options?: Parameters<typeof customFetch>[1]): Promise<loginResponse> => {
 
   return customFetch<loginResponse>(getLoginUrl(),

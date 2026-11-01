@@ -82,6 +82,9 @@ class ModAuthServiceIntegrationTest {
 
         assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ghost.getMessage());
         assertEquals(ghost.getMessage(), badPassword.getMessage());
+        assertTrue(auditLogPort.events().contains("LOGIN_FAILURE:ghost@umss.edu.bo"));
+        assertTrue(auditLogPort.events().contains("LOGIN_FAILURE:cc@umss.edu.bo"));
+        assertTrue(auditLogPort.events().stream().noneMatch(event -> event.contains("bad")));
     }
 
     @Test
@@ -90,6 +93,8 @@ class ModAuthServiceIntegrationTest {
         InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("user@gmail.com", "secret"));
         assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+        assertTrue(auditLogPort.events().contains("LOGIN_FAILURE:user@gmail.com"));
+        assertTrue(auditLogPort.events().stream().noneMatch(event -> event.contains("secret")));
     }
 
     @Test
@@ -137,6 +142,8 @@ class ModAuthServiceIntegrationTest {
         assertEquals(1, assignmentRepository.allAssignments().size());
         assertTrue(assignmentRepository.allAssignments().getFirst().getRevokedAt() != null);
         assertTrue(auditLogPort.events().contains("DEACTIVATE:" + registered.userId()));
+        assertTrue(auditLogPort.events().stream().anyMatch(event -> event.startsWith("LOGIN_FAILURE:")));
+        assertTrue(auditLogPort.events().stream().noneMatch(event -> event.contains("ChangeMe123")));
     }
 
     private static RegisterUserUseCase.RegisterUserCommand ccCommand(String email, UUID programId, String password) {

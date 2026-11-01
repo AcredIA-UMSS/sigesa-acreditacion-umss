@@ -4,6 +4,7 @@ import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.AuthenticateUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
+import com.umss.sigesa.application.port.in.LogoutUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
@@ -17,6 +18,7 @@ import com.umss.sigesa.application.service.auth.ActivateUserService;
 import com.umss.sigesa.application.service.auth.AuthenticateService;
 import com.umss.sigesa.application.service.auth.DeactivateUserService;
 import com.umss.sigesa.application.service.auth.ListUsersService;
+import com.umss.sigesa.application.service.auth.LogoutService;
 import com.umss.sigesa.application.service.auth.ManageUserProgramAssignmentService;
 import com.umss.sigesa.application.service.auth.RegisterUserService;
 import com.umss.sigesa.application.service.catalog.ListProgramsService;
@@ -32,6 +34,11 @@ public class AuthModuleConfig {
                                             UserRepositoryPort userRepository,
                                             AuditLogPort auditLogPort) {
         return new AuthenticateService(authPort, tokenPort, userRepository, auditLogPort);
+    }
+
+    @Bean
+    LogoutUseCase logoutUseCase(UserRepositoryPort userRepository, AuditLogPort auditLogPort) {
+        return new LogoutService(userRepository, auditLogPort);
     }
 
     @Bean

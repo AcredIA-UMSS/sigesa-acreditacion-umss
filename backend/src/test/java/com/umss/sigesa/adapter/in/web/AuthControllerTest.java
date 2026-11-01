@@ -3,6 +3,8 @@ package com.umss.sigesa.adapter.in.web;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
 import com.umss.sigesa.application.port.in.AuthenticateUseCase;
+import com.umss.sigesa.application.port.in.LogoutUseCase;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.IssuedToken;
 import com.umss.sigesa.domain.exception.InvalidCredentialsException;
 import com.umss.sigesa.domain.model.Role;
@@ -37,6 +39,12 @@ class AuthControllerTest {
 
     @MockitoBean
     private AuthenticateUseCase authenticateUseCase;
+
+    @MockitoBean
+    private LogoutUseCase logoutUseCase;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;

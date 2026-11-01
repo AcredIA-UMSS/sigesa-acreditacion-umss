@@ -12,6 +12,7 @@ import com.umss.sigesa.domain.model.AppUser;
 import com.umss.sigesa.domain.model.AuthenticatedIdentity;
 import com.umss.sigesa.domain.model.Email;
 import com.umss.sigesa.domain.model.UserStatus;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 
@@ -33,7 +34,17 @@ public class AuthenticateService implements AuthenticateUseCase {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public LoginResult authenticate(String email, String password) {
+        try {
+            return doAuthenticate(email, password);
+        } catch (InvalidCredentialsException | RoleNotAssignedException ex) {
+            auditLogPort.logLoginFailure(email);
+            throw ex;
+        }
+    }
+
+    private LoginResult doAuthenticate(String email, String password) {
         if (password == null || password.isBlank()) {
             throw new InvalidCredentialsException();
         }

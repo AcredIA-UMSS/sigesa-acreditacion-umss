@@ -52,7 +52,7 @@ ultima_actualizacion: "2026-08-07"
 | `FSD-UC-014` | Reporte ejecutivo PDF | [JD] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-014.md) | [`DD-UC-014`](../design/DD-UC-014.md) | [`PR-IMPL-005`](../prompts/impl/PR-IMPL-005.md) |
 | `FSD-UC-015` | Notificaciones y alertas | Sistema | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-015.md) | — | — |
 | `FSD-UC-016` | Portal público | [P] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-016.md) | — | — |
-| `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | Pendiente | [Ver detalle](uc/FSD-UC-017.md) | — | — |
+| `FSD-UC-017` | Bitácora de auditoría | [JD] | v1.0 | **En curso (backend)** | [Ver detalle](uc/FSD-UC-017.md) | [`DD-UC-017`](../design/DD-UC-017.md) | — |
 | `FSD-UC-018` | Importación masiva | [CC] | v1.1 | Pendiente | [Ver detalle](uc/FSD-UC-018.md) | — | — |
 | `FSD-UC-019` | Consulta de procesos de acreditación | [JD], [TD], [CC] | v1.0 | **Implementado** | [Ver detalle](uc/FSD-UC-019.md) | [DD-UC-019](../design/DD-UC-019.md) | [PR-IMPL-019](../prompts/impl/PR-IMPL-019.md) |
 | `FSD-UC-020` | Revisión documental [EE] | [EE] | v1.1 | **En Curso** | [Ver detalle](uc/FSD-UC-020.md) | [`DD-UC-020`](../design/DD-UC-020.md) | [`PR-IMPL-014`](../prompts/impl/PR-IMPL-014.md) |

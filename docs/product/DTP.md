@@ -45,6 +45,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 01/11/2026 | **MOD-AUDIT:** `LOGOUT`, `SESSION_EXPIRED`, carga con nombre de archivo e indicador/proceso, `action` múltiple y `GET /api/v1/audit/logs/export`. Sin operaciones de evidencia que el sistema no ejecuta. | FSD-UC-017 / DD-UC-017 | — | — | Cursor Agent |
+| 29/10/2026 | **MOD-AUDIT v1 (backend):** tabla `audit_log` (Flyway V8 + trigger append-only en PostgreSQL); `AuditLogJpaAdapter` reemplaza el stub; login éxito/fallo y carga de evidencia; `GET /api/v1/audit/logs` solo [JD]. Sin CSV ni UI. | FSD-UC-017 / DD-UC-017 | ADR-0005 (tabla `audit_log`, no `LOG_AUDITORIA`) | — | Cursor Agent |
 | 11/09/2026 | **E2E Playwright:** `@playwright/test` en raíz; specs en `e2e/` anclados a `data-testid` del frontend (`getByTestId`). Stub API por defecto; `E2E_LIVE=1` contra backend real. | QA E2E | N/A | — | Cursor Agent |
 | 07/08/2026 | **MOD-PROCESS responsable (FSD-UC-023) — Full-Stack:** tabla `process_responsible_assignment` (Flyway V7); API-PROC-09…11; `ProcessResponsiblePort`; extensión UC-019 con `responsible`; UI sección/modal en detalle y listado. | FSD-UC-023 / DD-UC-023 | N/A | PM-010 / PR-IMPL-023 | Boris Anthony Angulo Urquieta |
 | 07/08/2026 | **MOD-PROCESS estructura (FSD-UC-022) — Full-Stack:** `ProcessStructureController` API-PROC-05…08; `ProcessStructurePort` + `SubphaseWorkflowPort` (stub); guard `ProcessStructureGuard`; UI `/procesos/{processId}/estructura`; extensión GET detalle con `description`/`referenceUrl`. | FSD-UC-022 / DD-UC-022 | N/A | PM-009 / PR-IMPL-022 | Boris Anthony Angulo Urquieta |
@@ -103,6 +105,7 @@ artefactos_vivos:
 | 11 | Asistente / IA | Chatbot FAQ normativo (Could, v2.0 PRD) | **MOD-ASSISTANT MVP:** proxy backend → Open WebUI → Ollama; sin RAG ni persistencia de chats | Piloto self-hosted local; API key Open WebUI solo en servidor | DD-SYS-002 |
 | 12 | RBAC consulta proceso [CC] | 403 Forbidden cross-scope (patrón REST típico) | **404 `PROCESS_NOT_FOUND`** cuando `career_id ∉ programScope` | No revelar existencia de procesos ajenos al coordinador | N/A (DD-UC-019) |
 | 13 | Migraciones dev Docker | Flyway habilitado en perfil `dev` | **`ddl-auto: update`** + **`flyway.enabled: false`** en `application-dev.yaml`; scripts `V5…V6` aplican solo en **prod** | Migraciones incrementales asumen tablas base Hibernate; BD Docker fresca fallaba en `V4` (`app_user` inexistente) | N/A (operacional dev) |
+| 14 | Bitácora | `REVOKE DELETE, UPDATE` sobre `LOG_AUDITORIA` y rol `sigesa_app` | Tabla `audit_log`. Trigger `BEFORE UPDATE/DELETE` en Flyway V8. El rol de aplicación real es `sigesa` / `sigesa_user` | El ADR nombra un rol y una tabla que el código no usa | ADR-0005 (adaptado en DD-UC-017) |
 
 ### A.3 Estado de implementación por FSD-UC
 
@@ -118,6 +121,7 @@ artefactos_vivos:
 | `FSD-UC-004` | `DD-UC-004` | en curso | `release/3.0.0` | Unit `UploadEvidenceService`; JaCoCo pendiente | `PR-IMPL-006` | v1 carga; UC-006 subsanación pendiente |
 | `FSD-UC-011` | `DD-UC-011` | hecho | `release/3.0.0` | Suite §6 DD-UC-011 (Gherkin TC-09a/c) | `PR-IMPL-011` | Suite Híbrida Compuesta PBAC (`/me/summary`, `/details`, `/export`) conectado a DB real sin stubs |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
+| `FSD-UC-017` | `DD-UC-017` | **en curso (backend v1)** | `v1.0` | `AuthenticateServiceTest`, `UploadEvidenceServiceTest`, `GetAuditLogsServiceTest`, `AuditLogControllerWebMvcTest`, `AuditLogPersistenceIT` | — | Login éxito/fallo y carga de evidencia; consulta solo [JD]. Sin CSV ni UI |
 | `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |

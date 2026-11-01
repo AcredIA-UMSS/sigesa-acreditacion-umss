@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AuthExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ class ProgramCatalogControllerTest {
     private ListProgramsUseCase listProgramsUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     void list_withoutAuthenticationReturns401() throws Exception {

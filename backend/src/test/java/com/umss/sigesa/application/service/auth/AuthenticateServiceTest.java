@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,6 +68,7 @@ class AuthenticateServiceTest {
         assertEquals("token", result.token().accessToken());
         verify(userRepository).update(any(AppUser.class));
         verify(auditLogPort).logLogin(userId, email);
+        verify(auditLogPort, never()).logLoginFailure(any());
     }
 
     @Test
@@ -87,6 +89,7 @@ class AuthenticateServiceTest {
         assertEquals(Role.JD, result.role());
         verify(userRepository, never()).update(any(AppUser.class));
         verify(auditLogPort).logLogin(userId, email);
+        verify(auditLogPort, never()).logLoginFailure(any());
     }
 
     @Test
@@ -97,6 +100,8 @@ class AuthenticateServiceTest {
         InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("ghost@umss.edu.bo", "bad"));
         assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+        verify(auditLogPort).logLoginFailure("ghost@umss.edu.bo");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 
     @Test
@@ -107,6 +112,8 @@ class AuthenticateServiceTest {
         InvalidCredentialsException ex = assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("cc@umss.edu.bo", "wrong"));
         assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
+        verify(auditLogPort).logLoginFailure("cc@umss.edu.bo");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 
     @Test
@@ -116,6 +123,8 @@ class AuthenticateServiceTest {
 
         assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("cc@umss.edu.bo", "secret"));
+        verify(auditLogPort).logLoginFailure("cc@umss.edu.bo");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 
     @Test
@@ -130,6 +139,8 @@ class AuthenticateServiceTest {
         assertThrows(RoleNotAssignedException.class,
                 () -> authenticateService.authenticate("cc@umss.edu.bo", "secret"));
         verify(userRepository, never()).findById(userId);
+        verify(auditLogPort).logLoginFailure("cc@umss.edu.bo");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 
     @Test
@@ -139,6 +150,8 @@ class AuthenticateServiceTest {
                 () -> authenticateService.authenticate("user@gmail.com", "secret"));
         assertEquals(InvalidCredentialsException.GENERIC_MESSAGE, ex.getMessage());
         verify(authPort, never()).authenticate(any(Email.class), any(char[].class));
+        verify(auditLogPort).logLoginFailure("user@gmail.com");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 
     @Test
@@ -149,5 +162,7 @@ class AuthenticateServiceTest {
         assertThrows(InvalidCredentialsException.class,
                 () -> authenticateService.authenticate("cc@umss.edu.bo", "  "));
         verify(authPort, never()).authenticate(any(Email.class), any(char[].class));
+        verify(auditLogPort, times(2)).logLoginFailure("cc@umss.edu.bo");
+        verify(auditLogPort, never()).logLogin(any(), any());
     }
 }

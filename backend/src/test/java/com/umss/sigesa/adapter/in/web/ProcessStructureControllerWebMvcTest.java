@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
@@ -60,6 +61,9 @@ class ProcessStructureControllerWebMvcTest {
     private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     @WithMockUser(roles = "JD")

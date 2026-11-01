@@ -507,12 +507,38 @@ security:
 | **200** | Solo `published=true` |
 | **404** | Borradores no publicados |
 
-### API-AUDIT-01 — `GET /audit/logs`
+### API-AUDIT-01 — `GET /api/v1/audit/logs`
 
 | UC | FSD-UC-017 |
 | **x-allowed-roles** | `[JD]` |
-| **Query** | `actorId`, `action`, `from`, `to` |
-| **200** | Log paginado; export `Accept: text/csv` |
+| **Query** | `actorId`, `actorEmail`, `action` (repetida o separada por comas), `resourceType`, `resourceId`, `result`, `from`, `to`, `page`, `size` |
+| **200** | Página Spring (`content`, `totalElements`, …), orden `occurredAt` descendente, tope `size` 100. `occurredAt` en `America/La_Paz`. El listado no incluye `payload`. |
+| **401** | Sin Bearer |
+| **403** | Rol distinto de [JD] |
+| **422** | `from` posterior a `to`, o filtro de enumeración desconocido (`INVALID_FILTER`) |
+
+No hay `PUT`, `PATCH` ni `DELETE`.
+
+### API-AUDIT-03 — `GET /api/v1/audit/logs/export`
+
+| UC | FSD-UC-017 |
+| **x-allowed-roles** | `[JD]` |
+| **Query** | Los mismos filtros que API-AUDIT-01, sin paginación |
+| **200** | `text/csv`. Tope 1000 filas. Sin `payload`. |
+| **401 / 403 / 422** | Igual que API-AUDIT-01 |
+
+### API-AUTH-03 — `POST /api/v1/auth/logout`
+
+| UC | FSD-UC-017 |
+| **x-allowed-roles** | autenticado |
+| **204** | Registra `LOGOUT` del sujeto del JWT. No invalida el token: el cliente debe descartarlo. |
+
+### API-AUDIT-02 — `GET /api/v1/audit/logs/{id}`
+
+| UC | FSD-UC-017 |
+| **x-allowed-roles** | `[JD]` |
+| **200** | Mismo recurso que el listado, con `payload` |
+| **404** | `AUDIT_EVENT_NOT_FOUND` |
 
 ---
 
@@ -531,6 +557,9 @@ security:
 | GET /public/programs/* | | | | ✓ |
 | POST /admin/users | | | ✓ | |
 | GET /admin/users | | | ✓ | |
+| GET /api/v1/audit/logs | | | ✓ | |
+| GET /api/v1/audit/logs/export | | | ✓ | |
+| POST /api/v1/auth/logout | ✓ | ✓ | ✓ | |
 
 ---
 
@@ -549,6 +578,8 @@ security:
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v1.7 | 2026-11-01 | API-AUDIT-03 CSV; `action` múltiple; `POST /api/v1/auth/logout`; `SESSION_EXPIRED` |
+| v1.6 | 2026-10-29 | API-AUDIT-01/02 bajo `/api/v1/audit/logs`; CSV fuera de v1 |
 | v1.5 | 2026-08-03 | API-CAT-01: catálogo `programs` en BD + query `q`; FSD-UC-003 autocomplete carreras; plantillas proceso solo CEUB/ARCU-SUR |
 | v1.4 | 2026-07-31 | API-USER-03: contrato formal `docs/product/api/API-USER-03.md`; GET `/admin/users`; tool `list_users` |
 | v1.1 | 2026-06-23 | MOD-AUTH: campo `error` canónico; nota perímetro `UNAUTHORIZED`; rutas bajo `/api/v1` |

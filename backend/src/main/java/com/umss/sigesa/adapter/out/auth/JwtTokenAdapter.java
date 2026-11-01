@@ -3,6 +3,8 @@ package com.umss.sigesa.adapter.out.auth;
 import com.umss.sigesa.application.port.out.IssuedToken;
 import com.umss.sigesa.application.port.out.TokenPort;
 import com.umss.sigesa.domain.model.AuthenticatedIdentity;
+import com.umss.sigesa.domain.model.ExpiredSession;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -72,8 +75,29 @@ public class JwtTokenAdapter implements TokenPort {
         try {
             parseClaims(token);
             return true;
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             return false;
+        }
+    }
+
+    /**
+     * Solo un JWT firmado por este sistema y ya vencido. Una firma inválida no es una sesión expirada.
+     */
+    public Optional<ExpiredSession> readExpiredSession(String token) {
+        try {
+            parseClaims(token);
+            return Optional.empty();
+        } catch (ExpiredJwtException ex) {
+            String subject = ex.getClaims().getSubject();
+            try {
+                return Optional.of(new ExpiredSession(
+                        UUID.fromString(subject),
+                        ex.getClaims().get("email", String.class)));
+            } catch (RuntimeException badSubject) {
+                return Optional.empty();
+            }
+        } catch (RuntimeException ex) {
+            return Optional.empty();
         }
     }
 

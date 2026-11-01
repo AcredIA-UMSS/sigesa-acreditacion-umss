@@ -11,6 +11,7 @@ import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
+import com.umss.sigesa.domain.model.EvidenceAuditDetails;
 import com.umss.sigesa.domain.model.EvidenceUploadCommand;
 import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
@@ -18,6 +19,7 @@ import com.umss.sigesa.domain.model.UserProgramAssignment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +92,11 @@ class UploadEvidenceServiceTest {
         assertEquals(IndicatorState.SUBIDO, result.currentState());
         assertEquals(UploadEvidenceService.EVENT_EVIDENCE_UPLOADED, result.event());
         verify(uploadPersistence).persistUpload(any(), any(), any());
+        ArgumentCaptor<EvidenceAuditDetails> audited = ArgumentCaptor.forClass(EvidenceAuditDetails.class);
+        verify(auditLogPort).logEvidenceUploaded(eq(userId), any(UUID.class), audited.capture());
+        assertEquals(indicatorId, audited.getValue().indicatorId());
+        assertEquals(programId, audited.getValue().programId());
+        assertEquals("doc.pdf", audited.getValue().originalFilename());
         verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));
     }
 
@@ -155,5 +163,35 @@ class UploadEvidenceServiceTest {
                 "application/pdf", "doc.pdf", userId)));
 
         verify(blobStorage).delete("key");
+        verify(auditLogPort, never()).logEvidenceUploaded(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Escenario: fallo de auditoría elimina el blob y no confirma la carga")
+    void upload_compensatesBlobOnAuditFailure() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID criterionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+
+        when(indicatorRepository.findById(indicatorId))
+                .thenReturn(Optional.of(new Indicator(indicatorId, programId, criterionId, UUID.randomUUID())));
+        when(indicatorRepository.getCurrentState(indicatorId)).thenReturn(IndicatorState.PENDIENTE);
+        when(evidenceRepository.existsByIndicatorId(indicatorId)).thenReturn(false);
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(uploadLock.tryAcquire(indicatorId)).thenReturn(true);
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc123");
+        when(blobStorage.store(any(), eq(1), eq(pdf), eq("doc.pdf"))).thenReturn("key");
+        doThrow(new RuntimeException("audit down")).when(auditLogPort)
+                .logEvidenceUploaded(eq(userId), any(UUID.class), any(EvidenceAuditDetails.class));
+
+        assertThrows(RuntimeException.class, () -> service.upload(new EvidenceUploadCommand(
+                indicatorId, criterionId, "Descripción válida", pdf,
+                "application/pdf", "doc.pdf", userId)));
+
+        verify(blobStorage).delete("key");
+        verify(notificationOutbox, never()).enqueueEvidenceUploaded(any(), any(), any());
     }
 }

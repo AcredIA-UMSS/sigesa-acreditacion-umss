@@ -12,6 +12,7 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
+import { AUDIT_HISTORY_VIEWS, AuditHistoryPage } from './features/audit';
 
 function App() {
   return (
@@ -142,6 +143,20 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {AUDIT_HISTORY_VIEWS.map((view) => (
+          <Route
+            key={view.path}
+            path={view.path}
+            element={
+              <ProtectedRoute>
+                <JdOnlyRoute>
+                  <AuditHistoryPage />
+                </JdOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+        ))}
 
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

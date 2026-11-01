@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
 import com.umss.sigesa.application.port.in.DeleteTemplateUseCase;
@@ -67,6 +68,9 @@ class TemplateControllerWebMvcTest {
     private DeleteTemplateUseCase deleteTemplateUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     @WithMockUser(roles = "JD")

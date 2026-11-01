@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.security;
 
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
+import com.umss.sigesa.domain.model.ExpiredSession;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +22,11 @@ import java.util.UUID;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenAdapter jwtTokenAdapter;
+    private final AuditLogPort auditLogPort;
 
-    public JwtAuthenticationFilter(JwtTokenAdapter jwtTokenAdapter) {
+    public JwtAuthenticationFilter(JwtTokenAdapter jwtTokenAdapter, AuditLogPort auditLogPort) {
         this.jwtTokenAdapter = jwtTokenAdapter;
+        this.auditLogPort = auditLogPort;
     }
 
     @Override
@@ -44,8 +48,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Detalle: alcance de carrera del JWT (sobrevive reinicios H2 si el claim es estable).
                 authentication.setDetails(programScope);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                recordExpiredSession(token);
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void recordExpiredSession(String token) {
+        try {
+            java.util.Optional<ExpiredSession> expired = jwtTokenAdapter.readExpiredSession(token);
+            if (expired != null && expired.isPresent()) {
+                ExpiredSession session = expired.get();
+                auditLogPort.logSessionExpired(session.userId(), session.email());
+            }
+        } catch (RuntimeException ignored) {
+            // La petición sigue sin autenticación si la bitácora no puede escribir.
+        }
     }
 }

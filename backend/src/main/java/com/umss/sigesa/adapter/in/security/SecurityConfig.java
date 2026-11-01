@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/audit/**").hasRole("JD")
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers(HttpMethod.GET, "/api/v1/indicators/uploadable").authenticated()

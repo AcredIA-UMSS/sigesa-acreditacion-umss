@@ -5,6 +5,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
 import com.umss.sigesa.application.port.in.ListEligibleResponsiblesUseCase;
@@ -52,6 +53,9 @@ class ProcessResponsibleControllerWebMvcTest {
     private ListEligibleResponsiblesUseCase listEligibleResponsiblesUseCase;
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     @WithMockUser(roles = "JD")

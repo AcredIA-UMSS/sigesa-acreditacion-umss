@@ -65,7 +65,7 @@ class RegisterUserServiceTest {
         verify(assignmentRepository).save(captor.capture());
         assertEquals(programId, captor.getValue().getProgramId());
         assertEquals(userId, captor.getValue().getUserId());
-        verify(auditLogPort).logUserRegistered(userId, Email.of("cc@umss.edu.bo"));
+        verify(auditLogPort).logUserRegistered(userId, Email.of("cc@umss.edu.bo"), Role.CC);
     }
 
     @Test
@@ -82,7 +82,7 @@ class RegisterUserServiceTest {
 
         assertEquals(UserStatus.INACTIVE, result.status());
         verify(assignmentRepository, never()).save(any());
-        verify(auditLogPort).logUserRegistered(userId, Email.of("td@umss.edu.bo"));
+        verify(auditLogPort).logUserRegistered(userId, Email.of("td@umss.edu.bo"), Role.TD);
     }
 
     @Test

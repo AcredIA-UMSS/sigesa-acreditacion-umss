@@ -18,6 +18,7 @@ import com.umss.sigesa.domain.exception.InvalidEvidenceFormatException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.UploadInProgressException;
 import com.umss.sigesa.domain.model.Evidence;
+import com.umss.sigesa.domain.model.EvidenceAuditDetails;
 import com.umss.sigesa.domain.model.EvidenceUploadCommand;
 import com.umss.sigesa.domain.model.EvidenceUploadResult;
 import com.umss.sigesa.domain.model.EvidenceVersion;
@@ -25,6 +26,7 @@ import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 import com.umss.sigesa.domain.model.Role;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -76,6 +78,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public EvidenceUploadResult upload(EvidenceUploadCommand command) {
         validateMetadata(command);
         validatePayload(command.fileContent(), command.contentType());
@@ -126,15 +129,21 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
 
             try {
                 uploadPersistence.persistUpload(evidence, version, historyEntry);
+                auditLogPort.logEvidenceUploaded(
+                        command.uploadedBy(),
+                        evidenceId,
+                        new EvidenceAuditDetails(
+                                command.indicatorId(),
+                                indicator.getProgramId(),
+                                command.criterionId(),
+                                command.originalFilename()));
+                notificationOutbox.enqueueEvidenceUploaded(
+                        command.indicatorId(), evidenceId, indicator.getProgramId());
             } catch (RuntimeException ex) {
                 blobStorage.delete(storageKey);
                 storageKey = null;
                 throw ex;
             }
-
-            notificationOutbox.enqueueEvidenceUploaded(
-                    command.indicatorId(), evidenceId, indicator.getProgramId());
-            auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
 
             return new EvidenceUploadResult(
                     evidenceId,

@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.web.advice.DashboardExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.in.ExportReportJobUseCase;
 import com.umss.sigesa.application.port.in.GetCompositeDashboardSummaryUseCase;
 import com.umss.sigesa.application.port.in.GetCoordinatorObservationsDetailsUseCase;
@@ -56,6 +57,9 @@ class DashboardCompositeControllerTest {
 
     @MockitoBean
     private JwtTokenAdapter jwtTokenAdapter;
+
+    @MockitoBean
+    private AuditLogPort auditLogPort;
 
     @Test
     @DisplayName("GET /api/v1/dashboards/me/summary: Returns 200 OK and composite summary")
