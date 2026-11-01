@@ -47,6 +47,10 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
+| 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
+| 22/10/2026 | **Demo 2:** `openapi.json` generado desde springdoc; CI drift + Spectral (`.github/workflows/openapi.yml`). Registro `docs/demos/demo-2.md` y `8.2.0-aportes.md`. | FSD-UC-004 / FSD-UC-005 | — | PM-029 | Boris Anthony Angulo Urquieta |
+| 22/10/2026 | **MOD-EVIDENCE UC-005:** `DELETE /evidences/{id}` retira evidencia si el indicador no está `APROBADO` (CC/CAE, 204 + blob/asset exclusivo); `409 EVIDENCE_IMMUTABLE` si aprobado. UI «Quitar / reemplazar». | FSD-UC-005 / DD-UC-005 | ADR-0001 | PM-028 | Boris Anthony Angulo Urquieta |
 | 19/10/2026 | **MOD-ASSISTANT FEAT-10 (#57):** FAB global en panel autenticado (`FloatingAssistantButton`) abre modal a11y con copiloto general; `/ayuda` y copilotos de dominio sin cambios. Offset `bottom-24` para no solapar el FAB de dominio. | FSD-UC-024 / DD-FEAT-10 | — | PM-027 / PR-IMPL-045 / #57 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **MOD-ASSISTANT FEAT-03 (#52):** timeout LLM 10 s (`SIGESA_ASSISTANT_TIMEOUT_MS`); `sendAsync` + hilos virtuales; 504 `ASSISTANT_GATEWAY_TIMEOUT`. Contrato `PR-IMPL-042`. | FSD-UC-024 / DD-SYS-002 | — | PM-023 / PM-024 / PR-IMPL-042 / #52 | Boris Anthony Angulo Urquieta |
 | 17/10/2026 | **Compose object storage:** imagen `docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (API S3/MinIO). `minio/minio` y `quay.io/minio/minio` ya no son pullables anónimamente. Servicio Compose sigue `minio` + `MINIO_*` + volumen `minio_data`. | FSD-UC-004 / DD-UC-004-M7 | — | PM-022 / PR-IMPL-041 / #51 | Boris Anthony Angulo Urquieta |
@@ -145,7 +149,7 @@ artefactos_vivos:
 | `FSD-UC-021` | `DD-UC-021` | **hecho (Full-Stack v2)** | `2.0.0` | API-TPL-08 + WebMvc; UI `/admin/plantillas`; publish BR-24 | `PR-IMPL-021` | Duplicate v2; legacy tabs coexisten |
 | `FSD-UC-022` | `DD-UC-022` | **hecho v2** | `2.0.0` | API-STR-01…05 + UI estructura v2 | `PR-IMPL-022` | |
 | `FSD-UC-004` | `DD-UC-004-M7` | **hecho (M7)** | `2.1.0` | EVD-01 ext + EVD-06 link + EVD-07 asset | `PR-IMPL-M7-004` | PM-015 |
-| `FSD-UC-005` | `DD-UC-005` / `DD-UC-004-M7` | **hecho (M7)** | `2.1.0` | Append-only vigente; folio/link no borra DocumentAsset | `PR-IMPL-035` / `PR-IMPL-M7-004` | PM-015 |
+| `FSD-UC-005` | `DD-UC-005` / `DD-UC-004-M7` | **hecho (M7)** | `2.1.0` | Append-only si `APROBADO`; CC puede retirar si no aprobado | `PR-IMPL-035` / `PR-IMPL-M7-004` | PM-015 / PM-028 |
 | `FSD-UC-006` | `DD-UC-006` | **hecho v2** | `2.0.0` | Subsanación por indicador API-EVD-05 | `PR-IMPL-036` | |
 | `FSD-UC-007` | `DD-UC-007` | **hecho v2** | `2.0.0` | API-EVD-02 filtros `level1Id`, `indicatorId` | `PR-IMPL-037` | |
 | `FSD-UC-008` | `DD-UC-008` | **hecho v2** | `2.0.0` | API-WF-01 reject indicador | `PR-IMPL-038` | |
@@ -301,7 +305,7 @@ artefactos_vivos:
 | **Dominio** | `DocumentAsset`, `IndicatorEvidenceLink`; `Evidence` sigue 1:1 indicador (`uk_evidence_normative_indicator`) |
 | **Puertos** | OUT `DocumentAssetPort`; IN `LinkDocumentAssetToIndicatorUseCase`, `GetDocumentAssetUseCase` |
 | **Migración Flyway** | `V19` DocumentAsset; **`V23__evidence_upload_lock.sql`** (FEAT-02); Docker: Hibernate + `DevWorkflowSchemaAlignmentRunner` |
-| **Object storage** | `S3EvidenceBlobStorageAdapter` si `sigesa.evidence.storage=s3`; Compose `minio` = `pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (`:9000` API / `:9001` consola); keys `evidences/{id}/v{n}/…` |
+| **Object storage** | `S3EvidenceBlobStorageAdapter` si `sigesa.evidence.storage=s3`; Compose `minio` = `pgsty/silo:RELEASE.2026-10-15T00-00-00Z` (`:9000` API / `:9001` consola); keys `evidences/{id}/v{n}/…`. Reuso por SHA-256: `restore` si el objeto falta. |
 | **Upload lock** | `JdbcEvidenceUploadLockAdapter` — PK `indicator_id`; sin `ConcurrentHashMap` |
 | **Errores clave** | 409 `INDICATOR_ALREADY_HAS_EVIDENCE`; 404 `DOCUMENT_ASSET_NOT_FOUND`; 403 `PROGRAM_SCOPE_DENIED` (asset de otro proceso) |
 | **Frontend** | Modal carga: checkbox vincular asset del proceso; folio en lista de evidencias; wrapper Orval |

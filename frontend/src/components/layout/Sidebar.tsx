@@ -17,6 +17,7 @@ import {
   FileUp,
   FileSearch,
   FileCheck,
+  Gauge,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -29,7 +30,9 @@ type SidebarNavKey =
   | 'templates'
   | 'reports'
   | 'history'
-  | 'help';
+  | 'help'
+  | 'semaphore'
+  | 'inbox';
 
 
 interface SidebarProps {
@@ -86,15 +89,17 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       </button>
 
       <div
-        className={`flex h-[88px] items-center gap-3 border-b border-primary-800 p-6 ${
-          !isExpanded && 'justify-center'
+        className={`flex items-center gap-3 border-b border-primary-800 px-4 py-4 ${
+          isExpanded ? '' : 'justify-center px-2'
         }`}
       >
-        <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-full bg-body">
-          <img src="/umss-logo.svg" alt="UMSS" className="h-8 w-8" />
-        </div>
+        <img
+          src="/duea-logo.png"
+          alt="Dirección Universitaria de Evaluación y Acreditación, DUEA-UMSS"
+          className={`shrink-0 rounded-full object-cover ${isExpanded ? 'h-16 w-16' : 'h-12 w-12'}`}
+        />
         {isExpanded && (
-          <div className="overflow-hidden whitespace-nowrap">
+          <div className="overflow-hidden">
             <h1 className="text-heading-sm font-bold leading-tight">UMSS DUEA</h1>
             <p className="text-label-md text-primary-200">{panelSubtitle}</p>
           </div>
@@ -110,6 +115,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           active={activeNav === 'dashboard'}
           to="/dashboard"
         />
+
+        {isJd && (
+          <NavItem
+            icon={<Gauge size={20} />}
+            label="SEMÁFORO"
+            isExpanded={isExpanded}
+            active={activeNav === 'semaphore' || location.pathname.startsWith('/executive/semaphore')}
+            to="/executive/semaphore"
+          />
+        )}
 
         {!isExternalEvaluator && (
           <div>

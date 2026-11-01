@@ -10,9 +10,18 @@ import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
+import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessDossierExportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.adapter.in.web.dto.ExportJobResponse;
+import com.umss.sigesa.adapter.in.web.dto.JobStatusResponse;
+import com.umss.sigesa.domain.model.JobStatus;
+import com.umss.sigesa.domain.model.ReportExportJob;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;import java.io.InputStream;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
@@ -52,6 +61,8 @@ public class ProcessController {
     private final DeleteProcessUseCase deleteProcessUseCase;
     private final UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
     private final NormativeStructureWebMapper normativeStructureWebMapper;
+    private final ExportProcessDossierUseCase exportProcessDossierUseCase;
+    private final GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
 
     @PostMapping
     @PreAuthorize("hasRole('JD')")
@@ -111,6 +122,65 @@ public class ProcessController {
     public ResponseEntity<Void> deleteProcess(@PathVariable UUID processId) {
         deleteProcessUseCase.delete(processId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{processId}/dossier/export")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE')")
+    @Operation(summary = "Exportar dossier digital en ZIP", description = "Encola la exportación asíncrona del dossier completo del proceso.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "202", description = "Exportación encolada"),
+            @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content),
+            @ApiResponse(responseCode = "403", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Proceso no encontrado", content = @Content)
+    })
+    public ResponseEntity<ExportJobResponse> exportDossier(@PathVariable UUID processId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UUID userId = extractUserId(auth);
+        ReportExportJob job = exportProcessDossierUseCase.enqueueJob(userId, processId);
+        exportProcessDossierUseCase.processJobAsync(job.getJobId());
+        String statusUrl = "/api/v1/processes/" + processId + "/dossier/export-jobs/" + job.getJobId();
+        ExportJobResponse response = new ExportJobResponse(
+                job.getJobId(),
+                job.getStatus().name(),
+                "Dossier export has started in the background.",
+                statusUrl
+        );
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    @GetMapping("/{processId}/dossier/export-jobs/{jobId}")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE')")
+    @Operation(summary = "Estado del job de exportación de dossier")
+    public ResponseEntity<JobStatusResponse> getDossierExportJobStatus(@PathVariable UUID processId, @PathVariable UUID jobId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UUID userId = extractUserId(auth);
+        ReportExportJob job = getProcessDossierExportJobStatusUseCase.getJobStatus(jobId, userId);
+        String downloadUrl = job.getStatus() == JobStatus.COMPLETED
+                ? "/api/v1/processes/" + processId + "/dossier/export-jobs/" + job.getJobId() + "/download"
+                : null;
+        JobStatusResponse response = new JobStatusResponse(
+                job.getJobId(),
+                job.getStatus().name(),
+                job.getProgressPercentage(),
+                downloadUrl,
+                job.getErrorMessage()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{processId}/dossier/export-jobs/{jobId}/download")
+    @PreAuthorize("hasAnyRole('JD','TD','CC','EE')")
+    @Operation(summary = "Descargar ZIP del dossier exportado")
+    public ResponseEntity<InputStreamResource> downloadDossier(@PathVariable UUID processId, @PathVariable UUID jobId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UUID userId = extractUserId(auth);
+        ReportExportJob job = getProcessDossierExportJobStatusUseCase.getJobStatus(jobId, userId);
+        InputStream fileStream = getProcessDossierExportJobStatusUseCase.getJobFileStream(jobId, userId);
+        String filename = "Dossier_" + processId.toString().substring(0, 8) + ".zip";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(new InputStreamResource(fileStream));
     }
 
     private ProcessQueryContext buildQueryContext() {

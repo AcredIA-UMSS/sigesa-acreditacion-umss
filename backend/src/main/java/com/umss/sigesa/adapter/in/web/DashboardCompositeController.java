@@ -65,6 +65,19 @@ public class DashboardCompositeController {
         return ResponseEntity.ok(summary);
     }
 
+    @GetMapping("/executive/observations")
+    public ResponseEntity<List<ObservationSummary>> listExecutiveObservations(@RequestParam UUID programId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<String> permissions = extractAuthorities(auth);
+        boolean isJd = permissions.contains("READ_JD_DASHBOARD")
+                || permissions.contains("ROLE_JD")
+                || permissions.contains("JD");
+        if (!isJd) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(detailsUseCase.listByProgram(programId));
+    }
+
     @GetMapping("/coordinator/details")
     public ResponseEntity<Page<ObservationSummary>> getCoordinatorDetails(
             @RequestParam(required = false) Integer phaseId,

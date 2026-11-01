@@ -5,7 +5,9 @@ import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
+import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.GetProcessDossierExportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.adapter.in.web.mapper.NormativeStructureWebMapper;
@@ -44,6 +46,10 @@ class ProcessControllerQueryTest {
     private DeleteProcessUseCase deleteProcessUseCase;
     @Mock
     private UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort;
+    @Mock
+    private ExportProcessDossierUseCase exportProcessDossierUseCase;
+    @Mock
+    private GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
 
     private MockMvc mockMvc;
 
@@ -55,7 +61,9 @@ class ProcessControllerQueryTest {
                 getProcessDetailUseCase,
                 deleteProcessUseCase,
                 userProgramAssignmentRepositoryPort,
-                new NormativeStructureWebMapper()
+                new NormativeStructureWebMapper(),
+                exportProcessDossierUseCase,
+                getProcessDossierExportJobStatusUseCase
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ProcessExceptionHandler())

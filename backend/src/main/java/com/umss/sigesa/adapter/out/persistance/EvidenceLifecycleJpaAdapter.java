@@ -44,6 +44,19 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     }
 
     private Optional<EvidenceContext> toContext(EvidenceEntity evidence) {
+        if (evidence.getNormativeIndicatorId() != null) {
+            return normativeIndicatorRepository.findWithProcessById(evidence.getNormativeIndicatorId())
+                    .map(indicator -> {
+                        var process = indicator.getLevel3Node().getLevel2Node().getLevel1Node().getProcess();
+                        return new EvidenceContext(
+                                evidence.getId(),
+                                process.getCareerId(),
+                                evidence.getLatestVersionId(),
+                                process.getId(),
+                                indicator.getId(),
+                                indicator.getStatus());
+                    });
+        }
         UUID programId = resolveProgramId(evidence);
         if (programId == null) {
             return Optional.empty();
@@ -94,6 +107,10 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     private static String extractFilename(String storageKey) {
         if (storageKey == null || storageKey.isBlank()) {
             return "evidencia";
+        }
+        int slash = storageKey.lastIndexOf('/');
+        if (slash >= 0 && slash < storageKey.length() - 1) {
+            return storageKey.substring(slash + 1);
         }
         int lastUnderscore = storageKey.lastIndexOf('_');
         if (lastUnderscore >= 0 && lastUnderscore < storageKey.length() - 1) {

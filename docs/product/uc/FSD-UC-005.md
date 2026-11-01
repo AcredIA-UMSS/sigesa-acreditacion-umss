@@ -3,13 +3,13 @@ id: FSD-UC-005
 nombre: Versionado y bloqueo de borrado
 estado: Hecho (M7 DocumentAsset)
 release: v2.1
-actor_principal: "[CC], [TD] (consulta); cualquier rol (intento DELETE)"
+actor_principal: "[CC], [TD] (consulta); [CC]/[CAE_MEMBER] retira si no APROBADO"
 trazabilidad_prd: PRD-US-007, PRD-US-008
 modulo: MOD-EVIDENCE
 reglas: FSD-BR-02, FSD-BR-15
 design_doc: DD-UC-004-M7
 pr_impl: PR-IMPL-M7-004
-ultima_actualizacion: "2026-10-13"
+ultima_actualizacion: "2026-10-22"
 ---
 
 # FSD-UC-005 — Versionado y bloqueo de borrado
@@ -33,12 +33,13 @@ ultima_actualizacion: "2026-10-13"
 
 | Paso | Condición | Respuesta |
 |------|-----------|-----------|
-| 1 | Cualquier rol invoca `DELETE /evidences/{id}` sobre Evidencia aprobada | `409 EVIDENCE_IMMUTABLE` |
-| 2 | — | Registra `AUDIT_DELETE_DENIED` en bitácora (UC-017) |
+| 1 | `DELETE /evidences/{id}` y el indicador está `APROBADO` (o evidencia legacy) | `409 EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED` |
+| 2 | [CC]/[CAE] invoca `DELETE` y el indicador **no** está `APROBADO` | `204`; retira evidencia, asset exclusivo y blob; indicador vuelve a `PENDIENTE`; `AUDIT_EVIDENCE_RETRACTED` |
+| 3 | Rol distinto de [CC]/[CAE] intenta retirar evidencia no aprobada | `403 PROGRAM_SCOPE_DENIED` |
 
 ## Postcondiciones
 
-Historial intacto; intentos de borrado auditados.
+Historial intacto si el indicador está aprobado. Si no está aprobado, [CC] puede retirar la evidencia y volver a cargarla.
 
 ## Diagramas
 
@@ -71,4 +72,11 @@ Característica: Historial de versiones
     Entonces el sistema rechaza la operación
     Y registra el intento en la bitácora de auditoría
     Y mantiene todas las versiones existentes
+
+  Escenario: Coordinador retira evidencia no aprobada
+    Dado un indicador en estado SUBIDO con una evidencia
+    Cuando el [CC] elimina esa evidencia
+    Entonces el sistema responde 204
+    Y el indicador vuelve a PENDIENTE
+    Y permite una nueva carga
 ```

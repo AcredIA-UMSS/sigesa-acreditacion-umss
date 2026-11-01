@@ -130,6 +130,7 @@ class UploadNormativeIndicatorEvidenceServiceTest {
                 .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
         when(contentHashPort.sha256Hex(pdf)).thenReturn("abc12345deadbeef");
         when(documentAssetPort.findByHashInProcess(processId, "abc12345deadbeef")).thenReturn(Optional.of(existing));
+        when(blobStorage.retrieve("existing-key")).thenReturn(Optional.of(pdf));
 
         var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
                 indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId));
@@ -138,7 +139,38 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         assertEquals(existing.getId(), result.documentAssetId());
         assertEquals(existing.getFolioCode(), result.folioCode());
         verify(blobStorage, never()).store(any(), anyInt(), any(), any());
+        verify(blobStorage, never()).restore(any(), any());
         verify(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), eq(null), eq(existing), eq(false), any());
+    }
+
+    @Test
+    @DisplayName("Reuso de asset con blob ausente restaura el objeto en la clave existente")
+    void upload_restoresMissingBlobWhenReusingAsset() {
+        UUID indicatorId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID processId = UUID.randomUUID();
+        byte[] pdf = "%PDF-1.4".getBytes();
+        DocumentAsset existing = DocumentAsset.create(
+                processId, "doc.pdf", "existing-key", "abc12345deadbeef", userId, LocalDateTime.now());
+
+        when(hierarchyQueryPort.findIndicatorContext(indicatorId))
+                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.NormativeIndicatorContext(
+                        indicatorId, processId, programId, UUID.randomUUID(),
+                        "N1", "IND-1", "Descripción", IndicatorState.PENDIENTE)));
+        when(observationPort.findLatestOpenByIndicatorId(indicatorId)).thenReturn(Optional.empty());
+        when(assignmentRepository.findActiveByUserId(userId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), userId, programId, LocalDateTime.now(), null)));
+        when(contentHashPort.sha256Hex(pdf)).thenReturn("abc12345deadbeef");
+        when(documentAssetPort.findByHashInProcess(processId, "abc12345deadbeef")).thenReturn(Optional.of(existing));
+        when(blobStorage.retrieve("existing-key")).thenReturn(Optional.empty());
+
+        var result = service.upload(new NormativeIndicatorEvidenceUploadCommand(
+                indicatorId, "Descripción válida", pdf, "application/pdf", "doc.pdf", null, userId));
+
+        assertTrue(result.reusedAsset());
+        verify(blobStorage, never()).store(any(), anyInt(), any(), any());
+        verify(blobStorage).restore("existing-key", pdf);
     }
 
     @Test

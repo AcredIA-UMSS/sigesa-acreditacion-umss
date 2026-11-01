@@ -27,7 +27,7 @@ public class JpaNotificationOutboxAdapter implements NotificationOutboxPort {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void enqueueEvidenceUploaded(UUID indicatorId, UUID evidenceId, UUID programId) {
         String deepLink = "/evaluation/program/" + programId + "/indicator/" + indicatorId;
         String subject = "Nueva evidencia registrada - Indicador " + indicatorId;
@@ -54,7 +54,7 @@ public class JpaNotificationOutboxAdapter implements NotificationOutboxPort {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void enqueue(String eventType, UUID recipientId, Map<String, String> payload) {
         String indicatorId = payload.getOrDefault("indicatorId", "");
         String observationId = payload.getOrDefault("observationId", "");

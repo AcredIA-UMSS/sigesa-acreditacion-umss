@@ -38,6 +38,20 @@ public class S3EvidenceBlobStorageAdapter implements EvidenceBlobStoragePort {
     }
 
     @Override
+    public void restore(String storageKey, byte[] content) {
+        if (storageKey == null || storageKey.isBlank()) {
+            throw new IllegalArgumentException("storageKey is required to restore a blob");
+        }
+        try {
+            s3Client.putObject(
+                    PutObjectRequest.builder().bucket(bucket).key(storageKey).build(),
+                    RequestBody.fromBytes(content == null ? new byte[0] : content));
+        } catch (RuntimeException ex) {
+            throw new IllegalStateException("Unable to restore evidence blob in object storage", ex);
+        }
+    }
+
+    @Override
     public void delete(String storageKey) {
         if (storageKey == null || storageKey.isBlank()) {
             return;

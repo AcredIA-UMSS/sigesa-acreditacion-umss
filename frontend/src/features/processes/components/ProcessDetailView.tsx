@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Download, Pencil, RefreshCw } from 'lucide-react';
+import { useDossierExport } from '../hooks/useDossierExport';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
@@ -61,6 +62,8 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     }, 150);
   }, []);
 
+  const { exportDossier, isPending: isExporting, progress, error: exportError } = useDossierExport(processId);
+
   return (
     <div className="space-y-6" ref={structureAnchorRef}>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -120,9 +123,25 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                 <ProcessOperationalModeBadge mode={process.operationalMode} />
               </div>
             </div>
-            <p className="mt-4 text-body-md text-primary-100">
-              Inicio: {formatDate(process.startDate)}
-            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-body-md text-primary-100">Inicio: {formatDate(process.startDate)}</p>
+              {(session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC' || session?.role === 'EE') && (
+                <div className="flex flex-col items-start gap-1">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportDossier().catch(() => undefined)}
+                    disabled={isExporting}
+                    className="bg-body text-primary-700 hover:bg-primary-50"
+                  >
+                    <Download size={16} />
+                    {isExporting ? `Exportando... ${progress}%` : 'Exportar Dossier Completo (ZIP)'}
+                  </Button>
+                  {exportError && (
+                    <p className="text-body-sm text-primary-50">{exportError}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </section>
 
           <ProcessResponsibleContainer

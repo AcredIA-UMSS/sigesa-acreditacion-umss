@@ -57,4 +57,10 @@ public class DashboardSummaryAggregationService implements GetCompositeDashboard
     public Page<ObservationSummary> getObservationsDetails(UUID programId, Integer phaseId, String status, Pageable pageable) {
         return queryPort.findObservationDetails(programId, phaseId, status, pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ObservationSummary> listByProgram(UUID programId) {
+        return queryPort.findObservationsByProgram(programId);
+    }
 }

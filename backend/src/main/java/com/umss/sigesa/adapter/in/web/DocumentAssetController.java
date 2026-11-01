@@ -4,6 +4,9 @@ import com.umss.sigesa.adapter.in.web.dto.DocumentAssetResponseDto;
 import com.umss.sigesa.application.port.in.GetDocumentAssetUseCase;
 import com.umss.sigesa.domain.model.DocumentAssetView;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +36,7 @@ public class DocumentAssetController {
     }
 
     @GetMapping("/{documentAssetId}")
-    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE','CAE_MEMBER')")
     @Operation(summary = "Obtener metadatos de un DocumentAsset")
     public ResponseEntity<DocumentAssetResponseDto> getDocumentAsset(
             @PathVariable UUID documentAssetId,
@@ -44,8 +47,14 @@ public class DocumentAssetController {
     }
 
     @GetMapping("/{documentAssetId}/content")
-    @PreAuthorize("hasAnyRole('CC','TD','JD','EE')")
+    @PreAuthorize("hasAnyRole('CC','TD','JD','EE','CAE_MEMBER')")
     @Operation(summary = "Descargar blob del DocumentAsset (API-EVD-07b)")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Bytes del documento almacenado (MinIO/S3)",
+            content = @Content(
+                    mediaType = "application/octet-stream",
+                    schema = @Schema(type = "string", format = "binary")))
     public ResponseEntity<byte[]> downloadContent(
             @PathVariable UUID documentAssetId,
             Authentication authentication) {

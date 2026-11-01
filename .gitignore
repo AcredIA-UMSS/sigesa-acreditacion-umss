@@ -73,3 +73,11 @@ data/reports/
 *.zip
 M7_Evals_EquipoSIGESA.zip
 M7_Evals_EquipoSIGESA/
+
+### Dependencies & Local Tooling ###
+node_modules/
+.aidlc/
+aidlc/
+.opencode/
+opencode.json
+

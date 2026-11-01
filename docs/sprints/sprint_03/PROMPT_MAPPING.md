@@ -34,6 +34,12 @@
 | PM-025 | PR-IMPL-043 | DD-EVALS-OFFLINE | Módulo 7 (Evals) | Marco de evaluación offline de la IA: dataset dorado (15 casos), métricas deterministas/Juez LLM (Kappa 1.0), compuerta exit 0 v3 e informe PDF |
 | PM-026 | PR-IMPL-044 | DD-MOD8-ISSUES | FSD-UC-012/015/017 | Issues #53, #54, #55, #56: fail-fast env, outbox transaccional, bandeja dictamen y audit log append-only |
 | PM-027 | PR-IMPL-045 | DD-FEAT-10 | FSD-UC-024 | FEAT-10 #57: FAB global de asistencia + modal a11y en el panel autenticado |
+| PM-028 | PR-IMPL-035 | DD-UC-005 | FSD-UC-005 | DELETE evidencia no aprobada (CC/CAE 204) + UI quitar/reemplazar |
+| PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
+| PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
+| PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
+| PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+
 
 ---
 
@@ -1789,6 +1795,370 @@ FEAT-10 implementado en `feat/57-floating-assistant`.
 
 - [ ] PR `Fixes #57` contra `release/2.0.0`
 
+---
 
+## PM-028
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-028 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 16:35 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | grok-4.6 |
+| **Tarea** | Permitir modificar/eliminar evidencia si el indicador no está aprobado |
+| **Objetivo** | `DELETE /api/v1/evidences/{id}` 204 cuando el indicador no es `APROBADO`; 409 `EVIDENCE_IMMUTABLE` si está aprobado; UI de retiro/reemplazo para CC |
+| **Contexto** | Tras cargar evidencia el coordinador no podía reemplazarla (`INDICATOR_ALREADY_HAS_EVIDENCE` + DELETE siempre 409) |
+| **PR-IMPL vinculado** | PR-IMPL-035 |
+| **DD-UC vinculado** | DD-UC-005 |
+| **FSD-UC vinculado** | FSD-UC-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+pero, me deberia permitir modificar/eliminar la evidencia si es que el indicador no esta aprobado
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-005.md`
+- `docs/product/uc/FSD-UC-005.md`
+- `docs/prompts/impl/PR-IMPL-035.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.test.tsx` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/AttemptDeleteEvidenceService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/EvidenceUploadJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/EvidenceLifecycleController.java` |
+| modificado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.tsx` |
+| modificado | `frontend/src/features/evidence/api/normativeIndicatorEvidenceApi.ts` |
+| modificado | `docs/product/uc/FSD-UC-005.md` |
+| modificado | `docs/design/DD-UC-005.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- DELETE retira evidencia normativa no `APROBADO` (CC/CAE), resetea indicador a `PENDIENTE`, borra blob/asset exclusivo.
+- APROBADO y evidencia legacy siguen `409 EVIDENCE_IMMUTABLE` + `AUDIT_DELETE_DENIED`.
+- UI: botón «Quitar / reemplazar» y volver a «Subir evidencia».
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=EvidenceLifecycleServiceTest,JpaAuditLogAdapterTest test` — OK
+- [x] `pnpm test:run NormativeIndicatorCollaborationSection.test.tsx` — 2 passed
+
+### Resultado obtenido
+
+Coordinador puede quitar y volver a cargar evidencia mientras el indicador no esté aprobado.
+
+### Próximos pasos
+
+- [ ] Rebuild Docker (`docker compose up --build`) para que el API nuevo quede en el contenedor
+
+---
+
+## PM-029
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-029 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 16:43 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | grok-4.6 |
+| **Tarea** | Registrar Demo 2: OpenAPI + CI y aportes 8.2.0 (cargar/eliminar evidencias) |
+| **Objetivo** | Contrato `openapi.json` desde springdoc, workflow drift+Spectral, `docs/demos/demo-2.md` y `8.2.0-aportes.md` |
+| **Contexto** | Entrega Classroom Demo 2 sobre `release/8.2.0` |
+| **PR-IMPL vinculado** | N/A (registro Demo 2 + contrato) |
+| **DD-UC vinculado** | DD-UC-005 |
+| **FSD-UC vinculado** | FSD-UC-004 / FSD-UC-005 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+2. Contrato OpenAPI y su flujo de validación
+- Contrato generado desde el código: el backend genera su contrato con decoradores (NestJS), anotaciones (Spring) o modelos (FastAPI). Un comando lo exporta a openapi.json y el archivo se sube al repositorio. Debe incluir los endpoints de las funcionalidades que se presentan.
+- Flujo de CI: un workflow en .github/workflows/ que, en cada pull request, compruebe que el archivo coincide con lo que genera el código (drift) y que pasa Spectral (lint). oasdiff y Schemathesis son opcionales y suman.
+
+El grupo decide si esta parte la hace una persona o varias. Cuenta como una de las funcionalidades de quien la haga.
+
+El ejemplo completo está en la sesión 5 (partes B y C) y en sus diapositivas.
+
+3. Qué registrar
+- En docs/demos/demo-2.md y aquí en Classroom: una tabla con cada integrante, sus funcionalidades. mas el link de su repositorio esto de forma individual.
+- El plazo para acordar esto lo maneja cada grupo; lo registrado debe estar en el release antes de la demo.
+- release/8.2.0 creado antes de la demo, con 8.2.0-aportes.md en la raíz. El release es el entregable del grupo: reúne las funcionalidades de todos sus integrantes.
+
+Puedes registrar estas cosas para este feature que vendria a ser cargar/eliminar evidencias
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-005.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/product/uc/FSD-UC-005.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `openapi.json` |
+| generado | `.spectral.yml` |
+| generado | `.github/workflows/openapi.yml` |
+| generado | `scripts/export-openapi.sh` |
+| generado | `docs/demos/demo-2.md` |
+| generado | `8.2.0-aportes.md` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/OpenApiExportIT.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/config/OpenApiConfig.java` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Exportación springdoc a `openapi.json` (incluye POST evidencias y DELETE).
+- CI: drift + Spectral.
+- Registro individual Demo 2 para Boris (cargar/eliminar evidencias + OpenAPI).
+
+### Validación ejecutada
+
+- [x] `OPENAPI_WRITE=true ./mvnw -Dtest=OpenApiExportIT test` — OK
+- [x] Spectral lint `openapi.json` — sin errores
+
+### Resultado obtenido
+
+Artefactos Demo 2 listos en `release/8.2.0`.
+
+### Próximos pasos
+
+- [ ] Completar filas de los demás integrantes en `8.2.0-aportes.md`
+- [ ] Push de `release/8.2.0` cuando el grupo lo pida
+
+---
+
+## PM-030
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-030 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 17:12 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Restaurar blob S3/MinIO al reutilizar DocumentAsset huérfano |
+| **Objetivo** | Que una evidencia visible en el frontend exista también en Silo cuando el SHA-256 coincide con un asset cuyo objeto ya fue borrado |
+| **Contexto** | Upload inicial escribió Postgres y luego el catch de outbox borró el objeto. Re-subidas del mismo PDF (`00gjDPSka5p6EK8DSX9A_guia_bash_mouredev_pro.pdf`, folio `SIGESA-20261022-0a01fdbf`) reutilizaron `storageKey` sin PUT. |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 |
+| **FSD-UC vinculado** | FSD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+00gjDPSka5p6EK8DSX9A_guia_bash_mouredev_pro.pdf
+subi esta evidencia pero no hay ene el silo, sale que esta subido en el fronten pero no hay en el servidor S3
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-004-M7.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/prompts/impl/PR-IMPL-041.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/EvidenceBlobStoragePort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/S3EvidenceBlobStorageAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/evidence/LocalFileEvidenceBlobStorageAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/evidence/UploadNormativeIndicatorEvidenceService.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/out/evidence/S3EvidenceBlobStorageAdapterTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/evidence/UploadNormativeIndicatorEvidenceServiceTest.java` |
+| modificado | `docs/product/uc/FSD-UC-004.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Puerto `restore(storageKey, content)` + adaptadores S3 y filesystem local.
+- Al reutilizar `DocumentAsset`, si `retrieve` está vacío se reescribe el objeto en la misma clave.
+- Tests de reuso con blob presente/ausente.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=UploadNormativeIndicatorEvidenceServiceTest,S3EvidenceBlobStorageAdapterTest test` — BUILD SUCCESS
+- [ ] `pnpm run lint` — N/A (sin cambios FE)
+
+### Resultado obtenido
+
+Metadatos en BD ya no quedan huérfanos si se vuelve a subir el mismo archivo tras rebuild.
+
+### Próximos pasos
+
+- [ ] Rebuild del backend (`docker compose up --build`)
+- [ ] Re-subir el mismo PDF a un indicador sin evidencia vigente para restaurar el objeto en Silo
+
+---
+
+## PM-031
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-031 |
+| **Fecha** | 2026-10-22 |
+| **Hora** | 17:28 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Visualizar evidencias subidas + registrar Demo 2 (OpenAPI/CI) |
+| **Objetivo** | Que [CC]/[TD] vean y descarguen el blob desde el detalle del indicador; documentar el parámetro 2 de Classroom |
+| **Contexto** | FSD-UC-004 API-EVD-07b ya existía; el listado no abría el archivo. Demo 2 exige contrato generado + drift/Spectral. |
+| **PR-IMPL vinculado** | PR-IMPL-041 |
+| **DD-UC vinculado** | DD-UC-004-M7 |
+| **FSD-UC vinculado** | FSD-UC-004 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Perfecto, ahora hagamos otro feature, donde pueda visualizar las evidencias subidas desde el frontend, marca el UC, 
+y llena los parametros de la tarea:
+2. Contrato OpenAPI y su flujo de validación
+...
+3. Qué registrar
+- En docs/demos/demo-2.md y aquí en Classroom...
+tambien llena los docs que se deben llenar en el repo como al sprint 3
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-004-M7.md`
+- `docs/product/uc/FSD-UC-004.md`
+- `docs/prompts/impl/PR-IMPL-041.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `frontend/src/features/evidence/components/EvidencePreviewDialog.tsx` |
+| generado | `frontend/src/features/evidence/components/EvidencePreviewDialog.test.tsx` |
+| generado | `frontend/src/features/evidence/hooks/useEvidencePreview.ts` |
+| modificado | `frontend/src/features/processes/components/NormativeIndicatorCollaborationSection.tsx` |
+| modificado | `frontend/src/features/evidence/api/normativeIndicatorEvidenceApi.ts` |
+| modificado | `frontend/src/api/endpoints/document-assets/document-assets.ts` |
+| modificado | `frontend/src/lib/api/customFetch.ts` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/DocumentAssetController.java` |
+| modificado | `docs/demos/demo-2.md` |
+| modificado | `8.2.0-aportes.md` |
+| modificado | `docs/product/uc/FSD-UC-004.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Botón «Ver evidencia» + diálogo de preview/descarga (`GET /document-assets/{id}/content`).
+- Registro Classroom: tabla integrantes, contrato OpenAPI (drift + Spectral), UC marcado.
+
+### Validación ejecutada
+
+- [x] `OPENAPI_WRITE=true ./mvnw -Dtest=OpenApiExportIT,DocumentAssetControllerWebMvcTest test` — OK
+- [x] `vitest` CollaborationSection + EvidencePreviewDialog — 5 passed
+- [x] oxlint sobre archivos del visor — OK
+
+### Resultado obtenido
+
+FSD-UC-004 cubre carga + visualización; Demo 2 documentada para Boris.
+
+### Próximos pasos
+
+- [ ] Rebuild frontend Docker para ver el visor
+- [ ] Push a `release/8.2.0` cuando se pida
+
+---
+
+## PM-032
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-032 |
+| **Fecha** | 2026-10-23 |
+| **Solicitante** | Alexander Alvarez (`Alex553-bot`) |
+| **Rol** | Fullstack Dev / Tech Lead |
+| **Sprint** | 03 |
+| **PR-IMPL** | PR-IMPL-046 |
+| **Design Doc** | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
+| **FSD / PRD** | `FSD-UC-032` / Transversal §10 |
+| **Rama** | `feat/73-dossier-zip-export` |
+| **Issue GitHub** | [#73](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/73) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+check the new feature implemented, there are some tests that are failing in the backend and the frontend as well
+coudl u pls fil the database to showcase this new feature ?
+commit all the changes
+```
+
+### Entradas auxiliares
+
+- `docs/features/FEAT-11-exportacion-dossier-digital-zip.md`
+- `docs/prompts/impl/PR-IMPL-046.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/InMemoryDossierExportJobTrackerAdapter.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/ExportProcessDossierUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/in/GetProcessDossierExportJobStatusUseCase.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/port/out/DossierExportPort.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/dossier/DossierExportService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/config/DossierDemoDataLoader.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ProcessDossierExportControllerTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapterTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/dossier/DossierExportServiceTest.java` |
+| generado | `frontend/src/features/processes/hooks/useDossierExport.ts` |
+| generado | `frontend/src/features/processes/hooks/useDossierExport.test.ts` |
+| generado | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
+| generado | `docs/prompts/impl/PR-IMPL-046.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessController.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/DocumentAssetJpaAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/DocumentAssetPort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/ReportModuleConfig.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/ReportFormat.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/security/JwtAuthenticationFilterTest.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ProcessControllerQueryTest.java` |
+| modificado | `frontend/src/features/processes/components/ProcessDetailView.tsx` |
+| modificado | `.gitignore` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Implementación del pipeline asíncrono para exportación de Dossier Digital (ZIP Jerárquico y Foliado).
+- Corrección de pruebas en backend con `JwtTokenAdapter` mock y perfiles aislados.
+- Tipado estricto y migración a `customFetch` en `useDossierExport.ts` con cobertura de pruebas unitarias Vitest.
+- Seeder de demostración `DossierDemoDataLoader` con árbol CEUB de 4 niveles, 6 PDFs binarios reales y metadatos foliados.
+
+### Validación ejecutada
+
+- [x] Backend: `./mvnw test` — 564 pruebas pasadas, 0 fallos, 0 errores.
+- [x] Frontend: `npm run test:run` — 44 suites, 119 pruebas pasadas.
+- [x] Calidad Frontend: `npx oxlint` (0 errores) y `npx tsc -b` (0 errores).
 
 

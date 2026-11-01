@@ -22,4 +22,8 @@ public interface DocumentAssetPort {
     IndicatorEvidenceLink saveLink(IndicatorEvidenceLink link);
 
     List<UUID> findLinkedIndicatorIds(UUID documentAssetId);
+
+    List<com.umss.sigesa.domain.model.IndicatorEvidenceLink> findLinksByDocumentAssetId(UUID documentAssetId);
+
+    List<com.umss.sigesa.domain.model.IndicatorEvidenceLink> findAllLinksByProcessId(UUID processId);
 }
