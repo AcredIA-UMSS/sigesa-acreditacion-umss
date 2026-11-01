@@ -1,6 +1,6 @@
 # frontend/Dockerfile
 # Etapa 1: Construcción
-FROM node:22-alpine AS builder
+FROM docker.io/library/node:22-alpine AS builder
 WORKDIR /app
 
 ENV CI=true
@@ -24,7 +24,7 @@ ENV VITE_ASSISTANT_DEBUG_ACTIONS=$VITE_ASSISTANT_DEBUG_ACTIONS
 RUN pnpm exec tsc -b && pnpm exec vite build
 
 # Etapa 2: Servidor Web
-FROM nginx:alpine
+FROM docker.io/library/nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
