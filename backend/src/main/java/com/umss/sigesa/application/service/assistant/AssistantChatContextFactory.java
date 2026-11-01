@@ -48,12 +48,27 @@ public class AssistantChatContextFactory {
 
         ProcessQueryContext ctx = new ProcessQueryContext(auth.role(), auth.programScope());
         EnrichedProcessDetail detail = getProcessDetailUseCase.getDetail(processId, ctx);
-        String phaseCatalog = AssistantStructureLookup.buildPhaseCatalogPrompt(detail);
+        String structureSummary = buildNormativeStructureSummary(detail);
         return AssistantChatContext.phases(
                 detail.id(),
                 detail.careerName(),
                 detail.careerCode(),
                 detail.templateType(),
-                phaseCatalog);
+                structureSummary);
+    }
+
+    private static String buildNormativeStructureSummary(EnrichedProcessDetail detail) {
+        if (detail.level1Nodes() == null || detail.level1Nodes().isEmpty()) {
+            return "(sin nodos de nivel 1)";
+        }
+        StringBuilder sb = new StringBuilder();
+        detail.level1Nodes().forEach(level1 -> sb.append("- order=")
+                .append(level1.getOrder())
+                .append(" level1Id=")
+                .append(level1.getId())
+                .append(" name=\"")
+                .append(level1.getName())
+                .append("\"\n"));
+        return sb.toString().trim();
     }
 }

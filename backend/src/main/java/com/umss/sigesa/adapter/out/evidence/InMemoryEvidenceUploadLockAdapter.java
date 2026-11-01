@@ -1,12 +1,13 @@
 package com.umss.sigesa.adapter.out.evidence;
 
 import com.umss.sigesa.application.port.out.EvidenceUploadLockPort;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+/**
+ * Solo tests unitarios que instancian el adaptador a mano. El runtime usa
+ * {@link JdbcEvidenceUploadLockAdapter} (no hay {@code @Component} aquí).
+ */
 public class InMemoryEvidenceUploadLockAdapter implements EvidenceUploadLockPort {
 
     private final ConcurrentHashMap<UUID, UUID> locks = new ConcurrentHashMap<>();

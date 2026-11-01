@@ -6,6 +6,14 @@ Cada archivo `FSD-UC-NNN.md` es la **única fuente funcional viva** para impleme
 |---------|----------------|
 | [`../FSD.md`](../FSD.md) | LFSD ⚡ — índice y hard constraints |
 
+## Release 2.0.0 — Jerarquía normativa
+
+Desde **2026-09-08** el modelo funcional objetivo es:
+
+**Modelo evaluador (CEUB \| ARCU-SUR) → Nivel 1 → Nivel 2 → Nivel 3 → Indicador → Evidencia**
+
+Ver [`../glosario.md`](../glosario.md) §2 para nomenclatura ARCU-SUR vs CEUB. Los UC marcados `Reespecificado` / `release: v2.0` reflejan el target; el código puede seguir en entidades legacy Fase/Subfase hasta migración (FSD.md §7).
+
 **Estructura estándar por UC:**
 
 1. Frontmatter YAML (id, estado, trazabilidad)

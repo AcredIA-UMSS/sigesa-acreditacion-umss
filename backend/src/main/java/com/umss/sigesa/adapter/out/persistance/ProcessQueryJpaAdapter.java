@@ -7,7 +7,6 @@ import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,9 +19,12 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
     private final SpringDataAccreditationProcessRepository repository;
     private final ProcessPersistenceMapper mapper;
 
+    private static final String ARCHIVED_STATUS = "ARCHIVED";
+
     @Override
     public List<ProcessListItem> findAllSummaryItems() {
         return repository.findAllByOrderByStartDateDesc().stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
                 .map(this::toListItem)
                 .toList();
     }
@@ -33,32 +35,23 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
             return List.of();
         }
         return repository.findByCareerIdInOrderByStartDateDesc(careerIds).stream()
+                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
                 .map(this::toListItem)
                 .toList();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<AccreditationProcess> findDetailById(UUID id) {
-        return repository.findWithPhasesById(id)
-                .map(entity -> {
-                    // Subfases: segunda carga lazy (evita MultipleBagFetchException).
-                    entity.getPhases().forEach(phase -> phase.getSubphases().size());
-                    return mapper.toDomain(entity);
-                });
+        return repository.findById(id).map(mapper::toDomain);
     }
 
     private ProcessListItem toListItem(AccreditationProcessJpaEntity entity) {
-        long phaseCount = repository.countPhasesByProcessId(entity.getId());
-        long subphaseCount = repository.countSubphasesByProcessId(entity.getId());
         return new ProcessListItem(
                 entity.getId(),
                 entity.getCareerId(),
                 entity.getTemplateId(),
                 entity.getStatus(),
-                entity.getStartDate(),
-                (int) phaseCount,
-                (int) subphaseCount
+                entity.getStartDate()
         );
     }
 }

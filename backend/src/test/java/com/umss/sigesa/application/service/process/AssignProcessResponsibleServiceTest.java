@@ -144,7 +144,6 @@ class AssignProcessResponsibleServiceTest {
                         .careerId(careerId)
                         .status("ACTIVE")
                         .startDate(LocalDateTime.now())
-                        .phases(List.of())
                         .build()));
     }
 

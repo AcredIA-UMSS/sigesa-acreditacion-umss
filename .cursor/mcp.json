@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "playwright-test": {
+      "command": "pnpm",
+      "args": [
+        "--dir",
+        "frontend",
+        "exec",
+        "playwright",
+        "run-test-mcp-server"
+      ]
+    }
+  }
+}

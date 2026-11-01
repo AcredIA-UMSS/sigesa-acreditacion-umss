@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
 import com.umss.sigesa.domain.exception.AssistantCompletionException;
+import com.umss.sigesa.domain.exception.AssistantGatewayTimeoutException;
 import com.umss.sigesa.domain.exception.AssistantInvalidInputException;
 import com.umss.sigesa.domain.exception.AssistantUnavailableException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,12 @@ public class AssistantExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUnavailable(AssistantUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(Map.of("error", "ASSISTANT_UNAVAILABLE", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AssistantGatewayTimeoutException.class)
+    public ResponseEntity<Map<String, String>> handleGatewayTimeout(AssistantGatewayTimeoutException ex) {
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                .body(Map.of("error", "ASSISTANT_GATEWAY_TIMEOUT", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(AssistantCompletionException.class)

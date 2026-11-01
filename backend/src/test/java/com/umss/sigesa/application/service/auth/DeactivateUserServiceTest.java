@@ -64,5 +64,41 @@ class DeactivateUserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> deactivateUserService.deactivate(userId));
+        verify(userRepository, org.mockito.Mockito.never()).update(org.mockito.ArgumentMatchers.any());
+        verify(assignmentRepository, org.mockito.Mockito.never()).revokeAllActiveByUserId(userId);
+        verify(auditLogPort, org.mockito.Mockito.never()).logUserDeactivated(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void shouldDeactivateAlreadyDeactivatedUser() {
+        UUID userId = UUID.randomUUID();
+        Email email = Email.of("cc@umss.edu.bo");
+        AppUser user = new AppUser(userId, email, Role.CC, UserStatus.DEACTIVATED,
+                LocalDateTime.now(), LocalDateTime.now());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        deactivateUserService.deactivate(userId);
+
+        ArgumentCaptor<AppUser> captor = ArgumentCaptor.forClass(AppUser.class);
+        verify(userRepository).update(captor.capture());
+        assertEquals(UserStatus.DEACTIVATED, captor.getValue().getStatus());
+        verify(assignmentRepository).revokeAllActiveByUserId(userId);
+        verify(auditLogPort).logUserDeactivated(userId, email);
+    }
+
+    @Test
+    void shouldPropagateRepositoryFailureAndSkipAudit() {
+        UUID userId = UUID.randomUUID();
+        AppUser user = new AppUser(userId, Email.of("cc@umss.edu.bo"), Role.CC, UserStatus.ACTIVE,
+                LocalDateTime.now(), LocalDateTime.now());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        org.mockito.Mockito.doThrow(new IllegalStateException("db down"))
+                .when(userRepository).update(org.mockito.ArgumentMatchers.any());
+
+        assertThrows(IllegalStateException.class, () -> deactivateUserService.deactivate(userId));
+        verify(assignmentRepository, org.mockito.Mockito.never()).revokeAllActiveByUserId(userId);
+        verify(auditLogPort, org.mockito.Mockito.never()).logUserDeactivated(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 }

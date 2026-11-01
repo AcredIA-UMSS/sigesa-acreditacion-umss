@@ -1,14 +1,21 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Download, Pencil, RefreshCw } from 'lucide-react';
+import { useDossierExport } from '../hooks/useDossierExport';
 import { Button } from '../../../components/ui/Button';
 import { useAuth } from '../../../lib/auth/useAuth';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
-import { ProcessPhaseTree } from './ProcessPhaseTree';
-import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
+import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
+import { EvaluationMetricsPanelContainer } from './EvaluationMetricsPanelContainer';
+import { ImprovementPlanPanelContainer } from './ImprovementPlanPanelContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
+import { ProcessOperationalModeBadge } from './ProcessOperationalModeBadge';
+import { ProcessFreezePanelContainer } from './ProcessFreezePanelContainer';
+import { PeerRoomChecklistPanelContainer } from './PeerRoomChecklistPanelContainer';
+import { DelegationsPanelContainer } from './DelegationsPanelContainer';
 
 interface ProcessDetailViewProps {
   processId: string;
@@ -30,27 +37,35 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const { session } = useAuth();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const operationalMode = process?.operationalMode ?? 'ACTIVE';
+  const isAuditFrozen = operationalMode === 'AUDIT_READONLY';
+  const isMonitoring = operationalMode === 'IMPROVEMENT_MONITORING';
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
-  const canUseCopilot =
-    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
-  const copilotReadOnly = session?.role === 'CC';
-  const canUploadEvidence = session?.role === 'CC';
-  const canObserveEvidence = session?.role === 'JD' || session?.role === 'TD';
+  const canUploadEvidence =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
+  const canEditFoda =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
   const canReviewEvidence = session?.role === 'TD';
-  const subphaseAnchorRef = useRef<HTMLDivElement>(null);
+  const structureAnchorRef = useRef<HTMLDivElement>(null);
+  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
 
-  const navigateToSubphase = useCallback((subphaseId: string) => {
-    const element = document.getElementById(`subphase-${subphaseId}`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element?.classList.add('ring-2', 'ring-primary-400');
+  const navigateToIndicator = useCallback((indicatorId: string) => {
+    setExpandToIndicatorId(indicatorId);
     window.setTimeout(() => {
-      element?.classList.remove('ring-2', 'ring-primary-400');
-    }, 2000);
+      const element = document.getElementById(`indicator-${indicatorId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element?.classList.add('ring-2', 'ring-primary-400');
+      window.setTimeout(() => {
+        element?.classList.remove('ring-2', 'ring-primary-400');
+      }, 2000);
+    }, 150);
   }, []);
 
+  const { exportDossier, isPending: isExporting, progress, error: exportError } = useDossierExport(processId);
+
   return (
-    <div className="space-y-6" ref={subphaseAnchorRef}>
+    <div className="space-y-6" ref={structureAnchorRef}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/procesos"
@@ -103,17 +118,63 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   {process.careerCode ?? '—'} · {process.templateName ?? '—'}
                 </p>
               </div>
-              <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+                <ProcessOperationalModeBadge mode={process.operationalMode} />
+              </div>
             </div>
-            <p className="mt-4 text-body-md text-primary-100">
-              Inicio: {formatDate(process.startDate)}
-            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-body-md text-primary-100">Inicio: {formatDate(process.startDate)}</p>
+              {(session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC' || session?.role === 'EE') && (
+                <div className="flex flex-col items-start gap-1">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportDossier().catch(() => undefined)}
+                    disabled={isExporting}
+                    className="bg-body text-primary-700 hover:bg-primary-50"
+                  >
+                    <Download size={16} />
+                    {isExporting ? `Exportando... ${progress}%` : 'Exportar Dossier Completo (ZIP)'}
+                  </Button>
+                  {exportError && (
+                    <p className="text-body-sm text-primary-50">{exportError}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </section>
 
           <ProcessResponsibleContainer
             processId={processId}
             process={process}
             onUpdated={refetch}
+          />
+
+          <EvaluationMetricsPanelContainer processId={processId} />
+
+          <ProcessFreezePanelContainer processId={processId} />
+
+          {session?.role !== 'CAE_MEMBER' && (
+            <PeerRoomChecklistPanelContainer processId={processId} />
+          )}
+
+          {(session?.role === 'CC' || session?.role === 'JD') && (
+            <DelegationsPanelContainer
+              processId={processId}
+              level1Nodes={process.level1Nodes ?? []}
+            />
+          )}
+
+          <ImprovementPlanPanelContainer
+            processId={processId}
+            operationalMode={operationalMode}
+            frozen={isAuditFrozen}
+          />
+
+          <MethodologicalStageTimelineContainer
+            processId={processId}
+            frozen={isAuditFrozen}
+            monitoring={isMonitoring}
           />
 
           <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
@@ -123,49 +184,42 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  Fases y subfases con requisitos de completitud. En cada subfase puede
-                  cargar una o más evidencias y el equipo técnico puede registrar observaciones.
+                  Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
+                  (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
                 </p>
               </div>
               {canEditStructure && (
                 <Link to={`/procesos/${processId}/estructura`}>
                   <Button variant="secondary">
                     <Pencil size={16} />
-                    Editar estructura
+                    Editar estructura normativa
                   </Button>
                 </Link>
               )}
             </div>
+
             <ProcessEvidenceSearchPanel
               processId={processId}
               programId={process.careerId}
-              phases={process.phases ?? []}
-              onNavigateToSubphase={navigateToSubphase}
+              level1Nodes={process.level1Nodes ?? []}
+              onNavigateToIndicator={navigateToIndicator}
             />
-            <ProcessPhaseTree
-              phases={process.phases ?? []}
-              processId={processId}
-              canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canUploadEvidence}
-              canClosePhase={canReviewEvidence}
-              onStructureUpdated={refetch}
-              onNavigateToSubphase={navigateToSubphase}
-            />
-          </section>
 
-          {canUseCopilot && (
-            <PhasesCopilotPanel
-              readOnly={copilotReadOnly}
-              process={{
-                processId,
-                careerName: process.careerName ?? 'Carrera',
-                careerCode: process.careerCode ?? '—',
-                templateType: process.templateType ?? 'CEUB',
-              }}
-            />
-          )}
+            <div className="mt-6">
+              <ProcessNormativeTree
+                level1Nodes={process.level1Nodes ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canEditFoda={canEditFoda}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                canCloseLevel1={canReviewEvidence}
+                onStructureUpdated={refetch}
+                onNavigateToIndicator={navigateToIndicator}
+                expandToIndicatorId={expandToIndicatorId}
+              />
+            </div>
+          </section>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/useAuth';
+import { FloatingAssistantButton } from '../FloatingAssistantButton';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -13,5 +14,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  return children;
+  return (
+    <>
+      {children}
+      <FloatingAssistantButton />
+    </>
+  );
 }

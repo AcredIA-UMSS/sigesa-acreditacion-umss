@@ -6,7 +6,7 @@
  */
 
 /**
- * Respuesta de carga de evidencia v1 (FSD-UC-004)
+ * Respuesta de carga o vínculo de evidencia (FSD-UC-004 / M7)
  */
 export interface UploadEvidenceResponse {
   /** Identificador de la evidencia */
@@ -19,4 +19,10 @@ export interface UploadEvidenceResponse {
   event?: string;
   /** Estado vigente del indicador */
   currentState: string;
+  /** Identificador del DocumentAsset físico */
+  documentAssetId?: string;
+  /** Folio institucional */
+  folioCode?: string;
+  /** True si se reutilizó un blob existente del proceso */
+  reusedAsset?: boolean;
 }

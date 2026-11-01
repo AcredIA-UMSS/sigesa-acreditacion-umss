@@ -3,7 +3,7 @@ package com.umss.sigesa.adapter.out.persistance;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorEntity;
-import com.umss.sigesa.adapter.out.persistance.repository.SpringDataSubphaseRepository;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeIndicatorRepository;
 import com.umss.sigesa.application.port.out.EvidenceLifecycleQueryPort;
 import com.umss.sigesa.domain.model.EvidenceVersionHistoryItem;
 import org.springframework.stereotype.Repository;
@@ -18,16 +18,16 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     private final EvidenceJpaRepository evidenceRepository;
     private final EvidenceVersionJpaRepository versionRepository;
     private final IndicatorJpaRepository indicatorRepository;
-    private final SpringDataSubphaseRepository subphaseRepository;
+    private final SpringDataNormativeIndicatorRepository normativeIndicatorRepository;
 
     public EvidenceLifecycleJpaAdapter(EvidenceJpaRepository evidenceRepository,
                                        EvidenceVersionJpaRepository versionRepository,
                                        IndicatorJpaRepository indicatorRepository,
-                                       SpringDataSubphaseRepository subphaseRepository) {
+                                       SpringDataNormativeIndicatorRepository normativeIndicatorRepository) {
         this.evidenceRepository = evidenceRepository;
         this.versionRepository = versionRepository;
         this.indicatorRepository = indicatorRepository;
-        this.subphaseRepository = subphaseRepository;
+        this.normativeIndicatorRepository = normativeIndicatorRepository;
     }
 
     @Override
@@ -44,6 +44,19 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     }
 
     private Optional<EvidenceContext> toContext(EvidenceEntity evidence) {
+        if (evidence.getNormativeIndicatorId() != null) {
+            return normativeIndicatorRepository.findWithProcessById(evidence.getNormativeIndicatorId())
+                    .map(indicator -> {
+                        var process = indicator.getLevel3Node().getLevel2Node().getLevel1Node().getProcess();
+                        return new EvidenceContext(
+                                evidence.getId(),
+                                process.getCareerId(),
+                                evidence.getLatestVersionId(),
+                                process.getId(),
+                                indicator.getId(),
+                                indicator.getStatus());
+                    });
+        }
         UUID programId = resolveProgramId(evidence);
         if (programId == null) {
             return Optional.empty();
@@ -60,9 +73,9 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
                     .map(IndicatorEntity::getProgramId)
                     .orElse(null);
         }
-        if (evidence.getSubphaseId() != null) {
-            return subphaseRepository.findWithProcessById(evidence.getSubphaseId())
-                    .map(entity -> entity.getPhase().getProcess().getCareerId())
+        if (evidence.getNormativeIndicatorId() != null) {
+            return normativeIndicatorRepository.findWithProcessById(evidence.getNormativeIndicatorId())
+                    .map(entity -> entity.getLevel3Node().getLevel2Node().getLevel1Node().getProcess().getCareerId())
                     .orElse(null);
         }
         return null;
@@ -94,6 +107,10 @@ public class EvidenceLifecycleJpaAdapter implements EvidenceLifecycleQueryPort {
     private static String extractFilename(String storageKey) {
         if (storageKey == null || storageKey.isBlank()) {
             return "evidencia";
+        }
+        int slash = storageKey.lastIndexOf('/');
+        if (slash >= 0 && slash < storageKey.length() - 1) {
+            return storageKey.substring(slash + 1);
         }
         int lastUnderscore = storageKey.lastIndexOf('_');
         if (lastUnderscore >= 0 && lastUnderscore < storageKey.length() - 1) {

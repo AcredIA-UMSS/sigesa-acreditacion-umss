@@ -6,12 +6,17 @@ import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
+import { HomePage } from './features/home';
 import { CreateProcessPage } from './features/accreditation-process';
 import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
+import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
 import { AssistantPage } from './features/assistant/AssistantPage';
+import { TechnicianInboxPage } from './features/dashboard/pages/TechnicianInboxPage';
+import { ExecutiveSemaphorePage } from './features/dashboard/pages/ExecutiveSemaphorePage';
+import { AuditLogPage } from './features/admin/audit/pages/AuditLogPage';
 
 function App() {
   return (
@@ -24,6 +29,48 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/technician/inbox"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <TechnicianInboxPage />
+              </JdOrTdRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/technician/inbox"
+          element={
+            <ProtectedRoute>
+              <JdOrTdRoute>
+                <TechnicianInboxPage />
+              </JdOrTdRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/auditoria"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <AuditLogPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/audit"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <AuditLogPage />
+              </JdOnlyRoute>
             </ProtectedRoute>
           }
         />
@@ -124,6 +171,34 @@ function App() {
         />
 
         <Route
+          path="/evidencias/buscar"
+          element={
+            <ProtectedRoute>
+              <EvidenceSearchPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/evidencias/search"
+          element={
+            <ProtectedRoute>
+              <EvidenceSearchPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/executive/semaphore"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <ExecutiveSemaphorePage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/reportes/ejecutivo"
           element={
             <ProtectedRoute>
@@ -143,7 +218,7 @@ function App() {
           }
         />
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

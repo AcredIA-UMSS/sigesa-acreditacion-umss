@@ -1,24 +1,23 @@
 package com.umss.sigesa.application.service.workflow;
 
 import com.umss.sigesa.application.port.in.RejectIndicatorUseCase;
-import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.out.NotificationOutboxPort;
-import com.umss.sigesa.application.port.out.SubphaseEvidenceQueryPort;
-import com.umss.sigesa.application.port.out.SubphaseObservationPort;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
-import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
+import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
+import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.JustificationRequiredException;
-import com.umss.sigesa.domain.model.Indicator;
+import com.umss.sigesa.domain.model.IndicatorObservation;
 import com.umss.sigesa.domain.model.IndicatorState;
-import com.umss.sigesa.domain.model.IndicatorTransitionResult;
 import com.umss.sigesa.domain.model.IndicatorWorkflowResult;
-import com.umss.sigesa.domain.model.Role;
-import com.umss.sigesa.domain.model.SubphaseObservation;
-import com.umss.sigesa.domain.model.SubphaseObservationStatus;
+import com.umss.sigesa.domain.model.IndicatorObservationStatus;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -28,22 +27,25 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
 
     private static final int MIN_JUSTIFICATION_LENGTH = 20;
     private static final Set<String> ALLOWED_ROLES = Set.of("TD");
+    private static final Set<IndicatorState> REVIEWABLE_STATES =
+            EnumSet.of(IndicatorState.SUBIDO, IndicatorState.SUBSANADO);
 
-    private final IndicatorRepositoryPort indicatorRepository;
-    private final SubphaseEvidenceQueryPort evidenceQueryPort;
-    private final SubphaseObservationPort observationPort;
-    private final IndicatorTransitionHelper transitionHelper;
+    private final NormativeHierarchyQueryPort hierarchyQueryPort;
+    private final NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
+    private final NormativeIndicatorObservationPort observationPort;
+    private final NormativeIndicatorWorkflowPort workflowPort;
     private final NotificationOutboxPort notificationOutbox;
 
-    public RejectIndicatorService(IndicatorRepositoryPort indicatorRepository,
-                                  SubphaseEvidenceQueryPort evidenceQueryPort,
-                                  SubphaseObservationPort observationPort,
-                                  IndicatorTransitionHelper transitionHelper,
-                                  NotificationOutboxPort notificationOutbox) {
-        this.indicatorRepository = indicatorRepository;
+    public RejectIndicatorService(
+            NormativeHierarchyQueryPort hierarchyQueryPort,
+            NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
+            NormativeIndicatorObservationPort observationPort,
+            NormativeIndicatorWorkflowPort workflowPort,
+            NotificationOutboxPort notificationOutbox) {
+        this.hierarchyQueryPort = hierarchyQueryPort;
         this.evidenceQueryPort = evidenceQueryPort;
         this.observationPort = observationPort;
-        this.transitionHelper = transitionHelper;
+        this.workflowPort = workflowPort;
         this.notificationOutbox = notificationOutbox;
     }
 
@@ -52,61 +54,57 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
         assertRole(actorRole);
         validateJustification(justification);
 
-        Indicator indicator = indicatorRepository.findById(indicatorId)
+        NormativeHierarchyQueryPort.NormativeIndicatorContext context = hierarchyQueryPort
+                .findIndicatorContext(indicatorId)
                 .orElseThrow(() -> new IndicatorNotFoundException(indicatorId));
 
-        if (!evidenceQueryPort.hasEvidenceForIndicator(indicatorId)) {
+        if (!evidenceQueryPort.hasEvidences(indicatorId)) {
             throw new EvidenceRequiredException(
                     "No se puede rechazar: el indicador no tiene evidencia cargada.");
         }
 
-        UUID observationId = createObservationIfSubphaseLinked(indicatorId, justification, actorId, actorRole);
-
-        IndicatorTransitionResult transition = transitionHelper.transition(
-                indicatorId,
-                IndicatorState.OBSERVADO,
-                actorId,
-                Role.TD,
-                IndicatorTransitionHelper.REVIEWABLE_STATES);
-
-        notificationOutbox.enqueue(
-                "IndicatorRejected",
-                indicator.getProgramId(),
-                Map.of(
-                        "indicatorId", indicatorId.toString(),
-                        "observationId", observationId != null ? observationId.toString() : ""));
-
-        return new IndicatorWorkflowResult(
-                indicatorId,
-                transition.previousState(),
-                transition.newState(),
-                transition.stateHistoryId(),
-                observationId);
-    }
-
-    private UUID createObservationIfSubphaseLinked(
-            UUID indicatorId, String justification, UUID actorId, String actorRole) {
-        List<UUID> subphaseIds = evidenceQueryPort.findSubphaseIdsByIndicatorId(indicatorId);
-        if (subphaseIds.isEmpty()) {
-            return null;
-        }
-        UUID subphaseId = subphaseIds.getFirst();
-        observationPort.findLatestOpenBySubphaseId(subphaseId).ifPresent(existing -> {
-            throw new IllegalStateException(
-                    "Ya existe una observación pendiente en la subfase vinculada.");
+        observationPort.findLatestOpenByIndicatorId(indicatorId).ifPresent(existing -> {
+            throw new InvalidIndicatorStateException(
+                    "Ya existe una observación pendiente de subsanación en este indicador.");
         });
+
+        IndicatorState currentState = context.status();
+        if (!REVIEWABLE_STATES.contains(currentState)) {
+            throw new InvalidIndicatorStateException(
+                    "Indicador " + indicatorId + " en estado " + currentState
+                            + "; se requiere " + REVIEWABLE_STATES);
+        }
+
         LocalDateTime now = LocalDateTime.now();
-        SubphaseObservation observation = SubphaseObservation.builder()
-                .id(UUID.randomUUID())
-                .subphaseId(subphaseId)
+        UUID observationId = UUID.randomUUID();
+        IndicatorObservation observation = IndicatorObservation.builder()
+                .id(observationId)
+                .indicatorId(indicatorId)
                 .authorId(actorId)
                 .authorRole(actorRole.trim().toUpperCase(Locale.ROOT))
                 .body(justification.trim())
-                .status(SubphaseObservationStatus.OPEN)
+                .status(IndicatorObservationStatus.OPEN)
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
-        return observationPort.save(observation).getId();
+        observationPort.save(observation);
+
+        workflowPort.updateIndicatorStatus(indicatorId, IndicatorState.OBSERVADO);
+
+        notificationOutbox.enqueue(
+                "IndicatorRejected",
+                context.careerId(),
+                Map.of(
+                        "indicatorId", indicatorId.toString(),
+                        "observationId", observationId.toString(),
+                        "newState", IndicatorState.OBSERVADO.name()));
+
+        return new IndicatorWorkflowResult(
+                indicatorId,
+                currentState,
+                IndicatorState.OBSERVADO,
+                null,
+                observationId);
     }
 
     private static void assertRole(String actorRole) {

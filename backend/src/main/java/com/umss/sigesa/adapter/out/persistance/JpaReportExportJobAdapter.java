@@ -4,6 +4,7 @@ import com.umss.sigesa.adapter.out.persistance.entity.ReportExportJobEntity;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +19,7 @@ public class JpaReportExportJobAdapter implements ReportExportJobRepositoryPort 
     }
 
     @Override
+    @Transactional
     public ReportExportJob save(ReportExportJob job) {
         ReportExportJobEntity entity = toEntity(job);
         ReportExportJobEntity saved = repository.save(entity);
@@ -25,6 +27,7 @@ public class JpaReportExportJobAdapter implements ReportExportJobRepositoryPort 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<ReportExportJob> findById(UUID jobId) {
         return repository.findById(jobId).map(this::toDomain);
     }

@@ -9,6 +9,7 @@ import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.domain.exception.AssistantInvalidInputException;
 import com.umss.sigesa.config.AssistantProperties;
 import com.umss.sigesa.domain.exception.AssistantAgentAccessDeniedException;
@@ -61,7 +62,8 @@ class AssistantControllerToolCallingTest {
                 assistantProperties,
                 assignmentRepository,
                 chatContextFactory,
-                chatInputValidator);
+                chatInputValidator,
+                new AssistantReplyOutputGuard(true));
     }
 
     @AfterEach

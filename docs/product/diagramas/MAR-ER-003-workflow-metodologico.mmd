@@ -1,0 +1,145 @@
+%% diagramId: MAR-ER-003
+%% version: v2.1 (diseño — release 2.1.0+)
+%% fsdTrace: docs/product/FSD.md §8-§10
+%% adrTrace: ADR-0005
+%% nota: entidades punteadas = planificadas M6-M11, no implementadas en 2.0.0
+erDiagram
+    ACCREDITATION_PROCESS ||--o{ METHODOLOGICAL_STAGE : has
+    METHODOLOGICAL_STAGE ||--o{ STAGE_DELIVERABLE : requires
+    METHODOLOGICAL_STAGE ||--o{ STAGE_GATE_EVALUATION : evaluates
+    STAGE_DELIVERABLE }o--o| DOCUMENT_ASSET : attaches
+    ACCREDITATION_PROCESS ||--o| PROCESS_FREEZE : may_have
+    ACCREDITATION_PROCESS ||--o{ IMPROVEMENT_PLAN_ITEM : monitors
+    ACCREDITATION_PROCESS ||--o{ PRIMARY_SURVEY_BATCH : registers
+    ACCREDITATION_PROCESS ||--o{ LEVEL1_NODE : contains
+    LEVEL1_NODE ||--o{ LEVEL2_NODE : contains
+    LEVEL2_NODE ||--o{ LEVEL3_NODE : contains
+    LEVEL3_NODE ||--o{ INDICATOR : contains
+    INDICATOR ||--o{ INDICATOR_ANALYSIS : analyzed_by
+    INDICATOR ||--o{ INDICATOR_EVIDENCE_LINK : links
+    DOCUMENT_ASSET ||--o{ INDICATOR_EVIDENCE_LINK : referenced_by
+    DOCUMENT_ASSET ||--o{ EVIDENCE_VERSION : versions
+    INDICATOR ||--o{ EVIDENCE : proves
+    EVIDENCE ||--o{ EVIDENCE_VERSION : has
+    IMPROVEMENT_PLAN_ITEM }o--o| INDICATOR : sourced_from
+    APP_USER ||--o{ STAGE_DELIVERABLE : approves
+    APP_USER ||--o{ INDICATOR_DELEGATION : assigned
+
+    ACCREDITATION_PROCESS {
+        uuid id PK
+        uuid program_id FK
+        string evaluator_model
+        string operational_mode "ACTIVE|AUDIT_READONLY|IMPROVEMENT_MONITORING"
+        uuid current_stage_id FK
+        string status
+    }
+
+    METHODOLOGICAL_STAGE {
+        uuid id PK
+        uuid process_id FK
+        int stage_order "1-7"
+        string code "PREPARATORY|COLLECTION|..."
+        string status "PENDING|IN_PROGRESS|SUBMITTED|OBSERVED|APPROVED"
+        timestamptz started_at
+        timestamptz closed_at
+    }
+
+    STAGE_DELIVERABLE {
+        uuid id PK
+        uuid stage_id FK
+        string deliverable_code "HCC_RESOLUTION|SELF_ASSESSMENT_REPORT|..."
+        string approval_status "PENDING|APPROVED|REJECTED"
+        uuid document_asset_id FK
+        uuid approved_by FK
+        text technical_observations
+    }
+
+    STAGE_GATE_EVALUATION {
+        uuid id PK
+        uuid stage_id FK
+        json gate_rules_snapshot
+        string result "PASS|BLOCK"
+        text block_reason
+        timestamptz evaluated_at
+        uuid evaluated_by FK
+    }
+
+    PROCESS_FREEZE {
+        uuid id PK
+        uuid process_id FK
+        string mode "NONE|AUDIT_READONLY|IMPROVEMENT_PARTIAL"
+        timestamptz frozen_at
+        timestamptz lifted_at
+        uuid frozen_by FK
+    }
+
+    DOCUMENT_ASSET {
+        uuid id PK
+        string folio_code UK
+        string title
+        string storage_key
+        string content_hash
+        boolean is_institutional
+        uuid uploaded_by FK
+        timestamptz uploaded_at
+    }
+
+    INDICATOR_EVIDENCE_LINK {
+        uuid id PK
+        uuid indicator_id FK
+        uuid document_asset_id FK
+        boolean is_primary_reference
+        uuid evidence_id FK
+    }
+
+    INDICATOR_ANALYSIS {
+        uuid id PK
+        uuid indicator_id FK
+        string foda_quadrant "STRENGTH|WEAKNESS|OPPORTUNITY|THREAT"
+        string compliance "COMPLIES|NON_COMPLIES|NA"
+        text synthesis
+        uuid author_id FK
+    }
+
+    IMPROVEMENT_PLAN_ITEM {
+        uuid id PK
+        uuid process_id FK
+        uuid source_indicator_id FK
+        text objective
+        text activity
+        text success_indicator
+        uuid responsible_id FK
+        date deadline
+        string progress "OPEN|IN_PROGRESS|CLOSED"
+    }
+
+    PRIMARY_SURVEY_BATCH {
+        uuid id PK
+        uuid process_id FK
+        string audience "STUDENTS|FACULTY|GRADUATES|EMPLOYERS|STAFF"
+        int responses_count
+        uuid document_asset_id FK
+        timestamptz registered_at
+    }
+
+    INDICATOR_DELEGATION {
+        uuid id PK
+        uuid process_id FK
+        uuid user_id FK
+        uuid level1_id FK
+        uuid level2_id FK
+        uuid indicator_id FK
+        string permission "UPLOAD|FODA|READ"
+    }
+
+    INDICATOR {
+        uuid id PK
+        string code
+        string status
+    }
+
+    LEVEL1_NODE {
+        uuid id PK
+        string name
+        string status
+    }

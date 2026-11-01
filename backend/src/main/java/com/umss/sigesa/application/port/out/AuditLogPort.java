@@ -19,4 +19,6 @@ public interface AuditLogPort {
     void logEvidenceUploaded(UUID uploadedBy, UUID evidenceId, UUID subphaseId);
 
     void logDeleteDenied(UUID actorId, UUID evidenceId);
+
+    void logEvidenceRetracted(UUID actorId, UUID evidenceId, UUID indicatorId);
 }

@@ -1,0 +1,39 @@
+.home-page {
+  --home-gold: #c9962b;
+  --home-gold-soft: #f6e9c8;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.home-gold-soft {
+  background-color: var(--home-gold-soft);
+}
+
+.home-gold-text {
+  color: var(--home-gold);
+}
+
+.home-gold-fill {
+  background-color: var(--home-gold);
+}
+
+.home-hero-photo {
+  background-size: cover;
+  background-position: center;
+}
+
+.home-hero-photo--campus {
+  background-image: linear-gradient(160deg, #375f9a 0%, #003770 55%, #001b3d 100%);
+}
+
+.home-hero-photo--group {
+  background-image: linear-gradient(200deg, #ffdad5 0%, #e80f16 45%, #690003 100%);
+}
+
+.home-map-placeholder {
+  background-image: linear-gradient(#d6e3ff 1px, transparent 1px),
+    linear-gradient(90deg, #d6e3ff 1px, transparent 1px);
+  background-size: 18px 18px;
+  background-color: #e8f1ff;
+}

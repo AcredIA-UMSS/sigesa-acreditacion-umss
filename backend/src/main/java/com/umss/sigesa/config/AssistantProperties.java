@@ -17,6 +17,9 @@ public class AssistantProperties {
     private int maxToolIterations = 3;
     private boolean ragEnabled = true;
     private int ragMaxChunks = 3;
+    private boolean outputGuardEnabled = true;
+    /** Timeout de conexión y de request LLM (ms). Issue #52: default 10 s. */
+    private long timeoutMs = 10_000;
 
     public boolean isEnabled() {
         return enabled;
@@ -88,5 +91,26 @@ public class AssistantProperties {
 
     public void setRagMaxChunks(int ragMaxChunks) {
         this.ragMaxChunks = ragMaxChunks;
+    }
+
+    public boolean isOutputGuardEnabled() {
+        return outputGuardEnabled;
+    }
+
+    public void setOutputGuardEnabled(boolean outputGuardEnabled) {
+        this.outputGuardEnabled = outputGuardEnabled;
+    }
+
+    public long getTimeoutMs() {
+        return timeoutMs;
+    }
+
+    public void setTimeoutMs(long timeoutMs) {
+        this.timeoutMs = timeoutMs;
+    }
+
+    public java.time.Duration requestTimeout() {
+        long ms = timeoutMs < 1 ? 1 : timeoutMs;
+        return java.time.Duration.ofMillis(ms);
     }
 }

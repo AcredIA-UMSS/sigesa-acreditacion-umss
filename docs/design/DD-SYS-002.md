@@ -151,7 +151,9 @@ return chatCompletionPort.complete(conversation);
 - **Autenticación:** `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}`
 - **Body:** formato OpenAI (`model`, `stream: false`, `messages[]`)
 - **Parseo:** `choices[0].message.content`
-- **Timeout:** 120 segundos
+- **Timeout (histórico auditoría):** 120 segundos (`HttpClient.send` en el worker Tomcat).
+- **Timeout FEAT-03 (#52 / `PR-IMPL-042`):** conexión y lectura **10 s** (`sigesa.assistant.timeout` / `SIGESA_ASSISTANT_TIMEOUT_MS`, default `10000`). Demo Ollama lento: subir la env, no reabrir 120 s en código. Exceso → **504** `ASSISTANT_GATEWAY_TIMEOUT`.
+- **No bloqueo de plataforma:** `spring.threads.virtual.enabled=true` y/o `HttpClient.sendAsync` con cancelación al timeout. El contrato REST `POST /assistant/chat` **no** pasa a 202/polling.
 - **HTTP/1.1 obligatorio:** Java `HttpClient` usa HTTP/2 por defecto; uvicorn/Open WebUI respondía `400 Invalid HTTP request received` con HTTP/2. Se fuerza `HttpClient.Version.HTTP_1_1`.
 
 ### 3.4 API REST expuesta por SIGESA

@@ -1,0 +1,84 @@
+{
+  "promptVersion": "v2",
+  "dataset": "datos/conocimiento/data_set_dorado.jsonl",
+  "apiBase": "http://127.0.0.1:8080",
+  "capturedAt": "2026-09-25T02:24:51.842132+00:00",
+  "gitCommit": "69a4df4f5d18e032bbfc70dc0fcbf74c387c490e",
+  "cases": [
+    {
+      "id": "HECH-001",
+      "file": "HECH-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "HECH-002",
+      "file": "HECH-002.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "HECH-003",
+      "file": "HECH-003.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "HECH-CRIT-001",
+      "file": "HECH-CRIT-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "SIN-001",
+      "file": "SIN-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "SIN-002",
+      "file": "SIN-002.json",
+      "httpStatus": 401
+    },
+    {
+      "id": "SIN-CRIT-001",
+      "file": "SIN-CRIT-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "FUE-001",
+      "file": "FUE-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "FUE-002",
+      "file": "FUE-002.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "FUE-CRIT-001",
+      "file": "FUE-CRIT-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "ESC-001",
+      "file": "ESC-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "ESC-002",
+      "file": "ESC-002.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "SEC-001",
+      "file": "SEC-001.json",
+      "httpStatus": 200
+    },
+    {
+      "id": "SEC-002",
+      "file": "SEC-002.json",
+      "httpStatus": 502
+    },
+    {
+      "id": "SEC-CRIT-001",
+      "file": "SEC-CRIT-001.json",
+      "httpStatus": 502
+    }
+  ]
+}

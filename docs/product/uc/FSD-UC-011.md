@@ -2,12 +2,12 @@
 id: FSD-UC-011
 nombre: Dashboard [CC] y observaciones
 estado: En Curso
-release: v1.0
+release: v2.0
 actor_principal: "[CC]"
 trazabilidad_prd: PRD-US-012, PRD-US-015
 modulo: MOD-DASH
 reglas: FSD-BR-09
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-10-17"
 ---
 
 # FSD-UC-011 — Dashboard [CC] y observaciones
@@ -20,11 +20,12 @@ ultima_actualizacion: "2026-08-27"
 | **Pantalla** | `/dashboard` (Shell Híbrido PBAC) / `/coordinator/dashboard` |
 | **API** | Suite Híbrida: `GET /api/v1/dashboards/me/summary` (KPIs PBAC), `GET /api/v1/dashboards/coordinator/details`, `GET /api/v1/dashboards/coordinator/export` |
 | **Nota implementación viva (2026-08-27)** | KPIs CC, tabla observaciones y export operativos en `/dashboard` con datos reales (PM-003). **Pendiente:** enlace «Subsanar» hasta UC-006; ruta dedicada `/coordinator/dashboard` unificada en shell híbrido. |
+| **Hardening 8.1.0 (2026-10-17)** | FEAT-01 / GitHub #50 / `PR-IMPL-040`: export async sin I/O de archivo dentro de TX write; Hikari explícito. T-007 dashboards dedicados sigue parcial. |
 
 ## Flujo principal
 
 1. [CC] abre `/coordinator/dashboard`.
-2. Sistema muestra avance por Fase **solo de su carrera**.
+2. Sistema muestra avance por **Nivel 1** (Dimensión/Área) **solo de su carrera**, desglosado por indicadores.
 3. Lista observaciones abiertas ordenadas por plazo ascendente.
 4. Acceso en ≤ **3 clics** a formulario de subsanación (BRD-REQ-026).
 
@@ -54,13 +55,13 @@ Característica: Dashboard del Coordinador de Carrera
   Escenario: Vista de carrera propia
     Dado un [CC] autenticado de la carrera X
     Cuando abre su dashboard
-    Entonces ve el avance por Fase de la carrera X
+    Entonces ve el avance por Nivel 1 de la carrera X
     Y no ve datos de otras carreras
 
   Escenario: Acceso rápido a observación
     Dado una observación abierta en el dashboard
     Cuando selecciona la observación
-    Entonces navega a la Subfase y formulario de subsanación
+    Entonces navega al Indicador y formulario de subsanación
 
 @PRD-US-015 @FSD-UC-011 @TC-09c
   Escenario: Orden por fecha límite

@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   sigesa: {
     input: {
-      target: 'http://localhost:8080/v3/api-docs',
+      target: process.env.ORVAL_OPENAPI_URL ?? 'http://localhost:8080/v3/api-docs',
     },
     output: {
       mode: 'tags-split',
