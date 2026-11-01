@@ -1,0 +1,12 @@
+target
+.m2
+.m2repo
+.git
+.env
+.env.*
+*.log
+.idea
+*.iml
+src/test
+node_modules
+dist
