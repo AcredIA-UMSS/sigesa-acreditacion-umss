@@ -28,17 +28,17 @@ Etiquetas de laboratorio:
 
 ## Tabla antes → después
 
-| Medida | Antes | Después |
-|---|---|---|
-| Tamaño DISK USAGE | **479 MB** | **507 MB** |
-| Tamaño CONTENT SIZE | **166 MB** | **179 MB** |
-| Número de capas (`docker image history -q \| wc -l`) | **16** | **18** |
-| Usuario | `Config.User` vacío; `id` → **`uid=0(root)`** | **`sigesa` (`uid=100 gid=101`)** |
-| CVE HIGH + CRITICAL (Trivy) | OS **14** (13H+1C) + JAR **19** (12H+7C) = **33** | OS **0** + JAR **25** (17H+8C) = **25** |
-| CVE totales (todas las severidades) | OS 59 + JAR 33 = **92** | OS 0 + JAR 46 = **46** |
-| hadolint | **DL3059** (info, `RUN` consecutivos) | **DL3066** (info, USER no numérico) |
-| Dive efficiency / wasted | 99.88 % / 558 kB | 99.89 % / 560 kB |
-| ¿Arranca y responde? | — | **Sí.** `GET /api/health` → `{"status":"UP"}` HTTP 200 |
+| Medida                                              | Antes                                             | Después                                                |
+| --------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
+| Tamaño DISK USAGE                                   | **479 MB**                                        | **507 MB**                                             |
+| Tamaño CONTENT SIZE                                 | **166 MB**                                        | **179 MB**                                             |
+| Número de capas (`docker image history -q | wc -l`) | **16**                                            | **18**                                                 |
+| Usuario                                             | `Config.User` vacío; `id` → `uid=0(root)`         | `sigesa` **(**`uid=100 gid=101`**)**                   |
+| CVE HIGH + CRITICAL (Trivy)                         | OS **14** (13H+1C) + JAR **19** (12H+7C) = **33** | OS **0** + JAR **25** (17H+8C) = **25**                |
+| CVE totales (todas las severidades)                 | OS 59 + JAR 33 = **92**                           | OS 0 + JAR 46 = **46**                                 |
+| hadolint                                            | **DL3059** (info, `RUN` consecutivos)             | **DL3066** (info, USER no numérico)                    |
+| Dive efficiency / wasted                            | 99.88 % / 558 kB                                  | 99.89 % / 560 kB                                       |
+| ¿Arranca y responde?                                | —                                                 | **Sí.** `GET /api/health` → `{"status":"UP"}` HTTP 200 |
 
 El runtime **no adelgazó**. El JAR pasó de 99.8 MB a 114 MB porque en esta rama se mergeó `release/2.0.0` (más código) entre A1 y A6. La base nueva (Alpine 3.24.3 / JRE 21.0.13) pesa un poco más que la de A1 (Alpine 3.23.5 / JRE 21.0.11). El recorte útil está en el **contexto de build** (~124 MB → **1.2 MB**) y en **no correr como root**.
 
@@ -155,11 +155,11 @@ Después: **DL3066** info: `USER sigesa` no es UID numérico. hadolint **no** av
 
 Archivos: `backend/Dockerfile`, `backend/.dockerignore` (nuevo), `backend/pom.xml` (exclude de `spring-boot-devtools` en el plugin).
 
-1. **`.dockerignore`** con `target`, `.m2`, `.git`, `.env`, `.env.*`, `src/test`, etc. El `Sending build context` bajó de ~124 MB a **1.2 MB**.
-2. **`FROM` con digest**  
+1. `.dockerignore` con `target`, `.m2`, `.git`, `.env`, `.env.*`, `src/test`, etc. El `Sending build context` bajó de ~124 MB a **1.2 MB**.
+2. `FROM` **con digest**
    - JDK: `eclipse-temurin:21-jdk-alpine@sha256:b78a1d385da875588e21207f07dddf9a1418849971ae857fb24c8f3a7d441a72`  
    - JRE: `eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372`  
-   Digest tomado de `docker image inspect --format "{{index .RepoDigests 0}}"`.
+    Digest tomado de `docker image inspect --format "{{index .RepoDigests 0}}"`.
 3. **Usuario no root:** `addgroup`/`adduser` `sigesa` y `USER sigesa`. Sin `--chown` del JAR (Java solo necesita leerlo).
 4. Un `RUN` para `chmod +x ./mvnw && ./mvnw -B dependency:go-offline` (DL3059).
 5. No copiar `.env` en la imagen; Compose ya usa `env_file`.
@@ -203,4 +203,4 @@ Log: `Started SigesaApplication in 14.057 seconds`. No faltó ningún archivo de
 - **Bajar DISK USAGE** por debajo de 479 MB: el peso es JRE (~165 MB) + JAR (~114 MB). Adelgazar de verdad pediría distroless/JRE más chica **y** un JAR más liviano.
 - **CVE HIGH/CRITICAL del fat JAR:** hay que actualizar Spring, Tomcat embed, Jackson, Netty, etc. en el `pom`.
 - **DL3066:** se dejó `USER sigesa` (legible) en lugar de `USER 100:101`.
-- **`compose up --wait` completo** en esta máquina: 11434 tomado por Ollama nativo. El backend nuevo igual respondió contra Postgres/MinIO ya en marcha.
+- `compose up --wait` **completo** en esta máquina: 11434 tomado por Ollama nativo. El backend nuevo igual respondió contra Postgres/MinIO ya en marcha.
