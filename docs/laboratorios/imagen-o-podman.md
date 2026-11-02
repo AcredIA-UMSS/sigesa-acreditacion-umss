@@ -23,80 +23,76 @@ El grupo se repartió las opciones. Este archivo junta las dos entregas.
 | **Docker** | Client y Engine **29.6.2**, Docker Desktop **4.85.0**, contexto `desktop-linux` |
 | **Podman** | **5.8.9** (CLI Windows + máquina WSL `podman-machine-default`). En Windows 10 no se usa Podman 6 (el enunciado lo prohíbe). |
 | **Rootless** | `true` (`podman info --format "{{.Host.Security.Rootless}}"`) |
-| **Proveedor de `podman compose`** | **docker-compose** de Docker Desktop: `C:\Users\Desktop\AppData\Local\Programs\DockerDesktop\resources\bin\docker-compose.exe`, Compose **v5.3.1**. No se usó `podman-compose` (Python). |
+| **Proveedor de `podman compose`** | Primera corrida: **docker-compose.exe** de Docker Desktop (Compose **v5.3.1**). Corrida “desde cero”: **podman-compose 1.6.0** (`PODMAN_COMPOSE_PROVIDER`), porque con Docker Desktop apagado `docker-compose.exe` no habla con el pipe de Podman (`win-sshproxy` falló). |
 | **Uso de IA** | **Sí**, Cursor (agente) para: (1) leer el README del laboratorio y el `compose` del repo; (2) ejecutar y recopilar `podman --version`, `info`, `compose version`, `ps`, `top` y peticiones HTTP; (3) redactar esta sección. **Todas las cifras y códigos HTTP se comprobaron en la terminal** (1 nov 2026, ~18:50–19:00). No se inventaron tiempos ni estados. |
 
 ### Tabla Docker vs Podman
 
-| | Docker | Podman |
-|---|---|---|
-| ¿Levantó a la primera? | Sí, es el camino habitual del repo (`docker-compose.yml`). | **Sí**, con `podman compose -f compose.podman.yml up -d` tras tener imágenes construidas. `podman compose ps`: 6/6 Up. |
-| Cambios necesarios | Nombres cortos (`postgres:16-alpine`, `node:22-alpine`) y `docker-compose.yml`. | Copia `compose.podman.yml`: imágenes con registry (`docker.io/library/...`, `docker.io/ollama/...`). `FROM` del backend y frontend con `docker.io/library/...`. `sed -i 's/\r$//'` en `mvnw` (CRLF de Windows rompía el builder Alpine). Puertos de host ya altos (`3000:80`, `8080:8080`): no hizo falta cambiar el 80 interno. |
-| Tiempo de `up -d` | No se midió “desde cero” en esta sesión: el stack Docker **no estaba arriba** (`docker ps` vacío) para no chocar puertos con Podman. | **29,6 s** (`Measure-Command` sobre el `up -d` de esta máquina, **con imágenes ya construidas**). No es un cold start: faltaría borrar imágenes/volúmenes para una corrida desde cero. |
-| Usuario dentro / fuera | Con Docker, `HUSER` no existe; el proceso se ve con el UID del contenedor (p. ej. `sigesa` / `postgres`). | `podman top sigesa-backend user huser pid args` → **USER `sigesa` / HUSER `524387`**, PID 1 = `java -jar app.jar`. Postgres: USER `postgres` / HUSER `524357`. Frontend: master nginx USER `root` / HUSER `1000`; workers USER `nginx` / HUSER `524388`. El root de dentro **no** es root del host (rootless). |
-| ¿El endpoint responde? | Sí en el flujo Docker del grupo (`GET /api/health` → 200; documentado en la opción A). | **Sí.** Medido con el stack Podman en marcha: API `http://127.0.0.1:8080/api/health` → **200** `{"status":"UP"}`; frontend `http://127.0.0.1:3000/` → **200**; MinIO `/minio/health/live` → **200**; Open WebUI `http://127.0.0.1:3001/health` → **200** `{"status":true}`. |
+Archivo usado en las dos corridas de 1–2 nov 2026: **`compose.podman.yml`** (mismo compose; no se mezcló con `docker-compose.yml` en el cronómetro).
 
-Contenedores comprobados (`podman ps`): `sigesa-postgres`, `sigesa-minio`, `sigesa-ollama` (healthy), `open-webui` (healthy), `sigesa-backend`, `sigesa-frontend`.
+| | Docker (esta máquina, 1–2 nov 2026) | Podman (esta máquina, 1–2 nov 2026) |
+|---|---|---|
+| ¿Levantó a la primera? | **No el stack completo.** `docker compose -f compose.podman.yml up -d` bajó imágenes (~13,9 min) y **falló** al construir `frontend` (`corepack prepare pnpm@latest`, exit 1: fetch a npm). Un segundo intento de `backend` también falló (`./mvnw dependency:go-offline`, exit 1). Sí levantaron, **sin rebuild**, `db` + `minio` + `ollama`. | **Sí** el stack completo (6/6), dos veces: (1) con imágenes ya construidas; (2) tras borrar backend/frontend y volúmenes. |
+| Cambios necesarios | El `FROM docker.io/library/...` del compose Podman **lo acepta**. No hizo falta otro YAML. El fallo fue de **red/build** (corepack/Maven dentro del builder), no de nombres cortos. | `compose.podman.yml` + `FROM docker.io/...` + `sed` CRLF en `mvnw`. Con Desktop apagado hubo que usar **podman-compose 1.6.0** (el `docker-compose.exe` no conectaba al pipe de Podman). |
+| Tiempo de `up -d` | **834,9 s** (`Measure-Command { docker compose -f compose.podman.yml up -d }`) **desde cero de Docker** (sin imágenes ni volúmenes en el engine). El comando **terminó en error** (frontend). No es un stack UP completo. | Con caché de imágenes: **29,6 s**. Desde cero de **imágenes construidas + volúmenes** (pulls de postgres/ollama/open-webui **sí** estaban en Podman): **205,9 s**. Luego API y frontend 200. |
+| Usuario dentro / fuera | `docker top sigesa-postgres`: columna **UID = 70** (usuario `postgres` de Alpine). `docker top sigesa-ollama`: **UID = root**. Docker **no** muestra `HUSER`; el UID 70/root es el del contenedor, no un mapeo rootless al usuario de Windows. | `podman top sigesa-backend user huser`: **USER `sigesa` / HUSER `524387`**. Postgres: USER `postgres` / HUSER `524357`. Nginx master: USER `root` / HUSER `1000`. Rootless: el root de dentro no es admin del host. |
+| ¿El endpoint responde? | **MinIO** `http://127.0.0.1:9000/minio/health/live` → **200**. **No** se obtuvo `/api/health` ni frontend en Docker en esta corrida (backend/frontend no construyeron). | **Sí.** API `/api/health` → **200** `{"status":"UP"}`; frontend `:3000` → **200**; MinIO → **200**; Open WebUI `/health` → **200**. |
 
 ### Problemas y cómo se resolvieron
 
 1. **Nombres cortos de imagen.** Podman no asume Docker Hub. Causa: `postgres:16-alpine` / `ollama/ollama:latest` / `node:22-alpine`. Cambio: `compose.podman.yml` y `FROM docker.io/library/...` en Dockerfiles. El `docker-compose.yml` se dejó para Docker.
 2. **Windows 10 + Podman 6.** El enunciado dice que 6 no corre aquí. Se instaló **Podman 5.8.9**. Máquina: `podman machine init` / `start`, estado `Running`, VMType **WSL**.
-3. **`podman compose` no es Compose propio.** La primera línea avisa: *Executing external compose provider ... docker-compose.exe*. Causa: Docker Desktop en el PATH. No se forzó `PODMAN_COMPOSE_PROVIDER`; se anotó el proveedor real.
+3. **`podman compose` no es Compose propio.** Con Desktop encendido usaba `docker-compose.exe`. Con Desktop apagado y `win-sshproxy` caído, `up -d` fallaba (`npipe:////./pipe/podman-machine-default`). Se instaló `podman-compose` 1.6.0 y se forzó `PODMAN_COMPOSE_PROVIDER`.
 4. **`mvnw` con CRLF.** En el builder Alpine el wrapper Maven fallaba por `\r`. Causa: checkout Windows. Cambio: `sed -i 's/\r$//' ./mvnw` antes de `chmod +x` en `backend/Dockerfile`.
 5. **Frontend: import muerto `XCircle`.** OxLint fallaba el build. Se quitó el símbolo no usado en `TechnicianInboxPage.tsx`. Rebuild: `podman build -t sigesa-frontend-test ./frontend` → tag `localhost/sigesa-frontend-test:latest`.
-6. **No se pueden tener Docker y Podman en los mismos puertos a la vez.** `docker ps` quedó vacío a propósito. Comparación de *up* simultáneo no aplica.
+6. **No se pueden tener Docker y Podman en los mismos puertos a la vez.** Secuencia real: Podman `down` (y `rm -f` + `volume rm` porque `podman-compose down -v` no limpió) → `docker compose up`. Luego `podman machine stop`.
 7. **Warnings de seed MinIO** al arrancar el backend (`Unable to restore evidence blob in object storage`). El API igual llegó a `UP` y el bucket `sigesa-evidences` se creó. No bloqueó el laboratorio.
 8. **No se tocó** el servicio `test-generator` (profile `tools`): sigue con `host.docker.internal`. En Podman sería `host.containers.internal` si se usara ese profile.
 
 ### Duda: ¿se hizo la comparación con Docker?
 
-**A medias. No fue un A/B en la misma corrida.**
-
-| Qué sí se comparó (medido aquí) | Qué no se comparó |
-|---|---|
-| Motores instalados: Docker Engine **29.6.2** vs Podman **5.8.9** (`docker version` / `podman --version`). | `docker compose up -d` **no se ejecutó** en esta sesión: los puertos 3000/8080/5432/11434 ya los tenía Podman. |
-| `docker ps` vacío vs `podman ps` con 6 contenedores Up. | Tiempo de `up -d` **desde cero** en Docker: no hay cifra. En Podman solo hay **29,6 s con imágenes ya construidas**. |
-| Endpoint con **Podman**: `/api/health` 200, frontend 200, MinIO 200, Open WebUI 200. | El 200 de Docker en `/api/health` de la tabla sale de la **opción A** (otra máquina, CachyOS, Boris), no de un `docker compose up` paralelo en este Windows. |
-| Usuario: `podman top` (USER vs HUSER). | `docker top` del mismo contenedor: no aplica; Docker no tenía el stack. |
-| Compose: `docker-compose.yml` (nombres cortos) vs `compose.podman.yml` (registry completo). | Proveedor: `podman compose` **usa** `docker-compose.exe`; no se aisló Podman de Docker Desktop. |
-
-Conclusión para el enunciado B7: se comparó **instalación, compose, rootless y que Podman responde**. No se puede afirmar un ganador de tiempo ni un “Docker también levantó en este PC el mismo día”, porque no se bajó Podman para volver a levantar con Docker.
+**Sí, en esta máquina, el 1–2 nov 2026, con el mismo `compose.podman.yml`.** Antes solo estaba Podman; faltaba bajar Podman, cronometrar Docker y `docker top`. Eso ya se hizo. Lo que **sigue incompleto** es el stack Docker **completo** (backend + frontend no construyeron).
 
 ### Comparación
 
-- **Qué se gana con Podman:** rootless real (`Rootless=true`); un `root` de nginx por dentro se ve como UID 1000 / 524388 fuera. En Windows 10 se puede seguir el laboratorio con 5.8. El mismo Compose (vía docker-compose.exe) entiende `depends_on` + healthchecks.
-- **Qué se pierde:** hay que duplicar el compose (`compose.podman.yml`) por los nombres de registry. `podman compose` **delega** en Docker Compose de Desktop: no es un stack “sin Docker instalado”, solo sin el *engine* de Docker levantando los contenedores. Cold start desde cero no se midió (imágenes ya estaban). Docker Desktop sigue haciendo falta en esta máquina como proveedor de Compose.
-- **Para SIGESA:** el stack de demo (API + UI + Postgres + MinIO + Ollama) **funciona igual de cara al HTTP**. La diferencia útil es el aislamiento de usuario, no el rendimiento de un `up -d` de ~30 s con caché.
+- **Qué se gana con Podman (medido):** rootless (`HUSER` 524387 vs UID Docker 70/`root`); el `up -d` con capas de postgres/ollama ya en disco y rebuild de backend/frontend tardó **205,9 s** y **sí** dejó API+UI en 200. En Windows 10, Podman 5.8 basta.
+- **Qué se pierde / duele:** hay que duplicar compose por registries. `podman compose` depende de un proveedor externo. `down -v` de podman-compose 1.6 **no borró** contenedores/volúmenes (hubo que `podman rm -f` + `volume rm`). Docker Desktop apagado rompe el proveedor `docker-compose.exe`.
+- **Docker en este PC:** el `up -d` desde engine vacío duró **834,9 s** y **no** dejó SIGESA entero: falló `corepack pnpm@latest` (frontend) y luego Maven `go-offline` (backend). Sí responden Postgres/MinIO/Ollama; MinIO live **200**. No se puede decir “Docker también sirvió `/api/health` aquí hoy”.
+- **Tiempos no son 1:1:** Podman “desde cero” **no** re-descargó ollama/open-webui (ya estaban). Docker **sí** las bajó. Por eso 206 s vs 835 s no corona a Podman como más rápido: Docker pagó el pull.
 
 ### Comandos usados (opción B)
 
 ```powershell
+# --- Podman (B1–B7, luego desde cero) ---
 podman --version
-podman machine init
 podman machine start
 podman info --format "{{.Host.Security.Rootless}}"
-podman compose version
-podman compose -f compose.podman.yml up -d
-Measure-Command { podman compose -f compose.podman.yml up -d }
-podman compose -f compose.podman.yml ps
-podman ps
-podman logs --tail 30 sigesa-backend
+podman rm -f sigesa-frontend sigesa-backend open-webui sigesa-minio sigesa-ollama sigesa-postgres
+podman volume rm -f sigesa-backend-springboot_postgres_data sigesa-backend-springboot_ollama_state sigesa-backend-springboot_minio_data sigesa-backend-springboot_open-webui
+podman rmi -f docker.io/library/sigesa-backend-springboot-backend:latest docker.io/library/sigesa-backend-springboot-frontend:latest
+$env:PODMAN_COMPOSE_PROVIDER = 'C:\Users\Desktop\AppData\Roaming\Python\Python314\Scripts\podman-compose.exe'
+Measure-Command { podman compose -f compose.podman.yml up -d }   # 205,9 s
 podman top sigesa-backend user huser pid args
-podman top sigesa-postgres user huser pid args
-podman top sigesa-frontend user huser pid args
 Invoke-WebRequest http://127.0.0.1:8080/api/health
 Invoke-WebRequest http://127.0.0.1:3000/
+podman compose -f compose.podman.yml down -v
+podman rm -f sigesa-frontend sigesa-backend open-webui sigesa-minio sigesa-ollama sigesa-postgres
+podman volume rm -f sigesa-backend-springboot_postgres_data sigesa-backend-springboot_ollama_state sigesa-backend-springboot_minio_data sigesa-backend-springboot_open-webui
+
+# --- Docker (mismo compose.podman.yml, engine vacío) ---
+Measure-Command { docker compose -f compose.podman.yml up -d }   # 834,9 s, falló frontend
+docker compose -f compose.podman.yml up -d db minio ollama
+docker top sigesa-postgres
+docker top sigesa-ollama
 Invoke-WebRequest http://127.0.0.1:9000/minio/health/live
-Invoke-WebRequest http://127.0.0.1:3001/health
-docker version
-docker ps
-podman machine info
+
+# --- B8 ---
+podman machine stop
 ```
 
-Archivos de esta opción: `compose.podman.yml` (nuevo), `backend/Dockerfile` y `frontend/Dockerfile` (prefijo `docker.io/library/` + `sed` CRLF).
+Archivos de esta opción: `compose.podman.yml`, `backend/Dockerfile`, `frontend/Dockerfile`.
 
-No se ejecutó `podman compose down -v` ni `podman machine stop` al cerrar este informe: el stack se dejó arriba para las pruebas HTTP.
+**B8 (hecho):** contenedores/volúmenes Podman eliminados; `podman machine stop` → estado **Stopped**. En Docker quedaron `db` / `minio` / `ollama` arriba para las pruebas (no se pidió `docker compose down`).
 
 ---
 
