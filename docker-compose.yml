@@ -109,7 +109,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
+      - "3000:8080" # El contenedor escucha en 8080, sin privilegios de root.
 
   # Generador de tests AcredIA (Python) — NO producción; profile tools
   # Uso: ./tools/test-generator/run.sh --batch L1
