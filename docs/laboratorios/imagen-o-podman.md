@@ -49,6 +49,20 @@ Contenedores comprobados (`podman ps`): `sigesa-postgres`, `sigesa-minio`, `sige
 7. **Warnings de seed MinIO** al arrancar el backend (`Unable to restore evidence blob in object storage`). El API igual llegó a `UP` y el bucket `sigesa-evidences` se creó. No bloqueó el laboratorio.
 8. **No se tocó** el servicio `test-generator` (profile `tools`): sigue con `host.docker.internal`. En Podman sería `host.containers.internal` si se usara ese profile.
 
+### Duda: ¿se hizo la comparación con Docker?
+
+**A medias. No fue un A/B en la misma corrida.**
+
+| Qué sí se comparó (medido aquí) | Qué no se comparó |
+|---|---|
+| Motores instalados: Docker Engine **29.6.2** vs Podman **5.8.9** (`docker version` / `podman --version`). | `docker compose up -d` **no se ejecutó** en esta sesión: los puertos 3000/8080/5432/11434 ya los tenía Podman. |
+| `docker ps` vacío vs `podman ps` con 6 contenedores Up. | Tiempo de `up -d` **desde cero** en Docker: no hay cifra. En Podman solo hay **29,6 s con imágenes ya construidas**. |
+| Endpoint con **Podman**: `/api/health` 200, frontend 200, MinIO 200, Open WebUI 200. | El 200 de Docker en `/api/health` de la tabla sale de la **opción A** (otra máquina, CachyOS, Boris), no de un `docker compose up` paralelo en este Windows. |
+| Usuario: `podman top` (USER vs HUSER). | `docker top` del mismo contenedor: no aplica; Docker no tenía el stack. |
+| Compose: `docker-compose.yml` (nombres cortos) vs `compose.podman.yml` (registry completo). | Proveedor: `podman compose` **usa** `docker-compose.exe`; no se aisló Podman de Docker Desktop. |
+
+Conclusión para el enunciado B7: se comparó **instalación, compose, rootless y que Podman responde**. No se puede afirmar un ganador de tiempo ni un “Docker también levantó en este PC el mismo día”, porque no se bajó Podman para volver a levantar con Docker.
+
 ### Comparación
 
 - **Qué se gana con Podman:** rootless real (`Rootless=true`); un `root` de nginx por dentro se ve como UID 1000 / 524388 fuera. En Windows 10 se puede seguir el laboratorio con 5.8. El mismo Compose (vía docker-compose.exe) entiende `depends_on` + healthchecks.
