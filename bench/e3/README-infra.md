@@ -53,4 +53,40 @@ k6 (opcional): `docker compose -f bench/e3/docker-compose.yml --profile bench ru
 
 Variables: raíz `.env` / `.env.example` (`E3_*`). Timeouts E3 ≥ 5 s para que el toxic `lento` (2 s) sea medible.
 
-Scripts: `chmod +x bench/e3/*.sh` (Git Bash / WSL / Linux). Healthchecks: `wget` en la JRE Alpine (no hay Python); Toxiproxy 2.9.0 es `scratch` → `/toxiproxy-cli list`.
+Scripts: `chmod +x bench/e3/*.sh` (Git Bash / WSL / Linux). Healthchecks: `wget` en la JRE Alpine (no hay Python); Toxiproxy 2.9.0 es `scratch` → `/toxiproxy-cli list`. `start_period` api/modulo: **120 s**. `run-limpio.sh` usa `--wait-timeout 300`.
+
+## Timeouts y reintentos efectivos (forma HTTP)
+
+Valores inyectados en `api` (no los defaults 200/800 del adaptador):
+
+| Variable | Valor | Efecto |
+|---|---|---|
+| `E3_NOTIFICATION_TIMEOUT_MS` → `SIGESA_NOTIFICATION_TIMEOUT_MS` | **5000** | timeout por intento (connect + request) |
+| `E3_NOTIFICATION_DEADLINE_MS` → `SIGESA_NOTIFICATION_DEADLINE_MS` | **5000** | presupuesto total de `inspect()` |
+| `E3_NOTIFICATION_RETRIES` → `SIGESA_NOTIFICATION_RETRIES` | **1** | `maxAttempts = 1` (un solo intento) |
+| `E3_NOTIFICATION_RETRY_BACKOFF_MS` | **50** | no aplica con 1 intento |
+
+`api` y `modulo` comparten `JAVA_OPTS`/`JAVA_TOOL_OPTIONS=-Xms256m -Xmx256m`, `mem_limit=512m`, `cpus=1.0`.
+
+## Tiempos de fallo por tóxico (medidos con `verificar-infra.sh`)
+
+Ruta: `GET /api/v1/e3/notifications`. Control `GET /api/health` = 200 en todos los casos.
+
+| Tóxico | Qué hace Toxiproxy | Resultado medido |
+|---|---|---|
+| `lento` | latency downstream 2000 ms, jitter 0 | **~2 s**, HTTP **200** (timeout 5 s > latencia) |
+| `colgado` | timeout downstream, timeout 0 (cuelga) | `curl -m 5` → **rc 28** a los **5006 ms** |
+| `caido` | proxy `enabled: false` | HTTP **503** en **0 s** |
+
+Tras `reset`: módulo vuelve a 200.
+
+## Tiempos de build y up (`bench/e3/resultados/tiempos.csv`)
+
+Corridas con cache de imagen (Maven ya empaquetado):
+
+| forma | fecha (UTC) | build_s | up_s |
+|---|---|---|---|
+| http | 2026-11-03T01:52:27Z | 1 | 45 |
+| in_process | 2026-11-03T01:53:18Z | 2 | 25 |
+
+El `package` Maven en Docker (cuando cambió código) tardó **~10 s**. El primer `up` HTTP exitoso esperó health de modulo + api (~45 s).

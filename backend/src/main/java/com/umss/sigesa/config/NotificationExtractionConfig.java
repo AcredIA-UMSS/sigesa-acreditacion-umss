@@ -25,7 +25,6 @@ public class NotificationExtractionConfig {
     @Bean
     @ConditionalOnProperty(name = "sigesa.extraction.mode", havingValue = "http")
     NotificationModulePort httpNotificationModule(
-            ObjectMapper objectMapper,
             @Value("${sigesa.extraction.http.base-url}") String baseUrl,
             @Value("${sigesa.extraction.http.timeout-ms:200}") int timeoutMs,
             @Value("${sigesa.extraction.http.retries:2}") int retries,
@@ -36,6 +35,7 @@ public class NotificationExtractionConfig {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(timeout)
                 .build();
+        ObjectMapper objectMapper = new ObjectMapper();
         return new HttpNotificationModuleAdapter(
                 client,
                 objectMapper,

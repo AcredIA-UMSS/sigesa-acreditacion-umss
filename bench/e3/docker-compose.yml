@@ -10,11 +10,19 @@ services:
       dockerfile: Dockerfile
     image: sigesa-e3:local
     container_name: sigesa-e3-api
-    command: ["java", "-jar", "app.jar"]
+    mem_limit: ${E3_MEM_LIMIT:-512m}
+    cpus: ${E3_CPUS:-1.0}
+    mem_reservation: ${E3_MEM_RESERVATION:-256m}
     environment:
+      JAVA_OPTS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      JAVA_TOOL_OPTIONS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
       SIGESA_APP: api
       EXTRACTION_MODE: http
       SERVER_PORT: "8080"
+      SIGESA_EVIDENCE_STORAGE: local
+      SIGESA_REPORT_STORAGE_PATH: /tmp/sigesa-reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/sigesa-evidences
+      SIGESA_EVIDENCE_STORAGE_DIR: /tmp/sigesa-uploads
       SIGESA_NOTIFICATION_BASE_URL: http://toxiproxy:${E3_TOXIPROXY_LISTEN_PORT:-8666}
       SIGESA_NOTIFICATION_TIMEOUT_MS: ${E3_NOTIFICATION_TIMEOUT_MS:-5000}
       SIGESA_NOTIFICATION_DEADLINE_MS: ${E3_NOTIFICATION_DEADLINE_MS:-5000}
@@ -38,7 +46,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
-      start_period: 90s
+      start_period: 120s
     networks:
       - e3
 
@@ -46,10 +54,18 @@ services:
     build: *app-build
     image: sigesa-e3:local
     container_name: sigesa-e3-modulo
-    command: ["java", "-jar", "app.jar"]
+    mem_limit: ${E3_MEM_LIMIT:-512m}
+    cpus: ${E3_CPUS:-1.0}
+    mem_reservation: ${E3_MEM_RESERVATION:-256m}
     environment:
+      JAVA_OPTS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      JAVA_TOOL_OPTIONS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
       SIGESA_APP: notification-service
       SERVER_PORT: "${E3_MODULE_PORT:-8080}"
+      SIGESA_EVIDENCE_STORAGE: local
+      SIGESA_REPORT_STORAGE_PATH: /tmp/sigesa-reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/sigesa-evidences
+      SIGESA_EVIDENCE_STORAGE_DIR: /tmp/sigesa-uploads
     expose:
       - "${E3_MODULE_PORT:-8080}"
     healthcheck:
@@ -61,7 +77,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
-      start_period: 90s
+      start_period: 120s
     networks:
       - e3
 
