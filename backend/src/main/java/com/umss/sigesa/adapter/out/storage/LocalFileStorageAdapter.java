@@ -19,7 +19,8 @@ public class LocalFileStorageAdapter implements FileStoragePort {
 
     private final Path storageDirectory;
 
-    public LocalFileStorageAdapter(@Value("${sigesa.evidence.storage-dir:uploads/evidences}") String storageDir) {
+    public LocalFileStorageAdapter(
+            @Value("${sigesa.evidence.storage-dir:${sigesa.evidence.storage-path:./data/evidences}}") String storageDir) {
         this.storageDirectory = Paths.get(storageDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.storageDirectory);

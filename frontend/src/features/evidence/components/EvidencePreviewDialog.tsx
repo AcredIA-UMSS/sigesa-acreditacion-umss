@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { FileText, X } from 'lucide-react';
+import { AlertCircle, FileText, X } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 
 export type EvidencePreviewDialogProps = {
@@ -93,9 +93,13 @@ export function EvidencePreviewDialog({
         <div className="min-h-64 flex-1 overflow-auto p-4">
           {isLoading && <p className="text-body-md text-gray-500">Cargando evidencia…</p>}
           {error && (
-            <p className="text-body-md text-danger" role="alert">
-              {error}
-            </p>
+            <div className="flex flex-col items-center justify-center p-8 text-center" role="alert">
+              <AlertCircle size={40} className="mb-3 text-danger" />
+              <p className="text-body-md font-medium text-danger">{error}</p>
+              <p className="mt-1 text-body-sm text-gray-500">
+                Verifique que el archivo haya sido cargado correctamente o intente de nuevo más tarde.
+              </p>
+            </div>
           )}
           {!isLoading && !error && previewable && objectUrl && isImage && (
             <img src={objectUrl} alt={title} className="mx-auto max-h-[70vh] max-w-full rounded-md" />

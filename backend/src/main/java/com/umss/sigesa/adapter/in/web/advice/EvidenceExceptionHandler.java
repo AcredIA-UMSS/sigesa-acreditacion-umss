@@ -31,14 +31,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class EvidenceExceptionHandler {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EvidenceExceptionHandler.class);
+
     @ExceptionHandler(DocumentAssetNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleDocumentAssetNotFound(DocumentAssetNotFoundException ex) {
+        log.warn("DocumentAsset no encontrado: assetId={}", ex.getDocumentAssetId());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "DOCUMENT_ASSET_NOT_FOUND", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(EvidenceBlobNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEvidenceBlobNotFound(EvidenceBlobNotFoundException ex) {
+        log.warn("Archivo de evidencia no encontrado en almacenamiento: assetId={}", ex.getDocumentAssetId());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "EVIDENCE_BLOB_NOT_FOUND", "message", ex.getMessage()));
     }

@@ -2,7 +2,10 @@
 
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: sigesa-postgres:16-alpine
     container_name: sigesa-postgres
     restart: always
     env_file:
@@ -15,8 +18,9 @@ services:
       # Host 5432 suele estar ocupado por PostgreSQL nativo; override: POSTGRES_HOST_PORT=5433 en .env
       - "${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - postgres_data:/var/lib/postgresql/data:Z
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/01_seed.sql:ro,Z
+      - ./db/02_seed_e3.sql:/docker-entrypoint-initdb.d/02_seed_e3.sql:ro,Z
 
   ollama:
     image: ollama/ollama:latest

@@ -12,6 +12,8 @@ RUN ./mvnw -B package -DskipTests
 FROM eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372
 WORKDIR /app
 RUN addgroup -S sigesa && adduser -S -G sigesa -H sigesa
+RUN mkdir -p /app/data/evidences /app/data/reports /app/uploads && chown -R sigesa:sigesa /app/data /app/uploads
+COPY --chown=sigesa:sigesa data/ /app/data/
 COPY --from=builder /app/target/sigesa-0.0.1-SNAPSHOT.jar app.jar
 USER sigesa
 EXPOSE 8080

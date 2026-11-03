@@ -45,6 +45,8 @@ frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
 frontend/.cache/
+test-results/
+playwright-report/
 
 ### pnpm local store ###
 .pnpm-store/

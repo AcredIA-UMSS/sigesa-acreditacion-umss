@@ -61,6 +61,7 @@ public class S3EvidenceStorageConfig {
     }
 
     @Bean
+    @org.springframework.core.annotation.Order(10)
     ApplicationRunner evidenceS3BucketInitializer(
             S3Client evidenceS3Client,
             @Value("${sigesa.evidence.s3.bucket}") String bucket) {

@@ -39,6 +39,7 @@
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 | PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
 | PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+| PM-033 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 
 
 ---
@@ -2160,5 +2161,60 @@ commit all the changes
 - [x] Backend: `./mvnw test` — 564 pruebas pasadas, 0 fallos, 0 errores.
 - [x] Frontend: `npm run test:run` — 44 suites, 119 pruebas pasadas.
 - [x] Calidad Frontend: `npx oxlint` (0 errores) y `npx tsc -b` (0 errores).
+
+---
+
+## PM-033
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-033 |
+| **Fecha** | 2026-11-03 |
+| **Hora** | 18:10 |
+| **Solicitante** | Tech Lead / Alexander Alvarez |
+| **Agente/Entorno** | Antigravity AI Pair Programming |
+| **Modelo** | Claude 3.7 Sonnet |
+| **Tarea** | Corrección de nombres de negocio y enlaces locales en exportación Dossier Digital |
+| **Objetivo** | Reemplazar IDs crudos por nombres de carrera y proceso/plantilla en el índice HTML, resumen ejecutivo y manifiesto; asegurar enlaces relativos offline directos a evidencias foliadas; y asignar filename legible en Content-Disposition. |
+| **Contexto** | El usuario detectó que el dossier generado mostraba UUIDs en lugar de nombres humanos para el proceso y carrera, y que los hipervínculos a los archivos dentro del HTML maestro no abrían las evidencias locales. |
+| **PR-IMPL vinculado** | [PR-IMPL-046](file:///mnt/sda2/informatica/maestria/sigesa-acreditacion-umss/docs/prompts/impl/PR-IMPL-046.md) |
+| **DD-UC vinculado** | [FEAT-11](file:///mnt/sda2/informatica/maestria/sigesa-acreditacion-umss/docs/features/FEAT-11-exportacion-dossier-digital-zip.md) |
+| **FSD-UC vinculado** | FSD-UC-032 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+the dosier export generation, is showing ids instead of the business names for processes, careers, and that the links for the files are not working in the export, pls review
+```
+
+### Entradas auxiliares
+
+- `docs/features/FEAT-11-exportacion-dossier-digital-zip.md`
+- `docs/prompts/impl/PR-IMPL-046.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessController.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapterTest.java` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Inyección de `ProgramCatalogPort` y `TemplatePort` en `ZipDossierExportStreamingAdapter` para resolver nombres legibles de carrera (`careerDisplayName`, `careerSlug`) y plantilla de acreditación (`processBusinessName`, `processSlug`).
+- Sustitución de IDs UUID en `00_Indice_Maestro_Cumplimiento.html`, `00_Resumen_Ejecutivo.txt` y `00_Manifiest_Checksums.txt` por los nombres de negocio (manteniendo el UUID como identificador secundario).
+- Generación de hipervínculos relativos funcionales (`<a class='file-link' href='...'>`) desde el índice HTML raíz hacia las carpetas y evidencias foliadas dentro del archivo ZIP, facilitando la navegación offline una vez descomprimido.
+- Reutilización en memoria de los blobs de evidencias mediante mapa temporal en una sola pasada, previniendo lecturas redundantes del almacenamiento.
+- Nombre descriptivo de descarga en `Content-Disposition` en `ProcessController.resolveDossierDownloadFilename` (`Dossier_<careerCode>.zip`).
+- Ampliación de la suite de pruebas unitarias en `ZipDossierExportStreamingAdapterTest` cubriendo resolución de nombres de negocio y enlaces HTML relativos.
+
+### Validación ejecutada
+
+- [x] Backend: `./mvnw test -Dtest=ZipDossierExportStreamingAdapterTest,ProcessDossierExportControllerTest,DossierExportServiceTest` — 12 pruebas pasadas (0 fallos, 0 errores).
+- [x] Frontend: `npx vitest run src/features/processes/hooks/useDossierExport.test.ts` — 4 pruebas pasadas (0 fallos).
+
 
 
