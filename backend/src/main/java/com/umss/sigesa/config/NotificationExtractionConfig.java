@@ -35,6 +35,7 @@ public class NotificationExtractionConfig {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(timeout)
                 .build();
+        ObjectMapper objectMapper = new ObjectMapper();
         return new HttpNotificationModuleAdapter(
                 client,
                 new ObjectMapper(),
