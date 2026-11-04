@@ -557,7 +557,7 @@ INSERT INTO tb_observation (
     ('OBS-E3-010', 'e3000000-0000-0000-0001-000000000009', 'e3000000-0004-0000-0000-000000000021', 'ARCU-IND-1.1', 'Convenios de Internado Rotatorio y Campos Clínicos', 'Ratificar actas de rotación hospitalaria en Hospital Viedma y Maternológico German Urquidi.', CURRENT_DATE - 9, CURRENT_DATE - 1, 'APROBADO', '/processes/e3000000-0000-0003-0000-000000000007/indicators/101');
 
 -- 8.1 Notificaciones Outbox - Limpieza general del bloque E3
-DELETE FROM notification_outbox WHERE id >= 'e3000000-0000-0000-0000-000000000001' AND id <= 'e3000000-0000-0000-0000-000000020000';
+DELETE FROM notification_outbox WHERE id >= 'e3000000-0000-0000-0000-000000000001' AND id <= 'e3000000-0000-0000-0000-ffffffffffff';
 
 -- 8.2 Notificaciones críticas iniciales (PENDING)
 INSERT INTO notification_outbox (
@@ -568,7 +568,7 @@ INSERT INTO notification_outbox (
     ('e3000000-0000-0000-0000-000000000003', 'ALERT_PEER_REVIEW_COMMENCING', 'e3000000-0000-0000-0002-000000000003', 'coord.bioquimica@umss.edu.bo', 'Notificación: Inicio de evaluación por comité de pares ARCU-SUR (Bioquímica y Farmacia)', 'El comité externo asignado iniciará la revisión documental de laboratorios y bioseguridad a partir del lunes.', '/processes/e3000000-0000-0003-0000-000000000003/summary', 'PENDING', 0, 5, NULL, NOW() - INTERVAL '2 hours', NULL),
     ('e3000000-0000-0000-0000-000000000004', 'ALERT_PROCESS_OPENED', 'e3000000-0000-0000-0002-000000000004', 'coord.odontologia@umss.edu.bo', 'Apertura formal de proceso de acreditación CEUB 2026 (Odontología)', 'Se ha dado inicio oficial al proceso de autoevaluación para la carrera de Odontología de la UMSS.', '/processes/e3000000-0000-0003-0000-000000000004', 'PENDING', 0, 5, NULL, NOW() - INTERVAL '5 hours', NULL);
 
--- 8.3 Lote masivo de notificaciones PENDING (2,496 registros adicionales -> 2,500 en total)
+-- 8.3 Lote masivo de notificaciones PENDING (39,996 registros adicionales -> 40,000 en total)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
@@ -611,14 +611,14 @@ SELECT
     NULL,
     NOW() - ((i % 1440) || ' minutes')::interval,
     NULL
-FROM generate_series(1, 2496) AS i;
+FROM generate_series(1, 39996) AS i;
 
--- 8.4 Lote masivo de notificaciones SENT (7,500 registros históricos)
+-- 8.4 Lote masivo de notificaciones SENT (100,000 registros históricos)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
-    ('e3000000-0000-0000-0000-' || LPAD((2500 + i)::text, 12, '0'))::uuid,
+    ('e3000000-0000-0000-0000-' || LPAD((40000 + i)::text, 12, '0'))::uuid,
     CASE (i % 5)
         WHEN 0 THEN 'EVIDENCE_APPROVED'
         WHEN 1 THEN 'INDICATOR_COMPLETED'
@@ -644,7 +644,7 @@ SELECT
         WHEN 13 THEN 'coord.arquitectura@umss.edu.bo'
         ELSE 'coord.economia@umss.edu.bo'
     END,
-    'Confirmación de envío exitoso #' || (2500 + i),
+    'Confirmación de envío exitoso #' || (40000 + i),
     'La evidencia ha sido procesada y aprobada correctamente en la plataforma SIGESA.',
     '/processes/e3000000-0000-0003-0000-000000000001/summary',
     'SENT',
@@ -653,18 +653,18 @@ SELECT
     NULL,
     NOW() - ((i % 90) || ' days')::interval - ((i % 24) || ' hours')::interval,
     NOW() - ((i % 90) || ' days')::interval - (((i % 24) - 1) || ' hours')::interval
-FROM generate_series(1, 7500) AS i;
+FROM generate_series(1, 100000) AS i;
 
--- 8.5 Lote de notificaciones FAILED (500 registros con reintentos agotados)
+-- 8.5 Lote de notificaciones FAILED (7,000 registros con reintentos agotados)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
-    ('e3000000-0000-0000-0000-' || LPAD((10000 + i)::text, 12, '0'))::uuid,
+    ('e3000000-0000-0000-0000-' || LPAD((140000 + i)::text, 12, '0'))::uuid,
     'SMTP_DISPATCH_ALERT',
     ('e3000000-0000-0000-0002-000000000005')::uuid,
     'invalid_user_' || i || '@umss.edu.bo',
-    'Falla en despacho SMTP #' || (10000 + i),
+    'Falla en despacho SMTP #' || (140000 + i),
     'Error persistente al despachar notificación electrónica tras agotar 5 reintentos máximos.',
     '/admin/notifications/failed',
     'FAILED',
@@ -673,18 +673,18 @@ SELECT
     NULL,
     NOW() - ((i % 30) || ' days')::interval,
     NULL
-FROM generate_series(1, 500) AS i;
+FROM generate_series(1, 7000) AS i;
 
--- 8.6 Lote de notificaciones RETRYING (200 registros pendientes en reintento)
+-- 8.6 Lote de notificaciones RETRYING (3,000 registros pendientes en reintento)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
-    ('e3000000-0000-0000-0000-' || LPAD((10500 + i)::text, 12, '0'))::uuid,
+    ('e3000000-0000-0000-0000-' || LPAD((147000 + i)::text, 12, '0'))::uuid,
     'EVIDENCE_REVIEW_EXPEDITE',
     ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 15))::text, 12, '0'))::uuid,
     'coord.informatica@umss.edu.bo',
-    'Reintento de despacho de alerta #' || (10500 + i),
+    'Reintento de despacho de alerta #' || (147000 + i),
     'Intento de entrega diferido por saturación temporal del servidor de correo institucional.',
     '/processes/e3000000-0000-0003-0000-000000000001/indicators/104',
     'PENDING',
@@ -693,4 +693,4 @@ SELECT
     NOW() + ((i % 60) || ' minutes')::interval,
     NOW() - ((i % 120) || ' minutes')::interval,
     NULL
-FROM generate_series(1, 200) AS i;
+FROM generate_series(1, 3000) AS i;

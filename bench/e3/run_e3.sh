@@ -95,7 +95,9 @@ verify_smoke() {
 
 run_k6() {
     local port="${BACKEND_PORT:-8080}"
-    echo "[4/4] Ejecutando escenario de estrés K6 (MODO: ${MODE})..."
+    local target_rps="${TARGET_RPS:-50}"
+    local fault_latency="${FAULT_LATENCY_MS:-2000}"
+    echo "[4/4] Ejecutando escenario de estrés K6 (MODO: ${MODE}, TARGET_RPS: ${target_rps}, FAULT_LATENCY_MS: ${fault_latency}ms)..."
     if command -v k6 &> /dev/null; then
         echo "K6 nativo detectado en el host."
         API_BASE_URL="http://localhost:${port}" \
@@ -104,12 +106,19 @@ run_k6() {
         PROXY_LISTEN="0.0.0.0:8081" \
         TOXIPROXY_UPSTREAM="notification-service:8082" \
         EXTRACTION_MODE="${MODE}" \
+        TARGET_RPS="${target_rps}" \
+        FAULT_LATENCY_MS="${fault_latency}" \
         BENCH_DIR="${SCRIPT_DIR}" \
         SUMMARY_PATH="${SCRIPT_DIR}/k6_last_result.json" \
         k6 run "${SCRIPT_DIR}/stress_toxiproxy.js"
     else
         echo "K6 nativo no encontrado. Ejecutando mediante contenedor Docker (grafana/k6)..."
-        EXTRACTION_MODE="${MODE}" docker compose -f "${COMPOSE_FILE}" run --rm -e EXTRACTION_MODE="${MODE}" k6
+        EXTRACTION_MODE="${MODE}" TARGET_RPS="${target_rps}" FAULT_LATENCY_MS="${fault_latency}" \
+        docker compose -f "${COMPOSE_FILE}" run --rm \
+            -e EXTRACTION_MODE="${MODE}" \
+            -e TARGET_RPS="${target_rps}" \
+            -e FAULT_LATENCY_MS="${fault_latency}" \
+            k6
     fi
 }
 
