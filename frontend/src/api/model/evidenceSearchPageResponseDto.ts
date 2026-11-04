@@ -9,7 +9,7 @@ import type { EvidenceSearchHitResponseDto } from './evidenceSearchHitResponseDt
 
 export interface EvidenceSearchPageResponseDto {
   items?: EvidenceSearchHitResponseDto[];
-  total?: number;
   page?: number;
   size?: number;
+  total?: number;
 }

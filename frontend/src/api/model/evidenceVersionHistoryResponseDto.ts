@@ -7,15 +7,15 @@
  */
 
 export interface EvidenceVersionHistoryResponseDto {
-  versionId?: string;
-  version?: number;
-  supersedesVersion?: number;
-  observationId?: string;
-  description?: string;
-  contentHash?: string;
-  originalFilename?: string;
-  createdBy?: string;
-  createdAt?: string;
-  current?: boolean;
   blobAvailable?: boolean;
+  contentHash?: string;
+  createdAt?: string;
+  createdBy?: string;
+  current?: boolean;
+  description?: string;
+  observationId?: string;
+  originalFilename?: string;
+  supersedesVersion?: number;
+  version?: number;
+  versionId?: string;
 }

@@ -9,6 +9,6 @@
 export interface LoginResponse {
   accessToken?: string;
   expiresIn?: number;
-  role?: string;
   programScope?: string[];
+  role?: string;
 }

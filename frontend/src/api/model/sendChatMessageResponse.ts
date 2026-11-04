@@ -8,10 +8,10 @@
 import type { AssistantToolStepResponse } from './assistantToolStepResponse.ts';
 
 export interface SendChatMessageResponse {
-  reply?: string;
-  toolId?: string;
-  sourceTables?: string[];
-  path?: string;
   llmInvoked?: boolean;
+  path?: string;
+  reply?: string;
+  sourceTables?: string[];
   steps?: AssistantToolStepResponse[];
+  toolId?: string;
 }

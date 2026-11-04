@@ -7,8 +7,8 @@
  */
 
 export interface ReportJobStatusResponse {
-  jobId?: string;
-  status?: string;
   downloadUrl?: string;
   errorCode?: string;
+  jobId?: string;
+  status?: string;
 }

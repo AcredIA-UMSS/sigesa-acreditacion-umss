@@ -8,7 +8,7 @@
 
 export interface ExportJobResponse {
   jobId?: string;
-  status?: string;
   message?: string;
+  status?: string;
   statusUrl?: string;
 }

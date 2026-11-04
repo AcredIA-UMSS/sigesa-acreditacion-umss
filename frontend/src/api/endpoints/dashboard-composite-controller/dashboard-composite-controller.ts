@@ -57,6 +57,308 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export type getCoordinatorDetailsResponse200 = {
+  data: PageObservationSummary
+  status: 200
+}
+
+export type getCoordinatorDetailsResponseSuccess = (getCoordinatorDetailsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getCoordinatorDetailsResponse = (getCoordinatorDetailsResponseSuccess)
+
+export const getGetCoordinatorDetailsUrl = (params: GetCoordinatorDetailsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/dashboards/coordinator/details?${stringifiedParams}` : `/api/v1/dashboards/coordinator/details`
+}
+
+export const getCoordinatorDetails = async (params: GetCoordinatorDetailsParams, options?: Parameters<typeof customFetch>[1]): Promise<getCoordinatorDetailsResponse> => {
+
+  return customFetch<getCoordinatorDetailsResponse>(getGetCoordinatorDetailsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCoordinatorDetailsQueryKey = (params?: GetCoordinatorDetailsParams,) => {
+    return [
+    `/api/v1/dashboards/coordinator/details`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCoordinatorDetailsQueryOptions = <TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCoordinatorDetailsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoordinatorDetails>>> = ({ signal }) => getCoordinatorDetails(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCoordinatorDetailsQueryResult = NonNullable<Awaited<ReturnType<typeof getCoordinatorDetails>>>
+export type GetCoordinatorDetailsQueryError = unknown
+
+
+export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
+ params: GetCoordinatorDetailsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCoordinatorDetails>>,
+          TError,
+          Awaited<ReturnType<typeof getCoordinatorDetails>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
+ params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCoordinatorDetails>>,
+          TError,
+          Awaited<ReturnType<typeof getCoordinatorDetails>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
+ params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
+ params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCoordinatorDetailsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type enqueueExportJob1Response200 = {
+  data: ExportJobResponse
+  status: 200
+}
+
+export type enqueueExportJob1ResponseSuccess = (enqueueExportJob1Response200) & {
+  headers: Headers;
+};
+;
+
+export type enqueueExportJob1Response = (enqueueExportJob1ResponseSuccess)
+
+export const getEnqueueExportJob1Url = () => {
+
+
+
+
+  return `/api/v1/dashboards/coordinator/export-jobs`
+}
+
+export const enqueueExportJob1 = async (exportJobRequest: ExportJobRequest, options?: Parameters<typeof customFetch>[1]): Promise<enqueueExportJob1Response> => {
+
+  return customFetch<enqueueExportJob1Response>(getEnqueueExportJob1Url(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(exportJobRequest)
+  }
+);}
+
+
+
+
+
+export const getEnqueueExportJob1MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext> => {
+
+const mutationKey = ['enqueueExportJob1'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enqueueExportJob1>>, {data: ExportJobRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  enqueueExportJob1(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EnqueueExportJob1MutationResult = NonNullable<Awaited<ReturnType<typeof enqueueExportJob1>>>
+    export type EnqueueExportJob1MutationBody = ExportJobRequest
+    export type EnqueueExportJob1MutationError = unknown
+
+    export const useEnqueueExportJob1 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof enqueueExportJob1>>,
+        TError,
+        {data: ExportJobRequest},
+        TContext
+      > => {
+      return useMutation(getEnqueueExportJob1MutationOptions(options), queryClient);
+    }
+    export type listExecutiveObservationsResponse200 = {
+  data: ObservationSummary[]
+  status: 200
+}
+
+export type listExecutiveObservationsResponseSuccess = (listExecutiveObservationsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type listExecutiveObservationsResponse = (listExecutiveObservationsResponseSuccess)
+
+export const getListExecutiveObservationsUrl = (params: ListExecutiveObservationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/dashboards/executive/observations?${stringifiedParams}` : `/api/v1/dashboards/executive/observations`
+}
+
+export const listExecutiveObservations = async (params: ListExecutiveObservationsParams, options?: Parameters<typeof customFetch>[1]): Promise<listExecutiveObservationsResponse> => {
+
+  return customFetch<listExecutiveObservationsResponse>(getListExecutiveObservationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListExecutiveObservationsQueryKey = (params?: ListExecutiveObservationsParams,) => {
+    return [
+    `/api/v1/dashboards/executive/observations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListExecutiveObservationsQueryOptions = <TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListExecutiveObservationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExecutiveObservations>>> = ({ signal }) => listExecutiveObservations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListExecutiveObservationsQueryResult = NonNullable<Awaited<ReturnType<typeof listExecutiveObservations>>>
+export type ListExecutiveObservationsQueryError = unknown
+
+
+export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
+ params: ListExecutiveObservationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExecutiveObservations>>,
+          TError,
+          Awaited<ReturnType<typeof listExecutiveObservations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
+ params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listExecutiveObservations>>,
+          TError,
+          Awaited<ReturnType<typeof listExecutiveObservations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
+ params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
+ params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListExecutiveObservationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export type enqueueExportJobResponse200 = {
   data: ExportJobResponse
   status: 200
@@ -133,189 +435,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getEnqueueExportJobMutationOptions(options), queryClient);
     }
-    export type enqueueExportJob1Response200 = {
-  data: ExportJobResponse
-  status: 200
-}
-
-export type enqueueExportJob1ResponseSuccess = (enqueueExportJob1Response200) & {
-  headers: Headers;
-};
-;
-
-export type enqueueExportJob1Response = (enqueueExportJob1ResponseSuccess)
-
-export const getEnqueueExportJob1Url = () => {
-
-
-
-
-  return `/api/v1/dashboards/coordinator/export-jobs`
-}
-
-export const enqueueExportJob1 = async (exportJobRequest: ExportJobRequest, options?: Parameters<typeof customFetch>[1]): Promise<enqueueExportJob1Response> => {
-
-  return customFetch<enqueueExportJob1Response>(getEnqueueExportJob1Url(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(exportJobRequest)
-  }
-);}
-
-
-
-
-
-export const getEnqueueExportJob1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext> => {
-
-const mutationKey = ['enqueueExportJob1'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enqueueExportJob1>>, {data: ExportJobRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  enqueueExportJob1(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type EnqueueExportJob1MutationResult = NonNullable<Awaited<ReturnType<typeof enqueueExportJob1>>>
-    export type EnqueueExportJob1MutationBody = ExportJobRequest
-    export type EnqueueExportJob1MutationError = unknown
-
-    export const useEnqueueExportJob1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enqueueExportJob1>>, TError,{data: ExportJobRequest}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof enqueueExportJob1>>,
-        TError,
-        {data: ExportJobRequest},
-        TContext
-      > => {
-      return useMutation(getEnqueueExportJob1MutationOptions(options), queryClient);
-    }
-    export type getCompositeSummaryResponse200 = {
-  data: CompositeDashboardSummary
-  status: 200
-}
-
-export type getCompositeSummaryResponseSuccess = (getCompositeSummaryResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getCompositeSummaryResponse = (getCompositeSummaryResponseSuccess)
-
-export const getGetCompositeSummaryUrl = () => {
-
-
-
-
-  return `/api/v1/dashboards/me/summary`
-}
-
-export const getCompositeSummary = async ( options?: Parameters<typeof customFetch>[1]): Promise<getCompositeSummaryResponse> => {
-
-  return customFetch<getCompositeSummaryResponse>(getGetCompositeSummaryUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetCompositeSummaryQueryKey = () => {
-    return [
-    `/api/v1/dashboards/me/summary`
-    ] as const;
-    }
-
-
-export const getGetCompositeSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetCompositeSummaryQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompositeSummary>>> = ({ signal }) => getCompositeSummary({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetCompositeSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getCompositeSummary>>>
-export type GetCompositeSummaryQueryError = unknown
-
-
-export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCompositeSummary>>,
-          TError,
-          Awaited<ReturnType<typeof getCompositeSummary>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCompositeSummary>>,
-          TError,
-          Awaited<ReturnType<typeof getCompositeSummary>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetCompositeSummaryQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export type getJobStatusResponse200 = {
+    export type getJobStatusResponse200 = {
   data: JobStatusResponse
   status: 200
 }
@@ -527,36 +647,29 @@ export function useDownloadReport<TData = Awaited<ReturnType<typeof downloadRepo
 
 
 
-export type listExecutiveObservationsResponse200 = {
-  data: ObservationSummary[]
+export type getCompositeSummaryResponse200 = {
+  data: CompositeDashboardSummary
   status: 200
 }
 
-export type listExecutiveObservationsResponseSuccess = (listExecutiveObservationsResponse200) & {
+export type getCompositeSummaryResponseSuccess = (getCompositeSummaryResponse200) & {
   headers: Headers;
 };
 ;
 
-export type listExecutiveObservationsResponse = (listExecutiveObservationsResponseSuccess)
+export type getCompositeSummaryResponse = (getCompositeSummaryResponseSuccess)
 
-export const getListExecutiveObservationsUrl = (params: ListExecutiveObservationsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getGetCompositeSummaryUrl = () => {
 
-  Object.entries(params || {}).forEach(([key, value]) => {
 
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/dashboards/executive/observations?${stringifiedParams}` : `/api/v1/dashboards/executive/observations`
+  return `/api/v1/dashboards/me/summary`
 }
 
-export const listExecutiveObservations = async (params: ListExecutiveObservationsParams, options?: Parameters<typeof customFetch>[1]): Promise<listExecutiveObservationsResponse> => {
+export const getCompositeSummary = async ( options?: Parameters<typeof customFetch>[1]): Promise<getCompositeSummaryResponse> => {
 
-  return customFetch<listExecutiveObservationsResponse>(getListExecutiveObservationsUrl(params),
+  return customFetch<getCompositeSummaryResponse>(getGetCompositeSummaryUrl(),
   {
     ...options,
     method: 'GET'
@@ -569,179 +682,66 @@ export const listExecutiveObservations = async (params: ListExecutiveObservation
 
 
 
-export const getListExecutiveObservationsQueryKey = (params?: ListExecutiveObservationsParams,) => {
+export const getGetCompositeSummaryQueryKey = () => {
     return [
-    `/api/v1/dashboards/executive/observations`, ...(params ? [params] : [])
+    `/api/v1/dashboards/me/summary`
     ] as const;
     }
 
 
-export const getListExecutiveObservationsQueryOptions = <TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetCompositeSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListExecutiveObservationsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetCompositeSummaryQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listExecutiveObservations>>> = ({ signal }) => listExecutiveObservations(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCompositeSummary>>> = ({ signal }) => getCompositeSummary({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListExecutiveObservationsQueryResult = NonNullable<Awaited<ReturnType<typeof listExecutiveObservations>>>
-export type ListExecutiveObservationsQueryError = unknown
+export type GetCompositeSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getCompositeSummary>>>
+export type GetCompositeSummaryQueryError = unknown
 
 
-export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
- params: ListExecutiveObservationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>> & Pick<
+export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listExecutiveObservations>>,
+          Awaited<ReturnType<typeof getCompositeSummary>>,
           TError,
-          Awaited<ReturnType<typeof listExecutiveObservations>>
+          Awaited<ReturnType<typeof getCompositeSummary>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
- params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>> & Pick<
+export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listExecutiveObservations>>,
+          Awaited<ReturnType<typeof getCompositeSummary>>,
           TError,
-          Awaited<ReturnType<typeof listExecutiveObservations>>
+          Awaited<ReturnType<typeof getCompositeSummary>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
- params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListExecutiveObservations<TData = Awaited<ReturnType<typeof listExecutiveObservations>>, TError = unknown>(
- params: ListExecutiveObservationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listExecutiveObservations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetCompositeSummary<TData = Awaited<ReturnType<typeof getCompositeSummary>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCompositeSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListExecutiveObservationsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export type getCoordinatorDetailsResponse200 = {
-  data: PageObservationSummary
-  status: 200
-}
-
-export type getCoordinatorDetailsResponseSuccess = (getCoordinatorDetailsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getCoordinatorDetailsResponse = (getCoordinatorDetailsResponseSuccess)
-
-export const getGetCoordinatorDetailsUrl = (params: GetCoordinatorDetailsParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/api/v1/dashboards/coordinator/details?${stringifiedParams}` : `/api/v1/dashboards/coordinator/details`
-}
-
-export const getCoordinatorDetails = async (params: GetCoordinatorDetailsParams, options?: Parameters<typeof customFetch>[1]): Promise<getCoordinatorDetailsResponse> => {
-
-  return customFetch<getCoordinatorDetailsResponse>(getGetCoordinatorDetailsUrl(params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetCoordinatorDetailsQueryKey = (params?: GetCoordinatorDetailsParams,) => {
-    return [
-    `/api/v1/dashboards/coordinator/details`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getGetCoordinatorDetailsQueryOptions = <TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetCoordinatorDetailsQueryKey(params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCoordinatorDetails>>> = ({ signal }) => getCoordinatorDetails(params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetCoordinatorDetailsQueryResult = NonNullable<Awaited<ReturnType<typeof getCoordinatorDetails>>>
-export type GetCoordinatorDetailsQueryError = unknown
-
-
-export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
- params: GetCoordinatorDetailsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCoordinatorDetails>>,
-          TError,
-          Awaited<ReturnType<typeof getCoordinatorDetails>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
- params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCoordinatorDetails>>,
-          TError,
-          Awaited<ReturnType<typeof getCoordinatorDetails>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
- params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetCoordinatorDetails<TData = Awaited<ReturnType<typeof getCoordinatorDetails>>, TError = unknown>(
- params: GetCoordinatorDetailsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCoordinatorDetails>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetCoordinatorDetailsQueryOptions(params,options)
+  const queryOptions = getGetCompositeSummaryQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

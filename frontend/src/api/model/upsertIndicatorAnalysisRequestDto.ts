@@ -13,9 +13,9 @@ import type { UpsertIndicatorAnalysisRequestDtoFodaQuadrant } from './upsertIndi
  */
 export interface UpsertIndicatorAnalysisRequestDto {
   /** @minLength 1 */
-  fodaQuadrant: UpsertIndicatorAnalysisRequestDtoFodaQuadrant;
-  /** @minLength 1 */
   compliance: UpsertIndicatorAnalysisRequestDtoCompliance;
+  /** @minLength 1 */
+  fodaQuadrant: UpsertIndicatorAnalysisRequestDtoFodaQuadrant;
   /** @minLength 1 */
   synthesis: string;
 }

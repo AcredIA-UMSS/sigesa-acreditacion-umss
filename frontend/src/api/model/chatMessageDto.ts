@@ -8,7 +8,7 @@
 
 export interface ChatMessageDto {
   /** @minLength 1 */
-  role: string;
-  /** @minLength 1 */
   content: string;
+  /** @minLength 1 */
+  role: string;
 }

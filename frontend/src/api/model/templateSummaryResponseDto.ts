@@ -7,12 +7,12 @@
  */
 
 export interface TemplateSummaryResponseDto {
-  id?: string;
-  name?: string;
   description?: string;
-  type?: string;
-  status?: string;
-  level1Count?: number;
-  indicatorCount?: number;
   evaluatorModel?: string;
+  id?: string;
+  indicatorCount?: number;
+  level1Count?: number;
+  name?: string;
+  status?: string;
+  type?: string;
 }

@@ -7,6 +7,6 @@
  */
 
 export interface Item {
-  itemCode?: string;
   checked?: boolean;
+  itemCode?: string;
 }

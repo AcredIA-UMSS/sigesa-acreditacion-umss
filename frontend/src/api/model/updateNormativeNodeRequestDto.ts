@@ -7,7 +7,7 @@
  */
 
 export interface UpdateNormativeNodeRequestDto {
+  description?: string;
   name?: string;
   order?: number;
-  description?: string;
 }
