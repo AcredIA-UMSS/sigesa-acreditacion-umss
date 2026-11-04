@@ -1,6 +1,8 @@
-import { CircleHelp, GraduationCap, Menu, University, X } from 'lucide-react';
+import { CircleHelp, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import logoDuea from '../../assets/logo-duea.png';
+import logoUmss from '../../assets/logo-umss.png';
 import { useAuth } from '../../lib/auth/useAuth';
 
 type HomeNavItem = {
@@ -51,15 +53,15 @@ export function HomeHeader() {
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-body">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
         <Link to="/" className="flex items-center gap-3" aria-label="Ir al inicio">
-          <div className="flex items-center gap-2 text-primary-700">
-            <University size={28} aria-hidden />
-            <span className="text-label-md font-semibold tracking-wide">DUEA</span>
-          </div>
+          <img src={logoDuea} alt="" className="h-10 w-10 object-contain" />
+          <span className="hidden text-label-md font-semibold tracking-wide text-primary-700 sm:inline">
+            DUEA
+          </span>
           <span className="h-8 w-px bg-gray-300" aria-hidden />
-          <div className="flex items-center gap-2 text-primary-700">
-            <GraduationCap size={28} aria-hidden />
-            <span className="text-label-md font-semibold tracking-wide">UMSS</span>
-          </div>
+          <img src={logoUmss} alt="" className="h-10 w-auto object-contain" />
+          <span className="hidden text-label-md font-semibold tracking-wide text-primary-700 sm:inline">
+            UMSS
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Secciones">

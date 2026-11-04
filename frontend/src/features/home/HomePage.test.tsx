@@ -25,6 +25,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomeRoutes />, { route: '/' });
 
     expect(screen.getByRole('heading', { level: 1, name: /Excelencia que/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir al inicio' })).toBeInTheDocument();
 
     const loginLinks = screen.getAllByRole('link', { name: /Iniciar Sesión/i });
     expect(loginLinks[0]).toHaveAttribute('href', '/login');

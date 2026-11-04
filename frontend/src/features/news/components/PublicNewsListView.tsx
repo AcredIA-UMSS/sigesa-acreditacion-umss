@@ -9,6 +9,7 @@ export type PublicNewsListViewProps = {
   onPageChange: (page: number) => void;
   isLoading: boolean;
   error: string | null;
+  canManage?: boolean;
 };
 
 export function PublicNewsListView({
@@ -18,22 +19,33 @@ export function PublicNewsListView({
   onPageChange,
   isLoading,
   error,
+  canManage = false,
 }: PublicNewsListViewProps) {
   return (
     <main className="bg-gray-50">
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-10 md:px-6">
-        <div>
-          <p className="text-body-md text-gray-500">
-            <Link to="/" className="text-primary-700 hover:text-primary-500">
-              Inicio
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-body-md text-gray-500">
+              <Link to="/" className="text-primary-700 hover:text-primary-500">
+                Inicio
+              </Link>
+              <span className="mx-2 text-gray-400">/</span>
+              <span>Noticias</span>
+            </p>
+            <h1 className="mt-3 text-heading-xl text-primary-800">Noticias y destacados</h1>
+            <p className="mt-2 max-w-2xl text-body-md text-gray-700">
+              Comunicados publicados por la DUEA. Solo se muestra lo autorizado.
+            </p>
+          </div>
+          {canManage ? (
+            <Link
+              to="/admin/noticias"
+              className="inline-flex rounded-lg bg-primary-700 px-4 py-2.5 text-label-md font-medium text-body hover:bg-primary-600"
+            >
+              Publicar noticia
             </Link>
-            <span className="mx-2 text-gray-400">/</span>
-            <span>Noticias</span>
-          </p>
-          <h1 className="mt-3 text-heading-xl text-primary-800">Noticias y destacados</h1>
-          <p className="mt-2 max-w-2xl text-body-md text-gray-700">
-            Comunicados publicados por la DUEA. Solo se muestra lo autorizado.
-          </p>
+          ) : null}
         </div>
 
         {error ? (

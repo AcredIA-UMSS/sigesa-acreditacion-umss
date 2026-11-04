@@ -1,5 +1,7 @@
-import { Globe, MapPin, Share2, University } from 'lucide-react';
+import { Globe, MapPin, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import logoDuea from '../../assets/logo-duea.png';
+import logoUmss from '../../assets/logo-umss.png';
 import { useAuth } from '../../lib/auth/useAuth';
 
 export function HomeFooter() {
@@ -9,8 +11,9 @@ export function HomeFooter() {
     <footer className="bg-primary-800 text-primary-100">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:px-6 lg:grid-cols-4">
         <div>
-          <div className="mb-3 flex items-center gap-2 text-body">
-            <University size={28} aria-hidden />
+          <div className="mb-3 flex items-center gap-3 text-body">
+            <img src={logoDuea} alt="" className="h-12 w-12 object-contain" />
+            <img src={logoUmss} alt="" className="h-12 w-auto object-contain" />
             <span className="text-heading-sm font-semibold">Universidad Mayor de San Simón</span>
           </div>
           <p className="text-body-md text-primary-200">
