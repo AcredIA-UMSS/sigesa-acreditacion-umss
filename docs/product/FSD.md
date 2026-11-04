@@ -8,7 +8,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-10-17"
+ultima_actualizacion: "2026-11-04"
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
 
@@ -80,6 +80,7 @@ ultima_actualizacion: "2026-10-17"
 | `FSD-UC-029` | Métricas completitud evaluación y FODA                         | [CC], [TD], [JD] | v2.1    | **Hecho (M8)**                                     | [Ver detalle](uc/FSD-UC-029.md) | `[DD-UC-029](../design/DD-UC-029.md)`                 | `[PR-IMPL-M8-029](../prompts/impl/PR-IMPL-M8-029.md)` |
 | `FSD-UC-030` | Congelamiento / Sala de Pares                                  | [TD], [EE]       | v2.1    | **Hecho (M10)**                                    | [Ver detalle](uc/FSD-UC-030.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
 | `FSD-UC-031` | Plan de Mejoras y documentos E4 / ciclo E7                     | [CC], [TD]       | v2.1    | **Hecho (M9+M11)**                                 | [Ver detalle](uc/FSD-UC-031.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
+| `FSD-UC-033` | Consulta normativa ARCU-SUR vía asistente (corpus)             | [JD], [TD], [CC], [EE] | v2.1 | **Implementado (corpus v1)**                    | [Ver detalle](uc/FSD-UC-033.md) | `[DD-UC-033](../design/DD-UC-033.md)`                 | `[PR-IMPL-048](../prompts/impl/PR-IMPL-048.md)` |
 
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
@@ -321,6 +322,7 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 | 2026-09-09 | **Reconciliación índice v2.0:** UC-004…010, UC-019 → **Implementado v2** (alineado a atom UC y código post-M5)                                                                                                                                                                |
 | 2026-09-09 | **UI árbol normativo:** capas desplegables N1→Indicador (`NormativeCollapsibleLayer`); PM-011 sprint 3                                                                                                                                                                        |
 | 2026-09-09 | **README + PM sprint 03:** releases 2.0.0/2.1.0; PM-011…013 (UI capas, fix login, sync docs)                                                                                                                                                                                  |
+| 2026-11-04 | **FSD-UC-033 / #76:** corpus RAG Manual ARCU-SUR 2023 en classpath; mismo `POST /assistant/chat`; `PR-IMPL-048`, `DD-UC-033`, PM-037 sprint 3 |
 | 2026-10-22 | **FSD-UC-004 visor:** UI «Ver evidencia» / descarga blob `GET /document-assets/{id}/content`; Demo 2 OpenAPI+CI |
 | 2026-10-22 | **FSD-UC-005:** DELETE evidencia no aprobada (CC/CAE → 204, indicador a PENDIENTE); APROBADO sigue `409 EVIDENCE_IMMUTABLE` |
 | 2026-10-19 | **FEAT-10 (#57):** FAB + modal del asistente general en el panel (`DD-FEAT-10`, `PR-IMPL-045`); `/ayuda` intacta |
