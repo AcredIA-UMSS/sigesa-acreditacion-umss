@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 02/11/2026 | **E3 notificaciones:** se mantiene el outbox en el monolito. Corrida limpia A/B/A/B: p95 +2.126 ms, arranque 1.20×, health 33/2496 (1.322 %) con el sidecar cortado. Informe `bench/e3/INFORME.md`. | bench E3 | ADR-001 | — | Marlene Velasquez |
 | 28/10/2026 | **MOD-EXP (FSD-UC-032 / FEAT-11):** Exportación asíncrona Dossier Digital ZIP en streaming directo hacia S3/storage; semáforo global concurrente (429 Retry-After) y límite 1/usuario; descarga paralela acotada de blobs; purge job TTL 24-48h; URLs prefirmadas S3 (15m) y RBAC por carrera para CC. | FSD-UC-032 / DD-UC-032 | ADR-0005 | PM-032 / PR-IMPL-046 | Antigravity / Alex553-bot |
 | 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
@@ -199,7 +200,7 @@ artefactos_vivos:
 | **MOD-TEMPLATE (plantillas normativas)** | **sí** | Ver §B.7 abajo; design doc `DD-UC-021` |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
-| §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**, **ADR-0004 jerarquía v2.0**; baseline en `docs/baseline/05_dti/adrs/`) |
+| §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**, **ADR-0004 jerarquía v2.0**, **ADR-001 notificaciones en el monolito**; baseline en `docs/baseline/05_dti/adrs/`) |
 
 ### B.1 MOD-AUTH — contrato técnico vigente (`DD-UC-001` + `DD-UC-002`)
 

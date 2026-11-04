@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * (p. ej. {@code current_stage_id} sin {@code operational_mode}), rompiendo consultas JPA post-login.
  */
 @Component
-@Profile("dev")
+@Profile({"dev", "qa"})
 @Order(0)
 public class DevWorkflowSchemaAlignmentRunner implements ApplicationRunner {
 

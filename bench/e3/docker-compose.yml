@@ -1,0 +1,144 @@
+# E3 — forma HTTP (API + sidecar + Toxiproxy).
+# No reemplaza el docker-compose.yml de producto en la raíz del repo.
+# Uso: docker compose -f bench/e3/docker-compose.yml up -d --build --wait
+name: sigesa-e3
+
+services:
+  api:
+    build: &app-build
+      context: ../../backend
+      dockerfile: Dockerfile
+    image: sigesa-e3:local
+    container_name: sigesa-e3-api
+    mem_limit: ${E3_MEM_LIMIT:-512m}
+    cpus: ${E3_CPUS:-1.0}
+    mem_reservation: ${E3_MEM_RESERVATION:-256m}
+    environment:
+      JAVA_OPTS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      JAVA_TOOL_OPTIONS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      SIGESA_APP: api
+      EXTRACTION_MODE: http
+      SERVER_PORT: "8080"
+      SIGESA_EVIDENCE_STORAGE: local
+      SIGESA_REPORT_STORAGE_PATH: /tmp/sigesa-reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/sigesa-evidences
+      SIGESA_EVIDENCE_STORAGE_DIR: /tmp/sigesa-uploads
+      SIGESA_NOTIFICATION_BASE_URL: http://toxiproxy:${E3_TOXIPROXY_LISTEN_PORT:-8666}
+      SIGESA_NOTIFICATION_TIMEOUT_MS: ${E3_NOTIFICATION_TIMEOUT_MS:-5000}
+      SIGESA_NOTIFICATION_DEADLINE_MS: ${E3_NOTIFICATION_DEADLINE_MS:-5000}
+      SIGESA_NOTIFICATION_RETRIES: ${E3_NOTIFICATION_RETRIES:-1}
+      SIGESA_NOTIFICATION_RETRY_BACKOFF_MS: ${E3_NOTIFICATION_RETRY_BACKOFF_MS:-50}
+    ports:
+      - "${E3_API_HOST_PORT:-8080}:8080"
+    depends_on:
+      modulo:
+        condition: service_healthy
+      toxiproxy:
+        condition: service_healthy
+      toxiproxy-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:8080/api/health >/dev/null || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+    networks:
+      - e3
+
+  modulo:
+    build: *app-build
+    image: sigesa-e3:local
+    container_name: sigesa-e3-modulo
+    mem_limit: ${E3_MEM_LIMIT:-512m}
+    cpus: ${E3_CPUS:-1.0}
+    mem_reservation: ${E3_MEM_RESERVATION:-256m}
+    environment:
+      JAVA_OPTS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      JAVA_TOOL_OPTIONS: "${E3_JAVA_OPTS:--Xms256m -Xmx256m}"
+      SIGESA_APP: notification-service
+      SERVER_PORT: "${E3_MODULE_PORT:-8080}"
+      SIGESA_EVIDENCE_STORAGE: local
+      SIGESA_REPORT_STORAGE_PATH: /tmp/sigesa-reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/sigesa-evidences
+      SIGESA_EVIDENCE_STORAGE_DIR: /tmp/sigesa-uploads
+    expose:
+      - "${E3_MODULE_PORT:-8080}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:${E3_MODULE_PORT:-8080}/api/health >/dev/null || exit 1",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+    networks:
+      - e3
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    container_name: sigesa-e3-toxiproxy
+    ports:
+      - "${E3_TOXIPROXY_API_PORT:-8474}:8474"
+    expose:
+      - "8474"
+      - "${E3_TOXIPROXY_LISTEN_PORT:-8666}"
+    healthcheck:
+      test: ["CMD", "/toxiproxy-cli", "list"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - e3
+
+  toxiproxy-setup:
+    image: curlimages/curl:8.12.1
+    container_name: sigesa-e3-toxiproxy-setup
+    depends_on:
+      toxiproxy:
+        condition: service_healthy
+      modulo:
+        condition: service_healthy
+    restart: "no"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        if curl -sf http://toxiproxy:8474/proxies/modulo >/dev/null; then
+          curl -sSf -X POST http://toxiproxy:8474/proxies/modulo \
+            -H "Content-Type: application/json" \
+            -d '{"listen":"0.0.0.0:${E3_TOXIPROXY_LISTEN_PORT:-8666}","upstream":"modulo:${E3_MODULE_PORT:-8080}","enabled":true}'
+        else
+          curl -sSf -X POST http://toxiproxy:8474/proxies \
+            -H "Content-Type: application/json" \
+            -d '{"name":"modulo","listen":"0.0.0.0:${E3_TOXIPROXY_LISTEN_PORT:-8666}","upstream":"modulo:${E3_MODULE_PORT:-8080}","enabled":true}'
+        fi
+    networks:
+      - e3
+
+  k6:
+    image: grafana/k6:0.54.0
+    container_name: sigesa-e3-k6
+    profiles: ["bench"]
+    working_dir: /scripts
+    volumes:
+      - .:/scripts
+    environment:
+      API_BASE_URL: http://api:8080
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - e3
+
+networks:
+  e3:
+    name: sigesa-e3
+    driver: bridge

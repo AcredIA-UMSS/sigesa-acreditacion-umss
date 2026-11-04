@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import java.io.InputStream;
 import java.util.Optional;
+import java.text.Normalizer;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.adapter.in.web.dto.CreateProcessRequestDto;
@@ -219,6 +220,31 @@ public class ProcessController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(new InputStreamResource(fileStream));
+    }
+
+    private String resolveDossierDownloadFilename(UUID processId) {
+        try {
+            EnrichedProcessDetail detail = getProcessDetailUseCase.getDetail(processId, buildQueryContext());
+            if (detail != null) {
+                String careerPart = (detail.careerCode() != null && !detail.careerCode().isBlank())
+                        ? detail.careerCode()
+                        : (detail.careerName() != null && !detail.careerName().isBlank() ? detail.careerName() : null);
+                if (careerPart != null) {
+                    return "Dossier_" + sanitizeFilenamePart(careerPart) + ".zip";
+                }
+            }
+        } catch (Exception ignored) {
+            // Fallback a identificador abreviado del proceso
+        }
+        return "Dossier_" + processId.toString().substring(0, 8) + ".zip";
+    }
+
+    private String sanitizeFilenamePart(String s) {
+        if (s == null) return "Proceso";
+        String normalized = Normalizer.normalize(s, Normalizer.Form.NFD);
+        String withoutAccents = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        String cleaned = withoutAccents.replaceAll("[^A-Za-z0-9._-]", "_");
+        return cleaned.isBlank() ? "Proceso" : cleaned;
     }
 
     private ProcessQueryContext buildQueryContext() {

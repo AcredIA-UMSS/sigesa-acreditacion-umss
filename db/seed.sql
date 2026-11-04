@@ -11,18 +11,11 @@ CREATE TABLE IF NOT EXISTS accreditation_processes (
     start_date TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS phases (
-    id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    phase_order INTEGER NOT NULL,
-    process_id UUID NOT NULL REFERENCES accreditation_processes(id) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS indicator (
     id UUID PRIMARY KEY,
     program_id UUID NOT NULL,
     criterion_id UUID NOT NULL,
-    phase_id UUID REFERENCES phases(id) ON DELETE SET NULL
+    phase_id UUID
 );
 
 CREATE TABLE IF NOT EXISTS indicator_state_history (
@@ -81,16 +74,7 @@ INSERT INTO accreditation_processes (id, career_id, template_id, status, start_d
 ('950e8400-e29b-41d4-a716-446655440024', '660e8400-e29b-41d4-a716-446655440001', '850e8400-e29b-41d4-a716-446655440012', 'ARCHIVED', NOW() - INTERVAL '700 days')
 ON CONFLICT (id) DO NOTHING;
 
--- 2.2 Fases (5 registros vinculados a los procesos)
-INSERT INTO phases (id, name, phase_order, process_id) VALUES
-('550e8400-e29b-41d4-a716-446655440004', 'Fase 1: Autoevaluación Inicial', 1, '950e8400-e29b-41d4-a716-446655440020'),
-('550e8400-e29b-41d4-a716-446655440005', 'Fase 2: Verificación de Evidencias', 2, '950e8400-e29b-41d4-a716-446655440020'),
-('550e8400-e29b-41d4-a716-446655440006', 'Fase 3: Dictamen de Pares Evaluadores', 3, '950e8400-e29b-41d4-a716-446655440020'),
-('660e8400-e29b-41d4-a716-446655440004', 'Fase 1: Planificación CEUB', 1, '950e8400-e29b-41d4-a716-446655440021'),
-('770e8400-e29b-41d4-a716-446655440004', 'Fase 1: Preparación ARCU-SUR', 1, '950e8400-e29b-41d4-a716-446655440022')
-ON CONFLICT (id) DO NOTHING;
-
--- 2.3 Resúmenes de Dashboard de Programas (5 registros)
+-- 2.2 Resúmenes de Dashboard de Programas (5 registros)
 INSERT INTO tb_program_dashboard_summary (program_id, program_name, total_indicators, overall_progress_percentage, approved_evidences, rejected_evidences, pending_observations, updated_at) VALUES
 ('550e8400-e29b-41d4-a716-446655440000', 'Ingeniería de Sistemas', 20, 45.0, 9, 3, 5, NOW()),
 ('660e8400-e29b-41d4-a716-446655440001', 'Coordinación CEUB (demo)', 40, 80.0, 32, 2, 2, NOW()),
