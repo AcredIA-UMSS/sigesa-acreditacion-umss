@@ -217,7 +217,16 @@ VALUES
     ('e3000000-0000-0000-0001-000000000003', 'BIOQ-FARM', 'Licenciatura en Bioquímica y Farmacia', 'FBF', TRUE),
     ('e3000000-0000-0000-0001-000000000004', 'ODON', 'Licenciatura en Odontología', 'FO', TRUE),
     ('e3000000-0000-0000-0001-000000000005', 'CIEN-EDU', 'Ciencias de la Educación', 'FHCE', TRUE),
-    ('e3000000-0000-0000-0001-000000000006', 'FIS-KIN', 'Licenciatura en Fisioterapia y Kinesiología', 'FCMM', TRUE)
+    ('e3000000-0000-0000-0001-000000000006', 'FIS-KIN', 'Licenciatura en Fisioterapia y Kinesiología', 'FCMM', TRUE),
+    ('e3000000-0000-0000-0001-000000000007', 'LIC-MAT', 'Licenciatura en Matemáticas', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000008', 'LIC-FIS', 'Licenciatura en Física', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000009', 'ING-SIST-E3', 'Ingeniería de Sistemas - Mención Software', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000010', 'BIO-ING', 'Ingeniería Biomédica', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000011', 'ING-ROB-E3', 'Ingeniería Robótica y Automatización', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000012', 'ING-TELE-E3', 'Ingeniería en Telecomunicaciones y Redes', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000013', 'LIC-QUIM', 'Licenciatura en Química', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000014', 'ING-HIDR', 'Ingeniería de Recursos Hídricos', 'FCT', TRUE),
+    ('e3000000-0000-0000-0001-000000000015', 'ING-AGRO-E3', 'Ingeniería Agroindustrial', 'FCAyP', TRUE)
 ON CONFLICT (id) DO UPDATE SET
     name = EXCLUDED.name,
     code = EXCLUDED.code,
@@ -237,7 +246,16 @@ INSERT INTO app_user (
     ('e3000000-0000-0000-0002-000000000003', 'coord.bioquimica@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Dra. Elena', 'Camacho', '+591-4-4250103', 0, NOW(), NOW()),
     ('e3000000-0000-0000-0002-000000000004', 'coord.odontologia@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Dr. Javier', 'Montaño', '+591-4-4250104', 0, NOW(), NOW()),
     ('e3000000-0000-0000-0002-000000000005', 'evaluador.e3@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'EE', 'ACTIVE', 'Dr. Roberto', 'Gómez', '+591-4-4250105', 0, NOW(), NOW()),
-    ('e3000000-0000-0000-0002-000000000006', 'cae.e3@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CAE_MEMBER', 'ACTIVE', 'Ing. Lucía', 'Fernández', '+591-4-4250106', 0, NOW(), NOW())
+    ('e3000000-0000-0000-0002-000000000006', 'cae.e3@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CAE_MEMBER', 'ACTIVE', 'Ing. Lucía', 'Fernández', '+591-4-4250106', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000007', 'coord.sistemas@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Ing. Boris', 'Calancha', '+591-4-4250107', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000008', 'coord.civil@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Ing. Patricia', 'Vargas', '+591-4-4250108', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000009', 'coord.medicina@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Dr. Carlos', 'Arnez', '+591-4-4250109', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000010', 'coord.admin@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Lic. Fernando', 'Rocha', '+591-4-4250110', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000011', 'coord.derecho@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Dra. Miriam', 'Claure', '+591-4-4250111', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000012', 'coord.industrial@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Ing. Álvaro', 'Guzmán', '+591-4-4250112', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000013', 'coord.enfermeria@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Lic. Carmen', 'Mercado', '+591-4-4250113', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000014', 'coord.arquitectura@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Arq. Diego', 'Morales', '+591-4-4250114', 0, NOW(), NOW()),
+    ('e3000000-0000-0000-0002-000000000015', 'coord.economia@umss.edu.bo', '$argon2id$v=19$m=16384,t=2,p=1$z5SuTQXKid+sUWQiI5d0FQ$nqZDUEXON6VZSTqTpvcrxMly3GNVl9RPOjz/onysnhg', 'CC', 'ACTIVE', 'Lic. Gabriela', 'Siles', '+591-4-4250115', 0, NOW(), NOW())
 ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
     first_name = EXCLUDED.first_name,
@@ -252,7 +270,16 @@ VALUES
     ('e3000000-0000-0000-0004-000000000001', 'e3000000-0000-0000-0002-000000000001', 'e3000000-0000-0000-0001-000000000001', NOW(), NULL),
     ('e3000000-0000-0000-0004-000000000002', 'e3000000-0000-0000-0002-000000000002', 'e3000000-0000-0000-0001-000000000002', NOW(), NULL),
     ('e3000000-0000-0000-0004-000000000003', 'e3000000-0000-0000-0002-000000000003', 'e3000000-0000-0000-0001-000000000003', NOW(), NULL),
-    ('e3000000-0000-0000-0004-000000000004', 'e3000000-0000-0000-0002-000000000004', 'e3000000-0000-0000-0001-000000000004', NOW(), NULL)
+    ('e3000000-0000-0000-0004-000000000004', 'e3000000-0000-0000-0002-000000000004', 'e3000000-0000-0000-0001-000000000004', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000005', 'e3000000-0000-0000-0002-000000000007', 'e3000000-0000-0000-0001-000000000007', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000006', 'e3000000-0000-0000-0002-000000000008', 'e3000000-0000-0000-0001-000000000008', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000007', 'e3000000-0000-0000-0002-000000000009', 'e3000000-0000-0000-0001-000000000009', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000008', 'e3000000-0000-0000-0002-000000000010', 'e3000000-0000-0000-0001-000000000010', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000009', 'e3000000-0000-0000-0002-000000000011', 'e3000000-0000-0000-0001-000000000011', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000010', 'e3000000-0000-0000-0002-000000000012', 'e3000000-0000-0000-0001-000000000012', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000011', 'e3000000-0000-0000-0002-000000000013', 'e3000000-0000-0000-0001-000000000013', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000012', 'e3000000-0000-0000-0002-000000000014', 'e3000000-0000-0000-0001-000000000014', NOW(), NULL),
+    ('e3000000-0000-0000-0004-000000000013', 'e3000000-0000-0000-0002-000000000015', 'e3000000-0000-0000-0001-000000000015', NOW(), NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================================
@@ -266,7 +293,14 @@ VALUES
     ('e3000000-0000-0003-0000-000000000001', 'e3000000-0000-0000-0001-000000000001', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '40 days', 'ACTIVE'),
     ('e3000000-0000-0003-0000-000000000002', 'e3000000-0000-0000-0001-000000000002', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '20 days', 'ACTIVE'),
     ('e3000000-0000-0003-0000-000000000003', 'e3000000-0000-0000-0001-000000000003', '850e8400-e29b-41d4-a716-446655440011', 'ACTIVE', NOW() - INTERVAL '10 days', 'ACTIVE'),
-    ('e3000000-0000-0003-0000-000000000004', 'e3000000-0000-0000-0001-000000000004', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '3 days', 'ACTIVE')
+    ('e3000000-0000-0003-0000-000000000004', 'e3000000-0000-0000-0001-000000000004', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '3 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000005', 'e3000000-0000-0000-0001-000000000007', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '30 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000006', 'e3000000-0000-0000-0001-000000000008', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '25 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000007', 'e3000000-0000-0000-0001-000000000009', '850e8400-e29b-41d4-a716-446655440011', 'ACTIVE', NOW() - INTERVAL '15 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000008', 'e3000000-0000-0000-0001-000000000010', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '12 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000009', 'e3000000-0000-0000-0001-000000000011', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '8 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000010', 'e3000000-0000-0000-0001-000000000012', '850e8400-e29b-41d4-a716-446655440010', 'ACTIVE', NOW() - INTERVAL '5 days', 'ACTIVE'),
+    ('e3000000-0000-0003-0000-000000000011', 'e3000000-0000-0000-0001-000000000013', '850e8400-e29b-41d4-a716-446655440011', 'ACTIVE', NOW() - INTERVAL '2 days', 'ACTIVE')
 ON CONFLICT (id) DO UPDATE SET
     status = EXCLUDED.status,
     operational_mode = EXCLUDED.operational_mode;
@@ -515,11 +549,17 @@ INSERT INTO tb_observation (
     ('OBS-E3-002', 'e3000000-0000-0000-0001-000000000001', 'e3000000-0004-0000-0000-000000000004', 'CEUB-IND-4.1', 'Escalafón y Concursos Docentes', 'Acta aclaratoria RCF 342/2026 cargada en versión 2; expediente en nueva revisión técnica.', CURRENT_DATE - 5, CURRENT_DATE + 3, 'EN_REVISION', '/processes/e3000000-0000-0003-0000-000000000001/indicators/104'),
     ('OBS-E3-003', 'e3000000-0000-0000-0001-000000000003', 'e3000000-0004-0000-0000-000000000024', 'ARCU-IND-4.1', 'Certificación de Bioseguridad en Laboratorios', 'Los manuales de manejo de reactivos y desinfección requieren certificación actualizada del SEDES Cochabamba.', CURRENT_DATE - 7, CURRENT_DATE + 2, 'PENDIENTE_SUBSANACION', '/processes/e3000000-0000-0003-0000-000000000003/summary'),
     ('OBS-E3-004', 'e3000000-0000-0000-0001-000000000001', 'e3000000-0004-0000-0000-000000000010', 'CEUB-IND-10.1', 'Laboratorios de Computación y Equipamiento', 'Protocolos de mantenimiento preventivo y software libre verificados satisfactoriamente.', CURRENT_DATE - 10, CURRENT_DATE - 1, 'APROBADO', '/processes/e3000000-0000-0003-0000-000000000001/indicators/110'),
-    ('OBS-E3-005', 'e3000000-0000-0000-0001-000000000001', 'e3000000-0004-0000-0000-000000000009', 'CEUB-IND-9.1', 'Ejecución Presupuestaria de Carrera (POA)', 'Discrepancia en partida 200 respecto al balance SIGMA-UMSS. Adjuntar certificación emitida por DAF.', CURRENT_DATE - 2, CURRENT_DATE + 1, 'PENDIENTE_SUBSANACION', '/processes/e3000000-0000-0003-0000-000000000001/indicators/109');
+    ('OBS-E3-005', 'e3000000-0000-0000-0001-000000000001', 'e3000000-0004-0000-0000-000000000009', 'CEUB-IND-9.1', 'Ejecución Presupuestaria de Carrera (POA)', 'Discrepancia en partida 200 respecto al balance SIGMA-UMSS. Adjuntar certificación emitida por DAF.', CURRENT_DATE - 2, CURRENT_DATE + 1, 'PENDIENTE_SUBSANACION', '/processes/e3000000-0000-0003-0000-000000000001/indicators/109'),
+    ('OBS-E3-006', 'e3000000-0000-0000-0001-000000000002', 'e3000000-0004-0000-0000-000000000002', 'CEUB-IND-2.1', 'Malla Curricular Electromecánica', 'Actualización de carga horaria en laboratorio de alta tensión conforme a estándares regionales.', CURRENT_DATE - 12, CURRENT_DATE + 4, 'EN_REVISION', '/processes/e3000000-0000-0003-0000-000000000002/indicators/102'),
+    ('OBS-E3-007', 'e3000000-0000-0000-0001-000000000004', 'e3000000-0004-0000-0000-000000000003', 'CEUB-IND-3.1', 'Clínica Odontológica Docente-Asistencial', 'Verificar cumplimiento de protocolos de esterilización y autoclave en sillones odontológicos.', CURRENT_DATE - 8, CURRENT_DATE + 5, 'OBSERVADO', '/processes/e3000000-0000-0003-0000-000000000004/indicators/103'),
+    ('OBS-E3-008', 'e3000000-0000-0000-0001-000000000007', 'e3000000-0004-0000-0000-000000000006', 'CEUB-IND-6.1', 'Producción Científica en Computación y Sistemas', 'Registrar convenios de pasantías de investigación vigentes con el Centro de Cómputo.', CURRENT_DATE - 6, CURRENT_DATE + 8, 'APROBADO', '/processes/e3000000-0000-0003-0000-000000000005/indicators/106'),
+    ('OBS-E3-009', 'e3000000-0000-0000-0001-000000000008', 'e3000000-0004-0000-0000-000000000010', 'CEUB-IND-10.1', 'Laboratorio de Resistencia de Materiales y Suelos', 'Certificación de calibración de prensa hidráulica emitida por IBMETRO pendiente de carga.', CURRENT_DATE - 4, CURRENT_DATE + 2, 'PENDIENTE_SUBSANACION', '/processes/e3000000-0000-0003-0000-000000000006/indicators/110'),
+    ('OBS-E3-010', 'e3000000-0000-0000-0001-000000000009', 'e3000000-0004-0000-0000-000000000021', 'ARCU-IND-1.1', 'Convenios de Internado Rotatorio y Campos Clínicos', 'Ratificar actas de rotación hospitalaria en Hospital Viedma y Maternológico German Urquidi.', CURRENT_DATE - 9, CURRENT_DATE - 1, 'APROBADO', '/processes/e3000000-0000-0003-0000-000000000007/indicators/101');
 
--- 8.1 Notificaciones Outbox
-DELETE FROM notification_outbox WHERE id >= 'e3000000-0000-0000-0000-000000000001' AND id <= 'e3000000-0000-0000-0000-000000000200';
+-- 8.1 Notificaciones Outbox - Limpieza general del bloque E3
+DELETE FROM notification_outbox WHERE id >= 'e3000000-0000-0000-0000-000000000001' AND id <= 'e3000000-0000-0000-0000-000000020000';
 
+-- 8.2 Notificaciones críticas iniciales (PENDING)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 ) VALUES
@@ -528,76 +568,129 @@ INSERT INTO notification_outbox (
     ('e3000000-0000-0000-0000-000000000003', 'ALERT_PEER_REVIEW_COMMENCING', 'e3000000-0000-0000-0002-000000000003', 'coord.bioquimica@umss.edu.bo', 'Notificación: Inicio de evaluación por comité de pares ARCU-SUR (Bioquímica y Farmacia)', 'El comité externo asignado iniciará la revisión documental de laboratorios y bioseguridad a partir del lunes.', '/processes/e3000000-0000-0003-0000-000000000003/summary', 'PENDING', 0, 5, NULL, NOW() - INTERVAL '2 hours', NULL),
     ('e3000000-0000-0000-0000-000000000004', 'ALERT_PROCESS_OPENED', 'e3000000-0000-0000-0002-000000000004', 'coord.odontologia@umss.edu.bo', 'Apertura formal de proceso de acreditación CEUB 2026 (Odontología)', 'Se ha dado inicio oficial al proceso de autoevaluación para la carrera de Odontología de la UMSS.', '/processes/e3000000-0000-0003-0000-000000000004', 'PENDING', 0, 5, NULL, NOW() - INTERVAL '5 hours', NULL);
 
--- 8.2 Lote adicional de notificaciones PENDING
+-- 8.3 Lote masivo de notificaciones PENDING (2,496 registros adicionales -> 2,500 en total)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
     ('e3000000-0000-0000-0000-' || LPAD((4 + i)::text, 12, '0'))::uuid,
-    CASE (i % 4)
+    CASE (i % 8)
         WHEN 0 THEN 'INDICATOR_DEADLINE_APPROACHING'
         WHEN 1 THEN 'EVIDENCE_SUBMITTED_FOR_REVIEW'
         WHEN 2 THEN 'EVIDENCE_REJECTED'
-        ELSE 'PEER_REVIEW_ASSIGNED'
+        WHEN 3 THEN 'PEER_REVIEW_ASSIGNED'
+        WHEN 4 THEN 'AUTOEVAL_MILESTONE_EXPIRED'
+        WHEN 5 THEN 'STAGE_TRANSITION_COMMENCED'
+        WHEN 6 THEN 'OBSERVATION_CRITICAL_DEADLINE'
+        ELSE 'REMEDIATION_ACTION_DUE'
     END,
-    ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 4))::text, 12, '0'))::uuid,
-    CASE (i % 4)
+    ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 15))::text, 12, '0'))::uuid,
+    CASE (i % 15)
         WHEN 0 THEN 'coord.informatica@umss.edu.bo'
         WHEN 1 THEN 'coord.electromecanica@umss.edu.bo'
         WHEN 2 THEN 'coord.bioquimica@umss.edu.bo'
-        ELSE 'coord.odontologia@umss.edu.bo'
+        WHEN 3 THEN 'coord.odontologia@umss.edu.bo'
+        WHEN 4 THEN 'evaluador.e3@umss.edu.bo'
+        WHEN 5 THEN 'cae.e3@umss.edu.bo'
+        WHEN 6 THEN 'coord.sistemas@umss.edu.bo'
+        WHEN 7 THEN 'coord.civil@umss.edu.bo'
+        WHEN 8 THEN 'coord.medicina@umss.edu.bo'
+        WHEN 9 THEN 'coord.admin@umss.edu.bo'
+        WHEN 10 THEN 'coord.derecho@umss.edu.bo'
+        WHEN 11 THEN 'coord.industrial@umss.edu.bo'
+        WHEN 12 THEN 'coord.enfermeria@umss.edu.bo'
+        WHEN 13 THEN 'coord.arquitectura@umss.edu.bo'
+        ELSE 'coord.economia@umss.edu.bo'
     END,
     'Notificación de acreditación SIGESA #' || (4 + i),
     'Detalle del evento generado para seguimiento del criterio y evidencia #' || (4 + i) || ' en el marco del proceso de autoevaluación.',
-    '/processes/e3000000-0000-0003-0000-000000000001/indicators/' || (100 + i),
+    '/processes/e3000000-0000-0003-0000-000000000001/indicators/' || (100 + (i % 20)),
     'PENDING',
     0,
     5,
     NULL,
-    NOW() - (i || ' minutes')::interval,
+    NOW() - ((i % 1440) || ' minutes')::interval,
     NULL
-FROM generate_series(1, 46) AS i;
+FROM generate_series(1, 2496) AS i;
 
--- 8.3 Lote de notificaciones SENT
+-- 8.4 Lote masivo de notificaciones SENT (7,500 registros históricos)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
-    ('e3000000-0000-0000-0000-' || LPAD((50 + i)::text, 12, '0'))::uuid,
-    CASE (i % 3)
+    ('e3000000-0000-0000-0000-' || LPAD((2500 + i)::text, 12, '0'))::uuid,
+    CASE (i % 5)
         WHEN 0 THEN 'EVIDENCE_APPROVED'
         WHEN 1 THEN 'INDICATOR_COMPLETED'
-        ELSE 'STAGE_TRANSITION'
+        WHEN 2 THEN 'STAGE_TRANSITION'
+        WHEN 3 THEN 'REPORT_GENERATED'
+        ELSE 'ACCREDITATION_CONFIRMED'
     END,
-    ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 4))::text, 12, '0'))::uuid,
-    'coord.informatica@umss.edu.bo',
-    'Confirmación de envío exitoso #' || (50 + i),
+    ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 15))::text, 12, '0'))::uuid,
+    CASE (i % 15)
+        WHEN 0 THEN 'coord.informatica@umss.edu.bo'
+        WHEN 1 THEN 'coord.electromecanica@umss.edu.bo'
+        WHEN 2 THEN 'coord.bioquimica@umss.edu.bo'
+        WHEN 3 THEN 'coord.odontologia@umss.edu.bo'
+        WHEN 4 THEN 'evaluador.e3@umss.edu.bo'
+        WHEN 5 THEN 'cae.e3@umss.edu.bo'
+        WHEN 6 THEN 'coord.sistemas@umss.edu.bo'
+        WHEN 7 THEN 'coord.civil@umss.edu.bo'
+        WHEN 8 THEN 'coord.medicina@umss.edu.bo'
+        WHEN 9 THEN 'coord.admin@umss.edu.bo'
+        WHEN 10 THEN 'coord.derecho@umss.edu.bo'
+        WHEN 11 THEN 'coord.industrial@umss.edu.bo'
+        WHEN 12 THEN 'coord.enfermeria@umss.edu.bo'
+        WHEN 13 THEN 'coord.arquitectura@umss.edu.bo'
+        ELSE 'coord.economia@umss.edu.bo'
+    END,
+    'Confirmación de envío exitoso #' || (2500 + i),
     'La evidencia ha sido procesada y aprobada correctamente en la plataforma SIGESA.',
     '/processes/e3000000-0000-0003-0000-000000000001/summary',
     'SENT',
     0,
     5,
     NULL,
-    NOW() - ((50 + i) || ' hours')::interval,
-    NOW() - ((50 + i - 1) || ' hours')::interval
-FROM generate_series(1, 100) AS i;
+    NOW() - ((i % 90) || ' days')::interval - ((i % 24) || ' hours')::interval,
+    NOW() - ((i % 90) || ' days')::interval - (((i % 24) - 1) || ' hours')::interval
+FROM generate_series(1, 7500) AS i;
 
--- 8.4 Lote de notificaciones FAILED
+-- 8.5 Lote de notificaciones FAILED (500 registros con reintentos agotados)
 INSERT INTO notification_outbox (
     id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
 )
 SELECT
-    ('e3000000-0000-0000-0000-' || LPAD((150 + i)::text, 12, '0'))::uuid,
+    ('e3000000-0000-0000-0000-' || LPAD((10000 + i)::text, 12, '0'))::uuid,
     'SMTP_DISPATCH_ALERT',
     ('e3000000-0000-0000-0002-000000000005')::uuid,
-    'invalid_user_mailbox@umss.edu',
-    'Falla en despacho SMTP #' || (150 + i),
-    'Error persistente al despachar notificación electrónica tras agotar reintentos máximos.',
+    'invalid_user_' || i || '@umss.edu.bo',
+    'Falla en despacho SMTP #' || (10000 + i),
+    'Error persistente al despachar notificación electrónica tras agotar 5 reintentos máximos.',
     '/admin/notifications/failed',
     'FAILED',
     5,
     5,
     NULL,
-    NOW() - (i || ' days')::interval,
+    NOW() - ((i % 30) || ' days')::interval,
     NULL
-FROM generate_series(1, 20) AS i;
+FROM generate_series(1, 500) AS i;
+
+-- 8.6 Lote de notificaciones RETRYING (200 registros pendientes en reintento)
+INSERT INTO notification_outbox (
+    id, event_type, recipient_id, recipient_email, subject, body, deep_link, status, retry_count, max_retries, next_retry_at, created_at, sent_at
+)
+SELECT
+    ('e3000000-0000-0000-0000-' || LPAD((10500 + i)::text, 12, '0'))::uuid,
+    'EVIDENCE_REVIEW_EXPEDITE',
+    ('e3000000-0000-0000-0002-' || LPAD((1 + (i % 15))::text, 12, '0'))::uuid,
+    'coord.informatica@umss.edu.bo',
+    'Reintento de despacho de alerta #' || (10500 + i),
+    'Intento de entrega diferido por saturación temporal del servidor de correo institucional.',
+    '/processes/e3000000-0000-0003-0000-000000000001/indicators/104',
+    'PENDING',
+    (1 + (i % 4)),
+    5,
+    NOW() + ((i % 60) || ' minutes')::interval,
+    NOW() - ((i % 120) || ' minutes')::interval,
+    NULL
+FROM generate_series(1, 200) AS i;
