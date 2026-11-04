@@ -14,6 +14,7 @@ function HomeRoutes() {
       <Route path="/dashboard" element={<p>Dashboard</p>} />
       <Route path="/ayuda" element={<p>Ayuda</p>} />
       <Route path="/admin/users" element={<p>Admin JD</p>} />
+      <Route path="/public/news" element={<p>Listado de noticias</p>} />
     </Routes>
   );
 }

@@ -7,6 +7,7 @@ import { TemplatesListPage, TemplateEditorPage } from './features/admin/template
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { HomePage } from './features/home';
+import { NewsAdminPage, PublicNewsDetailPage, PublicNewsListPage } from './features/news';
 import { PublicStatusPage } from './features/public-portal';
 import { CreateProcessPage } from './features/accreditation-process';
 import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
@@ -119,6 +120,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/noticias"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <NewsAdminPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/procesos/nuevo"
@@ -221,6 +232,8 @@ function App() {
 
         <Route path="/" element={<HomePage />} />
         <Route path="/public/status" element={<PublicStatusPage />} />
+        <Route path="/public/news" element={<PublicNewsListPage />} />
+        <Route path="/public/news/:slug" element={<PublicNewsDetailPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

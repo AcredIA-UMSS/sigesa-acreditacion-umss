@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **MOD-PUBLIC noticias:** `GET /api/v1/public/news` (paginado), `/featured`, `/{slug}`; admin `/api/v1/admin/news` CRUD+publish/feature. Tabla `news_article` V28. UI `/admin/noticias`, `/public/news`. | FSD-UC-035 / DD-UC-035 | — | PM-040 / PR-IMPL-051 | Cursor Agent |
 | 04/11/2026 | **MOD-PUBLIC portal:** `GET /api/v1/public/programs` (listado nombre+slug), `/{slug}`, `/{slug}/certificate` (PDF en memoria). Prefijo `/api/v1/public` (FSD original: `/public/programs/{slug}`). 404 genérico. | FSD-UC-016 / DD-UC-016 | — | PM-039 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
 | 04/11/2026 | **MOD-ASSISTANT RAG (#76):** corpus classpath `normative-corpus/arcu-sur-2023/` (manual de procedimientos 2023); upsert al boot; retira placeholders ARCU-SUR de demo. | FSD-UC-033 / DD-UC-033 / PR-IMPL-032 | — | PM-037 / PR-IMPL-048 / #76 | Boris Anthony Angulo Urquieta |

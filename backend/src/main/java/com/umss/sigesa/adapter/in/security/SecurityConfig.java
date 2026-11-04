@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/internal/notifications/status").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
+                        .requestMatchers("/api/v1/admin/news", "/api/v1/admin/news/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers("/api/v1/audit/logs", "/api/v1/audit/logs/**").hasRole("JD")
                         .requestMatchers("/api/v1/dashboards/technician/**").hasAnyRole("TD", "JD")

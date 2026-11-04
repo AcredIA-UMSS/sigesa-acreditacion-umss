@@ -722,6 +722,10 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | API-PUB-01 | `GET /api/v1/public/programs/{slug}` — estado publicado — FSD-UC-016 |
 | API-PUB-02 | `GET /api/v1/public/programs` — listado `{slug,name}` solo publicadas — FSD-UC-016 (adición 2026-11-04) |
 | API-PUB-03 | `GET /api/v1/public/programs/{slug}/certificate` — PDF si certificado publicado; 404 genérico — FSD-UC-016 / PRD-US-020 |
+| API-NEWS-01 | `GET /api/v1/public/news` — listado publicado paginado (`page`,`size`) — FSD-UC-035 |
+| API-NEWS-02 | `GET /api/v1/public/news/featured` — destacada o más reciente; 204 si no hay publicadas — FSD-UC-035 |
+| API-NEWS-03 | `GET /api/v1/public/news/{slug}` — detalle publicado; 404 genérico — FSD-UC-035 |
+| API-NEWS-04…11 | `/api/v1/admin/news` CRUD + publish/unpublish/feature [JD] — FSD-UC-035 |
 | API-AUDIT-01 | Bitácora [JD] — FSD-UC-017 |
 | API-IMP-01 | `POST /imports/evidences` — filas con `indicatorCode` — FSD-UC-018 |
 
@@ -738,6 +742,22 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 ### API-PUB-03 — Certificado PDF
 
 **200** `application/pdf` + `Content-Disposition: attachment; filename="certificado-{slug}.pdf"` + `X-Certificate-Valid-From` / `X-Certificate-Valid-Until`. **404** si el programa o el certificado no están publicados.
+
+### API-NEWS-01 — Listado público de noticias
+
+**200** Spring `Page` de `{ slug, title, category, summary, publishedAt, featured }`. Solo `PUBLICADA`. Orden `publishedAt` desc.
+
+### API-NEWS-02 — Destacada / fallback
+
+**200** misma forma de resumen. Si no hay `featured=true`, la publicada más reciente. **204** si no hay ninguna publicada.
+
+### API-NEWS-03 — Detalle público
+
+**200** `{ slug, title, category, summary, body, publishedAt, featured }`. Borrador o slug desconocido: 404 genérico.
+
+### API-NEWS-04…11 — Admin [JD]
+
+`GET/POST /api/v1/admin/news`, `GET/PUT/DELETE /{id}`, `POST /{id}/publish|unpublish|feature`. Destacar borrador: **409** `NEWS_NOT_PUBLISHED`. Eliminar publicada: **409** `NEWS_PUBLISHED`.
 
 ---
 
@@ -759,6 +779,10 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | GET /api/v1/public/programs | | | | | ✓ |
 | GET /api/v1/public/programs/{slug} | | | | | ✓ |
 | GET /api/v1/public/programs/{slug}/certificate | | | | | ✓ |
+| GET /api/v1/public/news | | | | | ✓ |
+| GET /api/v1/public/news/featured | | | | | ✓ |
+| GET /api/v1/public/news/{slug} | | | | | ✓ |
+| /api/v1/admin/news/** | | | ✓ | | |
 
 \* [EE] solo lectura; sin mutaciones (FSD-BR-19).
 

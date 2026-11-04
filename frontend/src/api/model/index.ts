@@ -6,6 +6,7 @@
  * OpenAPI spec version: 8.2.0
  */
 
+export * from './adminNewsResponse.ts';
 export * from './assignResponsibleRequestDto.ts';
 export * from './assistantChatContextDto.ts';
 export * from './assistantDemoScenarioResponse.ts';
@@ -51,13 +52,16 @@ export * from './level1CompleteResponseDto.ts';
 export * from './liftFreezeRequestDto.ts';
 export * from './linkDocumentAssetRequestDto.ts';
 export * from './list1Params.ts';
+export * from './listAdminNewsParams.ts';
 export * from './listByProcessParams.ts';
 export * from './listExecutiveObservationsParams.ts';
 export * from './listParams.ts';
+export * from './listPublicNewsParams.ts';
 export * from './listTemplatesParams.ts';
 export * from './loginRequest.ts';
 export * from './loginResponse.ts';
 export * from './methodologicalStageResponseDto.ts';
+export * from './newsWriteRequest.ts';
 export * from './normativeIndicatorDetailResponseDto.ts';
 export * from './normativeIndicatorDto.ts';
 export * from './normativeIndicatorEvidenceResponseDto.ts';
@@ -70,8 +74,10 @@ export * from './observationSummary.ts';
 export * from './observeStageRequestDto.ts';
 export * from './pageable.ts';
 export * from './pageableObject.ts';
+export * from './pageAdminNewsResponse.ts';
 export * from './pageAuditLogResponseDto.ts';
 export * from './pageObservationSummary.ts';
+export * from './pagePublicNewsSummaryResponse.ts';
 export * from './pageTechnicianInboxResponseDto.ts';
 export * from './peerRoomChecklistItemDto.ts';
 export * from './phaseProgressSummary.ts';
@@ -82,6 +88,8 @@ export * from './processResponsibleDto.ts';
 export * from './processSummaryResponseDto.ts';
 export * from './programSummaryResponse.ts';
 export * from './programTrafficLight.ts';
+export * from './publicNewsDetailResponse.ts';
+export * from './publicNewsSummaryResponse.ts';
 export * from './publicProgramStatusResponse.ts';
 export * from './publicProgramSummaryResponse.ts';
 export * from './recentEvaluation.ts';

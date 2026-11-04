@@ -156,6 +156,7 @@ Transiciones: UC-004, UC-006, UC-008, UC-009. Cierre N1 (UC-010): todos los indi
 | `EvidenceVersion` | `evidence_version` | V9+ |
 | `IndicatorObservation` | `indicator_observation` | V14 |
 | `PublicationSnapshot` | `publication_snapshot` | V27 |
+| `NewsArticle` | `news_article` | V28 |
 
 **M5 (V16):** eliminadas tablas legacy `phases`, `subphases`, `template_phases`, `template_subphases`, `subphase_observation` y columnas `legacy_*`, `evidence.subphase_id`.
 
@@ -174,6 +175,7 @@ Transiciones: UC-004, UC-006, UC-008, UC-009. Cierre N1 (UC-010): todos los indi
 | FSD-BR-24 | Plantilla publicada exige árbol completo hasta indicador |
 | FSD-BR-25 | `weight` obligatorio y ≥ 0 en indicador |
 | FSD-BR-10 | Portal: solo filas `publication_snapshot.published=true`; certificado si `certificate_published=true` |
+| FSD-BR-10 | Noticias: [P] solo filas `news_article.status=PUBLICADA`; a lo sumo una `featured=true` |
 
 ---
 
@@ -314,6 +316,7 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.3 | 2026-11-04 | UC-035: `news_article` Flyway **V28**; status/featured/published_at |
 | v2.1.2 | 2026-11-04 | UC-016: `publication_snapshot` Flyway **V27**; flags `published` / `certificate_published` |
 | v2.1.1 | 2026-10-13 | M7: `document_assets` / `indicator_evidence_links` → Flyway **V19** (V18 ya usado por evidencia nullable) |
 | v2.1 | 2026-09-08 | ADR-0005: workflow metodológico, entidades planificadas, MAR-ER-003; MAR-ER-001 actualizado v2.0; M5 reflejado en §6 |

@@ -35,6 +35,11 @@ describe('App routing', () => {
     expect(await screen.findByRole('heading', { name: 'Estado de acreditación' })).toBeInTheDocument();
   });
 
+  it('shouldRenderPublicNewsWithoutAuth', async () => {
+    renderApp('/public/news');
+    expect(await screen.findByRole('heading', { name: 'Noticias y destacados' })).toBeInTheDocument();
+  });
+
   it('shouldRedirectUnknownPathsTowardDashboardThenLoginWhenAnonymous', async () => {
     renderApp('/ruta-inexistente');
     expect(await screen.findByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();

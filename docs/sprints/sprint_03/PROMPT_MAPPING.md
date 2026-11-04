@@ -46,6 +46,7 @@
 | PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
 | PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
 | PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
+| PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
 
 
 ---
@@ -2671,5 +2672,83 @@ Portal público anónimo: listado `{slug,name}`, estado vigente y PDF en memoria
 - [ ] Commit / PR si el usuario lo pide
 - [ ] UI de publicación [JD] (fuera de este UC)
 - [ ] Noticias = UC-035 (no implementado)
+
+---
+
+## PM-040
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-040 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 19:42 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-035 noticias y destacados |
+| **Objetivo** | CRUD [JD], lectura anónima, una destacada, home `#noticias` real, 404 genérico |
+| **Contexto** | Spec v1.1 aprobada + seis adiciones (unpublish featured=false, feature draft 409, fallback latest, home excluye slug). Sin imágenes/tags/schedule. Sin tocar UC-016/015/002 ni baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-051](../../prompts/impl/PR-IMPL-051.md) |
+| **DD-UC vinculado** | [DD-UC-035](../../design/DD-UC-035.md) |
+| **FSD-UC vinculado** | [FSD-UC-035](../../product/uc/FSD-UC-035.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+ok para implementar
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-035.md`
+- `docs/prompts/impl/PR-IMPL-051.md`
+- `docs/product/uc/FSD-UC-035.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-035.md` |
+| generado | `docs/prompts/impl/PR-IMPL-051.md` |
+| generado | `backend/src/main/resources/db/migration/V28__news.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/news/NewsService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicNewsController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/NewsAdminController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/NewsGherkinIT.java` |
+| generado | `frontend/src/features/news/` |
+| generado | `frontend/src/api/endpoints/public-news/` |
+| generado | `frontend/src/api/endpoints/admin-news/` |
+| modificado | `docs/product/uc/FSD-UC-035.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeNewsSection.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Tabla `news_article` (V28), servicio hexagonal, APIs públicas y admin JD.
+- Seis tests Gherkin `@TC-NEWS`. Home `#noticias` consume Orval; «Ver mas Noticias» → `/public/news`.
+- 404 genérico público; 409 `NEWS_NOT_PUBLISHED` al destacar borrador; unpublish fuerza `featured=false`.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=NewsGherkinIT,NewsServiceTest,OpenApiExportIT test` — OK
+- [x] `pnpm exec vitest run` (App + HomePage + useHomeNews + public-portal) — 15 passed
+- [x] `oxlint` sobre news/home/App/Sidebar — OK
+
+### Resultado obtenido
+
+FSD-UC-035 Implementado. [JD] gestiona noticias; [P] lee solo publicadas. Home usa destacada o la más reciente y no duplica ese slug en el recorte.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Imágenes / tags / programación (fuera de alcance)
 
 

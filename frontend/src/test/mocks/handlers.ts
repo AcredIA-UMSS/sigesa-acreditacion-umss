@@ -134,6 +134,60 @@ export const handlers = [
       },
     });
   }),
+  http.get('/api/v1/public/news/featured', () => {
+    return HttpResponse.json({
+      slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+      title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+      category: 'EVENTO',
+      summary:
+        'Tras un riguroso proceso de evaluación, la carrera de medicina mantiene sus estándares de excelencia regional.',
+      publishedAt: '2026-10-20T12:00:00Z',
+      featured: false,
+    });
+  }),
+  http.get('/api/v1/public/news/:slug', ({ params }) => {
+    if (params.slug === 'facultad-de-medicina-renueva-acreditacion-mercosur') {
+      return HttpResponse.json({
+        slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+        title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+        category: 'EVENTO',
+        summary:
+          'Tras un riguroso proceso de evaluación, la carrera de medicina mantiene sus estándares de excelencia regional.',
+        body: 'La Facultad de Medicina de la UMSS renovó su acreditación MERCOSUR.',
+        publishedAt: '2026-10-20T12:00:00Z',
+        featured: false,
+      });
+    }
+    return HttpResponse.json(
+      { error: 'NOT_FOUND', message: 'El recurso solicitado no existe.' },
+      { status: 404 },
+    );
+  }),
+  http.get('/api/v1/public/news', () => {
+    return HttpResponse.json({
+      content: [
+        {
+          slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+          title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+          category: 'EVENTO',
+          summary: 'Tras un riguroso proceso de evaluación.',
+          publishedAt: '2026-10-20T12:00:00Z',
+          featured: false,
+        },
+        {
+          slug: 'taller-de-autoevaluacion-para-nuevas-carreras',
+          title: 'Taller de Autoevaluación para nuevas carreras',
+          category: 'CAPACITACION',
+          summary: 'Iniciamos la formación para los comités.',
+          publishedAt: '2026-10-15T12:00:00Z',
+          featured: false,
+        },
+      ],
+      totalPages: 1,
+      totalElements: 2,
+      number: 0,
+    });
+  }),
   http.get('/api/v1/public/programs', () => {
     return HttpResponse.json([
       { slug: 'inf-sis', name: 'Ingeniería de Sistemas' },
