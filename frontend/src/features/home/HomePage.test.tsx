@@ -36,6 +36,13 @@ describe('HomePage', () => {
     expect(screen.getByText('Página de login')).toBeInTheDocument();
   });
 
+  it('sends the header Noticias link to the public news list', () => {
+    renderWithProviders(<HomeRoutes />, { route: '/' });
+
+    const newsLinks = screen.getAllByRole('link', { name: 'Noticias' });
+    expect(newsLinks[0]).toHaveAttribute('href', '/public/news');
+  });
+
   it('sends help to the assistant when there is an active session', () => {
     seedSession('CC');
     renderWithProviders(<HomeRoutes />, { route: '/' });

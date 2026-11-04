@@ -1,24 +1,56 @@
 import { CircleHelp, GraduationCap, Menu, University, X } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/useAuth';
 
-const NAV_LINKS = [
-  { href: '#inicio', label: 'Inicio', current: true },
-  { href: '#modalidades', label: 'Modalidades', current: false },
-  { href: '#carreras', label: 'Carreras', current: false },
-  { href: '#noticias', label: 'Noticias', current: false },
-] as const;
+type HomeNavItem = {
+  label: string;
+  homeHref: string;
+  to?: string;
+};
+
+const NAV_LINKS: HomeNavItem[] = [
+  { label: 'Inicio', homeHref: '#inicio' },
+  { label: 'Modalidades', homeHref: '#modalidades' },
+  { label: 'Carreras', homeHref: '#carreras' },
+  { label: 'Noticias', homeHref: '#noticias', to: '/public/news' },
+];
+
+function navClassName(current: boolean): string {
+  return current
+    ? 'border-b-2 border-primary-700 pb-0.5 text-body-md font-bold text-primary-800'
+    : 'text-body-md text-gray-700 hover:text-primary-700';
+}
 
 export function HomeHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const helpTo = isAuthenticated ? '/ayuda' : '/login';
+  const isHome = location.pathname === '/';
+  const isNews = location.pathname.startsWith('/public/news');
+
+  const isCurrent = (item: HomeNavItem): boolean => {
+    if (item.to != null) {
+      return isNews;
+    }
+    if (item.homeHref === '#inicio') {
+      return isHome;
+    }
+    return false;
+  };
+
+  const itemHref = (item: HomeNavItem): string => {
+    if (item.to != null) {
+      return item.to;
+    }
+    return isHome ? item.homeHref : `/${item.homeHref}`;
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-body">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
-        <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-3" aria-label="Ir al inicio">
           <div className="flex items-center gap-2 text-primary-700">
             <University size={28} aria-hidden />
             <span className="text-label-md font-semibold tracking-wide">DUEA</span>
@@ -28,23 +60,35 @@ export function HomeHeader() {
             <GraduationCap size={28} aria-hidden />
             <span className="text-label-md font-semibold tracking-wide">UMSS</span>
           </div>
-        </div>
+        </Link>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Secciones">
-          {NAV_LINKS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={
-                item.current
-                  ? 'border-b-2 border-primary-700 pb-0.5 text-body-md font-bold text-primary-800'
-                  : 'text-body-md text-gray-700 hover:text-primary-700'
-              }
-              aria-current={item.current ? 'page' : undefined}
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((item) => {
+            const href = itemHref(item);
+            const current = isCurrent(item);
+            if (item.to != null) {
+              return (
+                <Link
+                  key={item.label}
+                  to={href}
+                  className={navClassName(current)}
+                  aria-current={current ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              );
+            }
+            return (
+              <a
+                key={item.label}
+                href={href}
+                className={navClassName(current)}
+                aria-current={current ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -77,17 +121,23 @@ export function HomeHeader() {
       {menuOpen ? (
         <nav id="home-mobile-nav" className="border-t border-gray-200 bg-body px-4 py-3 lg:hidden" aria-label="Móvil">
           <ul className="flex flex-col gap-3">
-            {NAV_LINKS.map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  className="block py-1 text-body-md text-primary-800"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((item) => {
+              const href = itemHref(item);
+              const className = 'block py-1 text-body-md text-primary-800';
+              return (
+                <li key={item.label}>
+                  {item.to != null ? (
+                    <Link to={href} className={className} onClick={() => setMenuOpen(false)}>
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a href={href} className={className} onClick={() => setMenuOpen(false)}>
+                      {item.label}
+                    </a>
+                  )}
+                </li>
+              );
+            })}
             <li>
               <Link to="/login" className="block py-1 text-body-md font-medium text-primary-700" onClick={() => setMenuOpen(false)}>
                 Iniciar Sesión

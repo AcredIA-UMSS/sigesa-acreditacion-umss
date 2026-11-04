@@ -26,14 +26,19 @@ export function HomeFooter() {
           <h2 className="text-label-md font-medium uppercase tracking-wide text-body">Explorar</h2>
           <ul className="mt-3 space-y-2 text-body-md">
             <li>
-              <a href="#carreras" className="hover:text-body">
+              <a href="/#carreras" className="hover:text-body">
                 Carreras Acreditadas
               </a>
             </li>
             <li>
-              <a href="#modalidades" className="hover:text-body">
+              <a href="/#modalidades" className="hover:text-body">
                 Modalidades
               </a>
+            </li>
+            <li>
+              <Link to="/public/news" className="hover:text-body">
+                Noticias
+              </Link>
             </li>
             <li>
               <Link to={faqTo} className="hover:text-body">

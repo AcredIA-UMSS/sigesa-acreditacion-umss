@@ -38,6 +38,9 @@ describe('App routing', () => {
   it('shouldRenderPublicNewsWithoutAuth', async () => {
     renderApp('/public/news');
     expect(await screen.findByRole('heading', { name: 'Noticias y destacados' })).toBeInTheDocument();
+    const newsLinks = await screen.findAllByRole('link', { name: 'Noticias' });
+    expect(newsLinks[0]).toHaveAttribute('href', '/public/news');
+    expect(screen.getAllByRole('link', { name: /Iniciar Sesión/i })[0]).toHaveAttribute('href', '/login');
   });
 
   it('shouldRedirectUnknownPathsTowardDashboardThenLoginWhenAnonymous', async () => {

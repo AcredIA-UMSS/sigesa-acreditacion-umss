@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { PublicNewsDetailResponse } from '../../../api/model';
 import { formatNewsDate, newsCategoryLabel } from '../labels';
@@ -11,19 +12,32 @@ export type PublicNewsDetailViewProps = {
 
 export function PublicNewsDetailView({ article, isLoading, error }: PublicNewsDetailViewProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-body">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
-          <Link to="/public/news" className="text-body-md font-medium text-primary-700">
-            Volver al listado
-          </Link>
-          <Link to="/" className="text-body-md font-medium text-primary-700">
+    <main className="bg-gray-50">
+      <div className="mx-auto max-w-3xl space-y-6 px-4 py-10 md:px-6">
+        <p className="text-body-md text-gray-500">
+          <Link to="/" className="text-primary-700 hover:text-primary-500">
             Inicio
           </Link>
-        </div>
-      </header>
+          <span className="mx-2 text-gray-400">/</span>
+          <Link to="/public/news" className="text-primary-700 hover:text-primary-500">
+            Noticias
+          </Link>
+          {article?.title ? (
+            <>
+              <span className="mx-2 text-gray-400">/</span>
+              <span>{article.title}</span>
+            </>
+          ) : null}
+        </p>
 
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 md:px-6">
+        <Link
+          to="/public/news"
+          className="inline-flex items-center gap-1 text-body-md font-medium text-primary-700 hover:text-primary-500"
+        >
+          <ChevronLeft size={16} aria-hidden />
+          Todas las noticias
+        </Link>
+
         {isLoading ? <p className="text-body-md text-gray-600">Cargando noticia…</p> : null}
         {error ? (
           <p role="alert" className="text-body-md text-danger">
@@ -31,7 +45,7 @@ export function PublicNewsDetailView({ article, isLoading, error }: PublicNewsDe
           </p>
         ) : null}
         {article != null ? (
-          <article className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
+          <article className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm md:p-8">
             <p className="text-label-md font-medium uppercase tracking-wide text-secondary-600">
               {newsCategoryLabel(article.category)}
             </p>
@@ -43,7 +57,7 @@ export function PublicNewsDetailView({ article, isLoading, error }: PublicNewsDe
             </div>
           </article>
         ) : null}
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
