@@ -7,14 +7,14 @@
  */
 
 export interface ObservationSummary {
-  observationId?: string;
-  indicatorId?: string;
-  indicatorCode?: string;
-  indicatorTitle?: string;
   description?: string;
-  issueDate?: string;
   dueDate?: string;
+  indicatorCode?: string;
+  indicatorId?: string;
+  indicatorTitle?: string;
+  issueDate?: string;
+  observationId?: string;
   remainingDays?: number;
-  status?: string;
   remediationUrl?: string;
+  status?: string;
 }

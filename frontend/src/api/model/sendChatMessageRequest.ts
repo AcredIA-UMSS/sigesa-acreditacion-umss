@@ -9,8 +9,8 @@ import type { AssistantChatContextDto } from './assistantChatContextDto.ts';
 import type { ChatMessageDto } from './chatMessageDto.ts';
 
 export interface SendChatMessageRequest {
+  context?: AssistantChatContextDto;
+  history?: ChatMessageDto[];
   /** @minLength 1 */
   message: string;
-  history?: ChatMessageDto[];
-  context?: AssistantChatContextDto;
 }

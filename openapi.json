@@ -1566,6 +1566,16 @@
         "required" : [ "id" ],
         "type" : "object"
       },
+      "ProbeRequest" : {
+        "properties" : {
+          "name" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "name" ],
+        "type" : "object"
+      },
       "ProcessFreezeResponseDto" : {
         "description" : "Estado de freeze del proceso (API-WF-18…20)",
         "properties" : {
@@ -2462,6 +2472,78 @@
         },
         "summary" : "Liveness: HTTP 200 con {\"status\":\"UP\"} sin autenticación",
         "tags" : [ "Health" ]
+      }
+    },
+    "/api/v1/_error-probe/boom" : {
+      "get" : {
+        "operationId" : "boom",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "error-contract-probe-controller" ]
+      }
+    },
+    "/api/v1/_error-probe/echo" : {
+      "post" : {
+        "operationId" : "echo",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProbeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "error-contract-probe-controller" ]
+      }
+    },
+    "/api/v1/_error-probe/typed" : {
+      "get" : {
+        "operationId" : "typed",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "additionalProperties" : {
+                    "type" : "string"
+                  },
+                  "type" : "object"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "error-contract-probe-controller" ]
       }
     },
     "/api/v1/admin/users" : {
@@ -4214,6 +4296,12 @@
           },
           "404" : {
             "description" : "Proceso no encontrado"
+          },
+          "409" : {
+            "description" : "Exportación activa duplicada"
+          },
+          "429" : {
+            "description" : "Concurrencia máxima alcanzada"
           }
         },
         "summary" : "Exportar dossier digital en ZIP",
@@ -4281,8 +4369,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "format" : "binary",
-                  "type" : "string"
+                  "type" : "object"
                 }
               }
             },

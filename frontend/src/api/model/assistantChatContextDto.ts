@@ -9,10 +9,10 @@
 export interface AssistantChatContextDto {
   /** @pattern phases|users|evidence|general */
   agent?: string;
-  processId?: string;
-  careerName?: string;
   careerCode?: string;
+  careerName?: string;
+  processId?: string;
+  programId?: string;
   templateType?: string;
   userId?: string;
-  programId?: string;
 }

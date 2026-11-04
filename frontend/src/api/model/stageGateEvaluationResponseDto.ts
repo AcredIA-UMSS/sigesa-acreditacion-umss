@@ -7,7 +7,7 @@
  */
 
 export interface StageGateEvaluationResponseDto {
-  pass?: boolean;
   failedRules?: string[];
+  pass?: boolean;
   summary?: string;
 }

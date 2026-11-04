@@ -9,17 +9,17 @@ import type { NormativeLevel1NodeDto } from './normativeLevel1NodeDto.ts';
 import type { ProcessResponsibleDto } from './processResponsibleDto.ts';
 
 export interface ProcessResponseDto {
-  id?: string;
-  careerId?: string;
   careerCode?: string;
+  careerId?: string;
   careerName?: string;
+  evaluatorModel?: string;
+  id?: string;
+  level1Nodes?: NormativeLevel1NodeDto[];
+  operationalMode?: string;
+  responsible?: ProcessResponsibleDto;
+  startDate?: string;
+  status?: string;
   templateId?: string;
   templateName?: string;
   templateType?: string;
-  evaluatorModel?: string;
-  status?: string;
-  operationalMode?: string;
-  startDate?: string;
-  level1Nodes?: NormativeLevel1NodeDto[];
-  responsible?: ProcessResponsibleDto;
 }

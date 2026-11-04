@@ -60,110 +60,29 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type updateLevel11Response200 = {
-  data: NormativeLevel1NodeDto
-  status: 200
-}
-
-export type updateLevel11ResponseSuccess = (updateLevel11Response200) & {
-  headers: Headers;
-};
-;
-
-export type updateLevel11Response = (updateLevel11ResponseSuccess)
-
-export const getUpdateLevel11Url = (processId: string,
-    level1Id: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/level1-nodes/${level1Id}`
-}
-
-export const updateLevel11 = async (processId: string,
-    level1Id: string,
-    updateLevel1NodeRequestDto: UpdateLevel1NodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel11Response> => {
-
-  return customFetch<updateLevel11Response>(getUpdateLevel11Url(processId,level1Id),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateLevel1NodeRequestDto)
-  }
-);}
-
-
-
-
-
-export const getUpdateLevel11MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext> => {
-
-const mutationKey = ['updateLevel11'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel11>>, {processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}> = (props) => {
-          const {processId,level1Id,data} = props ?? {};
-
-          return  updateLevel11(processId,level1Id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateLevel11MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel11>>>
-    export type UpdateLevel11MutationBody = UpdateLevel1NodeRequestDto
-    export type UpdateLevel11MutationError = unknown
-
-    export const useUpdateLevel11 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateLevel11>>,
-        TError,
-        {processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto},
-        TContext
-      > => {
-      return useMutation(getUpdateLevel11MutationOptions(options), queryClient);
-    }
-    export type deleteLevel11Response200 = {
+export type deleteIndicator1Response200 = {
   data: void
   status: 200
 }
 
-export type deleteLevel11ResponseSuccess = (deleteLevel11Response200) & {
+export type deleteIndicator1ResponseSuccess = (deleteIndicator1Response200) & {
   headers: Headers;
 };
 ;
 
-export type deleteLevel11Response = (deleteLevel11ResponseSuccess)
+export type deleteIndicator1Response = (deleteIndicator1ResponseSuccess)
 
-export const getDeleteLevel11Url = (processId: string,
-    level1Id: string,) => {
-
+export const getDeleteIndicator1Url = (indicatorId: string,) => {
 
 
 
-  return `/api/v1/processes/${processId}/level1-nodes/${level1Id}`
+
+  return `/api/v1/indicators/${indicatorId}`
 }
 
-export const deleteLevel11 = async (processId: string,
-    level1Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel11Response> => {
+export const deleteIndicator1 = async (indicatorId: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteIndicator1Response> => {
 
-  return customFetch<deleteLevel11Response>(getDeleteLevel11Url(processId,level1Id),
+  return customFetch<deleteIndicator1Response>(getDeleteIndicator1Url(indicatorId),
   {
     ...options,
     method: 'DELETE'
@@ -176,11 +95,11 @@ export const deleteLevel11 = async (processId: string,
 
 
 
-export const getDeleteLevel11MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext> => {
+export const getDeleteIndicator1MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext> => {
 
-const mutationKey = ['deleteLevel11'];
+const mutationKey = ['deleteIndicator1'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -190,10 +109,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel11>>, {processId: string;level1Id: string}> = (props) => {
-          const {processId,level1Id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteIndicator1>>, {indicatorId: string}> = (props) => {
+          const {indicatorId} = props ?? {};
 
-          return  deleteLevel11(processId,level1Id,requestOptions)
+          return  deleteIndicator1(indicatorId,requestOptions)
         }
 
 
@@ -203,325 +122,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteLevel11MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel11>>>
+    export type DeleteIndicator1MutationResult = NonNullable<Awaited<ReturnType<typeof deleteIndicator1>>>
 
-    export type DeleteLevel11MutationError = unknown
+    export type DeleteIndicator1MutationError = unknown
 
-    export const useDeleteLevel11 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const useDeleteIndicator1 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteLevel11>>,
+        Awaited<ReturnType<typeof deleteIndicator1>>,
         TError,
-        {processId: string;level1Id: string},
+        {indicatorId: string},
         TContext
       > => {
-      return useMutation(getDeleteLevel11MutationOptions(options), queryClient);
-    }
-    export type updateLevel31Response200 = {
-  data: NormativeLevel3NodeDto
-  status: 200
-}
-
-export type updateLevel31ResponseSuccess = (updateLevel31Response200) & {
-  headers: Headers;
-};
-;
-
-export type updateLevel31Response = (updateLevel31ResponseSuccess)
-
-export const getUpdateLevel31Url = (level3Id: string,) => {
-
-
-
-
-  return `/api/v1/level3-nodes/${level3Id}`
-}
-
-export const updateLevel31 = async (level3Id: string,
-    updateNormativeNodeRequestDto: UpdateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel31Response> => {
-
-  return customFetch<updateLevel31Response>(getUpdateLevel31Url(level3Id),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateNormativeNodeRequestDto)
-  }
-);}
-
-
-
-
-
-export const getUpdateLevel31MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext> => {
-
-const mutationKey = ['updateLevel31'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel31>>, {level3Id: string;data: UpdateNormativeNodeRequestDto}> = (props) => {
-          const {level3Id,data} = props ?? {};
-
-          return  updateLevel31(level3Id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel31>>>
-    export type UpdateLevel31MutationBody = UpdateNormativeNodeRequestDto
-    export type UpdateLevel31MutationError = unknown
-
-    export const useUpdateLevel31 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateLevel31>>,
-        TError,
-        {level3Id: string;data: UpdateNormativeNodeRequestDto},
-        TContext
-      > => {
-      return useMutation(getUpdateLevel31MutationOptions(options), queryClient);
-    }
-    export type deleteLevel31Response200 = {
-  data: void
-  status: 200
-}
-
-export type deleteLevel31ResponseSuccess = (deleteLevel31Response200) & {
-  headers: Headers;
-};
-;
-
-export type deleteLevel31Response = (deleteLevel31ResponseSuccess)
-
-export const getDeleteLevel31Url = (level3Id: string,) => {
-
-
-
-
-  return `/api/v1/level3-nodes/${level3Id}`
-}
-
-export const deleteLevel31 = async (level3Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel31Response> => {
-
-  return customFetch<deleteLevel31Response>(getDeleteLevel31Url(level3Id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-
-export const getDeleteLevel31MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext> => {
-
-const mutationKey = ['deleteLevel31'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel31>>, {level3Id: string}> = (props) => {
-          const {level3Id} = props ?? {};
-
-          return  deleteLevel31(level3Id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel31>>>
-
-    export type DeleteLevel31MutationError = unknown
-
-    export const useDeleteLevel31 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteLevel31>>,
-        TError,
-        {level3Id: string},
-        TContext
-      > => {
-      return useMutation(getDeleteLevel31MutationOptions(options), queryClient);
-    }
-    export type updateLevel21Response200 = {
-  data: NormativeLevel2NodeDto
-  status: 200
-}
-
-export type updateLevel21ResponseSuccess = (updateLevel21Response200) & {
-  headers: Headers;
-};
-;
-
-export type updateLevel21Response = (updateLevel21ResponseSuccess)
-
-export const getUpdateLevel21Url = (level2Id: string,) => {
-
-
-
-
-  return `/api/v1/level2-nodes/${level2Id}`
-}
-
-export const updateLevel21 = async (level2Id: string,
-    updateNormativeNodeRequestDto: UpdateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel21Response> => {
-
-  return customFetch<updateLevel21Response>(getUpdateLevel21Url(level2Id),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateNormativeNodeRequestDto)
-  }
-);}
-
-
-
-
-
-export const getUpdateLevel21MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext> => {
-
-const mutationKey = ['updateLevel21'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel21>>, {level2Id: string;data: UpdateNormativeNodeRequestDto}> = (props) => {
-          const {level2Id,data} = props ?? {};
-
-          return  updateLevel21(level2Id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel21>>>
-    export type UpdateLevel21MutationBody = UpdateNormativeNodeRequestDto
-    export type UpdateLevel21MutationError = unknown
-
-    export const useUpdateLevel21 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateLevel21>>,
-        TError,
-        {level2Id: string;data: UpdateNormativeNodeRequestDto},
-        TContext
-      > => {
-      return useMutation(getUpdateLevel21MutationOptions(options), queryClient);
-    }
-    export type deleteLevel21Response200 = {
-  data: void
-  status: 200
-}
-
-export type deleteLevel21ResponseSuccess = (deleteLevel21Response200) & {
-  headers: Headers;
-};
-;
-
-export type deleteLevel21Response = (deleteLevel21ResponseSuccess)
-
-export const getDeleteLevel21Url = (level2Id: string,) => {
-
-
-
-
-  return `/api/v1/level2-nodes/${level2Id}`
-}
-
-export const deleteLevel21 = async (level2Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel21Response> => {
-
-  return customFetch<deleteLevel21Response>(getDeleteLevel21Url(level2Id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-
-export const getDeleteLevel21MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext> => {
-
-const mutationKey = ['deleteLevel21'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel21>>, {level2Id: string}> = (props) => {
-          const {level2Id} = props ?? {};
-
-          return  deleteLevel21(level2Id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel21>>>
-
-    export type DeleteLevel21MutationError = unknown
-
-    export const useDeleteLevel21 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteLevel21>>,
-        TError,
-        {level2Id: string},
-        TContext
-      > => {
-      return useMutation(getDeleteLevel21MutationOptions(options), queryClient);
+      return useMutation(getDeleteIndicator1MutationOptions(options), queryClient);
     }
     export type getIndicatorResponse200 = {
   data: NormativeIndicatorDetailResponseDto
@@ -712,29 +325,106 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateIndicator1MutationOptions(options), queryClient);
     }
-    export type deleteIndicator1Response200 = {
-  data: void
+    export type addLevel21Response200 = {
+  data: NormativeLevel2NodeDto
   status: 200
 }
 
-export type deleteIndicator1ResponseSuccess = (deleteIndicator1Response200) & {
+export type addLevel21ResponseSuccess = (addLevel21Response200) & {
   headers: Headers;
 };
 ;
 
-export type deleteIndicator1Response = (deleteIndicator1ResponseSuccess)
+export type addLevel21Response = (addLevel21ResponseSuccess)
 
-export const getDeleteIndicator1Url = (indicatorId: string,) => {
-
-
+export const getAddLevel21Url = (level1Id: string,) => {
 
 
-  return `/api/v1/indicators/${indicatorId}`
+
+
+  return `/api/v1/level1-nodes/${level1Id}/level2-nodes`
 }
 
-export const deleteIndicator1 = async (indicatorId: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteIndicator1Response> => {
+export const addLevel21 = async (level1Id: string,
+    createNormativeNodeRequestDto: CreateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addLevel21Response> => {
 
-  return customFetch<deleteIndicator1Response>(getDeleteIndicator1Url(indicatorId),
+  return customFetch<addLevel21Response>(getAddLevel21Url(level1Id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createNormativeNodeRequestDto)
+  }
+);}
+
+
+
+
+
+export const getAddLevel21MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext> => {
+
+const mutationKey = ['addLevel21'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addLevel21>>, {level1Id: string;data: CreateNormativeNodeRequestDto}> = (props) => {
+          const {level1Id,data} = props ?? {};
+
+          return  addLevel21(level1Id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof addLevel21>>>
+    export type AddLevel21MutationBody = CreateNormativeNodeRequestDto
+    export type AddLevel21MutationError = unknown
+
+    export const useAddLevel21 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addLevel21>>,
+        TError,
+        {level1Id: string;data: CreateNormativeNodeRequestDto},
+        TContext
+      > => {
+      return useMutation(getAddLevel21MutationOptions(options), queryClient);
+    }
+    export type deleteLevel21Response200 = {
+  data: void
+  status: 200
+}
+
+export type deleteLevel21ResponseSuccess = (deleteLevel21Response200) & {
+  headers: Headers;
+};
+;
+
+export type deleteLevel21Response = (deleteLevel21ResponseSuccess)
+
+export const getDeleteLevel21Url = (level2Id: string,) => {
+
+
+
+
+  return `/api/v1/level2-nodes/${level2Id}`
+}
+
+export const deleteLevel21 = async (level2Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel21Response> => {
+
+  return customFetch<deleteLevel21Response>(getDeleteLevel21Url(level2Id),
   {
     ...options,
     method: 'DELETE'
@@ -747,11 +437,11 @@ export const deleteIndicator1 = async (indicatorId: string, options?: Parameters
 
 
 
-export const getDeleteIndicator1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext> => {
+export const getDeleteLevel21MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext> => {
 
-const mutationKey = ['deleteIndicator1'];
+const mutationKey = ['deleteLevel21'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -761,10 +451,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteIndicator1>>, {indicatorId: string}> = (props) => {
-          const {indicatorId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel21>>, {level2Id: string}> = (props) => {
+          const {level2Id} = props ?? {};
 
-          return  deleteIndicator1(indicatorId,requestOptions)
+          return  deleteLevel21(level2Id,requestOptions)
         }
 
 
@@ -774,19 +464,403 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteIndicator1MutationResult = NonNullable<Awaited<ReturnType<typeof deleteIndicator1>>>
+    export type DeleteLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel21>>>
 
-    export type DeleteIndicator1MutationError = unknown
+    export type DeleteLevel21MutationError = unknown
 
-    export const useDeleteIndicator1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIndicator1>>, TError,{indicatorId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const useDeleteLevel21 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel21>>, TError,{level2Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteIndicator1>>,
+        Awaited<ReturnType<typeof deleteLevel21>>,
         TError,
-        {indicatorId: string},
+        {level2Id: string},
         TContext
       > => {
-      return useMutation(getDeleteIndicator1MutationOptions(options), queryClient);
+      return useMutation(getDeleteLevel21MutationOptions(options), queryClient);
+    }
+    export type updateLevel21Response200 = {
+  data: NormativeLevel2NodeDto
+  status: 200
+}
+
+export type updateLevel21ResponseSuccess = (updateLevel21Response200) & {
+  headers: Headers;
+};
+;
+
+export type updateLevel21Response = (updateLevel21ResponseSuccess)
+
+export const getUpdateLevel21Url = (level2Id: string,) => {
+
+
+
+
+  return `/api/v1/level2-nodes/${level2Id}`
+}
+
+export const updateLevel21 = async (level2Id: string,
+    updateNormativeNodeRequestDto: UpdateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel21Response> => {
+
+  return customFetch<updateLevel21Response>(getUpdateLevel21Url(level2Id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateNormativeNodeRequestDto)
+  }
+);}
+
+
+
+
+
+export const getUpdateLevel21MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext> => {
+
+const mutationKey = ['updateLevel21'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel21>>, {level2Id: string;data: UpdateNormativeNodeRequestDto}> = (props) => {
+          const {level2Id,data} = props ?? {};
+
+          return  updateLevel21(level2Id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel21>>>
+    export type UpdateLevel21MutationBody = UpdateNormativeNodeRequestDto
+    export type UpdateLevel21MutationError = unknown
+
+    export const useUpdateLevel21 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel21>>, TError,{level2Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateLevel21>>,
+        TError,
+        {level2Id: string;data: UpdateNormativeNodeRequestDto},
+        TContext
+      > => {
+      return useMutation(getUpdateLevel21MutationOptions(options), queryClient);
+    }
+    export type addLevel31Response200 = {
+  data: NormativeLevel3NodeDto
+  status: 200
+}
+
+export type addLevel31ResponseSuccess = (addLevel31Response200) & {
+  headers: Headers;
+};
+;
+
+export type addLevel31Response = (addLevel31ResponseSuccess)
+
+export const getAddLevel31Url = (level2Id: string,) => {
+
+
+
+
+  return `/api/v1/level2-nodes/${level2Id}/level3-nodes`
+}
+
+export const addLevel31 = async (level2Id: string,
+    createNormativeNodeRequestDto: CreateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addLevel31Response> => {
+
+  return customFetch<addLevel31Response>(getAddLevel31Url(level2Id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createNormativeNodeRequestDto)
+  }
+);}
+
+
+
+
+
+export const getAddLevel31MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext> => {
+
+const mutationKey = ['addLevel31'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addLevel31>>, {level2Id: string;data: CreateNormativeNodeRequestDto}> = (props) => {
+          const {level2Id,data} = props ?? {};
+
+          return  addLevel31(level2Id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof addLevel31>>>
+    export type AddLevel31MutationBody = CreateNormativeNodeRequestDto
+    export type AddLevel31MutationError = unknown
+
+    export const useAddLevel31 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addLevel31>>,
+        TError,
+        {level2Id: string;data: CreateNormativeNodeRequestDto},
+        TContext
+      > => {
+      return useMutation(getAddLevel31MutationOptions(options), queryClient);
+    }
+    export type deleteLevel31Response200 = {
+  data: void
+  status: 200
+}
+
+export type deleteLevel31ResponseSuccess = (deleteLevel31Response200) & {
+  headers: Headers;
+};
+;
+
+export type deleteLevel31Response = (deleteLevel31ResponseSuccess)
+
+export const getDeleteLevel31Url = (level3Id: string,) => {
+
+
+
+
+  return `/api/v1/level3-nodes/${level3Id}`
+}
+
+export const deleteLevel31 = async (level3Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel31Response> => {
+
+  return customFetch<deleteLevel31Response>(getDeleteLevel31Url(level3Id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteLevel31MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext> => {
+
+const mutationKey = ['deleteLevel31'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel31>>, {level3Id: string}> = (props) => {
+          const {level3Id} = props ?? {};
+
+          return  deleteLevel31(level3Id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel31>>>
+
+    export type DeleteLevel31MutationError = unknown
+
+    export const useDeleteLevel31 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel31>>, TError,{level3Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteLevel31>>,
+        TError,
+        {level3Id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteLevel31MutationOptions(options), queryClient);
+    }
+    export type updateLevel31Response200 = {
+  data: NormativeLevel3NodeDto
+  status: 200
+}
+
+export type updateLevel31ResponseSuccess = (updateLevel31Response200) & {
+  headers: Headers;
+};
+;
+
+export type updateLevel31Response = (updateLevel31ResponseSuccess)
+
+export const getUpdateLevel31Url = (level3Id: string,) => {
+
+
+
+
+  return `/api/v1/level3-nodes/${level3Id}`
+}
+
+export const updateLevel31 = async (level3Id: string,
+    updateNormativeNodeRequestDto: UpdateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel31Response> => {
+
+  return customFetch<updateLevel31Response>(getUpdateLevel31Url(level3Id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateNormativeNodeRequestDto)
+  }
+);}
+
+
+
+
+
+export const getUpdateLevel31MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext> => {
+
+const mutationKey = ['updateLevel31'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel31>>, {level3Id: string;data: UpdateNormativeNodeRequestDto}> = (props) => {
+          const {level3Id,data} = props ?? {};
+
+          return  updateLevel31(level3Id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel31>>>
+    export type UpdateLevel31MutationBody = UpdateNormativeNodeRequestDto
+    export type UpdateLevel31MutationError = unknown
+
+    export const useUpdateLevel31 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel31>>, TError,{level3Id: string;data: UpdateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateLevel31>>,
+        TError,
+        {level3Id: string;data: UpdateNormativeNodeRequestDto},
+        TContext
+      > => {
+      return useMutation(getUpdateLevel31MutationOptions(options), queryClient);
+    }
+    export type addIndicator1Response200 = {
+  data: NormativeIndicatorDto
+  status: 200
+}
+
+export type addIndicator1ResponseSuccess = (addIndicator1Response200) & {
+  headers: Headers;
+};
+;
+
+export type addIndicator1Response = (addIndicator1ResponseSuccess)
+
+export const getAddIndicator1Url = (level3Id: string,) => {
+
+
+
+
+  return `/api/v1/level3-nodes/${level3Id}/indicators`
+}
+
+export const addIndicator1 = async (level3Id: string,
+    createNormativeIndicatorRequestDto: CreateNormativeIndicatorRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addIndicator1Response> => {
+
+  return customFetch<addIndicator1Response>(getAddIndicator1Url(level3Id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createNormativeIndicatorRequestDto)
+  }
+);}
+
+
+
+
+
+export const getAddIndicator1MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext> => {
+
+const mutationKey = ['addIndicator1'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addIndicator1>>, {level3Id: string;data: CreateNormativeIndicatorRequestDto}> = (props) => {
+          const {level3Id,data} = props ?? {};
+
+          return  addIndicator1(level3Id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddIndicator1MutationResult = NonNullable<Awaited<ReturnType<typeof addIndicator1>>>
+    export type AddIndicator1MutationBody = CreateNormativeIndicatorRequestDto
+    export type AddIndicator1MutationError = unknown
+
+    export const useAddIndicator1 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addIndicator1>>,
+        TError,
+        {level3Id: string;data: CreateNormativeIndicatorRequestDto},
+        TContext
+      > => {
+      return useMutation(getAddIndicator1MutationOptions(options), queryClient);
     }
     export type listLevel1Nodes1Response200 = {
   data: NormativeLevel1NodeDto[]
@@ -983,35 +1057,36 @@ export const useAddLevel11 = <TError = unknown,
       > => {
       return useMutation(getAddLevel11MutationOptions(options), queryClient);
     }
-    export type addIndicator1Response200 = {
-  data: NormativeIndicatorDto
+    export type deleteLevel11Response200 = {
+  data: void
   status: 200
 }
 
-export type addIndicator1ResponseSuccess = (addIndicator1Response200) & {
+export type deleteLevel11ResponseSuccess = (deleteLevel11Response200) & {
   headers: Headers;
 };
 ;
 
-export type addIndicator1Response = (addIndicator1ResponseSuccess)
+export type deleteLevel11Response = (deleteLevel11ResponseSuccess)
 
-export const getAddIndicator1Url = (level3Id: string,) => {
+export const getDeleteLevel11Url = (processId: string,
+    level1Id: string,) => {
 
 
 
 
-  return `/api/v1/level3-nodes/${level3Id}/indicators`
+  return `/api/v1/processes/${processId}/level1-nodes/${level1Id}`
 }
 
-export const addIndicator1 = async (level3Id: string,
-    createNormativeIndicatorRequestDto: CreateNormativeIndicatorRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addIndicator1Response> => {
+export const deleteLevel11 = async (processId: string,
+    level1Id: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteLevel11Response> => {
 
-  return customFetch<addIndicator1Response>(getAddIndicator1Url(level3Id),
+  return customFetch<deleteLevel11Response>(getDeleteLevel11Url(processId,level1Id),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createNormativeIndicatorRequestDto)
+    method: 'DELETE'
+
+
   }
 );}
 
@@ -1019,11 +1094,11 @@ export const addIndicator1 = async (level3Id: string,
 
 
 
-export const getAddIndicator1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext> => {
+export const getDeleteLevel11MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext> => {
 
-const mutationKey = ['addIndicator1'];
+const mutationKey = ['deleteLevel11'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1033,10 +1108,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addIndicator1>>, {level3Id: string;data: CreateNormativeIndicatorRequestDto}> = (props) => {
-          const {level3Id,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLevel11>>, {processId: string;level1Id: string}> = (props) => {
+          const {processId,level1Id} = props ?? {};
 
-          return  addIndicator1(level3Id,data,requestOptions)
+          return  deleteLevel11(processId,level1Id,requestOptions)
         }
 
 
@@ -1046,49 +1121,51 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AddIndicator1MutationResult = NonNullable<Awaited<ReturnType<typeof addIndicator1>>>
-    export type AddIndicator1MutationBody = CreateNormativeIndicatorRequestDto
-    export type AddIndicator1MutationError = unknown
+    export type DeleteLevel11MutationResult = NonNullable<Awaited<ReturnType<typeof deleteLevel11>>>
 
-    export const useAddIndicator1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addIndicator1>>, TError,{level3Id: string;data: CreateNormativeIndicatorRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export type DeleteLevel11MutationError = unknown
+
+    export const useDeleteLevel11 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLevel11>>, TError,{processId: string;level1Id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addIndicator1>>,
+        Awaited<ReturnType<typeof deleteLevel11>>,
         TError,
-        {level3Id: string;data: CreateNormativeIndicatorRequestDto},
+        {processId: string;level1Id: string},
         TContext
       > => {
-      return useMutation(getAddIndicator1MutationOptions(options), queryClient);
+      return useMutation(getDeleteLevel11MutationOptions(options), queryClient);
     }
-    export type addLevel31Response200 = {
-  data: NormativeLevel3NodeDto
+    export type updateLevel11Response200 = {
+  data: NormativeLevel1NodeDto
   status: 200
 }
 
-export type addLevel31ResponseSuccess = (addLevel31Response200) & {
+export type updateLevel11ResponseSuccess = (updateLevel11Response200) & {
   headers: Headers;
 };
 ;
 
-export type addLevel31Response = (addLevel31ResponseSuccess)
+export type updateLevel11Response = (updateLevel11ResponseSuccess)
 
-export const getAddLevel31Url = (level2Id: string,) => {
+export const getUpdateLevel11Url = (processId: string,
+    level1Id: string,) => {
 
 
 
 
-  return `/api/v1/level2-nodes/${level2Id}/level3-nodes`
+  return `/api/v1/processes/${processId}/level1-nodes/${level1Id}`
 }
 
-export const addLevel31 = async (level2Id: string,
-    createNormativeNodeRequestDto: CreateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addLevel31Response> => {
+export const updateLevel11 = async (processId: string,
+    level1Id: string,
+    updateLevel1NodeRequestDto: UpdateLevel1NodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updateLevel11Response> => {
 
-  return customFetch<addLevel31Response>(getAddLevel31Url(level2Id),
+  return customFetch<updateLevel11Response>(getUpdateLevel11Url(processId,level1Id),
   {
     ...options,
-    method: 'POST',
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createNormativeNodeRequestDto)
+    body: JSON.stringify(updateLevel1NodeRequestDto)
   }
 );}
 
@@ -1096,11 +1173,11 @@ export const addLevel31 = async (level2Id: string,
 
 
 
-export const getAddLevel31MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext> => {
+export const getUpdateLevel11MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext> => {
 
-const mutationKey = ['addLevel31'];
+const mutationKey = ['updateLevel11'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1110,10 +1187,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addLevel31>>, {level2Id: string;data: CreateNormativeNodeRequestDto}> = (props) => {
-          const {level2Id,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLevel11>>, {processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}> = (props) => {
+          const {processId,level1Id,data} = props ?? {};
 
-          return  addLevel31(level2Id,data,requestOptions)
+          return  updateLevel11(processId,level1Id,data,requestOptions)
         }
 
 
@@ -1123,94 +1200,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AddLevel31MutationResult = NonNullable<Awaited<ReturnType<typeof addLevel31>>>
-    export type AddLevel31MutationBody = CreateNormativeNodeRequestDto
-    export type AddLevel31MutationError = unknown
+    export type UpdateLevel11MutationResult = NonNullable<Awaited<ReturnType<typeof updateLevel11>>>
+    export type UpdateLevel11MutationBody = UpdateLevel1NodeRequestDto
+    export type UpdateLevel11MutationError = unknown
 
-    export const useAddLevel31 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel31>>, TError,{level2Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const useUpdateLevel11 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLevel11>>, TError,{processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addLevel31>>,
+        Awaited<ReturnType<typeof updateLevel11>>,
         TError,
-        {level2Id: string;data: CreateNormativeNodeRequestDto},
+        {processId: string;level1Id: string;data: UpdateLevel1NodeRequestDto},
         TContext
       > => {
-      return useMutation(getAddLevel31MutationOptions(options), queryClient);
-    }
-    export type addLevel21Response200 = {
-  data: NormativeLevel2NodeDto
-  status: 200
-}
-
-export type addLevel21ResponseSuccess = (addLevel21Response200) & {
-  headers: Headers;
-};
-;
-
-export type addLevel21Response = (addLevel21ResponseSuccess)
-
-export const getAddLevel21Url = (level1Id: string,) => {
-
-
-
-
-  return `/api/v1/level1-nodes/${level1Id}/level2-nodes`
-}
-
-export const addLevel21 = async (level1Id: string,
-    createNormativeNodeRequestDto: CreateNormativeNodeRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<addLevel21Response> => {
-
-  return customFetch<addLevel21Response>(getAddLevel21Url(level1Id),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createNormativeNodeRequestDto)
-  }
-);}
-
-
-
-
-
-export const getAddLevel21MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext> => {
-
-const mutationKey = ['addLevel21'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addLevel21>>, {level1Id: string;data: CreateNormativeNodeRequestDto}> = (props) => {
-          const {level1Id,data} = props ?? {};
-
-          return  addLevel21(level1Id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddLevel21MutationResult = NonNullable<Awaited<ReturnType<typeof addLevel21>>>
-    export type AddLevel21MutationBody = CreateNormativeNodeRequestDto
-    export type AddLevel21MutationError = unknown
-
-    export const useAddLevel21 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addLevel21>>, TError,{level1Id: string;data: CreateNormativeNodeRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addLevel21>>,
-        TError,
-        {level1Id: string;data: CreateNormativeNodeRequestDto},
-        TContext
-      > => {
-      return useMutation(getAddLevel21MutationOptions(options), queryClient);
+      return useMutation(getUpdateLevel11MutationOptions(options), queryClient);
     }

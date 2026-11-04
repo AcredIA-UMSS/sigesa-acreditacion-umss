@@ -8,10 +8,10 @@
 import type { NormativeLevel3NodeDto } from './normativeLevel3NodeDto.ts';
 
 export interface NormativeLevel2NodeDto {
-  id?: string;
-  name?: string;
-  label?: string;
-  order?: number;
   description?: string;
+  id?: string;
+  label?: string;
   level3Nodes?: NormativeLevel3NodeDto[];
+  name?: string;
+  order?: number;
 }

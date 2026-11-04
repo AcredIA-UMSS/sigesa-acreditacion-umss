@@ -10,11 +10,11 @@
  * Métricas de completitud de evidencia, FODA y encuestas (API-WF-09)
  */
 export interface EvaluationMetricsResponseDto {
-  processId: string;
-  totalIndicators?: number;
-  indicatorsWithEvidence?: number;
   evidenceCompletenessRatio?: number;
   fodaComplete?: number;
   fodaCompletenessRatio?: number;
+  indicatorsWithEvidence?: number;
   primarySurveyBatchCount?: number;
+  processId: string;
+  totalIndicators?: number;
 }

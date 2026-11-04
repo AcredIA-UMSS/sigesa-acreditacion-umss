@@ -7,19 +7,19 @@
  */
 
 export interface TechnicianInboxResponseDto {
-  indicatorId?: string;
+  activeObservationsCount?: number;
+  criterionName?: string;
+  dimensionName?: string;
+  evidenceFilename?: string;
+  evidenceId?: string;
+  evidenceUploadedAt?: string;
   indicatorCode?: string;
   indicatorDescription?: string;
-  status?: string;
-  dimensionName?: string;
-  criterionName?: string;
-  subcriterionName?: string;
+  indicatorId?: string;
   pathHierarchy?: string;
   programId?: string;
   programName?: string;
-  evidenceId?: string;
-  evidenceFilename?: string;
-  evidenceUploadedAt?: string;
-  activeObservationsCount?: number;
+  status?: string;
+  subcriterionName?: string;
   updatedAt?: string;
 }

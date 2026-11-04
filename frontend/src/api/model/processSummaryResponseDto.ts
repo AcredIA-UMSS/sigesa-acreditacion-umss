@@ -8,17 +8,17 @@
 import type { ProcessResponsibleDto } from './processResponsibleDto.ts';
 
 export interface ProcessSummaryResponseDto {
-  id?: string;
-  careerId?: string;
   careerCode?: string;
+  careerId?: string;
   careerName?: string;
+  evaluatorModel?: string;
+  id?: string;
+  indicatorCount?: number;
+  level1Count?: number;
+  responsible?: ProcessResponsibleDto;
+  startDate?: string;
+  status?: string;
   templateId?: string;
   templateName?: string;
   templateType?: string;
-  evaluatorModel?: string;
-  status?: string;
-  startDate?: string;
-  level1Count?: number;
-  indicatorCount?: number;
-  responsible?: ProcessResponsibleDto;
 }

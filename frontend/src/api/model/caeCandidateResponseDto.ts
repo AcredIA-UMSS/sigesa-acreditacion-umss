@@ -10,9 +10,9 @@
  * Usuario CAE_MEMBER candidato a delegación
  */
 export interface CaeCandidateResponseDto {
-  id?: string;
   email?: string;
   firstName?: string;
-  lastName?: string;
   fullName?: string;
+  id?: string;
+  lastName?: string;
 }

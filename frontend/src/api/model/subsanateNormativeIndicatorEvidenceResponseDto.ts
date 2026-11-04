@@ -7,10 +7,10 @@
  */
 
 export interface SubsanateNormativeIndicatorEvidenceResponseDto {
-  evidenceId?: string;
-  version?: number;
-  observationId?: string;
-  supersedesVersion?: number;
   contentHash?: string;
   event?: string;
+  evidenceId?: string;
+  observationId?: string;
+  supersedesVersion?: number;
+  version?: number;
 }

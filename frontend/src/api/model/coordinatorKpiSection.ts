@@ -9,13 +9,13 @@ import type { BottleneckSummary } from './bottleneckSummary.ts';
 import type { PhaseProgressSummary } from './phaseProgressSummary.ts';
 
 export interface CoordinatorKpiSection {
-  programId?: string;
-  programName?: string;
-  totalIndicators?: number;
-  overallProgressPercentage?: number;
   approvedEvidences?: number;
-  rejectedEvidences?: number;
+  bottlenecks?: BottleneckSummary[];
+  overallProgressPercentage?: number;
   pendingObservations?: number;
   phaseProgressList?: PhaseProgressSummary[];
-  bottlenecks?: BottleneckSummary[];
+  programId?: string;
+  programName?: string;
+  rejectedEvidences?: number;
+  totalIndicators?: number;
 }

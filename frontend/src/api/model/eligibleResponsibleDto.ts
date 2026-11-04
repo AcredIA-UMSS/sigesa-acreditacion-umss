@@ -7,7 +7,7 @@
  */
 
 export interface EligibleResponsibleDto {
-  userId?: string;
-  fullName?: string;
   email?: string;
+  fullName?: string;
+  userId?: string;
 }
