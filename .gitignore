@@ -71,6 +71,9 @@ backend/data/reports/
 data/evidences/
 data/reports/
 
+### RAG inbox (PDFs locales, no versionar) ###
+tmp/rag-inbox/
+
 ### Temporary Delivery Packages & Zips ###
 *.zip
 M7_Evals_EquipoSIGESA.zip

@@ -47,6 +47,8 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
+| 04/11/2026 | **MOD-ASSISTANT RAG (#76):** corpus classpath `normative-corpus/arcu-sur-2023/` (manual de procedimientos 2023); upsert al boot; retira placeholders ARCU-SUR de demo. | FSD-UC-033 / DD-UC-033 / PR-IMPL-032 | — | PM-037 / PR-IMPL-048 / #76 | Boris Anthony Angulo Urquieta |
 | 02/11/2026 | **E3 notificaciones:** se mantiene el outbox en el monolito. Corrida limpia A/B/A/B: p95 +2.126 ms, arranque 1.20×, health 33/2496 (1.322 %) con el sidecar cortado. Informe `bench/e3/INFORME.md`. | bench E3 | ADR-001 | — | Marlene Velasquez |
 | 28/10/2026 | **MOD-EXP (FSD-UC-032 / FEAT-11):** Exportación asíncrona Dossier Digital ZIP en streaming directo hacia S3/storage; semáforo global concurrente (429 Retry-After) y límite 1/usuario; descarga paralela acotada de blobs; purge job TTL 24-48h; URLs prefirmadas S3 (15m) y RBAC por carrera para CC. | FSD-UC-032 / DD-UC-032 | ADR-0005 | PM-032 / PR-IMPL-046 | Antigravity / Alex553-bot |
 | 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
@@ -370,7 +372,7 @@ artefactos_vivos:
 | **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1). **FEAT-03:** timeout 10 s; hilos virtuales/`sendAsync`; 504 `ASSISTANT_GATEWAY_TIMEOUT` |
 | **Tool calling** | Loop multi-tool en `SendChatMessageService` (max **5** iter. default); una tool/iteración; `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
 | **Nivel 4 (multi-tool)** | LLM encadena tools secuenciales; respuesta combinada por `AssistantResponseFormatter`; traza `steps[]` en API y UI |
-| **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; config `rag-enabled`, `rag-max-chunks` |
+| **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; corpus ARCU-SUR 2023 en `classpath:normative-corpus/arcu-sur-2023/`; config `rag-enabled`, `rag-max-chunks` |
 | **Tools vigentes** | Catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) — read + write con confirmación en chat |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |

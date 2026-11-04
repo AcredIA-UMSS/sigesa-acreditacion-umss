@@ -21,6 +21,12 @@ services:
       - postgres_data:/var/lib/postgresql/data:Z
       - ./db/seed.sql:/docker-entrypoint-initdb.d/01_seed.sql:ro,Z
       - ./db/02_seed_e3.sql:/docker-entrypoint-initdb.d/02_seed_e3.sql:ro,Z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-sigesa_user} -d $${POSTGRES_DB:-sigesa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   ollama:
     image: ollama/ollama:latest
@@ -72,11 +78,11 @@ services:
       - .env
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy
       open-webui:
-        condition: service_started
+        condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
     environment:
       - SIGESA_IN_DOCKER=true
       - SPRING_PROFILES_ACTIVE=dev
@@ -107,6 +113,12 @@ services:
 
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s
 
   minio:
     image: docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z
@@ -121,6 +133,12 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:9000/minio/health/live >/dev/null || wget -qO- http://127.0.0.1:9000/minio/health/live >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   frontend:
     build:
@@ -135,9 +153,16 @@ services:
     container_name: sigesa-frontend
     restart: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   # Generador de tests AcredIA (Python) — NO producción; profile tools
   # Uso: ./tools/test-generator/run.sh --batch L1

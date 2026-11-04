@@ -43,6 +43,8 @@
 | PM-034 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 infra: compose Toxiproxy, toxic.sh, verificar-infra, run-limpio |
 | PM-035 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 ejecucion: up HTTP/in_process, correccion de fallos, down -v |
 | PM-036 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
+| PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
+| PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
 
 
 ---
@@ -2455,5 +2457,142 @@ the dosier export generation, is showing ids instead of the business names for p
 
 - [x] Backend: `./mvnw test -Dtest=ZipDossierExportStreamingAdapterTest,ProcessDossierExportControllerTest,DossierExportServiceTest` — 12 pruebas pasadas (0 fallos, 0 errores).
 - [x] Frontend: `npx vitest run src/features/processes/hooks/useDossierExport.test.ts` — 4 pruebas pasadas (0 fallos).
+
+---
+
+## PM-037
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-037 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 14:54 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Corpus RAG Manual ARCU-SUR 2023 + trazabilidad FSD/sprint 03 |
+| **Objetivo** | Que el asistente existente responda con el manual 2023 (Markdown indexado) y quede registrado en FSD, PR-IMPL y PROMPT_MAPPING |
+| **Contexto** | Issue #76. Motor RAG ya existía (PR-IMPL-032). No se crea un quinto agent=. PDF origen en tmp/rag-inbox (gitignored). |
+| **PR-IMPL vinculado** | [PR-IMPL-048](../../prompts/impl/PR-IMPL-048.md) |
+| **DD-UC vinculado** | [DD-UC-033](../../design/DD-UC-033.md) |
+| **FSD-UC vinculado** | [FSD-UC-033](../../product/uc/FSD-UC-033.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+conectalo, a la vez quiero que tambien edites el issue de github, este esta usando el #76
+quiero que agregues a ese issue todo lo que se esta haciendo y se hara
+
+ya hiciste la documentacion? el fsd, prompt_mapping u registrarlo en sprint 3?
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-032.md`
+- `docs/design/assistant/TOOL-CATALOG.md`
+- `https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/76`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `.gitignore` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/repository/SpringDataNormativeDocumentRepository.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantNormativeRagService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/NormativeDocumentSeedLoader.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantNormativeRagServiceTest.java` |
+| modificado | `docs/design/assistant/TOOL-CATALOG.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-024.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/normative/NormativeMarkdownDocumentParser.java` |
+| generado | `backend/src/main/resources/normative-corpus/arcu-sur-2023/` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/normative/NormativeMarkdownDocumentParserTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/config/NormativeDocumentCorpusResourceTest.java` |
+| generado | `docs/product/uc/FSD-UC-033.md` |
+| generado | `docs/design/DD-UC-033.md` |
+| generado | `docs/prompts/impl/PR-IMPL-048.md` |
+
+### Cambios realizados
+
+- Corpus Markdown del manual ARCU-SUR 2023 en classpath; loader upsert al boot; se retiran placeholders demo ARCU-SUR.
+- Detector RAG ampliado (pares, autoevaluación, convocatoria, visita).
+- Cadena documental FSD-UC-033 → DD-UC-033 → PR-IMPL-048 → PM-037; issue #76 actualizado.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=NormativeMarkdownDocumentParserTest,NormativeDocumentCorpusResourceTest,AssistantNormativeRagServiceTest test` — OK
+- [ ] Smoke Docker `RAG corpus ARCU-SUR 2023: 33 chunks upserted` — pendiente de rebuild
+
+### Resultado obtenido
+
+El asistente usa el mismo `POST /api/v1/assistant/chat`. El PDF no viaja al cliente. Otra máquina requiere pull + rebuild de la imagen.
+
+### Próximos pasos
+
+- [ ] Commit y push para que el corpus viaje con el repo
+- [ ] Smoke autenticado (comité de pares / cronograma)
+- [ ] Citas en UI y más documentos (issue #76)
+
+---
+
+## PM-038
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-038 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 15:12 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Manejo uniforme de errores REST (#67) |
+| **Objetivo** | Envelope `{error,message,details?}`, 500 sin traza, validación con details, docs FSD-UC-034 |
+| **Contexto** | Issue #67. El producto ya usaba `error`+`message` en advice de dominio; faltaba fallback 500 y details. |
+| **PR-IMPL vinculado** | [PR-IMPL-049](../../prompts/impl/PR-IMPL-049.md) |
+| **DD-UC vinculado** | [DD-UC-034](../../design/DD-UC-034.md) |
+| **FSD-UC vinculado** | [FSD-UC-034](../../product/uc/FSD-UC-034.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero hacer ahora el #67 issue,
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/ApiErrorResponse.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandler.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/ErrorContractProbeController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandlerWebMvcTest.java` |
+| generado | `docs/product/uc/FSD-UC-034.md` |
+| generado | `docs/design/DD-UC-034.md` |
+| generado | `docs/prompts/impl/PR-IMPL-049.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/AuthExceptionHandler.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAuthenticationEntryPoint.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAccessDeniedHandler.java` |
+| modificado | `backend/src/main/resources/application.yaml` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=GlobalExceptionHandlerWebMvcTest,AuthControllerTest test` — OK
+
+### Resultado obtenido
+
+API unifica 400/401/403/500 en el envelope documentado. Códigos de negocio 409 no se reescribieron.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Cerrar #67 tras merge
 
 
