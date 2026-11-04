@@ -38,7 +38,7 @@
 | PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 | PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
-| PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+| PM-032 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
 
 
 ---
@@ -2100,8 +2100,8 @@ FSD-UC-004 cubre carga + visualización; Demo 2 documentada para Boris.
 | **Rol** | Fullstack Dev / Tech Lead |
 | **Sprint** | 03 |
 | **PR-IMPL** | PR-IMPL-046 |
-| **Design Doc** | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
-| **FSD / PRD** | `FSD-UC-032` / Transversal §10 |
+| **Design Doc** | `docs/design/DD-UC-032.md` |
+| **FSD / PRD** | `docs/product/uc/FSD-UC-032.md` / Transversal §10 |
 | **Rama** | `feat/73-dossier-zip-export` |
 | **Issue GitHub** | [#73](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/73) |
 | **Estado** | completado |

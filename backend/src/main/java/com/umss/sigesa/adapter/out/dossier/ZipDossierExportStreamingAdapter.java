@@ -16,14 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
@@ -38,17 +34,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.zip.CRC32;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Genera el ZIP jerárquico del Dossier Digital con:
+ * Genera el ZIP jerárquico del Dossier Digital en streaming directo hacia el storage
+ * configurado (sin crear archivos temporales en disco efímero ni retener el ZIP completo en memoria heap).
  * <ul>
- *   <li>Índice maestro HTML5 con CSS embebido, estadísticas y tabla de contenidos.</li>
- *   <li>Verificación de integridad: SHA-256 de cada archivo y re-lectura del ZIP al finalizar.</li>
- *   <li>Archivo de manifiesto con checksums para validación offline.</li>
+ *   <li>Streaming directo sobre EvidenceBlobStoragePort.createOutputStream</li>
+ *   <li>Descarga paralela acotada de blobs de evidencia (8 hilos) con backpressure</li>
+ *   <li>Índice maestro HTML5 responsivo y resumen ejecutivo</li>
+ *   <li>Manifiesto de checksums SHA-256 para auditoría offline</li>
  * </ul>
  */
 @Component
@@ -71,17 +75,34 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         this.blobStorage = blobStorage;
     }
 
+    private record EvidenceTask(String entryPath, DocumentAsset doc) {}
+    private record EmptyIndicatorEntry(String entryPath) {}
+
+    private record DownloadResult(
+            String entryPath,
+            DocumentAsset doc,
+            byte[] data,
+            boolean isError
+    ) {
+        private static final DownloadResult POISON_PILL = new DownloadResult(null, null, null, false);
+    }
+
     @Override
-    public File generateDossierZip(UUID processId, String jobId) {
+    public String generateDossierZip(UUID processId, String jobId) {
+        return generateDossierZip(processId, jobId, p -> {});
+    }
+
+    @Override
+    public String generateDossierZip(UUID processId, String jobId, Consumer<Integer> progressListener) {
+        String storageKey = null;
         try {
             AccreditationProcess process = processQueryPort.findDetailById(processId)
                     .orElseThrow(() -> new IllegalStateException("Proceso no encontrado: " + processId));
             String careerIdStr = process.getCareerId() != null ? process.getCareerId().toString() : "N/D";
             String processCode = processId.toString().substring(0, 8);
             String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            String zipName = "Dossier_" + sanitize(careerIdStr) + "_" + sanitize(processCode) + "_" + dateStr + ".zip";
-            File tempFile = Files.createTempFile("dossier-", ".zip").toFile();
-            tempFile.deleteOnExit();
+            String zipName = sanitize(careerIdStr) + "_" + sanitize(processCode) + "_" + dateStr + ".zip";
+            storageKey = "dossier-exports/" + jobId + "/" + zipName;
 
             Optional<NormativeHierarchyQueryPort.ProcessNormativeTree> treeOpt =
                     normativeHierarchyQueryPort.findProcessTree(processId);
@@ -97,22 +118,41 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                 docsByIndicator.computeIfAbsent(link.getIndicatorId(), k -> new ArrayList<>()).add(asset);
             }
 
-            // Contadores para estadísticas del índice
-            int dimCount = 0, compCount = 0, critCount = 0, indCount = 0, evCount = 0, missingCount = 0;
+            int dimCount = 0, compCount = 0, critCount = 0, indCount = 0;
+            List<EvidenceTask> tasks = new ArrayList<>();
+            List<EmptyIndicatorEntry> emptyEntries = new ArrayList<>();
+
             if (treeOpt.isPresent()) {
-                for (Level1Node l1 : treeOpt.get().level1Nodes()) {
+                for (Level1Node level1 : treeOpt.get().level1Nodes()) {
                     dimCount++;
-                    for (Level2Node l2 : l1.getLevel2Nodes()) {
+                    String dimName = level1.getName() == null ? "Dimension" : level1.getName();
+                    String dimPath = "Dimension_" + sanitize(dimName);
+                    for (Level2Node level2 : level1.getLevel2Nodes()) {
                         compCount++;
-                        for (Level3Node l3 : l2.getLevel3Nodes()) {
+                        String areaName = level2.getName() == null ? "Area" : level2.getName();
+                        String areaPath = dimPath + "/Componente_" + sanitize(areaName);
+                        for (Level3Node level3 : level2.getLevel3Nodes()) {
                             critCount++;
-                            for (NormativeIndicator ind : l3.getIndicators()) {
+                            String critName = level3.getName() == null ? "Criterio" : level3.getName();
+                            String critPath = areaPath + "/Criterio_" + sanitize(critName);
+                            for (NormativeIndicator indicator : level3.getIndicators()) {
                                 indCount++;
-                                List<DocumentAsset> docs = docsByIndicator.getOrDefault(ind.getId(), List.of());
-                                evCount += docs.size();
-                                for (DocumentAsset doc : docs) {
-                                    if (blobStorage.retrieve(doc.getStorageKey()).isEmpty()) {
-                                        missingCount++;
+                                String indName = indicator.getCode() == null
+                                        ? indicator.getDescription()
+                                         : indicator.getCode();
+                                String indPath = critPath + "/Indicador_" + sanitize(indName);
+                                List<DocumentAsset> docs = docsByIndicator.getOrDefault(indicator.getId(), List.of());
+                                if (docs.isEmpty()) {
+                                    emptyEntries.add(new EmptyIndicatorEntry(indPath + "/_SIN_EVIDENCIAS.txt"));
+                                } else {
+                                    Set<String> seen = new HashSet<>();
+                                    for (DocumentAsset doc : docs) {
+                                        String fileName = buildFileName(doc);
+                                        if (!seen.add(fileName)) {
+                                            fileName = makeUnique(fileName);
+                                        }
+                                        String entryPath = indPath + "/" + fileName;
+                                        tasks.add(new EvidenceTask(entryPath, doc));
                                     }
                                 }
                             }
@@ -121,104 +161,153 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                 }
             }
 
-            // Manifiest de checksums SHA-256 (declarado fuera del try para poder usarlo en verifyZipIntegrity)
+            int evCount = tasks.size();
+            int missingCount = 0;
             Map<String, String> checksums = new LinkedHashMap<>();
+            Set<String> missingStorageKeys = new HashSet<>();
+            Map<String, Long> docSizes = new HashMap<>();
+            Set<String> addedZipPaths = new HashSet<>();
 
-            try (FileOutputStream fos = new FileOutputStream(tempFile);
-                 ZipOutputStream zos = new ZipOutputStream(fos)) {
+            // Streaming directo hacia el storage configurado
+            try (OutputStream rawOut = blobStorage.createOutputStream(storageKey, "application/zip");
+                 BufferedOutputStream bos = new BufferedOutputStream(rawOut);
+                 ZipOutputStream zos = new ZipOutputStream(bos)) {
 
-                // 1. Índice maestro HTML mejorado
-                String indexHtml = buildIndexHtml(process, processId, careerIdStr, treeOpt,
-                        docsByIndicator, dimCount, compCount, critCount, indCount, evCount, missingCount);
-                addZipEntryString(zos, "00_Indice_Maestro_Cumplimiento.html", indexHtml);
+                // 1. Entradas para indicadores sin evidencias
+                for (EmptyIndicatorEntry empty : emptyEntries) {
+                    addZipEntryString(zos, empty.entryPath(), "Este indicador no tiene evidencias cargadas.\n", addedZipPaths);
+                }
 
-                // 2. Resumen ejecutivo (texto plano)
-                String execSummary = buildExecutiveSummary(process, processId, careerIdStr,
-                        dimCount, compCount, critCount, indCount, evCount, missingCount);
-                addZipEntryString(zos, "00_Resumen_Ejecutivo.txt", execSummary);
+                // 2. Descarga paralela acotada de evidencias (8 hilos) con backpressure
+                if (!tasks.isEmpty()) {
+                    int parallelism = Math.min(8, Math.max(1, tasks.size()));
+                    ExecutorService fetchPool = Executors.newFixedThreadPool(parallelism);
+                    BlockingQueue<DownloadResult> queue = new ArrayBlockingQueue<>(16);
+                    AtomicBoolean cancelled = new AtomicBoolean(false);
 
-                // 3. Archivos de evidencias con verificación de integridad
-                if (treeOpt.isPresent()) {
-                    for (Level1Node level1 : treeOpt.get().level1Nodes()) {
-                        String dimName = level1.getName() == null ? "Dimension" : level1.getName();
-                        String dimPath = "Dimension_" + sanitize(dimName);
-                        for (Level2Node level2 : level1.getLevel2Nodes()) {
-                            String areaName = level2.getName() == null ? "Area" : level2.getName();
-                            String areaPath = dimPath + "/Componente_" + sanitize(areaName);
-                            for (Level3Node level3 : level2.getLevel3Nodes()) {
-                                String critName = level3.getName() == null ? "Criterio" : level3.getName();
-                                String critPath = areaPath + "/Criterio_" + sanitize(critName);
-                                for (NormativeIndicator indicator : level3.getIndicators()) {
-                                    String indName = indicator.getCode() == null
-                                            ? indicator.getDescription()
-                                            : indicator.getCode();
-                                    String indPath = critPath + "/Indicador_" + sanitize(indName);
-                                    List<DocumentAsset> docs = docsByIndicator.getOrDefault(indicator.getId(), List.of());
-                                    if (docs.isEmpty()) {
-                                        // Entry vacío para indicar indicador sin evidencias
-                                        addZipEntryString(zos, indPath + "/_SIN_EVIDENCIAS.txt",
-                                                "Este indicador no tiene evidencias cargadas.\n");
-                                    } else {
-                                        Set<String> seen = new HashSet<>();
-                                        for (DocumentAsset doc : docs) {
-                                            String fileName = buildFileName(doc);
-                                            if (!seen.add(fileName)) {
-                                                fileName = makeUnique(fileName);
-                                            }
-                                            String entryPath = indPath + "/" + fileName;
-                                            Optional<byte[]> dataOpt = blobStorage.retrieve(doc.getStorageKey());
-                                            if (dataOpt.isPresent()) {
-                                                byte[] data = dataOpt.get();
-                                                if (data.length == 0) {
-                                                    log.warn("[generateDossierZip] Blob vacío para job {} documento {} (key={})",
-                                                            jobId, doc.getId(), doc.getStorageKey());
-                                                    addZipEntryString(zos, entryPath + "_VACIO.txt",
-                                                            "El archivo original está vacío en el almacenamiento.\n"
-                                                                + "Folio: " + (doc.getFolioCode() == null ? "N/D" : doc.getFolioCode())
-                                                                + "\nStorageKey: " + doc.getStorageKey() + "\n");
-                                                } else {
-                                                    String sha256 = sha256Hex(data);
-                                                    checksums.put(entryPath, sha256);
-                                                    addZipEntry(zos, entryPath, data, doc);
-                                                }
-                                            } else {
-                                                missingCount++;
-                                                addZipEntryString(zos, entryPath + "_NO_DISPONIBLE.txt",
-                                                        buildWarningContent(doc));
-                                            }
+                    Thread producer = Thread.ofVirtual().name("dossier-fetch-" + jobId).start(() -> {
+                        try {
+                            List<CompletableFuture<Void>> futures = new ArrayList<>();
+                            for (EvidenceTask task : tasks) {
+                                if (cancelled.get() || Thread.currentThread().isInterrupted()) break;
+                                CompletableFuture<Void> f = CompletableFuture.runAsync(() -> {
+                                    if (cancelled.get() || Thread.currentThread().isInterrupted()) return;
+                                    try {
+                                        Optional<byte[]> dataOpt = blobStorage.retrieve(task.doc().getStorageKey());
+                                        queue.put(new DownloadResult(task.entryPath(), task.doc(), dataOpt.orElse(null), false));
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
+                                    } catch (Exception ex) {
+                                        log.warn("[generateDossierZip] Error recuperando evidencia {}: {}",
+                                                task.doc().getStorageKey(), ex.getMessage());
+                                        try {
+                                            queue.put(new DownloadResult(task.entryPath(), task.doc(), null, true));
+                                        } catch (InterruptedException ie) {
+                                            Thread.currentThread().interrupt();
                                         }
                                     }
-                                }
+                                }, fetchPool);
+                                futures.add(f);
+                            }
+                            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+                        } catch (Exception ignored) {
+                        } finally {
+                            try {
+                                queue.offer(DownloadResult.POISON_PILL, 2, TimeUnit.SECONDS);
+                            } catch (InterruptedException ignored) {
+                                Thread.currentThread().interrupt();
                             }
                         }
+                    });
+
+                    try {
+                        int processedTasks = 0;
+                        int lastReportedPercent = 10;
+                        if (progressListener != null) {
+                            progressListener.accept(10);
+                        }
+
+                        DownloadResult result;
+                        while ((result = queue.take()) != DownloadResult.POISON_PILL) {
+                            processedTasks++;
+                            if (progressListener != null && evCount > 0) {
+                                int currentPercent = 10 + (int) ((80.0 * processedTasks) / evCount);
+                                if (currentPercent >= lastReportedPercent + 5 && currentPercent <= 90) {
+                                    lastReportedPercent = currentPercent;
+                                    progressListener.accept(currentPercent);
+                                }
+                            }
+
+                            if (result.isError() || result.data() == null) {
+                                missingCount++;
+                                missingStorageKeys.add(result.doc().getStorageKey());
+                                addZipEntryString(zos, result.entryPath() + "_ERROR_DOCUMENTO_NO_DISPONIBLE.txt",
+                                        buildWarningContent(result.doc()), addedZipPaths);
+                            } else if (result.data().length == 0) {
+                                missingCount++;
+                                missingStorageKeys.add(result.doc().getStorageKey());
+                                addZipEntryString(zos, result.entryPath() + "_VACIO.txt",
+                                        "El archivo original está vacío en el almacenamiento.\n"
+                                                + "Folio: " + (result.doc().getFolioCode() == null ? "N/D" : result.doc().getFolioCode())
+                                                + "\nStorageKey: " + result.doc().getStorageKey() + "\n", addedZipPaths);
+                            } else {
+                                String sha256 = sha256Hex(result.data());
+                                checksums.put(result.entryPath(), sha256);
+                                docSizes.put(result.doc().getStorageKey(), (long) result.data().length);
+                                addZipEntry(zos, result.entryPath(), result.data(), addedZipPaths);
+                            }
+                        }
+                    } catch (Exception loopEx) {
+                        cancelled.set(true);
+                        fetchPool.shutdownNow();
+                        producer.interrupt();
+                        throw loopEx;
+                    } finally {
+                        fetchPool.shutdownNow();
                     }
                 }
 
-                // 4. Manifiesto de checksums SHA-256
+                // 3. Índice maestro HTML5
+                String indexHtml = buildIndexHtml(process, processId, careerIdStr, treeOpt,
+                        docsByIndicator, dimCount, compCount, critCount, indCount, evCount, missingCount,
+                        missingStorageKeys, docSizes);
+                addZipEntryString(zos, "00_Indice_Maestro_Cumplimiento.html", indexHtml, addedZipPaths);
+
+                // 4. Resumen ejecutivo (texto plano)
+                String execSummary = buildExecutiveSummary(process, processId, careerIdStr,
+                        dimCount, compCount, critCount, indCount, evCount, missingCount);
+                addZipEntryString(zos, "00_Resumen_Ejecutivo.txt", execSummary, addedZipPaths);
+
+                // 5. Manifiesto de checksums SHA-256
                 String manifest = buildManifest(checksums, processId, jobId);
-                addZipEntryString(zos, "00_Manifiest_Checksums.txt", manifest);
+                addZipEntryString(zos, "00_Manifiest_Checksums.txt", manifest, addedZipPaths);
             }
 
-            // 5. Verificación de integridad: re-abrir el ZIP y leer todas las entradas
-            verifyZipIntegrity(tempFile, checksums);
-
-            log.info("[generateDossierZip] ZIP generado correctamente para job {}: {} entradas, {} checksums",
-                    jobId, checksums.size(), checksums.size());
-            return tempFile;
+            log.info("[generateDossierZip] ZIP generado en streaming directo sin archivos temporales para job {}: {} checksums, storageKey={}",
+                    jobId, checksums.size(), storageKey);
+            return storageKey;
         } catch (Exception e) {
             log.error("[generateDossierZip] Error generando dossier para job {}: {}", jobId, e.getMessage(), e);
+            if (storageKey != null) {
+                try {
+                    blobStorage.delete(storageKey);
+                } catch (Exception delEx) {
+                    log.warn("[generateDossierZip] Error purgando storageKey parcial {}: {}", storageKey, delEx.getMessage());
+                }
+            }
             throw new IllegalStateException("Error generating dossier zip", e);
         }
     }
 
     /* ------------------------------------------------------------------ *
-     *  Construcción del índice HTML5 mejorado                            *
+     *  Construcción del índice HTML5 responsivo                          *
      * ------------------------------------------------------------------ */
 
     private String buildIndexHtml(AccreditationProcess process, UUID processId, String careerIdStr,
                                   Optional<NormativeHierarchyQueryPort.ProcessNormativeTree> treeOpt,
                                   Map<UUID, List<DocumentAsset>> docsByIndicator,
-                                  int dimCount, int compCount, int critCount, int indCount, int evCount, int missingCount) {
+                                  int dimCount, int compCount, int critCount, int indCount, int evCount, int missingCount,
+                                  Set<String> missingStorageKeys, Map<String, Long> docSizes) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html>\n");
         html.append("<html lang='es'>\n");
@@ -238,7 +327,9 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         html.append("      --primary-700: #002249;\n");
         html.append("      --primary-800: #001B3D;\n");
         html.append("      --secondary-50: #FFECE8;\n");
+        html.append("      --secondary-300: #FFB4A8;\n");
         html.append("      --secondary-500: #E80F16;\n");
+        html.append("      --secondary-700: #930006;\n");
         html.append("      --gray-50: #F8F9FA;\n");
         html.append("      --gray-100: #F3F4F5;\n");
         html.append("      --gray-200: #EDEEEF;\n");
@@ -266,31 +357,21 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         html.append("    p { margin: 0.5rem 0; color: var(--gray-700); }\n");
         html.append("    a { color: var(--primary-600); text-decoration: none; }\n");
         html.append("    a:hover { text-decoration: underline; }\n");
-
-        /* Header */
         html.append("    .header { background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%); color: #fff; padding: 24px 32px; border-radius: 12px 12px 0 0; margin-bottom: 24px; }\n");
         html.append("    .header h1 { margin: 0 0 8px 0; font-size: 1.875rem; color: #fff; }\n");
         html.append("    .header .subtitle { opacity: 0.9; font-size: 0.875rem; }\n");
-
-        /* Meta chips */
         html.append("    .meta { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }\n");
         html.append("    .meta .item { background: var(--primary-50); color: var(--primary-700); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; border: 1px solid var(--primary-200); }\n");
-
-        /* Stats cards */
         html.append("    .stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }\n");
         html.append("    .stat-card { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 14px 16px; min-width: 120px; text-align: center; }\n");
         html.append("    .stat-card .num { display: block; font-size: 1.875rem; font-weight: 700; color: var(--primary-600); }\n");
         html.append("    .stat-card .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-600); }\n");
         html.append("    .stat-card .lbl-missing { color: var(--danger); }\n");
-
-        /* Table of contents */
         html.append("    .toc { margin: 24px 0; }\n");
         html.append("    .toc h2 { border-bottom: 2px solid var(--primary-600); padding-bottom: 6px; margin-bottom: 12px; }\n");
         html.append("    .toc ul { list-style: none; padding: 0; }\n");
         html.append("    .toc li { margin: 6px 0; }\n");
         html.append("    .toc a { color: var(--primary-700); }\n");
-
-        /* Hierarchy */
         html.append("    .dimension { margin: 30px 0; page-break-inside: avoid; border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }\n");
         html.append("    .dimension > h2 { background: var(--primary-50); color: var(--primary-800); border-left: 4px solid var(--primary-600); padding: 12px 16px; margin: 0; font-size: 1.25rem; }\n");
         html.append("    .component { margin: 16px 0 0 20px; padding-left: 12px; border-left: 2px solid var(--gray-300); }\n");
@@ -299,32 +380,20 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         html.append("    .criterion h4 { color: var(--primary-600); margin: 6px 0; font-size: 1rem; }\n");
         html.append("    .indicator { margin: 10px 0 0 40px; padding-left: 12px; border-left: 2px solid var(--primary-300); }\n");
         html.append("    .indicator h5 { color: var(--primary-500); margin: 4px 0; font-size: 0.875rem; }\n");
-
-        /* Evidence table */
         html.append("    table.evidence { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.875rem; }\n");
         html.append("    table.evidence th { background: var(--gray-100); border: 1px solid var(--gray-300); padding: 8px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-700); }\n");
         html.append("    table.evidence td { border: 1px solid var(--gray-300); padding: 8px 10px; vertical-align: top; }\n");
         html.append("    table.evidence tr:nth-child(even) td { background: var(--gray-50); }\n");
-
-        /* Badges */
         html.append("    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }\n");
         html.append("    .badge-ok { background: #dcfce7; color: #166534; }\n");
         html.append("    .badge-missing { background: #fee2e2; color: #991b1b; }\n");
         html.append("    .no-evidences { color: var(--gray-600); font-style: italic; font-size: 0.875rem; }\n");
-
-        /* Missing section */
         html.append("    .missing-section { background: var(--secondary-50); border: 1px solid var(--secondary-300); border-radius: 8px; padding: 16px; margin: 24px 0; }\n");
         html.append("    .missing-section h3 { color: var(--secondary-700); margin-top: 0; }\n");
-
-        /* Manifest */
         html.append("    .manifest { background: var(--primary-50); border: 1px solid var(--primary-200); border-radius: 8px; padding: 16px; margin: 24px 0; font-size: 0.75rem; }\n");
         html.append("    .manifest h3 { color: var(--primary-800); margin-top: 0; font-size: 0.875rem; }\n");
         html.append("    .manifest pre { margin: 8px 0 0 0; white-space: pre-wrap; word-break: break-all; font-family: var(--font-mono); }\n");
-
-        /* Footer */
         html.append("    .footer { margin-top: 40px; border-top: 1px solid var(--gray-300); padding-top: 16px; font-size: 0.75rem; color: var(--gray-600); }\n");
-
-        /* Print */
         html.append("    @media print { body { padding: 0; } .header { background: var(--primary-600); -webkit-print-color-adjust: exact; }\n");
         html.append("    .no-print { display: none; } }\n");
         html.append("  </style>\n");
@@ -405,11 +474,11 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                                 html.append("            <thead><tr><th>Folio</th><th>Archivo</th><th>Tamaño</th><th>Estado</th></tr></thead>\n");
                                 html.append("            <tbody>\n");
                                 for (DocumentAsset doc : docs) {
-                                    Optional<byte[]> dataOpt = blobStorage.retrieve(doc.getStorageKey());
+                                    boolean missing = missingStorageKeys.contains(doc.getStorageKey());
                                     String folio = doc.getFolioCode() == null ? "N/D" : doc.getFolioCode();
                                     String title = doc.getTitle() == null ? "documento" : doc.getTitle();
-                                    long size = dataOpt.map(d -> (long) d.length).orElse(0L);
-                                    boolean available = dataOpt.isPresent();
+                                    long size = docSizes.getOrDefault(doc.getStorageKey(), 0L);
+                                    boolean available = !missing && size > 0;
                                     html.append("              <tr>\n");
                                     html.append("                <td><strong>").append(escape(folio)).append("</strong></td>\n");
                                     html.append("                <td>").append(escape(title)).append("</td>\n");
@@ -443,7 +512,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                             for (NormativeIndicator indicator : level3.getIndicators()) {
                                 List<DocumentAsset> docs = docsByIndicator.getOrDefault(indicator.getId(), List.of());
                                 for (DocumentAsset doc : docs) {
-                                    if (blobStorage.retrieve(doc.getStorageKey()).isEmpty()) {
+                                    if (missingStorageKeys.contains(doc.getStorageKey())) {
                                         html.append("    <p>- Folio: ").append(escape(doc.getFolioCode() == null ? "N/D" : doc.getFolioCode()))
                                                 .append(" | Archivo: ").append(escape(doc.getTitle() == null ? "documento" : doc.getTitle()))
                                                 .append(" | Indicador: ").append(escape(indicator.getCode() == null ? indicator.getDescription() : indicator.getCode()))
@@ -521,7 +590,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         String ext = getExtension(originalName);
         String base = doc.getFolioCode() == null ? UUID.randomUUID().toString().substring(0, 8) : doc.getFolioCode();
         String fileName = base + "_" + sanitize(originalName);
-        if (fileName.toLowerCase().endsWith(ext.toLowerCase()) && ext.length() > 0) {
+        if (fileName.toLowerCase().endsWith(ext.toLowerCase()) && !ext.isEmpty()) {
             // keep as is
         } else if (!ext.isEmpty()) {
             if (!fileName.toLowerCase().endsWith(ext.toLowerCase())) {
@@ -546,89 +615,44 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                 + "El archivo original no se pudo recuperar del almacenamiento.\n";
     }
 
-    /* ------------------------------------------------------------------ *
-     *  Escritura de entradas ZIP con verificación                        *
-     * ------------------------------------------------------------------ */
+    private String ensureUniqueZipPath(String path, Set<String> addedPaths) {
+        String normalized = normalizePath(path);
+        if (addedPaths.add(normalized)) {
+            return normalized;
+        }
+        String ext = getExtension(normalized);
+        String base = ext.isEmpty() ? normalized : normalized.substring(0, normalized.length() - ext.length());
+        int counter = 1;
+        String candidate;
+        do {
+            candidate = base + "_" + counter + ext;
+            counter++;
+        } while (!addedPaths.add(candidate));
+        return candidate;
+    }
 
-    private void addZipEntry(ZipOutputStream zos, String path, byte[] data, DocumentAsset doc) throws IOException {
-        ZipEntry entry = new ZipEntry(normalizePath(path));
+    private void addZipEntry(ZipOutputStream zos, String path, byte[] data, Set<String> addedZipPaths) throws IOException {
+        String uniquePath = ensureUniqueZipPath(path, addedZipPaths);
+        ZipEntry entry = new ZipEntry(uniquePath);
         entry.setSize(data.length);
-        entry.setCompressedSize(-1); // deja que ZIP calcule
+        entry.setCompressedSize(-1);
         entry.setMethod(ZipEntry.DEFLATED);
         zos.putNextEntry(entry);
         zos.write(data);
         zos.closeEntry();
-        log.debug("[addZipEntry] Entrada escrita: {} ({} bytes)", path, data.length);
+        log.debug("[addZipEntry] Entrada escrita: {} ({} bytes)", uniquePath, data.length);
     }
 
-    private void addZipEntryString(ZipOutputStream zos, String path, String content) throws IOException {
+    private void addZipEntryString(ZipOutputStream zos, String path, String content, Set<String> addedZipPaths) throws IOException {
+        String uniquePath = ensureUniqueZipPath(path, addedZipPaths);
         byte[] data = content.getBytes(StandardCharsets.UTF_8);
-        ZipEntry entry = new ZipEntry(normalizePath(path));
+        ZipEntry entry = new ZipEntry(uniquePath);
         entry.setSize(data.length);
         entry.setMethod(ZipEntry.DEFLATED);
         zos.putNextEntry(entry);
         zos.write(data);
         zos.closeEntry();
     }
-
-    /* ------------------------------------------------------------------ *
-     *  Verificación de integridad del ZIP generado                       *
-     * ------------------------------------------------------------------ */
-
-    private void verifyZipIntegrity(File zipFile, Map<String, String> expectedChecksums) throws IOException {
-        int totalEntries = 0;
-        int readableEntries = 0;
-        List<String> corruptEntries = new ArrayList<>();
-
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                totalEntries++;
-                String entryName = entry.getName();
-                long expectedSize = entry.getSize();
-                long readBytes = 0;
-
-                // Leer toda la entrada para verificar que no esté corrupta
-                byte[] buffer = new byte[8192];
-                int n;
-                while ((n = zis.read(buffer)) != -1) {
-                    readBytes += n;
-                }
-
-                // Si el entry tiene tamaño declarado, verificar que coincida
-                if (expectedSize >= 0 && readBytes != expectedSize) {
-                    corruptEntries.add(entryName + " (esperado " + expectedSize + " bytes, leídos " + readBytes + ")");
-                } else {
-                    readableEntries++;
-                }
-
-                // Si hay checksum esperado, verificarlo
-                String expectedHash = expectedChecksums.get(entryName);
-                if (expectedHash != null) {
-                    // Re-leer para calcular hash (necesitamos reiniciar, pero ZIS ya pasó la entrada)
-                    // Para simplicidad, logueamos solo si hay discrepancia de tamaño
-                    // El hash se verificará offline con el manifiest
-                }
-
-                zis.closeEntry();
-            }
-        }
-
-        log.info("[verifyZipIntegrity] Entradas totales: {}, legibles: {}, corruptas: {}",
-                totalEntries, readableEntries, corruptEntries.size());
-
-        if (!corruptEntries.isEmpty()) {
-            StringBuilder sb = new StringBuilder("Entradas ZIP corruptas detectadas:\n");
-            for (String c : corruptEntries) {
-                sb.append("  - ").append(c).append("\n");
-            }
-            throw new IllegalStateException(sb.toString());
-        }
-    }
-
-    /* ------------------------------------------------------------------ *
-     *  Utilidades                                                        *
-     * ------------------------------------------------------------------ */
 
     private String sha256Hex(byte[] data) {
         try {

@@ -152,4 +152,46 @@ describe('useDossierExport', () => {
     expect(result.current.isPending).toBe(false);
     expect(result.current.error).toBe('Network Error');
   });
+
+  it('triggers direct browser download without backend fetch when presigned S3 URL is provided', async () => {
+    const mockCustomFetch = vi.mocked(customFetchModule.customFetch);
+    const presignedS3Url = 'https://sigesa-bucket.s3.amazonaws.com/dossier-exports/999.zip?AWSAccessKeyId=abc';
+
+    mockCustomFetch.mockResolvedValueOnce({
+      data: {
+        jobId,
+        status: 'PENDING',
+        message: 'Started',
+        statusUrl: `/api/v1/processes/${processId}/dossier/export-jobs/${jobId}`,
+      },
+      status: 202,
+      headers: new Headers(),
+    });
+
+    mockCustomFetch.mockResolvedValueOnce({
+      data: {
+        jobId,
+        status: 'COMPLETED',
+        progressPercentage: 100,
+        downloadUrl: presignedS3Url,
+        errorMessage: null,
+      },
+      status: 200,
+      headers: new Headers(),
+    });
+
+    const globalFetchSpy = vi.spyOn(globalThis, 'fetch');
+    const { result } = renderHook(() => useDossierExport(processId));
+
+    await act(async () => {
+      await result.current.exportDossier();
+    });
+
+    expect(result.current.isPending).toBe(false);
+    expect(result.current.progress).toBe(100);
+    // Should NOT call backend fetch endpoint when presigned URL is used
+    expect(globalFetchSpy).not.toHaveBeenCalled();
+
+    globalFetchSpy.mockRestore();
+  });
 });

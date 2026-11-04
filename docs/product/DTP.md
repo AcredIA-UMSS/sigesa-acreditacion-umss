@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 28/10/2026 | **MOD-EXP (FSD-UC-032 / FEAT-11):** Exportación asíncrona Dossier Digital ZIP en streaming directo hacia S3/storage; semáforo global concurrente (429 Retry-After) y límite 1/usuario; descarga paralela acotada de blobs; purge job TTL 24-48h; URLs prefirmadas S3 (15m) y RBAC por carrera para CC. | FSD-UC-032 / DD-UC-032 | ADR-0005 | PM-032 / PR-IMPL-046 | Antigravity / Alex553-bot |
 | 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **Demo 2:** `openapi.json` generado desde springdoc; CI drift + Spectral (`.github/workflows/openapi.yml`). Registro `docs/demos/demo-2.md` y `8.2.0-aportes.md`. | FSD-UC-004 / FSD-UC-005 | — | PM-029 | Boris Anthony Angulo Urquieta |
