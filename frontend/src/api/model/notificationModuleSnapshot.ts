@@ -7,7 +7,7 @@
  */
 
 export interface NotificationModuleSnapshot {
+  origin?: string;
   pendingCount?: number;
   totalCount?: number;
-  origin?: string;
 }

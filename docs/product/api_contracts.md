@@ -719,9 +719,25 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 |----|---------|
 | API-REP-01…03 | PDF ejecutivo [JD] — FSD-UC-014 |
 | API-NOTIF-01 | Outbox interno — FSD-UC-015 |
-| API-PUB-01 | Portal público — FSD-UC-016 |
+| API-PUB-01 | `GET /api/v1/public/programs/{slug}` — estado publicado — FSD-UC-016 |
+| API-PUB-02 | `GET /api/v1/public/programs` — listado `{slug,name}` solo publicadas — FSD-UC-016 (adición 2026-11-04) |
+| API-PUB-03 | `GET /api/v1/public/programs/{slug}/certificate` — PDF si certificado publicado; 404 genérico — FSD-UC-016 / PRD-US-020 |
 | API-AUDIT-01 | Bitácora [JD] — FSD-UC-017 |
 | API-IMP-01 | `POST /imports/evidences` — filas con `indicatorCode` — FSD-UC-018 |
+
+> **Delta de path:** el FSD original nombraba `GET /public/programs/{slug}` (sin `/api/v1`). La implementación usa el prefijo de plataforma `/api/v1/public/**`. Anónimo (`permitAll`). 404 genérico `{ "error": "NOT_FOUND", "message": "El recurso solicitado no existe." }` para slug desconocido, no publicado o certificado no publicado. El PDF se genera en memoria; **no** se expone URL de archivo (`Location` / storage key).
+
+### API-PUB-02 — Listado publicado (adición UC-016)
+
+**200** `[{ "slug": "inf-sis", "name": "Ingeniería de Sistemas" }]` — solo `published=true`. Sin observaciones. Filtro por nombre en el cliente (`/public/status`).
+
+### API-PUB-01 — Estado publicado
+
+**200** `{ "slug", "name", "accreditationStatus", "validFrom", "validUntil", "certificateAvailable" }` — `certificateAvailable` es boolean, no URL.
+
+### API-PUB-03 — Certificado PDF
+
+**200** `application/pdf` + `Content-Disposition: attachment; filename="certificado-{slug}.pdf"` + `X-Certificate-Valid-From` / `X-Certificate-Valid-Until`. **404** si el programa o el certificado no están publicados.
 
 ---
 
@@ -740,7 +756,9 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | POST /templates | | | ✓ | | |
 | POST /processes | | | ✓ | | |
 | POST /admin/users | | | ✓ | | |
-| GET /public/programs/* | | | | | ✓ |
+| GET /api/v1/public/programs | | | | | ✓ |
+| GET /api/v1/public/programs/{slug} | | | | | ✓ |
+| GET /api/v1/public/programs/{slug}/certificate | | | | | ✓ |
 
 \* [EE] solo lectura; sin mutaciones (FSD-BR-19).
 

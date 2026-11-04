@@ -58,627 +58,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type getPeerRoomChecklistResponse200 = {
-  data: PeerRoomChecklistItemDto[]
-  status: 200
-}
-
-export type getPeerRoomChecklistResponseSuccess = (getPeerRoomChecklistResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getPeerRoomChecklistResponse = (getPeerRoomChecklistResponseSuccess)
-
-export const getGetPeerRoomChecklistUrl = (processId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/peer-room-checklist`
-}
-
-/**
- * @summary Consultar checklist Sala de Pares
- */
-export const getPeerRoomChecklist = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getPeerRoomChecklistResponse> => {
-
-  return customFetch<getPeerRoomChecklistResponse>(getGetPeerRoomChecklistUrl(processId),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getGetPeerRoomChecklistQueryKey = (processId: string,) => {
-    return [
-    `/api/v1/processes/${processId}/peer-room-checklist`
-    ] as const;
-    }
-
-
-export const getGetPeerRoomChecklistQueryOptions = <TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetPeerRoomChecklistQueryKey(processId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPeerRoomChecklist>>> = ({ signal }) => getPeerRoomChecklist(processId, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetPeerRoomChecklistQueryResult = NonNullable<Awaited<ReturnType<typeof getPeerRoomChecklist>>>
-export type GetPeerRoomChecklistQueryError = unknown
-
-
-export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
- processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
-          TError,
-          Awaited<ReturnType<typeof getPeerRoomChecklist>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
-          TError,
-          Awaited<ReturnType<typeof getPeerRoomChecklist>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Consultar checklist Sala de Pares
- */
-
-export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetPeerRoomChecklistQueryOptions(processId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export type updatePeerRoomChecklistResponse200 = {
-  data: PeerRoomChecklistItemDto[]
-  status: 200
-}
-
-export type updatePeerRoomChecklistResponseSuccess = (updatePeerRoomChecklistResponse200) & {
-  headers: Headers;
-};
-;
-
-export type updatePeerRoomChecklistResponse = (updatePeerRoomChecklistResponseSuccess)
-
-export const getUpdatePeerRoomChecklistUrl = (processId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/peer-room-checklist`
-}
-
-/**
- * @summary Actualizar ítems del checklist Sala de Pares
- */
-export const updatePeerRoomChecklist = async (processId: string,
-    updatePeerRoomChecklistRequestDto: UpdatePeerRoomChecklistRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updatePeerRoomChecklistResponse> => {
-
-  return customFetch<updatePeerRoomChecklistResponse>(getUpdatePeerRoomChecklistUrl(processId),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updatePeerRoomChecklistRequestDto)
-  }
-);}
-
-
-
-
-
-export const getUpdatePeerRoomChecklistMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext> => {
-
-const mutationKey = ['updatePeerRoomChecklist'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, {processId: string;data: UpdatePeerRoomChecklistRequestDto}> = (props) => {
-          const {processId,data} = props ?? {};
-
-          return  updatePeerRoomChecklist(processId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdatePeerRoomChecklistMutationResult = NonNullable<Awaited<ReturnType<typeof updatePeerRoomChecklist>>>
-    export type UpdatePeerRoomChecklistMutationBody = UpdatePeerRoomChecklistRequestDto
-    export type UpdatePeerRoomChecklistMutationError = unknown
-
-    /**
- * @summary Actualizar ítems del checklist Sala de Pares
- */
-export const useUpdatePeerRoomChecklist = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updatePeerRoomChecklist>>,
-        TError,
-        {processId: string;data: UpdatePeerRoomChecklistRequestDto},
-        TContext
-      > => {
-      return useMutation(getUpdatePeerRoomChecklistMutationOptions(options), queryClient);
-    }
-    export type submitStageResponse200 = {
-  data: MethodologicalStageResponseDto
-  status: 200
-}
-
-export type submitStageResponseSuccess = (submitStageResponse200) & {
-  headers: Headers;
-};
-;
-
-export type submitStageResponse = (submitStageResponseSuccess)
-
-export const getSubmitStageUrl = (processId: string,
-    stageId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/stages/${stageId}/submit`
-}
-
-/**
- * @summary Enviar etapa activa a revisión técnica
- */
-export const submitStage = async (processId: string,
-    stageId: string, options?: Parameters<typeof customFetch>[1]): Promise<submitStageResponse> => {
-
-  return customFetch<submitStageResponse>(getSubmitStageUrl(processId,stageId),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-
-export const getSubmitStageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext> => {
-
-const mutationKey = ['submitStage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitStage>>, {processId: string;stageId: string}> = (props) => {
-          const {processId,stageId} = props ?? {};
-
-          return  submitStage(processId,stageId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SubmitStageMutationResult = NonNullable<Awaited<ReturnType<typeof submitStage>>>
-
-    export type SubmitStageMutationError = unknown
-
-    /**
- * @summary Enviar etapa activa a revisión técnica
- */
-export const useSubmitStage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof submitStage>>,
-        TError,
-        {processId: string;stageId: string},
-        TContext
-      > => {
-      return useMutation(getSubmitStageMutationOptions(options), queryClient);
-    }
-    export type observeStageResponse200 = {
-  data: MethodologicalStageResponseDto
-  status: 200
-}
-
-export type observeStageResponseSuccess = (observeStageResponse200) & {
-  headers: Headers;
-};
-;
-
-export type observeStageResponse = (observeStageResponseSuccess)
-
-export const getObserveStageUrl = (processId: string,
-    stageId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/stages/${stageId}/observe`
-}
-
-/**
- * @summary Observar etapa metodológica (devolver a CC)
- */
-export const observeStage = async (processId: string,
-    stageId: string,
-    observeStageRequestDto?: ObserveStageRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<observeStageResponse> => {
-
-  return customFetch<observeStageResponse>(getObserveStageUrl(processId,stageId),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(observeStageRequestDto)
-  }
-);}
-
-
-
-
-
-export const getObserveStageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext> => {
-
-const mutationKey = ['observeStage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof observeStage>>, {processId: string;stageId: string;data?: ObserveStageRequestDto}> = (props) => {
-          const {processId,stageId,data} = props ?? {};
-
-          return  observeStage(processId,stageId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ObserveStageMutationResult = NonNullable<Awaited<ReturnType<typeof observeStage>>>
-    export type ObserveStageMutationBody = ObserveStageRequestDto | undefined
-    export type ObserveStageMutationError = unknown
-
-    /**
- * @summary Observar etapa metodológica (devolver a CC)
- */
-export const useObserveStage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof observeStage>>,
-        TError,
-        {processId: string;stageId: string;data?: ObserveStageRequestDto},
-        TContext
-      > => {
-      return useMutation(getObserveStageMutationOptions(options), queryClient);
-    }
-    export type generateStageDeliverableResponse200 = {
-  data: GenerateDeliverableResponseDto
-  status: 200
-}
-
-export type generateStageDeliverableResponseSuccess = (generateStageDeliverableResponse200) & {
-  headers: Headers;
-};
-;
-
-export type generateStageDeliverableResponse = (generateStageDeliverableResponseSuccess)
-
-export const getGenerateStageDeliverableUrl = (processId: string,
-    stageId: string,
-    deliverableId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/stages/${stageId}/deliverables/${deliverableId}/generate`
-}
-
-/**
- * @summary Generar borrador PDF institucional del entregable E4
- */
-export const generateStageDeliverable = async (processId: string,
-    stageId: string,
-    deliverableId: string, options?: Parameters<typeof customFetch>[1]): Promise<generateStageDeliverableResponse> => {
-
-  return customFetch<generateStageDeliverableResponse>(getGenerateStageDeliverableUrl(processId,stageId,deliverableId),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-
-export const getGenerateStageDeliverableMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext> => {
-
-const mutationKey = ['generateStageDeliverable'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateStageDeliverable>>, {processId: string;stageId: string;deliverableId: string}> = (props) => {
-          const {processId,stageId,deliverableId} = props ?? {};
-
-          return  generateStageDeliverable(processId,stageId,deliverableId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type GenerateStageDeliverableMutationResult = NonNullable<Awaited<ReturnType<typeof generateStageDeliverable>>>
-
-    export type GenerateStageDeliverableMutationError = unknown
-
-    /**
- * @summary Generar borrador PDF institucional del entregable E4
- */
-export const useGenerateStageDeliverable = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof generateStageDeliverable>>,
-        TError,
-        {processId: string;stageId: string;deliverableId: string},
-        TContext
-      > => {
-      return useMutation(getGenerateStageDeliverableMutationOptions(options), queryClient);
-    }
-    export type approveDeliverableResponse200 = {
-  data: StageDeliverableResponseDto
-  status: 200
-}
-
-export type approveDeliverableResponseSuccess = (approveDeliverableResponse200) & {
-  headers: Headers;
-};
-;
-
-export type approveDeliverableResponse = (approveDeliverableResponseSuccess)
-
-export const getApproveDeliverableUrl = (processId: string,
-    stageId: string,
-    deliverableId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/stages/${stageId}/deliverables/${deliverableId}/approve`
-}
-
-/**
- * @summary Aprobar entregable documental de etapa
- */
-export const approveDeliverable = async (processId: string,
-    stageId: string,
-    deliverableId: string, options?: Parameters<typeof customFetch>[1]): Promise<approveDeliverableResponse> => {
-
-  return customFetch<approveDeliverableResponse>(getApproveDeliverableUrl(processId,stageId,deliverableId),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-
-export const getApproveDeliverableMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext> => {
-
-const mutationKey = ['approveDeliverable'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveDeliverable>>, {processId: string;stageId: string;deliverableId: string}> = (props) => {
-          const {processId,stageId,deliverableId} = props ?? {};
-
-          return  approveDeliverable(processId,stageId,deliverableId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ApproveDeliverableMutationResult = NonNullable<Awaited<ReturnType<typeof approveDeliverable>>>
-
-    export type ApproveDeliverableMutationError = unknown
-
-    /**
- * @summary Aprobar entregable documental de etapa
- */
-export const useApproveDeliverable = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof approveDeliverable>>,
-        TError,
-        {processId: string;stageId: string;deliverableId: string},
-        TContext
-      > => {
-      return useMutation(getApproveDeliverableMutationOptions(options), queryClient);
-    }
-    export type approveStageResponse200 = {
-  data: MethodologicalStageResponseDto
-  status: 200
-}
-
-export type approveStageResponseSuccess = (approveStageResponse200) & {
-  headers: Headers;
-};
-;
-
-export type approveStageResponse = (approveStageResponseSuccess)
-
-export const getApproveStageUrl = (processId: string,
-    stageId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/stages/${stageId}/approve`
-}
-
-/**
- * @summary Aprobar etapa metodológica (exige compuerta PASS)
- */
-export const approveStage = async (processId: string,
-    stageId: string, options?: Parameters<typeof customFetch>[1]): Promise<approveStageResponse> => {
-
-  return customFetch<approveStageResponse>(getApproveStageUrl(processId,stageId),
-  {
-    ...options,
-    method: 'POST'
-
-
-  }
-);}
-
-
-
-
-
-export const getApproveStageMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext> => {
-
-const mutationKey = ['approveStage'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveStage>>, {processId: string;stageId: string}> = (props) => {
-          const {processId,stageId} = props ?? {};
-
-          return  approveStage(processId,stageId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ApproveStageMutationResult = NonNullable<Awaited<ReturnType<typeof approveStage>>>
-
-    export type ApproveStageMutationError = unknown
-
-    /**
- * @summary Aprobar etapa metodológica (exige compuerta PASS)
- */
-export const useApproveStage = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof approveStage>>,
-        TError,
-        {processId: string;stageId: string},
-        TContext
-      > => {
-      return useMutation(getApproveStageMutationOptions(options), queryClient);
-    }
-    export type getProcessFreezeResponse200 = {
+export type getProcessFreezeResponse200 = {
   data: ProcessFreezeResponseDto
   status: 200
 }
@@ -955,6 +335,201 @@ export const useLiftProcessFreeze = <TError = unknown,
       > => {
       return useMutation(getLiftProcessFreezeMutationOptions(options), queryClient);
     }
+    export type getPeerRoomChecklistResponse200 = {
+  data: PeerRoomChecklistItemDto[]
+  status: 200
+}
+
+export type getPeerRoomChecklistResponseSuccess = (getPeerRoomChecklistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPeerRoomChecklistResponse = (getPeerRoomChecklistResponseSuccess)
+
+export const getGetPeerRoomChecklistUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/peer-room-checklist`
+}
+
+/**
+ * @summary Consultar checklist Sala de Pares
+ */
+export const getPeerRoomChecklist = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<getPeerRoomChecklistResponse> => {
+
+  return customFetch<getPeerRoomChecklistResponse>(getGetPeerRoomChecklistUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPeerRoomChecklistQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/peer-room-checklist`
+    ] as const;
+    }
+
+
+export const getGetPeerRoomChecklistQueryOptions = <TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPeerRoomChecklistQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPeerRoomChecklist>>> = ({ signal }) => getPeerRoomChecklist(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPeerRoomChecklistQueryResult = NonNullable<Awaited<ReturnType<typeof getPeerRoomChecklist>>>
+export type GetPeerRoomChecklistQueryError = unknown
+
+
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>,
+          TError,
+          Awaited<ReturnType<typeof getPeerRoomChecklist>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Consultar checklist Sala de Pares
+ */
+
+export function useGetPeerRoomChecklist<TData = Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError = unknown>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPeerRoomChecklist>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPeerRoomChecklistQueryOptions(processId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type updatePeerRoomChecklistResponse200 = {
+  data: PeerRoomChecklistItemDto[]
+  status: 200
+}
+
+export type updatePeerRoomChecklistResponseSuccess = (updatePeerRoomChecklistResponse200) & {
+  headers: Headers;
+};
+;
+
+export type updatePeerRoomChecklistResponse = (updatePeerRoomChecklistResponseSuccess)
+
+export const getUpdatePeerRoomChecklistUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/peer-room-checklist`
+}
+
+/**
+ * @summary Actualizar ítems del checklist Sala de Pares
+ */
+export const updatePeerRoomChecklist = async (processId: string,
+    updatePeerRoomChecklistRequestDto: UpdatePeerRoomChecklistRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<updatePeerRoomChecklistResponse> => {
+
+  return customFetch<updatePeerRoomChecklistResponse>(getUpdatePeerRoomChecklistUrl(processId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updatePeerRoomChecklistRequestDto)
+  }
+);}
+
+
+
+
+
+export const getUpdatePeerRoomChecklistMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext> => {
+
+const mutationKey = ['updatePeerRoomChecklist'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, {processId: string;data: UpdatePeerRoomChecklistRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  updatePeerRoomChecklist(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePeerRoomChecklistMutationResult = NonNullable<Awaited<ReturnType<typeof updatePeerRoomChecklist>>>
+    export type UpdatePeerRoomChecklistMutationBody = UpdatePeerRoomChecklistRequestDto
+    export type UpdatePeerRoomChecklistMutationError = unknown
+
+    /**
+ * @summary Actualizar ítems del checklist Sala de Pares
+ */
+export const useUpdatePeerRoomChecklist = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePeerRoomChecklist>>, TError,{processId: string;data: UpdatePeerRoomChecklistRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePeerRoomChecklist>>,
+        TError,
+        {processId: string;data: UpdatePeerRoomChecklistRequestDto},
+        TContext
+      > => {
+      return useMutation(getUpdatePeerRoomChecklistMutationOptions(options), queryClient);
+    }
     export type listStagesResponse200 = {
   data: MethodologicalStageResponseDto[]
   status: 200
@@ -1067,7 +642,263 @@ export function useListStages<TData = Awaited<ReturnType<typeof listStages>>, TE
 
 
 
-export type evaluateGateResponse200 = {
+export type approveStageResponse200 = {
+  data: MethodologicalStageResponseDto
+  status: 200
+}
+
+export type approveStageResponseSuccess = (approveStageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type approveStageResponse = (approveStageResponseSuccess)
+
+export const getApproveStageUrl = (processId: string,
+    stageId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/approve`
+}
+
+/**
+ * @summary Aprobar etapa metodológica (exige compuerta PASS)
+ */
+export const approveStage = async (processId: string,
+    stageId: string, options?: Parameters<typeof customFetch>[1]): Promise<approveStageResponse> => {
+
+  return customFetch<approveStageResponse>(getApproveStageUrl(processId,stageId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getApproveStageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext> => {
+
+const mutationKey = ['approveStage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveStage>>, {processId: string;stageId: string}> = (props) => {
+          const {processId,stageId} = props ?? {};
+
+          return  approveStage(processId,stageId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveStageMutationResult = NonNullable<Awaited<ReturnType<typeof approveStage>>>
+
+    export type ApproveStageMutationError = unknown
+
+    /**
+ * @summary Aprobar etapa metodológica (exige compuerta PASS)
+ */
+export const useApproveStage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof approveStage>>,
+        TError,
+        {processId: string;stageId: string},
+        TContext
+      > => {
+      return useMutation(getApproveStageMutationOptions(options), queryClient);
+    }
+    export type approveDeliverableResponse200 = {
+  data: StageDeliverableResponseDto
+  status: 200
+}
+
+export type approveDeliverableResponseSuccess = (approveDeliverableResponse200) & {
+  headers: Headers;
+};
+;
+
+export type approveDeliverableResponse = (approveDeliverableResponseSuccess)
+
+export const getApproveDeliverableUrl = (processId: string,
+    stageId: string,
+    deliverableId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/deliverables/${deliverableId}/approve`
+}
+
+/**
+ * @summary Aprobar entregable documental de etapa
+ */
+export const approveDeliverable = async (processId: string,
+    stageId: string,
+    deliverableId: string, options?: Parameters<typeof customFetch>[1]): Promise<approveDeliverableResponse> => {
+
+  return customFetch<approveDeliverableResponse>(getApproveDeliverableUrl(processId,stageId,deliverableId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getApproveDeliverableMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext> => {
+
+const mutationKey = ['approveDeliverable'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveDeliverable>>, {processId: string;stageId: string;deliverableId: string}> = (props) => {
+          const {processId,stageId,deliverableId} = props ?? {};
+
+          return  approveDeliverable(processId,stageId,deliverableId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveDeliverableMutationResult = NonNullable<Awaited<ReturnType<typeof approveDeliverable>>>
+
+    export type ApproveDeliverableMutationError = unknown
+
+    /**
+ * @summary Aprobar entregable documental de etapa
+ */
+export const useApproveDeliverable = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof approveDeliverable>>,
+        TError,
+        {processId: string;stageId: string;deliverableId: string},
+        TContext
+      > => {
+      return useMutation(getApproveDeliverableMutationOptions(options), queryClient);
+    }
+    export type generateStageDeliverableResponse200 = {
+  data: GenerateDeliverableResponseDto
+  status: 200
+}
+
+export type generateStageDeliverableResponseSuccess = (generateStageDeliverableResponse200) & {
+  headers: Headers;
+};
+;
+
+export type generateStageDeliverableResponse = (generateStageDeliverableResponseSuccess)
+
+export const getGenerateStageDeliverableUrl = (processId: string,
+    stageId: string,
+    deliverableId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/deliverables/${deliverableId}/generate`
+}
+
+/**
+ * @summary Generar borrador PDF institucional del entregable E4
+ */
+export const generateStageDeliverable = async (processId: string,
+    stageId: string,
+    deliverableId: string, options?: Parameters<typeof customFetch>[1]): Promise<generateStageDeliverableResponse> => {
+
+  return customFetch<generateStageDeliverableResponse>(getGenerateStageDeliverableUrl(processId,stageId,deliverableId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateStageDeliverableMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext> => {
+
+const mutationKey = ['generateStageDeliverable'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateStageDeliverable>>, {processId: string;stageId: string;deliverableId: string}> = (props) => {
+          const {processId,stageId,deliverableId} = props ?? {};
+
+          return  generateStageDeliverable(processId,stageId,deliverableId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateStageDeliverableMutationResult = NonNullable<Awaited<ReturnType<typeof generateStageDeliverable>>>
+
+    export type GenerateStageDeliverableMutationError = unknown
+
+    /**
+ * @summary Generar borrador PDF institucional del entregable E4
+ */
+export const useGenerateStageDeliverable = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateStageDeliverable>>, TError,{processId: string;stageId: string;deliverableId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof generateStageDeliverable>>,
+        TError,
+        {processId: string;stageId: string;deliverableId: string},
+        TContext
+      > => {
+      return useMutation(getGenerateStageDeliverableMutationOptions(options), queryClient);
+    }
+    export type evaluateGateResponse200 = {
   data: StageGateEvaluationResponseDto
   status: 200
 }
@@ -1187,3 +1018,172 @@ export function useEvaluateGate<TData = Awaited<ReturnType<typeof evaluateGate>>
 
 
 
+export type observeStageResponse200 = {
+  data: MethodologicalStageResponseDto
+  status: 200
+}
+
+export type observeStageResponseSuccess = (observeStageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type observeStageResponse = (observeStageResponseSuccess)
+
+export const getObserveStageUrl = (processId: string,
+    stageId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/observe`
+}
+
+/**
+ * @summary Observar etapa metodológica (devolver a CC)
+ */
+export const observeStage = async (processId: string,
+    stageId: string,
+    observeStageRequestDto?: ObserveStageRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<observeStageResponse> => {
+
+  return customFetch<observeStageResponse>(getObserveStageUrl(processId,stageId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(observeStageRequestDto)
+  }
+);}
+
+
+
+
+
+export const getObserveStageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext> => {
+
+const mutationKey = ['observeStage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof observeStage>>, {processId: string;stageId: string;data?: ObserveStageRequestDto}> = (props) => {
+          const {processId,stageId,data} = props ?? {};
+
+          return  observeStage(processId,stageId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ObserveStageMutationResult = NonNullable<Awaited<ReturnType<typeof observeStage>>>
+    export type ObserveStageMutationBody = ObserveStageRequestDto | undefined
+    export type ObserveStageMutationError = unknown
+
+    /**
+ * @summary Observar etapa metodológica (devolver a CC)
+ */
+export const useObserveStage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof observeStage>>, TError,{processId: string;stageId: string;data?: ObserveStageRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof observeStage>>,
+        TError,
+        {processId: string;stageId: string;data?: ObserveStageRequestDto},
+        TContext
+      > => {
+      return useMutation(getObserveStageMutationOptions(options), queryClient);
+    }
+    export type submitStageResponse200 = {
+  data: MethodologicalStageResponseDto
+  status: 200
+}
+
+export type submitStageResponseSuccess = (submitStageResponse200) & {
+  headers: Headers;
+};
+;
+
+export type submitStageResponse = (submitStageResponseSuccess)
+
+export const getSubmitStageUrl = (processId: string,
+    stageId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/stages/${stageId}/submit`
+}
+
+/**
+ * @summary Enviar etapa activa a revisión técnica
+ */
+export const submitStage = async (processId: string,
+    stageId: string, options?: Parameters<typeof customFetch>[1]): Promise<submitStageResponse> => {
+
+  return customFetch<submitStageResponse>(getSubmitStageUrl(processId,stageId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSubmitStageMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext> => {
+
+const mutationKey = ['submitStage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitStage>>, {processId: string;stageId: string}> = (props) => {
+          const {processId,stageId} = props ?? {};
+
+          return  submitStage(processId,stageId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitStageMutationResult = NonNullable<Awaited<ReturnType<typeof submitStage>>>
+
+    export type SubmitStageMutationError = unknown
+
+    /**
+ * @summary Enviar etapa activa a revisión técnica
+ */
+export const useSubmitStage = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitStage>>, TError,{processId: string;stageId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof submitStage>>,
+        TError,
+        {processId: string;stageId: string},
+        TContext
+      > => {
+      return useMutation(getSubmitStageMutationOptions(options), queryClient);
+    }

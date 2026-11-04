@@ -7,6 +7,7 @@ import { TemplatesListPage, TemplateEditorPage } from './features/admin/template
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { HomePage } from './features/home';
+import { PublicStatusPage } from './features/public-portal';
 import { CreateProcessPage } from './features/accreditation-process';
 import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
@@ -219,6 +220,7 @@ function App() {
         />
 
         <Route path="/" element={<HomePage />} />
+        <Route path="/public/status" element={<PublicStatusPage />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>

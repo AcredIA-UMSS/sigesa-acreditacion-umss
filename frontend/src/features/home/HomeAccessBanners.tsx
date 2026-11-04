@@ -5,10 +5,9 @@ export function HomeAccessBanners() {
   return (
     <section className="bg-gray-50 px-4 py-12 md:px-6">
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
-        {/* TODO: no hay catálogo público de carreras; el banner entra al login del sistema. */}
         <Link
           id="carreras"
-          to="/login"
+          to="/public/status"
           className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-700 to-primary-900 p-8 text-body shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
         >
           <h2 className="text-heading-md text-body">Buscar Carrera Acreditada</h2>

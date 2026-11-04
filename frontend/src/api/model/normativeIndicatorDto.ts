@@ -7,11 +7,11 @@
  */
 
 export interface NormativeIndicatorDto {
-  id?: string;
   code?: string;
   description?: string;
-  weight?: number;
+  id?: string;
   order?: number;
-  status?: string;
   referenceUrl?: string;
+  status?: string;
+  weight?: number;
 }

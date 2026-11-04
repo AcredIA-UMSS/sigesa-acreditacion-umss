@@ -10,20 +10,20 @@ export interface RegisterUserRequest {
   /** @minLength 1 */
   email: string;
   /** @minLength 1 */
-  role: string;
-  programId?: string;
-  /** @minLength 1 */
   firstName: string;
   /** @minLength 1 */
   lastName: string;
-  /**
-     * @minLength 1
-     * @pattern ^[67]\d{7}$
-     */
-  phoneNumber: string;
   /**
      * @minLength 8
      * @maxLength 2147483647
      */
   password: string;
+  /**
+     * @minLength 1
+     * @pattern ^[67]\d{7}$
+     */
+  phoneNumber: string;
+  programId?: string;
+  /** @minLength 1 */
+  role: string;
 }

@@ -9,7 +9,7 @@
 export interface UpdateNormativeIndicatorRequestDto {
   code?: string;
   description?: string;
-  weight?: number;
   order?: number;
   referenceUrl?: string;
+  weight?: number;
 }

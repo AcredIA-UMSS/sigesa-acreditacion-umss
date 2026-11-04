@@ -30,6 +30,11 @@ describe('App routing', () => {
     expect(await screen.findByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();
   });
 
+  it('shouldRenderPublicStatusPortalWithoutAuth', async () => {
+    renderApp('/public/status');
+    expect(await screen.findByRole('heading', { name: 'Estado de acreditación' })).toBeInTheDocument();
+  });
+
   it('shouldRedirectUnknownPathsTowardDashboardThenLoginWhenAnonymous', async () => {
     renderApp('/ruta-inexistente');
     expect(await screen.findByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();

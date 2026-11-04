@@ -8,13 +8,13 @@
 import type { StageDeliverableResponseDto } from './stageDeliverableResponseDto.ts';
 
 export interface MethodologicalStageResponseDto {
-  id?: string;
-  processId?: string;
-  order?: number;
-  code?: string;
-  displayName?: string;
-  status?: string;
-  startedAt?: string;
   closedAt?: string;
+  code?: string;
   deliverables?: StageDeliverableResponseDto[];
+  displayName?: string;
+  id?: string;
+  order?: number;
+  processId?: string;
+  startedAt?: string;
+  status?: string;
 }

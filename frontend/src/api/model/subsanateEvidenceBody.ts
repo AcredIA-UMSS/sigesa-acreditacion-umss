@@ -7,7 +7,7 @@
  */
 
 export type SubsanateEvidenceBody = {
-  file: Blob;
   description: string;
+  file: Blob;
   observationId: string;
 };

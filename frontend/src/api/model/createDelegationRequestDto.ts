@@ -10,8 +10,8 @@
  * Alta de delegación CAE. Exactamente un alcance.
  */
 export interface CreateDelegationRequestDto {
-  userId: string;
+  indicatorId?: string;
   level1Id?: string;
   level2Id?: string;
-  indicatorId?: string;
+  userId: string;
 }

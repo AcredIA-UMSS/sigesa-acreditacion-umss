@@ -1763,6 +1763,42 @@
         },
         "type" : "object"
       },
+      "PublicProgramStatusResponse" : {
+        "properties" : {
+          "accreditationStatus" : {
+            "type" : "string"
+          },
+          "certificateAvailable" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "validFrom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "validUntil" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PublicProgramSummaryResponse" : {
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "RecentEvaluation" : {
         "properties" : {
           "evidenceId" : {
@@ -5287,6 +5323,89 @@
         "tags" : [ "Programas" ]
       }
     },
+    "/api/v1/public/programs" : {
+      "get" : {
+        "description" : "Solo nombre y slug de programas con published=true. Filtro por nombre en el cliente.",
+        "operationId" : "listPublicPrograms",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PublicProgramSummaryResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Listar carreras publicadas",
+        "tags" : [ "public-portal" ]
+      }
+    },
+    "/api/v1/public/programs/{slug}" : {
+      "get" : {
+        "description" : "404 genérico si el slug no existe o no está publicado.",
+        "operationId" : "getPublicProgram",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PublicProgramStatusResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Estado público de una carrera",
+        "tags" : [ "public-portal" ]
+      }
+    },
+    "/api/v1/public/programs/{slug}/certificate" : {
+      "get" : {
+        "description" : "PDF generado en memoria si el certificado está publicado. Sin URL de archivo. 404 genérico si no.",
+        "operationId" : "downloadPublicCertificate",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Descargar certificado PDF",
+        "tags" : [ "public-portal" ]
+      }
+    },
     "/api/v1/reports/executive/pdf" : {
       "post" : {
         "operationId" : "generate",
@@ -6077,6 +6196,9 @@
     "url" : "http://localhost"
   } ],
   "tags" : [ {
+    "description" : "Portal público de acreditación (anónimo, FSD-UC-016)",
+    "name" : "public-portal"
+  }, {
     "description" : "Delegaciones CAE (API-WF-22/23)",
     "name" : "Evaluation"
   }, {

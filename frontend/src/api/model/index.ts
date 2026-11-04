@@ -82,6 +82,8 @@ export * from './processResponsibleDto.ts';
 export * from './processSummaryResponseDto.ts';
 export * from './programSummaryResponse.ts';
 export * from './programTrafficLight.ts';
+export * from './publicProgramStatusResponse.ts';
+export * from './publicProgramSummaryResponse.ts';
 export * from './recentEvaluation.ts';
 export * from './registerSurveyBatchRequestDto.ts';
 export * from './registerUserRequest.ts';

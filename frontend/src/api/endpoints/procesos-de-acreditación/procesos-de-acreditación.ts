@@ -57,213 +57,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export type assignResponsibleResponse200 = {
-  data: ProcessResponsibleDto
-  status: 200
-}
-
-export type assignResponsibleResponse400 = {
-  data: void
-  status: 400
-}
-
-export type assignResponsibleResponse403 = {
-  data: void
-  status: 403
-}
-
-export type assignResponsibleResponse404 = {
-  data: void
-  status: 404
-}
-
-export type assignResponsibleResponse409 = {
-  data: void
-  status: 409
-}
-
-export type assignResponsibleResponseSuccess = (assignResponsibleResponse200) & {
-  headers: Headers;
-};
-export type assignResponsibleResponseError = (assignResponsibleResponse400 | assignResponsibleResponse403 | assignResponsibleResponse404 | assignResponsibleResponse409) & {
-  headers: Headers;
-};
-
-export type assignResponsibleResponse = (assignResponsibleResponseSuccess | assignResponsibleResponseError)
-
-export const getAssignResponsibleUrl = (processId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/responsible`
-}
-
-/**
- * Designa un coordinador como responsable único del proceso ACTIVE.
- * @summary Asignar responsable [CC]
- */
-export const assignResponsible = async (processId: string,
-    assignResponsibleRequestDto: AssignResponsibleRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<assignResponsibleResponse> => {
-
-  return customFetch<assignResponsibleResponse>(getAssignResponsibleUrl(processId),
-  {
-    ...options,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(assignResponsibleRequestDto)
-  }
-);}
-
-
-
-
-
-export const getAssignResponsibleMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext> => {
-
-const mutationKey = ['assignResponsible'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assignResponsible>>, {processId: string;data: AssignResponsibleRequestDto}> = (props) => {
-          const {processId,data} = props ?? {};
-
-          return  assignResponsible(processId,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AssignResponsibleMutationResult = NonNullable<Awaited<ReturnType<typeof assignResponsible>>>
-    export type AssignResponsibleMutationBody = AssignResponsibleRequestDto
-    export type AssignResponsibleMutationError = void
-
-    /**
- * @summary Asignar responsable [CC]
- */
-export const useAssignResponsible = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof assignResponsible>>,
-        TError,
-        {processId: string;data: AssignResponsibleRequestDto},
-        TContext
-      > => {
-      return useMutation(getAssignResponsibleMutationOptions(options), queryClient);
-    }
-    export type removeResponsibleResponse204 = {
-  data: void
-  status: 204
-}
-
-export type removeResponsibleResponse403 = {
-  data: void
-  status: 403
-}
-
-export type removeResponsibleResponse404 = {
-  data: void
-  status: 404
-}
-
-export type removeResponsibleResponse409 = {
-  data: void
-  status: 409
-}
-
-export type removeResponsibleResponseSuccess = (removeResponsibleResponse204) & {
-  headers: Headers;
-};
-export type removeResponsibleResponseError = (removeResponsibleResponse403 | removeResponsibleResponse404 | removeResponsibleResponse409) & {
-  headers: Headers;
-};
-
-export type removeResponsibleResponse = (removeResponsibleResponseSuccess | removeResponsibleResponseError)
-
-export const getRemoveResponsibleUrl = (processId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/responsible`
-}
-
-/**
- * Revoca la asignación activa del proceso.
- * @summary Quitar responsable
- */
-export const removeResponsible = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<removeResponsibleResponse> => {
-
-  return customFetch<removeResponsibleResponse>(getRemoveResponsibleUrl(processId),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-
-export const getRemoveResponsibleMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext> => {
-
-const mutationKey = ['removeResponsible'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeResponsible>>, {processId: string}> = (props) => {
-          const {processId} = props ?? {};
-
-          return  removeResponsible(processId,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RemoveResponsibleMutationResult = NonNullable<Awaited<ReturnType<typeof removeResponsible>>>
-
-    export type RemoveResponsibleMutationError = void
-
-    /**
- * @summary Quitar responsable
- */
-export const useRemoveResponsible = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof removeResponsible>>,
-        TError,
-        {processId: string},
-        TContext
-      > => {
-      return useMutation(getRemoveResponsibleMutationOptions(options), queryClient);
-    }
-    export type listProcessesResponse200 = {
+export type listProcessesResponse200 = {
   data: ProcessSummaryResponseDto[]
   status: 200
 }
@@ -493,53 +287,53 @@ export const useCreateProcess = <TError = void,
       > => {
       return useMutation(getCreateProcessMutationOptions(options), queryClient);
     }
-    export type exportDossierResponse202 = {
-  data: ExportJobResponse
-  status: 202
-}
-
-export type exportDossierResponse401 = {
+    export type deleteProcessResponse204 = {
   data: void
-  status: 401
+  status: 204
 }
 
-export type exportDossierResponse403 = {
+export type deleteProcessResponse403 = {
   data: void
   status: 403
 }
 
-export type exportDossierResponse404 = {
+export type deleteProcessResponse404 = {
   data: void
   status: 404
 }
 
-export type exportDossierResponseSuccess = (exportDossierResponse202) & {
+export type deleteProcessResponse409 = {
+  data: void
+  status: 409
+}
+
+export type deleteProcessResponseSuccess = (deleteProcessResponse204) & {
   headers: Headers;
 };
-export type exportDossierResponseError = (exportDossierResponse401 | exportDossierResponse403 | exportDossierResponse404) & {
+export type deleteProcessResponseError = (deleteProcessResponse403 | deleteProcessResponse404 | deleteProcessResponse409) & {
   headers: Headers;
 };
 
-export type exportDossierResponse = (exportDossierResponseSuccess | exportDossierResponseError)
+export type deleteProcessResponse = (deleteProcessResponseSuccess | deleteProcessResponseError)
 
-export const getExportDossierUrl = (processId: string,) => {
-
-
+export const getDeleteProcessUrl = (processId: string,) => {
 
 
-  return `/api/v1/processes/${processId}/dossier/export`
+
+
+  return `/api/v1/processes/${processId}`
 }
 
 /**
- * Encola la exportación asíncrona del dossier completo del proceso.
- * @summary Exportar dossier digital en ZIP
+ * Solo JD. Archiva procesos ACTIVE (sin evidencias) o CLOSED (desactivados).
+ * @summary Eliminar (archivar) proceso
  */
-export const exportDossier = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<exportDossierResponse> => {
+export const deleteProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteProcessResponse> => {
 
-  return customFetch<exportDossierResponse>(getExportDossierUrl(processId),
+  return customFetch<deleteProcessResponse>(getDeleteProcessUrl(processId),
   {
     ...options,
-    method: 'POST'
+    method: 'DELETE'
 
 
   }
@@ -549,11 +343,11 @@ export const exportDossier = async (processId: string, options?: Parameters<type
 
 
 
-export const getExportDossierMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext> => {
+export const getDeleteProcessMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext> => {
 
-const mutationKey = ['exportDossier'];
+const mutationKey = ['deleteProcess'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -563,10 +357,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof exportDossier>>, {processId: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProcess>>, {processId: string}> = (props) => {
           const {processId} = props ?? {};
 
-          return  exportDossier(processId,requestOptions)
+          return  deleteProcess(processId,requestOptions)
         }
 
 
@@ -576,22 +370,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type ExportDossierMutationResult = NonNullable<Awaited<ReturnType<typeof exportDossier>>>
+    export type DeleteProcessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProcess>>>
 
-    export type ExportDossierMutationError = void
+    export type DeleteProcessMutationError = void
 
     /**
- * @summary Exportar dossier digital en ZIP
+ * @summary Eliminar (archivar) proceso
  */
-export const useExportDossier = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useDeleteProcess = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof exportDossier>>,
+        Awaited<ReturnType<typeof deleteProcess>>,
         TError,
         {processId: string},
         TContext
       > => {
-      return useMutation(getExportDossierMutationOptions(options), queryClient);
+      return useMutation(getDeleteProcessMutationOptions(options), queryClient);
     }
     export type getProcessResponse200 = {
   data: ProcessResponseDto
@@ -723,53 +517,53 @@ export function useGetProcess<TData = Awaited<ReturnType<typeof getProcess>>, TE
 
 
 
-export type deleteProcessResponse204 = {
-  data: void
-  status: 204
+export type exportDossierResponse202 = {
+  data: ExportJobResponse
+  status: 202
 }
 
-export type deleteProcessResponse403 = {
+export type exportDossierResponse401 = {
+  data: void
+  status: 401
+}
+
+export type exportDossierResponse403 = {
   data: void
   status: 403
 }
 
-export type deleteProcessResponse404 = {
+export type exportDossierResponse404 = {
   data: void
   status: 404
 }
 
-export type deleteProcessResponse409 = {
-  data: void
-  status: 409
-}
-
-export type deleteProcessResponseSuccess = (deleteProcessResponse204) & {
+export type exportDossierResponseSuccess = (exportDossierResponse202) & {
   headers: Headers;
 };
-export type deleteProcessResponseError = (deleteProcessResponse403 | deleteProcessResponse404 | deleteProcessResponse409) & {
+export type exportDossierResponseError = (exportDossierResponse401 | exportDossierResponse403 | exportDossierResponse404) & {
   headers: Headers;
 };
 
-export type deleteProcessResponse = (deleteProcessResponseSuccess | deleteProcessResponseError)
+export type exportDossierResponse = (exportDossierResponseSuccess | exportDossierResponseError)
 
-export const getDeleteProcessUrl = (processId: string,) => {
-
-
+export const getExportDossierUrl = (processId: string,) => {
 
 
-  return `/api/v1/processes/${processId}`
+
+
+  return `/api/v1/processes/${processId}/dossier/export`
 }
 
 /**
- * Solo JD. Archiva procesos ACTIVE (sin evidencias) o CLOSED (desactivados).
- * @summary Eliminar (archivar) proceso
+ * Encola la exportación asíncrona del dossier completo del proceso.
+ * @summary Exportar dossier digital en ZIP
  */
-export const deleteProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<deleteProcessResponse> => {
+export const exportDossier = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<exportDossierResponse> => {
 
-  return customFetch<deleteProcessResponse>(getDeleteProcessUrl(processId),
+  return customFetch<exportDossierResponse>(getExportDossierUrl(processId),
   {
     ...options,
-    method: 'DELETE'
+    method: 'POST'
 
 
   }
@@ -779,11 +573,11 @@ export const deleteProcess = async (processId: string, options?: Parameters<type
 
 
 
-export const getDeleteProcessMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext> => {
+export const getExportDossierMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext> => {
 
-const mutationKey = ['deleteProcess'];
+const mutationKey = ['exportDossier'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -793,10 +587,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteProcess>>, {processId: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof exportDossier>>, {processId: string}> = (props) => {
           const {processId} = props ?? {};
 
-          return  deleteProcess(processId,requestOptions)
+          return  exportDossier(processId,requestOptions)
         }
 
 
@@ -806,149 +600,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteProcessMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProcess>>>
+    export type ExportDossierMutationResult = NonNullable<Awaited<ReturnType<typeof exportDossier>>>
 
-    export type DeleteProcessMutationError = void
+    export type ExportDossierMutationError = void
 
     /**
- * @summary Eliminar (archivar) proceso
+ * @summary Exportar dossier digital en ZIP
  */
-export const useDeleteProcess = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useExportDossier = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof exportDossier>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteProcess>>,
+        Awaited<ReturnType<typeof exportDossier>>,
         TError,
         {processId: string},
         TContext
       > => {
-      return useMutation(getDeleteProcessMutationOptions(options), queryClient);
+      return useMutation(getExportDossierMutationOptions(options), queryClient);
     }
-    export type listCandidatesResponse200 = {
-  data: EligibleResponsibleDto[]
-  status: 200
-}
-
-export type listCandidatesResponse403 = {
-  data: void
-  status: 403
-}
-
-export type listCandidatesResponse404 = {
-  data: void
-  status: 404
-}
-
-export type listCandidatesResponseSuccess = (listCandidatesResponse200) & {
-  headers: Headers;
-};
-export type listCandidatesResponseError = (listCandidatesResponse403 | listCandidatesResponse404) & {
-  headers: Headers;
-};
-
-export type listCandidatesResponse = (listCandidatesResponseSuccess | listCandidatesResponseError)
-
-export const getListCandidatesUrl = (processId: string,) => {
-
-
-
-
-  return `/api/v1/processes/${processId}/responsible/candidates`
-}
-
-/**
- * Coordinadores elegibles para el proceso según carrera y disponibilidad.
- * @summary Listar candidatos [CC]
- */
-export const listCandidates = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<listCandidatesResponse> => {
-
-  return customFetch<listCandidatesResponse>(getListCandidatesUrl(processId),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListCandidatesQueryKey = (processId: string,) => {
-    return [
-    `/api/v1/processes/${processId}/responsible/candidates`
-    ] as const;
-    }
-
-
-export const getListCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListCandidatesQueryKey(processId);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCandidates>>> = ({ signal }) => listCandidates(processId, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ListCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof listCandidates>>>
-export type ListCandidatesQueryError = void
-
-
-export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
- processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listCandidates>>,
-          TError,
-          Awaited<ReturnType<typeof listCandidates>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listCandidates>>,
-          TError,
-          Awaited<ReturnType<typeof listCandidates>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Listar candidatos [CC]
- */
-
-export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
- processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getListCandidatesQueryOptions(processId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export type getDossierExportJobStatusResponse200 = {
+    export type getDossierExportJobStatusResponse200 = {
   data: JobStatusResponse
   status: 200
 }
@@ -1177,6 +846,337 @@ export function useDownloadDossier<TData = Awaited<ReturnType<typeof downloadDos
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getDownloadDossierQueryOptions(processId,jobId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export type removeResponsibleResponse204 = {
+  data: void
+  status: 204
+}
+
+export type removeResponsibleResponse403 = {
+  data: void
+  status: 403
+}
+
+export type removeResponsibleResponse404 = {
+  data: void
+  status: 404
+}
+
+export type removeResponsibleResponse409 = {
+  data: void
+  status: 409
+}
+
+export type removeResponsibleResponseSuccess = (removeResponsibleResponse204) & {
+  headers: Headers;
+};
+export type removeResponsibleResponseError = (removeResponsibleResponse403 | removeResponsibleResponse404 | removeResponsibleResponse409) & {
+  headers: Headers;
+};
+
+export type removeResponsibleResponse = (removeResponsibleResponseSuccess | removeResponsibleResponseError)
+
+export const getRemoveResponsibleUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/responsible`
+}
+
+/**
+ * Revoca la asignación activa del proceso.
+ * @summary Quitar responsable
+ */
+export const removeResponsible = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<removeResponsibleResponse> => {
+
+  return customFetch<removeResponsibleResponse>(getRemoveResponsibleUrl(processId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemoveResponsibleMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext> => {
+
+const mutationKey = ['removeResponsible'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeResponsible>>, {processId: string}> = (props) => {
+          const {processId} = props ?? {};
+
+          return  removeResponsible(processId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveResponsibleMutationResult = NonNullable<Awaited<ReturnType<typeof removeResponsible>>>
+
+    export type RemoveResponsibleMutationError = void
+
+    /**
+ * @summary Quitar responsable
+ */
+export const useRemoveResponsible = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeResponsible>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeResponsible>>,
+        TError,
+        {processId: string},
+        TContext
+      > => {
+      return useMutation(getRemoveResponsibleMutationOptions(options), queryClient);
+    }
+    export type assignResponsibleResponse200 = {
+  data: ProcessResponsibleDto
+  status: 200
+}
+
+export type assignResponsibleResponse400 = {
+  data: void
+  status: 400
+}
+
+export type assignResponsibleResponse403 = {
+  data: void
+  status: 403
+}
+
+export type assignResponsibleResponse404 = {
+  data: void
+  status: 404
+}
+
+export type assignResponsibleResponse409 = {
+  data: void
+  status: 409
+}
+
+export type assignResponsibleResponseSuccess = (assignResponsibleResponse200) & {
+  headers: Headers;
+};
+export type assignResponsibleResponseError = (assignResponsibleResponse400 | assignResponsibleResponse403 | assignResponsibleResponse404 | assignResponsibleResponse409) & {
+  headers: Headers;
+};
+
+export type assignResponsibleResponse = (assignResponsibleResponseSuccess | assignResponsibleResponseError)
+
+export const getAssignResponsibleUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/responsible`
+}
+
+/**
+ * Designa un coordinador como responsable único del proceso ACTIVE.
+ * @summary Asignar responsable [CC]
+ */
+export const assignResponsible = async (processId: string,
+    assignResponsibleRequestDto: AssignResponsibleRequestDto, options?: Parameters<typeof customFetch>[1]): Promise<assignResponsibleResponse> => {
+
+  return customFetch<assignResponsibleResponse>(getAssignResponsibleUrl(processId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(assignResponsibleRequestDto)
+  }
+);}
+
+
+
+
+
+export const getAssignResponsibleMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext> => {
+
+const mutationKey = ['assignResponsible'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof assignResponsible>>, {processId: string;data: AssignResponsibleRequestDto}> = (props) => {
+          const {processId,data} = props ?? {};
+
+          return  assignResponsible(processId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AssignResponsibleMutationResult = NonNullable<Awaited<ReturnType<typeof assignResponsible>>>
+    export type AssignResponsibleMutationBody = AssignResponsibleRequestDto
+    export type AssignResponsibleMutationError = void
+
+    /**
+ * @summary Asignar responsable [CC]
+ */
+export const useAssignResponsible = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof assignResponsible>>, TError,{processId: string;data: AssignResponsibleRequestDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof assignResponsible>>,
+        TError,
+        {processId: string;data: AssignResponsibleRequestDto},
+        TContext
+      > => {
+      return useMutation(getAssignResponsibleMutationOptions(options), queryClient);
+    }
+    export type listCandidatesResponse200 = {
+  data: EligibleResponsibleDto[]
+  status: 200
+}
+
+export type listCandidatesResponse403 = {
+  data: void
+  status: 403
+}
+
+export type listCandidatesResponse404 = {
+  data: void
+  status: 404
+}
+
+export type listCandidatesResponseSuccess = (listCandidatesResponse200) & {
+  headers: Headers;
+};
+export type listCandidatesResponseError = (listCandidatesResponse403 | listCandidatesResponse404) & {
+  headers: Headers;
+};
+
+export type listCandidatesResponse = (listCandidatesResponseSuccess | listCandidatesResponseError)
+
+export const getListCandidatesUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/responsible/candidates`
+}
+
+/**
+ * Coordinadores elegibles para el proceso según carrera y disponibilidad.
+ * @summary Listar candidatos [CC]
+ */
+export const listCandidates = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<listCandidatesResponse> => {
+
+  return customFetch<listCandidatesResponse>(getListCandidatesUrl(processId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCandidatesQueryKey = (processId: string,) => {
+    return [
+    `/api/v1/processes/${processId}/responsible/candidates`
+    ] as const;
+    }
+
+
+export const getListCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCandidatesQueryKey(processId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCandidates>>> = ({ signal }) => listCandidates(processId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: processId !== null && processId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof listCandidates>>>
+export type ListCandidatesQueryError = void
+
+
+export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
+ processId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof listCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof listCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Listar candidatos [CC]
+ */
+
+export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidates>>, TError = void>(
+ processId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCandidates>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCandidatesQueryOptions(processId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

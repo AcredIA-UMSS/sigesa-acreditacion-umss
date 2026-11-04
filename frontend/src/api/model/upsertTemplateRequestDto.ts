@@ -7,9 +7,9 @@
  */
 
 export interface UpsertTemplateRequestDto {
+  description?: string;
   /** @minLength 1 */
   name: string;
-  description?: string;
   /** @minLength 1 */
   type: string;
 }

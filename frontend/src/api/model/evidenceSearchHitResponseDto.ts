@@ -7,18 +7,18 @@
  */
 
 export interface EvidenceSearchHitResponseDto {
+  blobAvailable?: boolean;
+  description?: string;
   evidenceId?: string;
+  indicatorCode?: string;
+  indicatorId?: string;
+  indicatorTitle?: string;
   level1Id?: string;
   level1Name?: string;
   level3Name?: string;
-  processId?: string;
-  indicatorId?: string;
-  indicatorCode?: string;
-  indicatorTitle?: string;
-  version?: number;
-  description?: string;
   originalFilename?: string;
+  processId?: string;
   uploadedAt?: string;
   uploadedBy?: string;
-  blobAvailable?: boolean;
+  version?: number;
 }

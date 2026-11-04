@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **MOD-PUBLIC portal:** `GET /api/v1/public/programs` (listado nombre+slug), `/{slug}`, `/{slug}/certificate` (PDF en memoria). Prefijo `/api/v1/public` (FSD original: `/public/programs/{slug}`). 404 genérico. | FSD-UC-016 / DD-UC-016 | — | PM-039 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
 | 04/11/2026 | **MOD-ASSISTANT RAG (#76):** corpus classpath `normative-corpus/arcu-sur-2023/` (manual de procedimientos 2023); upsert al boot; retira placeholders ARCU-SUR de demo. | FSD-UC-033 / DD-UC-033 / PR-IMPL-032 | — | PM-037 / PR-IMPL-048 / #76 | Boris Anthony Angulo Urquieta |
 | 02/11/2026 | **E3 notificaciones:** se mantiene el outbox en el monolito. Corrida limpia A/B/A/B: p95 +2.126 ms, arranque 1.20×, health 33/2496 (1.322 %) con el sidecar cortado. Informe `bench/e3/INFORME.md`. | bench E3 | ADR-001 | — | Marlene Velasquez |
@@ -172,6 +173,7 @@ artefactos_vivos:
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 | `FSD-UC-020` | `DD-UC-030` | **hecho (M10)** | `2.1.0` | EE lectura proceso + checklist Sala de Pares | `PR-IMPL-M10-030` | PM-018 |
+| `FSD-UC-016` | `DD-UC-016` | **hecho** | `1.1.0` | `@TC-PUB` / `@TC-PUB2` portal + certificado | `PR-IMPL-050` | PM-039; path `/api/v1/public` vs FSD `/public` |
 
 ### A.4 Trazabilidad código ↔ DTP
 
@@ -199,6 +201,7 @@ artefactos_vivos:
 | **MOD-ASSISTANT (chatbot MVP)** | **sí** | Ver §B.5 abajo; design doc `DD-SYS-002` |
 | **MOD-REVIEW (evaluador externo [EE])** | **sí** | Ver §B.6 abajo; design doc `DD-UC-019` |
 | **MOD-TEMPLATE (plantillas normativas)** | **sí** | Ver §B.7 abajo; design doc `DD-UC-021` |
+| **MOD-PUBLIC (portal [P])** | **sí** | Ver §B.9; design doc `DD-UC-016`; `GET /api/v1/public/**` anónimo |
 | §8 Despliegue cloud (AWS) | no | DTI vFinal §8 |
 | §10 Prompt mapping | **sí (crece)** | `docs/sprints/sprint_02/PROMPT_MAPPING.md` (Sprint 02 — MOD-ASSISTANT PM-001) |
 | §21 ADRs | **sí (crece)** | [`docs/adr/`](../adr/) (ADR-0003 MOD-AUTH, **ADR-0002 PostgreSQL**, **ADR-0004 jerarquía v2.0**, **ADR-001 notificaciones en el monolito**; baseline en `docs/baseline/05_dti/adrs/`) |
@@ -210,7 +213,7 @@ artefactos_vivos:
 | Área | Detalle vigente |
 | --- | --- |
 | **Endpoints** | `POST /api/v1/auth/login` (público); `POST /api/v1/admin/users` ([JD]); `PATCH /api/v1/admin/users/{id}/deactivate` ([JD]) |
-| **Perímetro JWT** | Todo `/api/v1/**` excepto login exige `Authorization: Bearer` (delta §A.2 #1) |
+| **Perímetro JWT** | Todo `/api/v1/**` excepto login y `GET /api/v1/public/**` exige `Authorization: Bearer` |
 | **Tablas JPA** | `app_user`, `user_program_assignment` |
 | **Índice parcial** | `uk_upa_active` — Flyway (`application-prod.yaml`) |
 | **Password hashing** | Argon2id (`Argon2PasswordEncoder`) |
@@ -431,6 +434,17 @@ artefactos_vivos:
 | **Publicación** | ≥1 fase + 1 subfase | ≥1 indicador en árbol completo |
 | **Flyway** | `V5__template_management.sql` | `V14+` tablas normativas v2 |
 | **Hook UC-003** | Clona subfases | Clona indicadores con ponderación |
+
+### B.9 MOD-PUBLIC — portal anónimo (`DD-UC-016`)
+
+| Área | Detalle vigente |
+| --- | --- |
+| **Endpoints** | `GET /api/v1/public/programs`, `GET /api/v1/public/programs/{slug}`, `GET /api/v1/public/programs/{slug}/certificate` |
+| **Auth** | Anónimo (`permitAll` en `GET /api/v1/public/**`). El FSD original decía `GET /public/programs/{slug}` sin `/api/v1`. |
+| **Tabla** | `publication_snapshot` (Flyway V27): `published`, `certificate_published`; sin observaciones |
+| **404** | Envelope `NOT_FOUND` / «El recurso solicitado no existe.» (slug, no publicado, certificado no publicado) |
+| **PDF** | OpenPDF en memoria; headers de vigencia; sin URL de archivo |
+| **UI** | `/public/status` (filtro por nombre en cliente) |
 
 ## C. Integraciones
 

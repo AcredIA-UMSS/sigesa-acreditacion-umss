@@ -60,6 +60,11 @@ class OpenApiExportIT {
                 "Falta GET /api/v1/document-assets/{documentAssetId}/content");
         assertTrue(paths.has("/api/health"), "Falta GET /api/health");
         assertTrue(paths.get("/api/health").has("get"), "El path /api/health no declara GET");
+        assertTrue(paths.has("/api/v1/public/programs"), "Falta GET /api/v1/public/programs");
+        assertTrue(paths.has("/api/v1/public/programs/{slug}"),
+                "Falta GET /api/v1/public/programs/{slug}");
+        assertTrue(paths.has("/api/v1/public/programs/{slug}/certificate"),
+                "Falta GET /api/v1/public/programs/{slug}/certificate");
 
         Path committed = Path.of("..", "openapi.json").toAbsolutePath().normalize();
         Path generated = Path.of("target", "openapi.json").toAbsolutePath().normalize();

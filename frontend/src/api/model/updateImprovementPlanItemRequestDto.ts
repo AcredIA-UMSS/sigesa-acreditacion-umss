@@ -10,11 +10,11 @@
  * Edición de ítem de Plan de Mejoras (API-WF-16)
  */
 export interface UpdateImprovementPlanItemRequestDto {
-  objective: string;
   activity?: string;
-  responsibleId?: string;
   deadline?: string;
-  progress?: number;
   justification?: string;
+  objective: string;
+  progress?: number;
   progressEvidenceAssetId?: string;
+  responsibleId?: string;
 }

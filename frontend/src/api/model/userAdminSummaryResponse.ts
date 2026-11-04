@@ -7,13 +7,13 @@
  */
 
 export interface UserAdminSummaryResponse {
-  userId?: string;
   email?: string;
+  firstName?: string;
+  fullName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  programIds?: string[];
   role?: string;
   status?: string;
-  programIds?: string[];
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  phoneNumber?: string;
+  userId?: string;
 }

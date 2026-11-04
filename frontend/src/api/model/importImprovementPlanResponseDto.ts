@@ -12,6 +12,6 @@ import type { ImprovementPlanItemResponseDto } from './improvementPlanItemRespon
  */
 export interface ImportImprovementPlanResponseDto {
   importedCount?: number;
-  skippedCount?: number;
   items?: ImprovementPlanItemResponseDto[];
+  skippedCount?: number;
 }

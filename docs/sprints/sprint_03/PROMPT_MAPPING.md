@@ -45,6 +45,7 @@
 | PM-036 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 | PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
 | PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
+| PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
 
 
 ---
@@ -2594,5 +2595,81 @@ API unifica 400/401/403/500 en el envelope documentado. Códigos de negocio 409 
 
 - [ ] Commit / PR si el usuario lo pide
 - [ ] Cerrar #67 tras merge
+
+---
+
+## PM-039
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-039 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 18:55 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-016 portal público |
+| **Objetivo** | Listado publicado, estado por slug y certificado PDF anónimo bajo `/api/v1/public`, 404 genérico, UI `/public/status` |
+| **Contexto** | Hueco de búsqueda por nombre resuelto con API-PUB-02 (adición UC-016). Prefijo `/api/v1/public` vs FSD original `/public/programs/{slug}`. Sin noticias, sin baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+1. Opción 2: añade GET /api/v1/public/programs (listado de publicadas, solo
+   nombre y slug). Documéntalo como adición al UC-016 y avísame del cambio de spec.
+2. Usa /api/v1/public/... en todos los endpoints; anota la diferencia con el
+   path del FSD.
+3. Acepto GET /api/v1/public/programs/{slug}/certificate: PDF solo si está
+   publicado, 404 genérico si no, sin exponer URLs directas del archivo.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-016.md` |
+| generado | `docs/prompts/impl/PR-IMPL-050.md` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicProgramController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/publicportal/PublicPortalService.java` |
+| generado | `backend/src/main/resources/db/migration/V27__publication_snapshot.sql` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/PublicPortalGherkinIT.java` |
+| generado | `frontend/src/features/public-portal/` |
+| generado | `frontend/src/api/endpoints/public-portal/public-portal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeAccessBanners.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicPortalGherkinIT,PublicPortalServiceTest,OpenPdfPublicCertificateRendererAdapterTest,OpenApiExportIT test` — OK
+- [x] `pnpm run test:run` (App + public-portal + HomePage) — 13 passed
+- [x] `pnpm run lint` — OK (warnings preexistentes en dashboard/RecentActivity)
+
+### Resultado obtenido
+
+Portal público anónimo: listado `{slug,name}`, estado vigente y PDF en memoria. 404 genérico para no publicados. Spec viva actualizada (path `/api/v1/public` vs FSD `/public`).
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] UI de publicación [JD] (fuera de este UC)
+- [ ] Noticias = UC-035 (no implementado)
 
 

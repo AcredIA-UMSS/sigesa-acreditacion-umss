@@ -7,8 +7,8 @@
  */
 
 export interface PhaseProgressSummary {
-  phaseId?: number;
   name?: string;
   percentage?: number;
+  phaseId?: number;
   status?: string;
 }
