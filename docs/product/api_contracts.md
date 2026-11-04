@@ -22,10 +22,35 @@
 | Base URL | `/api/v1` |
 | Formato | `application/json` (salvo upload: `multipart/form-data`) |
 | Auth | `Authorization: Bearer {token}` |
-| Errores | `{ "error": "ERROR_CODE", "message": "...", "details": {} }` |
+| Errores | `{ "error": "ERROR_CODE", "message": "...", "details": {} }` — ver §1.1 (#67 / FSD-UC-034) |
 | Paginación | `?page=&size=`; respuesta `{ "items": [], "total": n, "page", "size" }` |
 | Idempotencia | `Idempotency-Key` en POST críticos (carga, importación) |
 | Nomenclatura UI | Alias CEUB/ARCU-SUR en respuestas: `label` por nodo (`Área`, `Dimensión`, …) |
+
+### 1.1 Envelope de error (FSD-UC-034 / #67)
+
+Cuerpo JSON (nunca stack, SQL ni tokens):
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "El nombre es obligatorio",
+  "details": {
+    "fields": [{ "field": "name", "message": "El nombre es obligatorio" }]
+  }
+}
+```
+
+| HTTP | `error` típico | Notas |
+|------|----------------|-------|
+| 400 | `VALIDATION_ERROR`, `MALFORMED_JSON` | `details.fields` o `details.parameter` |
+| 401 | `UNAUTHORIZED`, `AUTH_INVALID_CREDENTIALS` | Security filter / login |
+| 403 | `ACCESS_DENIED` | Rol o alcance |
+| 404 | código de dominio o `NOT_FOUND` | |
+| 409 | códigos de negocio (`EVIDENCE_IMMUTABLE`, …) | Pueden traer extras (`pendingIndicators`) |
+| 500 | `INTERNAL_ERROR` | Mensaje genérico; traza solo en log |
+
+Handlers: `GlobalExceptionHandler`, `RestAuthenticationEntryPoint`, `RestAccessDeniedHandler`, plus advice de dominio.
 
 ### Códigos HTTP frecuentes
 

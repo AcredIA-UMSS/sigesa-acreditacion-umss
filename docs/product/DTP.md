@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
 | 04/11/2026 | **MOD-ASSISTANT RAG (#76):** corpus classpath `normative-corpus/arcu-sur-2023/` (manual de procedimientos 2023); upsert al boot; retira placeholders ARCU-SUR de demo. | FSD-UC-033 / DD-UC-033 / PR-IMPL-032 | — | PM-037 / PR-IMPL-048 / #76 | Boris Anthony Angulo Urquieta |
 | 02/11/2026 | **E3 notificaciones:** se mantiene el outbox en el monolito. Corrida limpia A/B/A/B: p95 +2.126 ms, arranque 1.20×, health 33/2496 (1.322 %) con el sidecar cortado. Informe `bench/e3/INFORME.md`. | bench E3 | ADR-001 | — | Marlene Velasquez |
 | 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |

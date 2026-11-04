@@ -44,6 +44,7 @@
 | PM-035 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 ejecucion: up HTTP/in_process, correccion de fallos, down -v |
 | PM-036 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 | PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
+| PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
 
 
 ---
@@ -2534,5 +2535,64 @@ El asistente usa el mismo `POST /api/v1/assistant/chat`. El PDF no viaja al clie
 - [ ] Commit y push para que el corpus viaje con el repo
 - [ ] Smoke autenticado (comité de pares / cronograma)
 - [ ] Citas en UI y más documentos (issue #76)
+
+---
+
+## PM-038
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-038 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 15:12 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Manejo uniforme de errores REST (#67) |
+| **Objetivo** | Envelope `{error,message,details?}`, 500 sin traza, validación con details, docs FSD-UC-034 |
+| **Contexto** | Issue #67. El producto ya usaba `error`+`message` en advice de dominio; faltaba fallback 500 y details. |
+| **PR-IMPL vinculado** | [PR-IMPL-049](../../prompts/impl/PR-IMPL-049.md) |
+| **DD-UC vinculado** | [DD-UC-034](../../design/DD-UC-034.md) |
+| **FSD-UC vinculado** | [FSD-UC-034](../../product/uc/FSD-UC-034.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero hacer ahora el #67 issue,
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/ApiErrorResponse.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandler.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/ErrorContractProbeController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandlerWebMvcTest.java` |
+| generado | `docs/product/uc/FSD-UC-034.md` |
+| generado | `docs/design/DD-UC-034.md` |
+| generado | `docs/prompts/impl/PR-IMPL-049.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/AuthExceptionHandler.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAuthenticationEntryPoint.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAccessDeniedHandler.java` |
+| modificado | `backend/src/main/resources/application.yaml` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=GlobalExceptionHandlerWebMvcTest,AuthControllerTest test` — OK
+
+### Resultado obtenido
+
+API unifica 400/401/403/500 en el envelope documentado. Códigos de negocio 409 no se reescribieron.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Cerrar #67 tras merge
 
 
