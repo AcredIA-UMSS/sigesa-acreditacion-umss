@@ -1,0 +1,168 @@
+# docker-compose.yml
+
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: sigesa-postgres:16-alpine
+    container_name: sigesa-postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sigesa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigesa_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sigesa}
+    ports:
+      # Host 5432 suele estar ocupado por PostgreSQL nativo; override: POSTGRES_HOST_PORT=5433 en .env
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:Z
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/01_seed.sql:ro,Z
+      - ./db/02_seed_e3.sql:/docker-entrypoint-initdb.d/02_seed_e3.sql:ro,Z
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sigesa-ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_MODELS: /root/.ollama
+    volumes:
+      # - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
+      # - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
+      - ollama_state:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      BYPASS_MODEL_ACCESS_CONTROL: "true"
+    ports:
+      - "3001:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigesa-backend
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_started
+      open-webui:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      - SIGESA_IN_DOCKER=true
+      - SPRING_PROFILES_ACTIVE=dev
+      - DB_URL=jdbc:postgresql://db:5432/sigesa
+      - DB_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
+      - SIGESA_JWT_SECRET=${SIGESA_JWT_SECRET:-xnqtIfcxwGYoGpYre7fXuXyGdJ34TnKWewqtLpCJS0ygFjVeAT3zEHyyx4Ry3+p5GPhl1gk2G3g9nloMvfPyOg==}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SIGESA_ASSISTANT_ENABLED=${SIGESA_ASSISTANT_ENABLED:-true}
+      - SIGESA_ASSISTANT_LLM_ENABLED=${SIGESA_ASSISTANT_LLM_ENABLED:-true}
+      - SIGESA_ASSISTANT_BASE_URL=${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://open-webui:8080/api}}
+      - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-${GROQ_API_KEY:-}}
+      - SIGESA_ASSISTANT_MODEL=${SIGESA_ASSISTANT_MODEL:-qwen2.5:7b}
+      - SIGESA_ASSISTANT_RAG_ENABLED=${SIGESA_ASSISTANT_RAG_ENABLED:-true}
+      - SIGESA_ASSISTANT_RAG_MAX_CHUNKS=${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:-3}
+      - SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS=${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:-5}
+      - SIGESA_EVIDENCE_STORAGE=s3
+      - SIGESA_S3_ENDPOINT=http://minio:9000
+      - SIGESA_S3_BUCKET=${SIGESA_S3_BUCKET:-sigesa-evidences}
+      - SIGESA_S3_ACCESS_KEY=${SIGESA_S3_ACCESS_KEY:-sigesa}
+      - SIGESA_S3_SECRET_KEY=${SIGESA_S3_SECRET_KEY:-sigesaMinioDev1}
+      - SIGESA_S3_REGION=${SIGESA_S3_REGION:-us-east-1}
+      - SIGESA_S3_PATH_STYLE=true
+
+    ports:
+      - "8080:8080"
+
+  minio:
+    image: docker.io/pgsty/silo:RELEASE.2026-10-15T00-00-00Z
+    container_name: sigesa-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${SIGESA_S3_ACCESS_KEY:-sigesa}
+      MINIO_ROOT_PASSWORD: ${SIGESA_S3_SECRET_KEY:-sigesaMinioDev1}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_PHASES_COPILOT_DEBUG_ACTIONS: ${VITE_PHASES_COPILOT_DEBUG_ACTIONS:-false}
+        VITE_USERS_COPILOT_DEBUG_ACTIONS: ${VITE_USERS_COPILOT_DEBUG_ACTIONS:-false}
+        VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS: ${VITE_EVIDENCE_COPILOT_DEBUG_ACTIONS:-false}
+        VITE_ASSISTANT_DEBUG_ACTIONS: ${VITE_ASSISTANT_DEBUG_ACTIONS:-false}
+    container_name: sigesa-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80" # Mapea el puerto 80 del contenedor al 3000 de tu host
+
+  # Generador de tests AcredIA (Python) — NO producción; profile tools
+  # Uso: ./tools/test-generator/run.sh --batch L1
+  test-generator:
+    profiles: ["tools"]
+    build:
+      context: ./tools/test-generator
+      dockerfile: Dockerfile
+    container_name: sigesa-test-generator
+    env_file:
+      - .env
+    depends_on:
+      ollama:
+        condition: service_started
+    environment:
+      SIGESA_REPO_ROOT: /workspace
+      SIGESA_RUNTIME: docker
+      SIGESA_IN_DOCKER: "true"
+    volumes:
+      - .:/workspace:rw
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_data:
+  open-webui:
+  ollama_state:
+  minio_data:
