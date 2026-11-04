@@ -39,6 +39,10 @@
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 | PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
 | PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+| PM-033 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 PASO 0: inventario de stack, puertos, modulo outbox y rutas GET |
+| PM-034 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 infra: compose Toxiproxy, toxic.sh, verificar-infra, run-limpio |
+| PM-035 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 ejecucion: up HTTP/in_process, correccion de fallos, down -v |
+| PM-036 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 
 
 ---
@@ -2160,5 +2164,296 @@ commit all the changes
 - [x] Backend: `./mvnw test` — 564 pruebas pasadas, 0 fallos, 0 errores.
 - [x] Frontend: `npm run test:run` — 44 suites, 119 pruebas pasadas.
 - [x] Calidad Frontend: `npx oxlint` (0 errores) y `npx tsc -b` (0 errores).
+
+---
+
+## PM-033
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-033 |
+| **Fecha** | 2026-11-02 |
+| **Hora** | 21:30 |
+| **Solicitante** | Aylen Gonzáles |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | PASO 0 — inventario del repo para el experimento E3 |
+| **Objetivo** | Reportar stack, arranque, Docker, DB, modulo extraible, puertos/adaptadores, cliente HTTP y rutas GET antes de escribir infra |
+| **Contexto** | El enunciado asumia Python/uvicorn. El repo es Spring Boot 4 / Java 21. Integrante 1 ya dejo el adaptador dual. |
+| **PR-IMPL vinculado** | [PR-IMPL-047](../../prompts/impl/PR-IMPL-047.md) |
+| **DD-UC vinculado** | N/A (laboratorio `bench/e3/HIPOTESIS.md`) |
+| **FSD-UC vinculado** | N/A — E3 laboratorio |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Actúa como ingeniero DevOps. Necesito dejar listo el entorno de infraestructura para un experimento de "monolito modular vs servicio extraído" con inyección de fallas de red usando Toxiproxy. Solo infraestructura: NO modifiques la lógica de negocio ni los adaptadores.
+
+## PASO 0: Investiga el repo antes de escribir nada
+Revisa el proyecto y repórtame (en una lista corta) lo que encuentres sobre:
+- Stack, versión de Python y gestor de dependencias (requirements.txt, pyproject.toml, etc.). Ignora el package.json: es solo de Playwright.
+- Cómo se arranca la app hoy (entry point, puerto, comando de uvicorn).
+- Si ya existe Dockerfile, docker-compose, .env o carpeta bench/.
+- Base de datos que se usa y dónde vive (archivo SQLite, Postgres, etc.).
+- Estructura de módulos y cuál es el candidato a extraer (frontera clara, tablas propias).
+- Interfaz/puerto y adaptadores (in-process / HTTP), la variable de entorno que los selecciona y la que guarda la URL del módulo. Si no existen aún, dímelo y propón nombres, sin implementarlos.
+- Cliente HTTP usado (httpx, requests, etc.) y si define timeouts.
+- Rutas GET disponibles: elige una que use el módulo y una de control que no lo use.
+Si algo es ambiguo o falta, pregúntame antes de asumir.
+```
+
+### Entradas auxiliares
+
+- `bench/e3/HIPOTESIS.md`
+- `docs/prompts/impl/PR-IMPL-047.md`
+
+### Archivos generados o modificados
+
+Ninguno (solo investigacion).
+
+### Cambios realizados
+
+- Inventario: Java 21 / Spring Boot 4 / Maven; `EXTRACTION_MODE` + `SIGESA_APP` + `SIGESA_NOTIFICATION_BASE_URL` ya existian; H2 default; rutas `GET /api/v1/e3/notifications` y `GET /api/health`.
+
+### Validacion ejecutada
+
+- [x] Lectura de `application.yaml`, `SigesaApplication`, adaptadores HTTP/in-process, compose de producto.
+
+### Resultado obtenido
+
+PASO 0 reportado. Compose E3 en `bench/e3/`; no se pisa el compose de producto.
+
+---
+
+## PM-034
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-034 |
+| **Fecha** | 2026-11-02 |
+| **Hora** | 21:35 |
+| **Solicitante** | DevOps E3 |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Infraestructura Docker E3 (Toxiproxy, scripts, override monolito) |
+| **Objetivo** | Compose HTTP + override in-process, toxic.sh, verificar-infra.sh, run-limpio.sh, README, `.env.example` |
+| **Contexto** | Entregables del mismo prompt que PM-033. Dockerfile de producto reutilizado. |
+| **PR-IMPL vinculado** | [PR-IMPL-047](../../prompts/impl/PR-IMPL-047.md) |
+| **DD-UC vinculado** | N/A (laboratorio `bench/e3/HIPOTESIS.md`) |
+| **FSD-UC vinculado** | N/A — E3 laboratorio |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+## Entregables (después del paso 0)
+1. Dockerfile (si no existe), sin --reload y con el mismo número de workers para A y B.
+2. docker-compose.yml con:
+   - api (A): modo HTTP, URL del módulo apuntando al PROXY (toxiproxy:8666), nunca directo a modulo.
+   - modulo (B): misma imagen, otro command; `expose`, NO `ports`.
+   - toxiproxy: ghcr.io/shopify/toxiproxy:2.9.0 (versión fija), publica 8474.
+   - toxiproxy-setup: curlimages/curl, crea el proxy `modulo` (listen 0.0.0.0:8666, upstream modulo:<puerto B>). Idempotente, corre en cada up.
+   - k6: grafana/k6 con profiles: ["bench"], volumen ./bench/e3.
+   - db solo si el paso 0 demuestra que hace falta.
+   - Healthchecks sin curl en imágenes slim (usa python urllib); depends_on con condition: service_healthy.
+   - Una sola red; comunicación por nombre de servicio.
+3. docker-compose.monolito.yml (override): api en modo in-process, sin modulo/toxiproxy/toxiproxy-setup.
+4. bench/e3/toxic.sh (bash, set -euo pipefail):
+   - lento on|off → latency downstream 2000, jitter 0
+   - colgado on|off → timeout downstream, timeout 0
+   - caido on|off → POST /proxies/modulo {"enabled": false|true}
+   - reset, status
+   - TOXIPROXY_URL configurable (default http://localhost:8474). Idempotente, valida argumentos.
+5. bench/e3/verificar-infra.sh: pasos OK/FALLA: ruta del módulo 200; lento ≥2 s; colgado termina con curl -m 5; caido falla al instante; reset vuelve a 200; ruta de control 200 en todos los casos.
+6. bench/e3/run-limpio.sh: down -v, up -d --build --wait, y guarda tiempos de build y up en bench/e3/resultados/tiempos.csv (forma,fecha,build_s,up_s).
+7. bench/e3/README-infra.md corto con puertos, nombres y uso.
+
+## Reglas
+- Versiones de imágenes fijas; variables configurables en .env.example.
+- Puerto de modulo no publicado al host.
+- Al terminar, lista los archivos creados y los comandos para validar.
+```
+
+### Entradas auxiliares
+
+- `bench/e3/HIPOTESIS.md`
+- `docs/prompts/impl/PR-IMPL-047.md`
+
+### Archivos generados o modificados
+
+| Accion | Ruta |
+|---|---|
+| generado | `bench/e3/docker-compose.yml` |
+| generado | `bench/e3/docker-compose.monolito.yml` |
+| generado | `bench/e3/toxic.sh` |
+| generado | `bench/e3/verificar-infra.sh` |
+| generado | `bench/e3/run-limpio.sh` |
+| generado | `bench/e3/README-infra.md` |
+| generado | `bench/e3/resultados/tiempos.csv` |
+| modificado | `.env.example` |
+
+### Cambios realizados
+
+- Compose E3 aislado del de producto. API apunta a Toxiproxy:8666. Sin servicio `db` (H2). Healthcheck wget / toxiproxy-cli.
+
+### Validacion ejecutada
+
+- [x] `docker compose -f bench/e3/docker-compose.yml config` -- CONFIG_OK
+- [x] Override monolito lista solo `api`
+
+### Resultado obtenido
+
+Infra escrita. Ejecucion real quedo en PM-035.
+
+---
+
+## PM-035
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-035 |
+| **Fecha** | 2026-11-02 |
+| **Hora** | 21:44 |
+| **Solicitante** | DevOps E3 |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Ejecutar y corregir la infra E3 hasta verificar-infra OK |
+| **Objetivo** | run-limpio http, verificar-infra (6 pasos), toxic status, run-limpio in_process, down -v; documentar timeouts y tiempos |
+| **Contexto** | Docker Desktop 29.6.2. Fallos reales: CRLF de mvnw, /app/data y /app/uploads no escribibles, bean ObjectMapper ausente en Boot 4. |
+| **PR-IMPL vinculado** | [PR-IMPL-047](../../prompts/impl/PR-IMPL-047.md) |
+| **DD-UC vinculado** | N/A (laboratorio `bench/e3/HIPOTESIS.md`) |
+| **FSD-UC vinculado** | N/A -- E3 laboratorio |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Docker ya está corriendo. Ejecuta tú mismo todo en terminal y corrige lo que falle. Mantén la infra en bench/e3/ y no pises el docker-compose.yml de producto.
+
+## 1. Revisa antes de ejecutar
+- start_period del healthcheck de api y modulo (Spring Boot tarda en arrancar).
+- Que el healthcheck use una herramienta que exista en la imagen Alpine (wget/busybox, no curl).
+- Mismo límite de memoria/CPU y mismas JAVA_OPTS en api y modulo.
+
+## 2. Ejecuta y valida (en este orden)
+chmod +x bench/e3/*.sh
+./bench/e3/run-limpio.sh http
+./bench/e3/verificar-infra.sh
+./bench/e3/toxic.sh status
+./bench/e3/run-limpio.sh in_process
+
+- Si algo falla: lee los logs (docker compose logs), diagnostica la causa raíz, corrige y vuelve a correr. Repite hasta que verificar-infra.sh pase sus 6 pasos.
+- No marques nada como hecho sin haberlo ejecutado. Pégame la salida real de cada comando.
+- Al terminar, deja el entorno limpio (docker compose down -v).
+
+## 3. Documenta en bench/e3/README-infra.md
+- Timeout y reintentos efectivos con E3_NOTIFICATION_* (valor, deadline, reintentos).
+- Cuánto tarda en fallar cada tóxico (lento, colgado, caído) con esos valores.
+- Tiempos medidos de build y up (de tiempos.csv).
+
+## 4. Registra los prompts en promptimpl
+- Busca primero la convención existente del repo (carpeta o archivo "promptimpl", plantillas PR-IMPL / PM-*). Síguela tal cual; no inventes formato.
+- Guarda ahí los prompts usados en esta tarea: el del paso 0 (investigación del repo), el de implementación de infraestructura y este de ejecución/corrección.
+- Para cada uno incluye: fecha, objetivo, texto del prompt, archivos creados o modificados y el resultado de la validación.
+- Si la convención exige un ID (PM-*), asígnalo según el patrón existente. Si no queda claro cuál usar, pregúntame. Guarda el anterior prompt y este igual
+
+## Al final
+Lista los archivos creados o modificados y el resultado de cada paso de verificar-infra.sh (OK/FALLA).
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-047.md`
+- `bench/e3/HIPOTESIS.md`
+
+### Archivos generados o modificados
+
+| Accion | Ruta |
+|---|---|
+| generado | `docs/prompts/impl/PR-IMPL-047.md` |
+| modificado | `bench/e3/docker-compose.yml` |
+| modificado | `bench/e3/run-limpio.sh` |
+| modificado | `bench/e3/README-infra.md` |
+| modificado | `bench/e3/resultados/tiempos.csv` |
+| modificado | `.env.example` |
+| modificado | `.gitattributes` |
+| modificado | `backend/Dockerfile` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/NotificationExtractionConfig.java` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- `start_period` 120 s; `--wait-timeout 300`; `JAVA_OPTS`/`JAVA_TOOL_OPTIONS` y limites 512m/1 CPU identicos en api y modulo.
+- Storage local en `/tmp/sigesa-*` (usuario `sigesa` no puede crear `/app/data` ni `/app/uploads`).
+- `sed` CRLF en `mvnw` (Alpine `./mvnw: not found`).
+- `ObjectMapper` local en `NotificationExtractionConfig` (Boot 4 no expone el bean Jackson 2).
+
+### Validacion ejecutada
+
+- [x] `chmod +x bench/e3/*.sh`
+- [x] `./bench/e3/run-limpio.sh http` -- api Healthy; `build_s=1` `up_s=45`
+- [x] `./bench/e3/verificar-infra.sh` -- 10 OK, 0 FALLA (6 pasos + control en cada uno)
+- [x] `./bench/e3/toxic.sh status` -- proxy `modulo` enabled, sin toxics
+- [x] `./bench/e3/run-limpio.sh in_process` -- `build_s=2` `up_s=25`; GET modulo `origin=in_process` 200
+- [x] `docker compose -f bench/e3/docker-compose.yml down -v` -- sin contenedores `sigesa-e3`
+
+### Resultado obtenido
+
+Infra E3 verificada. Entorno limpio. Timeouts efectivos 5000 ms / 1 intento. Toxicos: lento ~2 s / 200; colgado curl rc 28 a 5 s; caido 503 en 0 s.
+
+---
+
+## PM-036
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-036 |
+| **Fecha** | 2026-11-03 |
+| **Hora** | 18:10 |
+| **Solicitante** | Tech Lead / Alexander Alvarez |
+| **Agente/Entorno** | Antigravity AI Pair Programming |
+| **Modelo** | Claude 3.7 Sonnet |
+| **Tarea** | Corrección de nombres de negocio y enlaces locales en exportación Dossier Digital |
+| **Objetivo** | Reemplazar IDs crudos por nombres de carrera y proceso/plantilla en el índice HTML, resumen ejecutivo y manifiesto; asegurar enlaces relativos offline directos a evidencias foliadas; y asignar filename legible en Content-Disposition. |
+| **Contexto** | El usuario detectó que el dossier generado mostraba UUIDs en lugar de nombres humanos para el proceso y carrera, y que los hipervínculos a los archivos dentro del HTML maestro no abrían las evidencias locales. |
+| **PR-IMPL vinculado** | [PR-IMPL-046](file:///mnt/sda2/informatica/maestria/sigesa-acreditacion-umss/docs/prompts/impl/PR-IMPL-046.md) |
+| **DD-UC vinculado** | [FEAT-11](file:///mnt/sda2/informatica/maestria/sigesa-acreditacion-umss/docs/features/FEAT-11-exportacion-dossier-digital-zip.md) |
+| **FSD-UC vinculado** | FSD-UC-032 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+the dosier export generation, is showing ids instead of the business names for processes, careers, and that the links for the files are not working in the export, pls review
+```
+
+### Entradas auxiliares
+
+- `docs/features/FEAT-11-exportacion-dossier-digital-zip.md`
+- `docs/prompts/impl/PR-IMPL-046.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/ProcessController.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/adapter/out/dossier/ZipDossierExportStreamingAdapterTest.java` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Inyección de `ProgramCatalogPort` y `TemplatePort` en `ZipDossierExportStreamingAdapter` para resolver nombres legibles de carrera (`careerDisplayName`, `careerSlug`) y plantilla de acreditación (`processBusinessName`, `processSlug`).
+- Sustitución de IDs UUID en `00_Indice_Maestro_Cumplimiento.html`, `00_Resumen_Ejecutivo.txt` y `00_Manifiest_Checksums.txt` por los nombres de negocio (manteniendo el UUID como identificador secundario).
+- Generación de hipervínculos relativos funcionales (`<a class='file-link' href='...'>`) desde el índice HTML raíz hacia las carpetas y evidencias foliadas dentro del archivo ZIP, facilitando la navegación offline una vez descomprimido.
+- Reutilización en memoria de los blobs de evidencias mediante mapa temporal en una sola pasada, previniendo lecturas redundantes del almacenamiento.
+- Nombre descriptivo de descarga en `Content-Disposition` en `ProcessController.resolveDossierDownloadFilename` (`Dossier_<careerCode>.zip`).
+- Ampliación de la suite de pruebas unitarias en `ZipDossierExportStreamingAdapterTest` cubriendo resolución de nombres de negocio y enlaces HTML relativos.
+
+### Validación ejecutada
+
+- [x] Backend: `./mvnw test -Dtest=ZipDossierExportStreamingAdapterTest,ProcessDossierExportControllerTest,DossierExportServiceTest` — 12 pruebas pasadas (0 fallos, 0 errores).
+- [x] Frontend: `npx vitest run src/features/processes/hooks/useDossierExport.test.ts` — 4 pruebas pasadas (0 fallos).
 
 

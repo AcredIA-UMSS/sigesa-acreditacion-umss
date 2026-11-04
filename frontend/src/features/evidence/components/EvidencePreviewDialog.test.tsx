@@ -23,4 +23,27 @@ describe('EvidencePreviewDialog', () => {
     screen.getByRole('button', { name: 'Descargar' }).click();
     expect(onDownload).toHaveBeenCalled();
   });
+
+  it('muestra mensaje de error amigable cuando falla la carga del blob', () => {
+    render(
+      <EvidencePreviewDialog
+        isOpen
+        title="guia.pdf"
+        objectUrl={null}
+        contentType={null}
+        isLoading={false}
+        error="El archivo de la evidencia no está disponible en el servidor."
+        onClose={vi.fn()}
+        onDownload={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(
+      screen.getByText('El archivo de la evidencia no está disponible en el servidor.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Verifique que el archivo haya sido cargado correctamente/),
+    ).toBeInTheDocument();
+  });
 });

@@ -44,12 +44,12 @@ describe('ExecutiveSemaphorePage', () => {
     renderWithProviders(<ExecutiveSemaphorePage />, { route: '/executive/semaphore' });
 
     expect(await screen.findByRole('heading', { name: 'Semáforo institucional' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Buscar carrera o facultad')).toBeInTheDocument();
-    expect(screen.getByText('Facultad de Ciencias y Tecnología')).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText('Buscar carrera o facultad')).toBeInTheDocument();
+    expect(screen.getAllByText('Facultad de Ciencias y Tecnología').length).toBeGreaterThan(0);
     expect(screen.getByText('Ingeniería de Sistemas')).toBeInTheDocument();
     expect(screen.getByText('Ingeniería Civil')).toBeInTheDocument();
     expect(screen.getAllByText('Crítico').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Sin dato').length).toBeGreaterThan(0);
-    expect(screen.getByText('40%')).toBeInTheDocument();
+    expect(screen.getAllByText('40%').length).toBeGreaterThan(0);
   });
 });

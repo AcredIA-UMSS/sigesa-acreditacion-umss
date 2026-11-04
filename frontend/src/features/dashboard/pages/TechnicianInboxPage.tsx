@@ -6,7 +6,7 @@ import {
   rejectIndicator,
   type TechnicianInboxItemDto,
 } from '../api/technicianInboxApi';
-import { AlertTriangle, CheckCircle2, Search, X, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Search, X } from 'lucide-react';
 
 const STATUS_FILTERS: { id: string; label: string }[] = [
   { id: '', label: 'Pendientes' },

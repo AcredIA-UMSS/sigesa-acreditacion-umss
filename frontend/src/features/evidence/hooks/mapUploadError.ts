@@ -14,6 +14,7 @@ const ERROR_LABELS: Record<string, string> = {
   PAYLOAD_TOO_LARGE: 'El archivo supera el tamaño máximo permitido (50 MB).',
   INDICATOR_ALREADY_HAS_EVIDENCE: 'Este indicador ya tiene evidencia vigente.',
   DOCUMENT_ASSET_NOT_FOUND: 'El documento seleccionado no existe.',
+  EVIDENCE_BLOB_NOT_FOUND: 'El archivo de la evidencia no está disponible en el servidor.',
 };
 
 export function mapUploadError(error: Error | null): string | null {
