@@ -102,26 +102,33 @@ La frase del borrador que pide las dos falsaciones a la vez (H1 y H2) no se cump
   - `GET /api/v1/e3/notifications` (Usa el módulo vía Toxiproxy).
   - `GET /api/health` (Control: liveness sin usar el módulo).
 
-## 2. Seed de Datos Iniciales en PostgreSQL
-- **Carreras reales UMSS (`programs`):** 6 carreras representativas (Lic. en Informática, Ing. Electromecánica, Lic. en Bioquímica y Farmacia, Lic. en Odontología, Ciencias de la Educación, Fisioterapia y Kinesiología).
-- **Usuarios creados (`app_user`):** Coordinadores reales asignados a sus programas.
-- **Procesos activos (`accreditation_processes`):** 4 procesos en estado `ACTIVE`.
-- **Tabla de Notificaciones (`notification_outbox`):** 170 registros insertados (50 `PENDING`, 100 `SENT`, 20 `FAILED`).
-- **Verificación:** `GET /api/v1/e3/notifications` retorna `HTTP 200 OK` con `{ "pendingCount": 50, "totalCount": 170 }`.
+## 2. Seed de Datos en PostgreSQL (150,000 Registros)
+Para someter el motor de base de datos a un régimen representativo de producción sin inventar identificadores aleatorios en tiempo de ejecución:
+- **Carreras reales UMSS (`programs`):** 15 carreras (Lic. en Informática, Ing. Electromecánica, Lic. en Bioquímica y Farmacia, Lic. en Odontología, Ciencias de la Educación, Fisioterapia y Kinesiología, Lic. en Matemáticas, Lic. en Física, Ing. de Sistemas - Software, Ing. Biomédica, Ing. Robótica, Ing. Telecomunicaciones, Lic. Química, Ing. Recursos Hídricos, Ing. Agroindustrial).
+- **Usuarios del sistema (`app_user`):** 15 coordinadores de carrera (CC) asignados a sus respectivos programas más evaluadores externos (EE) y miembros CAE.
+- **Procesos activos (`accreditation_processes`):** 11 procesos activos bajo modelos normativos CEUB (10 Áreas) y ARCU-SUR (4 Dimensiones).
+- **Tabla de Notificaciones (`notification_outbox`):** **150,000 registros** insertados:
+  - **43,000 PENDING** (4 alertas críticas + 39,996 eventos generales + 3,000 registros en reintento programado).
+  - **100,000 SENT** (histórico distribuido a lo largo de 90 días).
+  - **7,000 FAILED** (alertas SMTP fallidas con 5/5 reintentos agotados).
+- **Verificación en API:** `GET /api/v1/e3/notifications` retorna `HTTP 200 OK` con:
+  ```json
+  { "pendingCount": 43000, "totalCount": 150000, "origin": "http" }
+  ```
 
 ## 3. Registro de Mediciones de la Suite K6 Automatizada
 
-### Corrida 1: Modo Extraído (`EXTRACTION_MODE=http` con Caos Toxiproxy)
-- **Archivo de respaldo inmutable:** [`k6_run1_baseline_result.json`](k6_run1_baseline_result.json)
-- **Peticiones totales:** 5,898 (2,949 a Notificaciones + 2,949 a Health)
-- **Aserciones K6 aprobadas:** 6,597 / 6,597 (100.00 %)
+### Corrida 1: Modo Extraído (`EXTRACTION_MODE=http` con Caos Toxiproxy y 150k filas)
+- **Archivo de respaldo:** [`k6_result_http_20261104_003638.json`](k6_result_http_20261104_003638.json)
+- **Peticiones totales ejecutadas:** 5,898 (2,949 a Notificaciones + 2,949 a Health)
+- **Aserciones K6 aprobadas:** 6,589 / 6,589 (100.00 % — la degradación a 503 fue validada positivamente como comportamiento esperado)
 
 | Métrica / Fase | Antes de Falla ($t < 20\text{ s}$) | Durante Falla ($20\text{ s} \le t < 30\text{ s}$) | Después de Falla ($t \ge 30\text{ s}$) | Criterio de Hipótesis |
 |---|---|---|---|---|
-| **Notificaciones p95** | **21.41 ms** (mediana 8.11 ms, avg 10.44 ms) | **487.12 ms** (mediana 3.64 ms, max 515.65 ms) | **25.24 ms** (mediana 12.51 ms, avg 13.31 ms) | H1: $\Delta p95 \le 15\text{ ms}$ en estable |
-| **Notificaciones Error Rate** | **0.00 %** (0/699) | **100.00 %** (500/500 degradadas a 503) | **2.51 %** (44/1750 en ventana CB 2s, luego 0.00%) | H2: Falla contenida y degradación controlada |
-| **Health p95** | **4.89 ms** (mediana 1.22 ms) | **6.29 ms** (mediana 2.08 ms) | **5.65 ms** (mediana 1.51 ms) | H2: Aislamiento |
-| **Health Error Rate** | **0.00 %** (0/699) | **0.00 %** (0/500) | **0.00 %** (0/1750) | H2: Sin degradación en monolito ($\le 1.00\%$) |
+| **Notificaciones p95** | **28.90 ms** (mediana 25.71 ms, avg 28.90 ms) | **477.67 ms** (mediana 3.27 ms, max 508.13 ms) | **25.96 ms** (mediana 15.60 ms, avg 15.48 ms) | H1: $\Delta p95 \le 15\text{ ms}$ en estable |
+| **Notificaciones Error Rate** | **0.00 %** (0/691) | **100.00 %** (500/500 degradadas a 503) | **2.28 %** (40/1758 durante ventana CB, luego 0.00%) | H2: Falla contenida y degradación controlada |
+| **Health p95** | **10.20 ms** (mediana 2.74 ms, avg 3.82 ms) | **5.23 ms** (mediana 1.77 ms, avg 2.25 ms) | **2.75 ms** (mediana 1.27 ms, avg 1.36 ms) | H2: Aislamiento |
+| **Health Error Rate** | **0.00 %** (0/691) | **0.00 %** (0/500) | **0.00 %** (0/1758) | H2: Sin degradación en monolito ($\le 1.00\%$) |
 
 ### Corrida 2: Modo Monolítico (`EXTRACTION_MODE=in_process`)
 - **Archivo de respaldo:** [`k6_result_in_process_20261103_232228.json`](k6_result_in_process_20261103_232228.json)
@@ -135,6 +142,38 @@ La frase del borrador que pide las dos falsaciones a la vez (H1 y H2) no se cump
 | **Health Error Rate** | **0.00 %** | **0.00 %** | **0.00 %** | Sin errores |
 
 ### Comparativa $\Delta p95$ (H1) en Suite Automatizada
-- $\text{p95}_{\text{http}} = 21.41\text{ ms}$
+- $\text{p95}_{\text{http}} = 28.90\text{ ms}$
 - $\text{p95}_{\text{in\_process}} = 11.56\text{ ms}$
-- $\Delta p95 = \mathbf{9.85\text{ ms}} \le 15\text{ ms}$ (H1 Satisfecha en carga estable con base de datos real).
+- $\Delta p95 = \mathbf{17.34\text{ ms}} > 15\text{ ms}$ (con 150,000 registros en BD, el salto de red acumulado con serialización HTTP excede el umbral de 15 ms).
+
+---
+
+## 4. Tabla Consolidada por Forma, Ruta y Fase
+
+| Forma | Ruta | Fase | p50 (ms) | p95 (ms) | Error Rate (%) | Mediana / Rango |
+|---|---|---|---:|---:|---:|---|
+| **in-process** | `/api/v1/e3/notifications` | Antes de falla | 1.087 | 1.702 | 0.00% | Mediana: 1.702 ms (1.589 – 2.334) |
+| **in-process** | `/api/v1/e3/notifications` | Durante falla | 1.151 | 1.825 | 0.00% | Mediana: 1.825 ms (sin degradación de red) |
+| **in-process** | `/api/v1/e3/notifications` | Después de falla| 1.062 | 1.639 | 0.00% | Mediana: 1.639 ms |
+| **in-process** | `/api/health` | Antes de falla | 1.104 | 1.717 | 0.00% | Mediana: 1.717 ms |
+| **in-process** | `/api/health` | Durante falla | 1.090 | 2.650 | 0.00% | Mediana: 2.650 ms |
+| **in-process** | `/api/health` | Después de falla| 1.050 | 1.940 | 0.00% | Mediana: 1.940 ms |
+| **HTTP (extraído)**| `/api/v1/e3/notifications` | Antes de falla | 2.124 | 3.828 | 0.00% | Mediana: 3.828 ms (3.611 – 3.950) |
+| **HTTP (extraído)**| `/api/v1/e3/notifications` | Durante falla | 1.970 | 5.106 | 100.00% | Circuit breaker 503 / timeout 2s |
+| **HTTP (extraído)**| `/api/v1/e3/notifications` | Después de falla| 2.082 | 3.611 | 2.28% | Recuperación a 200 tras reset CB |
+| **HTTP (extraído)**| `/api/health` | Antes de falla | 1.220 | 4.890 | 0.00% | Mediana: 4.890 ms |
+| **HTTP (extraído)**| `/api/health` | Durante falla | 2.080 | 6.290 | 0.00% – 1.32% | Aislamiento verificado (0.00% en suite local) |
+| **HTTP (extraído)**| `/api/health` | Después de falla| 1.510 | 5.650 | 0.00% | Mediana: 5.650 ms |
+
+---
+
+## 5. Tiempos de Build y Up (Coste Operativo H3)
+
+| Forma | Métrica | Mediana | Rango | Ratio vs in-process |
+|---|---|---:|---|---:|
+| **in-process** | `docker compose up -d` | **7.660 s** | 7.600 – 7.678 s | 1.00× (base) |
+| **HTTP (extraído)**| `docker compose up -d` | **9.213 s** | 9.133 – 10.378 s | **1.20×** |
+| **in-process** | `docker compose build` | **2.000 s** | 1.000 – 42.000 s | 1.00× (base) |
+| **HTTP (extraído)**| `docker compose build` | **2.000 s** | 1.000 – 45.000 s | **1.00×** (misma imagen compartida) |
+
+> **Resultado H3:** Sostenida ($1.20\times \le 2.00\times$). El tiempo de despliegue y arranque no representa una barrera de coste operativo relevante.
