@@ -1243,6 +1243,22 @@
         },
         "type" : "object"
       },
+      "NotificationModuleSnapshot" : {
+        "properties" : {
+          "origin" : {
+            "type" : "string"
+          },
+          "pendingCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalCount" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "ObservationSummary" : {
         "properties" : {
           "description" : {
@@ -3076,6 +3092,25 @@
         },
         "summary" : "Descargar blob del DocumentAsset (API-EVD-07b)",
         "tags" : [ "Document assets" ]
+      }
+    },
+    "/api/v1/e3/notifications" : {
+      "get" : {
+        "operationId" : "inspect",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotificationModuleSnapshot"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Inventario del outbox vía NotificationModulePort (in_process o http)",
+        "tags" : [ "E3 notifications" ]
       }
     },
     "/api/v1/evidences/search" : {
@@ -6050,6 +6085,9 @@
   }, {
     "description" : "Estructura N1–N3 + Indicador en plantilla DRAFT (API-TPL-08)",
     "name" : "Jerarquía normativa plantilla v2"
+  }, {
+    "description" : "Experimento monolito vs servicio extraído",
+    "name" : "E3 notifications"
   }, {
     "description" : "Consulta de documentos físicos (API-EVD-07)",
     "name" : "Document assets"
