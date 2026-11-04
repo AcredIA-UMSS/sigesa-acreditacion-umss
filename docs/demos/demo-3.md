@@ -4,20 +4,9 @@
 **Rama:** `release/8.3.0`  
 **Repositorio:** [https://github.com/BorisTB/sigesa-acreditacion-umss](https://github.com/BorisTB/sigesa-acreditacion-umss)
 
-Entrega de aula: enlace al repositorio + nombre del release (`8.3.0`). Imagen/compose y k6 son tareas de quien las asuma (no forman parte de los aportes de Boris Anthony). Análisis k6 del grupo: `bench/e3/` (mediana de 3 corridas).
+Entrega de aula: enlace al repositorio + nombre del release (`8.3.0`). 
 
 Registro de aportes: [`8.3.0-aportes.md`](../../8.3.0-aportes.md) (raíz). Cada commit con la identidad de su autor.
-
----
-
-## Orden de presentación
-
-Sorteo en clase (aleatorio). Completar tras el sorteo:
-
-1. _por sorteo_
-2. _por sorteo_
-3. _por sorteo_
-4. _por sorteo_
 
 ---
 
