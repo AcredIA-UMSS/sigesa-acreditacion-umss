@@ -19,7 +19,7 @@ Cada persona presenta **1 a 3** funcionalidades del release (1 grande, 2 mediana
 | **Boris Anthony Angulo Urquieta** | 1. RAG ARCU-SUR 2023 en el asistente existente (sin agente nuevo) | [FSD-UC-033](../product/uc/FSD-UC-033.md) | Corpus MD indexado; `search_normative_docs` / path RAG; respuesta cita el manual 2023 (no placeholders); el cliente no transfiere el PDF | [#76](https://github.com/BorisTB/sigesa-acreditacion-umss/issues/76) |
 | | 2. Contrato uniforme de errores REST | [FSD-UC-034](../product/uc/FSD-UC-034.md) | Envelope `{error, message, details?}`; 400/404/405/415/500; 500 genérico; `include-message/binding/stacktrace=never` | [#67](https://github.com/BorisTB/sigesa-acreditacion-umss/issues/67) |
 | **Alexander Villca** | _por registrar_ | | | |
-| **Aylen Laura** | 1. Portal público de acreditación (listado, estado y certificado PDF) | [FSD-UC-016](../product/uc/FSD-UC-016.md) | Anónimo ve solo carreras `published`; busca por nombre; 404 genérico si no publicado; PDF solo si certificado publicado | `b68fd5d1` · PM-039 · PR-IMPL-050 |
+| **Aylen Mariangel Gonzáles Alvino** | 1. Portal público de acreditación (listado, estado y certificado PDF) | [FSD-UC-016](../product/uc/FSD-UC-016.md) | Anónimo ve solo carreras `published`; busca por nombre; 404 genérico si no publicado; PDF solo si certificado publicado | `b68fd5d1` · PM-039 · PR-IMPL-050 |
 | | 2. Noticias y destacados (home + listado + admin [JD]) | [FSD-UC-035](../product/uc/FSD-UC-035.md) | [P] lee solo `publicada`; una destacada o la más reciente; [JD] CRUD/publicar/destacar; 404 genérico en borrador | `df465c15` `07c0ae8c` `0da6bdff` `fd5c5810` · PM-040 · PR-IMPL-051 |
 | **Marlene Velasquez** | _por registrar_ | | | |
 
