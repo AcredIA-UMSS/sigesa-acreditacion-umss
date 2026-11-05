@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { PublicNewsSummaryResponse } from '../../../api/model';
+import { campusPhotoAt } from '../../home/campusPhotos';
 import { formatNewsDate, newsCategoryLabel } from '../labels';
 
 export type PublicNewsListViewProps = {
@@ -61,15 +62,16 @@ export function PublicNewsListView({
         ) : null}
 
         <ul className="grid gap-4 md:grid-cols-2">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <li key={item.slug ?? item.title}>
               <Link
                 to={`/public/news/${item.slug ?? ''}`}
                 className="flex h-full gap-4 rounded-2xl border border-gray-200 bg-body p-5 shadow-sm hover:border-primary-300"
               >
-                <div
-                  className="home-hero-photo home-hero-photo--group h-24 w-28 shrink-0 rounded-xl"
-                  aria-hidden
+                <img
+                  src={campusPhotoAt(index).src}
+                  alt=""
+                  className="h-24 w-28 shrink-0 rounded-xl object-cover"
                 />
                 <div className="min-w-0">
                   <p className="text-label-md font-medium uppercase tracking-wide text-secondary-600">
