@@ -155,7 +155,7 @@ Transiciones: UC-004, UC-006, UC-008, UC-009. Cierre N1 (UC-010): todos los indi
 | `Evidence` | `evidence` (`normative_indicator_id`) | V14, V16 |
 | `EvidenceVersion` | `evidence_version` | V9+ |
 | `IndicatorObservation` | `indicator_observation` | V14 |
-| `PublicationSnapshot` | `publication_snapshot` | V27 |
+| `PublicationSnapshot` | `publication_snapshot` | V27, V29 |
 | `NewsArticle` | `news_article` | V28 |
 
 **M5 (V16):** eliminadas tablas legacy `phases`, `subphases`, `template_phases`, `template_subphases`, `subphase_observation` y columnas `legacy_*`, `evidence.subphase_id`.
@@ -316,6 +316,7 @@ Error HTTP: `409 STAGE_GATE_BLOCKED` con detalle de reglas fallidas.
 
 | Versión | Fecha | Cambio |
 |---------|-------|--------|
+| v2.1.4 | 2026-11-04 | UC-016: `publication_snapshot.agency` / `resolution_number` nullable (Flyway **V29**); sin `issued_at` |
 | v2.1.3 | 2026-11-04 | UC-035: `news_article` Flyway **V28**; status/featured/published_at |
 | v2.1.2 | 2026-11-04 | UC-016: `publication_snapshot` Flyway **V27**; flags `published` / `certificate_published` |
 | v2.1.1 | 2026-10-13 | M7: `document_assets` / `indicator_evidence_links` → Flyway **V19** (V18 ya usado por evidencia nullable) |

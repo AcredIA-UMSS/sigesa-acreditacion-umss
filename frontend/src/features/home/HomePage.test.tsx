@@ -15,6 +15,7 @@ function HomeRoutes() {
       <Route path="/ayuda" element={<p>Ayuda</p>} />
       <Route path="/admin/users" element={<p>Admin JD</p>} />
       <Route path="/public/news" element={<p>Listado de noticias</p>} />
+      <Route path="/public/status" element={<p>Estado de acreditación</p>} />
     </Routes>
   );
 }
@@ -35,6 +36,13 @@ describe('HomePage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ver demo' }));
     expect(screen.getByText('Página de login')).toBeInTheDocument();
+  });
+
+  it('sends the header Estado de Acreditación link to the public status page', () => {
+    renderWithProviders(<HomeRoutes />, { route: '/' });
+
+    const statusLinks = screen.getAllByRole('link', { name: 'Estado de Acreditación' });
+    expect(statusLinks[0]).toHaveAttribute('href', '/public/status');
   });
 
   it('sends the header Noticias link to the public news list', () => {

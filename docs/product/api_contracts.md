@@ -741,7 +741,7 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 
 ### API-PUB-03 — Certificado PDF
 
-**200** `application/pdf` + `Content-Disposition: attachment; filename="certificado-{slug}.pdf"` + `X-Certificate-Valid-From` / `X-Certificate-Valid-Until`. **404** si el programa o el certificado no están publicados.
+**200** `application/pdf` + `Content-Disposition: attachment; filename="certificado-{slug}.pdf"` + `X-Certificate-Valid-From` / `X-Certificate-Valid-Until`. Metadatos PDF: título y vigencia. Cuerpo: carrera, vigencia; `agency` / `resolution_number` solo si no son null. QR a `{sigesa.public.base-url}/public/status?slug={slug}`. **404** si el programa o el certificado no están publicados.
 
 ### API-NEWS-01 — Listado público de noticias
 

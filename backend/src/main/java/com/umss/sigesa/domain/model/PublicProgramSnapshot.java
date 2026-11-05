@@ -11,6 +11,8 @@ public record PublicProgramSnapshot(
         LocalDate validFrom,
         LocalDate validUntil,
         boolean published,
-        boolean certificatePublished
+        boolean certificatePublished,
+        String agency,
+        String resolutionNumber
 ) {
 }

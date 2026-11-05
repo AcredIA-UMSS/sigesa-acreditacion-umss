@@ -37,6 +37,17 @@ El Gherkin «busca por nombre de carrera» no tenía endpoint. Se añade **lista
 
 Slug público = `programs.code` en minúsculas (`INF-SIS` → `inf-sis`).
 
+## Adición al UC (2026-11-04, certificado PDF)
+
+Presentación de `API-PUB-03` (sin cambio de path ni de 404):
+
+- `publication_snapshot.agency` y `resolution_number` (nullable, Flyway **V29**).
+- Frase: *«Se certifica que la carrera de {carrera} ha sido acreditada [por {agencia}], con vigencia del {desde} al {hasta}[, según Resolución N.º {nº}].»* Si `agency` o `resolution_number` son null, se omite esa cláusula.
+- No hay `issued_at` ni fecha de publicación en el snapshot: el pie **no** imprime fecha de emisión.
+- Código de verificación = UUID del snapshot. QR a `{sigesa.public.base-url}/public/status?slug={slug}` (`SIGESA_PUBLIC_BASE_URL`).
+- UI: `/public/status` lee `?slug=` (deep-link del QR).
+- Seed `inf-sis`: `agency` y `resolution_number` quedan **null** hasta valores reales (no se inventan).
+
 ## Flujo principal
 
 1. Visitante abre `/public/status` y obtiene `GET /api/v1/public/programs`.

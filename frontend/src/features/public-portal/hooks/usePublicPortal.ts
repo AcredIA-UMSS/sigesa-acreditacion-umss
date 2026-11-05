@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   downloadPublicCertificate,
   useGetPublicProgram,
@@ -31,9 +32,15 @@ function errorMessage(error: unknown): string | null {
   return 'No se pudo completar la consulta.';
 }
 
+function slugFromSearch(searchParams: URLSearchParams): string | null {
+  const raw = searchParams.get('slug')?.trim().toLowerCase();
+  return raw != null && raw.length > 0 ? raw : null;
+}
+
 export function usePublicPortal() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(() => slugFromSearch(searchParams));
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
@@ -57,10 +64,21 @@ export function usePublicPortal() {
   const status: PublicProgramStatusResponse | null =
     statusQuery.data?.status === 200 ? (statusQuery.data.data ?? null) : null;
 
-  const selectProgram = useCallback((slug: string) => {
-    setSelectedSlug(slug);
-    setDownloadError(null);
-  }, []);
+  const selectProgram = useCallback(
+    (slug: string) => {
+      setSelectedSlug(slug);
+      setDownloadError(null);
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.set('slug', slug);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   const downloadCertificate = useCallback(async () => {
     if (selectedSlug == null) {

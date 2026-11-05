@@ -13,6 +13,7 @@ type HomeNavItem = {
 
 const NAV_LINKS: HomeNavItem[] = [
   { label: 'Inicio', homeHref: '#inicio' },
+  { label: 'Estado de Acreditación', homeHref: '#carreras', to: '/public/status' },
   { label: 'Modalidades', homeHref: '#modalidades' },
   { label: 'Carreras', homeHref: '#carreras' },
   { label: 'Noticias', homeHref: '#noticias', to: '/public/news' },
@@ -31,9 +32,13 @@ export function HomeHeader() {
   const helpTo = isAuthenticated ? '/ayuda' : '/login';
   const isHome = location.pathname === '/';
   const isNews = location.pathname.startsWith('/public/news');
+  const isStatus = location.pathname.startsWith('/public/status');
 
   const isCurrent = (item: HomeNavItem): boolean => {
-    if (item.to != null) {
+    if (item.to === '/public/status') {
+      return isStatus;
+    }
+    if (item.to === '/public/news') {
       return isNews;
     }
     if (item.homeHref === '#inicio') {
@@ -53,7 +58,7 @@ export function HomeHeader() {
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-body">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-6">
         <Link to="/" className="flex items-center gap-3" aria-label="Ir al inicio">
-          <img src={logoDuea} alt="" className="h-10 w-10 object-contain" />
+          <img src={logoDuea} alt="" className="h-10 w-10 rounded-full object-contain" />
           <span className="hidden text-label-md font-semibold tracking-wide text-primary-700 sm:inline">
             DUEA
           </span>

@@ -35,9 +35,9 @@ Slug = `programs.code` en minúsculas (`INF-SIS` → `inf-sis`).
 
 ## 3. Modelo
 
-Tabla `publication_snapshot` (Flyway V27): snapshot denormalizado, **sin** columnas de observaciones. Flags `published` y `certificate_published`. PDF OpenPDF generado al vuelo; no se persiste blob ni se expone `storageKey`.
+Tabla `publication_snapshot` (Flyway V27 + **V29**): snapshot denormalizado, **sin** columnas de observaciones. Flags `published` y `certificate_published`. `agency` y `resolution_number` nullable (certificado). Sin `issued_at`. PDF OpenPDF generado al vuelo; no se persiste blob ni se expone `storageKey`. QR a `{sigesa.public.base-url}/public/status?slug=`.
 
-UI: `/public/status`. Orval only.
+UI: `/public/status` (lee `?slug=`). Orval only.
 
 ## 4. Fuera de alcance
 

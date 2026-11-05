@@ -47,6 +47,7 @@
 | PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
 | PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
 | PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
+| PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
 
 
 ---
@@ -2750,5 +2751,94 @@ FSD-UC-035 Implementado. [JD] gestiona noticias; [P] lee solo publicadas. Home u
 
 - [ ] Commit / PR si el usuario lo pide
 - [ ] Imágenes / tags / programación (fuera de alcance)
+
+---
+
+## PM-041
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-041 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 21:00 |
+| **Solicitante** | Aylen Laura / Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Rediseñar presentación del certificado PDF (PRD-US-020 / FSD-UC-016) opción B-lite |
+| **Objetivo** | A4 horizontal, frase con carrera/agencia/vigencia/resolución, QR y logos; sin cambiar endpoints ni 404 |
+| **Contexto** | B-lite aprobada: V29 solo `agency` y `resolution_number` nullable. Sin `issued_at` (el snapshot no tiene fecha de publicación). Seed inf-sis sin valores reales → null. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Opción B-lite, aprobada.
+- Flyway V29 en publication_snapshot: solo agency y resolution_number
+  (nullable). Sin issued_at: usa la fecha de publicación del snapshot.
+  Sin signer_name/signer_title.
+- Documenta la adición en FSD-UC-016 y modelo_datos (no baseline).
+- Pie: línea de firma en blanco con "Firma y sello" y espacio para sello.
+- Frase completa con carrera, agencia, vigencia y resolución. Si agency o
+  resolution_number son null, omite esa parte sin romper el layout.
+- Seed de inf-sis: agency = [PEGA AQUÍ], resolution_number = [PEGA AQUÍ].
+  No inventes valores: si faltan, deja null y avísame.
+- Reutiliza los logos ya existentes en el frontend (UMSS en el
+  encabezado, DUEA en el pie), embebidos en alta resolución.
+- Código de verificación = UUID del snapshot.
+- QR aprobado: property de base URL por entorno, enlace a
+  {baseUrl}/public/status?slug={slug}. Si la UI no lee ?slug=, añádelo
+  como cambio mínimo.
+- Mantén metadatos PDF, test de campos + application/pdf, y deja la
+  muestra en backend/target/certificate-sample-inf-sis.pdf.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V29__publication_snapshot_certificate_fields.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicCertificateText.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/domain/model/PublicCertificateTextTest.java` |
+| generado | `backend/src/main/resources/public-certificate/` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/OpenPdfPublicCertificateRendererAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicProgramSnapshot.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/PublicationSnapshotJpaEntity.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/PublicProgramQueryJpaAdapter.java` |
+| modificado | `backend/pom.xml` |
+| modificado | `frontend/src/features/public-portal/hooks/usePublicPortal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- V29 `agency` / `resolution_number` nullable. Frase omite cláusulas vacías.
+- PDF A4 horizontal, borde doble, DejaVu embebida, logos UMSS/DUEA, QR ZXing, UUID de verificación.
+- `/public/status?slug=` en el hook. Property `sigesa.public.base-url`.
+- Seed inf-sis sin agencia ni resolución (valores no provistos).
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicCertificateTextTest,OpenPdfPublicCertificateRendererAdapterTest,PublicPortalServiceTest,PublicPortalGherkinIT test` — OK
+- [x] `pnpm exec vitest run` (public-portal + HomePage) — 10 passed
+- [x] Muestra `backend/target/certificate-sample-inf-sis.pdf`
+
+### Resultado obtenido
+
+Certificado rediseñado. Endpoints y 404 intactos. Muestra lista para revisión visual.
+
+### Próximos pasos
+
+- [ ] Pegar `agency` y `resolution_number` reales del seed inf-sis
+- [ ] Revisar la muestra PDF antes de cerrar
 
 

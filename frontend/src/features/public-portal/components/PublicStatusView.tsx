@@ -46,21 +46,17 @@ export function PublicStatusView({
   downloadError,
 }: PublicStatusViewProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-body">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
-          <Link to="/" className="text-body-md font-medium text-primary-700">
-            Volver al inicio
-          </Link>
-          <Link to="/login" className="text-body-md font-medium text-primary-700">
-            Iniciar sesión
-          </Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 md:px-6">
+    <main className="bg-gray-50">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-10 md:px-6">
         <div>
-          <h1 className="text-heading-xl text-primary-800">Estado de acreditación</h1>
+          <p className="text-body-md text-gray-500">
+            <Link to="/" className="text-primary-700 hover:text-primary-500">
+              Inicio
+            </Link>
+            <span className="mx-2 text-gray-400">/</span>
+            <span>Estado de Acreditación</span>
+          </p>
+          <h1 className="mt-3 text-heading-xl text-primary-800">Estado de acreditación</h1>
           <p className="mt-2 text-body-md text-gray-700">
             Consulte carreras con información publicada por la DUEA. Solo se muestra lo autorizado.
           </p>
@@ -154,7 +150,7 @@ export function PublicStatusView({
             )}
           </section>
         ) : null}
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

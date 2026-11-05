@@ -85,7 +85,9 @@ class PublicPortalServiceTest {
                 LocalDate.of(2025, 1, 1),
                 LocalDate.of(2029, 12, 31),
                 true,
-                certificate
+                certificate,
+                null,
+                null
         );
     }
 
@@ -98,7 +100,9 @@ class PublicPortalServiceTest {
                 LocalDate.of(2026, 1, 1),
                 LocalDate.of(2026, 12, 31),
                 false,
-                false
+                false,
+                null,
+                null
         );
     }
 }

@@ -47,4 +47,10 @@ public class PublicationSnapshotJpaEntity {
     @Column(name = "certificate_published", nullable = false)
     @Builder.Default
     private boolean certificatePublished = false;
+
+    @Column(length = 255)
+    private String agency;
+
+    @Column(name = "resolution_number", length = 64)
+    private String resolutionNumber;
 }

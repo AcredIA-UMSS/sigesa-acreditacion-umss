@@ -14,6 +14,7 @@ import java.util.UUID;
 /**
  * Snapshots públicos para FSD-UC-016. INF-SIS publicado con certificado;
  * Medicina publicada sin certificado; Ingeniería Civil no publicada (BR-10).
+ * agency / resolution_number de inf-sis quedan null: no se inventan valores.
  */
 @Component
 @Profile("!prod")

@@ -110,6 +110,7 @@ services:
       - SIGESA_S3_SECRET_KEY=${SIGESA_S3_SECRET_KEY:-sigesaMinioDev1}
       - SIGESA_S3_REGION=${SIGESA_S3_REGION:-us-east-1}
       - SIGESA_S3_PATH_STYLE=true
+      - SIGESA_PUBLIC_BASE_URL=${SIGESA_PUBLIC_BASE_URL:-http://localhost:3000}
 
     ports:
       - "8080:8080"

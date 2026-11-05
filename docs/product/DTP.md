@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **MOD-PUBLIC certificado PDF:** A4 horizontal; V29 `agency`/`resolution_number` nullable; QR `{baseUrl}/public/status?slug=`; UI lee `?slug=`. Sin `issued_at`. Dependencia `com.google.zxing:core` 3.5.3 (QR). | FSD-UC-016 / DD-UC-016 | — | PM-041 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **MOD-PUBLIC noticias:** `GET /api/v1/public/news` (paginado), `/featured`, `/{slug}`; admin `/api/v1/admin/news` CRUD+publish/feature. Tabla `news_article` V28. UI `/admin/noticias`, `/public/news`. | FSD-UC-035 / DD-UC-035 | — | PM-040 / PR-IMPL-051 | Cursor Agent |
 | 04/11/2026 | **MOD-PUBLIC portal:** `GET /api/v1/public/programs` (listado nombre+slug), `/{slug}`, `/{slug}/certificate` (PDF en memoria). Prefijo `/api/v1/public` (FSD original: `/public/programs/{slug}`). 404 genérico. | FSD-UC-016 / DD-UC-016 | — | PM-039 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
@@ -442,10 +443,10 @@ artefactos_vivos:
 | --- | --- |
 | **Endpoints** | `GET /api/v1/public/programs`, `GET /api/v1/public/programs/{slug}`, `GET /api/v1/public/programs/{slug}/certificate` |
 | **Auth** | Anónimo (`permitAll` en `GET /api/v1/public/**`). El FSD original decía `GET /public/programs/{slug}` sin `/api/v1`. |
-| **Tabla** | `publication_snapshot` (Flyway V27): `published`, `certificate_published`; sin observaciones |
+| **Tabla** | `publication_snapshot` (Flyway V27 + **V29**): `published`, `certificate_published`, `agency`, `resolution_number` (nullable); sin observaciones ni `issued_at` |
 | **404** | Envelope `NOT_FOUND` / «El recurso solicitado no existe.» (slug, no publicado, certificado no publicado) |
-| **PDF** | OpenPDF en memoria; headers de vigencia; sin URL de archivo |
-| **UI** | `/public/status` (filtro por nombre en cliente) |
+| **PDF** | OpenPDF A4 horizontal en memoria; metadatos título/vigencia; headers `X-Certificate-Valid-*`; QR a `{sigesa.public.base-url}/public/status?slug=`; sin URL de archivo |
+| **UI** | `/public/status` (filtro por nombre en cliente; lee `?slug=`) |
 
 ## C. Integraciones
 

@@ -39,7 +39,9 @@ public class PublicProgramQueryJpaAdapter implements PublicProgramQueryPort {
                 entity.getValidFrom(),
                 entity.getValidUntil(),
                 entity.isPublished(),
-                entity.isCertificatePublished()
+                entity.isCertificatePublished(),
+                entity.getAgency(),
+                entity.getResolutionNumber()
         );
     }
 }

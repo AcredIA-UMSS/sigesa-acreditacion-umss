@@ -103,7 +103,7 @@ class PublicPortalGherkinIT {
         assertThat(body).startsWith("%PDF".getBytes());
         assertThat(body.length).isGreaterThan(200);
         assertThat(pdf.getResponse().getHeader(HttpHeaders.LOCATION)).isNull();
-        assertThat(pdf.getResponse().getContentAsString()).doesNotContain("http://");
+        assertThat(pdf.getResponse().getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.APPLICATION_PDF_VALUE);
 
         mockMvc.perform(get("/api/v1/public/programs/med/certificate"))
                 .andExpect(status().isNotFound())
