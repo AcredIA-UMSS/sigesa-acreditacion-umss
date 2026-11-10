@@ -187,9 +187,8 @@ public class DossierExportService implements ExportProcessDossierUseCase, GetPro
             throw new InvalidJobStateException("The report has not been generated yet.");
         }
 
-        byte[] content = blobStorage.retrieve(job.getFilePath())
+        return blobStorage.openInputStream(job.getFilePath())
                 .orElseThrow(() -> new InvalidJobStateException("The generated file was not found on the server."));
-        return new ByteArrayInputStream(content);
     }
 
     @Override

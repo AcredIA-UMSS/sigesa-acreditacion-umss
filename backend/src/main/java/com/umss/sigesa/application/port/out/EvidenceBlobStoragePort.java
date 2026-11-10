@@ -1,5 +1,7 @@
 package com.umss.sigesa.application.port.out;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Optional;
@@ -22,6 +24,14 @@ public interface EvidenceBlobStoragePort {
     void delete(String storageKey);
 
     Optional<byte[]> retrieve(String storageKey);
+
+    /**
+     * Abre un flujo de lectura directo hacia el blob sin cargarlo en memoria heap.
+     * Retorna Optional.empty() si el objeto no existe en el storage.
+     */
+    default Optional<InputStream> openInputStream(String storageKey) {
+        return retrieve(storageKey).map(ByteArrayInputStream::new);
+    }
 
     /**
      * Crea un OutputStream para escribir directamente hacia el storage sin almacenar

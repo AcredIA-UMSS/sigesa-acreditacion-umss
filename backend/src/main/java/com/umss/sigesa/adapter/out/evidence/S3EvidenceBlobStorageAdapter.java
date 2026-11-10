@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.time.Instant;
@@ -112,6 +113,24 @@ public class S3EvidenceBlobStorageAdapter implements EvidenceBlobStoragePort {
                 return Optional.empty();
             }
             throw new IllegalStateException("Unable to read evidence blob: " + storageKey, ex);
+        }
+    }
+
+    @Override
+    public Optional<InputStream> openInputStream(String storageKey) {
+        if (storageKey == null || storageKey.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(s3Client.getObject(
+                    GetObjectRequest.builder().bucket(bucket).key(storageKey).build()));
+        } catch (NoSuchKeyException ex) {
+            return Optional.empty();
+        } catch (S3Exception ex) {
+            if (ex.statusCode() == 404) {
+                return Optional.empty();
+            }
+            throw new IllegalStateException("Unable to open evidence blob stream: " + storageKey, ex);
         }
     }
 

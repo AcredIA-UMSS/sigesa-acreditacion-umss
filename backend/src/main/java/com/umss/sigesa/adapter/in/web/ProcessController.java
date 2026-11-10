@@ -215,7 +215,7 @@ public class ProcessController {
 
         ReportExportJob job = getProcessDossierExportJobStatusUseCase.getJobStatus(jobId, userId);
         InputStream fileStream = getProcessDossierExportJobStatusUseCase.getJobFileStream(jobId, userId);
-        String filename = processId.toString().substring(0, 8) + ".zip";
+        String filename = resolveDossierDownloadFilename(processId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

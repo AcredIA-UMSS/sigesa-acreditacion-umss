@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -91,6 +92,22 @@ public class LocalFileEvidenceBlobStorageAdapter implements EvidenceBlobStorageP
             return Optional.of(Files.readAllBytes(target));
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to read evidence blob: " + storageKey, ex);
+        }
+    }
+
+    @Override
+    public Optional<InputStream> openInputStream(String storageKey) {
+        if (storageKey == null || storageKey.isBlank() || storageKey.contains("..")) {
+            return Optional.empty();
+        }
+        Path target = storageRoot.resolve(storageKey).normalize();
+        if (!target.startsWith(storageRoot.normalize()) || !Files.exists(target)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(Files.newInputStream(target));
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to open stream for evidence blob: " + storageKey, ex);
         }
     }
 

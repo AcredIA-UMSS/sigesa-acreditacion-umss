@@ -205,7 +205,7 @@ class DossierExportServiceTest {
             return supplier.get();
         });
         when(repositoryPort.findById(jobId)).thenReturn(Optional.of(job));
-        when(blobStorage.retrieve("dossier-exports/test.zip")).thenReturn(Optional.of("DUMMY_ZIP".getBytes()));
+        when(blobStorage.openInputStream("dossier-exports/test.zip")).thenReturn(Optional.of(new java.io.ByteArrayInputStream("DUMMY_ZIP".getBytes())));
 
         InputStream stream = service.getJobFileStream(jobId, userId);
         assertNotNull(stream);
