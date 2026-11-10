@@ -4,6 +4,8 @@ import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.application.port.out.ProgramCatalogPort;
+import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.DocumentAsset;
 import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
@@ -11,6 +13,7 @@ import com.umss.sigesa.domain.model.Level1Node;
 import com.umss.sigesa.domain.model.Level2Node;
 import com.umss.sigesa.domain.model.Level3Node;
 import com.umss.sigesa.domain.model.NormativeIndicator;
+import com.umss.sigesa.domain.model.Template;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +47,12 @@ class ZipDossierExportStreamingAdapterTest {
 
     @Mock
     private EvidenceBlobStoragePort blobStorage;
+
+    @Mock
+    private ProgramCatalogPort programCatalogPort;
+
+    @Mock
+    private TemplatePort templatePort;
 
     @Test
     @DisplayName("Genera ZIP con estructura jerárquica e índice maestro en streaming")
@@ -336,5 +345,98 @@ class ZipDossierExportStreamingAdapterTest {
         assertTrue(indexContent.contains("resolucion.pdf"), "Debe contener el nombre del archivo");
         assertTrue(indexContent.contains("SHA-256"), "Debe mencionar SHA-256 para integridad");
         assertTrue(indexContent.contains("badge-ok"), "Debe contener badges de estado");
+        assertTrue(indexContent.contains("<a href='"), "Debe contener enlace relativo al archivo");
+        assertFalse(indexContent.contains(processId.toString()), "No debe exponer el UUID del proceso");
+        assertFalse(indexContent.contains("evidences/1/v1/resolucion.pdf"), "No debe exponer la clave interna de almacenamiento");
+    }
+
+    @Test
+    @DisplayName("El índice HTML renderiza nombres de negocio de Carrera y Proceso sin exponer UUIDs")
+    void rendersBusinessNamesInHtmlIndex() throws Exception {
+        UUID processId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+
+        ZipDossierExportStreamingAdapter adapter = new ZipDossierExportStreamingAdapter(
+                processQueryPort, normativeHierarchyQueryPort, documentAssetPort, blobStorage,
+                programCatalogPort, templatePort);
+
+        AccreditationProcess process = AccreditationProcess.builder()
+                .id(processId)
+                .careerId(careerId)
+                .templateId(templateId)
+                .status("ACTIVE")
+                .build();
+        when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(process));
+
+        when(programCatalogPort.findById(careerId)).thenReturn(Optional.of(
+                new ProgramCatalogPort.ProgramEntry(careerId, "SIS", "Ingeniería de Sistemas")));
+        when(templatePort.findMetadataById(templateId)).thenReturn(Optional.of(
+                Template.builder().id(templateId).name("Modelo de Acreditación ARCU-SUR 2024").type("ARCU-SUR").build()));
+
+        UUID level1Id = UUID.randomUUID();
+        UUID level2Id = UUID.randomUUID();
+        UUID level3Id = UUID.randomUUID();
+        UUID indicatorId = UUID.randomUUID();
+
+        NormativeIndicator indicator = NormativeIndicator.builder().id(indicatorId).code("IND-1.1").description("Indicador 1").order(1).build();
+        Level3Node level3 = Level3Node.builder().id(level3Id).name("Criterio A").indicators(List.of(indicator)).build();
+        Level2Node level2 = Level2Node.builder().id(level2Id).name("Componente B").level3Nodes(List.of(level3)).build();
+        Level1Node level1 = Level1Node.builder().id(level1Id).name("Dimensión X").level2Nodes(List.of(level2)).build();
+
+        NormativeHierarchyQueryPort.ProcessNormativeTree tree =
+                new NormativeHierarchyQueryPort.ProcessNormativeTree(processId, List.of(level1));
+        when(normativeHierarchyQueryPort.findProcessTree(processId)).thenReturn(Optional.of(tree));
+
+        UUID assetId = UUID.randomUUID();
+        DocumentAsset asset = DocumentAsset.builder()
+                .id(assetId)
+                .processId(processId)
+                .folioCode("FOLIO-0099")
+                .title("plan_estudios.pdf")
+                .storageKey("evidences/sistemas/v1/plan_estudios.pdf")
+                .build();
+        when(documentAssetPort.findByProcessId(processId)).thenReturn(List.of(asset));
+        IndicatorEvidenceLink link = IndicatorEvidenceLink.builder()
+                .id(UUID.randomUUID())
+                .indicatorId(indicatorId)
+                .documentAssetId(assetId)
+                .evidenceId(UUID.randomUUID())
+                .build();
+        when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
+        when(blobStorage.retrieve("evidences/sistemas/v1/plan_estudios.pdf")).thenReturn(Optional.of("CONTENT".getBytes()));
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, "job-biz-01");
+        assertNotNull(storageKey);
+        assertTrue(storageKey.contains("SIS") || storageKey.contains("Sistemas"));
+
+        String indexHtml = null;
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if ("00_Indice_Maestro_Cumplimiento.html".equals(entry.getName())) {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = zis.read(buf)) != -1) {
+                        bos.write(buf, 0, n);
+                    }
+                    indexHtml = bos.toString(StandardCharsets.UTF_8);
+                    break;
+                }
+                zis.closeEntry();
+            }
+        }
+
+        assertNotNull(indexHtml);
+        assertTrue(indexHtml.contains("Ingeniería de Sistemas (SIS)"), "Debe mostrar el nombre de la carrera con código");
+        assertTrue(indexHtml.contains("Modelo de Acreditación ARCU-SUR 2024"), "Debe mostrar el nombre de la plantilla");
+        assertFalse(indexHtml.contains(processId.toString()), "NO debe mostrar el UUID del proceso");
+        assertFalse(indexHtml.contains(careerId.toString()), "NO debe mostrar el UUID de la carrera");
+        assertFalse(indexHtml.contains("evidences/sistemas/v1/plan_estudios.pdf"), "NO debe exponer la storage key");
+        assertTrue(indexHtml.contains("<a href='"), "Debe contener hipervínculo relativo al documento");
     }
 }

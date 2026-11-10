@@ -5,6 +5,8 @@ import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.application.port.out.ProgramCatalogPort;
+import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.domain.model.AccreditationProcess;
 import com.umss.sigesa.domain.model.DocumentAsset;
 import com.umss.sigesa.domain.model.IndicatorEvidenceLink;
@@ -12,8 +14,10 @@ import com.umss.sigesa.domain.model.Level1Node;
 import com.umss.sigesa.domain.model.Level2Node;
 import com.umss.sigesa.domain.model.Level3Node;
 import com.umss.sigesa.domain.model.NormativeIndicator;
+import com.umss.sigesa.domain.model.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedOutputStream;
@@ -64,15 +68,29 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
     private final NormativeHierarchyQueryPort normativeHierarchyQueryPort;
     private final DocumentAssetPort documentAssetPort;
     private final EvidenceBlobStoragePort blobStorage;
+    private final ProgramCatalogPort programCatalogPort;
+    private final TemplatePort templatePort;
+
+    @Autowired
+    public ZipDossierExportStreamingAdapter(ProcessQueryPort processQueryPort,
+                                            NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+                                            DocumentAssetPort documentAssetPort,
+                                            EvidenceBlobStoragePort blobStorage,
+                                            @Autowired(required = false) ProgramCatalogPort programCatalogPort,
+                                            @Autowired(required = false) TemplatePort templatePort) {
+        this.processQueryPort = processQueryPort;
+        this.normativeHierarchyQueryPort = normativeHierarchyQueryPort;
+        this.documentAssetPort = documentAssetPort;
+        this.blobStorage = blobStorage;
+        this.programCatalogPort = programCatalogPort;
+        this.templatePort = templatePort;
+    }
 
     public ZipDossierExportStreamingAdapter(ProcessQueryPort processQueryPort,
                                             NormativeHierarchyQueryPort normativeHierarchyQueryPort,
                                             DocumentAssetPort documentAssetPort,
                                             EvidenceBlobStoragePort blobStorage) {
-        this.processQueryPort = processQueryPort;
-        this.normativeHierarchyQueryPort = normativeHierarchyQueryPort;
-        this.documentAssetPort = documentAssetPort;
-        this.blobStorage = blobStorage;
+        this(processQueryPort, normativeHierarchyQueryPort, documentAssetPort, blobStorage, null, null);
     }
 
     private record EvidenceTask(String entryPath, DocumentAsset doc) {}
@@ -98,10 +116,67 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         try {
             AccreditationProcess process = processQueryPort.findDetailById(processId)
                     .orElseThrow(() -> new IllegalStateException("Proceso no encontrado: " + processId));
-            String careerIdStr = process.getCareerId() != null ? process.getCareerId().toString() : "N/D";
+
+            // 1. Resolver nombre de negocio de Carrera
+            String careerName = "";
+            String careerCode = "";
+            if (process.getCareerId() != null && programCatalogPort != null) {
+                try {
+                    Optional<ProgramCatalogPort.ProgramEntry> programOpt = programCatalogPort.findById(process.getCareerId());
+                    if (programOpt.isPresent()) {
+                        ProgramCatalogPort.ProgramEntry p = programOpt.get();
+                        if (p.name() != null && !p.name().isBlank()) {
+                            careerName = p.name();
+                        }
+                        if (p.code() != null && !p.code().isBlank()) {
+                            careerCode = p.code();
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("[DossierExport] No se pudo resolver nombre de carrera {}: {}", process.getCareerId(), e.getMessage());
+                }
+            }
+            if (careerName.isBlank()) {
+                careerName = "Carrera Universitaria";
+            }
+            String careerDisplayName = careerCode.isBlank()
+                    ? careerName
+                    : (careerName.contains(careerCode) ? careerName : careerName + " (" + careerCode + ")");
+
+            // 2. Resolver nombre de negocio de Proceso / Plantilla
+            String templateName = "";
+            String templateType = "";
+            if (process.getTemplateId() != null && templatePort != null) {
+                try {
+                    Optional<Template> templateOpt = templatePort.findMetadataById(process.getTemplateId());
+                    if (templateOpt.isPresent()) {
+                        Template tmpl = templateOpt.get();
+                        if (tmpl.getName() != null && !tmpl.getName().isBlank()) {
+                            templateName = tmpl.getName();
+                        }
+                        if (tmpl.getType() != null && !tmpl.getType().isBlank()) {
+                            templateType = tmpl.getType();
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("[DossierExport] No se pudo resolver plantilla {}: {}", process.getTemplateId(), e.getMessage());
+                }
+            }
+
             String processCode = processId.toString().substring(0, 8);
+            String processBusinessName;
+            if (!templateName.isBlank()) {
+                processBusinessName = templateName;
+            } else if (!templateType.isBlank()) {
+                processBusinessName = "Acreditación " + templateType;
+            } else {
+                processBusinessName = "Proceso de Autoevaluación y Acreditación";
+            }
+
             String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            String zipName = sanitize(careerIdStr) + "_" + sanitize(processCode) + "_" + dateStr + ".zip";
+            String careerSlug = sanitize(careerCode.isBlank() ? careerName : careerCode);
+            String processSlug = sanitize(!templateName.isBlank() ? templateName : (!templateType.isBlank() ? templateType : processCode));
+            String zipName = careerSlug + "_" + processSlug + "_" + dateStr + ".zip";
             storageKey = "dossier-exports/" + jobId + "/" + zipName;
 
             Optional<NormativeHierarchyQueryPort.ProcessNormativeTree> treeOpt =
@@ -121,6 +196,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
             int dimCount = 0, compCount = 0, critCount = 0, indCount = 0;
             List<EvidenceTask> tasks = new ArrayList<>();
             List<EmptyIndicatorEntry> emptyEntries = new ArrayList<>();
+            Map<String, String> entryPathsByLink = new HashMap<>();
 
             if (treeOpt.isPresent()) {
                 for (Level1Node level1 : treeOpt.get().level1Nodes()) {
@@ -152,6 +228,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                                             fileName = makeUnique(fileName);
                                         }
                                         String entryPath = indPath + "/" + fileName;
+                                        entryPathsByLink.put(indicator.getId() + "_" + doc.getId(), entryPath);
                                         tasks.add(new EvidenceTask(entryPath, doc));
                                     }
                                 }
@@ -249,7 +326,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                                 addZipEntryString(zos, result.entryPath() + "_VACIO.txt",
                                         "El archivo original está vacío en el almacenamiento.\n"
                                                 + "Folio: " + (result.doc().getFolioCode() == null ? "N/D" : result.doc().getFolioCode())
-                                                + "\nStorageKey: " + result.doc().getStorageKey() + "\n", addedZipPaths);
+                                                + "\nDocumento: " + (result.doc().getTitle() == null ? "documento" : result.doc().getTitle()) + "\n", addedZipPaths);
                             } else {
                                 String sha256 = sha256Hex(result.data());
                                 checksums.put(result.entryPath(), sha256);
@@ -268,18 +345,18 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                 }
 
                 // 3. Índice maestro HTML5
-                String indexHtml = buildIndexHtml(process, processId, careerIdStr, treeOpt,
-                        docsByIndicator, dimCount, compCount, critCount, indCount, evCount, missingCount,
+                String indexHtml = buildIndexHtml(process, processBusinessName, careerDisplayName, treeOpt,
+                        docsByIndicator, entryPathsByLink, dimCount, compCount, critCount, indCount, evCount, missingCount,
                         missingStorageKeys, docSizes);
                 addZipEntryString(zos, "00_Indice_Maestro_Cumplimiento.html", indexHtml, addedZipPaths);
 
                 // 4. Resumen ejecutivo (texto plano)
-                String execSummary = buildExecutiveSummary(process, processId, careerIdStr,
+                String execSummary = buildExecutiveSummary(process, processBusinessName, careerDisplayName,
                         dimCount, compCount, critCount, indCount, evCount, missingCount);
                 addZipEntryString(zos, "00_Resumen_Ejecutivo.txt", execSummary, addedZipPaths);
 
                 // 5. Manifiesto de checksums SHA-256
-                String manifest = buildManifest(checksums, processId, jobId);
+                String manifest = buildManifest(checksums, processBusinessName, jobId);
                 addZipEntryString(zos, "00_Manifiest_Checksums.txt", manifest, addedZipPaths);
             }
 
@@ -303,9 +380,10 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
      *  Construcción del índice HTML5 responsivo                          *
      * ------------------------------------------------------------------ */
 
-    private String buildIndexHtml(AccreditationProcess process, UUID processId, String careerIdStr,
+    private String buildIndexHtml(AccreditationProcess process, String processBusinessName, String careerDisplayName,
                                   Optional<NormativeHierarchyQueryPort.ProcessNormativeTree> treeOpt,
                                   Map<UUID, List<DocumentAsset>> docsByIndicator,
+                                  Map<String, String> entryPathsByLink,
                                   int dimCount, int compCount, int critCount, int indCount, int evCount, int missingCount,
                                   Set<String> missingStorageKeys, Map<String, Long> docSizes) {
         StringBuilder html = new StringBuilder();
@@ -383,6 +461,8 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         html.append("    table.evidence { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.875rem; }\n");
         html.append("    table.evidence th { background: var(--gray-100); border: 1px solid var(--gray-300); padding: 8px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-700); }\n");
         html.append("    table.evidence td { border: 1px solid var(--gray-300); padding: 8px 10px; vertical-align: top; }\n");
+        html.append("    table.evidence a { color: var(--primary-600); font-weight: 500; text-decoration: underline; }\n");
+        html.append("    table.evidence a:hover { color: var(--primary-800); }\n");
         html.append("    table.evidence tr:nth-child(even) td { background: var(--gray-50); }\n");
         html.append("    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }\n");
         html.append("    .badge-ok { background: #dcfce7; color: #166534; }\n");
@@ -408,8 +488,8 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
 
         // Metadatos del proceso
         html.append("  <div class='meta'>\n");
-        html.append("    <div class='item'><strong>Proceso:</strong> ").append(escape(processId.toString())).append("</div>\n");
-        html.append("    <div class='item'><strong>Carrera:</strong> ").append(escape(careerIdStr)).append("</div>\n");
+        html.append("    <div class='item'><strong>Proceso:</strong> ").append(escape(processBusinessName)).append("</div>\n");
+        html.append("    <div class='item'><strong>Carrera:</strong> ").append(escape(careerDisplayName)).append("</div>\n");
         html.append("    <div class='item'><strong>Estado:</strong> ")
                 .append(escape(process.getStatus() != null ? process.getStatus() : "N/D")).append("</div>\n");
         html.append("    <div class='item'><strong>Modalidad:</strong> ")
@@ -438,9 +518,9 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                 String anchor = "dim-" + sanitize(dimName);
                 html.append("      <li><a href='#").append(anchor).append("'>").append(escape(dimName)).append("</a></li>\n");
             }
+            html.append("      <li><a href='#missing'>Evidencias no disponibles</a></li>\n");
+            html.append("      <li><a href='#manifest'>Manifiesto de checksums</a></li>\n");
             html.append("    </ul>\n");
-            html.append("    <li><a href='#missing'>Evidencias no disponibles</a></li>\n");
-            html.append("    <li><a href='#manifest'>Manifiest de checksums</a></li>\n");
             html.append("  </div>\n");
         }
 
@@ -463,7 +543,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                             String indName = indicator.getCode() == null
                                     ? indicator.getDescription()
                                     : indicator.getCode();
-                            String anchorInd = "ind-" + escape(indicator.getCode() != null ? indicator.getCode() : indicator.getId().toString());
+                            String anchorInd = "ind-" + sanitize(indicator.getCode() != null ? indicator.getCode() : (indicator.getDescription() != null ? indicator.getDescription() : "ind"));
                             html.append("        <div class='indicator' id='").append(anchorInd).append("'>\n");
                             html.append("          <h5>").append(escape(indName)).append("</h5>\n");
                             List<DocumentAsset> docs = docsByIndicator.getOrDefault(indicator.getId(), List.of());
@@ -474,14 +554,21 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                                 html.append("            <thead><tr><th>Folio</th><th>Archivo</th><th>Tamaño</th><th>Estado</th></tr></thead>\n");
                                 html.append("            <tbody>\n");
                                 for (DocumentAsset doc : docs) {
+                                    String linkKey = indicator.getId() + "_" + doc.getId();
+                                    String entryPath = entryPathsByLink != null ? entryPathsByLink.get(linkKey) : null;
                                     boolean missing = missingStorageKeys.contains(doc.getStorageKey());
                                     String folio = doc.getFolioCode() == null ? "N/D" : doc.getFolioCode();
                                     String title = doc.getTitle() == null ? "documento" : doc.getTitle();
                                     long size = docSizes.getOrDefault(doc.getStorageKey(), 0L);
-                                    boolean available = !missing && size > 0;
+                                    boolean available = !missing && size > 0 && entryPath != null;
                                     html.append("              <tr>\n");
                                     html.append("                <td><strong>").append(escape(folio)).append("</strong></td>\n");
-                                    html.append("                <td>").append(escape(title)).append("</td>\n");
+                                    if (available) {
+                                        html.append("                <td><a href='").append(escape(entryPath)).append("' target='_blank'>")
+                                                .append(escape(title)).append("</a></td>\n");
+                                    } else {
+                                        html.append("                <td>").append(escape(title)).append("</td>\n");
+                                    }
                                     html.append("                <td>").append(formatSize(size)).append("</td>\n");
                                     html.append("                <td><span class='badge ").append(available ? "badge-ok" : "badge-missing")
                                             .append("'>").append(available ? "Disponible" : "No disponible").append("</span></td>\n");
@@ -504,7 +591,8 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         if (missingCount > 0) {
             html.append("  <div class='missing-section' id='missing'>\n");
             html.append("    <h3>Evidencias No Disponibles (").append(missingCount).append(")</h3>\n");
-            html.append("    <p>Los siguientes archivos no se pudieron recuperar del almacenamiento y se incluyeron como advertencia de texto dentro del ZIP:</p>\n");
+            html.append("    <p>Los siguientes documentos normativos no se pudieron recuperar del almacenamiento y se incluyeron como advertencia informativa dentro del archivo comprimido:</p>\n");
+            html.append("    <ul style='margin-left: 20px; margin-top: 8px;'>\n");
             if (treeOpt.isPresent()) {
                 for (Level1Node level1 : treeOpt.get().level1Nodes()) {
                     for (Level2Node level2 : level1.getLevel2Nodes()) {
@@ -513,10 +601,12 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                                 List<DocumentAsset> docs = docsByIndicator.getOrDefault(indicator.getId(), List.of());
                                 for (DocumentAsset doc : docs) {
                                     if (missingStorageKeys.contains(doc.getStorageKey())) {
-                                        html.append("    <p>- Folio: ").append(escape(doc.getFolioCode() == null ? "N/D" : doc.getFolioCode()))
-                                                .append(" | Archivo: ").append(escape(doc.getTitle() == null ? "documento" : doc.getTitle()))
-                                                .append(" | Indicador: ").append(escape(indicator.getCode() == null ? indicator.getDescription() : indicator.getCode()))
-                                                .append(" | Clave: ").append(escape(doc.getStorageKey())).append("</p>\n");
+                                        String indLabel = indicator.getCode() != null ? indicator.getCode() : indicator.getDescription();
+                                        html.append("      <li style='margin: 4px 0;'><strong>Folio:</strong> ")
+                                                .append(escape(doc.getFolioCode() == null ? "N/D" : doc.getFolioCode()))
+                                                .append(" &mdash; <strong>Documento:</strong> ")
+                                                .append(escape(doc.getTitle() == null ? "documento" : doc.getTitle()))
+                                                .append(" (<em>Indicador: ").append(escape(indLabel != null ? indLabel : "N/D")).append("</em>)</li>\n");
                                     }
                                 }
                             }
@@ -524,6 +614,7 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
                     }
                 }
             }
+            html.append("    </ul>\n");
             html.append("  </div>\n");
         }
 
@@ -542,16 +633,16 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         return html.toString();
     }
 
-    private String buildExecutiveSummary(AccreditationProcess process, UUID processId, String careerIdStr,
+    private String buildExecutiveSummary(AccreditationProcess process, String processBusinessName, String careerDisplayName,
                                          int dimCount, int compCount, int critCount, int indCount, int evCount, int missingCount) {
         StringBuilder sb = new StringBuilder();
-        sb.append("RESUMEN EJECUTIVO - DOSSIER DIGITAL\n");
-        sb.append("====================================\n\n");
-        sb.append("Proceso: ").append(processId).append("\n");
-        sb.append("Carrera: ").append(careerIdStr).append("\n");
-        sb.append("Estado: ").append(process.getStatus() != null ? process.getStatus() : "N/D").append("\n");
+        sb.append("RESUMEN EJECUTIVO - DOSSIER DIGITAL DE ACREDITACIÓN\n");
+        sb.append("===================================================\n\n");
+        sb.append("Proceso:   ").append(processBusinessName).append("\n");
+        sb.append("Carrera:   ").append(careerDisplayName).append("\n");
+        sb.append("Estado:    ").append(process.getStatus() != null ? process.getStatus() : "N/D").append("\n");
         sb.append("Modalidad: ").append(process.getOperationalMode() != null ? process.getOperationalMode() : "N/D").append("\n");
-        sb.append("Generado: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n\n");
+        sb.append("Generado:  ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n\n");
         sb.append("ESTADÍSTICAS\n");
         sb.append("-----------\n");
         sb.append("Dimensiones: ").append(dimCount).append("\n");
@@ -560,28 +651,28 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         sb.append("Indicadores: ").append(indCount).append("\n");
         sb.append("Evidencias:  ").append(evCount).append("\n");
         sb.append("Faltantes:   ").append(missingCount).append("\n\n");
-        sb.append("ESTRUCTURA DEL ZIP\n");
-        sb.append("-----------------\n");
-        sb.append("00_Indice_Maestro_Cumplimiento.html  - Índice navegable con enlaces relativos\n");
-        sb.append("00_Resumen_Ejecutivo.txt             - Este archivo\n");
-        sb.append("00_Manifiest_Checksums.txt           - Checksums SHA-256 para validación de integridad\n");
-        sb.append("Dimension_*/Componente_*/Criterio_*/Indicador_*/  - Jerarquía normativa con archivos\n");
+        sb.append("ESTRUCTURA DEL DOSSIER\n");
+        sb.append("----------------------\n");
+        sb.append("00_Indice_Maestro_Cumplimiento.html  - Índice navegable interactivo con enlaces directos\n");
+        sb.append("00_Resumen_Ejecutivo.txt             - Resumen en texto plano de métricas y metadatos\n");
+        sb.append("00_Manifiest_Checksums.txt           - Integridad criptográfica SHA-256 de todas las evidencias\n");
+        sb.append("Dimension_*/Componente_*/Criterio_*/Indicador_*/  - Jerarquía normativa con evidencias documentales\n");
         return sb.toString();
     }
 
-    private String buildManifest(Map<String, String> checksums, UUID processId, String jobId) {
+    private String buildManifest(Map<String, String> checksums, String processBusinessName, String jobId) {
         StringBuilder sb = new StringBuilder();
-        sb.append("MANIFIEST DE INTEGRIDAD - SHA-256\n");
+        sb.append("MANIFIESTO DE INTEGRIDAD - SHA-256\n");
         sb.append("==================================\n\n");
-        sb.append("Proceso: ").append(processId).append("\n");
-        sb.append("Job:     ").append(jobId).append("\n");
+        sb.append("Proceso: ").append(processBusinessName).append("\n");
+        sb.append("Job ID:  ").append(jobId).append("\n");
         sb.append("Generado: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))).append("\n");
         sb.append("Total archivos con checksum: ").append(checksums.size()).append("\n\n");
         sb.append("ARCHIVO\tSHA-256\n");
         sb.append("-------\t-------\n");
         checksums.forEach((path, hash) -> sb.append(path).append("\t").append(hash).append("\n"));
         sb.append("\n---\n");
-        sb.append("Para validar: sha256sum -c 00_Manifiest_Checksums.txt (descomprimir primero)\n");
+        sb.append("Para validar integridad en terminal Linux/macOS: sha256sum -c 00_Manifiest_Checksums.txt\n");
         return sb.toString();
     }
 
@@ -610,9 +701,8 @@ public class ZipDossierExportStreamingAdapter implements DossierExportPort {
         return "DOCUMENTO NO DISPONIBLE\n"
                 + "======================\n"
                 + "Folio: " + (doc.getFolioCode() == null ? "N/D" : doc.getFolioCode()) + "\n"
-                + "Archivo: " + (doc.getTitle() == null ? "documento" : doc.getTitle()) + "\n"
-                + "StorageKey: " + doc.getStorageKey() + "\n"
-                + "El archivo original no se pudo recuperar del almacenamiento.\n";
+                + "Documento: " + (doc.getTitle() == null ? "documento" : doc.getTitle()) + "\n"
+                + "El archivo original no se encuentra disponible temporalmente en el repositorio de evidencias.\n";
     }
 
     private String ensureUniqueZipPath(String path, Set<String> addedPaths) {
