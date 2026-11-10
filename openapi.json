@@ -1,6 +1,40 @@
 {
   "components" : {
     "schemas" : {
+      "AdminNewsResponse" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "featured" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "AssignResponsibleRequestDto" : {
         "properties" : {
           "userId" : {
@@ -1020,6 +1054,28 @@
         },
         "type" : "object"
       },
+      "NewsWriteRequest" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "maxLength" : 500,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "title" : {
+            "maxLength" : 255,
+            "minLength" : 0,
+            "type" : "string"
+          }
+        },
+        "required" : [ "category", "summary", "title" ],
+        "type" : "object"
+      },
       "NormativeIndicatorDetailResponseDto" : {
         "properties" : {
           "careerId" : {
@@ -1305,6 +1361,52 @@
         },
         "type" : "object"
       },
+      "PageAdminNewsResponse" : {
+        "properties" : {
+          "content" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AdminNewsResponse"
+            },
+            "type" : "array"
+          },
+          "empty" : {
+            "type" : "boolean"
+          },
+          "first" : {
+            "type" : "boolean"
+          },
+          "last" : {
+            "type" : "boolean"
+          },
+          "number" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "numberOfElements" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableObject"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortObject"
+          },
+          "totalElements" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "PageAuditLogResponseDto" : {
         "properties" : {
           "content" : {
@@ -1356,6 +1458,52 @@
           "content" : {
             "items" : {
               "$ref" : "#/components/schemas/ObservationSummary"
+            },
+            "type" : "array"
+          },
+          "empty" : {
+            "type" : "boolean"
+          },
+          "first" : {
+            "type" : "boolean"
+          },
+          "last" : {
+            "type" : "boolean"
+          },
+          "number" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "numberOfElements" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableObject"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortObject"
+          },
+          "totalElements" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "PagePublicNewsSummaryResponse" : {
+        "properties" : {
+          "content" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PublicNewsSummaryResponse"
             },
             "type" : "array"
           },
@@ -1566,16 +1714,6 @@
         "required" : [ "id" ],
         "type" : "object"
       },
-      "ProbeRequest" : {
-        "properties" : {
-          "name" : {
-            "minLength" : 1,
-            "type" : "string"
-          }
-        },
-        "required" : [ "name" ],
-        "type" : "object"
-      },
       "ProcessFreezeResponseDto" : {
         "description" : "Estado de freeze del proceso (API-WF-18…20)",
         "properties" : {
@@ -1768,6 +1906,93 @@
             "type" : "string"
           },
           "status" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PublicNewsDetailResponse" : {
+        "properties" : {
+          "body" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "featured" : {
+            "type" : "boolean"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PublicNewsSummaryResponse" : {
+        "properties" : {
+          "category" : {
+            "type" : "string"
+          },
+          "featured" : {
+            "type" : "boolean"
+          },
+          "publishedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PublicProgramStatusResponse" : {
+        "properties" : {
+          "accreditationStatus" : {
+            "type" : "string"
+          },
+          "certificateAvailable" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
+            "type" : "string"
+          },
+          "validFrom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "validUntil" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PublicProgramSummaryResponse" : {
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "slug" : {
             "type" : "string"
           }
         },
@@ -2474,25 +2699,50 @@
         "tags" : [ "Health" ]
       }
     },
-    "/api/v1/_error-probe/boom" : {
+    "/api/v1/admin/news" : {
       "get" : {
-        "operationId" : "boom",
+        "operationId" : "listAdminNews",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 20,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
         "responses" : {
           "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageAdminNewsResponse"
+                }
+              }
+            },
             "description" : "OK"
           }
         },
-        "tags" : [ "error-contract-probe-controller" ]
-      }
-    },
-    "/api/v1/_error-probe/echo" : {
+        "summary" : "Listar todas las noticias",
+        "tags" : [ "admin-news" ]
+      },
       "post" : {
-        "operationId" : "echo",
+        "operationId" : "createNews",
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ProbeRequest"
+                "$ref" : "#/components/schemas/NewsWriteRequest"
               }
             }
           },
@@ -2503,24 +2753,41 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "additionalProperties" : {
-                    "type" : "string"
-                  },
-                  "type" : "object"
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
                 }
               }
             },
             "description" : "OK"
           }
         },
-        "tags" : [ "error-contract-probe-controller" ]
+        "summary" : "Crear noticia en borrador",
+        "tags" : [ "admin-news" ]
       }
     },
-    "/api/v1/_error-probe/typed" : {
-      "get" : {
-        "operationId" : "typed",
+    "/api/v1/admin/news/{id}" : {
+      "delete" : {
+        "operationId" : "deleteNews",
         "parameters" : [ {
-          "in" : "query",
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        },
+        "summary" : "Eliminar solo si está en borrador",
+        "tags" : [ "admin-news" ]
+      },
+      "get" : {
+        "operationId" : "getAdminNews",
+        "parameters" : [ {
+          "in" : "path",
           "name" : "id",
           "required" : true,
           "schema" : {
@@ -2533,17 +2800,135 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "additionalProperties" : {
-                    "type" : "string"
-                  },
-                  "type" : "object"
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
                 }
               }
             },
             "description" : "OK"
           }
         },
-        "tags" : [ "error-contract-probe-controller" ]
+        "summary" : "Detalle admin de una noticia",
+        "tags" : [ "admin-news" ]
+      },
+      "put" : {
+        "operationId" : "updateNews",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NewsWriteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Editar contenido (no cambia status)",
+        "tags" : [ "admin-news" ]
+      }
+    },
+    "/api/v1/admin/news/{id}/feature" : {
+      "post" : {
+        "operationId" : "featureNews",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Marcar destacada (solo publicada)",
+        "tags" : [ "admin-news" ]
+      }
+    },
+    "/api/v1/admin/news/{id}/publish" : {
+      "post" : {
+        "operationId" : "publishNews",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Publicar noticia",
+        "tags" : [ "admin-news" ]
+      }
+    },
+    "/api/v1/admin/news/{id}/unpublish" : {
+      "post" : {
+        "operationId" : "unpublishNews",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AdminNewsResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Despublicar noticia",
+        "tags" : [ "admin-news" ]
       }
     },
     "/api/v1/admin/users" : {
@@ -5374,6 +5759,176 @@
         "tags" : [ "Programas" ]
       }
     },
+    "/api/v1/public/news" : {
+      "get" : {
+        "operationId" : "listPublicNews",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "page",
+          "required" : false,
+          "schema" : {
+            "default" : 0,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        }, {
+          "in" : "query",
+          "name" : "size",
+          "required" : false,
+          "schema" : {
+            "default" : 10,
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PagePublicNewsSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Listar noticias publicadas",
+        "tags" : [ "public-news" ]
+      }
+    },
+    "/api/v1/public/news/featured" : {
+      "get" : {
+        "operationId" : "getPublicFeaturedNews",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PublicNewsSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Noticia destacada o la más reciente",
+        "tags" : [ "public-news" ]
+      }
+    },
+    "/api/v1/public/news/{slug}" : {
+      "get" : {
+        "operationId" : "getPublicNewsBySlug",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PublicNewsDetailResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Detalle de noticia publicada",
+        "tags" : [ "public-news" ]
+      }
+    },
+    "/api/v1/public/programs" : {
+      "get" : {
+        "description" : "Solo nombre y slug de programas con published=true. Filtro por nombre en el cliente.",
+        "operationId" : "listPublicPrograms",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/PublicProgramSummaryResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Listar carreras publicadas",
+        "tags" : [ "public-portal" ]
+      }
+    },
+    "/api/v1/public/programs/{slug}" : {
+      "get" : {
+        "description" : "404 genérico si el slug no existe o no está publicado.",
+        "operationId" : "getPublicProgram",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PublicProgramStatusResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Estado público de una carrera",
+        "tags" : [ "public-portal" ]
+      }
+    },
+    "/api/v1/public/programs/{slug}/certificate" : {
+      "get" : {
+        "description" : "PDF generado en memoria si el certificado está publicado. Sin URL de archivo. 404 genérico si no.",
+        "operationId" : "downloadPublicCertificate",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "slug",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "security" : [ ],
+        "summary" : "Descargar certificado PDF",
+        "tags" : [ "public-portal" ]
+      }
+    },
     "/api/v1/reports/executive/pdf" : {
       "post" : {
         "operationId" : "generate",
@@ -6164,6 +6719,9 @@
     "url" : "http://localhost"
   } ],
   "tags" : [ {
+    "description" : "Portal público de acreditación (anónimo, FSD-UC-016)",
+    "name" : "public-portal"
+  }, {
     "description" : "Delegaciones CAE (API-WF-22/23)",
     "name" : "Evaluation"
   }, {
@@ -6193,6 +6751,9 @@
   }, {
     "description" : "Cierre de Nivel 1 normativo (FSD-UC-010 / API-WF-03)",
     "name" : "Level 1 workflow"
+  }, {
+    "description" : "Administración de noticias [JD] (FSD-UC-035)",
+    "name" : "admin-news"
   }, {
     "description" : "Asistente virtual SIGESA (tool calling + motor directo)",
     "name" : "Assistant"
@@ -6226,6 +6787,9 @@
   }, {
     "description" : "Carga y consulta de evidencias por indicador normativo v2 (API-EVD-01 / EVD-06)",
     "name" : "Evidence"
+  }, {
+    "description" : "Noticias públicas (anónimo, FSD-UC-035)",
+    "name" : "public-news"
   }, {
     "description" : "Bandeja centralizada de auditoría técnica y dictamen (FSD-UC-012)",
     "name" : "Technician Dashboard"

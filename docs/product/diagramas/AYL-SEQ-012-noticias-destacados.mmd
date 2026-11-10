@@ -1,0 +1,68 @@
+%% diagramId: AYL-SEQ-012
+%% fsdTrace: FSD-UC-035 PRD-US-027 PRD-US-028 PRD-US-029 FSD-BR-10
+sequenceDiagram
+    autonumber
+    title FSD-UC-035 — Noticias y destacados
+
+    actor JD as Jefatura_DUEA
+    actor P as Usuario_Publico
+    participant ADM as Admin_Noticias
+    participant HOME as Home_Noticias
+    participant API as API_v1
+    participant DB as PostgreSQL
+
+    JD->>ADM: abre /admin/noticias
+    ADM->>API: POST /api/v1/admin/news (JWT JD)
+    API->>DB: INSERT status=borrador featured=false
+    API-->>ADM: 201 borrador
+
+    JD->>ADM: publicar
+    ADM->>API: POST /api/v1/admin/news/{id}/publish
+    API->>DB: UPDATE status=publicada publishedAt=now
+    API-->>ADM: 200 publicada
+
+    opt marcar destacada
+        JD->>ADM: destacar
+        ADM->>API: POST /api/v1/admin/news/{id}/feature
+        alt es borrador
+            API-->>ADM: 409 NEWS_NOT_PUBLISHED envelope UC-034
+        else publicada
+            API->>DB: featured=false en la anterior publicada
+            API->>DB: featured=true en la actual
+            API-->>ADM: 200
+        end
+    end
+
+    opt despublicar
+        JD->>ADM: despublicar
+        ADM->>API: POST /api/v1/admin/news/{id}/unpublish
+        API->>DB: status=borrador featured=false
+        API-->>ADM: 200
+    end
+
+    P->>HOME: GET /  seccion #noticias
+    HOME->>API: GET /api/v1/public/news/featured
+    alt hay destacada publicada
+        API->>DB: SELECT published featured=true
+        API-->>HOME: 200 tarjeta destacada
+    else no hay destacada pero si publicadas
+        API->>DB: SELECT published ORDER BY publishedAt DESC LIMIT 1
+        API-->>HOME: 200 mas reciente
+    else ninguna publicada
+        API-->>HOME: 204
+    end
+    HOME->>API: GET /api/v1/public/news page size
+    API->>DB: SELECT published ORDER BY publishedAt DESC
+    HOME->>HOME: excluir slug de la tarjeta principal
+    API-->>HOME: 200 items publicos sin duplicar principal
+    HOME-->>P: render sin borradores
+
+    P->>HOME: GET /public/news/{slug}
+    HOME->>API: GET /api/v1/public/news/{slug}
+    alt no existe o borrador
+        API-->>HOME: 404 NOT_FOUND generico
+        Note over API: mismo envelope que FSD-BR-10 / UC-016
+    else publicada
+        API-->>HOME: 200 titulo categoria cuerpo
+    end
+    HOME-->>P: detalle o no encontrado

@@ -45,6 +45,9 @@
 | PM-036 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 | PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
 | PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
+| PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
+| PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
+| PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
 
 
 ---
@@ -2594,5 +2597,248 @@ API unifica 400/401/403/500 en el envelope documentado. Códigos de negocio 409 
 
 - [ ] Commit / PR si el usuario lo pide
 - [ ] Cerrar #67 tras merge
+
+---
+
+## PM-039
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-039 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 18:55 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-016 portal público |
+| **Objetivo** | Listado publicado, estado por slug y certificado PDF anónimo bajo `/api/v1/public`, 404 genérico, UI `/public/status` |
+| **Contexto** | Hueco de búsqueda por nombre resuelto con API-PUB-02 (adición UC-016). Prefijo `/api/v1/public` vs FSD original `/public/programs/{slug}`. Sin noticias, sin baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+1. Opción 2: añade GET /api/v1/public/programs (listado de publicadas, solo
+   nombre y slug). Documéntalo como adición al UC-016 y avísame del cambio de spec.
+2. Usa /api/v1/public/... en todos los endpoints; anota la diferencia con el
+   path del FSD.
+3. Acepto GET /api/v1/public/programs/{slug}/certificate: PDF solo si está
+   publicado, 404 genérico si no, sin exponer URLs directas del archivo.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-016.md` |
+| generado | `docs/prompts/impl/PR-IMPL-050.md` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicProgramController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/publicportal/PublicPortalService.java` |
+| generado | `backend/src/main/resources/db/migration/V27__publication_snapshot.sql` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/PublicPortalGherkinIT.java` |
+| generado | `frontend/src/features/public-portal/` |
+| generado | `frontend/src/api/endpoints/public-portal/public-portal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeAccessBanners.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicPortalGherkinIT,PublicPortalServiceTest,OpenPdfPublicCertificateRendererAdapterTest,OpenApiExportIT test` — OK
+- [x] `pnpm run test:run` (App + public-portal + HomePage) — 13 passed
+- [x] `pnpm run lint` — OK (warnings preexistentes en dashboard/RecentActivity)
+
+### Resultado obtenido
+
+Portal público anónimo: listado `{slug,name}`, estado vigente y PDF en memoria. 404 genérico para no publicados. Spec viva actualizada (path `/api/v1/public` vs FSD `/public`).
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] UI de publicación [JD] (fuera de este UC)
+- [ ] Noticias = UC-035 (no implementado)
+
+---
+
+## PM-040
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-040 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 19:42 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-035 noticias y destacados |
+| **Objetivo** | CRUD [JD], lectura anónima, una destacada, home `#noticias` real, 404 genérico |
+| **Contexto** | Spec v1.1 aprobada + seis adiciones (unpublish featured=false, feature draft 409, fallback latest, home excluye slug). Sin imágenes/tags/schedule. Sin tocar UC-016/015/002 ni baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-051](../../prompts/impl/PR-IMPL-051.md) |
+| **DD-UC vinculado** | [DD-UC-035](../../design/DD-UC-035.md) |
+| **FSD-UC vinculado** | [FSD-UC-035](../../product/uc/FSD-UC-035.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+ok para implementar
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-035.md`
+- `docs/prompts/impl/PR-IMPL-051.md`
+- `docs/product/uc/FSD-UC-035.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-035.md` |
+| generado | `docs/prompts/impl/PR-IMPL-051.md` |
+| generado | `backend/src/main/resources/db/migration/V28__news.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/news/NewsService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicNewsController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/NewsAdminController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/NewsGherkinIT.java` |
+| generado | `frontend/src/features/news/` |
+| generado | `frontend/src/api/endpoints/public-news/` |
+| generado | `frontend/src/api/endpoints/admin-news/` |
+| modificado | `docs/product/uc/FSD-UC-035.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeNewsSection.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Tabla `news_article` (V28), servicio hexagonal, APIs públicas y admin JD.
+- Seis tests Gherkin `@TC-NEWS`. Home `#noticias` consume Orval; «Ver mas Noticias» → `/public/news`.
+- 404 genérico público; 409 `NEWS_NOT_PUBLISHED` al destacar borrador; unpublish fuerza `featured=false`.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=NewsGherkinIT,NewsServiceTest,OpenApiExportIT test` — OK
+- [x] `pnpm exec vitest run` (App + HomePage + useHomeNews + public-portal) — 15 passed
+- [x] `oxlint` sobre news/home/App/Sidebar — OK
+
+### Resultado obtenido
+
+FSD-UC-035 Implementado. [JD] gestiona noticias; [P] lee solo publicadas. Home usa destacada o la más reciente y no duplica ese slug en el recorte.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Imágenes / tags / programación (fuera de alcance)
+
+---
+
+## PM-041
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-041 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 21:00 |
+| **Solicitante** | Aylen Laura / Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Rediseñar presentación del certificado PDF (PRD-US-020 / FSD-UC-016) opción B-lite |
+| **Objetivo** | A4 horizontal, frase con carrera/agencia/vigencia/resolución, QR y logos; sin cambiar endpoints ni 404 |
+| **Contexto** | B-lite aprobada: V29 solo `agency` y `resolution_number` nullable. Sin `issued_at` (el snapshot no tiene fecha de publicación). Seed inf-sis sin valores reales → null. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Opción B-lite, aprobada.
+- Flyway V29 en publication_snapshot: solo agency y resolution_number
+  (nullable). Sin issued_at: usa la fecha de publicación del snapshot.
+  Sin signer_name/signer_title.
+- Documenta la adición en FSD-UC-016 y modelo_datos (no baseline).
+- Pie: línea de firma en blanco con "Firma y sello" y espacio para sello.
+- Frase completa con carrera, agencia, vigencia y resolución. Si agency o
+  resolution_number son null, omite esa parte sin romper el layout.
+- Seed de inf-sis: agency = [PEGA AQUÍ], resolution_number = [PEGA AQUÍ].
+  No inventes valores: si faltan, deja null y avísame.
+- Reutiliza los logos ya existentes en el frontend (UMSS en el
+  encabezado, DUEA en el pie), embebidos en alta resolución.
+- Código de verificación = UUID del snapshot.
+- QR aprobado: property de base URL por entorno, enlace a
+  {baseUrl}/public/status?slug={slug}. Si la UI no lee ?slug=, añádelo
+  como cambio mínimo.
+- Mantén metadatos PDF, test de campos + application/pdf, y deja la
+  muestra en backend/target/certificate-sample-inf-sis.pdf.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V29__publication_snapshot_certificate_fields.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicCertificateText.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/domain/model/PublicCertificateTextTest.java` |
+| generado | `backend/src/main/resources/public-certificate/` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/OpenPdfPublicCertificateRendererAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicProgramSnapshot.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/PublicationSnapshotJpaEntity.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/PublicProgramQueryJpaAdapter.java` |
+| modificado | `backend/pom.xml` |
+| modificado | `frontend/src/features/public-portal/hooks/usePublicPortal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- V29 `agency` / `resolution_number` nullable. Frase omite cláusulas vacías.
+- PDF A4 horizontal, borde doble, DejaVu embebida, logos UMSS/DUEA, QR ZXing, UUID de verificación.
+- `/public/status?slug=` en el hook. Property `sigesa.public.base-url`.
+- Seed inf-sis sin agencia ni resolución (valores no provistos).
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicCertificateTextTest,OpenPdfPublicCertificateRendererAdapterTest,PublicPortalServiceTest,PublicPortalGherkinIT test` — OK
+- [x] `pnpm exec vitest run` (public-portal + HomePage) — 10 passed
+- [x] Muestra `backend/target/certificate-sample-inf-sis.pdf`
+
+### Resultado obtenido
+
+Certificado rediseñado. Endpoints y 404 intactos. Muestra lista para revisión visual.
+
+### Próximos pasos
+
+- [ ] Pegar `agency` y `resolution_number` reales del seed inf-sis
+- [ ] Revisar la muestra PDF antes de cerrar
 
 

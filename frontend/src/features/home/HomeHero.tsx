@@ -1,4 +1,4 @@
-import { Building2, Users } from 'lucide-react';
+import { CAMPUS_PHOTOS } from './campusPhotos';
 
 interface HomeHeroProps {
   onDemo: () => void;
@@ -47,12 +47,21 @@ export function HomeHero({ onDemo }: HomeHeroProps) {
         </div>
 
         <div className="relative mx-auto h-[22rem] w-full max-w-md lg:h-[26rem]">
-          <div className="home-hero-photo home-hero-photo--campus absolute right-0 top-0 h-48 w-56 rounded-2xl shadow-lg md:h-56 md:w-64">
-            <Building2 className="absolute bottom-4 right-4 h-16 w-16 text-body/40" aria-hidden />
-          </div>
-          <div className="home-hero-photo home-hero-photo--group absolute bottom-6 left-0 h-40 w-52 rounded-2xl border-4 border-body shadow-lg md:h-48 md:w-60">
-            <Users className="absolute bottom-3 right-3 h-14 w-14 text-body/50" aria-hidden />
-          </div>
+          <img
+            src={CAMPUS_PHOTOS[0].src}
+            alt={CAMPUS_PHOTOS[0].alt}
+            className="absolute right-0 top-0 h-48 w-56 rounded-2xl object-cover shadow-lg md:h-56 md:w-64"
+          />
+          <img
+            src={CAMPUS_PHOTOS[2].src}
+            alt={CAMPUS_PHOTOS[2].alt}
+            className="absolute left-10 top-6 h-28 w-36 rounded-2xl object-cover shadow-md md:h-32 md:w-40"
+          />
+          <img
+            src={CAMPUS_PHOTOS[1].src}
+            alt={CAMPUS_PHOTOS[1].alt}
+            className="absolute bottom-6 left-0 h-40 w-52 rounded-2xl border-4 border-body object-cover shadow-lg md:h-48 md:w-60"
+          />
           <div className="absolute bottom-16 right-6 rounded-xl bg-body px-4 py-3 shadow-lg">
             <p className="text-heading-lg font-semibold text-secondary-600">+25</p>
             <p className="text-label-md font-medium uppercase tracking-wide text-primary-700">

@@ -41,10 +41,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/e3/notifications").permitAll()
                         .requestMatchers(HttpMethod.GET, "/internal/notifications/status").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/admin/users", "/api/v1/admin/users/**").hasRole("JD")
+                        .requestMatchers("/api/v1/admin/news", "/api/v1/admin/news/**").hasRole("JD")
                         .requestMatchers("/api/v1/reports/**").hasRole("JD")
                         .requestMatchers("/api/v1/audit/logs", "/api/v1/audit/logs/**").hasRole("JD")
                         .requestMatchers("/api/v1/dashboards/technician/**").hasAnyRole("TD", "JD")
@@ -54,7 +56,7 @@ public class SecurityConfig {
                                 "/api/v1/dashboards/export-jobs",
                                 "/api/v1/dashboards/coordinator/export-jobs").hasAnyRole("CC", "TD", "JD")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        // Perímetro JWT v1.0: todo /api/v1/** (excepto login) exige Bearer token.
+                        // Perímetro JWT v1.0: /api/v1/** exige Bearer, excepto login y GET /api/v1/public/**.
                         .anyRequest().authenticated())
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

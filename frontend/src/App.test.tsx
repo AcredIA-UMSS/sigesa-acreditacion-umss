@@ -30,6 +30,19 @@ describe('App routing', () => {
     expect(await screen.findByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();
   });
 
+  it('shouldRenderPublicStatusPortalWithoutAuth', async () => {
+    renderApp('/public/status');
+    expect(await screen.findByRole('heading', { name: 'Estado de acreditación' })).toBeInTheDocument();
+  });
+
+  it('shouldRenderPublicNewsWithoutAuth', async () => {
+    renderApp('/public/news');
+    expect(await screen.findByRole('heading', { name: 'Noticias y destacados' })).toBeInTheDocument();
+    const newsLinks = await screen.findAllByRole('link', { name: 'Noticias' });
+    expect(newsLinks[0]).toHaveAttribute('href', '/public/news');
+    expect(screen.getAllByRole('link', { name: /Iniciar Sesión/i })[0]).toHaveAttribute('href', '/login');
+  });
+
   it('shouldRedirectUnknownPathsTowardDashboardThenLoginWhenAnonymous', async () => {
     renderApp('/ruta-inexistente');
     expect(await screen.findByRole('heading', { name: 'Bienvenido' })).toBeInTheDocument();
