@@ -52,17 +52,17 @@ test.describe('E2E / Integration Test — Public Portal & News Flow (FSD-UC-016 
     await expect(page.getByText('Ingeniería de Sistemas')).toBeVisible();
 
     // Search and select program
-    const searchInput = page.getByPlaceholder(/Buscar carrera por nombre/i);
+    const searchInput = page.getByRole('textbox', { name: /Buscar por nombre de carrera/i });
     await searchInput.fill('Sistemas');
     await page.getByRole('button', { name: /Ingeniería de Sistemas/i }).click();
 
     // Verify program status badge and validity period
-    await expect(page.getByText('ACREDITADA')).toBeVisible();
+    await expect(page.getByText('Acreditada', { exact: true })).toBeVisible();
     await expect(page.getByText(/2025/)).toBeVisible();
     await expect(page.getByText(/2029/)).toBeVisible();
 
     // Click download certificate button
-    const downloadBtn = page.getByRole('button', { name: /Descargar certificado oficial/i });
+    const downloadBtn = page.getByRole('button', { name: /Descargar certificado/i });
     await expect(downloadBtn).toBeVisible();
     await downloadBtn.click();
 
