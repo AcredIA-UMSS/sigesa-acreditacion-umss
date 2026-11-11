@@ -38,11 +38,11 @@
 | PM-029 | N/A | DD-UC-005 | FSD-UC-004 / FSD-UC-005 | Demo 2: openapi.json + CI Spectral/drift + 8.2.0-aportes |
 | PM-030 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Restore blob MinIO si reuso de DocumentAsset huérfano |
 | PM-031 | PR-IMPL-041 | DD-UC-004-M7 | FSD-UC-004 | Visor/descarga evidencias en frontend + registro Demo 2 OpenAPI |
-| PM-032 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
+| PM-032 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | FEAT-11 #73: Exportación Asíncrona del Dossier Digital (ZIP Jerárquico y Foliado) |
 | PM-033 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 PASO 0: inventario de stack, puertos, modulo outbox y rutas GET |
 | PM-034 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 infra: compose Toxiproxy, toxic.sh, verificar-infra, run-limpio |
 | PM-035 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 ejecucion: up HTTP/in_process, correccion de fallos, down -v |
-| PM-036 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
+| PM-036 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
 | PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
 | PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
 | PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
@@ -2109,8 +2109,8 @@ FSD-UC-004 cubre carga + visualización; Demo 2 documentada para Boris.
 | **Rol** | Fullstack Dev / Tech Lead |
 | **Sprint** | 03 |
 | **PR-IMPL** | PR-IMPL-046 |
-| **Design Doc** | `docs/features/FEAT-11-exportacion-dossier-digital-zip.md` |
-| **FSD / PRD** | `FSD-UC-032` / Transversal §10 |
+| **Design Doc** | `docs/design/DD-UC-032.md` |
+| **FSD / PRD** | `docs/product/uc/FSD-UC-032.md` / Transversal §10 |
 | **Rama** | `feat/73-dossier-zip-export` |
 | **Issue GitHub** | [#73](https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/73) |
 | **Estado** | completado |

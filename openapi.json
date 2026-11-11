@@ -4681,6 +4681,12 @@
           },
           "404" : {
             "description" : "Proceso no encontrado"
+          },
+          "409" : {
+            "description" : "Exportación activa duplicada"
+          },
+          "429" : {
+            "description" : "Concurrencia máxima alcanzada"
           }
         },
         "summary" : "Exportar dossier digital en ZIP",
@@ -4748,8 +4754,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "format" : "binary",
-                  "type" : "string"
+                  "type" : "object"
                 }
               }
             },

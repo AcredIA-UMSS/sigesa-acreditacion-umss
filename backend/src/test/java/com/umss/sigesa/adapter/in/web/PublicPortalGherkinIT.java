@@ -102,6 +102,14 @@ class PublicPortalGherkinIT {
         byte[] body = pdf.getResponse().getContentAsByteArray();
         assertThat(body).startsWith("%PDF".getBytes());
         assertThat(body.length).isGreaterThan(200);
+
+        com.lowagie.text.pdf.PdfReader reader = new com.lowagie.text.pdf.PdfReader(body);
+        String text = new com.lowagie.text.pdf.parser.PdfTextExtractor(reader).getTextFromPage(1);
+        String normalized = text.replaceAll("\\s+", " ");
+        assertThat(normalized).contains("Comité Ejecutivo de la Universidad Boliviana (CEUB)");
+        assertThat(normalized).contains("DUEA-A 048/2024");
+        reader.close();
+
         assertThat(pdf.getResponse().getHeader(HttpHeaders.LOCATION)).isNull();
         assertThat(pdf.getResponse().getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.APPLICATION_PDF_VALUE);
 
