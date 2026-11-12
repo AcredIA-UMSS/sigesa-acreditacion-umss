@@ -5,6 +5,7 @@ import {
   Network,
   BarChart,
   History,
+  Clock,
   HelpCircle,
   LogOut,
   ChevronLeft,
@@ -49,13 +50,22 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
 
   const isExternalEvaluator = session?.role === 'EE';
   const isProcessRoute = location.pathname.startsWith('/procesos');
+  const isReportsRoute =
+    location.pathname.startsWith('/reportes') || location.pathname.startsWith('/admin/ingresos');
   const [processesOpen, setProcessesOpen] = useState(isProcessRoute);
+  const [reportsOpen, setReportsOpen] = useState(isReportsRoute);
 
   useEffect(() => {
     if (isProcessRoute) {
       setProcessesOpen(true);
     }
   }, [isProcessRoute]);
+
+  useEffect(() => {
+    if (isReportsRoute) {
+      setReportsOpen(true);
+    }
+  }, [isReportsRoute]);
 
   const initials = session?.role ?? 'U';
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
@@ -74,6 +84,15 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       return;
     }
     setProcessesOpen((prev) => !prev);
+  };
+
+  const toggleReports = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      setReportsOpen(true);
+      return;
+    }
+    setReportsOpen((prev) => !prev);
   };
 
   return (
@@ -253,13 +272,72 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
         {!isExternalEvaluator && (
           <>
             {isJd ? (
-              <NavItem
-                icon={<BarChart size={20} />}
-                label="REPORTES"
-                isExpanded={isExpanded}
-                active={activeNav === 'reports'}
-                to="/reportes/ejecutivo"
-              />
+              <div>
+                <button
+                  type="button"
+                  onClick={toggleReports}
+                  className={`flex w-full items-center rounded-lg p-3 transition-colors ${
+                    isExpanded ? 'justify-between' : 'justify-center'
+                  } ${
+                    activeNav === 'reports' || isReportsRoute
+                      ? 'border-l-4 border-secondary bg-primary-800 text-body'
+                      : 'text-primary-200 hover:bg-primary-800 hover:text-body'
+                  }`}
+                  title={!isExpanded ? 'Reportes' : undefined}
+                  aria-expanded={reportsOpen}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-[20px]">
+                      <BarChart size={20} />
+                    </div>
+                    {isExpanded && (
+                      <span className="overflow-hidden whitespace-nowrap text-left text-label-md">
+                        REPORTES
+                      </span>
+                    )}
+                  </div>
+                  {isExpanded && (
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${reportsOpen ? 'rotate-180' : ''}`}
+                    />
+                  )}
+                </button>
+                {isExpanded && reportsOpen && (
+                  <ul className="mt-1 ml-5 space-y-1 border-l border-primary-700 pl-4">
+                    <SubNavItem
+                      icon={<BarChart size={16} />}
+                      label="Reporte ejecutivo"
+                      to="/reportes/ejecutivo"
+                      active={location.pathname.startsWith('/reportes')}
+                    />
+                    <SubNavItem
+                      icon={<Clock size={16} />}
+                      label="Historial de accesos"
+                      to="/admin/ingresos"
+                      active={location.pathname.startsWith('/admin/ingresos')}
+                    />
+                  </ul>
+                )}
+                {!isExpanded && isReportsRoute && (
+                  <ul className="mt-1 space-y-1">
+                    <SubNavItem
+                      icon={<BarChart size={16} />}
+                      label="Reporte ejecutivo"
+                      to="/reportes/ejecutivo"
+                      active={location.pathname.startsWith('/reportes')}
+                      compact
+                    />
+                    <SubNavItem
+                      icon={<Clock size={16} />}
+                      label="Historial de accesos"
+                      to="/admin/ingresos"
+                      active={location.pathname.startsWith('/admin/ingresos')}
+                      compact
+                    />
+                  </ul>
+                )}
+              </div>
             ) : (
               <NavItem
                 icon={<BarChart size={20} />}

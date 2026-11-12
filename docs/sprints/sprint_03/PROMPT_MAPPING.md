@@ -48,6 +48,7 @@
 | PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
 | PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
 | PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
+| PM-042 | PR-IMPL-052 | DD-UC-036 | FSD-UC-036 | Historial de ingresos: sesión, logout, intentos fallidos y actividad [JD] |
 
 
 ---
@@ -2840,5 +2841,59 @@ Certificado rediseñado. Endpoints y 404 intactos. Muestra lista para revisión 
 
 - [ ] Pegar `agency` y `resolution_number` reales del seed inf-sis
 - [ ] Revisar la muestra PDF antes de cerrar
+
+---
+
+## PM-042
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-042 |
+| **Fecha** | 2026-11-11 |
+| **Hora** | 23:42 |
+| **Solicitante** | Marlene Velasquez |
+| **Agente/Entorno** | Cursor |
+| **Modelo** | Grok 4.7 |
+| **Tarea** | Historial de ingresos y auditoría de acciones |
+| **Objetivo** | Registrar ingresos, salidas, fallos y acciones de sesión, y consultarlos desde el panel [JD] |
+| **Contexto** | La bitácora `audit_log` ya existía. Se añade `access_session` y `session_id` sin reemplazar FSD-UC-017 |
+| **PR-IMPL vinculado** | PR-IMPL-052 |
+| **DD-UC vinculado** | DD-UC-036 |
+| **FSD-UC vinculado** | FSD-UC-036 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+# Prompt: Implementar módulo de Historial de Ingresos y Auditoría de Acciones de Usuarios
+```
+
+El texto completo es el mensaje del chat del 2026-11-11 23:31. Alcance: menú HISTORIAL DE INGRESOS solo para el rol autorizado, registro de login, logout, expiración, fallo y acciones, consulta con filtros, paginación y detalle de sesión, sin edición ni borrado de la bitácora.
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V30__access_session.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/model/access/` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/AccessSessionController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/AccessActivityFilter.java` |
+| generado | `frontend/src/features/admin/access/` |
+| modificado | `AuthenticateService`, `AuthController`, `JwtAuthenticationFilter`, `JwtTokenAdapter`, `SecurityConfig`, `audit_log` |
+| modificado | `frontend/src/components/layout/Sidebar.tsx`, `App.tsx`, `AuthProvider.tsx` |
+| generado | `docs/product/uc/FSD-UC-036.md`, `docs/design/DD-UC-036.md`, `docs/prompts/impl/PR-IMPL-052.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=AuthenticateAccessSessionTest,AccessSessionTest,ModAuthServiceIntegrationTest test` — 11 pruebas, 0 fallos
+- [x] `oxlint` de la pantalla, el menú y la ruta — sin avisos
+
+### Resultado obtenido
+
+[JD] consulta `/admin/ingresos`. El ingreso abre una sesión, el fallo queda en `FAILED`, el logout cierra la sesión activa y un segundo cierre no la altera. Las acciones quedan en `audit_log.session_id`.
+
+### Próximos pasos
+
+- [ ] Reiniciar el backend que ya estaba en marcha para cargar V30 y los endpoints nuevos
 
 

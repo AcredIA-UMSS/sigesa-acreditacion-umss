@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,4 +44,8 @@ public interface AuditLogJpaRepository extends JpaRepository<AuditLogJpaEntity, 
             @Param("entityType") String entityType,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
+
+    List<AuditLogJpaEntity> findBySessionIdOrderByCreatedAtAsc(UUID sessionId);
+
+    List<AuditLogJpaEntity> findBySessionIdInOrderByCreatedAtAsc(Collection<UUID> sessionIds);
 }

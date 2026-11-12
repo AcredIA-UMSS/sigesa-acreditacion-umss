@@ -108,6 +108,30 @@ public class JpaAuditLogAdapter implements AuditLogPort, AuditLogQueryPort {
                 "Retiro de evidencia no aprobada indicador=" + indicatorId, null);
     }
 
+    @Override
+    @Transactional
+    public void logLogout(UUID userId, Email email, String role) {
+        saveEntry(userId, email != null ? email.value() : "unknown", role,
+                "LOGOUT", "SESSION", userId != null ? userId.toString() : "anonymous",
+                "Cierre de sesión voluntario", null);
+    }
+
+    @Override
+    @Transactional
+    public void logLoginFailed(String email) {
+        saveEntry(null, email != null ? email : "desconocido", null,
+                "LOGIN_FAILED", "SESSION", "anonymous",
+                "Intento de autenticación fallido", null);
+    }
+
+    private void markRequestAudited() {
+        if (org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
+                instanceof org.springframework.web.context.request.ServletRequestAttributes attributes) {
+            attributes.getRequest().setAttribute(
+                    com.umss.sigesa.application.access.AccessSessionHolder.AUDITED_ATTRIBUTE, Boolean.TRUE);
+        }
+    }
+
     private String resolveUserEmail(UUID userId) {
         if (userId == null) {
             return "system@umss.edu.bo";
@@ -141,10 +165,12 @@ public class JpaAuditLogAdapter implements AuditLogPort, AuditLogQueryPort {
                 .entityId(entityId)
                 .payloadDiff(sanitizedPayload)
                 .ipAddress(ipAddress != null ? ipAddress : "127.0.0.1")
+                .sessionId(com.umss.sigesa.application.access.AccessSessionHolder.current())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         auditLogRepository.save(entity);
+        markRequestAudited();
 
         // Registro estructurado a stdout (F12-04) sin filtrar secretos
         log.info("AUDIT_APPEND_ONLY action={} actor={} entityType={} entityId={}",

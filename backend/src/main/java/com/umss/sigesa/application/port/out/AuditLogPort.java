@@ -21,4 +21,8 @@ public interface AuditLogPort {
     void logDeleteDenied(UUID actorId, UUID evidenceId);
 
     void logEvidenceRetracted(UUID actorId, UUID evidenceId, UUID indicatorId);
+
+    void logLogout(UUID userId, Email email, String role);
+
+    void logLoginFailed(String email);
 }

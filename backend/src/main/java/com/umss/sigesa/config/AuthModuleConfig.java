@@ -8,6 +8,7 @@ import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
+import com.umss.sigesa.application.port.out.AccessSessionPort;
 import com.umss.sigesa.application.port.out.AuthPort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TokenPort;
@@ -30,8 +31,9 @@ public class AuthModuleConfig {
     AuthenticateUseCase authenticateUseCase(AuthPort authPort,
                                             TokenPort tokenPort,
                                             UserRepositoryPort userRepository,
-                                            AuditLogPort auditLogPort) {
-        return new AuthenticateService(authPort, tokenPort, userRepository, auditLogPort);
+                                            AuditLogPort auditLogPort,
+                                            AccessSessionPort accessSessionPort) {
+        return new AuthenticateService(authPort, tokenPort, userRepository, auditLogPort, accessSessionPort);
     }
 
     @Bean
@@ -44,8 +46,9 @@ public class AuthModuleConfig {
     @Bean
     DeactivateUserUseCase deactivateUserUseCase(UserRepositoryPort userRepository,
                                                   UserProgramAssignmentRepositoryPort assignmentRepository,
-                                                  AuditLogPort auditLogPort) {
-        return new DeactivateUserService(userRepository, assignmentRepository, auditLogPort);
+                                                  AuditLogPort auditLogPort,
+                                                  AccessSessionPort accessSessionPort) {
+        return new DeactivateUserService(userRepository, assignmentRepository, auditLogPort, accessSessionPort);
     }
 
     @Bean

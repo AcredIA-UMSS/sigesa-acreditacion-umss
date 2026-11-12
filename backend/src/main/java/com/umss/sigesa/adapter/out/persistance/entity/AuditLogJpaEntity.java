@@ -49,6 +49,9 @@ public class AuditLogJpaEntity {
     @Column(name = "ip_address", length = 50)
     private String ipAddress;
 
+    @Column(name = "session_id")
+    private UUID sessionId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

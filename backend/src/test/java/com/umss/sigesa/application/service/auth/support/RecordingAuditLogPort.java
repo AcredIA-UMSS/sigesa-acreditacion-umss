@@ -51,6 +51,16 @@ public class RecordingAuditLogPort implements AuditLogPort {
         events.add("EVIDENCE_RETRACTED:" + actorId + ":" + evidenceId + ":" + indicatorId);
     }
 
+    @Override
+    public void logLogout(UUID userId, Email email, String role) {
+        events.add("LOGOUT:" + userId);
+    }
+
+    @Override
+    public void logLoginFailed(String email) {
+        events.add("LOGIN_FAILED:" + email);
+    }
+
     public List<String> events() {
         return List.copyOf(events);
     }

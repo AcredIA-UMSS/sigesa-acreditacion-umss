@@ -809,6 +809,20 @@ El técnico [TD] registra observaciones sobre una evidencia del proceso. El coor
 
 ---
 
+## 9.2 Historial de accesos (FSD-UC-036)
+
+Solo [JD]. No hay PUT ni DELETE.
+
+| ID | Método y ruta | Efecto |
+| --- | --- | --- |
+| API-ACC-01 | `GET /api/v1/access-sessions/summary` | Totales, activos, hoy, fallidos |
+| API-ACC-02 | `GET /api/v1/access-sessions` | Lista paginada. Filtros `email`, `role`, `status`, `ipAddress`, `from`, `to`. Cada fila incluye `actions`: etiquetas distintas de crear, modificar y eliminar |
+| API-ACC-03 | `GET /api/v1/access-sessions/{sessionId}` | Detalle |
+| API-ACC-04 | `GET /api/v1/access-sessions/{sessionId}/actions` | Acciones de `audit_log` de esa sesión |
+| API-ACC-05 | `POST /api/v1/auth/logout` | Cierra la sesión del JWT |
+
+---
+
 ## 10. Anti-patrones (no implementar)
 
 | Anti-patrón | Alternativa |

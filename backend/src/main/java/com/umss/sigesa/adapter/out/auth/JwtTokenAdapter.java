@@ -39,6 +39,10 @@ public class JwtTokenAdapter implements TokenPort {
         claims.put("email", identity.email().value());
         claims.put("role", identity.role().name());
         claims.put("programScope", identity.programScope().stream().map(UUID::toString).toList());
+        UUID sessionId = com.umss.sigesa.application.access.AccessSessionHolder.current();
+        if (sessionId != null) {
+            claims.put("sid", sessionId.toString());
+        }
 
         String token = Jwts.builder()
                 .subject(identity.userId().toString())
@@ -59,6 +63,10 @@ public class JwtTokenAdapter implements TokenPort {
         return parseClaims(token).get("role", String.class);
     }
 
+    public String parseEmail(String token) {
+        return parseClaims(token).get("email", String.class);
+    }
+
     @SuppressWarnings("unchecked")
     public List<UUID> parseProgramScope(String token) {
         List<String> raw = parseClaims(token).get("programScope", List.class);
@@ -66,6 +74,25 @@ public class JwtTokenAdapter implements TokenPort {
             return List.of();
         }
         return raw.stream().map(UUID::fromString).toList();
+    }
+
+    public UUID parseSessionId(String token) {
+        String sid = parseClaims(token).get("sid", String.class);
+        return sid == null || sid.isBlank() ? null : UUID.fromString(sid);
+    }
+
+    public UUID parseSessionIdAllowExpired(String token) {
+        try {
+            return parseSessionId(token);
+        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            Object sid = ex.getClaims().get("sid");
+            if (sid == null || sid.toString().isBlank()) {
+                return null;
+            }
+            return UUID.fromString(sid.toString());
+        } catch (RuntimeException ex) {
+            return null;
+        }
     }
 
     public boolean isValid(String token) {

@@ -19,6 +19,7 @@ import { AssistantPage } from './features/assistant/AssistantPage';
 import { TechnicianInboxPage } from './features/dashboard/pages/TechnicianInboxPage';
 import { ExecutiveSemaphorePage } from './features/dashboard/pages/ExecutiveSemaphorePage';
 import { AuditLogPage } from './features/admin/audit/pages/AuditLogPage';
+import { AccessHistoryPage } from './features/admin/access/pages/AccessHistoryPage';
 
 function App() {
   return (
@@ -62,6 +63,16 @@ function App() {
             <ProtectedRoute>
               <JdOnlyRoute>
                 <AuditLogPage />
+              </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ingresos"
+          element={
+            <ProtectedRoute>
+              <JdOnlyRoute>
+                <AccessHistoryPage />
               </JdOnlyRoute>
             </ProtectedRoute>
           }

@@ -16,8 +16,8 @@ public class ObservationModuleConfig {
     @Bean
     ProcessObservationUseCase processObservationUseCase(ProcessQueryPort processQueryPort,
                                                         EvidenceLookupPort evidenceLookupPort,
-                                                        ProcessObservationRepositoryPort observationRepository,
-                                                        Clock clock) {
-        return new ProcessObservationService(processQueryPort, evidenceLookupPort, observationRepository, clock);
+                                                        ProcessObservationRepositoryPort observationRepository) {
+        return new ProcessObservationService(
+                processQueryPort, evidenceLookupPort, observationRepository, Clock.systemUTC());
     }
 }
