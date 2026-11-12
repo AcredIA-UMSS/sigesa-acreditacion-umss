@@ -53,3 +53,7 @@ Generar y descargar de manera asíncrona un archivo ZIP jerárquico estructurado
 | R3 | Tipado estricto en frontend con `customFetch` y `resolveAccessToken`. |
 | R4 | Suite completa de tests pasando en backend y frontend sin regresiones. |
 | R5 | Registro obligatorio en `docs/sprints/sprint_03/PROMPT_MAPPING.md`. |
+
+## 5. Mismo identificador en observaciones
+
+La rama de observaciones también registró `PR-IMPL-046` / `FSD-UC-032` para el flujo [TD]/[CC] de observaciones de evidencia (`DD-UC-032`). Ese texto no reemplaza el contrato FEAT-11 de este archivo: el [TD] registra observaciones sobre evidencias de un proceso y el [CC] responde, sin tocar `tb_observation` ni el estado del indicador.

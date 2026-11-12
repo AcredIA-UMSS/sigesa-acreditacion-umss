@@ -16,6 +16,7 @@ import { ProcessOperationalModeBadge } from './ProcessOperationalModeBadge';
 import { ProcessFreezePanelContainer } from './ProcessFreezePanelContainer';
 import { PeerRoomChecklistPanelContainer } from './PeerRoomChecklistPanelContainer';
 import { DelegationsPanelContainer } from './DelegationsPanelContainer';
+import { ObservationsPanel } from '../../observations/components/ObservationsPanel';
 
 interface ProcessDetailViewProps {
   processId: string;
@@ -47,6 +48,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
   const canEditFoda =
     (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
   const canReviewEvidence = session?.role === 'TD';
+  const canSeeObservations = session?.role === 'TD' || session?.role === 'CC';
   const structureAnchorRef = useRef<HTMLDivElement>(null);
   const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
 
@@ -177,7 +179,14 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             monitoring={isMonitoring}
           />
 
-          <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
+          {canSeeObservations && session && (
+            <ObservationsPanel processId={processId} role={session.role} />
+          )}
+
+          <section
+            className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm"
+            data-testid="process-structure-section"
+          >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-heading-lg font-semibold text-primary-800">
