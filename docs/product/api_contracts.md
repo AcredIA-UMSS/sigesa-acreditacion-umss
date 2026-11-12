@@ -563,6 +563,27 @@ No hay `PUT`, `PATCH` ni `DELETE`.
 
 ---
 
+## 9.1 Observaciones de proceso (FSD-UC-032)
+
+El técnico [TD] registra observaciones sobre una evidencia del proceso. El coordinador [CC] las revisa y responde. `tb_observation` del dashboard no se reutiliza.
+
+| ID | Método y ruta | Rol | Efecto |
+| --- | --- | --- | --- |
+| API-OBS-01 | `GET /processes/{processId}/observations/evidences` | TD, CC | Evidencias de la carrera del proceso |
+| API-OBS-02 | `GET /processes/{processId}/observations` | TD, CC | Lista. Filtros `status`, `priority`, `evidenceId`, `authorId` |
+| API-OBS-03 | `GET /processes/{processId}/observations/{observationId}` | TD, CC | Detalle e historial de mensajes |
+| API-OBS-04 | `POST /processes/{processId}/observations` | TD | Crea `BORRADOR` |
+| API-OBS-05 | `PUT /processes/{processId}/observations/{observationId}` | TD | Edita solo `BORRADOR` del autor |
+| API-OBS-06 | `POST .../{observationId}/submit` | TD autor | `BORRADOR` → `ENVIADA` |
+| API-OBS-07 | `POST .../{observationId}/review` | CC | `ENVIADA` → `EN_REVISION` |
+| API-OBS-08 | `POST .../{observationId}/reply` | CC | `EN_REVISION` → `RESPONDIDA` |
+| API-OBS-09 | `POST .../{observationId}/attend` | CC | `RESPONDIDA` → `ATENDIDA` |
+| API-OBS-10 | `POST .../{observationId}/close` | TD | `ATENDIDA` → `CERRADA` |
+
+[CC] fuera de la carrera del proceso: `404 PROCESS_NOT_FOUND`. Evidencia de otra carrera: `422 EVIDENCE_NOT_IN_PROCESS`. Transición inválida: `409 INVALID_OBSERVATION_STATE`. Envío sin recomendación o con descripción menor a 10 caracteres: `422 OBSERVATION_INCOMPLETE`.
+
+---
+
 ## 10. Anti-patrones (no implementar)
 
 | Anti-patrón | Alternativa |

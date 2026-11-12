@@ -45,6 +45,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **Observaciones de proceso:** [TD] registra cumplimiento sobre evidencias y [CC] responde. Tablas `process_observation` y `process_observation_message`. No altera `tb_observation`. | FSD-UC-032 / DD-UC-032 | — | PR-IMPL-046 | Marlene Velasquez |
 | 01/11/2026 | **MOD-AUDIT:** `LOGOUT`, `SESSION_EXPIRED`, carga con nombre de archivo e indicador/proceso, `action` múltiple y `GET /api/v1/audit/logs/export`. Sin operaciones de evidencia que el sistema no ejecuta. | FSD-UC-017 / DD-UC-017 | — | — | Cursor Agent |
 | 29/10/2026 | **MOD-AUDIT v1 (backend):** tabla `audit_log` (Flyway V8 + trigger append-only en PostgreSQL); `AuditLogJpaAdapter` reemplaza el stub; login éxito/fallo y carga de evidencia; `GET /api/v1/audit/logs` solo [JD]. Sin CSV ni UI. | FSD-UC-017 / DD-UC-017 | ADR-0005 (tabla `audit_log`, no `LOG_AUDITORIA`) | — | Cursor Agent |
 | 11/09/2026 | **E2E Playwright:** `@playwright/test` en raíz; specs en `e2e/` anclados a `data-testid` del frontend (`getByTestId`). Stub API por defecto; `E2E_LIVE=1` contra backend real. | QA E2E | N/A | — | Cursor Agent |

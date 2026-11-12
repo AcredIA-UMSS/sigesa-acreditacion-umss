@@ -23,6 +23,7 @@
 | PM-014 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 | Selectores Indicador/Criterio + GET uploadable |
 | PM-015 | PR-IMPL-026 | DD-AGENT-003 | FSD-UC-024 / FSD-UC-004 | Historial de acciones del agente de evidencias |
 | PM-016 | PR-IMPL-006 | DD-UC-004 | FSD-UC-004 / FSD-UC-019 | Espacio de carga de evidencias por subfase en estructura |
+| PM-017 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | Observaciones del técnico sobre evidencias y respuesta del coordinador |
 
 ## PM-001
 
@@ -1158,3 +1159,31 @@ en esta estructura del proceso, crear un espacio para que permita subir evidenci
 ### Resultado obtenido
 
 Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia.
+
+---
+
+## PM-017
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-017 |
+| **Fecha** | 2026-11-04 |
+| **Solicitante** | Marlene Velasquez |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Grok 4.7 |
+| **Tarea** | Diseño e implementación de observaciones de proceso |
+| **Objetivo** | [TD] registra observaciones sobre evidencias; [CC] responde y da seguimiento |
+| **PR-IMPL vinculado** | PR-IMPL-046 |
+| **DD vinculado** | DD-UC-032 |
+| **FSD / PRD vinculado** | FSD-UC-032 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+diseño y la implementacion de DD-uc para el flujo
+```
+
+### Resultado obtenido
+
+FSD-UC-032, DD-UC-032 y API-OBS-01…10. Agregado `process_observation` aparte de `tb_observation`. Seis pruebas de dominio y servicio en verde. Panel en el detalle del proceso.

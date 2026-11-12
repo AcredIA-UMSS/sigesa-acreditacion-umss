@@ -8,6 +8,7 @@ import { ProcessPhaseTree } from './ProcessPhaseTree';
 import { PhasesCopilotPanel } from './PhasesCopilotPanel';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
+import { ObservationsPanel } from '../../observations/components/ObservationsPanel';
 
 interface ProcessDetailViewProps {
   processId: string;
@@ -35,6 +36,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
   const copilotReadOnly = session?.role === 'CC';
   const canUploadEvidence = session?.role === 'CC';
+  const canSeeObservations = session?.role === 'TD' || session?.role === 'CC';
   const uploadable = useUploadableIndicators({ enabled: canUploadEvidence });
   const indicatorsForTree = canUploadEvidence ? uploadable.indicators : [];
   const indicatorsLoading = canUploadEvidence ? uploadable.isLoading : false;
@@ -107,6 +109,10 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             process={process}
             onUpdated={refetch}
           />
+
+          {canSeeObservations && session && (
+            <ObservationsPanel processId={processId} role={session.role} />
+          )}
 
           <section
             className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm"
