@@ -1,6 +1,107 @@
 {
   "components" : {
     "schemas" : {
+      "AccessActionResponse" : {
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actorEmail" : {
+            "type" : "string"
+          },
+          "actorRole" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "module" : {
+            "type" : "string"
+          },
+          "result" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AccessSessionResponse" : {
+        "properties" : {
+          "actions" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array"
+          },
+          "durationSeconds" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "email" : {
+            "type" : "string"
+          },
+          "endReason" : {
+            "type" : "string"
+          },
+          "endedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "fullName" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "ipAddress" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "startedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "userAgent" : {
+            "type" : "string"
+          },
+          "userId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AccessSessionSummaryResponse" : {
+        "properties" : {
+          "activeUsers" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "failed" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "today" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "total" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "AdminNewsResponse" : {
         "properties" : {
           "body" : {
@@ -418,6 +519,17 @@
           }
         },
         "required" : [ "career_id", "template_id" ],
+        "type" : "object"
+      },
+      "DeliverableFeedbackRequest" : {
+        "properties" : {
+          "technicalObservations" : {
+            "maxLength" : 4000,
+            "minLength" : 10,
+            "type" : "string"
+          }
+        },
+        "required" : [ "technicalObservations" ],
         "type" : "object"
       },
       "DocumentAssetResponseDto" : {
@@ -1315,6 +1427,125 @@
         },
         "type" : "object"
       },
+      "ObservationCommentRequest" : {
+        "properties" : {
+          "body" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        },
+        "required" : [ "body" ],
+        "type" : "object"
+      },
+      "ObservationDraftRequest" : {
+        "properties" : {
+          "compliance" : {
+            "enum" : [ "CUMPLE", "CUMPLE_PARCIAL", "NO_CUMPLE" ],
+            "type" : "string"
+          },
+          "description" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "evidenceId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "enum" : [ "FORMA", "CONTENIDO", "CUMPLIMIENTO" ],
+            "type" : "string"
+          },
+          "priority" : {
+            "enum" : [ "BAJA", "MEDIA", "ALTA" ],
+            "type" : "string"
+          },
+          "recommendation" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "compliance", "description", "evidenceId", "kind", "priority" ],
+        "type" : "object"
+      },
+      "ObservationMessageResponse" : {
+        "properties" : {
+          "authorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "authorRole" : {
+            "type" : "string"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ObservationResponse" : {
+        "properties" : {
+          "authorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "compliance" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "evidenceId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "indicatorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "kind" : {
+            "type" : "string"
+          },
+          "messages" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ObservationMessageResponse"
+            },
+            "type" : "array"
+          },
+          "priority" : {
+            "type" : "string"
+          },
+          "processId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "recommendation" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ObservationSummary" : {
         "properties" : {
           "description" : {
@@ -1357,6 +1588,52 @@
         "properties" : {
           "observations" : {
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PageAccessSessionResponse" : {
+        "properties" : {
+          "content" : {
+            "items" : {
+              "$ref" : "#/components/schemas/AccessSessionResponse"
+            },
+            "type" : "array"
+          },
+          "empty" : {
+            "type" : "boolean"
+          },
+          "first" : {
+            "type" : "boolean"
+          },
+          "last" : {
+            "type" : "boolean"
+          },
+          "number" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "numberOfElements" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "pageable" : {
+            "$ref" : "#/components/schemas/PageableObject"
+          },
+          "size" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "sort" : {
+            "$ref" : "#/components/schemas/SortObject"
+          },
+          "totalElements" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "totalPages" : {
+            "format" : "int32",
+            "type" : "integer"
           }
         },
         "type" : "object"
@@ -1712,6 +1989,25 @@
           }
         },
         "required" : [ "id" ],
+        "type" : "object"
+      },
+      "ProcessEvidenceOptionResponse" : {
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "evidenceId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "indicatorId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "ProcessFreezeResponseDto" : {
@@ -2699,6 +2995,156 @@
         "tags" : [ "Health" ]
       }
     },
+    "/api/v1/access-sessions" : {
+      "get" : {
+        "operationId" : "list_3",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "email",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "role",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "ACTIVE", "CLOSED", "EXPIRED", "FAILED", "REVOKED" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "ipAddress",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "pageable",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/Pageable"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageAccessSessionResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Consultar ingresos con filtros y paginación",
+        "tags" : [ "Access sessions" ]
+      }
+    },
+    "/api/v1/access-sessions/summary" : {
+      "get" : {
+        "operationId" : "summary",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccessSessionSummaryResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Totales del historial de accesos",
+        "tags" : [ "Access sessions" ]
+      }
+    },
+    "/api/v1/access-sessions/{sessionId}" : {
+      "get" : {
+        "operationId" : "detail",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sessionId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AccessSessionResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Detalle de un ingreso",
+        "tags" : [ "Access sessions" ]
+      }
+    },
+    "/api/v1/access-sessions/{sessionId}/actions" : {
+      "get" : {
+        "operationId" : "actions",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "sessionId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/AccessActionResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Acciones de la bitácora asociadas a la sesión",
+        "tags" : [ "Access sessions" ]
+      }
+    },
     "/api/v1/admin/news" : {
       "get" : {
         "operationId" : "listAdminNews",
@@ -2933,7 +3379,7 @@
     },
     "/api/v1/admin/users" : {
       "get" : {
-        "operationId" : "list",
+        "operationId" : "list_1",
         "parameters" : [ {
           "in" : "query",
           "name" : "role",
@@ -3216,6 +3662,17 @@
                 }
               }
             },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "auth-controller" ]
+      }
+    },
+    "/api/v1/auth/logout" : {
+      "post" : {
+        "operationId" : "logout",
+        "responses" : {
+          "200" : {
             "description" : "OK"
           }
         },
@@ -5195,6 +5652,426 @@
         "tags" : [ "Level 1 workflow" ]
       }
     },
+    "/api/v1/processes/{processId}/observations" : {
+      "get" : {
+        "operationId" : "list",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "status",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "BORRADOR", "ENVIADA", "EN_REVISION", "RESPONDIDA", "ATENDIDA", "CERRADA" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "priority",
+          "required" : false,
+          "schema" : {
+            "enum" : [ "BAJA", "MEDIA", "ALTA" ],
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "evidenceId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "authorId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ObservationResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Listar observaciones del proceso",
+        "tags" : [ "Observaciones de proceso" ]
+      },
+      "post" : {
+        "operationId" : "create",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ObservationDraftRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Registrar una observación en borrador",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/evidences" : {
+      "get" : {
+        "operationId" : "listEvidences_1",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProcessEvidenceOptionResponse"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Evidencias del proceso que pueden recibir una observación",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}" : {
+      "get" : {
+        "operationId" : "get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Detalle de una observación y su historial",
+        "tags" : [ "Observaciones de proceso" ]
+      },
+      "put" : {
+        "operationId" : "update",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ObservationDraftRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Actualizar un borrador",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}/attend" : {
+      "post" : {
+        "operationId" : "attend",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ObservationCommentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Marcar la observación como atendida",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}/close" : {
+      "post" : {
+        "operationId" : "close",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ObservationCommentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Cerrar la observación",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}/reply" : {
+      "post" : {
+        "operationId" : "reply",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ObservationCommentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Responder la observación",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}/review" : {
+      "post" : {
+        "operationId" : "review",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Marcar la observación en revisión",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
+    "/api/v1/processes/{processId}/observations/{observationId}/submit" : {
+      "post" : {
+        "operationId" : "submit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "observationId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ObservationResponse"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Enviar la retroalimentación al coordinador",
+        "tags" : [ "Observaciones de proceso" ]
+      }
+    },
     "/api/v1/processes/{processId}/peer-room-checklist" : {
       "get" : {
         "operationId" : "getPeerRoomChecklist",
@@ -5494,6 +6371,60 @@
         "tags" : [ "Stage workflow" ]
       }
     },
+    "/api/v1/processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/feedback" : {
+      "put" : {
+        "operationId" : "recordDeliverableFeedback",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "stageId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "deliverableId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DeliverableFeedbackRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StageDeliverableResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Registrar retroalimentación técnica de un entregable",
+        "tags" : [ "Stage workflow" ]
+      }
+    },
     "/api/v1/processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/generate" : {
       "post" : {
         "operationId" : "generateStageDeliverable",
@@ -5725,7 +6656,7 @@
     "/api/v1/programs" : {
       "get" : {
         "description" : "Devuelve carreras activas. Use q para autocompletar por nombre o código.",
-        "operationId" : "list_1",
+        "operationId" : "list_2",
         "parameters" : [ {
           "description" : "Texto de búsqueda (nombre o código)",
           "in" : "query",
@@ -6747,6 +7678,9 @@
     "description" : "Cierre de Nivel 1 normativo (FSD-UC-010 / API-WF-03)",
     "name" : "Level 1 workflow"
   }, {
+    "description" : "Historial de accesos. Solo consulta. [JD]",
+    "name" : "Access sessions"
+  }, {
     "description" : "Administración de noticias [JD] (FSD-UC-035)",
     "name" : "admin-news"
   }, {
@@ -6797,6 +7731,9 @@
   }, {
     "description" : "Plan de Mejoras (API-WF-13…16 / FSD-UC-031)",
     "name" : "Evaluation"
+  }, {
+    "description" : "Retroalimentación del técnico y seguimiento del coordinador",
+    "name" : "Observaciones de proceso"
   }, {
     "description" : "Estructura N1–N3 + Indicador (release 2.0.0, API-STR)",
     "name" : "Jerarquía normativa v2"

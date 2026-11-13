@@ -83,6 +83,7 @@ ultima_actualizacion: "2026-11-04"
 | `FSD-UC-033` | Consulta normativa ARCU-SUR vía asistente (corpus)             | [JD], [TD], [CC], [EE] | v2.1 | **Implementado (corpus v1)**                    | [Ver detalle](uc/FSD-UC-033.md) | `[DD-UC-033](../design/DD-UC-033.md)`                 | `[PR-IMPL-048](../prompts/impl/PR-IMPL-048.md)` |
 | `FSD-UC-034` | Manejo uniforme de errores de la API REST                      | Sistema          | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-034.md) | `[DD-UC-034](../design/DD-UC-034.md)`                 | `[PR-IMPL-049](../prompts/impl/PR-IMPL-049.md)` |
 | `FSD-UC-035` | Noticias y destacados                                          | [JD], [P]        | v1.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-035.md) | `[DD-UC-035](../design/DD-UC-035.md)`                 | `[PR-IMPL-051](../prompts/impl/PR-IMPL-051.md)`       |
+| `FSD-UC-037` | Fase del proceso de acreditación                               | [TD]             | v2.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-037.md) | —                                                     | —                                                     |
 
 
 **Leyenda de estado:** `Pendiente` · `En Curso` · `Implementado` / `Implementado v2` · `Hecho` / `Hecho (Full-Stack)` · `Planificado` *(ADR-0005, sin código)* · `Reespecificado` *(spec v2 reescrita; revisar atom UC o índice)* · `Verificado` · `Obsoleto`
@@ -131,6 +132,7 @@ ultima_actualizacion: "2026-11-04"
 | Cerrar N1 (dimensión/área)           | —   | ✓   | —   | —   | —   |
 | Enviar etapa metodológica a revisión | ✓   | —   | —   | —   | —   |
 | Aprobar entregable de etapa          | —   | ✓   | ✓   | —   | —   |
+| Consultar fase del proceso y retroalimentar entregables | — | ✓ | — | — | — |
 | Navegar árbol en auditoría           | —   | ✓   | ✓   | ✓   | —   |
 | Editar FODA                          | ✓   | —   | —   | —   | ✓*  |
 
@@ -299,6 +301,7 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 
 | Fecha      | Cambio                                                                                                                                                                                                                                                                        |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-13 | **FSD-UC-037:** menú principal [TD] «Fase del proceso» (`/reportes/fase`); fase actual del proceso y retroalimentación de entregables. |
 | 2026-11-04 | **FSD-UC-035** implementado: noticias/destacados; [JD] CRUD+publicar; [P] home `#noticias` + `/public/news`; FSD-BR-10; PRD-US-027…029. |
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en `[uc/](uc/)`                                                                                                                                                                                                     |
 | 2026-06-15 | UC-003 marcado **En Curso** (scaffolding Gestión de Fases en código)                                                                                                                                                                                                          |

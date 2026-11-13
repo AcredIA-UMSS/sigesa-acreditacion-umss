@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.security.JwtProgramScopeSupport;
+import com.umss.sigesa.adapter.in.web.dto.DeliverableFeedbackRequest;
 import com.umss.sigesa.adapter.in.web.dto.GenerateDeliverableResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.MethodologicalStageResponseDto;
 import com.umss.sigesa.adapter.in.web.dto.ObserveStageRequestDto;
@@ -12,6 +13,7 @@ import com.umss.sigesa.application.port.in.EvaluateStageGateUseCase;
 import com.umss.sigesa.application.port.in.GenerateStageDeliverableDocumentUseCase;
 import com.umss.sigesa.application.port.in.ListProcessStagesUseCase;
 import com.umss.sigesa.application.port.in.ObserveStageUseCase;
+import com.umss.sigesa.application.port.in.RecordDeliverableFeedbackUseCase;
 import com.umss.sigesa.application.port.in.SubmitStageForReviewUseCase;
 import com.umss.sigesa.application.port.out.DocumentAssetPort;
 import com.umss.sigesa.domain.model.DocumentAsset;
@@ -28,7 +30,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +53,7 @@ public class StageWorkflowController {
     private final ObserveStageUseCase observeStageUseCase;
     private final EvaluateStageGateUseCase evaluateStageGateUseCase;
     private final ApproveStageDeliverableUseCase approveStageDeliverableUseCase;
+    private final RecordDeliverableFeedbackUseCase recordDeliverableFeedbackUseCase;
     private final GenerateStageDeliverableDocumentUseCase generateStageDeliverableDocumentUseCase;
     private final DocumentAssetPort documentAssetPort;
 
@@ -59,6 +64,7 @@ public class StageWorkflowController {
             ObserveStageUseCase observeStageUseCase,
             EvaluateStageGateUseCase evaluateStageGateUseCase,
             ApproveStageDeliverableUseCase approveStageDeliverableUseCase,
+            RecordDeliverableFeedbackUseCase recordDeliverableFeedbackUseCase,
             GenerateStageDeliverableDocumentUseCase generateStageDeliverableDocumentUseCase,
             DocumentAssetPort documentAssetPort) {
         this.listProcessStagesUseCase = listProcessStagesUseCase;
@@ -67,6 +73,7 @@ public class StageWorkflowController {
         this.observeStageUseCase = observeStageUseCase;
         this.evaluateStageGateUseCase = evaluateStageGateUseCase;
         this.approveStageDeliverableUseCase = approveStageDeliverableUseCase;
+        this.recordDeliverableFeedbackUseCase = recordDeliverableFeedbackUseCase;
         this.generateStageDeliverableDocumentUseCase = generateStageDeliverableDocumentUseCase;
         this.documentAssetPort = documentAssetPort;
     }
@@ -144,6 +151,24 @@ public class StageWorkflowController {
                 actorId(authentication),
                 primaryRole(authentication));
         return ResponseEntity.ok(toGateDto(result));
+    }
+
+    @PutMapping("/{stageId}/deliverables/{deliverableId}/feedback")
+    @PreAuthorize("hasRole('TD')")
+    @Operation(summary = "Registrar retroalimentación técnica de un entregable")
+    public ResponseEntity<StageDeliverableResponseDto> recordDeliverableFeedback(
+            @PathVariable UUID processId,
+            @PathVariable UUID stageId,
+            @PathVariable UUID deliverableId,
+            @Valid @RequestBody DeliverableFeedbackRequest request,
+            Authentication authentication) {
+        StageDeliverable deliverable = recordDeliverableFeedbackUseCase.record(
+                processId,
+                stageId,
+                deliverableId,
+                request.technicalObservations(),
+                primaryRole(authentication));
+        return ResponseEntity.ok(toDeliverableDto(deliverable, folios(processId)));
     }
 
     @PostMapping("/{stageId}/deliverables/{deliverableId}/approve")

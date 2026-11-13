@@ -147,6 +147,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           />
         )}
 
+        {session?.role === 'TD' && (
+          <NavItem
+            icon={<Layers size={20} />}
+            label="FASE DEL PROCESO"
+            isExpanded={isExpanded}
+            active={activeNav === 'reports' || location.pathname.startsWith('/reportes/fase')}
+            to="/reportes/fase"
+          />
+        )}
+
         {!isExternalEvaluator && (
           <div>
             <button
@@ -309,7 +319,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                       icon={<BarChart size={16} />}
                       label="Reporte ejecutivo"
                       to="/reportes/ejecutivo"
-                      active={location.pathname.startsWith('/reportes')}
+                      active={location.pathname.startsWith('/reportes/ejecutivo')}
                     />
                     <SubNavItem
                       icon={<Clock size={16} />}
@@ -325,7 +335,7 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                       icon={<BarChart size={16} />}
                       label="Reporte ejecutivo"
                       to="/reportes/ejecutivo"
-                      active={location.pathname.startsWith('/reportes')}
+                      active={location.pathname.startsWith('/reportes/ejecutivo')}
                       compact
                     />
                     <SubNavItem
@@ -344,7 +354,9 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 label="REPORTES"
                 isExpanded={isExpanded}
                 hasDropdown
-                active={activeNav === 'reports'}
+                active={session?.role === 'TD'
+                  ? location.pathname.startsWith('/reportes') && !location.pathname.startsWith('/reportes/fase')
+                  : activeNav === 'reports'}
               />
             )}
             {(isJd || session?.role === 'TD') && (

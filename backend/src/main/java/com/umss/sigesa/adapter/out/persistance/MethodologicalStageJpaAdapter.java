@@ -182,6 +182,16 @@ public class MethodologicalStageJpaAdapter implements MethodologicalStagePort {
 
     @Override
     @Transactional
+    public void recordDeliverableFeedback(UUID deliverableId, String technicalObservations) {
+        StageDeliverableJpaEntity entity = deliverableRepository.findById(deliverableId)
+                .orElseThrow(() -> new IllegalStateException("Entregable no encontrado: " + deliverableId));
+        entity.setTechnicalObservations(technicalObservations);
+        entity.setUpdatedAt(LocalDateTime.now());
+        deliverableRepository.save(entity);
+    }
+
+    @Override
+    @Transactional
     public void saveGateEvaluation(
             UUID stageId,
             UUID evaluatedBy,

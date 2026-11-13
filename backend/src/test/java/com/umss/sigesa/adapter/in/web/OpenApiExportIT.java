@@ -69,6 +69,10 @@ class OpenApiExportIT {
         assertTrue(paths.has("/api/v1/public/news/featured"), "Falta GET /api/v1/public/news/featured");
         assertTrue(paths.has("/api/v1/public/news/{slug}"), "Falta GET /api/v1/public/news/{slug}");
         assertTrue(paths.has("/api/v1/admin/news"), "Falta /api/v1/admin/news");
+        JsonNode feedback = paths.get(
+                "/api/v1/processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/feedback");
+        assertNotNull(feedback, "Falta PUT de retroalimentación de entregable (FSD-UC-037)");
+        assertTrue(feedback.has("put"), "La retroalimentación de entregable no declara PUT");
 
         Path committed = Path.of("..", "openapi.json").toAbsolutePath().normalize();
         Path generated = Path.of("target", "openapi.json").toAbsolutePath().normalize();

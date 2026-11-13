@@ -512,6 +512,18 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | **Ruta** | `POST /processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/approve` |
 | **x-allowed-roles** | `[TD]` |
 
+### API-WF-24 — Retroalimentación de entregable
+
+| Campo | Valor |
+| --- | --- |
+| **UC** | FSD-UC-037 |
+| **Ruta** | `PUT /processes/{processId}/stages/{stageId}/deliverables/{deliverableId}/feedback` |
+| **x-allowed-roles** | `[TD]` |
+| **Body** | `{ "technicalObservations": string }` (10 a 4000 caracteres) |
+| **200** | Entregable con `technicalObservations`. El `approvalStatus` no cambia. |
+| **403** | Rol distinto de [TD] |
+| **404** | Etapa o entregable inexistente en el proceso |
+
 ### API-WF-09 — Métricas de evaluación (M8)
 
 | Campo | Valor |

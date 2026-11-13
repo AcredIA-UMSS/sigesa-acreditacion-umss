@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 13/11/2026 | **Fase del proceso:** [TD] consulta en `/reportes/fase` la fase ARCU-SUR de una carrera y registra retroalimentación del entregable (`PUT …/deliverables/{id}/feedback`). | FSD-UC-037 | — | — | Marlene Velasquez |
 | 12/11/2026 | **Historial de accesos:** la lista incluye `actions` (crear, modificar, eliminar). La pantalla `/admin/ingresos` muestra esa columna y permite imprimir el reporte filtrado. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
 | 11/11/2026 | **Historial de accesos:** tabla `access_session` (V30) y `audit_log.session_id`. [JD] consulta sesiones y acciones en `/admin/ingresos`. El login fallido, el logout y la expiración del JWT actualizan la sesión. No sustituye la bitácora FSD-UC-017. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
 | 04/11/2026 | **MOD-PUBLIC certificado PDF:** A4 horizontal; V29 `agency`/`resolution_number` nullable; QR `{baseUrl}/public/status?slug=`; UI lee `?slug=`. Sin `issued_at`. Dependencia `com.google.zxing:core` 3.5.3 (QR). | FSD-UC-016 / DD-UC-016 | — | PM-041 / PR-IMPL-050 | Cursor Agent |
@@ -168,6 +169,7 @@ artefactos_vivos:
 | `FSD-UC-009` | `DD-UC-009` | **hecho v2** | `2.0.0` | API-WF-02 approve indicador | `PR-IMPL-038` | |
 | `FSD-UC-010` | `DD-UC-010` | **hecho v2** | `2.0.0` | API-WF-03 cierre N1 | `PR-IMPL-039` | |
 | `FSD-UC-025` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | API-WF-04…08; bootstrap etapas | `PR-IMPL-M6-025` | UC-026…028 mismo contrato |
+| `FSD-UC-037` | — | **implementado** | `2.1.0` | Menú [TD] `/reportes/fase`; API-WF-24 | — | No reemplaza la timeline de UC-025 |
 | `FSD-UC-026` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST submit etapa | `PR-IMPL-M6-025` | |
 | `FSD-UC-027` | `DD-UC-025` | **hecho (M6)** | `2.1.0` | POST approve/observe etapa | `PR-IMPL-M6-025` | |
 | `FSD-UC-028` | `DD-UC-025` / `DD-UC-029` / `DD-UC-031` / `DD-UC-030` | **hecho (M11)** | `2.1.0` | Gates E1–E7 (freeze, checklist, justificación) | `PR-IMPL-M6-025` / `PR-IMPL-M8-029` / `PR-IMPL-M9-031` / `PR-IMPL-M10-030` | PM-018 |

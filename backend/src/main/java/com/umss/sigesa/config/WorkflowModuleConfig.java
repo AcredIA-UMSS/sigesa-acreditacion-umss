@@ -40,7 +40,9 @@ import com.umss.sigesa.application.service.workflow.LiftProcessFreezeService;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.application.service.workflow.UpdatePeerRoomChecklistService;
 import com.umss.sigesa.application.service.workflow.ApproveIndicatorService;
+import com.umss.sigesa.application.port.in.RecordDeliverableFeedbackUseCase;
 import com.umss.sigesa.application.service.workflow.ApproveStageDeliverableService;
+import com.umss.sigesa.application.service.workflow.RecordDeliverableFeedbackService;
 import com.umss.sigesa.application.service.workflow.ApproveStageService;
 import com.umss.sigesa.application.service.workflow.CloseLevel1Service;
 import com.umss.sigesa.application.service.workflow.EvaluateStageGateService;
@@ -116,6 +118,11 @@ public class WorkflowModuleConfig {
             StageGateEvaluator stageGateEvaluator,
             MethodologicalStageBootstrapper stageBootstrapper) {
         return new EvaluateStageGateService(stagePort, stageGateEvaluator, stageBootstrapper);
+    }
+
+    @Bean
+    RecordDeliverableFeedbackUseCase recordDeliverableFeedbackUseCase(MethodologicalStagePort stagePort) {
+        return new RecordDeliverableFeedbackService(stagePort);
     }
 
     @Bean

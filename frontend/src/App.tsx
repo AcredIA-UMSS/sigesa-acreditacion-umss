@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { JdOrTdRoute } from './components/auth/JdOrTdRoute';
 import { JdOnlyRoute } from './components/auth/JdOnlyRoute';
+import { TdOnlyRoute } from './components/auth/TdOnlyRoute';
 import { CcOnlyRoute } from './components/auth/CcOnlyRoute';
 import { TemplatesListPage, TemplateEditorPage } from './features/admin/templates';
 import { UsersAdminPage } from './features/admin/users/pages/UsersAdminPage';
@@ -15,6 +16,7 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
 import { ExecutiveReportPage } from './features/reports/ExecutiveReportPage';
+import { ProcessPhasePage } from './features/reports/phase/ProcessPhasePage';
 import { AssistantPage } from './features/assistant/AssistantPage';
 import { TechnicianInboxPage } from './features/dashboard/pages/TechnicianInboxPage';
 import { ExecutiveSemaphorePage } from './features/dashboard/pages/ExecutiveSemaphorePage';
@@ -228,6 +230,16 @@ function App() {
               <JdOnlyRoute>
                 <ExecutiveReportPage />
               </JdOnlyRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reportes/fase"
+          element={
+            <ProtectedRoute>
+              <TdOnlyRoute>
+                <ProcessPhasePage />
+              </TdOnlyRoute>
             </ProtectedRoute>
           }
         />

@@ -38,6 +38,8 @@ public interface MethodologicalStagePort {
             UUID approvedBy,
             String technicalObservations);
 
+    void recordDeliverableFeedback(UUID deliverableId, String technicalObservations);
+
     void saveGateEvaluation(
             UUID stageId,
             UUID evaluatedBy,
