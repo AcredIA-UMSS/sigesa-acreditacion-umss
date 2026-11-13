@@ -9,7 +9,8 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
@@ -66,7 +67,7 @@ class UploadNormativeIndicatorEvidenceServiceTest {
     @Mock
     private ContentHashPort contentHashPort;
     @Mock
-    private NotificationOutboxPort notificationOutbox;
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     @Mock
     private AuditLogPort auditLogPort;
     @Mock
@@ -107,7 +108,10 @@ class UploadNormativeIndicatorEvidenceServiceTest {
         assertTrue(result.folioCode().startsWith("SIGESA-"));
         verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.SUBIDO);
         verify(uploadPersistence).persistNormativeIndicatorUpload(any(), any(), eq(null), any(), eq(true), any());
-        verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.EvidenceUploaded
+                        && cmd.aggregateId().equals(indicatorId)
+                        && cmd.programId().equals(programId)));
     }
 
     @Test

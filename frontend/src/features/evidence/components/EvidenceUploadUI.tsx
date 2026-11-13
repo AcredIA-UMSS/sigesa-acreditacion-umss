@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AlertCircle,
-  Bell,
   CheckCircle2,
   FileUp,
   Info,
@@ -11,6 +10,7 @@ import {
   Upload,
 } from 'lucide-react';
 import type { EvidenceUploadResult } from '../hooks/useEvidenceUpload';
+import { NotificationBellPopover } from '../../notifications';
 import { Select } from '../../../components/ui/Select';
 import type {
   IndicatorUploadOption,
@@ -110,14 +110,7 @@ export function EvidenceUploadUI({
           <span className="text-gray-700">Cargar evidencia</span>
         </nav>
         <div className="flex items-center gap-4 text-gray-600">
-          <button
-            type="button"
-            className="relative hover:text-primary-600"
-            aria-label="Notificaciones"
-          >
-            <Bell size={24} />
-            <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-secondary" />
-          </button>
+          <NotificationBellPopover />
           <button
             type="button"
             className="hover:text-primary-600"

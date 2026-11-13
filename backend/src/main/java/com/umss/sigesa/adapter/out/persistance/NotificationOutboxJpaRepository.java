@@ -22,6 +22,7 @@ public interface NotificationOutboxJpaRepository extends JpaRepository<Notificat
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2")})
     @Query("SELECT n FROM NotificationOutboxJpaEntity n " +
            "WHERE n.status = :status AND (n.nextRetryAt IS NULL OR n.nextRetryAt <= :now) " +
+           "AND (n.channel IS NULL OR n.channel = 'EMAIL') " +
            "ORDER BY n.createdAt ASC")
     List<NotificationOutboxJpaEntity> findPendingBatch(
             @Param("status") String status,
@@ -29,4 +30,6 @@ public interface NotificationOutboxJpaRepository extends JpaRepository<Notificat
             Pageable pageable);
 
     long countByStatus(String status);
+
+    boolean existsByIdempotencyKey(String idempotencyKey);
 }

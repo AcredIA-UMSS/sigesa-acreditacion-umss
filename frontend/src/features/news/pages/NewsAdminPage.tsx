@@ -1,5 +1,6 @@
-import { Bell, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Sidebar } from '../../../components/layout/Sidebar';
+import { NotificationBellPopover } from '../../notifications';
 import { NewsAdminView } from '../components/NewsAdminView';
 import { useNewsAdmin } from '../hooks/useNewsAdmin';
 
@@ -15,9 +16,7 @@ export function NewsAdminPage() {
             <span className="text-primary-600">Inicio</span> / Noticias
           </div>
           <div className="flex items-center gap-4 text-gray-600">
-            <button type="button" className="relative hover:text-primary-600" aria-label="Notificaciones">
-              <Bell size={24} />
-            </button>
+            <NotificationBellPopover />
             <button type="button" className="hover:text-primary-600" aria-label="Configuración">
               <Settings size={24} />
             </button>

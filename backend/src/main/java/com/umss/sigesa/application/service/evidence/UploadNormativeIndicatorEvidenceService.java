@@ -10,7 +10,9 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
@@ -76,7 +78,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
     private final EvidenceUploadPersistencePort uploadPersistence;
     private final EvidenceBlobStoragePort blobStorage;
     private final ContentHashPort contentHashPort;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     private final AuditLogPort auditLogPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
     private final DocumentAssetPort documentAssetPort;
@@ -91,7 +93,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
             EvidenceUploadPersistencePort uploadPersistence,
             EvidenceBlobStoragePort blobStorage,
             ContentHashPort contentHashPort,
-            NotificationOutboxPort notificationOutbox,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
@@ -104,7 +106,7 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
         this.uploadPersistence = uploadPersistence;
         this.blobStorage = blobStorage;
         this.contentHashPort = contentHashPort;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
         this.auditLogPort = auditLogPort;
         this.assignmentRepository = assignmentRepository;
         this.documentAssetPort = documentAssetPort;
@@ -210,8 +212,16 @@ public class UploadNormativeIndicatorEvidenceService implements UploadNormativeI
                     evidence, version, externalUrl, asset, persistNewAsset, link);
 
             try {
-                notificationOutbox.enqueueEvidenceUploaded(
-                        command.indicatorId(), evidenceId, context.careerId());
+                enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                        NotificationEventType.EvidenceUploaded,
+                        command.indicatorId(),
+                        context.careerId(),
+                        context.processId(),
+                        Map.of(
+                                "indicatorId", command.indicatorId().toString(),
+                                "evidenceId", evidenceId.toString(),
+                                "programId", context.careerId().toString(),
+                                "processId", context.processId().toString())));
                 auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
             } catch (RuntimeException notifyEx) {
                 log.warn("Evidencia persistida y blob en object storage; outbox/auditoría falló: {}",

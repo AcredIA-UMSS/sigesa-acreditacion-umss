@@ -53,6 +53,7 @@ public class NormativeIndicatorObservationJpaAdapter implements NormativeIndicat
                 : IndicatorObservationStatus.OPEN.name());
         entity.setResolvedAt(observation.getResolvedAt());
         entity.setResolvedVersionId(observation.getResolvedVersionId());
+        entity.setDueDate(observation.getDueDate());
         entity.setCreatedAt(observation.getCreatedAt());
         entity.setUpdatedAt(observation.getUpdatedAt());
         return toDomain(observationRepository.save(entity));
@@ -70,6 +71,7 @@ public class NormativeIndicatorObservationJpaAdapter implements NormativeIndicat
                         : IndicatorObservationStatus.OPEN)
                 .resolvedAt(entity.getResolvedAt())
                 .resolvedVersionId(entity.getResolvedVersionId())
+                .dueDate(entity.getDueDate())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

@@ -1188,3 +1188,85 @@ export function useListCandidates<TData = Awaited<ReturnType<typeof listCandidat
 
 
 
+export type closeProcessResponse204 = {
+  data: void
+  status: 204
+}
+
+export type closeProcessResponseSuccess = (closeProcessResponse204) & {
+  headers: Headers;
+};
+;
+
+export type closeProcessResponse = (closeProcessResponseSuccess)
+
+export const getCloseProcessUrl = (processId: string,) => {
+
+
+
+
+  return `/api/v1/processes/${processId}/close`
+}
+
+/**
+ * @summary Close accreditation process when all indicators approved by EE
+ */
+export const closeProcess = async (processId: string, options?: Parameters<typeof customFetch>[1]): Promise<closeProcessResponse> => {
+
+  return customFetch<closeProcessResponse>(getCloseProcessUrl(processId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCloseProcessMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof closeProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof closeProcess>>, TError,{processId: string}, TContext> => {
+
+const mutationKey = ['closeProcess'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof closeProcess>>, {processId: string}> = (props) => {
+          const {processId} = props ?? {};
+
+          return  closeProcess(processId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CloseProcessMutationResult = NonNullable<Awaited<ReturnType<typeof closeProcess>>>
+
+    export type CloseProcessMutationError = unknown
+
+    /**
+ * @summary Close accreditation process when all indicators approved by EE
+ */
+export const useCloseProcess = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof closeProcess>>, TError,{processId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof closeProcess>>,
+        TError,
+        {processId: string},
+        TContext
+      > => {
+      return useMutation(getCloseProcessMutationOptions(options), queryClient);
+    }

@@ -105,6 +105,7 @@ function mapExecutiveSection(
     alertPrograms: dto.alertPrograms ?? 0,
     semaforoProgramas: (dto.programTrafficLights ?? []).map((t) => ({
       programaId: t.programId ?? '',
+      processId: t.processId ?? null,
       nombre: t.name ?? '',
       facultad: t.faculty?.trim() ? t.faculty : 'Sin facultad',
       estado: normalizeSemaphoreStatus(t.status),

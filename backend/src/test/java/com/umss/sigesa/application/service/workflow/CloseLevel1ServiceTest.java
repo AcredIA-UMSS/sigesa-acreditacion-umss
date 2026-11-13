@@ -2,7 +2,8 @@ package com.umss.sigesa.application.service.workflow;
 
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.InvalidLevel1StateException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
@@ -37,7 +38,7 @@ class CloseLevel1ServiceTest {
     private NormativeIndicatorWorkflowPort workflowPort;
 
     @Mock
-    private NotificationOutboxPort notificationOutbox;
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     @InjectMocks
     private CloseLevel1Service closeLevel1Service;
@@ -64,7 +65,10 @@ class CloseLevel1ServiceTest {
         assertEquals(PhaseState.COMPLETADA, result.newState());
         assertEquals("Level1Completed", result.event());
         verify(workflowPort).updateLevel1Status(level1Id, PhaseState.COMPLETADA);
-        verify(notificationOutbox).enqueue(eq("Level1Completed"), eq(careerId), org.mockito.ArgumentMatchers.anyMap());
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.Level1Completed
+                        && cmd.programId().equals(careerId)
+                        && cmd.aggregateId().equals(level1Id)));
     }
 
     @Test
@@ -162,11 +166,11 @@ class CloseLevel1ServiceTest {
 
         closeLevel1Service.close(processId, level1Id, UUID.randomUUID(), "td");
 
-        ArgumentCaptor<java.util.Map<String, String>> payloadCaptor =
-                ArgumentCaptor.forClass(java.util.Map.class);
-        verify(notificationOutbox).enqueue(
-                eq("Level1Completed"), eq(careerId), payloadCaptor.capture());
-        assertEquals(level1Id.toString(), payloadCaptor.getValue().get("level1Id"));
-        assertEquals(processId.toString(), payloadCaptor.getValue().get("processId"));
+        ArgumentCaptor<com.umss.sigesa.domain.model.notification.DomainNotificationCommand> captor =
+                ArgumentCaptor.forClass(com.umss.sigesa.domain.model.notification.DomainNotificationCommand.class);
+        verify(enqueueDomainNotificationUseCase).enqueue(captor.capture());
+        assertEquals(NotificationEventType.Level1Completed, captor.getValue().eventType());
+        assertEquals(level1Id.toString(), captor.getValue().payloadValue("level1Id"));
+        assertEquals(processId.toString(), captor.getValue().payloadValue("processId"));
     }
 }

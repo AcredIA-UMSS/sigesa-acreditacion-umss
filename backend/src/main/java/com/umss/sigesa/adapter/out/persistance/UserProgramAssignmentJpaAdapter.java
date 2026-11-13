@@ -40,6 +40,13 @@ public class UserProgramAssignmentJpaAdapter implements UserProgramAssignmentRep
     }
 
     @Override
+    public List<UserProgramAssignment> findActiveByProgramId(UUID programId) {
+        return jpaRepository.findByProgramIdAndRevokedAtIsNull(programId).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void revokeAllActiveByUserId(UUID userId) {
         jpaRepository.revokeAllActiveByUserId(userId, LocalDateTime.now());

@@ -7,7 +7,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
@@ -51,7 +51,7 @@ class LinkDocumentAssetToIndicatorServiceTest {
     @Mock
     private EvidenceUploadPersistencePort uploadPersistence;
     @Mock
-    private NotificationOutboxPort notificationOutbox;
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     @Mock
     private AuditLogPort auditLogPort;
     @Mock

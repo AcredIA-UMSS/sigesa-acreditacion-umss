@@ -7,7 +7,9 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.EvidenceNotFoundException;
 import com.umss.sigesa.domain.exception.SubsanationNotAllowedException;
 import com.umss.sigesa.domain.model.IndicatorObservation;
@@ -54,6 +56,8 @@ class SubsanateNormativeIndicatorEvidenceServiceTest {
     private ContentHashPort contentHashPort;
     @Mock
     private UserProgramAssignmentRepositoryPort assignmentRepository;
+    @Mock
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     @InjectMocks
     private SubsanateNormativeIndicatorEvidenceService service;
@@ -99,6 +103,9 @@ class SubsanateNormativeIndicatorEvidenceServiceTest {
         assertEquals(1, result.supersedesVersion());
         assertEquals(SubsanateNormativeIndicatorEvidenceService.EVENT_EVIDENCE_SUBSANATED, result.event());
         verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.SUBSANADO);
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.EvidenceSubsanated
+                        && cmd.aggregateId().equals(indicatorId)));
         verify(blobStorage).delete("storage-v1");
     }
 

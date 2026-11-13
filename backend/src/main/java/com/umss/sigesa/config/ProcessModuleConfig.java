@@ -1,6 +1,7 @@
 package com.umss.sigesa.config;
 
 import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
@@ -231,21 +232,28 @@ public class ProcessModuleConfig {
             UserRepositoryPort userRepositoryPort,
             UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort,
             ProcessResponsiblePort processResponsiblePort,
-            ProcessStructureGuard processStructureGuard) {
+            ProcessStructureGuard processStructureGuard,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         return new AssignProcessResponsibleService(
                 processQueryPort,
                 userRepositoryPort,
                 userProgramAssignmentRepositoryPort,
                 processResponsiblePort,
-                processStructureGuard);
+                processStructureGuard,
+                enqueueDomainNotificationUseCase);
     }
 
     @Bean
     RemoveProcessResponsibleUseCase removeProcessResponsibleUseCase(
             ProcessQueryPort processQueryPort,
             ProcessResponsiblePort processResponsiblePort,
-            ProcessStructureGuard processStructureGuard) {
-        return new RemoveProcessResponsibleService(processQueryPort, processResponsiblePort, processStructureGuard);
+            ProcessStructureGuard processStructureGuard,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
+        return new RemoveProcessResponsibleService(
+                processQueryPort,
+                processResponsiblePort,
+                processStructureGuard,
+                enqueueDomainNotificationUseCase);
     }
 
     @Bean

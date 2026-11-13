@@ -6,6 +6,7 @@ import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.ProcessExceptionHandler;
 import com.umss.sigesa.adapter.out.auth.JwtTokenAdapter;
+import com.umss.sigesa.application.port.in.CloseAccreditationProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
@@ -81,6 +82,8 @@ class ProcessDossierExportControllerTest {
     private ExportProcessDossierUseCase exportProcessDossierUseCase;
     @MockitoBean
     private GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
+    @MockitoBean
+    private CloseAccreditationProcessUseCase closeAccreditationProcessUseCase;
 
     private static RequestPostProcessor ccAuth() {
         return authentication(new UsernamePasswordAuthenticationToken(

@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-015
 nombre: Notificaciones y alertas
-estado: Pendiente
+estado: En progreso
 release: v2.0
-actor_principal: Sistema (outbox → correo UMSS)
+actor_principal: Sistema (outbox → correo UMSS + in-app)
 trazabilidad_prd: PRD-US-017, PRD-US-018, PRD-US-019
 modulo: MOD-NOTIFY
 reglas: FSD-BR-13
-ultima_actualizacion: "2026-09-08"
+ultima_actualizacion: "2026-11-12"
 ---
 
 # FSD-UC-015 — Notificaciones y alertas
@@ -16,24 +16,27 @@ ultima_actualizacion: "2026-09-08"
 
 | Campo | Valor |
 |-------|-------|
-| **Trazabilidad** | PRD-REQ-013 · PRD-US-017–019 · NFR-004 |
-| **Patrón** | `notification_outbox` + worker SMTP |
+| **Trazabilidad** | PRD-REQ-013 · PRD-US-017–019 · NFR-004 · BR-NOTIFY-001 · DD-UC-038 |
+| **Patrón** | Dual-canal: `notification_outbox` (EMAIL) + `in_app_notification` (misma TX) + worker SMTP |
 | **SLA** | Eventos críticos ≤ **15 min** |
+| **Remitente** | `no-reply@umss.edu.bo` |
 
 ## Flujo principal
 
-1. Sistema detecta evento de dominio (aprobación, rechazo, plazo, nueva carga).
-2. Encola mensaje en `notification_outbox`.
-3. Worker SMTP envía correo institucional con enlace profundo.
-4. Marca outbox como procesado o reintenta con backoff.
+1. Sistema detecta evento de dominio y resuelve destinatarios reales `@umss.edu.bo` (ACTIVE).
+2. Encola EMAIL en `notification_outbox` + inserta fila corta in-app (idempotency por canal).
+3. Worker SMTP (`PENDING→PROCESSING`) envía HTML institucional; in-app visible aunque SMTP falle.
+4. Marca outbox SENT o reintenta con backoff (máx. 5 → FAILED).
 
 ## Eventos disparadores
 
-| Evento | Destinatario |
-|--------|--------------|
-| Aprobación/rechazo Indicador | [CC] |
-| Plazo próximo (job programado) | [CC] |
-| Nueva Evidencia cargada | [TD] |
+| Evento | Destinatario | Deep link |
+|--------|--------------|-----------|
+| `IndicatorApproved` / `IndicatorRejected` | [CC] (responsable + asignación programa) | Indicador (+ observationId) |
+| `EvidenceUploaded` / `EvidenceSubsanated` | [TD] | Bandeja técnico |
+| `DeadlineApproaching` | [CC] | Indicador / observación |
+| `Level1Completed` | [CC] | Nivel 1 |
+| `ProcessClosed` | [JD] ACTIVE | `/executive/semaphore?processId=` (**override:** solo si status ya `CLOSED`; sin gate EE 100%) |
 
 ## Excepciones y flujos alternos
 

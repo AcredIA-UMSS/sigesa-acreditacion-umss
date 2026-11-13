@@ -45,9 +45,12 @@ class ExecutiveSemaphoreRulesTest {
     @DisplayName("El armado agrupa colores y deja en gris a la carrera sin datos")
     void assemblerSeparaSinDato() {
         ExecutiveKpiSection section = ExecutiveSemaphoreAssembler.assemble(List.of(
-                new CareerSemaphoreInput("a", "Sistemas", "FCT", 10, 40.0, 1, 2),
-                new CareerSemaphoreInput("b", "Civil", "FCT", 0, 0, 0, 0),
-                new CareerSemaphoreInput("c", "Medicina", "FCMM", 8, 90.0, 0, 0)));
+                new CareerSemaphoreInput("a", "Sistemas", "FCT", 10, 40.0, 1, 2, "proc-a"),
+                new CareerSemaphoreInput("b", "Civil", "FCT", 0, 0, 0, 0, null),
+                new CareerSemaphoreInput("c", "Medicina", "FCMM", 8, 90.0, 0, 0, "proc-c")));
+
+        assertEquals("proc-a", section.programTrafficLights().get(0).processId());
+        assertEquals(null, section.programTrafficLights().get(1).processId());
 
         assertEquals(2, section.totalPrograms());
         assertEquals(1, section.alertPrograms());

@@ -30,7 +30,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.workflow.FreezeProcessService;
@@ -54,6 +54,7 @@ import com.umss.sigesa.application.service.workflow.ObserveStageService;
 import com.umss.sigesa.application.service.workflow.RejectIndicatorService;
 import com.umss.sigesa.application.service.workflow.StageGateEvaluator;
 import com.umss.sigesa.application.service.workflow.SubmitStageForReviewService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -206,8 +207,8 @@ public class WorkflowModuleConfig {
     @Bean
     CloseLevel1UseCase closeLevel1UseCase(NormativeHierarchyQueryPort hierarchyQueryPort,
                                           NormativeIndicatorWorkflowPort workflowPort,
-                                          NotificationOutboxPort notificationOutbox) {
-        return new CloseLevel1Service(hierarchyQueryPort, workflowPort, notificationOutbox);
+                                          EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
+        return new CloseLevel1Service(hierarchyQueryPort, workflowPort, enqueueDomainNotificationUseCase);
     }
 
     @Bean
@@ -216,9 +217,11 @@ public class WorkflowModuleConfig {
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            NotificationOutboxPort notificationOutbox) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
+            @Value("${sigesa.notify.deadline-days:3}") int deadlineDays) {
         return new RejectIndicatorService(
-                hierarchyQueryPort, evidenceQueryPort, observationPort, workflowPort, notificationOutbox);
+                hierarchyQueryPort, evidenceQueryPort, observationPort, workflowPort,
+                enqueueDomainNotificationUseCase, deadlineDays);
     }
 
     @Bean
@@ -227,8 +230,9 @@ public class WorkflowModuleConfig {
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            NotificationOutboxPort notificationOutbox) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         return new ApproveIndicatorService(
-                hierarchyQueryPort, evidenceQueryPort, observationPort, workflowPort, notificationOutbox);
+                hierarchyQueryPort, evidenceQueryPort, observationPort, workflowPort,
+                enqueueDomainNotificationUseCase);
     }
 }

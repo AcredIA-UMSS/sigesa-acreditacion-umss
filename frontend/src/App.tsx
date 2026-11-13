@@ -176,6 +176,15 @@ function App() {
         />
 
         <Route
+          path="/procesos/:processId/indicadores/:indicatorId"
+          element={
+            <ProtectedRoute>
+              <ProcessDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/procesos/:processId"
           element={
             <ProtectedRoute>

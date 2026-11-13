@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessSummary;
+import com.umss.sigesa.application.port.in.CloseAccreditationProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
 import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
@@ -65,6 +66,7 @@ public class ProcessController {
     private final NormativeStructureWebMapper normativeStructureWebMapper;
     private final ExportProcessDossierUseCase exportProcessDossierUseCase;
     private final GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
+    private final CloseAccreditationProcessUseCase closeAccreditationProcessUseCase;
 
     @PostMapping
     @PreAuthorize("hasRole('JD')")
@@ -123,6 +125,21 @@ public class ProcessController {
     })
     public ResponseEntity<Void> deleteProcess(@PathVariable UUID processId) {
         deleteProcessUseCase.delete(processId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{processId}/close")
+    @PreAuthorize("hasAnyRole('JD','TD','EE')")
+    @Operation(summary = "Cerrar proceso de acreditación",
+            description = "Marca el proceso CLOSED y notifica a [JD] dual-canal (ProcessClosed). Override: sin gate EE 100%.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Proceso cerrado / notificación encolada"),
+            @ApiResponse(responseCode = "403", description = "No autorizado", content = @Content),
+            @ApiResponse(responseCode = "404", description = "PROCESS_NOT_FOUND", content = @Content)
+    })
+    public ResponseEntity<Void> closeProcess(@PathVariable UUID processId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        closeAccreditationProcessUseCase.close(processId, extractUserId(auth), extractRole(auth));
         return ResponseEntity.noContent().build();
     }
 

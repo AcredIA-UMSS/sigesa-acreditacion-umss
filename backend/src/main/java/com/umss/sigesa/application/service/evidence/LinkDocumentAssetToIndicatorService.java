@@ -8,8 +8,10 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
 import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
@@ -28,6 +30,7 @@ import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceUploadResult;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class LinkDocumentAssetToIndicatorService implements LinkDocumentAssetToIndicatorUseCase {
@@ -36,7 +39,7 @@ public class LinkDocumentAssetToIndicatorService implements LinkDocumentAssetToI
     private final NormativeIndicatorObservationPort observationPort;
     private final NormativeIndicatorWorkflowPort workflowPort;
     private final EvidenceUploadPersistencePort uploadPersistence;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     private final AuditLogPort auditLogPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
     private final DocumentAssetPort documentAssetPort;
@@ -49,7 +52,7 @@ public class LinkDocumentAssetToIndicatorService implements LinkDocumentAssetToI
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
             EvidenceUploadPersistencePort uploadPersistence,
-            NotificationOutboxPort notificationOutbox,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
@@ -60,7 +63,7 @@ public class LinkDocumentAssetToIndicatorService implements LinkDocumentAssetToI
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
         this.uploadPersistence = uploadPersistence;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
         this.auditLogPort = auditLogPort;
         this.assignmentRepository = assignmentRepository;
         this.documentAssetPort = documentAssetPort;
@@ -129,8 +132,16 @@ public class LinkDocumentAssetToIndicatorService implements LinkDocumentAssetToI
         uploadPersistence.persistNormativeIndicatorUpload(
                 evidence, version, null, asset, false, link);
 
-        notificationOutbox.enqueueEvidenceUploaded(
-                command.indicatorId(), evidenceId, context.careerId());
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.EvidenceUploaded,
+                command.indicatorId(),
+                context.careerId(),
+                context.processId(),
+                Map.of(
+                        "indicatorId", command.indicatorId().toString(),
+                        "evidenceId", evidenceId.toString(),
+                        "programId", context.careerId().toString(),
+                        "processId", context.processId().toString())));
         auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
 
         return new NormativeIndicatorEvidenceUploadResult(

@@ -34,6 +34,28 @@ public class NotificationOutboxJpaEntity {
     @Column(name = "recipient_email", length = 255)
     private String recipientEmail;
 
+    @Column(name = "recipient_role", length = 20)
+    private String recipientRole;
+
+    @Column(name = "program_id")
+    private UUID programId;
+
+    @Column(name = "process_id")
+    private UUID processId;
+
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private String channel = "EMAIL";
+
+    @Column(name = "idempotency_key", nullable = false, length = 200)
+    private String idempotencyKey;
+
+    @Column(name = "payload_json", columnDefinition = "TEXT")
+    private String payloadJson;
+
+    @Column(name = "error_detail", length = 500)
+    private String errorDetail;
+
     @Column(nullable = false, length = 255)
     private String subject;
 

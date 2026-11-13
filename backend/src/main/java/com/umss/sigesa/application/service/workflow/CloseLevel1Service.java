@@ -1,9 +1,9 @@
 package com.umss.sigesa.application.service.workflow;
 
 import com.umss.sigesa.application.port.in.CloseLevel1UseCase;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.domain.exception.InvalidLevel1StateException;
 import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
@@ -12,6 +12,8 @@ import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.Level1CompleteResult;
 import com.umss.sigesa.domain.model.PendingIndicator;
 import com.umss.sigesa.domain.model.PhaseState;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,14 +27,14 @@ public class CloseLevel1Service implements CloseLevel1UseCase {
 
     private final NormativeHierarchyQueryPort hierarchyQueryPort;
     private final NormativeIndicatorWorkflowPort workflowPort;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     public CloseLevel1Service(NormativeHierarchyQueryPort hierarchyQueryPort,
                               NormativeIndicatorWorkflowPort workflowPort,
-                              NotificationOutboxPort notificationOutbox) {
+                              EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.workflowPort = workflowPort;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
     }
 
     @Override
@@ -69,13 +71,16 @@ public class CloseLevel1Service implements CloseLevel1UseCase {
 
         workflowPort.updateLevel1Status(level1Id, PhaseState.COMPLETADA);
 
-        notificationOutbox.enqueue(
-                "Level1Completed",
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.Level1Completed,
+                level1Id,
                 context.careerId(),
+                processId,
                 Map.of(
                         "level1Id", level1Id.toString(),
                         "processId", processId.toString(),
-                        "newState", PhaseState.COMPLETADA.name()));
+                        "programId", context.careerId().toString(),
+                        "newState", PhaseState.COMPLETADA.name())));
 
         return new Level1CompleteResult(
                 level1Id,

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Sidebar } from '../../../components/layout/Sidebar';
+import { NotificationBellPopover } from '../../notifications';
 import {
   fetchTechnicianInbox,
   approveIndicator,
@@ -193,9 +194,12 @@ export function TechnicianInboxPage() {
               Indicadores con evidencia lista para aprobar u observar.
             </p>
           </div>
-          <p className="text-body-md text-gray-700">
-            <span className="font-semibold text-primary-800">{totalElements}</span> en esta vista
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-body-md text-gray-700">
+              <span className="font-semibold text-primary-800">{totalElements}</span> en esta vista
+            </p>
+            <NotificationBellPopover variant="header" />
+          </div>
         </header>
 
         {actionSuccessMessage && (

@@ -28,6 +28,13 @@ public class InMemoryUserProgramAssignmentRepository implements UserProgramAssig
     }
 
     @Override
+    public List<UserProgramAssignment> findActiveByProgramId(UUID programId) {
+        return assignments.stream()
+                .filter(a -> a.getProgramId().equals(programId) && a.getRevokedAt() == null)
+                .toList();
+    }
+
+    @Override
     public List<UserProgramAssignment> findActiveByUserId(UUID userId) {
         return assignments.stream()
                 .filter(a -> a.getUserId().equals(userId) && a.isActive())

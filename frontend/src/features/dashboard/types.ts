@@ -52,6 +52,8 @@ export interface ExecutiveSection {
   alertPrograms?: number;
   semaforoProgramas?: Array<{
     programaId: string;
+    /** Active accreditation process for this program, when the API provides it. */
+    processId?: string | null;
     nombre: string;
     facultad?: string;
     estado: 'VERDE' | 'AMARILLO' | 'ROJO' | 'SIN_DATO';

@@ -7,6 +7,7 @@ public record CareerSemaphoreInput(
         int totalIndicators,
         double progressPercentage,
         int pendingObservations,
-        int overdueObservations
+        int overdueObservations,
+        String processId
 ) {
 }

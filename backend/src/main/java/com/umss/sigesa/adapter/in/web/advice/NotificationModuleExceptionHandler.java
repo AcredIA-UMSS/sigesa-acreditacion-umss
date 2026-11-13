@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
 import com.umss.sigesa.domain.exception.NotificationModuleUnavailableException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,7 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
-@RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@RestControllerAdvice(basePackages = "com.umss.sigesa.adapter.in.web")
 public class NotificationModuleExceptionHandler {
 
     @ExceptionHandler(NotificationModuleUnavailableException.class)

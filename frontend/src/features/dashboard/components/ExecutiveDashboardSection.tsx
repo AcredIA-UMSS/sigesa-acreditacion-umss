@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Award,
   TrendingUp,
@@ -73,8 +73,15 @@ function groupByFaculty(programs: SemaphoreProgram[]) {
 }
 
 export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSectionProps) {
+  const navigate = useNavigate();
   const programs = section.semaforoProgramas ?? [];
   const facultyGroups = groupByFaculty(programs);
+
+  function goToProcess(program: SemaphoreProgram) {
+    if (program.processId) {
+      navigate(`/procesos/${program.processId}`);
+    }
+  }
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -205,8 +212,23 @@ export function ExecutiveDashboardSection({ section }: ExecutiveDashboardSection
                     <tbody className="divide-y divide-gray-50">
                       {facultyPrograms.map((prog) => {
                         const presentation = semaphorePresentation(prog.estado);
+                        const canOpenProcess = Boolean(prog.processId);
                         return (
-                          <tr key={prog.programaId} className="hover:bg-gray-50/50 transition-colors">
+                          <tr
+                            key={prog.programaId}
+                            className={`hover:bg-gray-50/50 transition-colors ${canOpenProcess ? 'cursor-pointer' : ''}`}
+                            onClick={() => goToProcess(prog)}
+                            onKeyDown={(event) => {
+                              if (!canOpenProcess) return;
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                goToProcess(prog);
+                              }
+                            }}
+                            tabIndex={canOpenProcess ? 0 : undefined}
+                            role={canOpenProcess ? 'link' : undefined}
+                            aria-label={canOpenProcess ? `Abrir proceso de ${prog.nombre}` : undefined}
+                          >
                             <td className="py-4">
                               <div className="font-semibold text-primary-800">{prog.nombre}</div>
                             </td>

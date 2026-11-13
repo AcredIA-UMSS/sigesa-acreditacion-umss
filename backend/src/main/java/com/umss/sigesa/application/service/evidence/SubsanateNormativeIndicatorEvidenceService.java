@@ -8,7 +8,10 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.EvidenceNotFoundException;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
@@ -23,6 +26,7 @@ import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.NormativeIndicatorEvidenceSubsanationCommand;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,6 +53,7 @@ public class SubsanateNormativeIndicatorEvidenceService implements SubsanateNorm
     private final EvidenceBlobStoragePort blobStorage;
     private final ContentHashPort contentHashPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     public SubsanateNormativeIndicatorEvidenceService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
@@ -58,7 +63,8 @@ public class SubsanateNormativeIndicatorEvidenceService implements SubsanateNorm
             EvidenceUploadPersistencePort uploadPersistence,
             EvidenceBlobStoragePort blobStorage,
             ContentHashPort contentHashPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.observationPort = observationPort;
         this.evidenceQueryPort = evidenceQueryPort;
@@ -67,6 +73,7 @@ public class SubsanateNormativeIndicatorEvidenceService implements SubsanateNorm
         this.blobStorage = blobStorage;
         this.contentHashPort = contentHashPort;
         this.assignmentRepository = assignmentRepository;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
     }
 
     @Override
@@ -132,6 +139,18 @@ public class SubsanateNormativeIndicatorEvidenceService implements SubsanateNorm
         if (context.status() == IndicatorState.OBSERVADO) {
             workflowPort.updateIndicatorStatus(command.indicatorId(), IndicatorState.SUBSANADO);
         }
+
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.EvidenceSubsanated,
+                command.indicatorId(),
+                context.careerId(),
+                context.processId(),
+                Map.of(
+                        "indicatorId", command.indicatorId().toString(),
+                        "evidenceId", command.evidenceId().toString(),
+                        "observationId", openObservation.getId().toString(),
+                        "programId", context.careerId().toString(),
+                        "processId", context.processId().toString())));
 
         return new EvidenceSubsanationResult(
                 command.evidenceId(),

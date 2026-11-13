@@ -730,8 +730,23 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | ID | Resumen |
 |----|---------|
 | API-REP-01…03 | PDF ejecutivo [JD] — FSD-UC-014 |
-| API-NOTIF-01 | Outbox interno — FSD-UC-015 |
+| API-NOTIF-01 | Outbox interno (EMAIL worker) — FSD-UC-015 |
+| API-NOTIF-02 | `GET /api/v1/notifications/me?unreadOnly=&page=&size=` — listado in-app del usuario autenticado — FSD-UC-015 |
+| API-NOTIF-03 | `POST /api/v1/notifications/{id}/read` — 204; 404 si no es del usuario — FSD-UC-015 |
+| API-NOTIF-04 | `POST /api/v1/notifications/me/read-all` — 204 — FSD-UC-015 |
 | API-PUB-01 | `GET /api/v1/public/programs/{slug}` — estado publicado — FSD-UC-016 |
+
+### API-NOTIF-02 — Listado in-app (yo)
+
+**Auth** Bearer obligatorio. **200** Spring `Page` de `{ id, eventType, title, body, deepLink, programId, processId, readAt, createdAt }`. Solo filas del `userId` del JWT. `unreadOnly=true` filtra `readAt IS NULL`.
+
+### API-NOTIF-03 — Marcar leída
+
+**204** si la notificación pertenece al usuario (idempotente si ya leída). **404** cross-user o inexistente.
+
+### API-NOTIF-04 — Marcar todas leídas
+
+**204** — marca `read_at` en todas las in-app del usuario autenticado.
 | API-PUB-02 | `GET /api/v1/public/programs` — listado `{slug,name}` solo publicadas — FSD-UC-016 (adición 2026-11-04) |
 | API-PUB-03 | `GET /api/v1/public/programs/{slug}/certificate` — PDF si certificado publicado; 404 genérico — FSD-UC-016 / PRD-US-020 |
 | API-NEWS-01 | `GET /api/v1/public/news` — listado publicado paginado (`page`,`size`) — FSD-UC-035 |

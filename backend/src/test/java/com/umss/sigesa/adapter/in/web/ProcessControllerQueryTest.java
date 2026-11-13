@@ -50,6 +50,8 @@ class ProcessControllerQueryTest {
     private ExportProcessDossierUseCase exportProcessDossierUseCase;
     @Mock
     private GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase;
+    @Mock
+    private com.umss.sigesa.application.port.in.CloseAccreditationProcessUseCase closeAccreditationProcessUseCase;
 
     private MockMvc mockMvc;
 
@@ -63,7 +65,8 @@ class ProcessControllerQueryTest {
                 userProgramAssignmentRepositoryPort,
                 new NormativeStructureWebMapper(),
                 exportProcessDossierUseCase,
-                getProcessDossierExportJobStatusUseCase
+                getProcessDossierExportJobStatusUseCase,
+                closeAccreditationProcessUseCase
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ProcessExceptionHandler())

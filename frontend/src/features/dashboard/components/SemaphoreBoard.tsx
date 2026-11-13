@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import { loadSession } from '../../../lib/auth/tokenStorage';
 import type { ExecutiveSection } from '../types';
@@ -6,6 +7,12 @@ import type { ExecutiveSection } from '../types';
 type SemaphoreProgram = NonNullable<ExecutiveSection['semaforoProgramas']>[number];
 type SemaphoreTone = SemaphoreProgram['estado'];
 type ToneFilter = 'TODOS' | SemaphoreTone;
+
+export type SemaphoreBoardProps = {
+  section: ExecutiveSection;
+  /** Fallback process ids by program when the dashboard payload omits processId. */
+  processIdByProgramId?: ReadonlyMap<string, string>;
+};
 
 interface SemaphoreObservation {
   observationId?: string;
@@ -89,7 +96,8 @@ function isOverdue(dueDate?: string) {
   return due < today;
 }
 
-export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
+export function SemaphoreBoard({ section, processIdByProgramId }: SemaphoreBoardProps) {
+  const navigate = useNavigate();
   const programs = section.semaforoProgramas ?? [];
   const [query, setQuery] = useState('');
   const [tone, setTone] = useState<ToneFilter>('TODOS');
@@ -97,6 +105,21 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
   const [observations, setObservations] = useState<SemaphoreObservation[]>([]);
   const [observationsError, setObservationsError] = useState<string | null>(null);
   const [loadingObservations, setLoadingObservations] = useState(false);
+
+  function resolveProcessId(program: SemaphoreProgram): string | null {
+    if (program.processId?.trim()) {
+      return program.processId.trim();
+    }
+    return processIdByProgramId?.get(program.programaId) ?? null;
+  }
+
+  function openProcess(program: SemaphoreProgram) {
+    const processId = resolveProcessId(program);
+    if (!processId) {
+      return;
+    }
+    navigate(`/procesos/${processId}`);
+  }
 
   useEffect(() => {
     if (!selected) return;
@@ -191,10 +214,15 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
                   const toneStyle = toneClasses(program.estado);
                   const progress = program.avance;
                   const selectedRow = selected?.programaId === program.programaId;
+                  const processId = resolveProcessId(program);
+                  const canOpenProcess = Boolean(processId);
                   return (
                     <tr
                       key={program.programaId}
-                      className={`border-b border-gray-100 ${selectedRow ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                      className={`border-b border-gray-100 ${selectedRow ? 'bg-primary-50' : 'hover:bg-gray-50'} ${
+                        canOpenProcess ? 'cursor-pointer' : ''
+                      }`}
+                      onClick={() => openProcess(program)}
                     >
                       <td className="px-4 py-3 align-middle text-body-md text-gray-700">
                         {facultyLabel(program.facultad)}
@@ -220,17 +248,35 @@ export function SemaphoreBoard({ section }: { section: ExecutiveSection }) {
                       <td className="px-4 py-3 align-middle">
                         <button
                           type="button"
-                          onClick={() => openObservations(program)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void openObservations(program);
+                          }}
                           className="text-body-md font-semibold text-primary underline-offset-2 hover:underline"
                         >
                           Ver
                         </button>
                       </td>
                       <td className="px-4 py-3 align-middle">
-                        <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-label-md font-semibold ${toneStyle.pill}`}>
-                          <span className={`h-2.5 w-2.5 rounded-full ${toneStyle.dot}`} />
-                          {toneLabel(program.estado)}
-                        </span>
+                        {canOpenProcess ? (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openProcess(program);
+                            }}
+                            className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-label-md font-semibold ${toneStyle.pill} hover:opacity-90`}
+                            title="Abrir proceso"
+                          >
+                            <span className={`h-2.5 w-2.5 rounded-full ${toneStyle.dot}`} />
+                            {toneLabel(program.estado)}
+                          </button>
+                        ) : (
+                          <span className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-label-md font-semibold ${toneStyle.pill}`}>
+                            <span className={`h-2.5 w-2.5 rounded-full ${toneStyle.dot}`} />
+                            {toneLabel(program.estado)}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );

@@ -13,4 +13,5 @@ export interface ProgramTrafficLight {
   name?: string;
   programId?: string;
   status?: string;
+  processId?: string;
 }

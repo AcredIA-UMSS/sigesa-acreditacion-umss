@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.evidence;
 
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
@@ -7,7 +8,6 @@ import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadLockPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
@@ -15,9 +15,12 @@ import com.umss.sigesa.domain.model.EvidenceUploadCommand;
 import com.umss.sigesa.domain.model.Indicator;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,7 +56,7 @@ class UploadEvidenceServiceTest {
     @Mock
     private EvidenceUploadLockPort uploadLock;
     @Mock
-    private NotificationOutboxPort notificationOutbox;
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     @Mock
     private AuditLogPort auditLogPort;
     @Mock
@@ -90,7 +93,12 @@ class UploadEvidenceServiceTest {
         assertEquals(IndicatorState.SUBIDO, result.currentState());
         assertEquals(UploadEvidenceService.EVENT_EVIDENCE_UPLOADED, result.event());
         verify(uploadPersistence).persistUpload(any(), any(), any());
-        verify(notificationOutbox).enqueueEvidenceUploaded(eq(indicatorId), any(), eq(programId));
+        ArgumentCaptor<DomainNotificationCommand> notifyCaptor =
+                ArgumentCaptor.forClass(DomainNotificationCommand.class);
+        verify(enqueueDomainNotificationUseCase).enqueue(notifyCaptor.capture());
+        assertEquals(NotificationEventType.EvidenceUploaded, notifyCaptor.getValue().eventType());
+        assertEquals(indicatorId, notifyCaptor.getValue().aggregateId());
+        assertEquals(programId, notifyCaptor.getValue().programId());
         verify(uploadLock).release(indicatorId);
     }
 

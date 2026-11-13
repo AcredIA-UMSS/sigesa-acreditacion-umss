@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+/**
+ * Always-available log-only fallback for {@link NotificationSenderPort}.
+ * When {@code spring.mail.host} is set, {@link JavaMailNotificationSenderAdapter}
+ * is registered as {@code @Primary} and takes precedence for injection.
+ */
 @Component
 public class DefaultNotificationSenderAdapter implements NotificationSenderPort {
 
@@ -14,9 +19,7 @@ public class DefaultNotificationSenderAdapter implements NotificationSenderPort 
 
     @Override
     public void send(UUID notificationId, String recipientEmail, String subject, String body, String deepLink) {
-        // En producción se vincula con JavaMailSender / SES / SMTP client configurado con timeout <= 10s.
-        // Aquí se ejecuta el dispatch físico registrando salida estructurada sin retener transacciones de BD.
-        log.info("DISPATCH_NOTIFICATION [SUCCESS] id={} recipient={} subject='{}' deepLink={}",
+        log.info("DISPATCH_NOTIFICATION [SUCCESS] id={} recipient={} subject='{}' deepLink={} (log-only fallback)",
                 notificationId, recipientEmail, subject, deepLink);
     }
 }

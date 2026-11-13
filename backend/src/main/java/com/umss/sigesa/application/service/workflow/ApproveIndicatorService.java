@@ -1,11 +1,11 @@
 package com.umss.sigesa.application.service.workflow;
 
 import com.umss.sigesa.application.port.in.ApproveIndicatorUseCase;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
@@ -13,6 +13,8 @@ import com.umss.sigesa.domain.exception.InvalidRoleException;
 import com.umss.sigesa.domain.exception.SubsanationNotAllowedException;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.IndicatorWorkflowResult;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 
 import java.util.EnumSet;
 import java.util.Locale;
@@ -30,19 +32,19 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
     private final NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
     private final NormativeIndicatorObservationPort observationPort;
     private final NormativeIndicatorWorkflowPort workflowPort;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     public ApproveIndicatorService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            NotificationOutboxPort notificationOutbox) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.evidenceQueryPort = evidenceQueryPort;
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
     }
 
     @Override
@@ -72,12 +74,16 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
 
         workflowPort.updateIndicatorStatus(indicatorId, IndicatorState.APROBADO);
 
-        notificationOutbox.enqueue(
-                "IndicatorApproved",
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.IndicatorApproved,
+                indicatorId,
                 context.careerId(),
+                context.processId(),
                 Map.of(
                         "indicatorId", indicatorId.toString(),
-                        "newState", IndicatorState.APROBADO.name()));
+                        "processId", context.processId().toString(),
+                        "programId", context.careerId().toString(),
+                        "newState", IndicatorState.APROBADO.name())));
 
         return new IndicatorWorkflowResult(
                 indicatorId,

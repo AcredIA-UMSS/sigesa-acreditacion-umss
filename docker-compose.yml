@@ -83,6 +83,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      smtp:
+        condition: service_healthy
     environment:
       - SIGESA_IN_DOCKER=true
       - SPRING_PROFILES_ACTIVE=dev
@@ -111,6 +113,13 @@ services:
       - SIGESA_S3_REGION=${SIGESA_S3_REGION:-us-east-1}
       - SIGESA_S3_PATH_STYLE=true
       - SIGESA_PUBLIC_BASE_URL=${SIGESA_PUBLIC_BASE_URL:-http://localhost:3000}
+      # Configuración SMTP (sigesa-smtp)
+      - SPRING_MAIL_HOST=sigesa-smtp
+      - SPRING_MAIL_PORT=2525
+      - SPRING_MAIL_USERNAME=
+      - SPRING_MAIL_PASSWORD=
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=false
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=false
 
     ports:
       - "8080:8080"
@@ -136,6 +145,30 @@ services:
       - minio_data:/data
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://127.0.0.1:9000/minio/health/live >/dev/null || wget -qO- http://127.0.0.1:9000/minio/health/live >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  smtp:
+    build:
+      context: ./smtp
+      dockerfile: Dockerfile
+    container_name: sigesa-smtp
+    restart: unless-stopped
+    ports:
+      - "2525:2525"
+      - "8025:8025"
+    environment:
+      SMTP_ALLOWED_DOMAIN: ${SMTP_ALLOWED_DOMAIN:-umss.edu.bo}
+      SMTP_HOST: 0.0.0.0
+      SMTP_PORT: 2525
+      SMTP_HTTP_PORT: 8025
+      SMTP_DATA_DIR: /data
+    volumes:
+      - smtp_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8025/api/messages', timeout=2)\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -192,3 +225,4 @@ volumes:
   open-webui:
   ollama_state:
   minio_data:
+  smtp_data:

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -41,4 +42,11 @@ public interface ObservationJpaRepository extends JpaRepository<ObservationEntit
 
     @Query("SELECT o FROM ObservationEntity o WHERE o.status IN ('APROBADO', 'RECHAZADO') ORDER BY o.issueDate DESC")
     List<ObservationEntity> findRecentEvaluations(Pageable pageable);
+
+    @Query("SELECT o FROM ObservationEntity o WHERE o.dueDate BETWEEN :from AND :to "
+            + "AND o.status NOT IN ('APROBADO', 'RESOLVED', 'CERRADA', 'CLOSED') "
+            + "ORDER BY o.dueDate ASC")
+    List<ObservationEntity> findApproachingDeadlines(
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }

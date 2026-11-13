@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.evidence;
 
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.UploadEvidenceUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.ContentHashPort;
@@ -8,8 +9,9 @@ import com.umss.sigesa.application.port.out.EvidenceRepositoryPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadLockPort;
 import com.umss.sigesa.application.port.out.EvidenceUploadPersistencePort;
 import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
@@ -27,6 +29,7 @@ import com.umss.sigesa.domain.model.IndicatorStateHistoryEntry;
 import com.umss.sigesa.domain.model.Role;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,7 +54,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
     private final EvidenceBlobStoragePort blobStorage;
     private final ContentHashPort contentHashPort;
     private final EvidenceUploadLockPort uploadLock;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     private final AuditLogPort auditLogPort;
     private final UserProgramAssignmentRepositoryPort assignmentRepository;
 
@@ -61,7 +64,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
                                  EvidenceBlobStoragePort blobStorage,
                                  ContentHashPort contentHashPort,
                                  EvidenceUploadLockPort uploadLock,
-                                 NotificationOutboxPort notificationOutbox,
+                                 EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
                                  AuditLogPort auditLogPort,
                                  UserProgramAssignmentRepositoryPort assignmentRepository) {
         this.indicatorRepository = indicatorRepository;
@@ -70,7 +73,7 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
         this.blobStorage = blobStorage;
         this.contentHashPort = contentHashPort;
         this.uploadLock = uploadLock;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
         this.auditLogPort = auditLogPort;
         this.assignmentRepository = assignmentRepository;
     }
@@ -132,8 +135,17 @@ public class UploadEvidenceService implements UploadEvidenceUseCase {
                 throw ex;
             }
 
-            notificationOutbox.enqueueEvidenceUploaded(
-                    command.indicatorId(), evidenceId, indicator.getProgramId());
+            enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                    NotificationEventType.EvidenceUploaded,
+                    command.indicatorId(),
+                    indicator.getProgramId(),
+                    null,
+                    Map.of(
+                            "indicatorId", command.indicatorId().toString(),
+                            "evidenceId", evidenceId.toString(),
+                            "programId", indicator.getProgramId() != null
+                                    ? indicator.getProgramId().toString()
+                                    : "")));
             auditLogPort.logEvidenceUploaded(command.uploadedBy(), evidenceId, command.indicatorId());
 
             return new EvidenceUploadResult(

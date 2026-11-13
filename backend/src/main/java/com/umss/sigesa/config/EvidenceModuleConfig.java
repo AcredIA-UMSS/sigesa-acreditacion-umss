@@ -29,7 +29,7 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.evaluation.CaeDelegationGuard;
@@ -62,7 +62,7 @@ public class EvidenceModuleConfig {
             EvidenceBlobStoragePort blobStorage,
             ContentHashPort contentHashPort,
             EvidenceUploadLockPort uploadLock,
-            NotificationOutboxPort notificationOutbox,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository) {
         return new UploadEvidenceService(
@@ -72,7 +72,7 @@ public class EvidenceModuleConfig {
                 blobStorage,
                 contentHashPort,
                 uploadLock,
-                notificationOutbox,
+                enqueueDomainNotificationUseCase,
                 auditLogPort,
                 assignmentRepository
         );
@@ -86,7 +86,7 @@ public class EvidenceModuleConfig {
             EvidenceUploadPersistencePort uploadPersistence,
             EvidenceBlobStoragePort blobStorage,
             ContentHashPort contentHashPort,
-            NotificationOutboxPort notificationOutbox,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
@@ -100,7 +100,7 @@ public class EvidenceModuleConfig {
                 uploadPersistence,
                 blobStorage,
                 contentHashPort,
-                notificationOutbox,
+                enqueueDomainNotificationUseCase,
                 auditLogPort,
                 assignmentRepository,
                 documentAssetPort,
@@ -115,7 +115,7 @@ public class EvidenceModuleConfig {
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
             EvidenceUploadPersistencePort uploadPersistence,
-            NotificationOutboxPort notificationOutbox,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
             AuditLogPort auditLogPort,
             UserProgramAssignmentRepositoryPort assignmentRepository,
             DocumentAssetPort documentAssetPort,
@@ -127,7 +127,7 @@ public class EvidenceModuleConfig {
                 observationPort,
                 workflowPort,
                 uploadPersistence,
-                notificationOutbox,
+                enqueueDomainNotificationUseCase,
                 auditLogPort,
                 assignmentRepository,
                 documentAssetPort,
@@ -173,7 +173,8 @@ public class EvidenceModuleConfig {
             EvidenceUploadPersistencePort uploadPersistence,
             EvidenceBlobStoragePort blobStorage,
             ContentHashPort contentHashPort,
-            UserProgramAssignmentRepositoryPort assignmentRepository) {
+            UserProgramAssignmentRepositoryPort assignmentRepository,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         return new SubsanateNormativeIndicatorEvidenceService(
                 hierarchyQueryPort,
                 observationPort,
@@ -182,7 +183,8 @@ public class EvidenceModuleConfig {
                 uploadPersistence,
                 blobStorage,
                 contentHashPort,
-                assignmentRepository);
+                assignmentRepository,
+                enqueueDomainNotificationUseCase);
     }
 
     @Bean

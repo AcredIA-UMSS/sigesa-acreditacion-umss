@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -41,6 +42,9 @@ public class IndicatorObservationJpaEntity {
 
     @Column(name = "resolved_version_id")
     private UUID resolvedVersionId;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

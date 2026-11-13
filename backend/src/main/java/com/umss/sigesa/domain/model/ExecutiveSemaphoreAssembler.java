@@ -36,7 +36,8 @@ public final class ExecutiveSemaphoreAssembler {
                     status,
                     career.pendingObservations(),
                     career.faculty(),
-                    completion));
+                    completion,
+                    career.processId()));
         }
 
         double average = withData == 0 ? 0.0 : Math.round((progressSum / withData) * 100.0) / 100.0;

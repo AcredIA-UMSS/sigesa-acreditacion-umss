@@ -1,11 +1,11 @@
 package com.umss.sigesa.application.service.workflow;
 
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.RejectIndicatorUseCase;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
@@ -15,7 +15,10 @@ import com.umss.sigesa.domain.model.IndicatorObservation;
 import com.umss.sigesa.domain.model.IndicatorState;
 import com.umss.sigesa.domain.model.IndicatorWorkflowResult;
 import com.umss.sigesa.domain.model.IndicatorObservationStatus;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -34,19 +37,22 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
     private final NormativeIndicatorEvidenceQueryPort evidenceQueryPort;
     private final NormativeIndicatorObservationPort observationPort;
     private final NormativeIndicatorWorkflowPort workflowPort;
-    private final NotificationOutboxPort notificationOutbox;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
+    private final int deadlineDays;
 
     public RejectIndicatorService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            NotificationOutboxPort notificationOutbox) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
+            int deadlineDays) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.evidenceQueryPort = evidenceQueryPort;
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
-        this.notificationOutbox = notificationOutbox;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
+        this.deadlineDays = Math.max(deadlineDays, 1);
     }
 
     @Override
@@ -84,6 +90,7 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
                 .authorRole(actorRole.trim().toUpperCase(Locale.ROOT))
                 .body(justification.trim())
                 .status(IndicatorObservationStatus.OPEN)
+                .dueDate(LocalDate.now().plusDays(deadlineDays))
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
@@ -91,13 +98,17 @@ public class RejectIndicatorService implements RejectIndicatorUseCase {
 
         workflowPort.updateIndicatorStatus(indicatorId, IndicatorState.OBSERVADO);
 
-        notificationOutbox.enqueue(
-                "IndicatorRejected",
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.IndicatorRejected,
+                indicatorId,
                 context.careerId(),
+                context.processId(),
                 Map.of(
                         "indicatorId", indicatorId.toString(),
                         "observationId", observationId.toString(),
-                        "newState", IndicatorState.OBSERVADO.name()));
+                        "processId", context.processId().toString(),
+                        "programId", context.careerId().toString(),
+                        "newState", IndicatorState.OBSERVADO.name())));
 
         return new IndicatorWorkflowResult(
                 indicatorId,

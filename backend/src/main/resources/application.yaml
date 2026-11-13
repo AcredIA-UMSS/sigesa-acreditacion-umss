@@ -11,6 +11,20 @@ spring:
       enabled: true
   application:
     name: sigesa
+  mail:
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:2525}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:false}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
   devtools:
     restart:
       poll-interval: 2s
@@ -51,6 +65,13 @@ spring:
       max-request-size: 55MB
 
 sigesa:
+  mail:
+    from: ${SIGESA_MAIL_FROM:no-reply@umss.edu.bo}
+  notify:
+    deadline-cron: ${SIGESA_NOTIFY_DEADLINE_CRON:0 0 7 * * *}
+    deadline-days: ${SIGESA_NOTIFY_DEADLINE_DAYS:3}
+  outbox:
+    poll-interval-ms: ${SIGESA_OUTBOX_POLL_INTERVAL_MS:5000}
   public:
     base-url: ${SIGESA_PUBLIC_BASE_URL:http://localhost:5173}
   extraction:

@@ -1,25 +1,32 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, Pencil, RefreshCw } from 'lucide-react';
-import { useDossierExport } from '../hooks/useDossierExport';
+import { ArrowLeft, Download, Lock, Pencil, RefreshCw } from 'lucide-react';
+import {
+  getGetProcessQueryKey,
+  getListProcessesQueryKey,
+  useCloseProcess,
+} from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
+import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
+import { getApiErrorMessage } from '../../../lib/api/mapApiError';
 import { useAuth } from '../../../lib/auth/useAuth';
+import { useDossierExport } from '../hooks/useDossierExport';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
 import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
-import { MethodologicalStageTimelineContainer } from './MethodologicalStageTimelineContainer';
 import { EvaluationMetricsPanelContainer } from './EvaluationMetricsPanelContainer';
-import { ImprovementPlanPanelContainer } from './ImprovementPlanPanelContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 import { ProcessOperationalModeBadge } from './ProcessOperationalModeBadge';
-import { ProcessFreezePanelContainer } from './ProcessFreezePanelContainer';
-import { PeerRoomChecklistPanelContainer } from './PeerRoomChecklistPanelContainer';
-import { DelegationsPanelContainer } from './DelegationsPanelContainer';
 import { ObservationsPanel } from '../../observations/components/ObservationsPanel';
 
 interface ProcessDetailViewProps {
   processId: string;
+  /** Deep-link target from notifications: /procesos/:id/indicadores/:indicatorId */
+  initialIndicatorId?: string;
+  initialObservationId?: string;
 }
 
 function formatDate(iso?: string): string {
@@ -34,13 +41,25 @@ function formatDate(iso?: string): string {
   }
 }
 
-export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
+export function ProcessDetailView({ processId, initialIndicatorId, initialObservationId }: ProcessDetailViewProps) {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [closeError, setCloseError] = useState<string | null>(null);
+  const { mutateAsync: closeProcess, isPending: isClosing } = useCloseProcess({
+    mutation: {
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) }),
+          queryClient.invalidateQueries({ queryKey: getListProcessesQueryKey() }),
+        ]);
+      },
+    },
+  });
   const operationalMode = process?.operationalMode ?? 'ACTIVE';
   const isAuditFrozen = operationalMode === 'AUDIT_READONLY';
-  const isMonitoring = operationalMode === 'IMPROVEMENT_MONITORING';
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
   const canUploadEvidence =
@@ -49,8 +68,13 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
   const canReviewEvidence = session?.role === 'TD';
   const canSeeObservations = session?.role === 'TD' || session?.role === 'CC';
+  const canCloseProcess =
+    (session?.role === 'JD' || session?.role === 'TD' || session?.role === 'EE') &&
+    process?.status === 'ACTIVE';
   const structureAnchorRef = useRef<HTMLDivElement>(null);
-  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>();
+  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>(
+    initialIndicatorId,
+  );
 
   const navigateToIndicator = useCallback((indicatorId: string) => {
     setExpandToIndicatorId(indicatorId);
@@ -64,7 +88,33 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
     }, 150);
   }, []);
 
+  // Deep-link from notifications: expand + scroll once the process tree is loaded.
+  useEffect(() => {
+    if (!initialIndicatorId || !process || isLoading) {
+      return;
+    }
+    navigateToIndicator(initialIndicatorId);
+  }, [initialIndicatorId, process, isLoading, navigateToIndicator]);
+
+  // initialObservationId reserved for future observation highlighting in the tree.
+  void initialObservationId;
+
   const { exportDossier, isPending: isExporting, progress, error: exportError } = useDossierExport(processId);
+
+  const handleConfirmClose = async () => {
+    setCloseError(null);
+    try {
+      const response = await closeProcess({ processId });
+      if (response.status !== 204) {
+        setCloseError('No se pudo cerrar el proceso.');
+        return;
+      }
+      setCloseDialogOpen(false);
+      await refetch();
+    } catch (error) {
+      setCloseError(getApiErrorMessage(error, 'No se pudo cerrar el proceso.'));
+    }
+  };
 
   return (
     <div className="space-y-6" ref={structureAnchorRef}>
@@ -123,6 +173,20 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
                 <ProcessOperationalModeBadge mode={process.operationalMode} />
+                {canCloseProcess && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setCloseError(null);
+                      setCloseDialogOpen(true);
+                    }}
+                    disabled={isClosing}
+                    className="bg-body text-primary-700 hover:bg-primary-50"
+                  >
+                    <Lock size={16} />
+                    Cerrar proceso
+                  </Button>
+                )}
               </div>
             </div>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -154,30 +218,7 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
 
           <EvaluationMetricsPanelContainer processId={processId} />
 
-          <ProcessFreezePanelContainer processId={processId} />
-
-          {session?.role !== 'CAE_MEMBER' && (
-            <PeerRoomChecklistPanelContainer processId={processId} />
-          )}
-
-          {(session?.role === 'CC' || session?.role === 'JD') && (
-            <DelegationsPanelContainer
-              processId={processId}
-              level1Nodes={process.level1Nodes ?? []}
-            />
-          )}
-
-          <ImprovementPlanPanelContainer
-            processId={processId}
-            operationalMode={operationalMode}
-            frozen={isAuditFrozen}
-          />
-
-          <MethodologicalStageTimelineContainer
-            processId={processId}
-            frozen={isAuditFrozen}
-            monitoring={isMonitoring}
-          />
+          {/* Temporarily hidden: congelamiento, sala de pares, CAE, plan mejoras, ciclo metodológico */}
 
           {canSeeObservations && session && (
             <ObservationsPanel processId={processId} role={session.role} />
@@ -231,6 +272,29 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
           </section>
         </div>
       )}
+
+      {closeError && <Alert variant="error">{closeError}</Alert>}
+
+      <ConfirmDialog
+        isOpen={closeDialogOpen}
+        title="Cerrar proceso de acreditación"
+        description={
+          process
+            ? `¿Cerrar el proceso de ${process.careerName ?? 'esta carrera'}? Pasará a estado CLOSED y se notificará a jefatura [JD] por correo e in-app.`
+            : '¿Cerrar este proceso de acreditación?'
+        }
+        confirmLabel="Cerrar proceso"
+        confirmVariant="danger"
+        isLoading={isClosing}
+        onClose={() => {
+          if (!isClosing) {
+            setCloseDialogOpen(false);
+          }
+        }}
+        onConfirm={() => {
+          void handleConfirmClose();
+        }}
+      />
     </div>
   );
 }

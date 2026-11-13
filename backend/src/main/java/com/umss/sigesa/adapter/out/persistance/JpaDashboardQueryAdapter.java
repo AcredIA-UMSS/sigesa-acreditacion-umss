@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.out.persistance;
 
+import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.ObservationEntity;
@@ -26,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -150,6 +152,8 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
         careerIds.addAll(programs.keySet());
         careerIds.addAll(summaries.keySet());
 
+        Map<UUID, String> latestProcessIds = resolveLatestProcessIds(careerIds);
+
         List<CareerSemaphoreInput> inputs = new ArrayList<>();
         for (UUID careerId : careerIds) {
             inputs.add(toSemaphoreInput(
@@ -157,7 +161,8 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                     programs.get(careerId),
                     summaries.get(careerId),
                     indicatorCounts.getOrDefault(careerId, new int[3]),
-                    observationCounts.getOrDefault(careerId, new int[2])));
+                    observationCounts.getOrDefault(careerId, new int[2]),
+                    latestProcessIds.get(careerId)));
         }
         inputs.sort(Comparator.comparing(CareerSemaphoreInput::faculty, Comparator.nullsLast(String::compareTo))
                 .thenComparing(CareerSemaphoreInput::name, Comparator.nullsLast(String::compareTo)));
@@ -207,12 +212,49 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
         return status != null && CLOSED_OBSERVATION_STATUSES.contains(status);
     }
 
+    private Map<UUID, String> resolveLatestProcessIds(Set<UUID> careerIds) {
+        if (careerIds.isEmpty()) {
+            return Map.of();
+        }
+        List<AccreditationProcessJpaEntity> processes =
+                processRepository.findByCareerIdInOrderByStartDateDesc(careerIds);
+        Map<UUID, List<AccreditationProcessJpaEntity>> byCareer = new HashMap<>();
+        for (AccreditationProcessJpaEntity process : processes) {
+            if (process.getCareerId() == null || ProcessStatus.ARCHIVED.name().equals(process.getStatus())) {
+                continue;
+            }
+            byCareer.computeIfAbsent(process.getCareerId(), ignored -> new ArrayList<>()).add(process);
+        }
+
+        Map<UUID, String> result = new HashMap<>();
+        for (Map.Entry<UUID, List<AccreditationProcessJpaEntity>> entry : byCareer.entrySet()) {
+            pickPreferredProcess(entry.getValue())
+                    .ifPresent(chosen -> result.put(entry.getKey(), chosen.getId().toString()));
+        }
+        return result;
+    }
+
+    /**
+     * Prefer ACTIVE, then CLOSED, then any other non-ARCHIVED. Within a status, list order is startDate DESC.
+     */
+    private static Optional<AccreditationProcessJpaEntity> pickPreferredProcess(
+            List<AccreditationProcessJpaEntity> candidates) {
+        return candidates.stream()
+                .filter(p -> ProcessStatus.ACTIVE.name().equals(p.getStatus()))
+                .findFirst()
+                .or(() -> candidates.stream()
+                        .filter(p -> ProcessStatus.CLOSED.name().equals(p.getStatus()))
+                        .findFirst())
+                .or(() -> candidates.stream().findFirst());
+    }
+
     private CareerSemaphoreInput toSemaphoreInput(
             UUID careerId,
             ProgramJpaEntity program,
             ProgramDashboardSummaryEntity summary,
             int[] indicators,
-            int[] observations) {
+            int[] observations,
+            String processId) {
         int total = indicators[0];
         int approved = indicators[1];
         int observed = indicators[2];
@@ -248,7 +290,8 @@ public class JpaDashboardQueryAdapter implements DashboardQueryPort {
                 total,
                 progress,
                 pending,
-                overdue);
+                overdue,
+                processId);
     }
 
     @Override

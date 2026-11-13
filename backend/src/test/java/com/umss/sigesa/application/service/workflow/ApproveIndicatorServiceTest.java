@@ -4,7 +4,8 @@ import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
-import com.umss.sigesa.application.port.out.NotificationOutboxPort;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
 import com.umss.sigesa.domain.exception.IndicatorNotFoundException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
@@ -24,8 +25,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,7 +41,7 @@ class ApproveIndicatorServiceTest {
     @Mock
     private NormativeIndicatorWorkflowPort workflowPort;
     @Mock
-    private NotificationOutboxPort notificationOutbox;
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     @InjectMocks
     private ApproveIndicatorService service;
@@ -66,7 +65,10 @@ class ApproveIndicatorServiceTest {
         assertEquals(IndicatorState.SUBIDO, result.previousState());
         assertEquals(IndicatorState.APROBADO, result.newState());
         verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.APROBADO);
-        verify(notificationOutbox).enqueue(eq("IndicatorApproved"), eq(careerId), any());
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.IndicatorApproved
+                        && cmd.programId().equals(careerId)
+                        && cmd.aggregateId().equals(indicatorId)));
     }
 
     @Test

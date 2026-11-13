@@ -21,6 +21,7 @@ import {
   Gauge,
   Newspaper,
 } from 'lucide-react';
+import { NotificationBellPopover } from '../../features/notifications';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
 
@@ -348,17 +349,8 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                   </ul>
                 )}
               </div>
-            ) : (
-              <NavItem
-                icon={<BarChart size={20} />}
-                label="REPORTES"
-                isExpanded={isExpanded}
-                hasDropdown
-                active={session?.role === 'TD'
-                  ? location.pathname.startsWith('/reportes') && !location.pathname.startsWith('/reportes/fase')
-                  : activeNav === 'reports'}
-              />
-            )}
+            ) : null}
+
             {(isJd || session?.role === 'TD') && (
               <NavItem
                 icon={<FileCheck size={20} />}
@@ -368,20 +360,13 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
                 to="/technician/inbox"
               />
             )}
-            {isJd ? (
+            {isJd && (
               <NavItem
                 icon={<History size={20} />}
                 label="HISTORIAL AUDITORÍA"
                 isExpanded={isExpanded}
                 active={activeNav === 'history' || location.pathname.startsWith('/admin/auditoria') || location.pathname.startsWith('/admin/audit')}
                 to="/admin/auditoria"
-              />
-            ) : (
-              <NavItem
-                icon={<History size={20} />}
-                label="HISTORIAL"
-                isExpanded={isExpanded}
-                active={activeNav === 'history'}
               />
             )}
           </>
@@ -398,34 +383,35 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       </nav>
 
       <div
-        className={`flex h-[88px] items-center border-t border-primary-800 bg-primary-900 p-4 ${
-          isExpanded ? 'justify-between' : 'justify-center'
+        className={`mt-auto flex h-[88px] shrink-0 items-center border-t border-primary-800 bg-primary-900 p-4 ${
+          isExpanded ? 'justify-between gap-2' : 'flex-col justify-center gap-2'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className={`flex min-w-0 items-center gap-3 ${isExpanded ? '' : 'justify-center'}`}>
+          <div className="relative shrink-0">
             <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-full bg-warning text-primary-900 text-heading-sm">
               {initials}
             </div>
             <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-primary-900 bg-secondary" />
           </div>
           {isExpanded && (
-            <div className="overflow-hidden whitespace-nowrap">
-              <p className="text-body-md font-bold">{roleLabel}</p>
+            <div className="min-w-0 overflow-hidden whitespace-nowrap">
+              <p className="truncate text-body-md font-bold">{roleLabel}</p>
               <p className="text-label-md text-primary-300">SIGESA</p>
             </div>
           )}
         </div>
-        {isExpanded && (
+        <div className={`flex shrink-0 items-center gap-1 ${isExpanded ? '' : 'flex-col'}`}>
+          <NotificationBellPopover variant="sidebar" compact={!isExpanded} />
           <button
             type="button"
             onClick={handleLogout}
-            className="text-primary-300 transition-colors hover:text-body"
+            className="shrink-0 text-primary-300 transition-colors hover:text-body"
             aria-label="Cerrar sesión"
           >
             <LogOut size={20} />
           </button>
-        )}
+        </div>
       </div>
     </aside>
   );
