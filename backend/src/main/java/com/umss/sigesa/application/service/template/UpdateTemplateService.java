@@ -27,8 +27,6 @@ public class UpdateTemplateService implements UpdateTemplateUseCase {
                 .orElseThrow(() -> new TemplateNotFoundException("Plantilla no encontrada con ID: " + templateId));
 
         validator.validateType(template.getType());
-        validator.validateOrders(template);
-        validator.validateSubphaseLinks(template);
 
         template.setId(existing.getId());
         template.setStatus(existing.getStatus());

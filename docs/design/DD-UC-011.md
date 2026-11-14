@@ -13,6 +13,7 @@ adrs:
   - "ADR_002_monolito_modular"
 prompts:
   - "PR-IMPL-011"
+  - "PR-IMPL-040"
   - "PR-CONTRACT-FE-DASHBOARD-012-MASTER"
 release: "v1.0"
 status: aprobado
@@ -209,9 +210,25 @@ flowchart TD
 
 ## 5. Prompts usados `[máquina]`
 
+### Límite transaccional del export (FEAT-01 / CON-03, 2026-10-17)
+
+`ReportExportJobService.processJobAsync` **no** abre una TX que cubra `generateReport`. Secuencia:
+
+1. TX write corta: `markProcessing` + `save`.
+2. TX read-only: consumir `streamAllObservationsForReport` a lista (el `Stream` JPA exige sesión abierta; no se retorna el stream fuera de TX).
+3. **Sin TX:** `ReportGeneratorPort.generateReport` (I/O disco).
+4. TX write corta: `markCompleted` / `markFailed`.
+
+`getJobFileStream` lee metadata en TX read-only y abre `FileInputStream` **después** de cerrar esa TX.
+
+Pool: `spring.datasource.hikari` en YAML (`maximum-pool-size=10`, `connection-timeout=30000`, `leak-detection-threshold=20000`). Puerto `TransactionRunnerPort` (adaptador `SpringTransactionRunnerAdapter`).
+
+---
+
 | Prompt | Tarea | Artefacto generado |
 |--------|-------|--------------------|
 | `PR-IMPL-011` | Generación del controlador compuesto, evaluador de permisos PBAC, servicios de aplicación y DTOs híbridos. | `DashboardCompositeController.java`, services y tests. |
+| `PR-IMPL-040` | Desacople I/O de reportes vs Hikari; pool explícito. Issue #50. | `TransactionRunnerPort`, `ReportExportJobService`, YAML Hikari, tests TX boundary. |
 | `PR-CONTRACT-FE-DASHBOARD-012-MASTER` | UI Audit, Role-Mapping Fixes, Binary Stream Debugging, Mock Expansion, and Complete Feature Implementation. | `customFetch.ts`, `dashboardHooks.ts`, `dashboardFixtures.ts`, `roleLabels.ts`, `DashboardPage.tsx` |
 
 ---

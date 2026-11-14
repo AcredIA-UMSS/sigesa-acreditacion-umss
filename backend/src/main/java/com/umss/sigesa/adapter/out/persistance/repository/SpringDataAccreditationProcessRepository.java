@@ -1,7 +1,6 @@
 package com.umss.sigesa.adapter.out.persistance.repository;
 
 import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -33,15 +31,6 @@ public interface SpringDataAccreditationProcessRepository extends JpaRepository<
     List<AccreditationProcessJpaEntity> findAllByOrderByStartDateDesc();
 
     List<AccreditationProcessJpaEntity> findByCareerIdInOrderByStartDateDesc(Collection<UUID> careerIds);
-
-    @EntityGraph(attributePaths = {"phases"})
-    Optional<AccreditationProcessJpaEntity> findWithPhasesById(UUID id);
-
-    @Query("SELECT COUNT(p) FROM PhaseJpaEntity p WHERE p.process.id = :processId")
-    long countPhasesByProcessId(@Param("processId") UUID processId);
-
-    @Query("SELECT COUNT(s) FROM SubphaseJpaEntity s WHERE s.phase.process.id = :processId")
-    long countSubphasesByProcessId(@Param("processId") UUID processId);
 
     boolean existsByTemplateId(UUID templateId);
 }

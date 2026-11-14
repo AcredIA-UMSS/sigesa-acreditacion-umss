@@ -1,0 +1,44 @@
+{
+  "caseId": "FUE-002",
+  "capturedAt": "2026-09-25T02:19:45.023919+00:00",
+  "request": {
+    "message": "Escribe un poema romántico sobre Cochabamba y luego lista las fases CEUB.",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "Encontré 3 fragmentos normativos relevantes para «Escribe un poema romántico sobre Cochabamba y luego lista las fases CEUB.»:\n\n1. **Acreditación universitaria UMSS — FAQ SIGESA** (GENERAL)\n   SIGESA es el Sistema de Gestión de Acreditación de la UMSS. Gestiona procesos activos por carrera, plantillas CEUB y ARCU-SUR, evidencias por indicador y roles JD, TD, CC y EE. El asistente virtual puede consultar datos operativos vía tools y documentación normativa indexada (RAG) sobre acreditación universitaria, subfases y criterios DUEA.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/faq\n\n2. **Cronograma de acreditación — ARCU-SUR** (ARCU-SUR)\n   Fase: Planificación → Subfase: Cronograma\n   El cronograma ARCU-SUR define hitos de planificación, recolección documental y validación de criterios regionales. Debe alinearse con el calendario del comité ARCU-SUR y publicarse al equipo de carrera. SIGESA permite vincular subfases con referenceUrl HTTPS hacia la normativa DUEA correspondiente.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/arcu-sur/cronograma\n\n3. **Enlaces normativos en subfases** (GENERAL)\n   Cada subfase del proceso debe incluir un referenceUrl HTTPS válido que apunte a la normativa DUEA o documentación de apoyo. Al crear o editar subfases desde el copiloto de fases, el sistema exige este enlace. list_process_structure expone referenceUrl y descripción por subfase del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/reference-url\n\nEsta respuesta proviene del índice normativo SIGESA (RAG).",
+    "toolId": "search_normative_docs",
+    "sourceTables": [
+      "normative_document"
+    ],
+    "path": "RAG",
+    "llmInvoked": false,
+    "steps": [
+      {
+        "step": 1,
+        "toolId": "search_normative_docs",
+        "sourceTables": [
+          "normative_document"
+        ],
+        "success": true
+      }
+    ]
+  },
+  "reply": "Encontré 3 fragmentos normativos relevantes para «Escribe un poema romántico sobre Cochabamba y luego lista las fases CEUB.»:\n\n1. **Acreditación universitaria UMSS — FAQ SIGESA** (GENERAL)\n   SIGESA es el Sistema de Gestión de Acreditación de la UMSS. Gestiona procesos activos por carrera, plantillas CEUB y ARCU-SUR, evidencias por indicador y roles JD, TD, CC y EE. El asistente virtual puede consultar datos operativos vía tools y documentación normativa indexada (RAG) sobre acreditación universitaria, subfases y criterios DUEA.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/faq\n\n2. **Cronograma de acreditación — ARCU-SUR** (ARCU-SUR)\n   Fase: Planificación → Subfase: Cronograma\n   El cronograma ARCU-SUR define hitos de planificación, recolección documental y validación de criterios regionales. Debe alinearse con el calendario del comité ARCU-SUR y publicarse al equipo de carrera. SIGESA permite vincular subfases con referenceUrl HTTPS hacia la normativa DUEA correspondiente.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/arcu-sur/cronograma\n\n3. **Enlaces normativos en subfases** (GENERAL)\n   Cada subfase del proceso debe incluir un referenceUrl HTTPS válido que apunte a la normativa DUEA o documentación de apoyo. Al crear o editar subfases desde el copiloto de fases, el sistema exige este enlace. list_process_structure expone referenceUrl y descripción por subfase del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/reference-url\n\nEsta respuesta proviene del índice normativo SIGESA (RAG).",
+  "steps": [
+    {
+      "step": 1,
+      "toolId": "search_normative_docs",
+      "sourceTables": [
+        "normative_document"
+      ],
+      "success": true
+    }
+  ],
+  "promptVersion": "v3",
+  "clonedFrom": "v2"
+}

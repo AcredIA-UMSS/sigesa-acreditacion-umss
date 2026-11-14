@@ -4,6 +4,7 @@ import com.umss.sigesa.application.model.process.ProcessQueryContext;
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import com.umss.sigesa.application.model.process.ProcessSummary;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -21,34 +22,38 @@ public class ListProcessesService implements ListProcessesUseCase {
     private final TemplatePort templatePort;
     private final ProcessResponsiblePort processResponsiblePort;
     private final UserRepositoryPort userRepositoryPort;
+    private final NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     public ListProcessesService(ProcessQueryPort processQueryPort,
                                 ProgramCatalogPort programCatalogPort,
                                 TemplatePort templatePort,
                                 ProcessResponsiblePort processResponsiblePort,
-                                UserRepositoryPort userRepositoryPort) {
+                                UserRepositoryPort userRepositoryPort,
+                                NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
         this.processQueryPort = processQueryPort;
         this.programCatalogPort = programCatalogPort;
         this.templatePort = templatePort;
         this.processResponsiblePort = processResponsiblePort;
         this.userRepositoryPort = userRepositoryPort;
+        this.normativeHierarchyQueryPort = normativeHierarchyQueryPort;
     }
 
     @Override
     public List<ProcessSummary> list(ProcessQueryContext ctx) {
-        if ("CC".equals(ctx.role()) && (ctx.programScope() == null || ctx.programScope().isEmpty())) {
+        if (isCareerScoped(ctx.role()) && (ctx.programScope() == null || ctx.programScope().isEmpty())) {
             return List.of();
         }
 
         List<ProcessQueryPort.ProcessListItem> items;
-        if ("CC".equals(ctx.role())) {
+        if (isCareerScoped(ctx.role())) {
             items = processQueryPort.findSummaryItemsByCareerIds(ctx.programScope());
         } else {
             items = processQueryPort.findAllSummaryItems();
         }
 
         List<ProcessSummary> summaries = items.stream()
-                .map(item -> ProcessEnrichmentHelper.toSummary(item, programCatalogPort, templatePort))
+                .map(item -> ProcessEnrichmentHelper.toSummary(
+                        item, programCatalogPort, templatePort, normativeHierarchyQueryPort))
                 .toList();
 
         List<UUID> processIds = summaries.stream().map(ProcessSummary::id).toList();
@@ -64,12 +69,17 @@ public class ListProcessesService implements ListProcessesUseCase {
                         summary.templateId(),
                         summary.templateName(),
                         summary.templateType(),
+                        summary.evaluatorModel(),
                         summary.status(),
                         summary.startDate(),
-                        summary.phaseCount(),
-                        summary.subphaseCount(),
+                        summary.level1Count(),
+                        summary.indicatorCount(),
                         responsibles.get(summary.id())
                 ))
                 .toList();
+    }
+
+    private static boolean isCareerScoped(String role) {
+        return "CC".equals(role) || "EE".equals(role) || "CAE_MEMBER".equals(role);
     }
 }

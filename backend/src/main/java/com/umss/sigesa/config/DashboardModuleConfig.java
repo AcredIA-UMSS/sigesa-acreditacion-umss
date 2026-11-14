@@ -13,4 +13,10 @@ public class DashboardModuleConfig {
             DashboardQueryPort queryPort) {
         return new DashboardSummaryAggregationService(queryPort);
     }
+
+    @Bean
+    com.umss.sigesa.application.port.in.GetTechnicianInboxUseCase getTechnicianInboxUseCase(
+            com.umss.sigesa.application.port.out.TechnicianInboxQueryPort queryPort) {
+        return new com.umss.sigesa.application.service.dashboard.GetTechnicianInboxService(queryPort);
+    }
 }

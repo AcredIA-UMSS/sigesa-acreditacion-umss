@@ -1,0 +1,17 @@
+date_utc 2026-11-03T01:32:29Z
+21:32  up 21 days,  1:40, 1 user, load averages: 5.44 4.92 5.18
+ProductName:		macOS
+ProductVersion:		26.5.2
+BuildVersion:		25F84
+Darwin MacBook-Pro-de-Marlene.local 25.5.0 Darwin Kernel Version 25.5.0: Tue Jun  9 22:18:58 PDT 2026; root:xnu-12377.121.10~1/RELEASE_ARM64_T6000 arm64
+client 29.6.2 server 29.6.2
+Docker Compose version v5.3.1
+k6 grafana/k6:0.57.0 timeout=5s vus=10
+  424  45.4  0.3  44096 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer
+42181  23.6  0.4  61312 /Applications/Cursor.app/Contents/Frameworks/Cursor Helper.app/Contents/MacOS/Cursor Helper
+42188  14.8  3.4 571632 /Applications/Cursor.app/Contents/Frameworks/Cursor Helper (Renderer).app/Contents/MacOS/Cursor Helper (Renderer)
+99262   5.3  8.0 1348048 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine
+ 5627   4.3  1.0 165776 Cursor Helper (Plugin): extension-host (agent-exec) sigesa-acreditacion-umss [1-13]
+99235   2.2  0.7 110368 /Applications/Docker.app/Contents/MacOS/com.docker.backend
+88954   1.8  0.9 152128 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.99/Helpers/Google Chrome Helper (Renderer).app/Contents/MacOS/Google Chrome Helper (Renderer)
+42206   1.1  0.5  82912 Cursor Helper (Plugin): extension-host (user) sigesa-acreditacion-umss [1-1]

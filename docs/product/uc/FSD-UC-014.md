@@ -7,7 +7,7 @@ actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-021
 modulo: MOD-REPORT
 reglas: FSD-BR-14
-ultima_actualizacion: "2026-08-09"
+ultima_actualizacion: "2026-10-17"
 ---
 
 # FSD-UC-014 — Reporte ejecutivo PDF
@@ -18,6 +18,7 @@ ultima_actualizacion: "2026-08-09"
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-014 · PRD-US-021 · NFR-003 |
 | **API** | `POST /reports/executive/pdf` |
+| **Hardening 8.1.0** | FEAT-01 / #50 / `PR-IMPL-040`: render PDF y `store` fuera de TX write; pool Hikari declarado en YAML. |
 
 ## Flujo principal
 

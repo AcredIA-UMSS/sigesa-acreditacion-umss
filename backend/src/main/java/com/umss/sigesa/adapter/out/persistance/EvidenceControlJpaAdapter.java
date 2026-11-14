@@ -4,6 +4,8 @@ import com.umss.sigesa.adapter.out.persistance.entity.EvidenceEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.EvidenceVersionEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorEntity;
 import com.umss.sigesa.adapter.out.persistance.entity.IndicatorStateHistoryEntity;
+import com.umss.sigesa.adapter.out.persistance.entity.NormativeIndicatorJpaEntity;
+import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeIndicatorRepository;
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
 import com.umss.sigesa.application.model.evidence.UploadableIndicator;
 import com.umss.sigesa.application.port.out.EvidenceControlQueryPort;
@@ -23,15 +25,18 @@ public class EvidenceControlJpaAdapter implements EvidenceControlQueryPort {
     private final IndicatorStateHistoryJpaRepository historyRepository;
     private final EvidenceJpaRepository evidenceRepository;
     private final EvidenceVersionJpaRepository versionRepository;
+    private final SpringDataNormativeIndicatorRepository normativeIndicatorRepository;
 
     public EvidenceControlJpaAdapter(IndicatorJpaRepository indicatorRepository,
                                      IndicatorStateHistoryJpaRepository historyRepository,
                                      EvidenceJpaRepository evidenceRepository,
-                                     EvidenceVersionJpaRepository versionRepository) {
+                                     EvidenceVersionJpaRepository versionRepository,
+                                     SpringDataNormativeIndicatorRepository normativeIndicatorRepository) {
         this.indicatorRepository = indicatorRepository;
         this.historyRepository = historyRepository;
         this.evidenceRepository = evidenceRepository;
         this.versionRepository = versionRepository;
+        this.normativeIndicatorRepository = normativeIndicatorRepository;
     }
 
     @Override
@@ -65,16 +70,43 @@ public class EvidenceControlJpaAdapter implements EvidenceControlQueryPort {
         if (programIds == null || programIds.isEmpty()) {
             return List.of();
         }
-        List<IndicatorEntity> indicators = indicatorRepository.findByProgramIdIn(programIds);
-        List<UploadableIndicator> items = new ArrayList<>();
-        for (IndicatorEntity indicator : indicators) {
-            IndicatorState currentState = getCurrentState(indicator.getId());
-            if (states != null && !states.isEmpty() && !states.contains(currentState)) {
-                continue;
-            }
-            items.add(toUploadable(indicator, currentState));
+        Set<IndicatorState> effectiveStates = states == null || states.isEmpty()
+                ? Set.of(IndicatorState.PENDIENTE, IndicatorState.OBSERVADO)
+                : states;
+        List<String> statusNames = effectiveStates.stream().map(Enum::name).toList();
+        return normativeIndicatorRepository
+                .findUploadableByProgramIdsAndStatuses(programIds, statusNames)
+                .stream()
+                .map(this::toUploadableFromNormative)
+                .toList();
+    }
+
+    private UploadableIndicator toUploadableFromNormative(NormativeIndicatorJpaEntity indicator) {
+        var level3 = indicator.getLevel3Node();
+        var level2 = level3.getLevel2Node();
+        var level1 = level2.getLevel1Node();
+        IndicatorState currentState = parseNormativeStatus(indicator.getStatus());
+        String level1Name = blankToFallback(level1.getName(), "N1");
+        String level3Name = blankToFallback(level3.getName(), "N3");
+        return new UploadableIndicator(
+                indicator.getId(),
+                blankToFallback(indicator.getCode(), "IND"),
+                blankToFallback(indicator.getDescription(), "Indicador"),
+                level1.getId(),
+                level1Name,
+                level3Name,
+                currentState);
+    }
+
+    private static IndicatorState parseNormativeStatus(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return IndicatorState.PENDIENTE;
         }
-        return items;
+        try {
+            return IndicatorState.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return IndicatorState.PENDIENTE;
+        }
     }
 
     private UploadableIndicator toUploadable(IndicatorEntity indicator, IndicatorState currentState) {

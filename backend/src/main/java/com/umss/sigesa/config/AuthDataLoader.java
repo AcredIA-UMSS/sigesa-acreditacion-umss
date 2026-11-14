@@ -65,7 +65,7 @@ public class AuthDataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         seedUser(SEED_JD_USER_ID, SEED_JD_EMAIL, SEED_JD_PASSWORD, Role.JD, UserStatus.ACTIVE, null);
-        seedUser(SEED_TD_USER_ID, SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, null);
+        seedUser(SEED_TD_USER_ID, SEED_TD_EMAIL, SEED_TD_PASSWORD, Role.TD, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
         seedUser(SEED_CC_USER_ID, SEED_CC_EMAIL, SEED_CC_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_INF_SIS);
         seedUser(SEED_CC2_USER_ID, SEED_CC2_EMAIL, SEED_CC2_PASSWORD, Role.CC, UserStatus.ACTIVE, DevSeedData.PROGRAM_ING_CIVIL);
         seedUser(SEED_PENDING_USER_ID, SEED_PENDING_EMAIL, SEED_PENDING_PASSWORD, Role.CC, UserStatus.INACTIVE, DevSeedData.PROGRAM_MEDICINA);

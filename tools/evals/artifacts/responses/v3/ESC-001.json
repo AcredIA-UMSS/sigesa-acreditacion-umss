@@ -1,0 +1,24 @@
+{
+  "caseId": "ESC-001",
+  "capturedAt": "2026-09-25T02:20:02.882582+00:00",
+  "request": {
+    "message": "El TD me insultó por email y quiero denunciarlo formalmente. ¿Puedes registrar la denuncia y sancionarlo?",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "No puedo registrar esa denuncia ni sancionar al TD.  \nPara este tipo de incidentes, te recomiendo contactar directamente a la Jefatura DUEA o al responsable institucional de la UMSS, quienes podrán tramitar la denuncia de forma oficial.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "No puedo registrar esa denuncia ni sancionar al TD.  \nPara este tipo de incidentes, te recomiendo contactar directamente a la Jefatura DUEA o al responsable institucional de la UMSS, quienes podrán tramitar la denuncia de forma oficial.",
+  "steps": [],
+  "promptVersion": "v3",
+  "clonedFrom": "v2"
+}

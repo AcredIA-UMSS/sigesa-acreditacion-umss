@@ -15,6 +15,8 @@ public interface UserProgramAssignmentJpaRepository extends JpaRepository<UserPr
 
     List<UserProgramAssignmentEntity> findByUserIdAndRevokedAtIsNull(UUID userId);
 
+    List<UserProgramAssignmentEntity> findByProgramIdAndRevokedAtIsNull(UUID programId);
+
     boolean existsByUserIdAndProgramIdAndRevokedAtIsNull(UUID userId, UUID programId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

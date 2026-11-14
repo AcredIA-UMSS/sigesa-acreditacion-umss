@@ -1,6 +1,40 @@
+management:
+  tracing:
+    sampling:
+      probability: ${SIGESA_TRACING_SAMPLE:1.0}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+
 spring:
+  threads:
+    virtual:
+      enabled: true
   application:
     name: sigesa
+  mail:
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:2525}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:false}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
   devtools:
     restart:
       poll-interval: 2s
@@ -10,6 +44,14 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+    hikari:
+      pool-name: sigesa-hikari
+      maximum-pool-size: ${SIGESA_HIKARI_MAX_POOL:10}
+      minimum-idle: ${SIGESA_HIKARI_MIN_IDLE:2}
+      connection-timeout: ${SIGESA_HIKARI_CONNECTION_TIMEOUT_MS:30000}
+      idle-timeout: ${SIGESA_HIKARI_IDLE_TIMEOUT_MS:600000}
+      max-lifetime: ${SIGESA_HIKARI_MAX_LIFETIME_MS:1800000}
+      leak-detection-threshold: ${SIGESA_HIKARI_LEAK_DETECTION_MS:20000}
   h2:
     console:
       enabled: false
@@ -33,13 +75,40 @@ spring:
       max-request-size: 55MB
 
 sigesa:
+  mail:
+    from: ${SIGESA_MAIL_FROM:no-reply@umss.edu.bo}
+  notify:
+    deadline-cron: ${SIGESA_NOTIFY_DEADLINE_CRON:0 0 7 * * *}
+    deadline-days: ${SIGESA_NOTIFY_DEADLINE_DAYS:3}
+  outbox:
+    poll-interval-ms: ${SIGESA_OUTBOX_POLL_INTERVAL_MS:5000}
+  public:
+    base-url: ${SIGESA_PUBLIC_BASE_URL:http://localhost:5173}
+  extraction:
+    mode: ${EXTRACTION_MODE:in_process}
+    deadline-ms: ${SIGESA_NOTIFICATION_DEADLINE_MS:800}
+    http:
+      base-url: ${SIGESA_NOTIFICATION_BASE_URL:http://127.0.0.1:8081}
+      timeout-ms: ${SIGESA_NOTIFICATION_TIMEOUT_MS:200}
+      retries: ${SIGESA_NOTIFICATION_RETRIES:2}
+      retry-backoff-ms: ${SIGESA_NOTIFICATION_RETRY_BACKOFF_MS:50}
+      circuit-failures: ${SIGESA_NOTIFICATION_CIRCUIT_FAILURES:5}
+      circuit-open-ms: ${SIGESA_NOTIFICATION_CIRCUIT_OPEN_MS:2000}
   jwt:
     secret: ${SIGESA_JWT_SECRET:sigesa-dev-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256}
     expiration-seconds: ${SIGESA_JWT_EXPIRATION_SECONDS:86400}
   report:
     storage-path: ${SIGESA_REPORT_STORAGE_PATH:./data/reports}
   evidence:
+    storage: ${SIGESA_EVIDENCE_STORAGE:local}
     storage-path: ${SIGESA_EVIDENCE_STORAGE_PATH:./data/evidences}
+    s3:
+      endpoint: ${SIGESA_S3_ENDPOINT:}
+      region: ${SIGESA_S3_REGION:us-east-1}
+      bucket: ${SIGESA_S3_BUCKET:sigesa-evidences}
+      access-key: ${SIGESA_S3_ACCESS_KEY:}
+      secret-key: ${SIGESA_S3_SECRET_KEY:}
+      path-style: ${SIGESA_S3_PATH_STYLE:true}
     async-threshold-bytes: ${SIGESA_EVIDENCE_ASYNC_THRESHOLD:5242880}
   assistant:
     enabled: ${SIGESA_ASSISTANT_ENABLED:true}
@@ -59,6 +128,16 @@ sigesa:
       vuelve a invocar con confirmed=true cuando el usuario confirme claramente (por ejemplo: "confirmo", "sí, procede").
       Nunca inventes datos del sistema: si no tienes una respuesta de tool ejecutada por el backend, dilo claramente.
       NUNCA afirmes que activaste/desactivaste un usuario o modificaste fases si no recibiste executed:true de una tool.
+      NUNCA apruebes ni rechaces indicadores normativos en nombre del TD ni de otro rol: responde con "no puedo" o
+      "no está permitido" y aclara que solo el TD (u otro rol autorizado en SIGESA) puede hacerlo.
+      Si te piden confirmar un UUID, estado (APROBADO, RECHAZADO, etc.) o un hecho concreto sin tool exitosa,
+      di explícitamente "no puedo confirmar" o "no dispongo de esa información"; no repitas la afirmación del usuario como hecho.
+      Si invocaste una tool y no hay datos, el indicador no existe o success es false, combina el resultado técnico
+      con una negación explícita: empieza o cierra con "No puedo confirmar" lo que el usuario afirmó (estado, fecha, UUID).
+      Para denuncias, conflictos personales o sanciones fuera del sistema, no simules registros: orienta a canal humano
+      o institucional (Jefatura DUEA, TD, vía institucional UMSS) y usa "no puedo registrar" cuando aplique.
     max-tool-iterations: ${SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS:5}
     rag-enabled: ${SIGESA_ASSISTANT_RAG_ENABLED:true}
     rag-max-chunks: ${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:3}
+    output-guard-enabled: ${SIGESA_ASSISTANT_OUTPUT_GUARD_ENABLED:true}
+    timeout-ms: ${SIGESA_ASSISTANT_TIMEOUT_MS:10000}

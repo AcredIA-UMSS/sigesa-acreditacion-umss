@@ -48,4 +48,20 @@ public class NoOpAuditLogAdapter implements AuditLogPort {
     public void logDeleteDenied(UUID actorId, UUID evidenceId) {
         log.info("AUDIT_DELETE_DENIED actorId={} evidenceId={}", actorId, evidenceId);
     }
+
+    @Override
+    public void logEvidenceRetracted(UUID actorId, UUID evidenceId, UUID indicatorId) {
+        log.info("AUDIT_EVIDENCE_RETRACTED actorId={} evidenceId={} indicatorId={}",
+                actorId, evidenceId, indicatorId);
+    }
+
+    @Override
+    public void logLogout(UUID userId, Email email, String role) {
+        log.info("AUDIT_LOGOUT userId={} email={} role={}", userId, email == null ? null : email.value(), role);
+    }
+
+    @Override
+    public void logLoginFailed(String email) {
+        log.info("AUDIT_LOGIN_FAILED email={}", email);
+    }
 }

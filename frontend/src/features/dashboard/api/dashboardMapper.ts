@@ -65,6 +65,15 @@ function mapCoordinatorSection(
   };
 }
 
+function normalizeSemaphoreStatus(
+  status?: string,
+): 'VERDE' | 'AMARILLO' | 'ROJO' | 'SIN_DATO' {
+  if (status === 'VERDE' || status === 'AMARILLO' || status === 'ROJO' || status === 'SIN_DATO') {
+    return status;
+  }
+  return 'SIN_DATO';
+}
+
 function mapTechnicianSection(
   dto?: TechnicianKpiSection
 ): TechnicianSection | null {
@@ -96,9 +105,12 @@ function mapExecutiveSection(
     alertPrograms: dto.alertPrograms ?? 0,
     semaforoProgramas: (dto.programTrafficLights ?? []).map((t) => ({
       programaId: t.programId ?? '',
+      processId: t.processId ?? null,
       nombre: t.name ?? '',
-      estado: (t.status ?? 'VERDE') as 'VERDE' | 'AMARILLO' | 'ROJO',
+      facultad: t.faculty?.trim() ? t.faculty : 'Sin facultad',
+      estado: normalizeSemaphoreStatus(t.status),
       observacionesCriticas: t.criticalObservations ?? 0,
+      avance: t.completionPercentage ?? null,
     })),
   };
 }

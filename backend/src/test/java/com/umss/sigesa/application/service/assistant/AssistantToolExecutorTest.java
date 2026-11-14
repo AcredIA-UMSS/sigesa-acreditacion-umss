@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umss.sigesa.application.model.assistant.AssistantAuthContext;
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
-import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
 import com.umss.sigesa.application.port.in.DeactivateUserUseCase;
-import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
 import com.umss.sigesa.application.port.in.GetEvidenceDetailUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
 import com.umss.sigesa.application.port.in.ListPendingEvidencesUseCase;
@@ -17,9 +15,7 @@ import com.umss.sigesa.application.port.in.ListProgramsUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.in.ManageUserProgramAssignmentUseCase;
 import com.umss.sigesa.application.port.in.RegisterUserUseCase;
-import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
 import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
-import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.application.service.assistant.support.AssistantToolExecutorTestFactory;
 import com.umss.sigesa.application.service.assistant.support.RecordingAssistantToolAuditPort;
@@ -68,20 +64,6 @@ class AssistantToolExecutorTest {
     @Mock
     private GetProcessDetailUseCase getProcessDetailUseCase;
     @Mock
-    private AddProcessPhaseUseCase addProcessPhaseUseCase;
-    @Mock
-    private UpdateProcessPhaseUseCase updateProcessPhaseUseCase;
-    @Mock
-    private DeleteProcessPhaseUseCase deleteProcessPhaseUseCase;
-    @Mock
-    private com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase addProcessSubphaseUseCase;
-    @Mock
-    private com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase;
-    @Mock
-    private com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase;
-    @Mock
-    private ReorderProcessStructureUseCase reorderProcessStructureUseCase;
-    @Mock
     private ListPendingEvidencesUseCase listPendingEvidencesUseCase;
     @Mock
     private GetEvidenceDetailUseCase getEvidenceDetailUseCase;
@@ -107,13 +89,6 @@ class AssistantToolExecutorTest {
                 listProgramsUseCase,
                 listProcessesUseCase,
                 getProcessDetailUseCase,
-                addProcessPhaseUseCase,
-                updateProcessPhaseUseCase,
-                deleteProcessPhaseUseCase,
-                addProcessSubphaseUseCase,
-                updateProcessSubphaseUseCase,
-                deleteProcessSubphaseUseCase,
-                reorderProcessStructureUseCase,
                 listPendingEvidencesUseCase,
                 getEvidenceDetailUseCase,
                 checkEvidenceCompletenessUseCase,

@@ -11,6 +11,9 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../../lib/auth/useAuth';
+import { QuickActions } from '../../../components/QuickActions';
+import { RecentActivity } from '../../../components/RecentActivity';
+import { NotificationBellPopover } from '../../notifications';
 
 export function DashboardPage() {
   const { session } = useAuth();
@@ -66,8 +69,7 @@ export function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-
-
+            <NotificationBellPopover variant="header" />
             {summary && (
               <div className="flex items-center gap-2.5 rounded-xl border border-primary-200/40 bg-primary-100/35 px-4 py-2.5 text-primary-600 shadow-sm backdrop-blur-sm">
                 <ShieldCheck size={18} className="text-secondary" />
@@ -78,6 +80,11 @@ export function DashboardPage() {
             )}
           </div>
         </header>
+
+        <div className="mb-8 space-y-8">
+          <QuickActions />
+          <RecentActivity />
+        </div>
 
         {/* Loading State Skeleton */}
         {isLoading && <DashboardSkeleton />}

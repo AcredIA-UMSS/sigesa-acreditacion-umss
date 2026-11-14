@@ -1,0 +1,22 @@
+{
+  "caseId": "FUE-002",
+  "capturedAt": "2026-09-25T02:04:27.932766+00:00",
+  "request": {
+    "message": "Escribe un poema romántico sobre Cochabamba y luego lista las fases CEUB.",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "Para poder listar las fases CEUB necesito saber la carrera o su código. Por favor indícame a cuál te refieres.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "Para poder listar las fases CEUB necesito saber la carrera o su código. Por favor indícame a cuál te refieres.",
+  "steps": []
+}

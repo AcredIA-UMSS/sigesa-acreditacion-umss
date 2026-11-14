@@ -1,59 +1,61 @@
 package com.umss.sigesa.config;
 
-import com.umss.sigesa.application.port.in.AddProcessPhaseUseCase;
-import com.umss.sigesa.application.port.in.AddProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.ArchiveTemplateUseCase;
 import com.umss.sigesa.application.port.in.CreateProcessUseCase;
+import com.umss.sigesa.application.port.in.DeleteProcessUseCase;
 import com.umss.sigesa.application.port.in.CreateTemplateUseCase;
-import com.umss.sigesa.application.port.in.DeleteProcessPhaseUseCase;
-import com.umss.sigesa.application.port.in.DeleteProcessSubphaseUseCase;
-import com.umss.sigesa.application.port.in.DeleteTemplateUseCase;
-import com.umss.sigesa.application.port.in.DuplicateTemplateUseCase;
+import com.umss.sigesa.application.port.in.GetNormativeIndicatorUseCase;
 import com.umss.sigesa.application.port.in.GetProcessDetailUseCase;
+import com.umss.sigesa.application.port.in.NormativeStructureUseCases;
+import com.umss.sigesa.application.port.in.TemplateNormativeStructureUseCases;
 import com.umss.sigesa.application.port.in.GetTemplateUseCase;
 import com.umss.sigesa.application.port.in.ListEligibleResponsiblesUseCase;
 import com.umss.sigesa.application.port.in.ListProcessesUseCase;
 import com.umss.sigesa.application.port.in.ListTemplatesUseCase;
 import com.umss.sigesa.application.port.in.PublishTemplateUseCase;
 import com.umss.sigesa.application.port.in.RemoveProcessResponsibleUseCase;
-import com.umss.sigesa.application.port.in.ReorderProcessStructureUseCase;
-import com.umss.sigesa.application.port.in.UpdateProcessPhaseUseCase;
-import com.umss.sigesa.application.port.in.UpdateProcessSubphaseUseCase;
 import com.umss.sigesa.application.port.in.UpdateTemplateUseCase;
 import com.umss.sigesa.application.port.out.AccreditationProcessPort;
+import com.umss.sigesa.application.port.out.EvaluationMetricsPort;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
+import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
+import com.umss.sigesa.application.port.out.NormativeStructurePort;
+import com.umss.sigesa.application.port.out.TemplateNormativeStructurePort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
-import com.umss.sigesa.application.port.out.ProcessStructurePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
-import com.umss.sigesa.application.port.out.SubphaseWorkflowPort;
 import com.umss.sigesa.application.port.out.TemplateManagementPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
-import com.umss.sigesa.application.service.process.AddProcessPhaseService;
-import com.umss.sigesa.application.service.process.AddProcessSubphaseService;
 import com.umss.sigesa.application.service.process.AssignProcessResponsibleService;
-import com.umss.sigesa.application.service.process.DeleteProcessPhaseService;
-import com.umss.sigesa.application.service.process.DeleteProcessSubphaseService;
+import com.umss.sigesa.application.service.process.DeleteProcessService;
+import com.umss.sigesa.application.service.process.GetNormativeIndicatorService;
 import com.umss.sigesa.application.service.process.GetProcessDetailService;
+import com.umss.sigesa.application.service.process.NormativeStructureCommandService;
+import com.umss.sigesa.application.service.process.NormativeStructureGuard;
+import com.umss.sigesa.application.service.process.ProcessNormativeTreeCloner;
 import com.umss.sigesa.application.service.process.ListEligibleResponsiblesService;
 import com.umss.sigesa.application.service.process.ListProcessesService;
 import com.umss.sigesa.application.service.process.ProcessStructureGuard;
 import com.umss.sigesa.application.service.process.RemoveProcessResponsibleService;
-import com.umss.sigesa.application.service.process.ReorderProcessStructureService;
-import com.umss.sigesa.application.service.process.UpdateProcessPhaseService;
-import com.umss.sigesa.application.service.process.UpdateProcessSubphaseService;
 import com.umss.sigesa.application.service.template.ArchiveTemplateService;
-import com.umss.sigesa.application.service.template.CreateTemplateService;
+import com.umss.sigesa.application.service.template.TemplateNormativeStructureCommandService;
+import com.umss.sigesa.application.service.template.TemplateNormativeStructureGuard;
 import com.umss.sigesa.application.service.template.DeleteTemplateService;
 import com.umss.sigesa.application.service.template.DuplicateTemplateService;
 import com.umss.sigesa.application.service.template.GetTemplateService;
 import com.umss.sigesa.application.service.template.ListTemplatesService;
 import com.umss.sigesa.application.service.template.PublishTemplateService;
+import com.umss.sigesa.application.service.template.TemplateNormativeTreeCloner;
 import com.umss.sigesa.application.service.template.TemplateStructureValidator;
 import com.umss.sigesa.application.service.template.UpdateTemplateService;
+import com.umss.sigesa.application.service.template.CreateTemplateService;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
+import com.umss.sigesa.application.port.in.DeleteTemplateUseCase;
+import com.umss.sigesa.application.port.in.DuplicateTemplateUseCase;
 import com.umss.sigesa.application.usecase.CreateProcessUseCaseImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -90,8 +92,11 @@ public class ProcessModuleConfig {
 
     @Bean
     PublishTemplateUseCase publishTemplateUseCase(TemplateManagementPort templateManagementPort,
-                                                    TemplateStructureValidator templateStructureValidator) {
-        return new PublishTemplateService(templateManagementPort, templateStructureValidator);
+                                                    NormativeHierarchyQueryPort hierarchyQueryPort,
+                                                    TemplateStructureValidator templateStructureValidator,
+                                                    TemplateNormativeStructureGuard templateNormativeStructureGuard) {
+        return new PublishTemplateService(templateManagementPort, hierarchyQueryPort,
+                templateStructureValidator, templateNormativeStructureGuard);
     }
 
     @Bean
@@ -100,8 +105,17 @@ public class ProcessModuleConfig {
     }
 
     @Bean
-    DuplicateTemplateUseCase duplicateTemplateUseCase(TemplateManagementPort templateManagementPort) {
-        return new DuplicateTemplateService(templateManagementPort);
+    DuplicateTemplateUseCase duplicateTemplateUseCase(TemplateManagementPort templateManagementPort,
+                                                      NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+                                                      TemplateNormativeTreeCloner templateNormativeTreeCloner) {
+        return new DuplicateTemplateService(
+                templateManagementPort, normativeHierarchyQueryPort, templateNormativeTreeCloner);
+    }
+
+    @Bean
+    TemplateNormativeTreeCloner templateNormativeTreeCloner(
+            TemplateNormativeStructurePort templateNormativeStructurePort) {
+        return new TemplateNormativeTreeCloner(templateNormativeStructurePort);
     }
 
     @Bean
@@ -112,8 +126,22 @@ public class ProcessModuleConfig {
     @Bean
     CreateProcessUseCase createProcessUseCase(AccreditationProcessPort accreditationProcessPort,
                                               TemplatePort templatePort,
-                                              ProgramCatalogPort programCatalogPort) {
-        return new CreateProcessUseCaseImpl(accreditationProcessPort, templatePort, programCatalogPort);
+                                              ProgramCatalogPort programCatalogPort,
+                                              NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+                                              ProcessNormativeTreeCloner processNormativeTreeCloner,
+                                              com.umss.sigesa.application.service.workflow.MethodologicalStageBootstrapper stageBootstrapper) {
+        return new CreateProcessUseCaseImpl(
+                accreditationProcessPort,
+                templatePort,
+                programCatalogPort,
+                normativeHierarchyQueryPort,
+                processNormativeTreeCloner,
+                stageBootstrapper);
+    }
+
+    @Bean
+    ProcessNormativeTreeCloner processNormativeTreeCloner(NormativeStructurePort normativeStructurePort) {
+        return new ProcessNormativeTreeCloner(normativeStructurePort);
     }
 
     @Bean
@@ -121,9 +149,21 @@ public class ProcessModuleConfig {
                                               ProgramCatalogPort programCatalogPort,
                                               TemplatePort templatePort,
                                               ProcessResponsiblePort processResponsiblePort,
-                                              UserRepositoryPort userRepositoryPort) {
+                                              UserRepositoryPort userRepositoryPort,
+                                              NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
         return new ListProcessesService(
-                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+                processQueryPort,
+                programCatalogPort,
+                templatePort,
+                processResponsiblePort,
+                userRepositoryPort,
+                normativeHierarchyQueryPort);
+    }
+
+    @Bean
+    DeleteProcessUseCase deleteProcessUseCase(AccreditationProcessPort accreditationProcessPort,
+                                              EvaluationMetricsPort evaluationMetricsPort) {
+        return new DeleteProcessService(accreditationProcessPort, evaluationMetricsPort);
     }
 
     @Bean
@@ -131,9 +171,59 @@ public class ProcessModuleConfig {
                                                     ProgramCatalogPort programCatalogPort,
                                                     TemplatePort templatePort,
                                                     ProcessResponsiblePort processResponsiblePort,
-                                                    UserRepositoryPort userRepositoryPort) {
+                                                    UserRepositoryPort userRepositoryPort,
+                                                    NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
         return new GetProcessDetailService(
-                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+                processQueryPort,
+                programCatalogPort,
+                templatePort,
+                processResponsiblePort,
+                userRepositoryPort,
+                normativeHierarchyQueryPort);
+    }
+
+    @Bean
+    GetNormativeIndicatorUseCase getNormativeIndicatorUseCase(
+            NormativeHierarchyQueryPort normativeHierarchyQueryPort) {
+        return new GetNormativeIndicatorService(normativeHierarchyQueryPort);
+    }
+
+    @Bean
+    NormativeStructureGuard normativeStructureGuard(ProcessStructureGuard processStructureGuard) {
+        return new NormativeStructureGuard(processStructureGuard);
+    }
+
+    @Bean
+    NormativeStructureUseCases normativeStructureUseCases(
+            ProcessQueryPort processQueryPort,
+            NormativeStructurePort normativeStructurePort,
+            NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+            NormativeIndicatorWorkflowPort normativeIndicatorWorkflowPort,
+            NormativeStructureGuard normativeStructureGuard) {
+        return new NormativeStructureCommandService(
+                processQueryPort,
+                normativeStructurePort,
+                normativeHierarchyQueryPort,
+                normativeIndicatorWorkflowPort,
+                normativeStructureGuard);
+    }
+
+    @Bean
+    TemplateNormativeStructureGuard templateNormativeStructureGuard(NormativeStructureGuard normativeStructureGuard) {
+        return new TemplateNormativeStructureGuard(normativeStructureGuard);
+    }
+
+    @Bean
+    TemplateNormativeStructureUseCases templateNormativeStructureUseCases(
+            TemplateManagementPort templateManagementPort,
+            TemplateNormativeStructurePort templateNormativeStructurePort,
+            NormativeHierarchyQueryPort normativeHierarchyQueryPort,
+            TemplateNormativeStructureGuard templateNormativeStructureGuard) {
+        return new TemplateNormativeStructureCommandService(
+                templateManagementPort,
+                templateNormativeStructurePort,
+                normativeHierarchyQueryPort,
+                templateNormativeStructureGuard);
     }
 
     @Bean
@@ -142,21 +232,28 @@ public class ProcessModuleConfig {
             UserRepositoryPort userRepositoryPort,
             UserProgramAssignmentRepositoryPort userProgramAssignmentRepositoryPort,
             ProcessResponsiblePort processResponsiblePort,
-            ProcessStructureGuard processStructureGuard) {
+            ProcessStructureGuard processStructureGuard,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         return new AssignProcessResponsibleService(
                 processQueryPort,
                 userRepositoryPort,
                 userProgramAssignmentRepositoryPort,
                 processResponsiblePort,
-                processStructureGuard);
+                processStructureGuard,
+                enqueueDomainNotificationUseCase);
     }
 
     @Bean
     RemoveProcessResponsibleUseCase removeProcessResponsibleUseCase(
             ProcessQueryPort processQueryPort,
             ProcessResponsiblePort processResponsiblePort,
-            ProcessStructureGuard processStructureGuard) {
-        return new RemoveProcessResponsibleService(processQueryPort, processResponsiblePort, processStructureGuard);
+            ProcessStructureGuard processStructureGuard,
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
+        return new RemoveProcessResponsibleService(
+                processQueryPort,
+                processResponsiblePort,
+                processStructureGuard,
+                enqueueDomainNotificationUseCase);
     }
 
     @Bean
@@ -170,49 +267,5 @@ public class ProcessModuleConfig {
     @Bean
     ProcessStructureGuard processStructureGuard() {
         return new ProcessStructureGuard();
-    }
-
-    @Bean
-    AddProcessPhaseUseCase addProcessPhaseUseCase(ProcessStructurePort processStructurePort,
-                                                  ProcessStructureGuard processStructureGuard) {
-        return new AddProcessPhaseService(processStructurePort, processStructureGuard);
-    }
-
-    @Bean
-    UpdateProcessPhaseUseCase updateProcessPhaseUseCase(ProcessStructurePort processStructurePort,
-                                                        ProcessStructureGuard processStructureGuard) {
-        return new UpdateProcessPhaseService(processStructurePort, processStructureGuard);
-    }
-
-    @Bean
-    DeleteProcessPhaseUseCase deleteProcessPhaseUseCase(ProcessStructurePort processStructurePort,
-                                                        SubphaseWorkflowPort subphaseWorkflowPort,
-                                                        ProcessStructureGuard processStructureGuard) {
-        return new DeleteProcessPhaseService(processStructurePort, subphaseWorkflowPort, processStructureGuard);
-    }
-
-    @Bean
-    AddProcessSubphaseUseCase addProcessSubphaseUseCase(ProcessStructurePort processStructurePort,
-                                                        ProcessStructureGuard processStructureGuard) {
-        return new AddProcessSubphaseService(processStructurePort, processStructureGuard);
-    }
-
-    @Bean
-    UpdateProcessSubphaseUseCase updateProcessSubphaseUseCase(ProcessStructurePort processStructurePort,
-                                                              ProcessStructureGuard processStructureGuard) {
-        return new UpdateProcessSubphaseService(processStructurePort, processStructureGuard);
-    }
-
-    @Bean
-    DeleteProcessSubphaseUseCase deleteProcessSubphaseUseCase(ProcessStructurePort processStructurePort,
-                                                              SubphaseWorkflowPort subphaseWorkflowPort,
-                                                              ProcessStructureGuard processStructureGuard) {
-        return new DeleteProcessSubphaseService(processStructurePort, subphaseWorkflowPort, processStructureGuard);
-    }
-
-    @Bean
-    ReorderProcessStructureUseCase reorderProcessStructureUseCase(ProcessStructurePort processStructurePort,
-                                                                  ProcessStructureGuard processStructureGuard) {
-        return new ReorderProcessStructureService(processStructurePort, processStructureGuard);
     }
 }

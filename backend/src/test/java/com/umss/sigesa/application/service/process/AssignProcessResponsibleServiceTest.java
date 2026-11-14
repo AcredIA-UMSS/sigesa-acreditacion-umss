@@ -1,7 +1,9 @@
 package com.umss.sigesa.application.service.process;
 
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
@@ -18,7 +20,6 @@ import com.umss.sigesa.domain.model.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,6 +47,8 @@ class AssignProcessResponsibleServiceTest {
     private ProcessResponsiblePort processResponsiblePort;
     @Mock
     private ProcessStructureGuard processStructureGuard;
+    @Mock
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     private AssignProcessResponsibleService service;
 
@@ -61,7 +64,8 @@ class AssignProcessResponsibleServiceTest {
                 userRepositoryPort,
                 assignmentRepositoryPort,
                 processResponsiblePort,
-                processStructureGuard);
+                processStructureGuard,
+                enqueueDomainNotificationUseCase);
     }
 
     @Test
@@ -72,6 +76,7 @@ class AssignProcessResponsibleServiceTest {
         when(assignmentRepositoryPort.findActiveByUserId(ccUserId))
                 .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), ccUserId, careerId, LocalDateTime.now(), null)));
         when(processResponsiblePort.findActiveByUserId(ccUserId)).thenReturn(Optional.empty());
+        when(processResponsiblePort.findActiveByProcessId(processId)).thenReturn(Optional.empty());
         when(processResponsiblePort.save(any(ProcessResponsibleAssignment.class)))
                 .thenAnswer(invocation -> {
                     ProcessResponsibleAssignment assignment = invocation.getArgument(0);
@@ -85,6 +90,42 @@ class AssignProcessResponsibleServiceTest {
         assertEquals(ccUserId, info.userId());
         assertEquals("María Coordinadora", info.fullName());
         verify(processResponsiblePort).revokeActiveByProcessId(processId);
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.ProcessAssigned
+                        && processId.equals(cmd.processId())
+                        && careerId.equals(cmd.programId())));
+    }
+
+    @Test
+    void shouldNotifyPreviousAndNewOnReassign() {
+        stubActiveProcess();
+        UUID previousUserId = UUID.randomUUID();
+        AppUser cc = activeCc();
+        when(userRepositoryPort.findById(ccUserId)).thenReturn(Optional.of(cc));
+        when(assignmentRepositoryPort.findActiveByUserId(ccUserId))
+                .thenReturn(List.of(new UserProgramAssignment(UUID.randomUUID(), ccUserId, careerId, LocalDateTime.now(), null)));
+        when(processResponsiblePort.findActiveByUserId(ccUserId)).thenReturn(Optional.empty());
+        when(processResponsiblePort.findActiveByProcessId(processId))
+                .thenReturn(Optional.of(ProcessResponsibleAssignment.builder()
+                        .processId(processId)
+                        .userId(previousUserId)
+                        .build()));
+        when(processResponsiblePort.save(any(ProcessResponsibleAssignment.class)))
+                .thenAnswer(invocation -> {
+                    ProcessResponsibleAssignment assignment = invocation.getArgument(0);
+                    assignment.setId(UUID.randomUUID());
+                    assignment.setAssignedAt(LocalDateTime.now());
+                    return assignment;
+                });
+
+        service.assign(processId, ccUserId, jdUserId);
+
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.ProcessUnassigned
+                        && previousUserId.toString().equals(cmd.payloadValue("removedUserId"))));
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.ProcessAssigned
+                        && ccUserId.toString().equals(cmd.payloadValue("assigneeUserId"))));
     }
 
     @Test
@@ -144,7 +185,6 @@ class AssignProcessResponsibleServiceTest {
                         .careerId(careerId)
                         .status("ACTIVE")
                         .startDate(LocalDateTime.now())
-                        .phases(List.of())
                         .build()));
     }
 

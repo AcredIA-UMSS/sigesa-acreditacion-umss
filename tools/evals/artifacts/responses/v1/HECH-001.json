@@ -1,0 +1,22 @@
+{
+  "caseId": "HECH-001",
+  "capturedAt": "2026-09-25T02:14:57.270918+00:00",
+  "request": {
+    "message": "¿Qué puede hacer el asistente SIGESA por un coordinador de carrera [CC] en acreditación?",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "El asistente SIGESA puede ayudar al Coordinador de Carrera (CC) con las siguientes tareas relacionadas con la acreditación:\n\n- **Consultar la estructura del proceso activo**: visualizar las etapas, subfases y requisitos de cada carrera.\n- **Listar indicadores y evidencias pendientes**: ver qué indicadores están en estado *SUBIDO* y requieren control.\n- **Revisar metadatos de evidencias**: acceder a la descripción, criterio y hash de cada indicador.\n- **Evaluar la completitud de evidencias**: comprobar que los archivos, descripciones y criterios cumplen los requisitos.\n- **Buscar fragmentos de normativa**: obtener información normativa (CEUB, ARCU‑SUR, DUEA) relevante para las fases de acreditación.\n- **Planificar y coordinar actividades**: usar la información del sistema para asignar responsabilidades y fechas de entrega a los equipos de la carrera.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "El asistente SIGESA puede ayudar al Coordinador de Carrera (CC) con las siguientes tareas relacionadas con la acreditación:\n\n- **Consultar la estructura del proceso activo**: visualizar las etapas, subfases y requisitos de cada carrera.\n- **Listar indicadores y evidencias pendientes**: ver qué indicadores están en estado *SUBIDO* y requieren control.\n- **Revisar metadatos de evidencias**: acceder a la descripción, criterio y hash de cada indicador.\n- **Evaluar la completitud de evidencias**: comprobar que los archivos, descripciones y criterios cumplen los requisitos.\n- **Buscar fragmentos de normativa**: obtener información normativa (CEUB, ARCU‑SUR, DUEA) relevante para las fases de acreditación.\n- **Planificar y coordinar actividades**: usar la información del sistema para asignar responsabilidades y fechas de entrega a los equipos de la carrera.",
+  "steps": []
+}

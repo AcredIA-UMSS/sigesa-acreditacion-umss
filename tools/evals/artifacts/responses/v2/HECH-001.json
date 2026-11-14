@@ -1,0 +1,23 @@
+{
+  "caseId": "HECH-001",
+  "capturedAt": "2026-09-25T02:18:10.353686+00:00",
+  "request": {
+    "message": "¿Qué puede hacer el asistente SIGESA por un coordinador de carrera [CC] en acreditación?",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "El asistente SIGESA puede ayudar a un coordinador de carrera (CC) con las siguientes funciones de apoyo en el proceso de acreditación:\n\n| Funcionalidad | Qué hace | Restricciones para CC |\n|---------------|----------|-----------------------|\n| **Estructura del proceso** | Lista los programas y las fases (subfases) del proceso activo, mostrando la jerarquía de criterios, indicadores y evidencia requerida. | Acceso de solo lectura. |\n| **Evidencia pendiente** | Muestra los indicadores que tienen evidencias en estado *SUBIDO* (pendientes de revisión por control de calidad). | Acceso de solo lectura. |\n| **Detalle de evidencia** | Proporciona el hash, descripción, criterio y estado de una versión de evidencia específica. | Acceso de solo lectura. |\n| **Checklist de completitud** | Evalúa si la evidencia cumple con todos los requisitos (archivo, descripción, criterio, hash). | Acceso de solo lectura. |\n| **Búsqueda normativa** | Accede a fragmentos de documentación normativa (CEUB, ARCU‑SUR, DUEA) relacionados con la acreditación, facilitando el cumplimiento de requisitos. | Acceso libre a todos los roles. |\n\nEn resumen, el asistente permite al coordinador revisar la configuración del proceso, identificar evidencias que faltan o están pendientes de control, verificar el estado y la calidad de las evidencias enviadas y consultar la normativa aplicable.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "El asistente SIGESA puede ayudar a un coordinador de carrera (CC) con las siguientes funciones de apoyo en el proceso de acreditación:\n\n| Funcionalidad | Qué hace | Restricciones para CC |\n|---------------|----------|-----------------------|\n| **Estructura del proceso** | Lista los programas y las fases (subfases) del proceso activo, mostrando la jerarquía de criterios, indicadores y evidencia requerida. | Acceso de solo lectura. |\n| **Evidencia pendiente** | Muestra los indicadores que tienen evidencias en estado *SUBIDO* (pendientes de revisión por control de calidad). | Acceso de solo lectura. |\n| **Detalle de evidencia** | Proporciona el hash, descripción, criterio y estado de una versión de evidencia específica. | Acceso de solo lectura. |\n| **Checklist de completitud** | Evalúa si la evidencia cumple con todos los requisitos (archivo, descripción, criterio, hash). | Acceso de solo lectura. |\n| **Búsqueda normativa** | Accede a fragmentos de documentación normativa (CEUB, ARCU‑SUR, DUEA) relacionados con la acreditación, facilitando el cumplimiento de requisitos. | Acceso libre a todos los roles. |\n\nEn resumen, el asistente permite al coordinador revisar la configuración del proceso, identificar evidencias que faltan o están pendientes de control, verificar el estado y la calidad de las evidencias enviadas y consultar la normativa aplicable.",
+  "steps": [],
+  "promptVersion": "v2"
+}

@@ -2,12 +2,12 @@
 id: FSD-UC-013
 nombre: Panel semáforo [JD]
 estado: En Curso
-release: v1.0
+release: v2.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-013
 modulo: MOD-DASH
 reglas: —
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-09-08"
 ---
 
 # FSD-UC-013 — Panel semáforo [JD]
@@ -19,7 +19,7 @@ ultima_actualizacion: "2026-08-27"
 | **Trazabilidad** | PRD-REQ-011 · PRD-US-013 |
 | **Pantalla** | `/executive/semaphore` |
 | **API** | `GET /api/v1/dashboards/me/summary` (sección `executiveSection`) |
-| **Nota implementación viva (2026-08-27)** | Semáforo por programa y KPIs ejecutivos en pestaña JD de `/dashboard`. **Pendiente:** ruta dedicada `/executive/semaphore` si se exige literal del FSD baseline. |
+| **Nota implementación viva (2026-10-26)** | Ruta `/executive/semaphore` (solo [JD]) y pestaña del panel. `executiveSection` de `GET /api/v1/dashboards/me/summary`. Rojo si hay observación vencida, avance &lt; 50% o más de 10 observaciones abiertas. Sin indicadores: `SIN_DATO` (gris), agrupado por facultad. |
 
 ## Flujo principal
 
@@ -57,6 +57,6 @@ Característica: Panel semáforo ejecutivo
 
   Escenario: Coherencia con reglas de completitud
     Dado reglas de completitud configuradas para el piloto
-    Cuando una carrera tiene subfases críticas vencidas
+    Cuando una carrera tiene indicadores críticos vencidos
     Entonces el semáforo de esa carrera es Rojo
 ```

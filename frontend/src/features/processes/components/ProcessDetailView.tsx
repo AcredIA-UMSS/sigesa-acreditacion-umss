@@ -1,17 +1,32 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Download, Lock, Pencil, RefreshCw } from 'lucide-react';
+import {
+  getGetProcessQueryKey,
+  getListProcessesQueryKey,
+  useCloseProcess,
+} from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
+import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
+import { getApiErrorMessage } from '../../../lib/api/mapApiError';
 import { useAuth } from '../../../lib/auth/useAuth';
+import { useDossierExport } from '../hooks/useDossierExport';
 import { useProcessDetail } from '../hooks/useProcessDetail';
 import { ProcessEvidenceSearchPanel } from '../../evidence/components/ProcessEvidenceSearchPanel';
-import { ProcessPhaseTree } from './ProcessPhaseTree';
-import { PhasesCopilotPanel } from './PhasesCopilotPanel';
+import { ProcessNormativeTree } from './ProcessNormativeTree';
 import { ProcessResponsibleContainer } from './ProcessResponsibleContainer';
+import { EvaluationMetricsPanelContainer } from './EvaluationMetricsPanelContainer';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
+import { ProcessOperationalModeBadge } from './ProcessOperationalModeBadge';
+import { ObservationsPanel } from '../../observations/components/ObservationsPanel';
 
 interface ProcessDetailViewProps {
   processId: string;
+  /** Deep-link target from notifications: /procesos/:id/indicadores/:indicatorId */
+  initialIndicatorId?: string;
+  initialObservationId?: string;
 }
 
 function formatDate(iso?: string): string {
@@ -26,31 +41,83 @@ function formatDate(iso?: string): string {
   }
 }
 
-export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
+export function ProcessDetailView({ processId, initialIndicatorId, initialObservationId }: ProcessDetailViewProps) {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   const { process, isLoading, isError, isNotFound, errorMessage, refetch } =
     useProcessDetail(processId);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [closeError, setCloseError] = useState<string | null>(null);
+  const { mutateAsync: closeProcess, isPending: isClosing } = useCloseProcess({
+    mutation: {
+      onSuccess: async () => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) }),
+          queryClient.invalidateQueries({ queryKey: getListProcessesQueryKey() }),
+        ]);
+      },
+    },
+  });
+  const operationalMode = process?.operationalMode ?? 'ACTIVE';
+  const isAuditFrozen = operationalMode === 'AUDIT_READONLY';
   const canEditStructure =
     (session?.role === 'JD' || session?.role === 'TD') && process?.status === 'ACTIVE';
-  const canUseCopilot =
-    session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC';
-  const copilotReadOnly = session?.role === 'CC';
-  const canUploadEvidence = session?.role === 'CC';
-  const canObserveEvidence = session?.role === 'JD' || session?.role === 'TD';
+  const canUploadEvidence =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
+  const canEditFoda =
+    (session?.role === 'CC' || session?.role === 'CAE_MEMBER') && !isAuditFrozen;
   const canReviewEvidence = session?.role === 'TD';
-  const subphaseAnchorRef = useRef<HTMLDivElement>(null);
+  const canSeeObservations = session?.role === 'TD' || session?.role === 'CC';
+  const canCloseProcess =
+    (session?.role === 'JD' || session?.role === 'TD' || session?.role === 'EE') &&
+    process?.status === 'ACTIVE';
+  const structureAnchorRef = useRef<HTMLDivElement>(null);
+  const [expandToIndicatorId, setExpandToIndicatorId] = useState<string | undefined>(
+    initialIndicatorId,
+  );
 
-  const navigateToSubphase = useCallback((subphaseId: string) => {
-    const element = document.getElementById(`subphase-${subphaseId}`);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element?.classList.add('ring-2', 'ring-primary-400');
+  const navigateToIndicator = useCallback((indicatorId: string) => {
+    setExpandToIndicatorId(indicatorId);
     window.setTimeout(() => {
-      element?.classList.remove('ring-2', 'ring-primary-400');
-    }, 2000);
+      const element = document.getElementById(`indicator-${indicatorId}`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element?.classList.add('ring-2', 'ring-primary-400');
+      window.setTimeout(() => {
+        element?.classList.remove('ring-2', 'ring-primary-400');
+      }, 2000);
+    }, 150);
   }, []);
 
+  // Deep-link from notifications: expand + scroll once the process tree is loaded.
+  useEffect(() => {
+    if (!initialIndicatorId || !process || isLoading) {
+      return;
+    }
+    navigateToIndicator(initialIndicatorId);
+  }, [initialIndicatorId, process, isLoading, navigateToIndicator]);
+
+  // initialObservationId reserved for future observation highlighting in the tree.
+  void initialObservationId;
+
+  const { exportDossier, isPending: isExporting, progress, error: exportError } = useDossierExport(processId);
+
+  const handleConfirmClose = async () => {
+    setCloseError(null);
+    try {
+      const response = await closeProcess({ processId });
+      if (response.status !== 204) {
+        setCloseError('No se pudo cerrar el proceso.');
+        return;
+      }
+      setCloseDialogOpen(false);
+      await refetch();
+    } catch (error) {
+      setCloseError(getApiErrorMessage(error, 'No se pudo cerrar el proceso.'));
+    }
+  };
+
   return (
-    <div className="space-y-6" ref={subphaseAnchorRef}>
+    <div className="space-y-6" ref={structureAnchorRef}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link
           to="/procesos"
@@ -103,11 +170,44 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
                   {process.careerCode ?? '—'} · {process.templateName ?? '—'}
                 </p>
               </div>
-              <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+              <div className="flex flex-wrap items-center gap-2">
+                <ProcessStatusBadge status={process.status ?? 'UNKNOWN'} />
+                <ProcessOperationalModeBadge mode={process.operationalMode} />
+                {canCloseProcess && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setCloseError(null);
+                      setCloseDialogOpen(true);
+                    }}
+                    disabled={isClosing}
+                    className="bg-body text-primary-700 hover:bg-primary-50"
+                  >
+                    <Lock size={16} />
+                    Cerrar proceso
+                  </Button>
+                )}
+              </div>
             </div>
-            <p className="mt-4 text-body-md text-primary-100">
-              Inicio: {formatDate(process.startDate)}
-            </p>
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-body-md text-primary-100">Inicio: {formatDate(process.startDate)}</p>
+              {(session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC' || session?.role === 'EE') && (
+                <div className="flex flex-col items-start gap-1">
+                  <Button
+                    variant="secondary"
+                    onClick={() => exportDossier().catch(() => undefined)}
+                    disabled={isExporting}
+                    className="bg-body text-primary-700 hover:bg-primary-50"
+                  >
+                    <Download size={16} />
+                    {isExporting ? `Exportando... ${progress}%` : 'Exportar Dossier Completo (ZIP)'}
+                  </Button>
+                  {exportError && (
+                    <p className="text-body-sm text-primary-50">{exportError}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </section>
 
           <ProcessResponsibleContainer
@@ -116,58 +216,85 @@ export function ProcessDetailView({ processId }: ProcessDetailViewProps) {
             onUpdated={refetch}
           />
 
-          <section className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm">
+          <EvaluationMetricsPanelContainer processId={processId} />
+
+          {/* Temporarily hidden: congelamiento, sala de pares, CAE, plan mejoras, ciclo metodológico */}
+
+          {canSeeObservations && session && (
+            <ObservationsPanel processId={processId} role={session.role} />
+          )}
+
+          <section
+            className="rounded-2xl border border-gray-200 bg-body p-6 shadow-sm"
+            data-testid="process-structure-section"
+          >
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-heading-lg font-semibold text-primary-800">
                   Estructura del proceso
                 </h2>
                 <p className="mt-1 text-body-md text-gray-600">
-                  Fases y subfases con requisitos de completitud. En cada subfase puede
-                  cargar una o más evidencias y el equipo técnico puede registrar observaciones.
+                  Jerarquía normativa {process.evaluatorModel ?? process.templateType ?? ''}{' '}
+                  (dimensión → área → criterio → indicador). Despliegue cada nivel con el icono ▸.
                 </p>
               </div>
               {canEditStructure && (
                 <Link to={`/procesos/${processId}/estructura`}>
                   <Button variant="secondary">
                     <Pencil size={16} />
-                    Editar estructura
+                    Editar estructura normativa
                   </Button>
                 </Link>
               )}
             </div>
+
             <ProcessEvidenceSearchPanel
               processId={processId}
               programId={process.careerId}
-              phases={process.phases ?? []}
-              onNavigateToSubphase={navigateToSubphase}
+              level1Nodes={process.level1Nodes ?? []}
+              onNavigateToIndicator={navigateToIndicator}
             />
-            <ProcessPhaseTree
-              phases={process.phases ?? []}
-              processId={processId}
-              canUploadEvidence={canUploadEvidence}
-              canObserveEvidence={canObserveEvidence}
-              canReviewEvidence={canReviewEvidence}
-              canSubsanateEvidence={canUploadEvidence}
-              canClosePhase={canReviewEvidence}
-              onStructureUpdated={refetch}
-              onNavigateToSubphase={navigateToSubphase}
-            />
-          </section>
 
-          {canUseCopilot && (
-            <PhasesCopilotPanel
-              readOnly={copilotReadOnly}
-              process={{
-                processId,
-                careerName: process.careerName ?? 'Carrera',
-                careerCode: process.careerCode ?? '—',
-                templateType: process.templateType ?? 'CEUB',
-              }}
-            />
-          )}
+            <div className="mt-6">
+              <ProcessNormativeTree
+                level1Nodes={process.level1Nodes ?? []}
+                processId={processId}
+                canUploadEvidence={canUploadEvidence}
+                canEditFoda={canEditFoda}
+                canReviewEvidence={canReviewEvidence}
+                canSubsanateEvidence={canUploadEvidence}
+                canCloseLevel1={canReviewEvidence}
+                onStructureUpdated={refetch}
+                onNavigateToIndicator={navigateToIndicator}
+                expandToIndicatorId={expandToIndicatorId}
+              />
+            </div>
+          </section>
         </div>
       )}
+
+      {closeError && <Alert variant="error">{closeError}</Alert>}
+
+      <ConfirmDialog
+        isOpen={closeDialogOpen}
+        title="Cerrar proceso de acreditación"
+        description={
+          process
+            ? `¿Cerrar el proceso de ${process.careerName ?? 'esta carrera'}? Pasará a estado CLOSED y se notificará a jefatura [JD] por correo e in-app.`
+            : '¿Cerrar este proceso de acreditación?'
+        }
+        confirmLabel="Cerrar proceso"
+        confirmVariant="danger"
+        isLoading={isClosing}
+        onClose={() => {
+          if (!isClosing) {
+            setCloseDialogOpen(false);
+          }
+        }}
+        onConfirm={() => {
+          void handleConfirmClose();
+        }}
+      />
     </div>
   );
 }

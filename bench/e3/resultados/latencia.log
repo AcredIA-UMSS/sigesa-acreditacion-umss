@@ -1,0 +1,2089 @@
+=== latencia 2026-11-03T01:18:46Z ===
+ Network e3a_default Creating 
+ Network e3a_default Created 
+ Container e3a-api-1 Creating 
+ Container e3a-api-1 Created 
+ Container e3a-api-1 Starting 
+ Container e3a-api-1 Started 
+ Network e3b_default Creating 
+ Network e3b_default Created 
+ Container e3b-toxiproxy-1 Creating 
+ Container e3b-api-1 Creating 
+ Container e3b-notify-1 Creating 
+ Container e3b-toxiproxy-1 Created 
+ Container e3b-api-1 Created 
+ Container e3b-notify-1 Created 
+ Container e3b-toxiproxy-1 Starting 
+ Container e3b-api-1 Starting 
+ Container e3b-notify-1 Starting 
+ Container e3b-api-1 Started 
+ Container e3b-notify-1 Started 
+ Container e3b-toxiproxy-1 Started 
+{"pendingCount":0,"totalCount":0,"origin":"in_process"}
+{"pendingCount":0,"totalCount":0,"origin":"http"}
+--- warmup ---
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 40s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 10s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1261 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  01.0s/10s
+
+running (02.0s), 10/10 VUs, 3466 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  02.0s/10s
+
+running (03.0s), 10/10 VUs, 5689 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  03.0s/10s
+
+running (04.0s), 10/10 VUs, 8201 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  04.0s/10s
+
+running (05.0s), 10/10 VUs, 11074 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  05.0s/10s
+
+running (06.0s), 10/10 VUs, 13922 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  06.0s/10s
+
+running (07.0s), 10/10 VUs, 16526 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  07.0s/10s
+
+running (08.0s), 10/10 VUs, 19932 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  08.0s/10s
+
+running (09.0s), 10/10 VUs, 24062 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  09.0s/10s
+
+running (10.0s), 10/10 VUs, 27816 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  10.0s/10s
+
+running (11.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (12.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (13.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (14.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (15.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (16.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (17.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (18.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (19.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (20.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (21.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (22.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (23.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (24.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (25.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (26.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (27.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (28.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (29.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (30.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (31.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (32.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (33.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (34.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (35.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (36.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (37.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (38.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+
+running (39.0s), 07/10 VUs, 27822 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  10s
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:19:39Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 27822 / ✗ 7
+     ✓ health 200
+
+     checks.........................: 99.98% 55651 out of 55658
+     data_received..................: 24 MB  592 kB/s
+     data_sent......................: 6.0 MB 151 kB/s
+     health_duration................: min=439.54µs med=1.37ms  avg=1.58ms  p(95)=2.83ms   max=98.76ms
+     health_failed..................: 0.00%  0 out of 27829
+     http_req_blocked...............: min=0s       med=1.16µs  avg=16.08µs p(95)=2.83µs   max=9.42ms 
+     http_req_connecting............: min=0s       med=0s      avg=13.45µs p(95)=0s       max=9.36ms 
+     http_req_duration..............: min=0s       med=1.44ms  avg=1.69ms  p(95)=3.15ms   max=98.76ms
+       { expected_response:true }...: min=436.12µs med=1.44ms  avg=1.69ms  p(95)=3.15ms   max=98.76ms
+     http_req_failed................: 0.01%  7 out of 55658
+     http_req_receiving.............: min=0s       med=16.29µs avg=50.41µs p(95)=195.13µs max=24.61ms
+     http_req_sending...............: min=0s       med=3.2µs   avg=6.73µs  p(95)=10.95µs  max=4.37ms 
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s       med=1.4ms   avg=1.63ms  p(95)=3.01ms   max=98.73ms
+     http_reqs......................: 55658  1394.163756/s
+     iteration_duration.............: min=980.29µs med=3.07ms  avg=11.08ms p(95)=6.46ms   max=30.03s 
+     iterations.....................: 27829  697.081878/s
+     notifications_duration.........: min=0s       med=1.52ms  avg=1.79ms  p(95)=3.41ms   max=98.22ms
+     notifications_failed...........: 0.02%  7 out of 27829
+     vus............................: 7      min=7              max=10
+     vus_max........................: 10     min=10             max=10
+
+
+running (39.9s), 00/10 VUs, 27829 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  10s
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 40s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 10s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 300 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  01.0s/10s
+
+running (02.0s), 10/10 VUs, 942 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  02.0s/10s
+
+running (03.0s), 10/10 VUs, 1864 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  03.0s/10s
+
+running (04.0s), 10/10 VUs, 3093 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  04.0s/10s
+
+running (05.0s), 10/10 VUs, 4382 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  05.0s/10s
+
+running (06.0s), 10/10 VUs, 5779 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  06.0s/10s
+
+running (07.0s), 10/10 VUs, 7235 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  07.0s/10s
+
+running (08.0s), 10/10 VUs, 8996 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  08.0s/10s
+
+running (09.0s), 10/10 VUs, 10998 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  09.0s/10s
+
+running (10.0s), 10/10 VUs, 13100 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  10.0s/10s
+
+     ✓ notifications 200
+     ✓ health 200
+
+     checks.........................: 100.00% 26232 out of 26232
+     data_received..................: 11 MB   1.1 MB/s
+     data_sent......................: 2.8 MB  285 kB/s
+     health_duration................: min=477.45µs med=1.59ms avg=2ms     p(95)=4.11ms   max=52.43ms 
+     health_failed..................: 0.00%   0 out of 13116
+     http_req_blocked...............: min=583ns    med=1.37µs avg=20.78µs p(95)=4.04µs   max=12.4ms  
+     http_req_connecting............: min=0s       med=0s     avg=17.19µs p(95)=0s       max=12.28ms 
+     http_req_duration..............: min=477.45µs med=2.73ms avg=3.69ms  p(95)=8.91ms   max=127.72ms
+       { expected_response:true }...: min=477.45µs med=2.73ms avg=3.69ms  p(95)=8.91ms   max=127.72ms
+     http_req_failed................: 0.00%   0 out of 26232
+     http_req_receiving.............: min=7.45µs   med=22.5µs avg=84.88µs p(95)=359.26µs max=8.76ms  
+     http_req_sending...............: min=1.79µs   med=3.83µs avg=11.3µs  p(95)=17.24µs  max=5.92ms  
+     http_req_tls_handshaking.......: min=0s       med=0s     avg=0s      p(95)=0s       max=0s      
+     http_req_waiting...............: min=395.62µs med=2.64ms avg=3.59ms  p(95)=8.76ms   max=127.48ms
+     http_reqs......................: 26232   2622.547032/s
+     iteration_duration.............: min=2.28ms   med=6.14ms avg=7.61ms  p(95)=15.87ms  max=149.96ms
+     iterations.....................: 13116   1311.273516/s
+     notifications_duration.........: min=1.44ms   med=4.19ms avg=5.37ms  p(95)=11.78ms  max=127.72ms
+     notifications_failed...........: 0.00%   0 out of 13116
+     vus............................: 10      min=10             max=10
+     vus_max........................: 10      min=10             max=10
+
+
+running (10.0s), 00/10 VUs, 13116 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  10s
+RUN A 1
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 1650 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 2531 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+     ✓ notifications 200
+     ✓ health 200
+
+     checks.........................: 100.00% 5092 out of 5092
+     data_received..................: 2.2 MB  105 kB/s
+     data_sent......................: 553 kB  27 kB/s
+     health_duration................: min=412.33µs med=753.06µs avg=955.37µs p(95)=1.84ms  max=22.91ms
+     health_failed..................: 0.00%   0 out of 2546
+     http_req_blocked...............: min=625ns    med=1.16µs   avg=38.33ms  p(95)=2.87µs  max=19.75s 
+     http_req_connecting............: min=0s       med=0s       avg=38.33ms  p(95)=0s      max=19.75s 
+     http_req_duration..............: min=412.33µs med=789.02µs avg=1.07ms   p(95)=1.94ms  max=26.92ms
+       { expected_response:true }...: min=412.33µs med=789.02µs avg=1.07ms   p(95)=1.94ms  max=26.92ms
+     http_req_failed................: 0.00%   0 out of 5092
+     http_req_receiving.............: min=7.37µs   med=18.41µs  avg=36.8µs   p(95)=94.93µs max=4.77ms 
+     http_req_sending...............: min=1.83µs   med=3.39µs   avg=6.86µs   p(95)=10.95µs max=4.65ms 
+     http_req_tls_handshaking.......: min=0s       med=0s       avg=0s       p(95)=0s      max=0s     
+     http_req_waiting...............: min=344.08µs med=760.6µs  avg=1.03ms   p(95)=1.86ms  max=24.75ms
+     http_reqs......................: 5092    247.38472/s
+     iteration_duration.............: min=943.5µs  med=1.72ms   avg=78.93ms  p(95)=4.24ms  max=19.76s 
+     iterations.....................: 2546    123.69236/s
+     notifications_duration.........: min=441.41µs med=830.41µs avg=1.19ms   p(95)=2.03ms  max=26.92ms
+     notifications_failed...........: 0.00%   0 out of 2546
+     vus............................: 10      min=10           max=10
+     vus_max........................: 10      min=10           max=10
+
+
+running (20.6s), 00/10 VUs, 2546 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN B 1
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1302 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 3186 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 5741 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 8367 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 11013 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 13128 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+running (21.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (35.0s), 10/10 VUs, 13550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:20:47Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:47Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:47Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:47Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (36.0s), 04/10 VUs, 13556 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:20:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 13550 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.96% 27110 out of 27120
+     data_received..................: 11 MB  315 kB/s
+     data_sent......................: 2.9 MB 81 kB/s
+     health_duration................: min=409.25µs med=1.11ms  avg=1.27ms  p(95)=2.17ms   max=30.35ms
+     health_failed..................: 0.00%  0 out of 13560
+     http_req_blocked...............: min=0s       med=1.2µs   avg=15.6µs  p(95)=2.83µs   max=5.52ms 
+     http_req_connecting............: min=0s       med=0s      avg=12.8µs  p(95)=0s       max=5.47ms 
+     http_req_duration..............: min=0s       med=1.66ms  avg=2.03ms  p(95)=4.14ms   max=62.1ms 
+       { expected_response:true }...: min=409.25µs med=1.66ms  avg=2.03ms  p(95)=4.14ms   max=62.1ms 
+     http_req_failed................: 0.03%  10 out of 27120
+     http_req_receiving.............: min=0s       med=17.79µs avg=46.01µs p(95)=153.92µs max=30.95ms
+     http_req_sending...............: min=0s       med=3.37µs  avg=8.46µs  p(95)=14.04µs  max=2.4ms  
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s       med=1.6ms   avg=1.98ms  p(95)=4.03ms   max=62.01ms
+     http_reqs......................: 27120  745.979139/s
+     iteration_duration.............: min=1.46ms   med=3.57ms  avg=26.36ms p(95)=7.83ms   max=30.02s 
+     iterations.....................: 13560  372.98957/s
+     notifications_duration.........: min=0s       med=2.27ms  avg=2.79ms  p(95)=5.19ms   max=62.1ms 
+     notifications_failed...........: 0.07%  10 out of 13560
+     vus............................: 4      min=4              max=10
+     vus_max........................: 10     min=10             max=10
+
+
+running (36.4s), 00/10 VUs, 13560 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN A 2
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 2684 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 6458 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 10234 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 14480 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 18441 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 22572 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 26562 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 30583 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 34690 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 38896 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 43116 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 47221 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 51290 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 55560 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 59837 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 64085 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 67841 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 72065 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 75944 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 79652 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+     ✓ notifications 200
+     ✓ health 200
+
+     checks.........................: 100.00% 159410 out of 159410
+     data_received..................: 68 MB   3.4 MB/s
+     data_sent......................: 17 MB   865 kB/s
+     health_duration................: min=502.75µs med=1.08ms  avg=1.16ms  p(95)=1.67ms  max=53.25ms
+     health_failed..................: 0.00%   0 out of 79705
+     http_req_blocked...............: min=583ns    med=1.08µs  avg=13.13µs p(95)=2.29µs  max=9.34ms 
+     http_req_connecting............: min=0s       med=0s      avg=11.11µs p(95)=0s      max=9.3ms  
+     http_req_duration..............: min=489.04µs med=1.1ms   avg=1.19ms  p(95)=1.73ms  max=53.3ms 
+       { expected_response:true }...: min=489.04µs med=1.1ms   avg=1.19ms  p(95)=1.73ms  max=53.3ms 
+     http_req_failed................: 0.00%   0 out of 159410
+     http_req_receiving.............: min=6.58µs   med=15.25µs avg=30.72µs p(95)=94.31µs max=4.82ms 
+     http_req_sending...............: min=1.66µs   med=3.08µs  avg=5.23µs  p(95)=7.25µs  max=2.62ms 
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s      max=0s     
+     http_req_waiting...............: min=464.95µs med=1.07ms  avg=1.15ms  p(95)=1.66ms  max=53.28ms
+     http_reqs......................: 159410  7969.648472/s
+     iteration_duration.............: min=1.33ms   med=2.32ms  avg=2.5ms   p(95)=3.6ms   max=77.81ms
+     iterations.....................: 79705   3984.824236/s
+     notifications_duration.........: min=489.04µs med=1.13ms  avg=1.22ms  p(95)=1.78ms  max=53.3ms 
+     notifications_failed...........: 0.00%   0 out of 79705
+     vus............................: 10      min=10               max=10
+     vus_max........................: 10      min=10               max=10
+
+
+running (20.0s), 00/10 VUs, 79705 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN B 2
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1824 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 3980 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 5869 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 8515 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 10886 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 13285 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 15895 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 18155 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 20655 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 23310 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 25742 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 28537 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 31021 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 33929 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 36490 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 39327 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 42060 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 44723 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 47332 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 50104 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+     ✓ notifications 200
+     ✓ health 200
+
+     checks.........................: 100.00% 100268 out of 100268
+     data_received..................: 42 MB   2.1 MB/s
+     data_sent......................: 11 MB   544 kB/s
+     health_duration................: min=440.41µs med=1.11ms  avg=1.26ms  p(95)=2.04ms   max=92.11ms 
+     health_failed..................: 0.00%   0 out of 50134
+     http_req_blocked...............: min=625ns    med=1.2µs   avg=15.32µs p(95)=2.87µs   max=8.12ms  
+     http_req_connecting............: min=0s       med=0s      avg=12.45µs p(95)=0s       max=7.99ms  
+     http_req_duration..............: min=440.41µs med=1.71ms  avg=1.9ms   p(95)=3.53ms   max=115.21ms
+       { expected_response:true }...: min=440.41µs med=1.71ms  avg=1.9ms   p(95)=3.53ms   max=115.21ms
+     http_req_failed................: 0.00%   0 out of 100268
+     http_req_receiving.............: min=7.2µs    med=17.25µs avg=43.77µs p(95)=153.09µs max=79.9ms  
+     http_req_sending...............: min=1.75µs   med=3.41µs  avg=7.5µs   p(95)=13.37µs  max=7.79ms  
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s       max=0s      
+     http_req_waiting...............: min=391.75µs med=1.66ms  avg=1.85ms  p(95)=3.44ms   max=115.13ms
+     http_reqs......................: 100268  5012.456667/s
+     iteration_duration.............: min=1.96ms   med=3.52ms  avg=3.98ms  p(95)=6.42ms   max=121.28ms
+     iterations.....................: 50134   2506.228334/s
+     notifications_duration.........: min=1.02ms   med=2.23ms  avg=2.55ms  p(95)=4.21ms   max=115.21ms
+     notifications_failed...........: 0.00%   0 out of 50134
+     vus............................: 10      min=10               max=10
+     vus_max........................: 10      min=10               max=10
+
+
+running (20.0s), 00/10 VUs, 50134 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN A 3
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 2335 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+running (21.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 2550 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:22:01Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:01Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:01Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:01Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:01Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:02Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:02Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:02Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:02Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (31.0s), 01/10 VUs, 2559 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:22:02Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 2550 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.80% 5110 out of 5120
+     data_received..................: 2.2 MB 70 kB/s
+     data_sent......................: 554 kB 18 kB/s
+     health_duration................: min=382.5µs  med=1.01ms  avg=1.21ms   p(95)=2.42ms  max=18.92ms
+     health_failed..................: 0.00%  0 out of 2560
+     http_req_blocked...............: min=0s       med=1.16µs  avg=23.36µs  p(95)=3.12µs  max=6.47ms 
+     http_req_connecting............: min=0s       med=0s      avg=20.53µs  p(95)=0s      max=6.2ms  
+     http_req_duration..............: min=0s       med=1.05ms  avg=1.29ms   p(95)=2.51ms  max=34.21ms
+       { expected_response:true }...: min=382.5µs  med=1.05ms  avg=1.29ms   p(95)=2.51ms  max=34.21ms
+     http_req_failed................: 0.19%  10 out of 5120
+     http_req_receiving.............: min=0s       med=18.02µs avg=32.8µs   p(95)=96µs    max=2.08ms 
+     http_req_sending...............: min=0s       med=3.33µs  avg=6.27µs   p(95)=12.16µs max=1.27ms 
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s       p(95)=0s      max=0s     
+     http_req_waiting...............: min=0s       med=1.01ms  avg=1.25ms   p(95)=2.45ms  max=34.07ms
+     http_reqs......................: 5120   163.868991/s
+     iteration_duration.............: min=895.33µs med=2.26ms  avg=119.95ms p(95)=5.45ms  max=30.02s 
+     iterations.....................: 2560   81.934496/s
+     notifications_duration.........: min=0s       med=1.09ms  avg=1.36ms   p(95)=2.6ms   max=34.21ms
+     notifications_failed...........: 0.39%  10 out of 2560
+     vus............................: 1      min=1            max=10
+     vus_max........................: 10     min=10           max=10
+
+
+running (31.2s), 00/10 VUs, 2560 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN B 3
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1538 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 3310 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 5888 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 8606 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 10602 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (21.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 10/10 VUs, 10750 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (35.0s), 03/10 VUs, 10757 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:22:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:22:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 10750 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.95% 21510 out of 21520
+     data_received..................: 9.1 MB 258 kB/s
+     data_sent......................: 2.3 MB 66 kB/s
+     health_duration................: min=451.91µs med=1.14ms  avg=1.35ms  p(95)=2.31ms   max=64.99ms
+     health_failed..................: 0.00%  0 out of 10760
+     http_req_blocked...............: min=0s       med=1.25µs  avg=20.36µs p(95)=3.58µs   max=63.21ms
+     http_req_connecting............: min=0s       med=0s      avg=17.21µs p(95)=0s       max=63.15ms
+     http_req_duration..............: min=0s       med=1.75ms  avg=2.11ms  p(95)=4.1ms    max=67.74ms
+       { expected_response:true }...: min=451.91µs med=1.75ms  avg=2.11ms  p(95)=4.11ms   max=67.74ms
+     http_req_failed................: 0.04%  10 out of 21520
+     http_req_receiving.............: min=0s       med=18.54µs avg=53.1µs  p(95)=178.71µs max=30.92ms
+     http_req_sending...............: min=0s       med=3.5µs   avg=7.79µs  p(95)=14.58µs  max=2.87ms 
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s       med=1.7ms   avg=2.04ms  p(95)=4.01ms   max=67.08ms
+     http_reqs......................: 21520  611.59467/s
+     iteration_duration.............: min=1.68ms   med=3.72ms  avg=32.29ms p(95)=7.83ms   max=30.04s 
+     iterations.....................: 10760  305.797335/s
+     notifications_duration.........: min=0s       med=2.37ms  avg=2.86ms  p(95)=5.18ms   max=67.74ms
+     notifications_failed...........: 0.09%  10 out of 10760
+     vus............................: 3      min=3              max=10
+     vus_max........................: 10     min=10             max=10
+
+
+running (35.2s), 00/10 VUs, 10760 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN A 4
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 3258 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 6862 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 10835 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 14759 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 18753 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 22688 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 26996 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 31000 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 35031 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 39255 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+running (21.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (35.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (36.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (37.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (38.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (39.0s), 10/10 VUs, 41150 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (40.0s), 08/10 VUs, 41152 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:19Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:20Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:23:20Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 41150 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.98% 82310 out of 82320
+     data_received..................: 35 MB  854 kB/s
+     data_sent......................: 8.9 MB 218 kB/s
+     health_duration................: min=391.95µs med=1.07ms avg=1.15ms  p(95)=1.7ms   max=17.53ms
+     health_failed..................: 0.00%  0 out of 41160
+     http_req_blocked...............: min=0s       med=1.08µs avg=13.63µs p(95)=2.5µs   max=8.69ms 
+     http_req_connecting............: min=0s       med=0s     avg=11.53µs p(95)=0s      max=8.61ms 
+     http_req_duration..............: min=0s       med=1.1ms  avg=1.18ms  p(95)=1.75ms  max=34.73ms
+       { expected_response:true }...: min=391.95µs med=1.1ms  avg=1.18ms  p(95)=1.75ms  max=34.73ms
+     http_req_failed................: 0.01%  10 out of 82320
+     http_req_receiving.............: min=0s       med=15.5µs avg=32.74µs p(95)=98.83µs max=14.78ms
+     http_req_sending...............: min=0s       med=3.08µs avg=5.41µs  p(95)=8.87µs  max=1.68ms 
+     http_req_tls_handshaking.......: min=0s       med=0s     avg=0s      p(95)=0s      max=0s     
+     http_req_waiting...............: min=0s       med=1.07ms avg=1.14ms  p(95)=1.68ms  max=34.39ms
+     http_reqs......................: 82320  2012.141495/s
+     iteration_duration.............: min=929.25µs med=2.32ms avg=9.78ms  p(95)=3.68ms  max=30.03s 
+     iterations.....................: 41160  1006.070748/s
+     notifications_duration.........: min=0s       med=1.12ms avg=1.21ms  p(95)=1.8ms   max=34.73ms
+     notifications_failed...........: 0.02%  10 out of 41160
+     vus............................: 8      min=8              max=10
+     vus_max........................: 10     min=10             max=10
+
+
+running (40.9s), 00/10 VUs, 41160 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN B 4
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1810 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 4174 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 6864 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 9390 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 12107 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 14812 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 17608 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 20369 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 23074 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 25747 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 28481 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 31071 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 33817 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 36382 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+running (21.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (35.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (36.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (37.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (38.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (39.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (40.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (41.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (42.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (43.0s), 10/10 VUs, 36650 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (44.0s), 02/10 VUs, 36658 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:24:04Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:05Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 36650 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.98% 73310 out of 73320
+     data_received..................: 31 MB  695 kB/s
+     data_sent......................: 8.0 MB 179 kB/s
+     health_duration................: min=417.5µs med=1.1ms   avg=1.19ms  p(95)=1.84ms   max=21.23ms
+     health_failed..................: 0.00%  0 out of 36660
+     http_req_blocked...............: min=0s      med=1.2µs   avg=15.4µs  p(95)=2.95µs   max=7.26ms 
+     http_req_connecting............: min=0s      med=0s      avg=12.29µs p(95)=0s       max=7.1ms  
+     http_req_duration..............: min=0s      med=1.65ms  avg=1.8ms   p(95)=3.24ms   max=74.95ms
+       { expected_response:true }...: min=417.5µs med=1.65ms  avg=1.8ms   p(95)=3.24ms   max=74.95ms
+     http_req_failed................: 0.01%  10 out of 73320
+     http_req_receiving.............: min=0s      med=17.16µs avg=45.68µs p(95)=176.16µs max=6.34ms 
+     http_req_sending...............: min=0s      med=3.25µs  avg=8.15µs  p(95)=14.33µs  max=2.58ms 
+     http_req_tls_handshaking.......: min=0s      med=0s      avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s      med=1.59ms  avg=1.74ms  p(95)=3.16ms   max=73.33ms
+     http_reqs......................: 73320  1649.14159/s
+     iteration_duration.............: min=1.37ms  med=3.48ms  avg=11.96ms p(95)=5.69ms   max=30.01s 
+     iterations.....................: 36660  824.570795/s
+     notifications_duration.........: min=0s      med=2.19ms  avg=2.41ms  p(95)=3.8ms    max=74.95ms
+     notifications_failed...........: 0.02%  10 out of 36660
+     vus............................: 2      min=2              max=10
+     vus_max........................: 10     min=10             max=10
+
+
+running (44.5s), 00/10 VUs, 36660 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN A 5
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 3303 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 7223 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 11268 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 15122 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 19096 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 23067 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 26942 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 30873 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 34910 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 38993 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 43146 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 47209 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 51335 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 55406 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 59427 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 63404 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 67308 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 71351 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 75262 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 77009 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+running (21.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (35.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (36.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (37.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (38.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (39.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (40.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (41.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (42.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (43.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (44.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (45.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (46.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (47.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (48.0s), 09/10 VUs, 77011 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (49.0s), 08/10 VUs, 77012 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:24:55Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 77011 / ✗ 9
+     ✓ health 200
+
+     checks.........................: 99.99% 154031 out of 154040
+     data_received..................: 65 MB  1.3 MB/s
+     data_sent......................: 17 MB  337 kB/s
+     health_duration................: min=392.66µs med=1.09ms  avg=1.15ms  p(95)=1.66ms   max=26.26ms
+     health_failed..................: 0.00%  0 out of 77020
+     http_req_blocked...............: min=0s       med=1.08µs  avg=12.86µs p(95)=2.41µs   max=6.97ms 
+     http_req_connecting............: min=0s       med=0s      avg=10.8µs  p(95)=0s       max=6.77ms 
+     http_req_duration..............: min=0s       med=1.11ms  avg=1.18ms  p(95)=1.72ms   max=26.82ms
+       { expected_response:true }...: min=392.66µs med=1.11ms  avg=1.18ms  p(95)=1.72ms   max=26.82ms
+     http_req_failed................: 0.00%  9 out of 154040
+     http_req_receiving.............: min=0s       med=15.37µs avg=32.66µs p(95)=101.91µs max=4.86ms 
+     http_req_sending...............: min=0s       med=3.16µs  avg=5.57µs  p(95)=8.5µs    max=2.51ms 
+     http_req_tls_handshaking.......: min=0s       med=0s      avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s       med=1.08ms  avg=1.14ms  p(95)=1.64ms   max=26.79ms
+     http_reqs......................: 154040 3103.251964/s
+     iteration_duration.............: min=910.75µs med=2.34ms  avg=5.99ms  p(95)=3.58ms   max=30.02s 
+     iterations.....................: 77020  1551.625982/s
+     notifications_duration.........: min=0s       med=1.14ms  avg=1.21ms  p(95)=1.78ms   max=26.82ms
+     notifications_failed...........: 0.01%  9 out of 77020
+     vus............................: 8      min=8                max=10
+     vus_max........................: 10     min=10               max=10
+
+
+running (49.6s), 00/10 VUs, 77020 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+RUN B 5
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1484 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 3544 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 5914 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 8489 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 11224 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 13725 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 16452 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 19131 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 21842 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 24586 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 27291 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 30003 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 32797 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 35574 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 38316 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 40855 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 43616 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 46252 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 49042 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 51843 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20.0s/20s
+
+     ✓ notifications 200
+     ✓ health 200
+
+     checks.........................: 100.00% 103722 out of 103722
+     data_received..................: 44 MB   2.2 MB/s
+     data_sent......................: 11 MB   563 kB/s
+     health_duration................: min=366.58µs med=1.11ms avg=1.2ms   p(95)=1.87ms   max=18.99ms 
+     health_failed..................: 0.00%   0 out of 51861
+     http_req_blocked...............: min=583ns    med=1.2µs  avg=14.64µs p(95)=2.91µs   max=4.67ms  
+     http_req_connecting............: min=0s       med=0s     avg=11.51µs p(95)=0s       max=4.54ms  
+     http_req_duration..............: min=366.58µs med=1.68ms avg=1.83ms  p(95)=3.25ms   max=324.2ms 
+       { expected_response:true }...: min=366.58µs med=1.68ms avg=1.83ms  p(95)=3.25ms   max=324.2ms 
+     http_req_failed................: 0.00%   0 out of 103722
+     http_req_receiving.............: min=7.16µs   med=17µs   avg=44.35µs p(95)=161.03µs max=33.03ms 
+     http_req_sending...............: min=1.7µs    med=3.41µs avg=8.32µs  p(95)=14.2µs   max=4.1ms   
+     http_req_tls_handshaking.......: min=0s       med=0s     avg=0s      p(95)=0s       max=0s      
+     http_req_waiting...............: min=349.95µs med=1.63ms avg=1.78ms  p(95)=3.16ms   max=323.94ms
+     http_reqs......................: 103722  5185.082364/s
+     iteration_duration.............: min=1.95ms   med=3.51ms avg=3.84ms  p(95)=5.66ms   max=331.49ms
+     iterations.....................: 51861   2592.541182/s
+     notifications_duration.........: min=1.06ms   med=2.21ms avg=2.46ms  p(95)=3.76ms   max=324.2ms 
+     notifications_failed...........: 0.00%   0 out of 51861
+     vus............................: 10      min=10               max=10
+     vus_max........................: 10      min=10               max=10
+
+
+running (20.0s), 00/10 VUs, 51861 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+--- H2 corte ---
+{"name":"notify","listen":"[::]:8666","upstream":"notify:8081","enabled":false,"Logger":{},"toxics":[]}{"name":"notify","listen":"[::]:8666","upstream":"notify:8081","enabled":false,"Logger":{},"toxics":[]}
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 1045 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20s
+
+running (21.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 1312 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+time="2026-11-03T01:25:48Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18082/api/health\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  0% — ✓ 0 / ✗ 1322
+     ✗ health 200
+      ↳  99% — ✓ 1312 / ✗ 10
+
+     checks.........................: 49.62%  1312 out of 2644
+     data_received..................: 1.2 MB  39 kB/s
+     data_sent......................: 286 kB  9.2 kB/s
+     health_duration................: min=0s       med=2.02ms   avg=2.67ms   p(95)=4.75ms   max=56.87ms 
+     health_failed..................: 0.75%   10 out of 1322
+     http_req_blocked...............: min=0s       med=653.41µs avg=1ms      p(95)=2.49ms   max=66.13ms 
+     http_req_connecting............: min=0s       med=288.47µs avg=973.53µs p(95)=2.45ms   max=66.08ms 
+     http_req_duration..............: min=0s       med=2.04ms   avg=3.26ms   p(95)=4.49ms   max=179.21ms
+       { expected_response:true }...: min=629.5µs  med=2.02ms   avg=2.69ms   p(95)=4.76ms   max=56.87ms 
+     http_req_failed................: 50.37%  1332 out of 2644
+     http_req_receiving.............: min=0s       med=30.66µs  avg=85.43µs  p(95)=235.65µs max=10.52ms 
+     http_req_sending...............: min=0s       med=7.7µs    avg=24.92µs  p(95)=62.28µs  max=1.74ms  
+     http_req_tls_handshaking.......: min=0s       med=0s       avg=0s       p(95)=0s       max=0s      
+     http_req_waiting...............: min=0s       med=1.96ms   avg=3.15ms   p(95)=4.29ms   max=177.95ms
+     http_reqs......................: 2644    84.8282/s
+     iteration_duration.............: min=2.08ms   med=5.79ms   avg=235.64ms p(95)=14.18ms  max=30s     
+     iterations.....................: 1322    42.4141/s
+     notifications_duration.........: min=605.62µs med=2.06ms   avg=3.86ms   p(95)=4.37ms   max=179.21ms
+     notifications_failed...........: 100.00% 1322 out of 1322
+     vus............................: 10      min=10           max=10
+     vus_max........................: 10      min=10           max=10
+
+
+running (31.2s), 00/10 VUs, 1322 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+--- H2 control ---
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/k6-e3.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * default: 10 looping VUs for 20s (gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 3119 complete and 0 interrupted iterations
+default   [   5% ] 10 VUs  01.0s/20s
+
+running (02.0s), 10/10 VUs, 6643 complete and 0 interrupted iterations
+default   [  10% ] 10 VUs  02.0s/20s
+
+running (03.0s), 10/10 VUs, 10604 complete and 0 interrupted iterations
+default   [  15% ] 10 VUs  03.0s/20s
+
+running (04.0s), 10/10 VUs, 14471 complete and 0 interrupted iterations
+default   [  20% ] 10 VUs  04.0s/20s
+
+running (05.0s), 10/10 VUs, 18250 complete and 0 interrupted iterations
+default   [  25% ] 10 VUs  05.0s/20s
+
+running (06.0s), 10/10 VUs, 22198 complete and 0 interrupted iterations
+default   [  30% ] 10 VUs  06.0s/20s
+
+running (07.0s), 10/10 VUs, 26229 complete and 0 interrupted iterations
+default   [  35% ] 10 VUs  07.0s/20s
+
+running (08.0s), 10/10 VUs, 30343 complete and 0 interrupted iterations
+default   [  40% ] 10 VUs  08.0s/20s
+
+running (09.0s), 10/10 VUs, 34233 complete and 0 interrupted iterations
+default   [  45% ] 10 VUs  09.0s/20s
+
+running (10.0s), 10/10 VUs, 38170 complete and 0 interrupted iterations
+default   [  50% ] 10 VUs  10.0s/20s
+
+running (11.0s), 10/10 VUs, 42388 complete and 0 interrupted iterations
+default   [  55% ] 10 VUs  11.0s/20s
+
+running (12.0s), 10/10 VUs, 46425 complete and 0 interrupted iterations
+default   [  60% ] 10 VUs  12.0s/20s
+
+running (13.0s), 10/10 VUs, 50573 complete and 0 interrupted iterations
+default   [  65% ] 10 VUs  13.0s/20s
+
+running (14.0s), 10/10 VUs, 54473 complete and 0 interrupted iterations
+default   [  70% ] 10 VUs  14.0s/20s
+
+running (15.0s), 10/10 VUs, 58582 complete and 0 interrupted iterations
+default   [  75% ] 10 VUs  15.0s/20s
+
+running (16.0s), 10/10 VUs, 62669 complete and 0 interrupted iterations
+default   [  80% ] 10 VUs  16.0s/20s
+
+running (17.0s), 10/10 VUs, 66694 complete and 0 interrupted iterations
+default   [  85% ] 10 VUs  17.0s/20s
+
+running (18.0s), 10/10 VUs, 70774 complete and 0 interrupted iterations
+default   [  90% ] 10 VUs  18.0s/20s
+
+running (19.0s), 10/10 VUs, 73285 complete and 0 interrupted iterations
+default   [  95% ] 10 VUs  19.0s/20s
+
+running (20.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default   [ 100% ] 10 VUs  20s
+
+running (21.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (22.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (23.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (24.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (25.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (26.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (27.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (28.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (29.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (30.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (31.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (32.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (33.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (34.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (35.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (36.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (37.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (38.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (39.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (40.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (41.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (42.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (43.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (44.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (45.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (46.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (47.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+
+running (48.0s), 10/10 VUs, 73450 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:37Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+time="2026-11-03T01:26:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+running (49.0s), 01/10 VUs, 73459 complete and 0 interrupted iterations
+default ↓ [ 100% ] 10 VUs  20s
+time="2026-11-03T01:26:38Z" level=warning msg="Request Failed" error="Get \"http://host.docker.internal:18080/api/v1/e3/notifications\": dial: i/o timeout"
+
+     ✗ notifications 200
+      ↳  99% — ✓ 73450 / ✗ 10
+     ✓ health 200
+
+     checks.........................: 99.99% 146910 out of 146920
+     data_received..................: 62 MB  1.3 MB/s
+     data_sent......................: 16 MB  324 kB/s
+     health_duration................: min=373.08µs med=1.09ms avg=1.16ms  p(95)=1.68ms   max=34.22ms
+     health_failed..................: 0.00%  0 out of 73460
+     http_req_blocked...............: min=0s       med=1.08µs avg=13.27µs p(95)=2.41µs   max=7.5ms  
+     http_req_connecting............: min=0s       med=0s     avg=11.23µs p(95)=0s       max=7.25ms 
+     http_req_duration..............: min=0s       med=1.12ms avg=1.19ms  p(95)=1.74ms   max=38.58ms
+       { expected_response:true }...: min=373.08µs med=1.12ms avg=1.19ms  p(95)=1.74ms   max=38.58ms
+     http_req_failed................: 0.00%  10 out of 146920
+     http_req_receiving.............: min=0s       med=15.5µs avg=32.75µs p(95)=103.54µs max=6.13ms 
+     http_req_sending...............: min=0s       med=3.12µs avg=5.48µs  p(95)=8.25µs   max=2.95ms 
+     http_req_tls_handshaking.......: min=0s       med=0s     avg=0s      p(95)=0s       max=0s     
+     http_req_waiting...............: min=0s       med=1.09ms avg=1.15ms  p(95)=1.67ms   max=38.28ms
+     http_reqs......................: 146920 2987.390956/s
+     iteration_duration.............: min=909.2µs  med=2.36ms avg=6.59ms  p(95)=3.61ms   max=30.08s 
+     iterations.....................: 73460  1493.695478/s
+     notifications_duration.........: min=0s       med=1.15ms avg=1.22ms  p(95)=1.79ms   max=38.58ms
+     notifications_failed...........: 0.01%  10 out of 73460
+     vus............................: 1      min=1                max=10
+     vus_max........................: 10     min=10               max=10
+
+
+running (49.2s), 00/10 VUs, 73460 complete and 0 interrupted iterations
+default ✓ [ 100% ] 10 VUs  20s
+{"name":"notify","listen":"[::]:8666","upstream":"notify:8081","enabled":true,"Logger":{},"toxics":[]}after_cut_status=200
+ Container e3a-api-1 Stopping 
+ Container e3a-api-1 Stopped 
+ Container e3a-api-1 Removing 
+ Container e3a-api-1 Removed 
+ Network e3a_default Removing 
+ Network e3a_default Removed 
+ Container e3b-api-1 Stopping 
+ Container e3b-notify-1 Stopping 
+ Container e3b-toxiproxy-1 Stopping 
+ Container e3b-toxiproxy-1 Stopped 
+ Container e3b-toxiproxy-1 Removing 
+ Container e3b-toxiproxy-1 Removed 
+ Container e3b-notify-1 Stopped 
+ Container e3b-notify-1 Removing 
+ Container e3b-notify-1 Removed 
+ Container e3b-api-1 Stopped 
+ Container e3b-api-1 Removing 
+ Container e3b-api-1 Removed 
+ Network e3b_default Removing 
+ Network e3b_default Removed 
+=== latencia done 2026-11-03T01:26:41Z ===

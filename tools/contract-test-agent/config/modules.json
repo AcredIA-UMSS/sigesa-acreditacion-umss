@@ -1,0 +1,33 @@
+{
+  "auth": {
+    "package": "com.sigesa.app.contracts.auth",
+    "plan": "plan_auth.md",
+    "titulo": "Contrato JSON POST /api/v1/auth/login",
+    "dtos": [
+      "adapter/in/web/dto/LoginRequest.java",
+      "adapter/in/web/dto/LoginResponse.java"
+    ],
+    "patron": "backend/src/test/java/com/sigesa/app/contracts/auth/LoginJsonContractTest.java"
+  },
+  "evidence": {
+    "package": "com.sigesa.app.contracts.evidence",
+    "plan": "plan_evidence.md",
+    "titulo": "Contrato JSON evidencias UC-004",
+    "dtos": [
+      "adapter/in/web/dto/UploadableIndicatorResponse.java",
+      "adapter/in/web/dto/UploadEvidenceResponse.java"
+    ],
+    "patron": "backend/src/test/java/com/sigesa/app/contracts/evidence/EvidenceJsonContractTest.java"
+  },
+  "assistant": {
+    "package": "com.sigesa.app.contracts.assistant",
+    "plan": "plan_assistant.md",
+    "titulo": "Contrato JSON POST /api/v1/assistant/chat",
+    "dtos": [
+      "adapter/in/web/dto/SendChatMessageRequest.java",
+      "adapter/in/web/dto/SendChatMessageResponse.java"
+    ],
+    "patron": "backend/src/test/java/com/sigesa/app/contracts/assistant/SendChatMessageJsonContractTest.java",
+    "schema": "docs/qa/schemas/send-chat-message-response.schema.json"
+  }
+}

@@ -5,6 +5,7 @@ import {
   Network,
   BarChart,
   History,
+  Clock,
   HelpCircle,
   LogOut,
   ChevronLeft,
@@ -15,7 +16,12 @@ import {
   Plus,
   Layers,
   FileUp,
+  FileSearch,
+  FileCheck,
+  Gauge,
+  Newspaper,
 } from 'lucide-react';
+import { NotificationBellPopover } from '../../features/notifications';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
 
@@ -27,7 +33,10 @@ type SidebarNavKey =
   | 'templates'
   | 'reports'
   | 'history'
-  | 'help';
+  | 'help'
+  | 'semaphore'
+  | 'inbox'
+  | 'news';
 
 
 interface SidebarProps {
@@ -42,13 +51,22 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
 
   const isExternalEvaluator = session?.role === 'EE';
   const isProcessRoute = location.pathname.startsWith('/procesos');
+  const isReportsRoute =
+    location.pathname.startsWith('/reportes') || location.pathname.startsWith('/admin/ingresos');
   const [processesOpen, setProcessesOpen] = useState(isProcessRoute);
+  const [reportsOpen, setReportsOpen] = useState(isReportsRoute);
 
   useEffect(() => {
     if (isProcessRoute) {
       setProcessesOpen(true);
     }
   }, [isProcessRoute]);
+
+  useEffect(() => {
+    if (isReportsRoute) {
+      setReportsOpen(true);
+    }
+  }, [isReportsRoute]);
 
   const initials = session?.role ?? 'U';
   const roleLabel = session ? getRoleLabel(session.role) : 'Usuario';
@@ -69,6 +87,15 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
     setProcessesOpen((prev) => !prev);
   };
 
+  const toggleReports = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+      setReportsOpen(true);
+      return;
+    }
+    setReportsOpen((prev) => !prev);
+  };
+
   return (
     <aside
       className={`relative flex h-screen flex-col border-r border-primary-800 bg-primary-900 text-body transition-all duration-300 ease-in-out ${
@@ -84,15 +111,17 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       </button>
 
       <div
-        className={`flex h-[88px] items-center gap-3 border-b border-primary-800 p-6 ${
-          !isExpanded && 'justify-center'
+        className={`flex items-center gap-3 border-b border-primary-800 px-4 py-4 ${
+          isExpanded ? '' : 'justify-center px-2'
         }`}
       >
-        <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-full bg-body">
-          <img src="/umss-logo.svg" alt="UMSS" className="h-8 w-8" />
-        </div>
+        <img
+          src="/duea-logo.png"
+          alt="Dirección Universitaria de Evaluación y Acreditación, DUEA-UMSS"
+          className={`shrink-0 rounded-full object-cover ${isExpanded ? 'h-16 w-16' : 'h-12 w-12'}`}
+        />
         {isExpanded && (
-          <div className="overflow-hidden whitespace-nowrap">
+          <div className="overflow-hidden">
             <h1 className="text-heading-sm font-bold leading-tight">UMSS DUEA</h1>
             <p className="text-label-md text-primary-200">{panelSubtitle}</p>
           </div>
@@ -108,6 +137,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           active={activeNav === 'dashboard'}
           to="/dashboard"
         />
+
+        {isJd && (
+          <NavItem
+            icon={<Gauge size={20} />}
+            label="SEMÁFORO"
+            isExpanded={isExpanded}
+            active={activeNav === 'semaphore' || location.pathname.startsWith('/executive/semaphore')}
+            to="/executive/semaphore"
+          />
+        )}
 
         {!isExternalEvaluator && (
           <div>
@@ -187,6 +226,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           </div>
         )}
 
+        {session?.role === 'TD' && (
+          <NavItem
+            icon={<Layers size={20} />}
+            label="SEGUIMIENTO DE PROCESOS"
+            isExpanded={isExpanded}
+            active={activeNav === 'reports' || location.pathname.startsWith('/reportes/fase')}
+            to="/reportes/fase"
+          />
+        )}
+
         {isJd && (
           <>
             <NavItem
@@ -203,6 +252,13 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               active={activeNav === 'users'}
               to="/admin/users"
             />
+            <NavItem
+              icon={<Newspaper size={20} />}
+              label="NOTICIAS"
+              isExpanded={isExpanded}
+              active={activeNav === 'news' || location.pathname.startsWith('/admin/noticias')}
+              to="/admin/noticias"
+            />
           </>
         )}
 
@@ -211,36 +267,108 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
             icon={<FileUp size={20} />}
             label="CARGAR EVIDENCIA"
             isExpanded={isExpanded}
-            active={activeNav === 'evidence'}
+            active={location.pathname === '/evidencias/cargar'}
             to="/evidencias/cargar"
           />
         )}
 
+        <NavItem
+          icon={<FileSearch size={20} />}
+          label="BUSCAR EVIDENCIAS"
+          isExpanded={isExpanded}
+          active={location.pathname === '/evidencias/buscar' || location.pathname === '/evidencias/search'}
+          to="/evidencias/buscar"
+        />
+
         {!isExternalEvaluator && (
           <>
             {isJd ? (
+              <div>
+                <button
+                  type="button"
+                  onClick={toggleReports}
+                  className={`flex w-full items-center rounded-lg p-3 transition-colors ${
+                    isExpanded ? 'justify-between' : 'justify-center'
+                  } ${
+                    activeNav === 'reports' || isReportsRoute
+                      ? 'border-l-4 border-secondary bg-primary-800 text-body'
+                      : 'text-primary-200 hover:bg-primary-800 hover:text-body'
+                  }`}
+                  title={!isExpanded ? 'Reportes' : undefined}
+                  aria-expanded={reportsOpen}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-[20px]">
+                      <BarChart size={20} />
+                    </div>
+                    {isExpanded && (
+                      <span className="overflow-hidden whitespace-nowrap text-left text-label-md">
+                        REPORTES
+                      </span>
+                    )}
+                  </div>
+                  {isExpanded && (
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${reportsOpen ? 'rotate-180' : ''}`}
+                    />
+                  )}
+                </button>
+                {isExpanded && reportsOpen && (
+                  <ul className="mt-1 ml-5 space-y-1 border-l border-primary-700 pl-4">
+                    <SubNavItem
+                      icon={<BarChart size={16} />}
+                      label="Reporte ejecutivo"
+                      to="/reportes/ejecutivo"
+                      active={location.pathname.startsWith('/reportes/ejecutivo')}
+                    />
+                    <SubNavItem
+                      icon={<Clock size={16} />}
+                      label="Historial de accesos"
+                      to="/admin/ingresos"
+                      active={location.pathname.startsWith('/admin/ingresos')}
+                    />
+                  </ul>
+                )}
+                {!isExpanded && isReportsRoute && (
+                  <ul className="mt-1 space-y-1">
+                    <SubNavItem
+                      icon={<BarChart size={16} />}
+                      label="Reporte ejecutivo"
+                      to="/reportes/ejecutivo"
+                      active={location.pathname.startsWith('/reportes/ejecutivo')}
+                      compact
+                    />
+                    <SubNavItem
+                      icon={<Clock size={16} />}
+                      label="Historial de accesos"
+                      to="/admin/ingresos"
+                      active={location.pathname.startsWith('/admin/ingresos')}
+                      compact
+                    />
+                  </ul>
+                )}
+              </div>
+            ) : null}
+
+            {(isJd || session?.role === 'TD') && (
               <NavItem
-                icon={<BarChart size={20} />}
-                label="REPORTES"
+                icon={<FileCheck size={20} />}
+                label="BANDEJA DICTAMEN"
                 isExpanded={isExpanded}
-                active={activeNav === 'reports'}
-                to="/reportes/ejecutivo"
-              />
-            ) : (
-              <NavItem
-                icon={<BarChart size={20} />}
-                label="REPORTES"
-                isExpanded={isExpanded}
-                hasDropdown
-                active={activeNav === 'reports'}
+                active={location.pathname.startsWith('/technician/inbox') || location.pathname.startsWith('/dashboard/technician/inbox')}
+                to="/technician/inbox"
               />
             )}
-            <NavItem
-              icon={<History size={20} />}
-              label="HISTORIAL"
-              isExpanded={isExpanded}
-              active={activeNav === 'history'}
-            />
+            {isJd && (
+              <NavItem
+                icon={<History size={20} />}
+                label="HISTORIAL AUDITORÍA"
+                isExpanded={isExpanded}
+                active={activeNav === 'history' || location.pathname.startsWith('/admin/auditoria') || location.pathname.startsWith('/admin/audit')}
+                to="/admin/auditoria"
+              />
+            )}
           </>
         )}
 
@@ -255,34 +383,35 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
       </nav>
 
       <div
-        className={`flex h-[88px] items-center border-t border-primary-800 bg-primary-900 p-4 ${
-          isExpanded ? 'justify-between' : 'justify-center'
+        className={`mt-auto flex h-[88px] shrink-0 items-center border-t border-primary-800 bg-primary-900 p-4 ${
+          isExpanded ? 'justify-between gap-2' : 'flex-col justify-center gap-2'
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className={`flex min-w-0 items-center gap-3 ${isExpanded ? '' : 'justify-center'}`}>
+          <div className="relative shrink-0">
             <div className="flex h-10 w-10 min-w-[40px] items-center justify-center rounded-full bg-warning text-primary-900 text-heading-sm">
               {initials}
             </div>
             <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-primary-900 bg-secondary" />
           </div>
           {isExpanded && (
-            <div className="overflow-hidden whitespace-nowrap">
-              <p className="text-body-md font-bold">{roleLabel}</p>
+            <div className="min-w-0 overflow-hidden whitespace-nowrap">
+              <p className="truncate text-body-md font-bold">{roleLabel}</p>
               <p className="text-label-md text-primary-300">SIGESA</p>
             </div>
           )}
         </div>
-        {isExpanded && (
+        <div className={`flex shrink-0 items-center gap-1 ${isExpanded ? '' : 'flex-col'}`}>
+          <NotificationBellPopover variant="sidebar" compact={!isExpanded} />
           <button
             type="button"
             onClick={handleLogout}
-            className="text-primary-300 transition-colors hover:text-body"
+            className="shrink-0 text-primary-300 transition-colors hover:text-body"
             aria-label="Cerrar sesión"
           >
             <LogOut size={20} />
           </button>
-        )}
+        </div>
       </div>
     </aside>
   );

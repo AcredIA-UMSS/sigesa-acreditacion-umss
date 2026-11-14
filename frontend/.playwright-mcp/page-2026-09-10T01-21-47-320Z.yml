@@ -1,0 +1,61 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - button [ref=f1e5]
+    - generic [ref=f1e8]:
+      - img "UMSS" [ref=f1e10]
+      - generic [ref=f1e11]:
+        - heading "UMSS DUEA" [level=1] [ref=f1e12]
+        - paragraph [ref=f1e13]: PANEL ADMINISTRATIVO
+    - navigation [ref=f1e14]:
+      - link "PANEL DE CONTROL ▼" [ref=f1e15] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e16]: PANEL DE CONTROL
+        - generic [ref=f1e24]: ▼
+      - button "GESTIÓN PROCESOS" [ref=f1e26]
+      - link "PLANTILLAS" [ref=f1e37] [cursor=pointer]:
+        - /url: /admin/plantillas
+      - link "GESTIÓN USUARIOS" [ref=f1e45] [cursor=pointer]:
+        - /url: /admin/users
+      - link "REPORTES" [ref=f1e54] [cursor=pointer]:
+        - /url: /reportes/ejecutivo
+      - button "HISTORIAL" [ref=f1e59]
+      - link "AYUDA" [ref=f1e67] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f1e74]:
+      - generic [ref=f1e75]:
+        - generic [ref=f1e76]: JD
+        - generic [ref=f1e79]:
+          - paragraph [ref=f1e80]: Jefatura DUEA [JD]
+          - paragraph [ref=f1e81]: SIGESA
+      - button "Cerrar sesión" [ref=f1e82]
+  - main [ref=f1e86]:
+    - generic [ref=f1e88]:
+      - generic [ref=f1e89]:
+        - paragraph [ref=f1e90]: SIGESA · Ayuda
+        - heading "Asistente virtual" [level=1] [ref=f1e91]
+        - paragraph [ref=f1e92]: "Tool calling SIGESA: la respuesta la produce el código. El LLM solo elige la herramienta cuando la pregunta no coincide con el catálogo de palabras clave. Las entradas se validan en el servidor (SQLi, XSS y límites de longitud)."
+      - generic [ref=f1e93]:
+        - paragraph [ref=f1e94]: Modelo (fijado)
+        - paragraph [ref=f1e95]: Cargando…
+        - paragraph [ref=f1e96]: IA (LLM)
+        - paragraph [ref=f1e97]: —
+    - generic [ref=f1e98]:
+      - complementary [ref=f1e99]:
+        - generic [ref=f1e100]:
+          - heading "Escenarios demo" [level=2] [ref=f1e101]
+          - list
+        - generic [ref=f1e102]:
+          - heading "Capacidades" [level=2] [ref=f1e103]
+          - list
+      - generic [ref=f1e105]:
+        - generic [ref=f1e106]:
+          - generic [ref=f1e107]:
+            - generic [ref=f1e108]: Conversación
+            - button "Historial de acciones" [ref=f1e111]
+          - button "Limpiar" [disabled] [ref=f1e112]
+        - generic [ref=f1e117]:
+          - heading "Demostración tool calling" [level=2] [ref=f1e122]
+          - paragraph [ref=f1e123]: Pruebe los escenarios demo (incluido Nivel 4 multi-tool). Use el historial de acciones para ver cada paso ejecutado (tool, camino, fuentes).
+        - generic [ref=f1e125]:
+          - textbox "Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)" [active] [ref=f1e126]
+          - button "Enviar" [disabled] [ref=f1e127]

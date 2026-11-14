@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.out.storage;
 
 import com.umss.sigesa.application.port.out.FileStoragePort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,11 +14,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @Component
+@ConditionalOnProperty(name = "sigesa.evidence.storage", havingValue = "local", matchIfMissing = true)
 public class LocalFileStorageAdapter implements FileStoragePort {
 
     private final Path storageDirectory;
 
-    public LocalFileStorageAdapter(@Value("${sigesa.evidence.storage-dir:uploads/evidences}") String storageDir) {
+    public LocalFileStorageAdapter(
+            @Value("${sigesa.evidence.storage-dir:${sigesa.evidence.storage-path:./data/evidences}}") String storageDir) {
         this.storageDirectory = Paths.get(storageDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(this.storageDirectory);

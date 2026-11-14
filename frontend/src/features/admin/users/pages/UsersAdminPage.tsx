@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Bell, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Sidebar } from '../../../../components/layout/Sidebar';
+import { NotificationBellPopover } from '../../../notifications';
 import { useAuth } from '../../../../lib/auth/useAuth';
 import { getApiErrorMessage } from '../../../../lib/api/mapApiError';
 import { AddUserModalUI } from '../components/AddUserModalUI';
@@ -38,10 +39,7 @@ export function UsersAdminPage() {
             <span className="text-primary-600">Inicio</span> / Administración de usuarios
           </div>
           <div className="flex items-center gap-4 text-gray-600">
-            <button type="button" className="relative hover:text-primary-600" aria-label="Notificaciones">
-              <Bell size={24} />
-              <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-secondary" />
-            </button>
+            <NotificationBellPopover variant="header" />
             <button type="button" className="hover:text-primary-600" aria-label="Configuración">
               <Settings size={24} />
             </button>
