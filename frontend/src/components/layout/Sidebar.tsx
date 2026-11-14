@@ -148,16 +148,6 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
           />
         )}
 
-        {session?.role === 'TD' && (
-          <NavItem
-            icon={<Layers size={20} />}
-            label="FASE DEL PROCESO"
-            isExpanded={isExpanded}
-            active={activeNav === 'reports' || location.pathname.startsWith('/reportes/fase')}
-            to="/reportes/fase"
-          />
-        )}
-
         {!isExternalEvaluator && (
           <div>
             <button
@@ -234,6 +224,16 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               </ul>
             )}
           </div>
+        )}
+
+        {session?.role === 'TD' && (
+          <NavItem
+            icon={<Layers size={20} />}
+            label="SEGUIMIENTO DE PROCESOS"
+            isExpanded={isExpanded}
+            active={activeNav === 'reports' || location.pathname.startsWith('/reportes/fase')}
+            to="/reportes/fase"
+          />
         )}
 
         {isJd && (

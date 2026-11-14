@@ -1,3 +1,8 @@
+management:
+  tracing:
+    sampling:
+      probability: ${SIGESA_TRACING_SAMPLE:0}
+
 spring:
   threads:
     virtual:

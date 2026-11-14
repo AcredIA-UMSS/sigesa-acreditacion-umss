@@ -6,6 +6,9 @@ public record ProcessEvidenceOptionResponse(
         UUID evidenceId,
         UUID indicatorId,
         String code,
-        String title
+        String title,
+        String originalFilename,
+        UUID documentAssetId,
+        String folioCode
 ) {
 }

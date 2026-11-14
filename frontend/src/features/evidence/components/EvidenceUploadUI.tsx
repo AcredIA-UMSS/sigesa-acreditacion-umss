@@ -48,6 +48,8 @@ export type EvidenceUploadUIProps = {
   result: EvidenceUploadResult | null;
   errorMessage: string | null;
   validationErrors: EvidenceUploadValidationErrors;
+  phaseName?: string | null;
+  trace?: ReactNode;
 };
 
 export function EvidenceUploadUI({
@@ -69,11 +71,14 @@ export function EvidenceUploadUI({
   result,
   errorMessage,
   validationErrors,
+  phaseName,
+  trace,
 }: EvidenceUploadUIProps) {
   const showProgress = isSubmitting || progress > 0;
   const selectedIndicator = indicatorOptions.find(
     (item) => item.indicatorId === form.indicatorId,
   );
+  const selectedProcess = processOptions.find((item) => item.processId === form.processId);
 
   const processSelectOptions = [
     {
@@ -102,7 +107,7 @@ export function EvidenceUploadUI({
   ];
 
   return (
-    <div className="flex flex-1 flex-col h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-body px-8 py-4">
         <nav className="text-body-md text-gray-600" aria-label="Ruta de navegación">
           <span className="text-primary-600">Inicio</span>
@@ -121,12 +126,12 @@ export function EvidenceUploadUI({
         </div>
       </header>
 
-      <main data-app-scroll className="flex-1 overflow-y-auto p-8">
+      <main data-app-scroll className="min-h-0 flex-1 overflow-y-auto p-8">
         <div className="mx-auto max-w-6xl">
           <header className="mb-8">
             <div className="mb-4 h-1 w-12 bg-secondary" />
             <h1 className="mb-2 text-heading-xl text-primary-800">
-              Cargar Evidencia
+              {phaseName ? `Cargar Evidencia · ${phaseName}` : 'Cargar Evidencia'}
             </h1>
             <p className="text-body-lg text-gray-600">
               El coordinador de carrera adjunta el archivo a un indicador normativo del proceso
@@ -151,7 +156,7 @@ export function EvidenceUploadUI({
                   </div>
                   <div>
                     <h2 className="text-heading-md text-primary-800">
-                      Metadatos y archivo
+                      {selectedProcess?.label ?? 'Metadatos y archivo'}
                     </h2>
                     <p className="text-body-md text-gray-500">
                       Proceso, indicador, descripción y documento de respaldo
@@ -353,6 +358,9 @@ export function EvidenceUploadUI({
                             {result.contentHash}
                           </dd>
                         </div>
+                        <p className="pt-2 text-body-md text-gray-700">
+                          El técnico ya puede visualizar este archivo y registrar la revisión en Seguimiento de procesos.
+                        </p>
                       </dl>
                     </div>
                   )}
@@ -426,6 +434,7 @@ export function EvidenceUploadUI({
               </section>
             </aside>
           </div>
+          {trace}
         </div>
       </main>
     </div>

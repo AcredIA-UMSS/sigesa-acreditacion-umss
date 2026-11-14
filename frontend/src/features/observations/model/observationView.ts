@@ -92,7 +92,8 @@ export function evidenceLabel(option: EvidenceOption | undefined): string {
   if (!option) return 'Evidencia sin indicador';
   const code = option.code ?? 'Indicador';
   const title = option.title ?? 'Sin título';
-  return `${code} — ${title}`;
+  const file = option.originalFilename ? ` · ${option.originalFilename}` : '';
+  return `${code} — ${title}${file}`;
 }
 
 export function technicianLabel(authorId: string): string {

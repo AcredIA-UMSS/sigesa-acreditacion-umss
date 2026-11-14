@@ -2079,12 +2079,22 @@
           "code" : {
             "type" : "string"
           },
+          "documentAssetId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
           "evidenceId" : {
             "format" : "uuid",
             "type" : "string"
           },
+          "folioCode" : {
+            "type" : "string"
+          },
           "indicatorId" : {
             "format" : "uuid",
+            "type" : "string"
+          },
+          "originalFilename" : {
             "type" : "string"
           },
           "title" : {

@@ -31,6 +31,9 @@ export interface EvidenceOption {
   indicatorId: string;
   code: string | null;
   title: string | null;
+  originalFilename: string | null;
+  documentAssetId: string | null;
+  folioCode: string | null;
 }
 
 export interface ObservationDraftInput {

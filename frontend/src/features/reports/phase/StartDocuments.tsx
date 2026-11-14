@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useListByProcess } from '../../../api/endpoints/document-assets/document-assets';
 import { Alert } from '../../../components/ui/Alert';
 import { Button } from '../../../components/ui/Button';
 import { Select } from '../../../components/ui/Select';
 import { isApiError } from '../../../lib/api/apiError';
-import { EvidencePreviewDialog } from '../../evidence/components/EvidencePreviewDialog';
-import { useEvidencePreview } from '../../evidence/hooks/useEvidencePreview';
 import { evidenceLabel } from '../../observations/model/observationView';
+import { ProcessEvidenceTrace } from '../../observations/components/ProcessEvidenceTrace';
 import { useProcessObservations } from '../../observations/hooks/useProcessObservations';
 
 interface StartDocumentsProps {
@@ -22,10 +20,7 @@ export function StartDocuments({ processId, documents }: StartDocumentsProps) {
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const preview = useEvidencePreview();
-  const uploads = useListByProcess({ processId }, { query: { enabled: Boolean(processId) } });
   const observations = useProcessObservations(processId);
-  const files = uploads.data?.status === 200 ? uploads.data.data : [];
   const evidenceData = observations.evidences.data;
   const evidences = evidenceData ?? [];
 
@@ -70,7 +65,7 @@ export function StartDocuments({ processId, documents }: StartDocumentsProps) {
         kind: 'CONTENIDO',
         priority: 'MEDIA',
         compliance: 'NO_CUMPLE',
-        recommendation: '',
+        recommendation: text,
       });
       setDescription('');
       setNotice('Observación registrada. Quedó en borrador para enviarla al coordinador.');
@@ -124,26 +119,7 @@ export function StartDocuments({ processId, documents }: StartDocumentsProps) {
 
               {isOpen && mode === 'view' && (
                 <div className="mt-3 border-t border-gray-200 pt-3">
-                  <p className="text-label-md font-medium uppercase text-gray-600">Documentos del coordinador</p>
-                  {uploads.isLoading && <p className="mt-2 text-body-md text-gray-600">Cargando documentos…</p>}
-                  {uploads.isError && <p className="mt-2 text-body-md text-danger">No se pudieron cargar los documentos.</p>}
-                  {!uploads.isLoading && files.length === 0 && (
-                    <p className="mt-2 text-body-md text-gray-600">El coordinador todavía no subió documentos para esta carrera.</p>
-                  )}
-                  <ul className="mt-2 space-y-2">
-                    {files.map((file) => (
-                      <li key={file.id} className="flex items-center justify-between gap-3">
-                        <span className="text-body-md text-gray-800">{file.title ?? file.folioCode ?? 'Documento sin título'}</span>
-                        <button
-                          type="button"
-                          onClick={() => preview.open(file.id, file.title ?? file.folioCode ?? 'Documento')}
-                          className={actionClass(false)}
-                        >
-                          Revisar
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <ProcessEvidenceTrace processId={processId} mode="technician" />
                 </div>
               )}
 
@@ -188,16 +164,6 @@ export function StartDocuments({ processId, documents }: StartDocumentsProps) {
           );
         })}
       </ul>
-      <EvidencePreviewDialog
-        isOpen={preview.isOpen}
-        title={preview.title}
-        objectUrl={preview.objectUrl}
-        contentType={preview.contentType}
-        isLoading={preview.isLoading}
-        error={preview.error}
-        onClose={preview.close}
-        onDownload={preview.download}
-      />
     </div>
   );
 }

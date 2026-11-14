@@ -301,7 +301,7 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 
 | Fecha      | Cambio                                                                                                                                                                                                                                                                        |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-13 | **FSD-UC-037:** menú principal [TD] «Fase del proceso» (`/reportes/fase`); fase actual del proceso y retroalimentación de entregables. |
+| 2026-11-13 | **FSD-UC-037:** menú principal [TD] «Seguimiento de procesos» (`/reportes/fase`); fase actual del proceso y retroalimentación de entregables. |
 | 2026-11-04 | **FSD-UC-035** implementado: noticias/destacados; [JD] CRUD+publicar; [P] home `#noticias` + `/public/news`; FSD-BR-10; PRD-US-027…029. |
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en `[uc/](uc/)`                                                                                                                                                                                                     |
 | 2026-06-15 | UC-003 marcado **En Curso** (scaffolding Gestión de Fases en código)                                                                                                                                                                                                          |

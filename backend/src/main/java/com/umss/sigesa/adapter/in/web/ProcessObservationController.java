@@ -188,7 +188,13 @@ public class ProcessObservationController {
 
     private ProcessEvidenceOptionResponse toOption(EvidenceLookupPort.EvidenceRef ref) {
         return new ProcessEvidenceOptionResponse(
-                ref.evidenceId(), ref.indicatorId(), ref.code(), ref.title());
+                ref.evidenceId(),
+                ref.indicatorId(),
+                ref.code(),
+                ref.title(),
+                ref.originalFilename(),
+                ref.documentAssetId(),
+                ref.folioCode());
     }
 
     private ObservationActor actor() {

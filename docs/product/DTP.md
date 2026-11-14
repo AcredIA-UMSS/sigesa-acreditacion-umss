@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 13/11/2026 | **Trazas del historial de accesos:** el backend exporta spans HTTP y JDBC por OTLP (`spring-boot-starter-opentelemetry`, `datasource-micrometer-spring-boot` 2.3.0). Tempo y Grafana están en `bench/access/` para el p95 de k6 de `GET /api/v1/access-sessions`. En prod el muestreo queda en 0 salvo `SIGESA_TRACING_SAMPLE`. | FSD-UC-036 | — | — | Marlene Velasquez |
 | 13/11/2026 | **Fase del proceso:** [TD] consulta en `/reportes/fase` la fase ARCU-SUR de una carrera y registra retroalimentación del entregable (`PUT …/deliverables/{id}/feedback`). | FSD-UC-037 | — | — | Marlene Velasquez |
 | 12/11/2026 | **Historial de accesos:** la lista incluye `actions` (crear, modificar, eliminar). La pantalla `/admin/ingresos` muestra esa columna y permite imprimir el reporte filtrado. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
 | 11/11/2026 | **Historial de accesos:** tabla `access_session` (V30) y `audit_log.session_id`. [JD] consulta sesiones y acciones en `/admin/ingresos`. El login fallido, el logout y la expiración del JWT actualizan la sesión. No sustituye la bitácora FSD-UC-017. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
@@ -471,6 +472,17 @@ Stack opcional para desarrollo/demo self-hosted:
 El backend SIGESA en Docker usa `SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api`. La API key se genera en Open WebUI (Settings → Account → API Keys) y se define en `.env` raíz (gitignored).
 
 **Nota operativa:** forzar HTTP/1.1 en `OpenWebUiChatAdapter` — Java `HttpClient` con HTTP/2 provoca `400 Invalid HTTP request` en uvicorn.
+
+### C.3 Tempo + Grafana (FSD-UC-036, banco local)
+
+No forma parte del compose de la aplicación. Sirve para ver las trazas de `GET /api/v1/access-sessions`.
+
+| Servicio | Imagen | Puerto host | Rol |
+| --- | --- | --- | --- |
+| Tempo | `grafana/tempo:2.8.2` | 3200, 4317, 4318 | Recibe OTLP y guarda trazas |
+| Grafana | `grafana/grafana:11.6.0` | 3030 | Explore → Tempo |
+
+El backend local envía a `http://127.0.0.1:4318/v1/traces`. Muestreo local: 1.0. El script de carga es `bench/access/k6-access-sessions.js`.
 
 
 ### C.1 React + Orval (Frontend)

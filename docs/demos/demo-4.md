@@ -63,7 +63,7 @@ Identidad Git: **marvelarias** `<marlene.velasquez@umss.edu>`.
 
 ### 2. Fase del proceso (FSD-UC-037)
 
-- Ruta UI: menú principal **Fase del proceso** → `/reportes/fase` (solo TD).
+- Ruta UI: menú principal **Seguimiento de procesos** → `/reportes/fase` (solo TD).
 - El técnico elige una carrera de su alcance y ve la fase actual en la secuencia ARCU-SUR.
 - Inicio: «Carta de solicitud de participación». Puede ver archivos del proceso y dejar una observación en borrador (FSD-UC-032).
 - En cada entregable: **Revisar** y **Retroalimentación**. El texto va a `technicalObservations`. El `approvalStatus` no cambia.
@@ -71,7 +71,7 @@ Identidad Git: **marvelarias** `<marlene.velasquez@umss.edu>`.
 
 ### Qué mostrar en el video
 
-1. Login TD → **Fase del proceso** → elegir carrera → fase marcada y las siete etapas.
+1. Login TD → **Seguimiento de procesos** → elegir carrera → fase marcada y las siete etapas.
 2. Inicio: solo la carta. **Revisar** un entregable sin archivo.
 3. **Retroalimentación** de al menos 10 caracteres: el texto queda como seguimiento y el estado de aprobación no cambia.
 4. Login JD → **Historial de accesos**: filtrar, ver la columna de acciones e imprimir.

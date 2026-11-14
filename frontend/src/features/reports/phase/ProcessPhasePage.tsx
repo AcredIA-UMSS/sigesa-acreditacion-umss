@@ -6,6 +6,7 @@ import { useListStages } from '../../../api/endpoints/stage-workflow/stage-workf
 import type { ProcessSummaryResponseDto } from '../../../api/model';
 import { isApiError } from '../../../lib/api/apiError';
 import { useProcessList } from '../../processes/hooks/useProcessList';
+import { ProcessEvidenceTrace } from '../../observations/components/ProcessEvidenceTrace';
 import { ProcessPhaseChart } from './ProcessPhaseChart';
 
 function processForCareer(processes: ProcessSummaryResponseDto[], careerId: string): ProcessSummaryResponseDto | undefined {
@@ -48,7 +49,7 @@ export function ProcessPhasePage() {
       <Sidebar activeNav="reports" />
       <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
         <header className="mb-6">
-          <h1 className="text-heading-xl font-semibold text-primary-800">Fase del proceso</h1>
+          <h1 className="text-heading-xl font-semibold text-primary-800">Seguimiento de procesos</h1>
           <p className="mt-1 text-body-md text-gray-600">
             Elija una carrera para ver la fase registrada y la secuencia de autoevaluación ARCU-SUR.
           </p>
@@ -70,6 +71,16 @@ export function ProcessPhasePage() {
             onChange={(event) => setCareerId(event.target.value)}
           />
         </form>
+
+        {selected?.id && (
+          <section className="mb-8 rounded-2xl border border-gray-200 bg-body p-6">
+            <h2 className="text-heading-md font-semibold text-primary-800">Evidencias del coordinador</h2>
+            <p className="mt-1 mb-4 text-body-md text-gray-600">
+              Archivos que el coordinador envió con Subir evidencia. Visualícelos y registre la revisión.
+            </p>
+            <ProcessEvidenceTrace processId={selected.id} mode="technician" />
+          </section>
+        )}
 
         {selected && (
           <div className="rounded-2xl border border-gray-200 bg-body p-6">

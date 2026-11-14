@@ -8,6 +8,8 @@ import { customFetch } from '../../../lib/api/customFetch';
 import { isApiError } from '../../../lib/api/apiError';
 import { EvidencePreviewDialog } from '../../evidence/components/EvidencePreviewDialog';
 import { useEvidencePreview } from '../../evidence/hooks/useEvidencePreview';
+import { useProcessObservations } from '../../observations/hooks/useProcessObservations';
+import { evidenceLabel } from '../../observations/model/observationView';
 import { APPROVAL_LABEL, DELIVERABLE_LABEL } from './arcuPhaseGuide';
 
 interface StageDeliverableFollowUpProps {
@@ -22,6 +24,8 @@ export function StageDeliverableFollowUp({ processId, stageId, deliverables }: S
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const preview = useEvidencePreview();
+  const trace = useProcessObservations(processId);
+  const uploaded = trace.evidences.data ?? [];
   const queryClient = useQueryClient();
   const save = useMutation({
     mutationFn: (input: { deliverableId: string; text: string }) =>
@@ -65,6 +69,7 @@ export function StageDeliverableFollowUp({ processId, stageId, deliverables }: S
           const status = APPROVAL_LABEL[deliverable.approvalStatus ?? ''] ?? deliverable.approvalStatus ?? 'Pendiente';
           const open = openId === id;
           const text = drafts[id] ?? deliverable.technicalObservations ?? '';
+          const source = uploaded.find((item) => item.documentAssetId && item.documentAssetId === deliverable.documentAssetId);
           return (
             <li key={id} className="rounded-lg border border-gray-200 bg-body px-3 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -73,6 +78,11 @@ export function StageDeliverableFollowUp({ processId, stageId, deliverables }: S
               </div>
               {deliverable.folioCode && (
                 <p className="mt-1 text-label-md text-gray-600">Folio {deliverable.folioCode}</p>
+              )}
+              {source && (
+                <p className="mt-1 text-label-md text-gray-600">
+                  Evidencia del coordinador en Cargar evidencia: {evidenceLabel(source)}
+                </p>
               )}
               {deliverable.technicalObservations && (
                 <p className="mt-2 text-body-md text-gray-800">

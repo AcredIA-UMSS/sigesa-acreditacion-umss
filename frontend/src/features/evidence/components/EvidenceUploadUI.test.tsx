@@ -80,6 +80,19 @@ describe('EvidenceUploadUI', () => {
     expect(onSubmit).toHaveBeenCalledOnce();
   });
 
+  it('shouldAddThePhaseToThePageTitle', () => {
+    renderUpload({ phaseName: 'Preparatoria y administrativa' });
+    expect(screen.getByRole('heading', { level: 1, name: 'Cargar Evidencia · Preparatoria y administrativa' })).toBeInTheDocument();
+  });
+
+  it('shouldShowTheSelectedProcessAsTitle', () => {
+    renderUpload({
+      form: { ...emptyForm, processId: 'proc-1' },
+      processOptions: [{ processId: 'proc-1', label: 'Contaduría Pública · ARCU-SUR' }],
+    });
+    expect(screen.getByRole('heading', { name: 'Contaduría Pública · ARCU-SUR' })).toBeInTheDocument();
+  });
+
   it('shouldDisableSubmitWhenBlocked', () => {
     renderUpload({ isBlocked: true });
     expect(screen.getByRole('button', { name: /Subir evidencia/ })).toBeDisabled();
