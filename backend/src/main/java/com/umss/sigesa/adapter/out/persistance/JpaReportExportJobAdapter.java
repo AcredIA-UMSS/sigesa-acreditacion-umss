@@ -2,10 +2,12 @@ package com.umss.sigesa.adapter.out.persistance;
 
 import com.umss.sigesa.adapter.out.persistance.entity.ReportExportJobEntity;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
+import com.umss.sigesa.domain.model.JobStatus;
 import com.umss.sigesa.domain.model.ReportExportJob;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +32,28 @@ public class JpaReportExportJobAdapter implements ReportExportJobRepositoryPort 
     @Transactional(readOnly = true)
     public Optional<ReportExportJob> findById(UUID jobId) {
         return repository.findById(jobId).map(this::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasActiveJobForUser(UUID userId) {
+        if (userId == null) {
+            return false;
+        }
+        return repository.countByUserIdAndStatusIn(userId, List.of(JobStatus.PENDING, JobStatus.PROCESSING)) > 0;
+    }
+
+    @Override
+    @Transactional
+    public int markStaleJobsAsFailed(java.time.Duration maxStaleDuration, String reason) {
+        java.time.Instant threshold = java.time.Instant.now().minus(maxStaleDuration);
+        return repository.markStaleJobsAsFailed(
+                List.of(JobStatus.PENDING, JobStatus.PROCESSING),
+                threshold,
+                JobStatus.FAILED,
+                reason,
+                java.time.Instant.now()
+        );
     }
 
     private ReportExportJobEntity toEntity(ReportExportJob job) {

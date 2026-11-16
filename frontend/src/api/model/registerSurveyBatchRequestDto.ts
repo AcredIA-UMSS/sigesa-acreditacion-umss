@@ -15,7 +15,7 @@ export interface RegisterSurveyBatchRequestDto {
      * @maxLength 32
      */
   audience: string;
+  documentAssetId?: string;
   /** @minimum 1 */
   responsesCount: number;
-  documentAssetId?: string;
 }

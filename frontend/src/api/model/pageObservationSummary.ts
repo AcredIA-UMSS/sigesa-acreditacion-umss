@@ -10,15 +10,15 @@ import type { PageableObject } from './pageableObject.ts';
 import type { SortObject } from './sortObject.ts';
 
 export interface PageObservationSummary {
-  totalPages?: number;
-  totalElements?: number;
-  pageable?: PageableObject;
+  content?: ObservationSummary[];
+  empty?: boolean;
   first?: boolean;
   last?: boolean;
-  numberOfElements?: number;
-  size?: number;
-  content?: ObservationSummary[];
   number?: number;
+  numberOfElements?: number;
+  pageable?: PageableObject;
+  size?: number;
   sort?: SortObject;
-  empty?: boolean;
+  totalElements?: number;
+  totalPages?: number;
 }

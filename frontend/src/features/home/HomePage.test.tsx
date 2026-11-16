@@ -14,6 +14,8 @@ function HomeRoutes() {
       <Route path="/dashboard" element={<p>Dashboard</p>} />
       <Route path="/ayuda" element={<p>Ayuda</p>} />
       <Route path="/admin/users" element={<p>Admin JD</p>} />
+      <Route path="/public/news" element={<p>Listado de noticias</p>} />
+      <Route path="/public/status" element={<p>Estado de acreditación</p>} />
     </Routes>
   );
 }
@@ -24,6 +26,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomeRoutes />, { route: '/' });
 
     expect(screen.getByRole('heading', { level: 1, name: /Excelencia que/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir al inicio' })).toBeInTheDocument();
 
     const loginLinks = screen.getAllByRole('link', { name: /Iniciar Sesión/i });
     expect(loginLinks[0]).toHaveAttribute('href', '/login');
@@ -33,6 +36,20 @@ describe('HomePage', () => {
 
     await user.click(screen.getByRole('button', { name: 'Ver demo' }));
     expect(screen.getByText('Página de login')).toBeInTheDocument();
+  });
+
+  it('sends the header Estado de Acreditación link to the public status page', () => {
+    renderWithProviders(<HomeRoutes />, { route: '/' });
+
+    const statusLinks = screen.getAllByRole('link', { name: 'Estado de Acreditación' });
+    expect(statusLinks[0]).toHaveAttribute('href', '/public/status');
+  });
+
+  it('sends the header Noticias link to the public news list', () => {
+    renderWithProviders(<HomeRoutes />, { route: '/' });
+
+    const newsLinks = screen.getAllByRole('link', { name: 'Noticias' });
+    expect(newsLinks[0]).toHaveAttribute('href', '/public/news');
   });
 
   it('sends help to the assistant when there is an active session', () => {

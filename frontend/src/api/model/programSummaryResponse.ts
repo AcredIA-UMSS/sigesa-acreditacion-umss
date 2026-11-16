@@ -7,7 +7,7 @@
  */
 
 export interface ProgramSummaryResponse {
-  id?: string;
   code?: string;
+  id?: string;
   name?: string;
 }

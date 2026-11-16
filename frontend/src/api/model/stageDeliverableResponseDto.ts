@@ -7,13 +7,13 @@
  */
 
 export interface StageDeliverableResponseDto {
-  id?: string;
-  stageId?: string;
-  deliverableCode?: string;
   approvalStatus?: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  deliverableCode?: string;
   documentAssetId?: string;
   folioCode?: string;
-  approvedBy?: string;
+  id?: string;
+  stageId?: string;
   technicalObservations?: string;
-  approvedAt?: string;
 }

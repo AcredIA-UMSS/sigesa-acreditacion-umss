@@ -51,6 +51,8 @@ spring:
       max-request-size: 55MB
 
 sigesa:
+  public:
+    base-url: ${SIGESA_PUBLIC_BASE_URL:http://localhost:5173}
   extraction:
     mode: ${EXTRACTION_MODE:in_process}
     deadline-ms: ${SIGESA_NOTIFICATION_DEADLINE_MS:800}

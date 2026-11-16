@@ -7,8 +7,8 @@
  */
 
 export interface CreateLevel1NodeRequestDto {
+  description?: string;
   /** @minLength 1 */
   name: string;
   order: number;
-  description?: string;
 }

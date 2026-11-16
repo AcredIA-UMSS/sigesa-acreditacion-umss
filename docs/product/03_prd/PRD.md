@@ -5,8 +5,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Versión** | **Dorada v1.0** |
-| **Última actualización (timestamp)** | `2026-05-16T15:44:47-04:00` |
-| **Resumen de cambios (esta versión)** | Enlace a roadmap canónico [`ROADMAP.md`](ROADMAP.md). Primera Versión Dorada del PRD: consolidación desde BRD Dorada v2.1, MRD Dorada v1.1 y aportes `team/*/docs/03_prd/`. Incluye **24 user stories** con Gherkin (camino feliz y triste), **28 requisitos funcionales**, **16 NFRs**, constitution, journeys Mermaid, MoSCoW, RICE y trazabilidad BRD↔MRD↔FSD. Producto = **sistema de automatización** de acreditación (no ERP). |
+| **Última actualización (timestamp)** | `2026-11-04T19:20:00-04:00` |
+| **Resumen de cambios (esta versión)** | Capa viva `FSD-UC-035`: **PRD-US-027**, **PRD-US-028**, **PRD-US-029** y **PRD-REQ-030** (noticias y destacados). Conteos vivos: **29 historias**, **30 requisitos funcionales**. |
 | **BRD de referencia** | `docs/01_brd/BRD.md` — Dorada v2.1 |
 | **MRD de referencia** | `docs/02_mrd/MRD.md` — Dorada v1.1 |
 | **Estado de auditoría** | **Apto para FSD Dorado** — ver §19 |
@@ -517,6 +517,9 @@ Escenario: Alerta de plazo próximo
 | PRD-US-016 | Como [P], quiero consultar estado de acreditación sin login | Should | BRD-REQ-016 / MRD-N-18 | Pendiente |
 | PRD-US-020 | Como [P], quiero descargar certificado publicado por [JD] | Could | BRD-REQ-023 | Pendiente |
 | PRD-US-026 | Como [EE], quiero revisar la documentación de acreditación de la carrera asignada en modo solo lectura | Should | BRD-REQ-001 / MRD-N-09 | **En curso** (`FSD-UC-019`, `DD-UC-019`, `PR-IMPL-014`) |
+| PRD-US-027 | Como [P], quiero leer noticias publicadas sin login | Should | BRD-REQ-016 / PRD-REQ-030 | Pendiente (`FSD-UC-035`) |
+| PRD-US-028 | Como [JD], quiero crear, editar, publicar y despublicar noticias | Should | PRD-REQ-030 | Pendiente (`FSD-UC-035`) |
+| PRD-US-029 | Como [JD], quiero marcar una sola noticia destacada para la home | Should | PRD-REQ-030 | Pendiente (`FSD-UC-035`) |
 
 #### PRD-US-026 — Revisión documental [EE]
 
@@ -532,6 +535,66 @@ Escenario: Bloqueo de acciones de mutación
   Dado un [EE] autenticado
   Cuando intenta cargar Evidencia o exportar reportes
   Entonces el sistema responde con acceso denegado
+```
+
+#### PRD-US-027 — Lectura pública de noticias [P]
+
+> Capa viva: [`FSD-UC-035`](../uc/FSD-UC-035.md). Sustituye el stub hardcodeado de `#noticias` en la home.
+
+```gherkin
+# language: es
+@PRD-US-027 @FSD-UC-035 @TC-NEWS
+Escenario: Borrador no visible para visitante anónimo
+  Dado una noticia en estado borrador creada por [JD]
+  Cuando un visitante anónimo consulta el listado público, la home o el detalle por slug
+  Entonces no ve esa noticia
+  Y el detalle responde 404 genérico
+  Y el cuerpo no revela si el slug existe
+
+@PRD-US-027 @FSD-UC-035 @TC-NEWS
+Escenario: Sin destacada, la home muestra la más reciente
+  Dado dos o más noticias publicadas y ninguna marcada como destacada
+  Cuando un visitante anónimo abre la home
+  Entonces GET /api/v1/public/news/featured devuelve la de publishedAt más reciente
+  Y esa noticia es la tarjeta principal
+  Y no se repite en el recorte lateral de API-NEWS-01
+```
+
+#### PRD-US-028 — Gestión de noticias [JD]
+
+```gherkin
+# language: es
+@PRD-US-028 @FSD-UC-035 @TC-NEWS
+Escenario: [JD] publica una noticia y aparece en la home y en el listado
+  Dado un [JD] autenticado y una noticia en borrador con título, categoría, resumen y cuerpo
+  Cuando la publica
+  Entonces un visitante anónimo la ve en GET /api/v1/public/news
+  Y aparece en la sección #noticias o en /public/news
+
+Escenario: [JD] despublica y deja de aparecer
+  Dado una noticia publicada visible en el listado público
+  Cuando el [JD] la despublica
+  Entonces deja de aparecer en la home y en /public/news
+  Y GET /api/v1/public/news/{slug} responde 404 genérico
+  Y si era destacada queda featured=false
+
+Escenario: Un usuario sin rol [JD] no puede crear ni editar
+  Dado un usuario autenticado con rol distinto de [JD] o un anónimo
+  Cuando intenta crear o editar una noticia en /api/v1/admin/news
+  Entonces el sistema rechaza la operación (401 o 403)
+  Y no se persiste ningún cambio
+```
+
+#### PRD-US-029 — Destacada única [JD]
+
+```gherkin
+# language: es
+@PRD-US-029 @FSD-UC-035 @TC-NEWS
+Escenario: Solo una destacada a la vez
+  Dado una noticia publicada ya marcada como destacada
+  Cuando el [JD] marca otra noticia publicada como destacada
+  Entonces GET /api/v1/public/news/featured devuelve solo la nueva
+  Y la anterior queda featured=false
 ```
 
 ```gherkin
@@ -640,6 +703,7 @@ Escenario: Progreso en carga de Evidencia grande
 | PRD-REQ-027 | IA explicable (sugerencias) | — | Could | BRD-REQ-018 | MRD-N-22 |
 | PRD-REQ-028 | Chatbot FAQ normativo | — | Could | BRD-REQ-024 | MRD-N-22 |
 | PRD-REQ-029 | Acceso [EE] solo lectura por carrera asignada | US-026 | Should | BRD-REQ-001 | MRD-N-09 |
+| PRD-REQ-030 | Noticias y destacados (solo publicadas para [P]; CRUD [JD]) | US-027–029 | Should | BRD-REQ-016 | — |
 
 ---
 
@@ -794,7 +858,7 @@ Heredadas BRD-Q-01…Q-03, Q-05…Q-08: ver BRD §21.
 |----------|--------|
 | Alineado BRD Dorada v2.1 (automatización, no ERP) | Cumple |
 | Alineado MRD Dorada v1.1 | Cumple |
-| ≥ 20 user stories | Cumple (24) |
+| ≥ 20 user stories | Cumple (29) |
 | Gherkin por historia Must | Cumple (bloques §5) |
 | Regla QA @Tag PRD-US | Cumple (NFR-014) |
 | Sin prescribir stack en PRD | Cumple |
@@ -809,6 +873,6 @@ Heredadas BRD-Q-01…Q-03, Q-05…Q-08: ver BRD §21.
 |-------|-------|
 | **Versión** | **Dorada v1.0** |
 | **Timestamp** | `2026-05-16T15:30:07-04:00` |
-| **Cambios aplicados** | PRD Dorado: 24 US + Gherkin, 28 REQ, 16 NFR, trazabilidad, sistema de automatización (no ERP). |
+| **Cambios aplicados** | Capa viva 2026-11-04: **PRD-US-027..029**, **PRD-REQ-030**; **29 historias**, **30 requisitos funcionales**; 16 NFR. |
 
 *Documento canónico SIGESA — UMSS, Cochabamba, Bolivia, 2026.*  

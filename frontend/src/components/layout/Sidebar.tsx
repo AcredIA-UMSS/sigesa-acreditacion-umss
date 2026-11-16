@@ -18,6 +18,7 @@ import {
   FileSearch,
   FileCheck,
   Gauge,
+  Newspaper,
 } from 'lucide-react';
 import { getRoleLabel } from '../../lib/auth/roleLabels';
 import { useAuth } from '../../lib/auth/useAuth';
@@ -32,7 +33,8 @@ type SidebarNavKey =
   | 'history'
   | 'help'
   | 'semaphore'
-  | 'inbox';
+  | 'inbox'
+  | 'news';
 
 
 interface SidebarProps {
@@ -219,6 +221,13 @@ export const Sidebar = ({ activeNav = 'processes' }: SidebarProps) => {
               isExpanded={isExpanded}
               active={activeNav === 'users'}
               to="/admin/users"
+            />
+            <NavItem
+              icon={<Newspaper size={20} />}
+              label="NOTICIAS"
+              isExpanded={isExpanded}
+              active={activeNav === 'news' || location.pathname.startsWith('/admin/noticias')}
+              to="/admin/noticias"
             />
           </>
         )}

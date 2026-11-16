@@ -7,10 +7,10 @@
  */
 
 export interface IndicatorWorkflowResponseDto {
-  indicatorId?: string;
-  previousState?: string;
-  newState?: string;
-  stateHistoryId?: string;
-  observationId?: string;
   event?: string;
+  indicatorId?: string;
+  newState?: string;
+  observationId?: string;
+  previousState?: string;
+  stateHistoryId?: string;
 }

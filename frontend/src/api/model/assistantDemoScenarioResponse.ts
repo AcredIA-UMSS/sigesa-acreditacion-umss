@@ -7,8 +7,8 @@
  */
 
 export interface AssistantDemoScenarioResponse {
-  number?: number;
-  title?: string;
-  sampleQuestion?: string;
   expectedPath?: string;
+  number?: number;
+  sampleQuestion?: string;
+  title?: string;
 }

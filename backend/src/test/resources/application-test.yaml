@@ -19,6 +19,8 @@ spring:
       mode: never
 
 sigesa:
+  public:
+    base-url: http://localhost:5173
   jwt:
     secret: "sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256"
     expiration-seconds: 3600

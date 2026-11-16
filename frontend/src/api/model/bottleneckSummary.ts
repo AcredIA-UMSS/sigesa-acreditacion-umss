@@ -7,7 +7,7 @@
  */
 
 export interface BottleneckSummary {
-  indicatorId?: string;
   criterionCode?: string;
   daysStagnant?: number;
+  indicatorId?: string;
 }

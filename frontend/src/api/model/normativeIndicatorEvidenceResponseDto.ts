@@ -7,15 +7,15 @@
  */
 
 export interface NormativeIndicatorEvidenceResponseDto {
-  evidenceId?: string;
-  indicatorId?: string;
-  version?: number;
-  description?: string;
   contentHash?: string;
-  originalFilename?: string;
+  description?: string;
+  documentAssetId?: string;
+  evidenceId?: string;
   externalUrl?: string;
+  folioCode?: string;
+  indicatorId?: string;
+  originalFilename?: string;
   uploadedAt?: string;
   uploadedBy?: string;
-  documentAssetId?: string;
-  folioCode?: string;
+  version?: number;
 }

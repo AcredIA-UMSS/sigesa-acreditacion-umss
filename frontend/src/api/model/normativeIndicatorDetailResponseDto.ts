@@ -7,16 +7,16 @@
  */
 
 export interface NormativeIndicatorDetailResponseDto {
-  id?: string;
-  processId?: string;
   careerId?: string;
-  level1Id?: string;
-  level1Name?: string;
   code?: string;
   description?: string;
-  weight?: number;
-  order?: number;
-  status?: string;
-  referenceUrl?: string;
+  id?: string;
+  level1Id?: string;
+  level1Name?: string;
   normativePath?: string[];
+  order?: number;
+  processId?: string;
+  referenceUrl?: string;
+  status?: string;
+  weight?: number;
 }

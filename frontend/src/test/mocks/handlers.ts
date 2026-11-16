@@ -134,4 +134,107 @@ export const handlers = [
       },
     });
   }),
+  http.get('/api/v1/public/news/featured', () => {
+    return HttpResponse.json({
+      slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+      title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+      category: 'EVENTO',
+      summary:
+        'Tras un riguroso proceso de evaluación, la carrera de medicina mantiene sus estándares de excelencia regional.',
+      publishedAt: '2026-10-20T12:00:00Z',
+      featured: false,
+    });
+  }),
+  http.get('/api/v1/public/news/:slug', ({ params }) => {
+    if (params.slug === 'facultad-de-medicina-renueva-acreditacion-mercosur') {
+      return HttpResponse.json({
+        slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+        title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+        category: 'EVENTO',
+        summary:
+          'Tras un riguroso proceso de evaluación, la carrera de medicina mantiene sus estándares de excelencia regional.',
+        body: 'La Facultad de Medicina de la UMSS renovó su acreditación MERCOSUR.',
+        publishedAt: '2026-10-20T12:00:00Z',
+        featured: false,
+      });
+    }
+    return HttpResponse.json(
+      { error: 'NOT_FOUND', message: 'El recurso solicitado no existe.' },
+      { status: 404 },
+    );
+  }),
+  http.get('/api/v1/public/news', () => {
+    return HttpResponse.json({
+      content: [
+        {
+          slug: 'facultad-de-medicina-renueva-acreditacion-mercosur',
+          title: 'Facultad de Medicina renueva Acreditación MERCOSUR',
+          category: 'EVENTO',
+          summary: 'Tras un riguroso proceso de evaluación.',
+          publishedAt: '2026-10-20T12:00:00Z',
+          featured: false,
+        },
+        {
+          slug: 'taller-de-autoevaluacion-para-nuevas-carreras',
+          title: 'Taller de Autoevaluación para nuevas carreras',
+          category: 'CAPACITACION',
+          summary: 'Iniciamos la formación para los comités.',
+          publishedAt: '2026-10-15T12:00:00Z',
+          featured: false,
+        },
+      ],
+      totalPages: 1,
+      totalElements: 2,
+      number: 0,
+    });
+  }),
+  http.get('/api/v1/public/programs', () => {
+    return HttpResponse.json([
+      { slug: 'inf-sis', name: 'Ingeniería de Sistemas' },
+      { slug: 'med', name: 'Medicina' },
+    ]);
+  }),
+  http.get('/api/v1/public/programs/:slug/certificate', ({ params }) => {
+    if (params.slug !== 'inf-sis') {
+      return HttpResponse.json(
+        { error: 'NOT_FOUND', message: 'El recurso solicitado no existe.' },
+        { status: 404 },
+      );
+    }
+    return new HttpResponse(new Uint8Array([0x25, 0x50, 0x44, 0x46]), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="certificado-inf-sis.pdf"',
+        'X-Certificate-Valid-From': '2025-01-01',
+        'X-Certificate-Valid-Until': '2029-12-31',
+      },
+    });
+  }),
+  http.get('/api/v1/public/programs/:slug', ({ params }) => {
+    if (params.slug === 'inf-sis') {
+      return HttpResponse.json({
+        slug: 'inf-sis',
+        name: 'Ingeniería de Sistemas',
+        accreditationStatus: 'ACREDITADA',
+        validFrom: '2025-01-01',
+        validUntil: '2029-12-31',
+        certificateAvailable: true,
+      });
+    }
+    if (params.slug === 'med') {
+      return HttpResponse.json({
+        slug: 'med',
+        name: 'Medicina',
+        accreditationStatus: 'EN_PROCESO',
+        validFrom: '2026-03-01',
+        validUntil: '2027-02-28',
+        certificateAvailable: false,
+      });
+    }
+    return HttpResponse.json(
+      { error: 'NOT_FOUND', message: 'El recurso solicitado no existe.' },
+      { status: 404 },
+    );
+  }),
 ];

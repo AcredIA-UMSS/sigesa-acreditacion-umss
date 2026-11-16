@@ -10,12 +10,12 @@
  * Estado de freeze del proceso (API-WF-18…20)
  */
 export interface ProcessFreezeResponseDto {
-  id: string;
-  processId?: string;
-  mode?: string;
   active?: boolean;
   frozenAt?: string;
   frozenBy?: string;
+  id: string;
   liftedAt?: string;
   liftedBy?: string;
+  mode?: string;
+  processId?: string;
 }

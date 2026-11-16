@@ -7,9 +7,9 @@
  */
 
 export interface JobStatusResponse {
-  jobId?: string;
-  status?: string;
-  progressPercentage?: number;
   downloadUrl?: string;
   errorMessage?: string;
+  jobId?: string;
+  progressPercentage?: number;
+  status?: string;
 }

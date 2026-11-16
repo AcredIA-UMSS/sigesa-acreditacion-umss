@@ -10,13 +10,13 @@
  * Análisis FODA de un indicador (API-WF-10)
  */
 export interface IndicatorAnalysisResponseDto {
+  authorId?: string;
+  compliance?: string;
+  createdAt?: string;
+  fodaQuadrant?: string;
   id: string;
   indicatorId?: string;
   processId?: string;
-  fodaQuadrant?: string;
-  compliance?: string;
   synthesis?: string;
-  authorId?: string;
-  createdAt?: string;
   updatedAt?: string;
 }

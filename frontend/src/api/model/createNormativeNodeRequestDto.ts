@@ -7,8 +7,8 @@
  */
 
 export interface CreateNormativeNodeRequestDto {
+  description?: string;
   /** @minLength 1 */
   name: string;
   order: number;
-  description?: string;
 }

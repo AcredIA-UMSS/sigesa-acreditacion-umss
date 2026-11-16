@@ -8,10 +8,10 @@
 import type { AssistantDemoScenarioResponse } from './assistantDemoScenarioResponse.ts';
 
 export interface AssistantStatusResponse {
+  agent?: string;
+  capabilities?: string[];
+  demoScenarios?: AssistantDemoScenarioResponse[];
   enabled?: boolean;
   llmEnabled?: boolean;
   model?: string;
-  capabilities?: string[];
-  demoScenarios?: AssistantDemoScenarioResponse[];
-  agent?: string;
 }

@@ -7,8 +7,8 @@
  */
 
 export interface AssistantToolStepResponse {
-  step?: number;
-  toolId?: string;
   sourceTables?: string[];
+  step?: number;
   success?: boolean;
+  toolId?: string;
 }

@@ -7,7 +7,7 @@
  */
 
 export interface UpdateLevel1NodeRequestDto {
+  description?: string;
   name?: string;
   order?: number;
-  description?: string;
 }

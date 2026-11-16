@@ -80,4 +80,19 @@ class S3EvidenceBlobStorageAdapterTest {
         var found = adapter.retrieve("evidences/id/v1/doc.pdf");
         assertEquals("hello", new String(found.orElseThrow()));
     }
+
+    @Test
+    @DisplayName("openInputStream: GET object stream directo sin buffering en heap")
+    void openInputStream_returnsStream() throws Exception {
+        S3EvidenceBlobStorageAdapter adapter = new S3EvidenceBlobStorageAdapter(s3Client, "sigesa-evidences");
+        var responseStream = new software.amazon.awssdk.core.ResponseInputStream<>(
+                software.amazon.awssdk.services.s3.model.GetObjectResponse.builder().build(),
+                software.amazon.awssdk.http.AbortableInputStream.create(new java.io.ByteArrayInputStream("streaming-bytes".getBytes())));
+        when(s3Client.getObject(any(software.amazon.awssdk.services.s3.model.GetObjectRequest.class)))
+                .thenReturn(responseStream);
+
+        var streamOpt = adapter.openInputStream("evidences/id/v1/doc.pdf");
+        var stream = streamOpt.orElseThrow();
+        assertEquals("streaming-bytes", new String(stream.readAllBytes()));
+    }
 }

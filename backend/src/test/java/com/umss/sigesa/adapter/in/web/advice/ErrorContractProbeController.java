@@ -1,5 +1,6 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.UUID;
 
+@Hidden
 @RestController
 @RequestMapping("/api/v1/_error-probe")
 public class ErrorContractProbeController {
