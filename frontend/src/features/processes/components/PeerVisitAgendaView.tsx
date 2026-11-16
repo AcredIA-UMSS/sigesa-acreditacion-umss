@@ -23,6 +23,7 @@ export interface PeerVisitAgendaViewProps {
   isLoading: boolean;
   isSaving: boolean;
   errorMessage: string | null;
+  successMessage?: string | null;
   onChange: (patch: Partial<PeerVisitDraft>) => void;
   onItemChange: (index: number, patch: PeerVisitItemRequestDto) => void;
   onAddItem: () => void;
@@ -53,6 +54,7 @@ export function PeerVisitAgendaView({
   isLoading,
   isSaving,
   errorMessage,
+  successMessage,
   onChange,
   onItemChange,
   onAddItem,
@@ -88,6 +90,12 @@ export function PeerVisitAgendaView({
       {errorMessage && (
         <p className="rounded-xl border border-danger/30 bg-secondary-50 p-4 text-body-md text-secondary-800">
           {errorMessage}
+        </p>
+      )}
+
+      {successMessage && (
+        <p className="rounded-xl border border-success/30 bg-success/10 p-4 text-body-md text-success-800">
+          {successMessage}
         </p>
       )}
 

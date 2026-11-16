@@ -28,6 +28,7 @@ export function PeerVisitAgendaPage() {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<PeerVisitDraft>(EMPTY_DRAFT);
   const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const query = useGetPeerVisit(processId ?? '', {
     query: { enabled: Boolean(processId) },
   });
@@ -37,6 +38,7 @@ export function PeerVisitAgendaPage() {
         if (processId) {
           await queryClient.invalidateQueries({ queryKey: getGetPeerVisitQueryKey(processId) });
         }
+        setSuccessMessage('Agenda guardada correctamente.');
       },
     },
   });
@@ -89,8 +91,13 @@ export function PeerVisitAgendaPage() {
           isLoading={query.isLoading}
           isSaving={mutation.isPending}
           errorMessage={errorMessage}
-          onChange={(patch) => setDraft((current) => ({ ...current, ...patch }))}
+          successMessage={successMessage}
+          onChange={(patch) => {
+            setSuccessMessage(null);
+            setDraft((current) => ({ ...current, ...patch }));
+          }}
           onItemChange={(index, patch) => {
+            setSuccessMessage(null);
             setDraft((current) => {
               const items = [...current.items];
               items[index] = patch;
@@ -98,10 +105,12 @@ export function PeerVisitAgendaPage() {
             });
           }}
           onAddItem={() => {
+            setSuccessMessage(null);
             const item: PeerVisitItemRequestDto = { type: 'DOCUMENT', title: '', done: false };
             setDraft((current) => ({ ...current, items: [...current.items, item] }));
           }}
           onRemoveItem={(index) => {
+            setSuccessMessage(null);
             setDraft((current) => ({
               ...current,
               items: current.items.filter((_, itemIndex) => itemIndex !== index),
@@ -109,6 +118,7 @@ export function PeerVisitAgendaPage() {
           }}
           onSave={() => {
             setFormError(null);
+            setSuccessMessage(null);
             mutation.mutate({
               processId,
               data: {
