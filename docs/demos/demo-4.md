@@ -153,6 +153,11 @@ docker compose up -d --wait
 
 ---
 
+## Contrato OpenAPI e integración continua
+
+- `openapi.json` (raíz) se genera desde el código vía `OpenApiExportIT` (`OPENAPI_WRITE=true`) y se valida en CI con drift check + Spectral (`.github/workflows/openapi.yml`).
+- Endpoints presentados en este release incluidos en contrato: recuperación/assistant y observaciones (Boris, FSD-UC-033/FSD-UC-011), notificaciones dual-canal y responsable/cierre de proceso (Alexander, FSD-UC-015), historial de accesos y fase/feedback (Marlene, FSD-UC-036/FSD-UC-037), **panel semáforo y auditoría** (`/api/v1/dashboards/me/summary`, `/api/v1/audit/logs`, `/api/v1/audit/logs/export`) y **matriz de cobertura/agenda de visita** (`/api/v1/processes/{processId}/coverage-matrix`, `.../coverage-matrix/pdf`, `/api/v1/processes/{processId}/peer-visit`) (Aylen, FSD-UC-013/FSD-UC-017/FSD-UC-039/FSD-UC-040).
+
 ## Fuera de esta demo
 
-Portal público y noticias (Demo 3, `8.3.0`). Evidencias y contrato OpenAPI de Demo 2. El `openapi.json` de este release incluye la retroalimentación del entregable (Marlene) y los endpoints de notificaciones dual-canal / responsable / cierre de proceso (Alexander Alvarez).
+Portal público y noticias (Demo 3, `8.3.0`). Evidencias y contrato OpenAPI de Demo 2.

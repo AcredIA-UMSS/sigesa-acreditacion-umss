@@ -333,6 +333,24 @@
         "required" : [ "content", "role" ],
         "type" : "object"
       },
+      "ComponentNode" : {
+        "properties" : {
+          "criteria" : {
+            "items" : {
+              "$ref" : "#/components/schemas/CriterionNode"
+            },
+            "type" : "array"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "CompositeDashboardSummary" : {
         "properties" : {
           "coordinatorSection" : {
@@ -396,6 +414,31 @@
           "totalIndicators" : {
             "format" : "int32",
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "CoverageMatrixResponseDto" : {
+        "properties" : {
+          "careerName" : {
+            "type" : "string"
+          },
+          "dimensions" : {
+            "items" : {
+              "$ref" : "#/components/schemas/DimensionNode"
+            },
+            "type" : "array"
+          },
+          "generatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "processId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "totals" : {
+            "$ref" : "#/components/schemas/Totals"
           }
         },
         "type" : "object"
@@ -521,6 +564,24 @@
         "required" : [ "career_id", "template_id" ],
         "type" : "object"
       },
+      "CriterionNode" : {
+        "properties" : {
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "indicators" : {
+            "items" : {
+              "$ref" : "#/components/schemas/IndicatorRow"
+            },
+            "type" : "array"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "DeliverableFeedbackRequest" : {
         "properties" : {
           "technicalObservations" : {
@@ -530,6 +591,24 @@
           }
         },
         "required" : [ "technicalObservations" ],
+        "type" : "object"
+      },
+      "DimensionNode" : {
+        "properties" : {
+          "components" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ComponentNode"
+            },
+            "type" : "array"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "DocumentAssetResponseDto" : {
@@ -1028,6 +1107,28 @@
           }
         },
         "required" : [ "id" ],
+        "type" : "object"
+      },
+      "IndicatorRow" : {
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "evidenceCount" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "IndicatorWorkflowResponseDto" : {
@@ -2025,6 +2126,124 @@
         },
         "type" : "object"
       },
+      "PeerVisitItemRequestDto" : {
+        "properties" : {
+          "done" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "scheduledAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PeerVisitItemResponseDto" : {
+        "properties" : {
+          "done" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "location" : {
+            "type" : "string"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "order" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "scheduledAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PeerVisitResponseDto" : {
+        "properties" : {
+          "endsOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "id" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PeerVisitItemResponseDto"
+            },
+            "type" : "array"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "processId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "room" : {
+            "type" : "string"
+          },
+          "startsOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "venue" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PeerVisitViewResponseDto" : {
+        "properties" : {
+          "careerName" : {
+            "type" : "string"
+          },
+          "processId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "visit" : {
+            "$ref" : "#/components/schemas/PeerVisitResponseDto"
+          }
+        },
+        "type" : "object"
+      },
       "PhaseProgressSummary" : {
         "properties" : {
           "name" : {
@@ -2820,6 +3039,35 @@
         },
         "type" : "object"
       },
+      "Totals" : {
+        "properties" : {
+          "approved" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "coveragePercent" : {
+            "format" : "double",
+            "type" : "number"
+          },
+          "indicators" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "observed" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "other" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "withEvidence" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "UpdateImprovementPlanItemRequestDto" : {
         "description" : "Edición de ítem de Plan de Mejoras (API-WF-16)",
         "properties" : {
@@ -3007,6 +3255,37 @@
           }
         },
         "required" : [ "compliance", "fodaQuadrant", "synthesis" ],
+        "type" : "object"
+      },
+      "UpsertPeerVisitRequestDto" : {
+        "properties" : {
+          "endsOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "items" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PeerVisitItemRequestDto"
+            },
+            "type" : "array"
+          },
+          "notes" : {
+            "type" : "string"
+          },
+          "room" : {
+            "type" : "string"
+          },
+          "startsOn" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "venue" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "UpsertTemplateRequestDto" : {
@@ -5171,6 +5450,63 @@
         "tags" : [ "Procesos de Acreditación" ]
       }
     },
+    "/api/v1/processes/{processId}/coverage-matrix" : {
+      "get" : {
+        "operationId" : "getCoverageMatrix",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CoverageMatrixResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Matriz criterio → indicador → evidencia → estado",
+        "tags" : [ "Coverage matrix" ]
+      }
+    },
+    "/api/v1/processes/{processId}/coverage-matrix/pdf" : {
+      "get" : {
+        "operationId" : "getCoverageMatrixPdf",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "format" : "byte",
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "PDF imprimible de la matriz de cobertura",
+        "tags" : [ "Coverage matrix" ]
+      }
+    },
     "/api/v1/processes/{processId}/delegations" : {
       "get" : {
         "operationId" : "listDelegations",
@@ -5887,6 +6223,14 @@
             "format" : "uuid",
             "type" : "string"
           }
+        }, {
+          "in" : "query",
+          "name" : "indicatorId",
+          "required" : false,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -6332,6 +6676,70 @@
         },
         "summary" : "Actualizar ítems del checklist Sala de Pares",
         "tags" : [ "Stage workflow" ]
+      }
+    },
+    "/api/v1/processes/{processId}/peer-visit" : {
+      "get" : {
+        "operationId" : "getPeerVisit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PeerVisitViewResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Consultar agenda de visita de pares",
+        "tags" : [ "Peer visit" ]
+      },
+      "put" : {
+        "operationId" : "upsertPeerVisit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "processId",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpsertPeerVisitRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PeerVisitResponseDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "summary" : "Crear o actualizar agenda de visita",
+        "tags" : [ "Peer visit" ]
       }
     },
     "/api/v1/processes/{processId}/responsible" : {
@@ -7884,6 +8292,12 @@
   }, {
     "description" : "Endpoints para la gestión de procesos CEUB/ARCU-SUR",
     "name" : "Procesos de Acreditación"
+  }, {
+    "description" : "Informe de autoevaluación / matriz de cobertura (FSD-UC-039)",
+    "name" : "Coverage matrix"
+  }, {
+    "description" : "Agenda de visita de pares (FSD-UC-040)",
+    "name" : "Peer visit"
   }, {
     "description" : "Lotes de encuesta primaria (API-WF-11 / WF-12)",
     "name" : "Evaluation"
