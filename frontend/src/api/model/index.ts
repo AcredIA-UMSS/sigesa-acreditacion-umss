@@ -25,6 +25,7 @@ export * from './createNormativeIndicatorRequestDto.ts';
 export * from './createNormativeNodeRequestDto.ts';
 export * from './createProcessRequestDto.ts';
 export * from './documentAssetResponseDto.ts';
+export * from './downloadDossier200.ts';
 export * from './eligibleResponsibleDto.ts';
 export * from './evaluationMetricsResponseDto.ts';
 export * from './evidenceSearchHitResponseDto.ts';

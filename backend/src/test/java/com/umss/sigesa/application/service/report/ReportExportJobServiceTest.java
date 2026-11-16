@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -175,7 +176,7 @@ class ReportExportJobServiceTest {
         job.markCompleted("reports/job.xlsx");
 
         when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
-        when(blobStorage.retrieve("reports/job.xlsx")).thenReturn(Optional.of(new byte[]{1, 2}));
+        when(blobStorage.openInputStream("reports/job.xlsx")).thenReturn(Optional.of(new ByteArrayInputStream(new byte[]{1, 2})));
 
         InputStream is = service.getJobFileStream(job.getJobId(), userId);
         assertNotNull(is);
@@ -226,7 +227,7 @@ class ReportExportJobServiceTest {
         ReportExportJob job = ReportExportJob.createNew(userId, UUID.randomUUID(), ReportFormat.XLSX, 1);
         job.markCompleted("reports/missing.xlsx");
         when(repositoryPort.findById(job.getJobId())).thenReturn(Optional.of(job));
-        when(blobStorage.retrieve("reports/missing.xlsx")).thenReturn(Optional.empty());
+        when(blobStorage.openInputStream("reports/missing.xlsx")).thenReturn(Optional.empty());
 
         assertThrows(InvalidJobStateException.class,
                 () -> service.getJobFileStream(job.getJobId(), userId));

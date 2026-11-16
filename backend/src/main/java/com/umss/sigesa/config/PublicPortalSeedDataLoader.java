@@ -12,9 +12,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Snapshots públicos para FSD-UC-016. INF-SIS publicado con certificado;
+ * Snapshots públicos para FSD-UC-016. INF-SIS publicado con certificado (CEUB / DUEA-A 048/2024);
  * Medicina publicada sin certificado; Ingeniería Civil no publicada (BR-10).
- * agency / resolution_number de inf-sis quedan null: no se inventan valores.
  */
 @Component
 @Profile("!prod")
@@ -29,6 +28,9 @@ public class PublicPortalSeedDataLoader implements ApplicationRunner {
     public static final String SLUG_MED = "med";
     public static final String SLUG_ING_CIV_DRAFT = "ing-civ";
 
+    public static final String DEFAULT_AGENCY = "Comité Ejecutivo de la Universidad Boliviana (CEUB)";
+    public static final String DEFAULT_RESOLUTION = "DUEA-A 048/2024";
+
     private final SpringDataPublicationSnapshotRepository repository;
 
     public PublicPortalSeedDataLoader(SpringDataPublicationSnapshotRepository repository) {
@@ -38,11 +40,14 @@ public class PublicPortalSeedDataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         seed(SNAPSHOT_INF_SIS, SLUG_INF_SIS, "Ingeniería de Sistemas", "ACREDITADA",
-                LocalDate.of(2025, 1, 1), LocalDate.of(2029, 12, 31), true, true);
+                LocalDate.of(2025, 1, 1), LocalDate.of(2029, 12, 31), true, true,
+                DEFAULT_AGENCY, DEFAULT_RESOLUTION);
         seed(SNAPSHOT_MED, SLUG_MED, "Medicina", "EN_PROCESO",
-                LocalDate.of(2026, 3, 1), LocalDate.of(2027, 2, 28), true, false);
+                LocalDate.of(2026, 3, 1), LocalDate.of(2027, 2, 28), true, false,
+                null, null);
         seed(SNAPSHOT_ING_CIV_DRAFT, SLUG_ING_CIV_DRAFT, "Ingeniería Civil", "BORRADOR",
-                LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), false, false);
+                LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), false, false,
+                null, null);
     }
 
     private void seed(UUID id,
@@ -52,19 +57,25 @@ public class PublicPortalSeedDataLoader implements ApplicationRunner {
                       LocalDate from,
                       LocalDate until,
                       boolean published,
-                      boolean certificatePublished) {
-        if (repository.existsById(id)) {
-            return;
+                      boolean certificatePublished,
+                      String agency,
+                      String resolutionNumber) {
+        PublicationSnapshotJpaEntity entity = repository.findById(id)
+                .orElseGet(() -> PublicationSnapshotJpaEntity.builder().id(id).build());
+
+        entity.setSlug(slug);
+        entity.setProgramName(name);
+        entity.setAccreditationStatus(status);
+        entity.setValidFrom(from);
+        entity.setValidUntil(until);
+        entity.setPublished(published);
+        entity.setCertificatePublished(certificatePublished);
+        if (agency != null) {
+            entity.setAgency(agency);
         }
-        repository.save(PublicationSnapshotJpaEntity.builder()
-                .id(id)
-                .slug(slug)
-                .programName(name)
-                .accreditationStatus(status)
-                .validFrom(from)
-                .validUntil(until)
-                .published(published)
-                .certificatePublished(certificatePublished)
-                .build());
+        if (resolutionNumber != null) {
+            entity.setResolutionNumber(resolutionNumber);
+        }
+        repository.save(entity);
     }
 }

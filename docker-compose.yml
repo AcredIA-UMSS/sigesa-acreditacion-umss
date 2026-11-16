@@ -28,45 +28,8 @@ services:
       retries: 20
       start_period: 10s
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: sigesa-ollama
-    restart: unless-stopped
-    environment:
-      OLLAMA_MODELS: /root/.ollama
-    volumes:
-      # - /var/lib/ollama/blobs:/root/.ollama/blobs:ro
-      # - /var/lib/ollama/manifests:/root/.ollama/manifests:ro
-      - ollama_state:/root/.ollama
-    ports:
-      - "11434:11434"
-    healthcheck:
-      test: ["CMD", "ollama", "list"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 15s
-
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    container_name: open-webui
-    restart: unless-stopped
-    depends_on:
-      ollama:
-        condition: service_healthy
-    environment:
-      OLLAMA_BASE_URL: http://ollama:11434
-      BYPASS_MODEL_ACCESS_CONTROL: "true"
-    ports:
-      - "3001:8080"
-    volumes:
-      - open-webui:/app/backend/data
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
+  # Ollama y Open WebUI corren en el HOST (no en Compose) para no duplicar modelos en disco.
+  # El backend llega a ellos vía host.docker.internal (Linux: extra_hosts host-gateway).
 
   backend:
     build:
@@ -76,10 +39,10 @@ services:
     restart: always
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
-        condition: service_healthy
-      open-webui:
         condition: service_healthy
       minio:
         condition: service_healthy
@@ -97,7 +60,8 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SIGESA_ASSISTANT_ENABLED=${SIGESA_ASSISTANT_ENABLED:-true}
       - SIGESA_ASSISTANT_LLM_ENABLED=${SIGESA_ASSISTANT_LLM_ENABLED:-true}
-      - SIGESA_ASSISTANT_BASE_URL=${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://open-webui:8080/api}}
+      # No usar SIGESA_ASSISTANT_BASE_URL del .env (suele ser localhost = este contenedor).
+      - SIGESA_ASSISTANT_BASE_URL=${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://host.docker.internal:3001/api}
       - SIGESA_ASSISTANT_API_KEY=${SIGESA_ASSISTANT_API_KEY:-${GROQ_API_KEY:-}}
       - SIGESA_ASSISTANT_MODEL=${SIGESA_ASSISTANT_MODEL:-qwen2.5:7b}
       - SIGESA_ASSISTANT_RAG_ENABLED=${SIGESA_ASSISTANT_RAG_ENABLED:-true}
@@ -175,9 +139,6 @@ services:
     container_name: sigesa-test-generator
     env_file:
       - .env
-    depends_on:
-      ollama:
-        condition: service_started
     environment:
       SIGESA_REPO_ROOT: /workspace
       SIGESA_RUNTIME: docker
@@ -189,6 +150,4 @@ services:
 
 volumes:
   postgres_data:
-  open-webui:
-  ollama_state:
   minio_data:

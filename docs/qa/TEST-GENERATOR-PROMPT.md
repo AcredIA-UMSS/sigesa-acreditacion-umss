@@ -44,7 +44,7 @@ Copiar `.env.example` → `.env` y configurar:
 | `SIGESA_TESTGEN_PROVIDER` | Override solo generador (opcional) |
 | `GROQ_API_KEY` | API key Groq |
 | `SIGESA_ASSISTANT_API_KEY` | API key Open WebUI (local) |
-| `SIGESA_LLM_BASE_URL_DOCKER` | `http://ollama:11434/v1` (Ollama en compose) |
+| `SIGESA_LLM_BASE_URL_DOCKER` | `http://host.docker.internal:11434/v1` (Ollama en el host) |
 | `SIGESA_LLM_BASE_URL_HOST` | `http://localhost:11434/v1` |
 | `SIGESA_LLM_MODEL_LOCAL` | ej. `qwen2.5:7b` |
 | `SIGESA_LLM_MODEL_GROQ` | ej. `llama-3.3-70b-versatile` |
@@ -61,10 +61,10 @@ SIGESA_LLM_BASE_URL_DOCKER=http://host.docker.internal:11434/v1
 
 ### Cambiar provider
 
-**Local (Ollama en compose):**
+**Local (Ollama en el host):**
 ```bash
 SIGESA_LLM_PROVIDER=local
-SIGESA_LLM_BASE_URL_DOCKER=http://ollama:11434/v1
+SIGESA_LLM_BASE_URL_DOCKER=http://host.docker.internal:11434/v1
 SIGESA_LLM_MODEL_LOCAL=qwen2.5:7b
 ```
 

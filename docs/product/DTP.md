@@ -47,12 +47,14 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 04/11/2026 | **Compose:** Ollama y Open WebUI salen del stack Docker; el backend usa `host.docker.internal:3001` (LLM en el host). | NFR compose | — | — | Boris Anthony Angulo Urquieta |
 | 04/11/2026 | **MOD-PUBLIC certificado PDF:** A4 horizontal; V29 `agency`/`resolution_number` nullable; QR `{baseUrl}/public/status?slug=`; UI lee `?slug=`. Sin `issued_at`. Dependencia `com.google.zxing:core` 3.5.3 (QR). | FSD-UC-016 / DD-UC-016 | — | PM-041 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **MOD-PUBLIC noticias:** `GET /api/v1/public/news` (paginado), `/featured`, `/{slug}`; admin `/api/v1/admin/news` CRUD+publish/feature. Tabla `news_article` V28. UI `/admin/noticias`, `/public/news`. | FSD-UC-035 / DD-UC-035 | — | PM-040 / PR-IMPL-051 | Cursor Agent |
 | 04/11/2026 | **MOD-PUBLIC portal:** `GET /api/v1/public/programs` (listado nombre+slug), `/{slug}`, `/{slug}/certificate` (PDF en memoria). Prefijo `/api/v1/public` (FSD original: `/public/programs/{slug}`). 404 genérico. | FSD-UC-016 / DD-UC-016 | — | PM-039 / PR-IMPL-050 | Cursor Agent |
 | 04/11/2026 | **API errores (#67):** envelope `{error,message,details?}`; `GlobalExceptionHandler` (400 validación, JSON malformado, 500 genérico sin traza); `server.error.include-*=never`. | FSD-UC-034 / DD-UC-034 | — | PM-038 / PR-IMPL-049 / #67 | Boris Anthony Angulo Urquieta |
 | 04/11/2026 | **MOD-ASSISTANT RAG (#76):** corpus classpath `normative-corpus/arcu-sur-2023/` (manual de procedimientos 2023); upsert al boot; retira placeholders ARCU-SUR de demo. | FSD-UC-033 / DD-UC-033 / PR-IMPL-032 | — | PM-037 / PR-IMPL-048 / #76 | Boris Anthony Angulo Urquieta |
 | 02/11/2026 | **E3 notificaciones:** se mantiene el outbox en el monolito. Corrida limpia A/B/A/B: p95 +2.126 ms, arranque 1.20×, health 33/2496 (1.322 %) con el sidecar cortado. Informe `bench/e3/INFORME.md`. | bench E3 | ADR-001 | — | Marlene Velasquez |
+| 28/10/2026 | **MOD-EXP (FSD-UC-032 / FEAT-11):** Exportación asíncrona Dossier Digital ZIP en streaming directo hacia S3/storage; semáforo global concurrente (429 Retry-After) y límite 1/usuario; descarga paralela acotada de blobs; purge job TTL 24-48h; URLs prefirmadas S3 (15m) y RBAC por carrera para CC. | FSD-UC-032 / DD-UC-032 | ADR-0005 | PM-032 / PR-IMPL-046 | Antigravity / Alex553-bot |
 | 22/10/2026 | **MOD-EVIDENCE UC-004 visor:** UI «Ver evidencia» descarga/previsualiza blob (`GET /document-assets/{id}/content`, API-EVD-07b). OpenAPI de Demo 2 incluye ese path. | FSD-UC-004 / DD-UC-004-M7 | — | PM-031 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **MOD-EVIDENCE:** reuso por hash restaura el blob en MinIO/S3 si la `storageKey` ya no existe (`EvidenceBlobStoragePort.restore`). Evita metadatos en BD sin objeto. | FSD-UC-004 / DD-UC-004-M7 | — | PM-030 | Boris Anthony Angulo Urquieta |
 | 22/10/2026 | **Demo 2:** `openapi.json` generado desde springdoc; CI drift + Spectral (`.github/workflows/openapi.yml`). Registro `docs/demos/demo-2.md` y `8.2.0-aportes.md`. | FSD-UC-004 / FSD-UC-005 | — | PM-029 | Boris Anthony Angulo Urquieta |
@@ -382,7 +384,7 @@ artefactos_vivos:
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
 | **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks`; **8.1.0 FEAT-03:** `timeout` default 10 s |
 | **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS`; **FEAT-03:** `SIGESA_ASSISTANT_TIMEOUT_MS` (default `10000`) |
-| **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
+| **Docker Compose (dev)** | `db`, `minio`, `backend`, `frontend`. Ollama/Open WebUI **en el host**; backend `SIGESA_ASSISTANT_BASE_URL_DOCKER=http://host.docker.internal:3001/api` + `extra_hosts` |
 | **Frontend** | `/ayuda` (`AssistantChatUI` — diseño página completa); copilotos dominio vía **`DomainCopilotFloatingChat`** ([DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md)): `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; historial conversaciones `sessionStorage`; metadata + traza vía `CopilotAssistantMetadata` |
 | **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence`; **shell UI compartido** [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md) |
 | **Respuesta chat** | `{ reply, toolId, sourceTables, path, llmInvoked, steps[] }` |
@@ -452,14 +454,7 @@ artefactos_vivos:
 
 ### C.2 Open WebUI + Ollama (MOD-ASSISTANT, dev local)
 
-Stack opcional para desarrollo/demo self-hosted:
-
-| Servicio | Imagen | Puerto host | Rol |
-| --- | --- | --- | --- |
-| Ollama | `ollama/ollama:latest` | 11434 | Runtime de modelos |
-| Open WebUI | `ghcr.io/open-webui/open-webui:main` | 3001 | UI admin + API compatible OpenAI |
-
-El backend SIGESA en Docker usa `SIGESA_ASSISTANT_BASE_URL=http://open-webui:8080/api`. La API key se genera en Open WebUI (Settings → Account → API Keys) y se define en `.env` raíz (gitignored).
+Ollama (:11434) y Open WebUI (:3001) se instalan **en el host**; no van en `docker compose up`. El backend en contenedor llega con `host.docker.internal` (`SIGESA_ASSISTANT_BASE_URL_DOCKER`, default `http://host.docker.internal:3001/api`). En el host (`./mvnw`): `http://localhost:3001/api`. La API key se genera en Open WebUI (Settings → Account → API Keys) y se define en `.env` raíz (gitignored). Solo Ollama nativo: `http://host.docker.internal:11434`.
 
 **Nota operativa:** forzar HTTP/1.1 en `OpenWebUiChatAdapter` — Java `HttpClient` con HTTP/2 provoca `400 Invalid HTTP request` en uvicorn.
 
