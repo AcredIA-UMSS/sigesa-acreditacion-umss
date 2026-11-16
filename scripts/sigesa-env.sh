@@ -34,8 +34,8 @@ if [[ "${provider}" == "groq" ]]; then
 
 # --- Perfil local (Open WebUI u Ollama) ---
 elif [[ "${runtime}" == "docker" ]]; then
-  export SIGESA_ASSISTANT_BASE_URL="${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://open-webui:8080/api}}"
-  export SIGESA_LLM_BASE_URL="${SIGESA_LLM_BASE_URL:-${SIGESA_LLM_BASE_URL_DOCKER:-http://ollama:11434/v1}}"
+  export SIGESA_ASSISTANT_BASE_URL="${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_DOCKER:-http://host.docker.internal:3001/api}}"
+  export SIGESA_LLM_BASE_URL="${SIGESA_LLM_BASE_URL:-${SIGESA_LLM_BASE_URL_DOCKER:-http://host.docker.internal:11434/v1}}"
   export SIGESA_ASSISTANT_MODEL="${SIGESA_ASSISTANT_MODEL:-${SIGESA_LLM_MODEL_LOCAL:-qwen2.5:7b}}"
 else
   export SIGESA_ASSISTANT_BASE_URL="${SIGESA_ASSISTANT_BASE_URL:-${SIGESA_ASSISTANT_BASE_URL_HOST:-http://localhost:3001/api}}"
