@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react';
+import { FileText, MessageSquare } from 'lucide-react';
+import { Button } from '../../../components/ui/Button';
+import { IndicatorObservationModal } from '../../observations/components/IndicatorObservationModal';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { getGetProcessQueryKey } from '../../../api/endpoints/procesos-de-acreditación/procesos-de-acreditación';
 import { deleteNormativeIndicatorEvidence } from '../../evidence/api/normativeIndicatorEvidenceApi';
@@ -153,6 +155,7 @@ export function NormativeIndicatorCollaborationSection({
     evidenceId: string;
     filename: string;
   } | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const effectiveHasOpenObservation =
     hasOpenObservation || indicatorStatus === 'OBSERVADO';
@@ -197,12 +200,21 @@ export function NormativeIndicatorCollaborationSection({
         onUploaded={() => void reload()}
       />
 
+      {!canReview && evidences.length > 0 && (
+        <Button type="button" variant="ghost" onClick={() => setHistoryOpen(true)}>
+          <MessageSquare size={16} aria-hidden />
+          Ver observaciones
+        </Button>
+      )}
+
       {canReview && (
         <NormativeIndicatorReviewActions
+          processId={processId}
           indicatorId={indicatorId}
           indicatorLabel={indicatorLabel}
           indicatorStatus={indicatorStatus}
           hasEvidences={evidences.length > 0}
+          evidenceId={evidences[0]?.evidenceId ?? null}
           onCompleted={() => void reload()}
         />
       )}
@@ -257,6 +269,16 @@ export function NormativeIndicatorCollaborationSection({
         error={preview.error}
         onClose={preview.close}
         onDownload={preview.download}
+      />
+
+      <IndicatorObservationModal
+        isOpen={historyOpen}
+        processId={processId}
+        indicatorId={indicatorId}
+        indicatorLabel={indicatorLabel}
+        evidenceId={evidences[0]?.evidenceId ?? null}
+        canWrite={false}
+        onClose={() => setHistoryOpen(false)}
       />
 
       {subsanationTarget && openObservationId && (

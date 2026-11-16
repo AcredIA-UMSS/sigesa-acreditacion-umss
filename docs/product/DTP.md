@@ -47,7 +47,13 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+<<<<<<< HEAD
 | 15/11/2026 | **MOD-DASH / MOD-AUDIT:** semáforo [JD] (`executiveSection`) y bitácora cerrados. `GET /api/v1/audit/logs` + `/export` responden **422** `INVALID_DATE_RANGE` si `from` &gt; `to`. Aprobación de indicador [TD] escribe `INDICATOR_APPROVED`. UI `/admin/auditoria` vía Orval. Gherkin `@TC-09` / `@TC-12`. | FSD-UC-013 / FSD-UC-017 | — | PM-043 | Aylen |
+=======
+| 15/11/2026 | **UC-023 candidatos:** `GET …/responsible/candidates` toma [CC] ACTIVE desde `user_program_assignment` de la carrera del proceso (no el catálogo global); UI lista cards y vacío explícito. | FSD-UC-023 / DD-UC-023 | — | — | Boris Anthony Angulo Urquieta |
+| 15/11/2026 | **Compose:** Ollama y Open WebUI salen del stack; el backend usa `host.docker.internal:3001`. | NFR compose | — | — | Boris Anthony Angulo Urquieta |
+| 15/11/2026 | **RAG retrieval v2:** tesauro CEUB/ARCU-SUR, peso/top-3 de palabras clave, FTS AND→OR sobre chunks existentes; reply muestra claves usadas. Catálogo `docs/design/assistant/RAG-RETRIEVAL-TECHNIQUES.md`. | FSD-UC-033 / DD-UC-033 | — | PM-043 / PR-IMPL-054 | Boris Anthony Angulo Urquieta |
+>>>>>>> ffe2d381 (tecnincas de recoleccion y observaciones/parcial)
 | 13/11/2026 | **Trazas del historial de accesos:** el backend exporta spans HTTP y JDBC por OTLP (`spring-boot-starter-opentelemetry`, `datasource-micrometer-spring-boot` 2.3.0). Tempo y Grafana están en `bench/access/` para el p95 de k6 de `GET /api/v1/access-sessions`. En prod el muestreo queda en 0 salvo `SIGESA_TRACING_SAMPLE`. | FSD-UC-036 | — | — | Marlene Velasquez |
 | 13/11/2026 | **Fase del proceso:** [TD] consulta en `/reportes/fase` la fase ARCU-SUR de una carrera y registra retroalimentación del entregable (`PUT …/deliverables/{id}/feedback`). | FSD-UC-037 | — | — | Marlene Velasquez |
 | 12/11/2026 | **Historial de accesos:** la lista incluye `actions` (crear, modificar, eliminar). La pantalla `/admin/ingresos` muestra esa columna y permite imprimir el reporte filtrado. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
@@ -276,7 +282,8 @@ artefactos_vivos:
 | **Migración Flyway** | `V7__process_responsible.sql` (prod); dev Docker: Hibernate `ddl-auto: update` |
 | **Errores clave** | 409 `CC_ALREADY_ASSIGNED_TO_PROCESS`, `CAREER_SCOPE_MISMATCH`, `PROCESS_NOT_EDITABLE`; 400 `INVALID_RESPONSIBLE_USER` |
 | **Extensión UC-019** | `ProcessSummaryResponseDto` / `ProcessResponseDto` → campo `responsible` (`ProcessResponsibleDto`) |
-| **Frontend** | Sección «Responsable del proceso» en detalle; modal asignación; columna en listado `/procesos` |
+| **Candidatos** | Solo [CC] `ACTIVE` con `user_program_assignment` activa al `careerId` del proceso; excluye responsables de **otro** proceso ACTIVE (BR-20); incluye el actual al cambiar |
+| **Frontend** | Sección «Responsable del proceso» en detalle; modal con lista de coordinadores de la carrera (vacío si la carrera no tiene [CC]) |
 | **Hooks Orval** | `useAssignResponsible`, `useRemoveResponsible`, `useListCandidates` en `procesos-de-acreditación.ts` |
 
 ---
@@ -388,13 +395,13 @@ artefactos_vivos:
 | **Proxy LLM** | Backend → Open WebUI `POST {baseUrl}/v1/chat/completions` (HTTP/1.1). **FEAT-03:** timeout 10 s; hilos virtuales/`sendAsync`; 504 `ASSISTANT_GATEWAY_TIMEOUT` |
 | **Tool calling** | Loop multi-tool en `SendChatMessageService` (max **5** iter. default); una tool/iteración; `AssistantToolRegistry` + `AssistantToolExecutor`; payload OpenAI `tools[]` + `tool_calls` |
 | **Nivel 4 (multi-tool)** | LLM encadena tools secuenciales; respuesta combinada por `AssistantResponseFormatter`; traza `steps[]` en API y UI |
-| **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; corpus ARCU-SUR 2023 en `classpath:normative-corpus/arcu-sur-2023/`; config `rag-enabled`, `rag-max-chunks` |
+| **RAG normativo** | `search_normative_docs` + `AssistantNormativeRagService`; FTS PostgreSQL; corpus ARCU-SUR 2023 en classpath; **retrieval v2** tesauro + pesos (`NormativeQueryPlanner`); config `rag-enabled`, `rag-max-chunks` |
 | **Tools vigentes** | Catálogo [`TOOL-CATALOG.md`](../design/assistant/TOOL-CATALOG.md) — read + write con confirmación en chat |
 | **Auth hacia Open WebUI** | `Authorization: Bearer {SIGESA_ASSISTANT_API_KEY}` — solo servidor |
 | **Modelo default** | `llama3.2:3b` (`SIGESA_ASSISTANT_MODEL`) |
 | **Config YAML** | `sigesa.assistant.*` — `max-tool-iterations` (default 5), `rag-enabled`, `rag-max-chunks`; **8.1.0 FEAT-03:** `timeout` default 10 s |
 | **Variables entorno** | `SIGESA_ASSISTANT_*`, `SIGESA_ASSISTANT_MAX_TOOL_ITERATIONS`, `SIGESA_ASSISTANT_RAG_ENABLED`, `SIGESA_ASSISTANT_RAG_MAX_CHUNKS`; **FEAT-03:** `SIGESA_ASSISTANT_TIMEOUT_MS` (default `10000`) |
-| **Docker Compose (dev)** | Servicios `ollama` (:11434), `open-webui` (:3001→8080); backend `depends_on` open-webui healthy |
+| **Docker Compose (dev)** | `db`, `minio`, `smtp`, `backend`, `frontend`. Ollama/Open WebUI en el host; `SIGESA_ASSISTANT_BASE_URL_DOCKER=http://host.docker.internal:3001/api` |
 | **Frontend** | `/ayuda` (`AssistantChatUI` — diseño página completa); copilotos dominio vía **`DomainCopilotFloatingChat`** ([DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md)): `PhasesCopilotPanel`, `UsersCopilotPanel`, `EvidenceCopilotPanel`; historial conversaciones `sessionStorage`; metadata + traza vía `CopilotAssistantMetadata` |
 | **Agentes embebidos** | `agent=phases` ([DD-AGENT-001](../design/assistant/DD-AGENT-001.md)); `agent=users` ([DD-AGENT-002](../design/assistant/DD-AGENT-002.md)) — JD-only + 403; `agent=evidence` ([DD-AGENT-003](../design/assistant/DD-AGENT-003.md)) — JD/TD/CC + MCP `mcp/sigesa-evidence`; **shell UI compartido** [DD-AGENT-UI-SHELL](../design/assistant/DD-AGENT-UI-SHELL.md) |
 | **Respuesta chat** | `{ reply, toolId, sourceTables, path, llmInvoked, steps[] }` |

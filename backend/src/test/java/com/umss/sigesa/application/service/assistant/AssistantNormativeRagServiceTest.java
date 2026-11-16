@@ -35,6 +35,7 @@ class AssistantNormativeRagServiceTest {
         assertThat(result.sourceTables()).contains("normative_document");
         assertThat(result.reply()).contains("Diagnóstico institucional");
         assertThat(result.reply()).contains("RAG");
+        assertThat(result.reply()).contains("Claves usadas");
     }
 
     @Test

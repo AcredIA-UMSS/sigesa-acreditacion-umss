@@ -10,7 +10,10 @@ prompts:
   - "PR-IMPL-046"
 release: "v1.0"
 status: implementado
-ultima_actualizacion: "2026-11-04"
+ultima_actualizacion: "2026-11-15"
+prompts:
+  - "PR-IMPL-046"
+  - "PR-IMPL-055"
 ---
 
 # Design Doc `DD-UC-032` — Observaciones del técnico sobre evidencias
@@ -22,9 +25,10 @@ ultima_actualizacion: "2026-11-04"
 | Incluido | Excluido |
 | --- | --- |
 | Borrador, envío, revisión, respuesta, atención y cierre | Rechazo de indicador (FSD-UC-008) |
-| Historial append-only de mensajes | Notificación por correo |
-| Lista de evidencias de la carrera del proceso | [JD] en este flujo |
-| Panel en el detalle de proceso | Cambiar `tb_observation` del dashboard |
+| Historial append-only de mensajes y de observaciones por indicador | Extraer microservicio de notificaciones |
+| Botón [TD] solo si el indicador tiene evidencia; modal | [JD] en este flujo |
+| Lista de evidencias de la carrera del proceso | Cambiar `tb_observation` del dashboard |
+| Evento `TechnicalObservationIssued` (EMAIL + in-app) al `submit` | Rechazo de indicador (FSD-UC-008) |
 
 La evidencia pertenece al proceso cuando `indicator.program_id` es la `career_id` del proceso. Ese es el vínculo que ya existe: `evidence.indicator_id` → `indicator.program_id`.
 
@@ -54,7 +58,8 @@ Un [CC] fuera de la carrera recibe el mismo `ProcessNotFoundException` que la co
 | Puertos out | `ProcessObservationRepositoryPort`, `EvidenceLookupPort`. Reutiliza `ProcessQueryPort` y `ProcessAccessPolicy` |
 | Adaptadores | `ProcessObservationController`, `ProcessObservationJpaAdapter`, `EvidenceLookupJpaAdapter` |
 | Persistencia | `process_observation`, `process_observation_message` (Flyway `V9`) |
-| Frontend | `ObservationsPanel` dentro de `ProcessDetailView` |
+| Frontend | `ObservationsPanel` (proceso) + `IndicatorObservationModal` en cada indicador (`NormativeIndicatorReviewActions`) |
+| Notificación | `EnqueueDomainNotificationUseCase` en `ProcessObservationService.submit` |
 
 ### 2.3 API
 

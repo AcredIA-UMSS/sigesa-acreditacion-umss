@@ -3,6 +3,7 @@ package com.umss.sigesa.application.service.observation;
 import com.umss.sigesa.application.model.observation.ObservationActor;
 import com.umss.sigesa.application.model.observation.ObservationDraft;
 import com.umss.sigesa.application.model.observation.ObservationFilter;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.ProcessObservationUseCase;
 import com.umss.sigesa.application.port.out.EvidenceLookupPort;
 import com.umss.sigesa.application.port.out.ProcessObservationRepositoryPort;
@@ -14,11 +15,14 @@ import com.umss.sigesa.domain.exception.ForbiddenObservationRoleException;
 import com.umss.sigesa.domain.exception.ObservationNotFoundException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.model.observation.ProcessObservation;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class ProcessObservationService implements ProcessObservationUseCase {
@@ -26,15 +30,18 @@ public class ProcessObservationService implements ProcessObservationUseCase {
     private final ProcessQueryPort processQueryPort;
     private final EvidenceLookupPort evidenceLookupPort;
     private final ProcessObservationRepositoryPort observationRepository;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
     private final Clock clock;
 
     public ProcessObservationService(ProcessQueryPort processQueryPort,
                                      EvidenceLookupPort evidenceLookupPort,
                                      ProcessObservationRepositoryPort observationRepository,
+                                     EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
                                      Clock clock) {
         this.processQueryPort = processQueryPort;
         this.evidenceLookupPort = evidenceLookupPort;
         this.observationRepository = observationRepository;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
         this.clock = clock;
     }
 
@@ -101,13 +108,15 @@ public class ProcessObservationService implements ProcessObservationUseCase {
     @Override
     public ProcessObservation submit(UUID processId, UUID observationId, ObservationActor actor) {
         requireRole(actor, "TD", "Solo el técnico envía la retroalimentación");
-        visibleProcess(processId, actor);
+        AccreditationProcess process = visibleProcess(processId, actor);
         ProcessObservation current = load(processId, observationId);
         if (!current.getAuthorId().equals(actor.userId())) {
             throw new ForbiddenObservationRoleException("Solo el autor puede enviar la observación");
         }
         current.submit(clock.instant());
-        return observationRepository.save(current);
+        ProcessObservation saved = observationRepository.save(current);
+        enqueueSubmitNotification(process, saved);
+        return saved;
     }
 
     @Override
@@ -193,6 +202,25 @@ public class ProcessObservationService implements ProcessObservationUseCase {
         if (filter.evidenceId() != null && !filter.evidenceId().equals(item.getEvidenceId())) {
             return false;
         }
+        if (filter.indicatorId() != null && !filter.indicatorId().equals(item.getIndicatorId())) {
+            return false;
+        }
         return filter.authorId() == null || filter.authorId().equals(item.getAuthorId());
+    }
+
+    private void enqueueSubmitNotification(AccreditationProcess process, ProcessObservation observation) {
+        UUID indicatorId = observation.getIndicatorId();
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.TechnicalObservationIssued,
+                observation.getId(),
+                process.getCareerId(),
+                process.getId(),
+                Map.of(
+                        "observationId", observation.getId().toString(),
+                        "indicatorId", indicatorId != null ? indicatorId.toString() : "",
+                        "processId", process.getId().toString(),
+                        "programId", process.getCareerId().toString(),
+                        "occurrenceId", observation.getId().toString()
+                )));
     }
 }

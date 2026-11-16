@@ -1,25 +1,31 @@
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, MessageSquare, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../../components/ui/Button';
+import { IndicatorObservationModal } from '../../observations/components/IndicatorObservationModal';
 import { approveNormativeIndicator, rejectNormativeIndicator } from '../api/indicatorWorkflowApi';
 
 export type NormativeIndicatorReviewActionsProps = {
+  processId: string;
   indicatorId: string;
   indicatorLabel: string;
   indicatorStatus?: string;
   hasEvidences: boolean;
+  evidenceId?: string | null;
   onCompleted: () => void;
 };
 
 export function NormativeIndicatorReviewActions({
+  processId,
   indicatorId,
   indicatorLabel,
   indicatorStatus,
   hasEvidences,
+  evidenceId = null,
   onCompleted,
 }: NormativeIndicatorReviewActionsProps) {
   const [justification, setJustification] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [observationOpen, setObservationOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -85,6 +91,19 @@ export function NormativeIndicatorReviewActions({
         </p>
       )}
 
+      {hasEvidences && (
+        <div className="mb-3">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setObservationOpen(true)}
+          >
+            <MessageSquare size={16} aria-hidden />
+            Registrar observación
+          </Button>
+        </div>
+      )}
+
       {canAct && (
         <div className="flex flex-wrap gap-2">
           <Button
@@ -138,6 +157,19 @@ export function NormativeIndicatorReviewActions({
           {success}
         </p>
       )}
+
+      <IndicatorObservationModal
+        isOpen={observationOpen}
+        processId={processId}
+        indicatorId={indicatorId}
+        indicatorLabel={indicatorLabel}
+        evidenceId={evidenceId ?? null}
+        canWrite
+        onClose={() => {
+          setObservationOpen(false);
+          onCompleted();
+        }}
+      />
     </div>
   );
 }

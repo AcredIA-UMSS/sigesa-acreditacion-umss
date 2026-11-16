@@ -110,6 +110,15 @@ final class NotificationMessageFactory {
                             + " del programa " + programLabel
                             + ". Esta es una notificación informativa; ya no tiene acceso de gestión a ese proceso.",
                     "");
+            case TechnicalObservationIssued -> new MessageBundle(
+                    "Nueva observación técnica",
+                    "El técnico registró una observación en el indicador " + indicatorLabel + ".",
+                    "Observación del técnico DUEA — " + indicatorLabel,
+                    "El técnico DUEA registró una observación sobre el indicador " + indicatorLabel
+                            + " del programa " + programLabel
+                            + " (proceso " + processLabel + ")."
+                            + " Consulte el historial de observaciones en el indicador.",
+                    deepLinkIndicator(processId, indicatorId, observationId));
         };
     }
 

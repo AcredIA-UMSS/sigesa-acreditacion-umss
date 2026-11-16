@@ -7,11 +7,12 @@ fsd_uc:
 prd_refs:
   - "PRD-REQ-028"
 prompts:
+  - "PR-IMPL-054"
   - "PR-IMPL-048"
   - "PR-IMPL-032"
-release: "2.1.0"
+release: "8.4.0"
 status: implementado
-fecha: "04/11/2026"
+fecha: "15/11/2026"
 github_issue: "https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/76"
 autores:
   - "Boris Anthony Angulo Urquieta"
@@ -28,6 +29,8 @@ Indexar el *Manual de procedimientos del Sistema ARCU-SUR 2023* para que el asis
 **Dentro:** conversión PDF→Markdown por sección, classpath, upsert al boot, retiro de placeholders ARCU-SUR de demo, ampliación del detector de queries.
 
 **Fuera:** PDFBox en caliente, pgvector, UI de citas, nuevo `agent=`, `docs/baseline/`.
+
+**Retrieval v2 (8.4.0):** tesauro + pesos + AND/OR sobre el mismo índice. Catálogo: [`assistant/RAG-RETRIEVAL-TECHNIQUES.md`](assistant/RAG-RETRIEVAL-TECHNIQUES.md). Piezas: `NormativeDomainThesaurus`, `NormativeQueryPlanner`, cascada en `NormativeDocumentSearchJpaAdapter`.
 
 ## 2. Diseño
 

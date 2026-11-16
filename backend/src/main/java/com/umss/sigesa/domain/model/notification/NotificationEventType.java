@@ -9,7 +9,8 @@ public enum NotificationEventType {
     ProcessClosed,
     Level1Completed,
     ProcessAssigned,
-    ProcessUnassigned;
+    ProcessUnassigned,
+    TechnicalObservationIssued;
 
     public static NotificationEventType fromWire(String raw) {
         if (raw == null || raw.isBlank()) {

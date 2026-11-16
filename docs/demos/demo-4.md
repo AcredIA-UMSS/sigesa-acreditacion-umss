@@ -16,11 +16,34 @@ Cada persona presenta **1 a 3** funcionalidades del release, con **caso de uso F
 
 | Integrante | Funcionalidades (1–3) | FSD / contrato | Criterios de aceptación (resumen) | Evidencia |
 |------------|----------------------|----------------|-----------------------------------|-----------|
-| **Boris Anthony Angulo Urquieta** | _por registrar_ | | | |
+| **Boris Anthony Angulo Urquieta** | 1. Recuperación RAG sobre chunks (sinónimos, peso de claves, AND→OR), Observaciones de tecnico a coordinador | [FSD-UC-033](../product/uc/FSD-UC-033.md) [FSD-UC-011](../product/uc/FSD-UC-011.md) | Tesauro de dominio; top-3 claves; descarta genéricos; reply muestra «Claves usadas»; sinónimos (*evaluadores externos* → pares); mismo `POST /assistant/chat` | [`RAG-RETRIEVAL-TECHNIQUES.md`](../design/assistant/RAG-RETRIEVAL-TECHNIQUES.md) · PR-IMPL-054 |
 | **Alexander Alvarez** | 1. Notificaciones dual-canal (in-app + email) | [FSD-UC-015](../product/uc/FSD-UC-015.md) · [DD-UC-038](../design/DD-UC-038.md) | Eventos de acreditación encolan EMAIL + in-app en la misma TX. Campana en sidebar/header; popover con deep-link. Asignar/retirar responsable notifica al CC afectado (retiro sin CTA). Asunto/cuerpo usan nombres de negocio (carrera/proceso/indicador), no UUID. Correo visible en catcher `:8025` | `66e1cdaa` |
 | **Aylen Mariangel Gonzáles Alvino** | _por registrar_ | | | |
 | **Marlene Velasquez** | 1. Historial de accesos [JD] | [FSD-UC-036](../product/uc/FSD-UC-036.md) | Login abre sesión `ACTIVE` con `sid`; fallo `FAILED`; logout `CLOSED`; JWT vencido `EXPIRED`. [JD] filtra `/admin/ingresos`, ve acciones (crear, modificar, eliminar) e imprime el filtro. Otro rol: 403. Sesión inexistente: 404. No hay alta, edición ni borrado por API | `1e5db083` `efd1bc40` |
 | | 2. Fase del proceso [TD] | [FSD-UC-037](../product/uc/FSD-UC-037.md) | Menú principal → `/reportes/fase`. Otro rol no permanece. La fase marcada es la etapa en curso y se ven las siete etapas ARCU-SUR. Inicio solo muestra la carta de solicitud. Revisar sin archivo lo indica. Retroalimentación de al menos 10 caracteres se guarda y no cambia la aprobación. Otro rol: 403 | en este release, junto con `PUT …/deliverables/{id}/feedback` en `openapi.json` |
+
+---
+
+## Boris Anthony Angulo Urquieta — detalle para la exposición
+
+### 1. Técnicas de recuperación sobre el índice (FSD-UC-033) — mediana
+
+No es un agente nuevo ni se suben PDFs. Se consulta lo ya indexado en `normative_document`.
+
+Catálogo de técnicas: [`docs/design/assistant/RAG-RETRIEVAL-TECHNIQUES.md`](../design/assistant/RAG-RETRIEVAL-TECHNIQUES.md).
+
+Preguntas de video:
+
+1. *«¿Quién arma el equipo de evaluadores externos?»* → claves `pares` → §6.12 comités de pares.  
+2. *«cronograma pares visita normativa procedimiento»* → busca las tres de dominio; descarta *normativa* / *procedimiento*.
+
+k6/Tempo de esta demo: ya cubierto por el grupo (Marlene / `bench/access/`); no se recuenta aquí.
+
+### FSD-UC-011 - DASHBOARD y Observaciones
+
+- observaciones en cada indicador del proceso de acreditacion
+- el Tecnico de la DUEA realiza observaciones y recomendaciones cuando el coordinador tiene errores en su presentacion de evidencias
+- el coordinador de carrera puede ver las observaciones y subsanarlas
 
 ---
 

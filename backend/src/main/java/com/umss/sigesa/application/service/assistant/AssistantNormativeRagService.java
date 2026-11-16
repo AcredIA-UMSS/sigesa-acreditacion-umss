@@ -4,7 +4,9 @@ import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolStep;
 import com.umss.sigesa.application.model.normative.NormativeDocumentHit;
+import com.umss.sigesa.application.model.normative.NormativeSearchPlan;
 import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
+import com.umss.sigesa.application.service.normative.NormativeQueryPlanner;
 
 import java.util.List;
 import java.util.Locale;
@@ -97,13 +99,17 @@ public final class AssistantNormativeRagService {
             return Optional.empty();
         }
         return Optional.of(AssistantChatResult.fromSteps(
-                formatHitsAsReply(userMessage, hits),
+                formatHitsAsReply(userMessage, hits, NormativeQueryPlanner.plan(userMessage, templateType)),
                 AssistantResolutionPath.RAG,
                 false,
                 List.of(new AssistantToolStep(1, TOOL_ID, List.of("normative_document"), true))));
     }
 
     static String formatHitsAsReply(String query, List<NormativeDocumentHit> hits) {
+        return formatHitsAsReply(query, hits, NormativeQueryPlanner.plan(query, null));
+    }
+
+    static String formatHitsAsReply(String query, List<NormativeDocumentHit> hits, NormativeSearchPlan plan) {
         StringBuilder sb = new StringBuilder();
         sb.append("Encontré ").append(hits.size())
                 .append(hits.size() == 1 ? " fragmento normativo" : " fragmentos normativos")
@@ -112,6 +118,15 @@ public final class AssistantNormativeRagService {
                 .append(" para «")
                 .append(query.trim())
                 .append("»:\n\n");
+        if (plan != null && plan.hasSelectedTerms()) {
+            sb.append("Claves usadas: ").append(String.join(", ", plan.selectedTerms())).append(".\n");
+            if (!plan.discardedTerms().isEmpty()) {
+                sb.append("Descartadas (poco peso): ")
+                        .append(String.join(", ", plan.discardedTerms()))
+                        .append(".\n");
+            }
+            sb.append('\n');
+        }
 
         int index = 1;
         for (NormativeDocumentHit hit : hits) {

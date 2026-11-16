@@ -260,8 +260,10 @@ public class ProcessModuleConfig {
     ListEligibleResponsiblesUseCase listEligibleResponsiblesUseCase(
             ProcessQueryPort processQueryPort,
             ListUsersUseCase listUsersUseCase,
-            ProcessResponsiblePort processResponsiblePort) {
-        return new ListEligibleResponsiblesService(processQueryPort, listUsersUseCase, processResponsiblePort);
+            ProcessResponsiblePort processResponsiblePort,
+            UserProgramAssignmentRepositoryPort assignmentRepositoryPort) {
+        return new ListEligibleResponsiblesService(
+                processQueryPort, listUsersUseCase, processResponsiblePort, assignmentRepositoryPort);
     }
 
     @Bean
