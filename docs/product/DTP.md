@@ -47,6 +47,7 @@ artefactos_vivos:
 
 | Fecha | Cambio | Disparador (FSD-UC / DD) | ADR | PR / commit | Autor |
 | ------- | -------- | -------------------------- | ----- | ------------- | ------- |
+| 15/11/2026 | **MOD-DASH / MOD-AUDIT:** semáforo [JD] (`executiveSection`) y bitácora cerrados. `GET /api/v1/audit/logs` + `/export` responden **422** `INVALID_DATE_RANGE` si `from` &gt; `to`. Aprobación de indicador [TD] escribe `INDICATOR_APPROVED`. UI `/admin/auditoria` vía Orval. Gherkin `@TC-09` / `@TC-12`. | FSD-UC-013 / FSD-UC-017 | — | PM-043 | Aylen |
 | 13/11/2026 | **Trazas del historial de accesos:** el backend exporta spans HTTP y JDBC por OTLP (`spring-boot-starter-opentelemetry`, `datasource-micrometer-spring-boot` 2.3.0). Tempo y Grafana están en `bench/access/` para el p95 de k6 de `GET /api/v1/access-sessions`. En prod el muestreo queda en 0 salvo `SIGESA_TRACING_SAMPLE`. | FSD-UC-036 | — | — | Marlene Velasquez |
 | 13/11/2026 | **Fase del proceso:** [TD] consulta en `/reportes/fase` la fase ARCU-SUR de una carrera y registra retroalimentación del entregable (`PUT …/deliverables/{id}/feedback`). | FSD-UC-037 | — | — | Marlene Velasquez |
 | 12/11/2026 | **Historial de accesos:** la lista incluye `actions` (crear, modificar, eliminar). La pantalla `/admin/ingresos` muestra esa columna y permite imprimir el reporte filtrado. | FSD-UC-036 / DD-UC-036 | — | PM-042 / PR-IMPL-052 | Marlene Velasquez |
@@ -181,7 +182,8 @@ artefactos_vivos:
 | `FSD-UC-023` | `DD-UC-023` | **hecho (Full-Stack)** | `2.0.0` | Sin cambio contrato | `PR-IMPL-023` | Responsable [CC] — independiente del árbol |
 | `FSD-UC-011` | `DD-UC-011` | hecho / **v2.0 filtros pendientes** | `2.0.0` | PBAC summary/details | `PR-IMPL-011` | Migrar filtros a level1Id/indicatorStatus |
 | `FSD-UC-014` | `DD-UC-014` | en curso | `release/3.0.0` | Unit `*Report*Service`; JaCoCo pendiente `mvn verify` | `PR-IMPL-005` | Stub datos; conectar UC-013 vía `ExecutiveDashboardQueryPort` |
-| `FSD-UC-013` | pendiente | pendiente | `release/3.0.0` | — | — | Debe implementar `ExecutiveDashboardQueryPort` para alimentar PDF |
+| `FSD-UC-013` | — | **hecho** | `2.1.0` | `GET /api/v1/dashboards/me/summary` `executiveSection`; UI `/executive/semaphore`; `@TC-09` | — | Semáforo ROJO/AMARILLO/VERDE/SIN_DATO |
+| `FSD-UC-017` | — | **hecho** | `2.1.0` | API-AUDIT-01; 422 rango; `INDICATOR_APPROVED`; UI Orval `/admin/auditoria` | — | PM-043 |
 | `FSD-SYS-001` | `DD-SYS-001` | **hecho** | `release/3.0.0` | Tests de conexión locales (Flyway) | `PR-IMPL-004` | Integración con PostgreSQL (Driver, HikariCP, YML) |
 | `PRD-REQ-028` | `DD-SYS-002` | **hecho (MVP)** | `release/3.0.0` | Manual E2E `/ayuda`; sin tests automatizados aún | `PR-IMPL-012` | Chat proxy Open WebUI; modelo `llama3.2:3b`; ver §B.5 |
 | `FSD-UC-020` | `DD-UC-030` | **hecho (M10)** | `2.1.0` | EE lectura proceso + checklist Sala de Pares | `PR-IMPL-M10-030` | PM-018 |

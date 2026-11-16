@@ -14,4 +14,6 @@ public interface GetAuditLogsUseCase {
 
     void streamCsvExport(String actorEmail, String action, String entityType,
                          LocalDateTime from, LocalDateTime to, OutputStream outputStream);
+
+    void validateDateRange(LocalDateTime from, LocalDateTime to);
 }

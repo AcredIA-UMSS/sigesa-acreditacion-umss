@@ -29,6 +29,7 @@ import com.umss.sigesa.application.port.out.MethodologicalStagePort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorWorkflowPort;
 import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
@@ -230,9 +231,10 @@ public class WorkflowModuleConfig {
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
+            AuditLogPort auditLogPort) {
         return new ApproveIndicatorService(
                 hierarchyQueryPort, evidenceQueryPort, observationPort, workflowPort,
-                enqueueDomainNotificationUseCase);
+                enqueueDomainNotificationUseCase, auditLogPort);
     }
 }

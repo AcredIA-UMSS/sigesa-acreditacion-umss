@@ -1,6 +1,7 @@
 package com.umss.sigesa.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -16,6 +17,9 @@ class ExecutiveSemaphoreRulesTest {
     }
 
     @Test
+    @Tag("PRD-US-013")
+    @Tag("FSD-UC-013")
+    @Tag("TC-09")
     @DisplayName("Indicador crítico vencido deja la carrera en rojo aunque el avance sea alto")
     void vencidoEsRojo() {
         assertEquals(ExecutiveSemaphoreRules.ROJO, ExecutiveSemaphoreRules.evaluate(10, 95.0, 1, 1));

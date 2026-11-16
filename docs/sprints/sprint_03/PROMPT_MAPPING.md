@@ -49,6 +49,7 @@
 | PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
 | PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
 | PM-042 | PR-IMPL-052 | DD-UC-036 | FSD-UC-036 | Historial de ingresos: sesión, logout, intentos fallidos y actividad [JD] |
+| PM-043 | N/A | — | FSD-UC-013 / FSD-UC-017 | Cierre de huecos: Gherkin semáforo `@TC-09`, 422 bitácora, `INDICATOR_APPROVED`, UI Orval |
 
 
 ---
@@ -2896,4 +2897,82 @@ El texto completo es el mensaje del chat del 2026-11-11 23:31. Alcance: menú HI
 
 - [ ] Reiniciar el backend que ya estaba en marcha para cargar V30 y los endpoints nuevos
 
+---
 
+## PM-043
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-043 |
+| **Fecha** | 2026-11-15 |
+| **Hora** | 22:26 |
+| **Solicitante** | Aylen |
+| **Agente/Entorno** | Cursor Grok 4.6 |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Cerrar huecos FSD-UC-013 y FSD-UC-017 y marcarlos Implementado |
+| **Objetivo** | Gherkin @TC-09, 422 de rango, auditoría al aprobar indicador, bitácora vía Orval, estados FSD en hecho |
+| **Contexto** | Ambas UCs ya tenían backend/UI; faltaban Gherkin, 422, INDICATOR_APPROVED y cliente Orval |
+| **PR-IMPL vinculado** | N/A |
+| **DD-UC vinculado** | — |
+| **FSD-UC vinculado** | FSD-UC-013 / FSD-UC-017 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+arregla los huecos de ambas Funcionalidades y marcalos como hechos
+```
+
+### Entradas auxiliares
+
+- docs/product/uc/FSD-UC-013.md
+- docs/product/uc/FSD-UC-017.md
+- docs/product/FSD.md
+- docs/product/DTP.md
+- docs/product/api_contracts.md
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/AuditExceptionHandler.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/exception/InvalidDateRangeException.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/AuditLogGherkinIT.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/ExecutiveSemaphoreGherkinIT.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/out/AuditLogPort.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/auth/JpaAuditLogAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/auth/NoOpAuditLogAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/workflow/ApproveIndicatorService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/WorkflowModuleConfig.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/audit/GetAuditLogsService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/port/in/GetAuditLogsUseCase.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/AuditLogController.java` |
+| modificado | `frontend/src/features/admin/audit/pages/AuditLogPage.tsx` |
+| modificado | `frontend/src/api/model/getAuditLogsParams.ts` |
+| eliminado | `frontend/src/features/admin/audit/api/auditLogApi.ts` |
+| modificado | `docs/product/uc/FSD-UC-013.md` |
+| modificado | `docs/product/uc/FSD-UC-017.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/api_contracts.md` |
+
+### Cambios realizados
+
+- Semáforo [JD]: Gherkin `@TC-09` sobre `GET /api/v1/dashboards/me/summary` y reglas ROJO por vencido.
+- Bitácora: `from > to` responde 422 `INVALID_DATE_RANGE` (lista y CSV).
+- Aprobación [TD] escribe `INDICATOR_APPROVED` / `INDICATOR`.
+- UI `/admin/auditoria` usa Orval; se retiró el fetch manual.
+- FSD-UC-013 y FSD-UC-017 quedan **Implementado**.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=ApproveIndicatorServiceTest,GetAuditLogsServiceTest,JpaAuditLogAdapterTest,ExecutiveSemaphoreRulesTest,ExecutiveSemaphoreGherkinIT,AuditLogGherkinIT,AuditLogControllerTest test` — OK (export 422 validado en el retry)
+- [x] `pnpm exec vitest run src/features/admin/audit/pages/AuditLogPage.test.tsx` — 1 passed
+
+### Resultado obtenido
+
+Huecos de UC-013 y UC-017 cerrados. Ambos casos de uso marcados como hechos en FSD vivo y DTP.
+
+### Próximos pasos
+
+- [ ] Regenerar Orval cuando se exporte OpenAPI para alinear `GetAuditLogsParams` (page/size) de forma permanente

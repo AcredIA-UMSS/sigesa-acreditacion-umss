@@ -753,7 +753,7 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 | API-NEWS-02 | `GET /api/v1/public/news/featured` — destacada o más reciente; 204 si no hay publicadas — FSD-UC-035 |
 | API-NEWS-03 | `GET /api/v1/public/news/{slug}` — detalle publicado; 404 genérico — FSD-UC-035 |
 | API-NEWS-04…11 | `/api/v1/admin/news` CRUD + publish/unpublish/feature [JD] — FSD-UC-035 |
-| API-AUDIT-01 | Bitácora [JD] — FSD-UC-017 |
+| API-AUDIT-01 | `GET /api/v1/audit/logs` + `/export` — bitácora [JD]; 422 si `from` &gt; `to` — FSD-UC-017 |
 | API-IMP-01 | `POST /imports/evidences` — filas con `indicatorCode` — FSD-UC-018 |
 
 > **Delta de path:** el FSD original nombraba `GET /public/programs/{slug}` (sin `/api/v1`). La implementación usa el prefijo de plataforma `/api/v1/public/**`. Anónimo (`permitAll`). 404 genérico `{ "error": "NOT_FOUND", "message": "El recurso solicitado no existe." }` para slug desconocido, no publicado o certificado no publicado. El PDF se genera en memoria; **no** se expone URL de archivo (`Location` / storage key).
@@ -785,6 +785,14 @@ El blob vive en object storage S3-compatible (`storageKey` opaca; Compose: Silo 
 ### API-NEWS-04…11 — Admin [JD]
 
 `GET/POST /api/v1/admin/news`, `GET/PUT/DELETE /{id}`, `POST /{id}/publish|unpublish|feature`. Destacar borrador: **409** `NEWS_NOT_PUBLISHED`. Eliminar publicada: **409** `NEWS_PUBLISHED`.
+
+### API-AUDIT-01 — Bitácora [JD]
+
+**200** Spring `Page` de `{ id, actorId, actorEmail, actorRole, action, entityType, entityId, payloadDiff, ipAddress, createdAt }`. Filtros: `actorEmail`, `action`, `entityType`, `from`, `to`, `page`, `size`. Solo [JD]. **403** otro rol. **422** `{ "error": "INVALID_DATE_RANGE", "message": "El rango de fechas es inválido: 'from' no puede ser posterior a 'to'." }` si ambas fechas vienen y `from` &gt; `to`.
+
+**Export** `GET /api/v1/audit/logs/export` — `text/csv` streaming, mismos filtros y 422. `Content-Disposition: attachment; filename="audit_logs.csv"`.
+
+Aprobación de indicador [TD] (`POST /api/v1/indicators/{id}/approve`) append-only `action=INDICATOR_APPROVED`, `entityType=INDICATOR`.
 
 ---
 

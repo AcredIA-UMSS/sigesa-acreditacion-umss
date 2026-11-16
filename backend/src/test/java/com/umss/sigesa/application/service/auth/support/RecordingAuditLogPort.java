@@ -61,6 +61,11 @@ public class RecordingAuditLogPort implements AuditLogPort {
         events.add("LOGIN_FAILED:" + email);
     }
 
+    @Override
+    public void logIndicatorApproved(UUID actorId, UUID indicatorId) {
+        events.add("INDICATOR_APPROVED:" + actorId + ":" + indicatorId);
+    }
+
     public List<String> events() {
         return List.copyOf(events);
     }

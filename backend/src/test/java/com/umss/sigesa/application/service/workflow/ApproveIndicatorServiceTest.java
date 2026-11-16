@@ -1,5 +1,6 @@
 package com.umss.sigesa.application.service.workflow;
 
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +44,8 @@ class ApproveIndicatorServiceTest {
     private NormativeIndicatorWorkflowPort workflowPort;
     @Mock
     private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
+    @Mock
+    private AuditLogPort auditLogPort;
 
     @InjectMocks
     private ApproveIndicatorService service;
@@ -65,6 +69,7 @@ class ApproveIndicatorServiceTest {
         assertEquals(IndicatorState.SUBIDO, result.previousState());
         assertEquals(IndicatorState.APROBADO, result.newState());
         verify(workflowPort).updateIndicatorStatus(indicatorId, IndicatorState.APROBADO);
+        verify(auditLogPort).logIndicatorApproved(actorId, indicatorId);
         verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
                 cmd.eventType() == NotificationEventType.IndicatorApproved
                         && cmd.programId().equals(careerId)
@@ -83,6 +88,7 @@ class ApproveIndicatorServiceTest {
 
         assertThrows(EvidenceRequiredException.class, () ->
                 service.approve(indicatorId, UUID.randomUUID(), "TD"));
+        verify(auditLogPort, never()).logIndicatorApproved(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     }
 
     @Test

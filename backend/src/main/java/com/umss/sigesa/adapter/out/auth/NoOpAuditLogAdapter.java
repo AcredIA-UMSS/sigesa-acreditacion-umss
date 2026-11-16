@@ -64,4 +64,9 @@ public class NoOpAuditLogAdapter implements AuditLogPort {
     public void logLoginFailed(String email) {
         log.info("AUDIT_LOGIN_FAILED email={}", email);
     }
+
+    @Override
+    public void logIndicatorApproved(UUID actorId, UUID indicatorId) {
+        log.info("AUDIT_INDICATOR_APPROVED actorId={} indicatorId={}", actorId, indicatorId);
+    }
 }

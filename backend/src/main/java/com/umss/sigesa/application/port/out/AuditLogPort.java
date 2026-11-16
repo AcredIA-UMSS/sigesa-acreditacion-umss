@@ -25,4 +25,6 @@ public interface AuditLogPort {
     void logLogout(UUID userId, Email email, String role);
 
     void logLoginFailed(String email);
+
+    void logIndicatorApproved(UUID actorId, UUID indicatorId);
 }

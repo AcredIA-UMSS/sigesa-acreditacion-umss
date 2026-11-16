@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.workflow;
 
 import com.umss.sigesa.application.port.in.ApproveIndicatorUseCase;
 import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
+import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorEvidenceQueryPort;
 import com.umss.sigesa.application.port.out.NormativeIndicatorObservationPort;
@@ -33,18 +34,21 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
     private final NormativeIndicatorObservationPort observationPort;
     private final NormativeIndicatorWorkflowPort workflowPort;
     private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
+    private final AuditLogPort auditLogPort;
 
     public ApproveIndicatorService(
             NormativeHierarchyQueryPort hierarchyQueryPort,
             NormativeIndicatorEvidenceQueryPort evidenceQueryPort,
             NormativeIndicatorObservationPort observationPort,
             NormativeIndicatorWorkflowPort workflowPort,
-            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
+            EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase,
+            AuditLogPort auditLogPort) {
         this.hierarchyQueryPort = hierarchyQueryPort;
         this.evidenceQueryPort = evidenceQueryPort;
         this.observationPort = observationPort;
         this.workflowPort = workflowPort;
         this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
+        this.auditLogPort = auditLogPort;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class ApproveIndicatorService implements ApproveIndicatorUseCase {
         }
 
         workflowPort.updateIndicatorStatus(indicatorId, IndicatorState.APROBADO);
+        auditLogPort.logIndicatorApproved(actorId, indicatorId);
 
         enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
                 NotificationEventType.IndicatorApproved,

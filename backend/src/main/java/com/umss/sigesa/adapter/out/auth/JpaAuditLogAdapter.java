@@ -124,6 +124,16 @@ public class JpaAuditLogAdapter implements AuditLogPort, AuditLogQueryPort {
                 "Intento de autenticación fallido", null);
     }
 
+    @Override
+    @Transactional
+    public void logIndicatorApproved(UUID actorId, UUID indicatorId) {
+        String email = resolveUserEmail(actorId);
+        String role = resolveUserRole(actorId, "TD");
+        saveEntry(actorId, email, role,
+                "INDICATOR_APPROVED", "INDICATOR", indicatorId.toString(),
+                "Aprobación de indicador", null);
+    }
+
     private void markRequestAudited() {
         if (org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()
                 instanceof org.springframework.web.context.request.ServletRequestAttributes attributes) {

@@ -8,7 +8,7 @@ fecha_inicio_implementacion: "2026-05-16"
 status: vivo
 audiencia: dual (humanos + agentes IA)
 baseline_ref: "docs/baseline/04_fsd/FSD.md"
-ultima_actualizacion: "2026-11-04"
+ultima_actualizacion: "2026-11-15"
 
 # Especificación Funcional Viva (LFSD ⚡) — SIGESA
 
@@ -61,11 +61,11 @@ ultima_actualizacion: "2026-11-04"
 | `FSD-UC-010` | Cerrar Nivel 1 (Dimensión/Área)                                | [TD]             | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-010.md) | `[DD-UC-010](../design/DD-UC-010.md)`                 | `[PR-IMPL-039](../prompts/impl/PR-IMPL-039.md)`       |
 | `FSD-UC-011` | Dashboard [CC] y observaciones                                 | [CC]             | v2.0    | **En Curso** (+ FEAT-01 Hikari/I/O `PR-IMPL-040`) | [Ver detalle](uc/FSD-UC-011.md) | `[DD-UC-011](../design/DD-UC-011.md)`                 | `[PR-IMPL-011](../prompts/impl/PR-IMPL-011.md)` · `[PR-IMPL-040](../prompts/impl/PR-IMPL-040.md)` |
 | `FSD-UC-012` | Bandeja auditoría [TD]                                         | [TD]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-012.md) | —                                                     | —                                                     |
-| `FSD-UC-013` | Panel semáforo [JD]                                            | [JD]             | v2.0    | **En Curso**                                       | [Ver detalle](uc/FSD-UC-013.md) | —                                                     | —                                                     |
+| `FSD-UC-013` | Panel semáforo [JD]                                            | [JD]             | v2.0    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-013.md) | —                                                     | —                                                     |
 | `FSD-UC-014` | Reporte ejecutivo PDF                                          | [JD]             | v1.0    | **Implementado** (+ FEAT-01 `PR-IMPL-040`)         | [Ver detalle](uc/FSD-UC-014.md) | `[DD-UC-014](../design/DD-UC-014.md)`                 | `[PR-IMPL-005](../prompts/impl/PR-IMPL-005.md)` · `[PR-IMPL-040](../prompts/impl/PR-IMPL-040.md)` |
 | `FSD-UC-015` | Notificaciones y alertas                                       | Sistema          | v2.0    | Pendiente                                          | [Ver detalle](uc/FSD-UC-015.md) | —                                                     | —                                                     |
 | `FSD-UC-016` | Portal público                                                 | [P]              | v1.1    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-016.md) | `[DD-UC-016](../design/DD-UC-016.md)`                 | `[PR-IMPL-050](../prompts/impl/PR-IMPL-050.md)`       |
-| `FSD-UC-017` | Bitácora de auditoría                                          | [JD]             | v1.0    | Pendiente                                          | [Ver detalle](uc/FSD-UC-017.md) | —                                                     | —                                                     |
+| `FSD-UC-017` | Bitácora de auditoría                                          | [JD]             | v1.0    | **Implementado**                                   | [Ver detalle](uc/FSD-UC-017.md) | —                                                     | —                                                     |
 | `FSD-UC-018` | Importación masiva                                             | [CC]             | v1.1    | Pendiente                                          | [Ver detalle](uc/FSD-UC-018.md) | —                                                     | —                                                     |
 | `FSD-UC-019` | Consulta de procesos de acreditación                           | [JD], [TD], [CC] | v2.0    | **Implementado v2**                                | [Ver detalle](uc/FSD-UC-019.md) | `[DD-UC-019](../design/DD-UC-019.md)`                 | `[PR-IMPL-019](../prompts/impl/PR-IMPL-019.md)`       |
 | `FSD-UC-020` | Revisión documental [EE]                                       | [EE]             | v2.1    | **Hecho (M10)**                                    | [Ver detalle](uc/FSD-UC-020.md) | `[DD-UC-030](../design/DD-UC-030.md)`                 | `[PR-IMPL-M10-030](../prompts/impl/PR-IMPL-M10-030.md)` |
@@ -301,6 +301,7 @@ UC-010 (cierre N1) permanece como compuerta **local** dentro del módulo de eval
 
 | Fecha      | Cambio                                                                                                                                                                                                                                                                        |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-15 | **FSD-UC-013 / FSD-UC-017:** panel semáforo [JD] y bitácora marcados Implementado; Gherkin `@TC-09` / `@TC-12`; 422 rango fechas; `INDICATOR_APPROVED`; UI bitácora vía Orval. |
 | 2026-11-13 | **FSD-UC-037:** menú principal [TD] «Seguimiento de procesos» (`/reportes/fase`); fase actual del proceso y retroalimentación de entregables. |
 | 2026-11-04 | **FSD-UC-035** implementado: noticias/destacados; [JD] CRUD+publicar; [P] home `#noticias` + `/public/news`; FSD-BR-10; PRD-US-027…029. |
 | 2026-06-15 | Transformación FSD clásico → **LFSD ⚡**; 18 UC atomizados en `[uc/](uc/)`                                                                                                                                                                                                     |

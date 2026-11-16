@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 import { Sidebar } from '../../../../components/layout/Sidebar';
 import {
-  fetchAuditLogs,
-  downloadAuditLogsCsv,
-  type AuditLogItemDto,
-} from '../api/auditLogApi';
+  exportAuditLogs,
+  useGetAuditLogs,
+} from '../../../../api/endpoints/audit-log/audit-log';
+import type { GetAuditLogsParams } from '../../../../api/model';
+import { isApiError } from '../../../../lib/api/apiError';
 import {
   ShieldAlert,
   Download,
@@ -16,54 +17,64 @@ import {
   Activity,
 } from 'lucide-react';
 
+function triggerBlobDownload(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 export function AuditLogPage() {
-  const [logs, setLogs] = useState<AuditLogItemDto[]>([]);
-  const [totalElements, setTotalElements] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [actorEmail, setActorEmail] = useState<string>('');
   const [actionFilter, setActionFilter] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExporting, setIsExporting] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
-  const loadLogs = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    try {
-      const response = await fetchAuditLogs({
-        actorEmail: actorEmail.trim() || undefined,
-        action: actionFilter.trim() || undefined,
-        page,
-        size: 20,
-      });
-      setLogs(response?.content ?? []);
-      setTotalElements(response?.totalElements ?? 0);
-      setTotalPages(response?.totalPages ?? 0);
-    } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : 'Error al cargar la bitácora de auditoría.',
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, actorEmail, actionFilter]);
+  const params: GetAuditLogsParams = useMemo(
+    () => ({
+      actorEmail: actorEmail.trim() || undefined,
+      action: actionFilter.trim() || undefined,
+      page,
+      size: 20,
+    }),
+    [actorEmail, actionFilter, page],
+  );
 
-  useEffect(() => {
-    void loadLogs();
-  }, [loadLogs]);
+  const query = useGetAuditLogs(params);
+  const pageData = query.data?.data;
+  const logs = pageData?.content ?? [];
+  const totalElements = pageData?.totalElements ?? 0;
+  const totalPages = pageData?.totalPages ?? 0;
+  const isLoading = query.isLoading;
+  const errorMessage = exportError
+    ?? (query.isError
+      ? (isApiError(query.error) ? query.error.message : 'Error al cargar la bitácora de auditoría.')
+      : null);
 
   const handleExportCsv = async () => {
     setIsExporting(true);
-    setErrorMessage(null);
+    setExportError(null);
     try {
-      await downloadAuditLogsCsv({
+      const response = await exportAuditLogs({
         actorEmail: actorEmail.trim() || undefined,
         action: actionFilter.trim() || undefined,
       });
+      const payload = response.data;
+      const blob = payload instanceof Blob
+        ? payload
+        : new Blob([typeof payload === 'string' ? payload : ''], { type: 'text/csv;charset=utf-8' });
+      triggerBlobDownload(
+        blob,
+        `bitacora_auditoria_${new Date().toISOString().slice(0, 10)}.csv`,
+      );
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : 'Error al descargar el archivo CSV de auditoría.',
+      setExportError(
+        isApiError(err) ? err.message : 'Error al descargar el archivo CSV de auditoría.',
       );
     } finally {
       setIsExporting(false);
@@ -104,7 +115,7 @@ export function AuditLogPage() {
         {errorMessage && (
           <div className="mb-4 rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger flex items-center justify-between">
             <span>{errorMessage}</span>
-            <button onClick={() => setErrorMessage(null)} className="font-bold">✕</button>
+            <button onClick={() => setExportError(null)} className="font-bold">✕</button>
           </div>
         )}
 
@@ -189,7 +200,7 @@ export function AuditLogPage() {
                         {log.action}
                       </td>
                       <td className="py-3 px-4 text-gray-600">
-                        {log.entityType} ({log.entityId.slice(0, 8)}...)
+                        {log.entityType} ({log.entityId ? `${log.entityId.slice(0, 8)}...` : '—'})
                       </td>
                       <td className="py-3 px-4 text-gray-700 max-w-xs truncate font-sans">
                         {log.payloadDiff || '-'}

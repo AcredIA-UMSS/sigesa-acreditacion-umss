@@ -1,6 +1,7 @@
 package com.umss.sigesa.application.service.audit;
 
 import com.umss.sigesa.application.port.out.AuditLogQueryPort;
+import com.umss.sigesa.domain.exception.InvalidDateRangeException;
 import com.umss.sigesa.domain.model.AuditLogEntry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,5 +79,25 @@ class GetAuditLogsServiceTest {
         // unpaged
         service.getAuditLogs(null, null, null, null, null, Pageable.unpaged());
         verify(queryPort).findAuditLogs(eq(null), eq(null), eq(null), eq(null), eq(null), eq(Pageable.unpaged()));
+    }
+
+    @Test
+    @DisplayName("from posterior a to lanza InvalidDateRangeException sin consultar")
+    void testInvalidDateRangeRejected() {
+        AuditLogQueryPort queryPort = mock(AuditLogQueryPort.class);
+        GetAuditLogsService service = new GetAuditLogsService(queryPort);
+
+        LocalDateTime from = LocalDateTime.of(2026, 12, 31, 0, 0);
+        LocalDateTime to = LocalDateTime.of(2026, 1, 1, 0, 0);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+                        service.getAuditLogs(null, null, null, from, to, PageRequest.of(0, 20)))
+                .isInstanceOf(InvalidDateRangeException.class)
+                .hasMessage(InvalidDateRangeException.CLIENT_MESSAGE);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() ->
+                        service.streamCsvExport(null, null, null, from, to, new ByteArrayOutputStream()))
+                .isInstanceOf(InvalidDateRangeException.class);
+
+        verifyNoInteractions(queryPort);
     }
 }

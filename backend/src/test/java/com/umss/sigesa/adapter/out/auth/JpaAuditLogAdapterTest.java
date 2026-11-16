@@ -47,6 +47,29 @@ class JpaAuditLogAdapterTest {
     }
 
     @Test
+    @DisplayName("logIndicatorApproved saves INDICATOR_APPROVED against the indicator")
+    void testLogIndicatorApproved() {
+        AuditLogJpaRepository repo = mock(AuditLogJpaRepository.class);
+        com.umss.sigesa.application.port.out.UserRepositoryPort userRepo =
+                mock(com.umss.sigesa.application.port.out.UserRepositoryPort.class);
+        JpaAuditLogAdapter adapter = new JpaAuditLogAdapter(repo, userRepo);
+
+        UUID actorId = UUID.randomUUID();
+        UUID indicatorId = UUID.randomUUID();
+        when(userRepo.findById(actorId)).thenReturn(java.util.Optional.empty());
+
+        adapter.logIndicatorApproved(actorId, indicatorId);
+
+        ArgumentCaptor<AuditLogJpaEntity> captor = ArgumentCaptor.forClass(AuditLogJpaEntity.class);
+        verify(repo).save(captor.capture());
+        AuditLogJpaEntity saved = captor.getValue();
+        assertThat(saved.getAction()).isEqualTo("INDICATOR_APPROVED");
+        assertThat(saved.getEntityType()).isEqualTo("INDICATOR");
+        assertThat(saved.getEntityId()).isEqualTo(indicatorId.toString());
+        assertThat(saved.getActorId()).isEqualTo(actorId);
+    }
+
+    @Test
     @DisplayName("logEvidenceUploaded and logDeleteDenied append without errors")
     void testEvidenceAuditLogs() {
         AuditLogJpaRepository repo = mock(AuditLogJpaRepository.class);

@@ -5,7 +5,6 @@
  * Contrato OpenAPI generado por springdoc desde los controladores Spring (carga y retiro de evidencias FSD-UC-004/005 y resto del API v1).
  * OpenAPI spec version: 8.2.0
  */
-import type { Pageable } from './pageable.ts';
 
 export type GetAuditLogsParams = {
 actorEmail?: string;
@@ -13,5 +12,6 @@ action?: string;
 entityType?: string;
 from?: string;
 to?: string;
-pageable: Pageable;
+page?: number;
+size?: number;
 };
