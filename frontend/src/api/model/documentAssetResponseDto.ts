@@ -10,11 +10,11 @@
  * Metadatos de DocumentAsset (API-EVD-07)
  */
 export interface DocumentAssetResponseDto {
-  id: string;
-  folioCode?: string;
-  title?: string;
   contentHash?: string;
-  processId?: string;
-  linkedIndicatorIds?: string[];
   createdAt?: string;
+  folioCode?: string;
+  id: string;
+  linkedIndicatorIds?: string[];
+  processId?: string;
+  title?: string;
 }

@@ -10,10 +10,10 @@
  * Lote de encuesta primaria (API-WF-11 / WF-12)
  */
 export interface PrimarySurveyBatchResponseDto {
+  audience?: string;
+  documentAssetId?: string;
   id: string;
   processId?: string;
-  audience?: string;
-  responsesCount?: number;
-  documentAssetId?: string;
   registeredAt?: string;
+  responsesCount?: number;
 }

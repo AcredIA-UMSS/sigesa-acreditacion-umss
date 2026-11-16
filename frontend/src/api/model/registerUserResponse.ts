@@ -7,6 +7,6 @@
  */
 
 export interface RegisterUserResponse {
-  userId?: string;
   status?: string;
+  userId?: string;
 }

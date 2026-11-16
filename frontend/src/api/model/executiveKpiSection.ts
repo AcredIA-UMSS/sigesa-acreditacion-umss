@@ -8,9 +8,9 @@
 import type { ProgramTrafficLight } from './programTrafficLight.ts';
 
 export interface ExecutiveKpiSection {
-  totalPrograms?: number;
+  alertPrograms?: number;
   averageGlobalProgress?: number;
   criticalObservations?: number;
-  alertPrograms?: number;
   programTrafficLights?: ProgramTrafficLight[];
+  totalPrograms?: number;
 }

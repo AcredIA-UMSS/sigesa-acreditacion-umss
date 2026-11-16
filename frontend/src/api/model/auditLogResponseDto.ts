@@ -7,14 +7,14 @@
  */
 
 export interface AuditLogResponseDto {
-  id?: string;
-  actorId?: string;
-  actorEmail?: string;
-  actorRole?: string;
   action?: string;
-  entityType?: string;
-  entityId?: string;
-  payloadDiff?: string;
-  ipAddress?: string;
+  actorEmail?: string;
+  actorId?: string;
+  actorRole?: string;
   createdAt?: string;
+  entityId?: string;
+  entityType?: string;
+  id?: string;
+  ipAddress?: string;
+  payloadDiff?: string;
 }

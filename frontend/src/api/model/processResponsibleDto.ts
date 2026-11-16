@@ -7,8 +7,8 @@
  */
 
 export interface ProcessResponsibleDto {
-  userId?: string;
-  fullName?: string;
-  email?: string;
   assignedAt?: string;
+  email?: string;
+  fullName?: string;
+  userId?: string;
 }

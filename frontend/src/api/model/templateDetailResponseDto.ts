@@ -8,15 +8,15 @@
 import type { NormativeLevel1NodeDto } from './normativeLevel1NodeDto.ts';
 
 export interface TemplateDetailResponseDto {
-  id?: string;
-  name?: string;
-  description?: string;
-  type?: string;
-  status?: string;
-  level1Count?: number;
-  indicatorCount?: number;
-  evaluatorModel?: string;
   createdAt?: string;
-  updatedAt?: string;
+  description?: string;
+  evaluatorModel?: string;
+  id?: string;
+  indicatorCount?: number;
+  level1Count?: number;
   level1Nodes?: NormativeLevel1NodeDto[];
+  name?: string;
+  status?: string;
+  type?: string;
+  updatedAt?: string;
 }

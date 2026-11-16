@@ -9,6 +9,6 @@
 export interface RecentEvaluation {
   evidenceId?: string;
   program?: string;
-  revisionDate?: string;
   result?: string;
+  revisionDate?: string;
 }

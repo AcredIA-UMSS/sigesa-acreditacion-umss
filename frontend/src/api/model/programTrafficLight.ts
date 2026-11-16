@@ -7,10 +7,10 @@
  */
 
 export interface ProgramTrafficLight {
-  programId?: string;
-  name?: string;
-  status?: string;
+  completionPercentage?: number;
   criticalObservations?: number;
   faculty?: string;
-  completionPercentage?: number;
+  name?: string;
+  programId?: string;
+  status?: string;
 }

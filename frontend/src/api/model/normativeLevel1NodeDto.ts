@@ -8,11 +8,11 @@
 import type { NormativeLevel2NodeDto } from './normativeLevel2NodeDto.ts';
 
 export interface NormativeLevel1NodeDto {
-  id?: string;
-  name?: string;
-  label?: string;
-  order?: number;
   description?: string;
-  status?: string;
+  id?: string;
+  label?: string;
   level2Nodes?: NormativeLevel2NodeDto[];
+  name?: string;
+  order?: number;
+  status?: string;
 }

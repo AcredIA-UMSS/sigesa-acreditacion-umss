@@ -10,12 +10,12 @@
  * Delegación CAE sobre N1, N2 o indicador
  */
 export interface IndicatorDelegationResponseDto {
+  createdAt?: string;
   id: string;
-  processId?: string;
-  userId?: string;
+  indicatorId?: string;
   level1Id?: string;
   level2Id?: string;
-  indicatorId?: string;
   permission?: string;
-  createdAt?: string;
+  processId?: string;
+  userId?: string;
 }

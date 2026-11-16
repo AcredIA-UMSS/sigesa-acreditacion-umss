@@ -7,8 +7,8 @@
  */
 
 export interface Level1CompleteResponseDto {
-  level1Id?: string;
-  previousState?: string;
-  newState?: string;
   event?: string;
+  level1Id?: string;
+  newState?: string;
+  previousState?: string;
 }

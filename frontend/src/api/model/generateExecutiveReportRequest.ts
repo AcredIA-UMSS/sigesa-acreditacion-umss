@@ -8,6 +8,6 @@
 
 export interface GenerateExecutiveReportRequest {
   facultyId?: string;
-  programId?: string;
   managementYear: number;
+  programId?: string;
 }

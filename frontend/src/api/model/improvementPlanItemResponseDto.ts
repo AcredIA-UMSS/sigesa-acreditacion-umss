@@ -10,16 +10,16 @@
  * Ítem del Plan de Mejoras (API-WF-13…16)
  */
 export interface ImprovementPlanItemResponseDto {
-  id: string;
-  processId?: string;
-  sourceIndicatorId?: string;
-  objective?: string;
   activity?: string;
-  responsibleId?: string;
-  deadline?: string;
-  progress?: number;
-  justification?: string;
-  progressEvidenceAssetId?: string;
   createdAt?: string;
+  deadline?: string;
+  id: string;
+  justification?: string;
+  objective?: string;
+  processId?: string;
+  progress?: number;
+  progressEvidenceAssetId?: string;
+  responsibleId?: string;
+  sourceIndicatorId?: string;
   updatedAt?: string;
 }

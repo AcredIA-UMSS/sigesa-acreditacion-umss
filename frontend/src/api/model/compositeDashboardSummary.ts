@@ -10,9 +10,9 @@ import type { ExecutiveKpiSection } from './executiveKpiSection.ts';
 import type { TechnicianKpiSection } from './technicianKpiSection.ts';
 
 export interface CompositeDashboardSummary {
-  userId?: string;
-  grantedPermissions?: string[];
   coordinatorSection?: CoordinatorKpiSection;
-  technicianSection?: TechnicianKpiSection;
   executiveSection?: ExecutiveKpiSection;
+  grantedPermissions?: string[];
+  technicianSection?: TechnicianKpiSection;
+  userId?: string;
 }

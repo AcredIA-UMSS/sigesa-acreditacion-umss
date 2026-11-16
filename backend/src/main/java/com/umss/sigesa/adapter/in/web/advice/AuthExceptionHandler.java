@@ -13,7 +13,6 @@ import com.umss.sigesa.domain.exception.InvalidUserProfileException;
 import com.umss.sigesa.domain.exception.WeakPasswordException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -89,15 +88,5 @@ public class AuthExceptionHandler {
     public ResponseEntity<Map<String, String>> handleWeakPassword(WeakPasswordException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(Map.of("error", "WEAK_PASSWORD", "message", ex.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Solicitud inválida.")
-                .orElse("Solicitud inválida.");
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "VALIDATION_ERROR", "message", message));
     }
 }

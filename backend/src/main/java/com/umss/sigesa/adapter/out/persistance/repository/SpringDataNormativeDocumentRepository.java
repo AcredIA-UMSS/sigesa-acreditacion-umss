@@ -6,11 +6,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface SpringDataNormativeDocumentRepository extends JpaRepository<NormativeDocumentJpaEntity, UUID> {
 
     long countByTemplateType(String templateType);
+
+    Optional<NormativeDocumentJpaEntity> findBySourceUrl(String sourceUrl);
+
+    List<NormativeDocumentJpaEntity> findByTemplateType(String templateType);
 
     @Query("""
             SELECT nd FROM NormativeDocumentJpaEntity nd

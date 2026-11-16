@@ -2,40 +2,109 @@ package com.umss.sigesa.config;
 
 import com.umss.sigesa.adapter.out.persistance.entity.NormativeDocumentJpaEntity;
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeDocumentRepository;
+import com.umss.sigesa.application.service.normative.NormativeMarkdownDocumentParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Corpus normativo inicial para RAG del asistente (CEUB, ARCU-SUR y FAQ SIGESA).
+ * Corpus normativo para RAG: manual ARCU-SUR 2023 (classpath) + seeds CEUB/FAQ en no-prod.
  */
 @Component
-@Profile("!prod")
 @Order(95)
 public class NormativeDocumentSeedLoader implements ApplicationRunner {
 
-    private final SpringDataNormativeDocumentRepository repository;
+    private static final Logger log = LoggerFactory.getLogger(NormativeDocumentSeedLoader.class);
+    static final String ARCU_SUR_CORPUS_PATTERN = "classpath:normative-corpus/arcu-sur-2023/*.md";
+    static final String ARCU_SUR_SOURCE_PREFIX = "https://arcusur.org/manual-procedimientos-2023#";
+    private static final String LEGACY_ARCU_PLACEHOLDER = "https://duea.umss.edu.bo/normativa/arcu-sur/";
 
-    public NormativeDocumentSeedLoader(SpringDataNormativeDocumentRepository repository) {
+    private final SpringDataNormativeDocumentRepository repository;
+    private final Environment environment;
+    private final NormativeMarkdownDocumentParser parser = new NormativeMarkdownDocumentParser();
+    private final PathMatchingResourcePatternResolver resources = new PathMatchingResourcePatternResolver();
+
+    public NormativeDocumentSeedLoader(SpringDataNormativeDocumentRepository repository,
+                                       Environment environment) {
         this.repository = repository;
+        this.environment = environment;
     }
 
     @Override
     @Transactional
-    public void run(ApplicationArguments args) {
-        if (repository.count() > 0) {
-            return;
-        }
+    public void run(ApplicationArguments args) throws IOException {
+        removeLegacyArcuSurPlaceholders();
+        int upserted = loadArcuSurCorpus();
+        log.info("RAG corpus ARCU-SUR 2023: {} chunks upserted", upserted);
 
-        seedCeubDocuments();
-        seedArcuSurDocuments();
-        seedGeneralDocuments();
+        if (!environment.acceptsProfiles(Profiles.of("prod"))) {
+            if (repository.countByTemplateType("CEUB") == 0) {
+                seedCeubDocuments();
+            }
+            if (repository.countByTemplateType("GENERAL") == 0) {
+                seedGeneralDocuments();
+            }
+        }
+    }
+
+    private void removeLegacyArcuSurPlaceholders() {
+        repository.findByTemplateType("ARCU-SUR").stream()
+                .filter(doc -> doc.getSourceUrl() != null
+                        && doc.getSourceUrl().startsWith(LEGACY_ARCU_PLACEHOLDER))
+                .forEach(repository::delete);
+    }
+
+    private int loadArcuSurCorpus() throws IOException {
+        Resource[] files = resources.getResources(ARCU_SUR_CORPUS_PATTERN);
+        int upserted = 0;
+        for (Resource file : files) {
+            String filename = file.getFilename();
+            if (filename == null || !filename.endsWith(".md") || filename.equalsIgnoreCase("INDEX.md")) {
+                continue;
+            }
+            String markdown = new String(file.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            var parsed = parser.parse(markdown);
+            if (parsed.isEmpty()) {
+                log.warn("Skipping unparseable normative markdown {}", filename);
+                continue;
+            }
+            upsertCorpusDocument(filename, parsed.get());
+            upserted++;
+        }
+        return upserted;
+    }
+
+    private void upsertCorpusDocument(String filename, NormativeMarkdownDocumentParser.Document parsed) {
+        String slug = filename.endsWith(".md") ? filename.substring(0, filename.length() - 3) : filename;
+        String sourceUrl = ARCU_SUR_SOURCE_PREFIX + slug;
+        NormativeDocumentJpaEntity entity = repository.findBySourceUrl(sourceUrl)
+                .orElseGet(() -> NormativeDocumentJpaEntity.builder()
+                        .id(UUID.randomUUID())
+                        .createdAt(LocalDateTime.now())
+                        .build());
+        entity.setTitle(parsed.title());
+        entity.setTemplateType(parsed.templateType());
+        entity.setPhaseName(parsed.phaseName());
+        entity.setSubphaseName(parsed.subphaseName());
+        entity.setSourceUrl(sourceUrl);
+        entity.setBodyText(parsed.bodyText());
+        if (entity.getCreatedAt() == null) {
+            entity.setCreatedAt(LocalDateTime.now());
+        }
+        repository.save(entity);
     }
 
     private void seedCeubDocuments() {
@@ -90,57 +159,6 @@ public class NormativeDocumentSeedLoader implements ApplicationRunner {
                 Debe archivarse junto con las actas del comité y el plan de seguimiento. \
                 En SIGESA, la plantilla CEUB 2026 organiza las fases de autoevaluación y evaluación externa \
                 para trazabilidad operativa del proceso activo por carrera.
-                """);
-    }
-
-    private void seedArcuSurDocuments() {
-        save(
-                "Cronograma de acreditación — ARCU-SUR",
-                "ARCU-SUR",
-                "Planificación",
-                "Cronograma",
-                "https://duea.umss.edu.bo/normativa/arcu-sur/cronograma",
-                """
-                El cronograma ARCU-SUR define hitos de planificación, recolección documental y validación \
-                de criterios regionales. Debe alinearse con el calendario del comité ARCU-SUR y publicarse \
-                al equipo de carrera. SIGESA permite vincular subfases con referenceUrl HTTPS hacia \
-                la normativa DUEA correspondiente.
-                """);
-
-        save(
-                "Designación de responsables — ARCU-SUR",
-                "ARCU-SUR",
-                "Planificación",
-                "Designación de responsables",
-                "https://duea.umss.edu.bo/normativa/arcu-sur/designacion-responsables",
-                """
-                Cada subfase ARCU-SUR requiere responsables institucionales (JD, TD, CC) con alcance \
-                definido. La designación debe documentarse antes de la recolección documental. \
-                En SIGESA, process_responsible_assignment registra al responsable del proceso activo.
-                """);
-
-        save(
-                "Recolección documental — ARCU-SUR",
-                "ARCU-SUR",
-                "Ejecución",
-                "Recolección documental",
-                "https://duea.umss.edu.bo/normativa/arcu-sur/recoleccion-documental",
-                """
-                La recolección documental ARCU-SUR exige evidencias por indicador, con control de versión \
-                y hash SHA-256. Los coordinadores de carrera cargan archivos; DUEA valida completitud \
-                antes del control formal. Estados: PENDIENTE, SUBIDO, APROBADO, OBSERVADO.
-                """);
-
-        save(
-                "Validación de criterios — ARCU-SUR",
-                "ARCU-SUR",
-                "Ejecución",
-                "Validación de criterios",
-                "https://duea.umss.edu.bo/normativa/arcu-sur/validacion-criterios",
-                """
-                La validación de criterios ARCU-SUR verifica que cada indicador cumple los estándares \
-                regionales de acreditación universitaria. El checklist de completitud en SIGESA revisa \
-                archivo, descripción, criterio, hash y estado actual del indicador.
                 """);
     }
 

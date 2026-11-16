@@ -10,9 +10,9 @@
  * Alta de ítem de Plan de Mejoras (API-WF-14)
  */
 export interface CreateImprovementPlanItemRequestDto {
-  objective: string;
   activity?: string;
-  responsibleId?: string;
   deadline?: string;
+  objective: string;
   progress?: number;
+  responsibleId?: string;
 }

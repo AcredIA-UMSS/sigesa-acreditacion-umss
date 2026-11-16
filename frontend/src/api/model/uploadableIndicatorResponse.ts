@@ -7,11 +7,11 @@
  */
 
 export interface UploadableIndicatorResponse {
-  indicatorId?: string;
   code?: string;
-  title?: string;
-  criterionId?: string;
   criterionCode?: string;
+  criterionId?: string;
   criterionTitle?: string;
   currentState?: string;
+  indicatorId?: string;
+  title?: string;
 }

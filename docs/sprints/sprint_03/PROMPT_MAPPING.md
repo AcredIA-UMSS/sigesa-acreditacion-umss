@@ -43,6 +43,11 @@
 | PM-034 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 infra: compose Toxiproxy, toxic.sh, verificar-infra, run-limpio |
 | PM-035 | PR-IMPL-047 | bench/e3/HIPOTESIS.md | E3 (laboratorio) | E3 ejecucion: up HTTP/in_process, correccion de fallos, down -v |
 | PM-036 | PR-IMPL-046 | FEAT-11 | FSD-UC-032 | Dossier ZIP: nombres de negocio para proceso/carrera, enlaces relativos locales en HTML y Content-Disposition |
+| PM-037 | PR-IMPL-048 | DD-UC-033 | FSD-UC-033 | Corpus RAG Manual ARCU-SUR 2023 en el asistente existente (#76) |
+| PM-038 | PR-IMPL-049 | DD-UC-034 | FSD-UC-034 | Envelope uniforme de errores REST (#67) |
+| PM-039 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Portal público: `/api/v1/public/programs` listado+estado+certificado PDF |
+| PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
+| PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
 
 
 ---
@@ -2455,5 +2460,385 @@ the dosier export generation, is showing ids instead of the business names for p
 
 - [x] Backend: `./mvnw test -Dtest=ZipDossierExportStreamingAdapterTest,ProcessDossierExportControllerTest,DossierExportServiceTest` — 12 pruebas pasadas (0 fallos, 0 errores).
 - [x] Frontend: `npx vitest run src/features/processes/hooks/useDossierExport.test.ts` — 4 pruebas pasadas (0 fallos).
+
+---
+
+## PM-037
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-037 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 14:54 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Corpus RAG Manual ARCU-SUR 2023 + trazabilidad FSD/sprint 03 |
+| **Objetivo** | Que el asistente existente responda con el manual 2023 (Markdown indexado) y quede registrado en FSD, PR-IMPL y PROMPT_MAPPING |
+| **Contexto** | Issue #76. Motor RAG ya existía (PR-IMPL-032). No se crea un quinto agent=. PDF origen en tmp/rag-inbox (gitignored). |
+| **PR-IMPL vinculado** | [PR-IMPL-048](../../prompts/impl/PR-IMPL-048.md) |
+| **DD-UC vinculado** | [DD-UC-033](../../design/DD-UC-033.md) |
+| **FSD-UC vinculado** | [FSD-UC-033](../../product/uc/FSD-UC-033.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+conectalo, a la vez quiero que tambien edites el issue de github, este esta usando el #76
+quiero que agregues a ese issue todo lo que se esta haciendo y se hara
+
+ya hiciste la documentacion? el fsd, prompt_mapping u registrarlo en sprint 3?
+```
+
+### Entradas auxiliares
+
+- `docs/prompts/impl/PR-IMPL-032.md`
+- `docs/design/assistant/TOOL-CATALOG.md`
+- `https://github.com/AcredIA-UMSS/sigesa-acreditacion-umss/issues/76`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| modificado | `.gitignore` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/repository/SpringDataNormativeDocumentRepository.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/assistant/AssistantNormativeRagService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/NormativeDocumentSeedLoader.java` |
+| modificado | `backend/src/test/java/com/umss/sigesa/application/service/assistant/AssistantNormativeRagServiceTest.java` |
+| modificado | `docs/design/assistant/TOOL-CATALOG.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/uc/FSD-UC-024.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/normative/NormativeMarkdownDocumentParser.java` |
+| generado | `backend/src/main/resources/normative-corpus/arcu-sur-2023/` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/normative/NormativeMarkdownDocumentParserTest.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/config/NormativeDocumentCorpusResourceTest.java` |
+| generado | `docs/product/uc/FSD-UC-033.md` |
+| generado | `docs/design/DD-UC-033.md` |
+| generado | `docs/prompts/impl/PR-IMPL-048.md` |
+
+### Cambios realizados
+
+- Corpus Markdown del manual ARCU-SUR 2023 en classpath; loader upsert al boot; se retiran placeholders demo ARCU-SUR.
+- Detector RAG ampliado (pares, autoevaluación, convocatoria, visita).
+- Cadena documental FSD-UC-033 → DD-UC-033 → PR-IMPL-048 → PM-037; issue #76 actualizado.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=NormativeMarkdownDocumentParserTest,NormativeDocumentCorpusResourceTest,AssistantNormativeRagServiceTest test` — OK
+- [ ] Smoke Docker `RAG corpus ARCU-SUR 2023: 33 chunks upserted` — pendiente de rebuild
+
+### Resultado obtenido
+
+El asistente usa el mismo `POST /api/v1/assistant/chat`. El PDF no viaja al cliente. Otra máquina requiere pull + rebuild de la imagen.
+
+### Próximos pasos
+
+- [ ] Commit y push para que el corpus viaje con el repo
+- [ ] Smoke autenticado (comité de pares / cronograma)
+- [ ] Citas en UI y más documentos (issue #76)
+
+---
+
+## PM-038
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-038 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 15:12 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Manejo uniforme de errores REST (#67) |
+| **Objetivo** | Envelope `{error,message,details?}`, 500 sin traza, validación con details, docs FSD-UC-034 |
+| **Contexto** | Issue #67. El producto ya usaba `error`+`message` en advice de dominio; faltaba fallback 500 y details. |
+| **PR-IMPL vinculado** | [PR-IMPL-049](../../prompts/impl/PR-IMPL-049.md) |
+| **DD-UC vinculado** | [DD-UC-034](../../design/DD-UC-034.md) |
+| **FSD-UC vinculado** | [FSD-UC-034](../../product/uc/FSD-UC-034.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Quiero hacer ahora el #67 issue,
+```
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/dto/ApiErrorResponse.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandler.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/ErrorContractProbeController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/advice/GlobalExceptionHandlerWebMvcTest.java` |
+| generado | `docs/product/uc/FSD-UC-034.md` |
+| generado | `docs/design/DD-UC-034.md` |
+| generado | `docs/prompts/impl/PR-IMPL-049.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/advice/AuthExceptionHandler.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAuthenticationEntryPoint.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/RestAccessDeniedHandler.java` |
+| modificado | `backend/src/main/resources/application.yaml` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=GlobalExceptionHandlerWebMvcTest,AuthControllerTest test` — OK
+
+### Resultado obtenido
+
+API unifica 400/401/403/500 en el envelope documentado. Códigos de negocio 409 no se reescribieron.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Cerrar #67 tras merge
+
+---
+
+## PM-039
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-039 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 18:55 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-016 portal público |
+| **Objetivo** | Listado publicado, estado por slug y certificado PDF anónimo bajo `/api/v1/public`, 404 genérico, UI `/public/status` |
+| **Contexto** | Hueco de búsqueda por nombre resuelto con API-PUB-02 (adición UC-016). Prefijo `/api/v1/public` vs FSD original `/public/programs/{slug}`. Sin noticias, sin baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+1. Opción 2: añade GET /api/v1/public/programs (listado de publicadas, solo
+   nombre y slug). Documéntalo como adición al UC-016 y avísame del cambio de spec.
+2. Usa /api/v1/public/... en todos los endpoints; anota la diferencia con el
+   path del FSD.
+3. Acepto GET /api/v1/public/programs/{slug}/certificate: PDF solo si está
+   publicado, 404 genérico si no, sin exponer URLs directas del archivo.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-016.md` |
+| generado | `docs/prompts/impl/PR-IMPL-050.md` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicProgramController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/publicportal/PublicPortalService.java` |
+| generado | `backend/src/main/resources/db/migration/V27__publication_snapshot.sql` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/PublicPortalGherkinIT.java` |
+| generado | `frontend/src/features/public-portal/` |
+| generado | `frontend/src/api/endpoints/public-portal/public-portal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeAccessBanners.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicPortalGherkinIT,PublicPortalServiceTest,OpenPdfPublicCertificateRendererAdapterTest,OpenApiExportIT test` — OK
+- [x] `pnpm run test:run` (App + public-portal + HomePage) — 13 passed
+- [x] `pnpm run lint` — OK (warnings preexistentes en dashboard/RecentActivity)
+
+### Resultado obtenido
+
+Portal público anónimo: listado `{slug,name}`, estado vigente y PDF en memoria. 404 genérico para no publicados. Spec viva actualizada (path `/api/v1/public` vs FSD `/public`).
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] UI de publicación [JD] (fuera de este UC)
+- [ ] Noticias = UC-035 (no implementado)
+
+---
+
+## PM-040
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-040 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 19:42 |
+| **Solicitante** | Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Implementar FSD-UC-035 noticias y destacados |
+| **Objetivo** | CRUD [JD], lectura anónima, una destacada, home `#noticias` real, 404 genérico |
+| **Contexto** | Spec v1.1 aprobada + seis adiciones (unpublish featured=false, feature draft 409, fallback latest, home excluye slug). Sin imágenes/tags/schedule. Sin tocar UC-016/015/002 ni baseline. |
+| **PR-IMPL vinculado** | [PR-IMPL-051](../../prompts/impl/PR-IMPL-051.md) |
+| **DD-UC vinculado** | [DD-UC-035](../../design/DD-UC-035.md) |
+| **FSD-UC vinculado** | [FSD-UC-035](../../product/uc/FSD-UC-035.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+ok para implementar
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-035.md`
+- `docs/prompts/impl/PR-IMPL-051.md`
+- `docs/product/uc/FSD-UC-035.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `docs/design/DD-UC-035.md` |
+| generado | `docs/prompts/impl/PR-IMPL-051.md` |
+| generado | `backend/src/main/resources/db/migration/V28__news.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/news/NewsService.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/PublicNewsController.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/adapter/in/web/NewsAdminController.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/adapter/in/web/NewsGherkinIT.java` |
+| generado | `frontend/src/features/news/` |
+| generado | `frontend/src/api/endpoints/public-news/` |
+| generado | `frontend/src/api/endpoints/admin-news/` |
+| modificado | `docs/product/uc/FSD-UC-035.md` |
+| modificado | `docs/product/FSD.md` |
+| modificado | `docs/product/api_contracts.md` |
+| modificado | `docs/product/DTP.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/in/security/SecurityConfig.java` |
+| modificado | `frontend/src/App.tsx` |
+| modificado | `frontend/src/features/home/HomeNewsSection.tsx` |
+| modificado | `openapi.json` |
+| modificado | `docs/sprints/sprint_03/PROMPT_MAPPING.md` |
+
+### Cambios realizados
+
+- Tabla `news_article` (V28), servicio hexagonal, APIs públicas y admin JD.
+- Seis tests Gherkin `@TC-NEWS`. Home `#noticias` consume Orval; «Ver mas Noticias» → `/public/news`.
+- 404 genérico público; 409 `NEWS_NOT_PUBLISHED` al destacar borrador; unpublish fuerza `featured=false`.
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=NewsGherkinIT,NewsServiceTest,OpenApiExportIT test` — OK
+- [x] `pnpm exec vitest run` (App + HomePage + useHomeNews + public-portal) — 15 passed
+- [x] `oxlint` sobre news/home/App/Sidebar — OK
+
+### Resultado obtenido
+
+FSD-UC-035 Implementado. [JD] gestiona noticias; [P] lee solo publicadas. Home usa destacada o la más reciente y no duplica ese slug en el recorte.
+
+### Próximos pasos
+
+- [ ] Commit / PR si el usuario lo pide
+- [ ] Imágenes / tags / programación (fuera de alcance)
+
+---
+
+## PM-041
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-041 |
+| **Fecha** | 2026-11-04 |
+| **Hora** | 21:00 |
+| **Solicitante** | Aylen Laura / Tech Lead (sesión) |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Rediseñar presentación del certificado PDF (PRD-US-020 / FSD-UC-016) opción B-lite |
+| **Objetivo** | A4 horizontal, frase con carrera/agencia/vigencia/resolución, QR y logos; sin cambiar endpoints ni 404 |
+| **Contexto** | B-lite aprobada: V29 solo `agency` y `resolution_number` nullable. Sin `issued_at` (el snapshot no tiene fecha de publicación). Seed inf-sis sin valores reales → null. |
+| **PR-IMPL vinculado** | [PR-IMPL-050](../../prompts/impl/PR-IMPL-050.md) |
+| **DD-UC vinculado** | [DD-UC-016](../../design/DD-UC-016.md) |
+| **FSD-UC vinculado** | [FSD-UC-016](../../product/uc/FSD-UC-016.md) |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+Opción B-lite, aprobada.
+- Flyway V29 en publication_snapshot: solo agency y resolution_number
+  (nullable). Sin issued_at: usa la fecha de publicación del snapshot.
+  Sin signer_name/signer_title.
+- Documenta la adición en FSD-UC-016 y modelo_datos (no baseline).
+- Pie: línea de firma en blanco con "Firma y sello" y espacio para sello.
+- Frase completa con carrera, agencia, vigencia y resolución. Si agency o
+  resolution_number son null, omite esa parte sin romper el layout.
+- Seed de inf-sis: agency = [PEGA AQUÍ], resolution_number = [PEGA AQUÍ].
+  No inventes valores: si faltan, deja null y avísame.
+- Reutiliza los logos ya existentes en el frontend (UMSS en el
+  encabezado, DUEA en el pie), embebidos en alta resolución.
+- Código de verificación = UUID del snapshot.
+- QR aprobado: property de base URL por entorno, enlace a
+  {baseUrl}/public/status?slug={slug}. Si la UI no lee ?slug=, añádelo
+  como cambio mínimo.
+- Mantén metadatos PDF, test de campos + application/pdf, y deja la
+  muestra en backend/target/certificate-sample-inf-sis.pdf.
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-016.md`
+- `docs/prompts/impl/PR-IMPL-050.md`
+- `docs/product/uc/FSD-UC-016.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/resources/db/migration/V29__publication_snapshot_certificate_fields.sql` |
+| generado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicCertificateText.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/domain/model/PublicCertificateTextTest.java` |
+| generado | `backend/src/main/resources/public-certificate/` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/report/OpenPdfPublicCertificateRendererAdapter.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/domain/model/PublicProgramSnapshot.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/entity/PublicationSnapshotJpaEntity.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/adapter/out/persistance/PublicProgramQueryJpaAdapter.java` |
+| modificado | `backend/pom.xml` |
+| modificado | `frontend/src/features/public-portal/hooks/usePublicPortal.ts` |
+| modificado | `docs/product/uc/FSD-UC-016.md` |
+| modificado | `docs/product/modelo_datos.md` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- V29 `agency` / `resolution_number` nullable. Frase omite cláusulas vacías.
+- PDF A4 horizontal, borde doble, DejaVu embebida, logos UMSS/DUEA, QR ZXing, UUID de verificación.
+- `/public/status?slug=` en el hook. Property `sigesa.public.base-url`.
+- Seed inf-sis sin agencia ni resolución (valores no provistos).
+
+### Validación ejecutada
+
+- [x] `./mvnw -Dtest=PublicCertificateTextTest,OpenPdfPublicCertificateRendererAdapterTest,PublicPortalServiceTest,PublicPortalGherkinIT test` — OK
+- [x] `pnpm exec vitest run` (public-portal + HomePage) — 10 passed
+- [x] Muestra `backend/target/certificate-sample-inf-sis.pdf`
+
+### Resultado obtenido
+
+Certificado rediseñado. Endpoints y 404 intactos. Muestra lista para revisión visual.
+
+### Próximos pasos
+
+- [ ] Pegar `agency` y `resolution_number` reales del seed inf-sis
+- [ ] Revisar la muestra PDF antes de cerrar
 
 

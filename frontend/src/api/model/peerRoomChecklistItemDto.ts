@@ -10,10 +10,10 @@
  * Ítem de checklist Sala de Pares
  */
 export interface PeerRoomChecklistItemDto {
+  checked?: boolean;
+  checkedAt?: string;
+  checkedBy?: string;
   id?: string;
   itemCode?: string;
   label?: string;
-  checked?: boolean;
-  checkedBy?: string;
-  checkedAt?: string;
 }

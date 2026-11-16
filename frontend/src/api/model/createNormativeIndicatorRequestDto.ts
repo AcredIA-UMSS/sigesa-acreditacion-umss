@@ -11,8 +11,8 @@ export interface CreateNormativeIndicatorRequestDto {
   code: string;
   /** @minLength 1 */
   description: string;
-  weight: number;
   order: number;
   /** @minLength 1 */
   referenceUrl: string;
+  weight: number;
 }

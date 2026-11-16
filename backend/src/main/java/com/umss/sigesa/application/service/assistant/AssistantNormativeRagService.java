@@ -20,8 +20,11 @@ public final class AssistantNormativeRagService {
     private static final Pattern NORMATIVE_QUERY_PATTERN = Pattern.compile(
             "(?is).*(normativa|ceub|arcu[-\\s]?sur|duea|acreditaci[oó]n\\s+universitaria|"
                     + "diagn[oó]stico\\s+institucional|matriz\\s+de\\s+evidencias|"
-                    + "informe\\s+(preliminar|final)|cronograma|criterios?\\s+de\\s+evaluaci[oó]n|"
-                    + "recolecci[oó]n\\s+documental|validaci[oó]n\\s+de\\s+criterios|"
+                    + "informe\\s+(preliminar|final|de\\s+autoevaluaci[oó]n)|cronograma|"
+                    + "criterios?\\s+de\\s+evaluaci[oó]n|recolecci[oó]n\\s+documental|"
+                    + "validaci[oó]n\\s+de\\s+criterios|pares\\s+evaluadores|"
+                    + "comit[eé]\\s+de\\s+pares|visita(\\s+del\\s+comit[eé])?|"
+                    + "convocatoria|autoevaluaci[oó]n|manual\\s+de\\s+procedimientos|"
                     + "qu[eé]\\s+dice\\s+la\\s+normativa|documentaci[oó]n\\s+normativa|"
                     + "buscar\\s+en\\s+normativa|referencia\\s+normativa|enlace\\s+normativo|"
                     + "subfase\\s+normativa|est[aá]ndares?\\s+de\\s+acreditaci[oó]n).*");

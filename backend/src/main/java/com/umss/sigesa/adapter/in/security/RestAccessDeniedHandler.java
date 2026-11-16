@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umss.sigesa.adapter.in.web.dto.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -9,7 +10,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
@@ -22,9 +22,7 @@ public class RestAccessDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        objectMapper.writeValue(response.getOutputStream(), Map.of(
-                "error", "ACCESS_DENIED",
-                "message", "No autorizado para esta operación"
-        ));
+        objectMapper.writeValue(response.getOutputStream(),
+                ApiErrorResponse.of("ACCESS_DENIED", "No autorizado para esta operación"));
     }
 }

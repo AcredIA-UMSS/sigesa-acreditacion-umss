@@ -8,9 +8,9 @@
 import type { RecentEvaluation } from './recentEvaluation.ts';
 
 export interface TechnicianKpiSection {
-  evidencesPendingReview?: number;
   assignedIndicators?: number;
-  openActions?: number;
   available?: number;
+  evidencesPendingReview?: number;
+  openActions?: number;
   recentEvaluations?: RecentEvaluation[];
 }

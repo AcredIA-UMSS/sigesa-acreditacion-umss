@@ -156,7 +156,7 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 
 | Componente | Descripción |
 |------------|-------------|
-| **Corpus** | Tabla `normative_document` (título, template_type, body_text, source_url) |
+| **Corpus** | Tabla `normative_document` (título, template_type, body_text, source_url). Manual ARCU-SUR 2023: `classpath:normative-corpus/arcu-sur-2023/*.md` (#76) |
 | **Retrieval** | PostgreSQL FTS (`tsvector` + GIN) en prod; fallback LIKE en dev/Hibernate |
 | **Tool** | `search_normative_docs` — todos los agentes y roles del asistente |
 | **Enriquecimiento** | `AssistantNormativeRagService` inyecta fragmentos en system prompt del LLM |
