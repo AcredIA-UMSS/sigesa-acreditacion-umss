@@ -37,7 +37,7 @@ class OpenPdfCoverageMatrixRendererAdapterTest {
         byte[] pdf = new OpenPdfCoverageMatrixRendererAdapter().render(matrix);
 
         assertThat(pdf).startsWith("%PDF".getBytes());
-        assertThat(pdf).doesNotStartWith("PK".getBytes());
+        assertThat(pdf.length < 2 || pdf[0] != 'P' || pdf[1] != 'K').isTrue();
         assertThat(pdf.length).isGreaterThan(100);
     }
 }

@@ -78,7 +78,7 @@ class CoverageMatrixGherkinIT {
         byte[] body = result.getResponse().getContentAsByteArray();
         assertThat(result.getResponse().getContentType()).contains("application/pdf");
         assertThat(body).startsWith("%PDF".getBytes());
-        assertThat(body).doesNotStartWith("PK".getBytes());
+        assertThat(body.length < 2 || body[0] != 'P' || body[1] != 'K').isTrue();
     }
 
     @Test
