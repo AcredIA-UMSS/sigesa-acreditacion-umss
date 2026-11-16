@@ -91,6 +91,26 @@ class GetCoverageMatrixServiceTest {
     }
 
     @Test
+    void get_emptyProcessReturnsZeroTotalsAndNoDimensions() {
+        UUID processId = UUID.randomUUID();
+        UUID careerId = UUID.randomUUID();
+        when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(
+                AccreditationProcess.builder().id(processId).careerId(careerId).status("ACTIVE").build()));
+        when(queryPort.findCareerName(careerId)).thenReturn(Optional.of("Carrera"));
+        when(queryPort.findIndicatorRows(processId)).thenReturn(List.of());
+
+        CoverageMatrix matrix = service.get(processId, UUID.randomUUID(), List.of("JD"), List.of());
+
+        assertThat(matrix.totals().indicators()).isZero();
+        assertThat(matrix.totals().withEvidence()).isZero();
+        assertThat(matrix.totals().approved()).isZero();
+        assertThat(matrix.totals().observed()).isZero();
+        assertThat(matrix.totals().other()).isZero();
+        assertThat(matrix.totals().coveragePercent()).isZero();
+        assertThat(matrix.dimensions()).isEmpty();
+    }
+
+    @Test
     void renderPdf_delegatesToPort() {
         UUID processId = UUID.randomUUID();
         UUID careerId = UUID.randomUUID();

@@ -155,6 +155,35 @@ class PeerVisitGherkinIT {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    @Order(5)
+    @Tag("FSD-UC-040")
+    @Tag("TC-VISIT")
+    @DisplayName("Evaluador externo no puede modificar la visita")
+    void externalEvaluatorCannotWrite() throws Exception {
+        String token = login(AuthDataLoader.SEED_EE_EMAIL, AuthDataLoader.SEED_EE_PASSWORD);
+        mockMvc.perform(put("/api/v1/processes/{processId}/peer-visit", PROCESS_ID)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"venue":"No","room":"No","status":"SCHEDULED"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Order(6)
+    @Tag("FSD-UC-040")
+    @Tag("TC-VISIT")
+    @DisplayName("Proceso inexistente responde 404 al consultar agenda")
+    void unknownProcessReturnsNotFound() throws Exception {
+        String token = login(AuthDataLoader.SEED_JD_EMAIL, AuthDataLoader.SEED_JD_PASSWORD);
+        mockMvc.perform(get("/api/v1/processes/{processId}/peer-visit", UUID.fromString("00000000-0000-0000-0000-000000000099"))
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("PROCESS_NOT_FOUND"));
+    }
+
     private String login(String email, String password) throws Exception {
         MvcResult login = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

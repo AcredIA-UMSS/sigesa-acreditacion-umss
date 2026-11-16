@@ -36,6 +36,8 @@ import com.umss.sigesa.domain.exception.TemplateNotPublishedException;
 import com.umss.sigesa.domain.exception.TemplateOrderConflictException;
 import com.umss.sigesa.domain.exception.TemplateStructureIncompleteException;
 import com.umss.sigesa.adapter.in.web.dto.PendingIndicatorResponseDto;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice(basePackages = "com.umss.sigesa.adapter.in.web")
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ProcessExceptionHandler {
 
     @ExceptionHandler(ProcessAlreadyActiveException.class)

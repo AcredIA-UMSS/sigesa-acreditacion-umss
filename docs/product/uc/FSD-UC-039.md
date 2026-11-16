@@ -1,14 +1,14 @@
 ---
 id: FSD-UC-039
 nombre: Matriz de cobertura / informe de autoevaluación
-estado: En Curso
+estado: Implementado
 release: v2.1
-actor_principal: "[JD], [TD], [EE], [CC]"
+actor_principal: "[JD], [TD], [EE], [CC], [CAE_MEMBER]"
 modulo: MOD-EVAL
 reglas: FSD-BR-09
 design_doc: DD-UC-039
-pr_impl: PR-IMPL-054
-ultima_actualizacion: "2026-11-15"
+pr_impl: PR-IMPL-056
+ultima_actualizacion: "2026-11-16"
 ---
 
 # FSD-UC-039 — Matriz de cobertura / informe de autoevaluación

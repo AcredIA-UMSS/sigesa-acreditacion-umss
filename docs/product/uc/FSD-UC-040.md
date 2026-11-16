@@ -1,15 +1,15 @@
 ---
 id: FSD-UC-040
 nombre: Agenda de visita de pares
-estado: En Curso
+estado: Implementado
 release: v2.1
 actor_principal: "[TD], [JD]"
 actores_secundarios: "[EE], [CC]"
 modulo: MOD-WORKFLOW
 reglas: FSD-BR-09
 design_doc: DD-UC-040
-pr_impl: PR-IMPL-055
-ultima_actualizacion: "2026-11-15"
+pr_impl: PR-IMPL-057
+ultima_actualizacion: "2026-11-16"
 relacionados: FSD-UC-030
 ---
 

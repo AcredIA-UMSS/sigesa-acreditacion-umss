@@ -189,24 +189,49 @@ export function ProcessDetailView({ processId, initialIndicatorId, initialObserv
                 )}
               </div>
             </div>
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <p className="text-body-md text-primary-100">Inicio: {formatDate(process.startDate)}</p>
-              {(session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC' || session?.role === 'EE') && (
-                <div className="flex flex-col items-start gap-1">
-                  <Button
-                    variant="secondary"
-                    onClick={() => exportDossier().catch(() => undefined)}
-                    disabled={isExporting}
-                    className="bg-body text-primary-700 hover:bg-primary-50"
-                  >
-                    <Download size={16} />
-                    {isExporting ? `Exportando... ${progress}%` : 'Exportar Dossier Completo (ZIP)'}
-                  </Button>
-                  {exportError && (
-                    <p className="text-body-sm text-primary-50">{exportError}</p>
-                  )}
-                </div>
-              )}
+              <div className="flex flex-col items-start gap-2">
+                {(session?.role === 'JD' ||
+                  session?.role === 'TD' ||
+                  session?.role === 'CC' ||
+                  session?.role === 'EE' ||
+                  session?.role === 'CAE_MEMBER') && (
+                  <Link to={`/procesos/${processId}/cobertura`}>
+                    <Button variant="secondary" className="bg-body text-primary-700 hover:bg-primary-50">
+                      <Table2 size={16} />
+                      Matriz de cobertura
+                    </Button>
+                  </Link>
+                )}
+                {(session?.role === 'JD' ||
+                  session?.role === 'TD' ||
+                  session?.role === 'CC' ||
+                  session?.role === 'EE') && (
+                  <Link to={`/procesos/${processId}/visita-pares`}>
+                    <Button variant="secondary" className="bg-body text-primary-700 hover:bg-primary-50">
+                      <CalendarDays size={16} />
+                      Agenda de visita de pares
+                    </Button>
+                  </Link>
+                )}
+                {(session?.role === 'JD' || session?.role === 'TD' || session?.role === 'CC' || session?.role === 'EE') && (
+                  <div className="flex flex-col items-start gap-1">
+                    <Button
+                      variant="secondary"
+                      onClick={() => exportDossier().catch(() => undefined)}
+                      disabled={isExporting}
+                      className="bg-body text-primary-700 hover:bg-primary-50"
+                    >
+                      <Download size={16} />
+                      {isExporting ? `Exportando... ${progress}%` : 'Exportar Dossier Completo (ZIP)'}
+                    </Button>
+                    {exportError && (
+                      <p className="text-body-sm text-primary-50">{exportError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
