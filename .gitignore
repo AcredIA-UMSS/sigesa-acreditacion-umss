@@ -81,6 +81,8 @@ M7_Evals_EquipoSIGESA/
 
 ### Dependencies & Local Tooling ###
 node_modules/
+frontend/coverage/
+coverage/
 .aidlc/
 aidlc/
 .opencode/
