@@ -2,9 +2,11 @@ package com.umss.sigesa.application.service.observation;
 
 import com.umss.sigesa.application.model.observation.ObservationActor;
 import com.umss.sigesa.application.model.observation.ObservationDraft;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.EvidenceLookupPort;
 import com.umss.sigesa.application.port.out.ProcessObservationRepositoryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 import com.umss.sigesa.domain.exception.ForbiddenObservationRoleException;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
@@ -30,6 +32,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +46,8 @@ class ProcessObservationServiceTest {
     private EvidenceLookupPort evidenceLookupPort;
     @Mock
     private ProcessObservationRepositoryPort observationRepository;
+    @Mock
+    private EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     private ProcessObservationService service;
     private UUID processId;
@@ -54,7 +59,11 @@ class ProcessObservationServiceTest {
     @BeforeEach
     void setUp() {
         service = new ProcessObservationService(
-                processQueryPort, evidenceLookupPort, observationRepository, Clock.fixed(NOW, ZoneOffset.UTC));
+                processQueryPort,
+                evidenceLookupPort,
+                observationRepository,
+                enqueueDomainNotificationUseCase,
+                Clock.fixed(NOW, ZoneOffset.UTC));
         processId = UUID.randomUUID();
         careerId = UUID.randomUUID();
         evidenceId = UUID.randomUUID();
@@ -94,6 +103,9 @@ class ProcessObservationServiceTest {
         when(observationRepository.findById(created.getId())).thenReturn(Optional.of(created));
 
         service.submit(processId, created.getId(), technician());
+        verify(enqueueDomainNotificationUseCase).enqueue(org.mockito.ArgumentMatchers.argThat(cmd ->
+                cmd.eventType() == NotificationEventType.TechnicalObservationIssued
+                        && created.getId().equals(cmd.aggregateId())));
         service.startReview(processId, created.getId(), coordinator());
         ProcessObservation replied = service.reply(processId, created.getId(), "Falta el plano", coordinator());
 

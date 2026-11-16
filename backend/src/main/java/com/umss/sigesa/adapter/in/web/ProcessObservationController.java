@@ -64,9 +64,10 @@ public class ProcessObservationController {
             @RequestParam(required = false) ObservationStatus status,
             @RequestParam(required = false) ObservationPriority priority,
             @RequestParam(required = false) UUID evidenceId,
-            @RequestParam(required = false) UUID authorId) {
+            @RequestParam(required = false) UUID authorId,
+            @RequestParam(required = false) UUID indicatorId) {
         List<ObservationResponse> body = processObservationUseCase
-                .list(processId, new ObservationFilter(status, priority, evidenceId, authorId), actor())
+                .list(processId, new ObservationFilter(status, priority, evidenceId, authorId, indicatorId), actor())
                 .stream()
                 .map(this::toResponse)
                 .toList();

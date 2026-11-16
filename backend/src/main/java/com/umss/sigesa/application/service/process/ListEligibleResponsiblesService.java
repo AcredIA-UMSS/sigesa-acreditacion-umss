@@ -4,25 +4,32 @@ import com.umss.sigesa.application.port.in.ListEligibleResponsiblesUseCase;
 import com.umss.sigesa.application.port.in.ListUsersUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
+import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
+import com.umss.sigesa.domain.model.UserProgramAssignment;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ListEligibleResponsiblesService implements ListEligibleResponsiblesUseCase {
 
     private final ProcessQueryPort processQueryPort;
     private final ListUsersUseCase listUsersUseCase;
     private final ProcessResponsiblePort processResponsiblePort;
+    private final UserProgramAssignmentRepositoryPort assignmentRepositoryPort;
 
     public ListEligibleResponsiblesService(ProcessQueryPort processQueryPort,
                                            ListUsersUseCase listUsersUseCase,
-                                           ProcessResponsiblePort processResponsiblePort) {
+                                           ProcessResponsiblePort processResponsiblePort,
+                                           UserProgramAssignmentRepositoryPort assignmentRepositoryPort) {
         this.processQueryPort = processQueryPort;
         this.listUsersUseCase = listUsersUseCase;
         this.processResponsiblePort = processResponsiblePort;
+        this.assignmentRepositoryPort = assignmentRepositoryPort;
     }
 
     @Override
@@ -30,13 +37,18 @@ public class ListEligibleResponsiblesService implements ListEligibleResponsibles
         AccreditationProcess process = processQueryPort.findDetailById(processId)
                 .orElseThrow(() -> new ProcessNotFoundException(processId));
 
+        UUID careerId = process.getCareerId();
+        Set<UUID> coordinatorsOfCareer = assignmentRepositoryPort.findActiveByProgramId(careerId).stream()
+                .map(UserProgramAssignment::getUserId)
+                .collect(Collectors.toCollection(HashSet::new));
+
         UUID currentResponsibleId = processResponsiblePort.findActiveByProcessId(processId)
                 .map(assignment -> assignment.getUserId())
                 .orElse(null);
         Set<UUID> occupiedUserIds = processResponsiblePort.findUserIdsWithActiveAssignment();
 
         return listUsersUseCase.list("CC", "ACTIVE").stream()
-                .filter(user -> user.programIds().contains(process.getCareerId()))
+                .filter(user -> coordinatorsOfCareer.contains(user.userId()))
                 .filter(user -> !occupiedUserIds.contains(user.userId())
                         || user.userId().equals(currentResponsibleId))
                 .map(user -> new EligibleResponsible(user.userId(), user.fullName(), user.email()))

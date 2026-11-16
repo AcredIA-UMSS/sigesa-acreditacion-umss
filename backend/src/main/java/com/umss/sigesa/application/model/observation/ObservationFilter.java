@@ -9,6 +9,7 @@ public record ObservationFilter(
         ObservationStatus status,
         ObservationPriority priority,
         UUID evidenceId,
-        UUID authorId
+        UUID authorId,
+        UUID indicatorId
 ) {
 }

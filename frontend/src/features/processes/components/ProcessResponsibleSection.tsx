@@ -1,16 +1,18 @@
 import { UserCheck, UserMinus, UserPlus, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { EligibleResponsibleDto } from '../../../api/model';
 import { Button } from '../../../components/ui/Button';
-import { Select } from '../../../components/ui/Select';
 import type { ProcessResponsibleDto } from '../hooks/useProcessResponsible';
 
 interface AssignResponsibleModalUIProps {
   isOpen: boolean;
+  careerName?: string;
   candidates: EligibleResponsibleDto[];
   selectedUserId: string;
   isLoadingCandidates: boolean;
   isSubmitting: boolean;
   submitError: string | null;
+  loadError: string | null;
   onClose: () => void;
   onSelectUser: (userId: string) => void;
   onSubmit: () => void;
@@ -18,11 +20,13 @@ interface AssignResponsibleModalUIProps {
 
 export function AssignResponsibleModalUI({
   isOpen,
+  careerName,
   candidates,
   selectedUserId,
   isLoadingCandidates,
   isSubmitting,
   submitError,
+  loadError,
   onClose,
   onSelectUser,
   onSubmit,
@@ -31,13 +35,8 @@ export function AssignResponsibleModalUI({
     return null;
   }
 
-  const options = [
-    { value: '', label: isLoadingCandidates ? 'Cargando coordinadores…' : 'Seleccione un coordinador' },
-    ...candidates.map((candidate) => ({
-      value: candidate.userId ?? '',
-      label: `${candidate.fullName ?? 'Sin nombre'} (${candidate.email ?? '—'})`,
-    })),
-  ];
+  const selectable = candidates.filter((candidate) => Boolean(candidate.userId));
+  const careerLabel = careerName?.trim() ? careerName.trim() : 'esta carrera';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -70,18 +69,78 @@ export function AssignResponsibleModalUI({
 
         <div className="space-y-4 px-6 py-5">
           <p className="text-body-md text-gray-600">
-            Seleccione un Coordinador de Carrera [CC] activo y disponible para la carrera del
-            proceso.
+            Solo se listan Coordinadores de Carrera [CC] activos asignados a{' '}
+            <span className="font-medium text-primary-800">{careerLabel}</span>.
           </p>
 
-          <Select
-            label="Coordinador responsable"
-            requiredMark
-            value={selectedUserId}
-            onChange={(event) => onSelectUser(event.target.value)}
-            options={options}
-            disabled={isLoadingCandidates || isSubmitting}
-          />
+          {isLoadingCandidates && (
+            <p className="text-body-md text-gray-600">Cargando coordinadores de la carrera…</p>
+          )}
+
+          {!isLoadingCandidates && loadError && (
+            <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-md text-danger">
+              {loadError}
+            </p>
+          )}
+
+          {!isLoadingCandidates && !loadError && selectable.length === 0 && (
+            <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-body-md text-gray-800">
+              <p>
+                No hay coordinadores [CC] activos asignados a {careerLabel}. Asigne un coordinador a
+                esa carrera en Usuarios y vuelva a intentar.
+              </p>
+              <Link
+                to="/admin/users"
+                className="mt-2 inline-block text-label-md font-medium text-primary-700 underline"
+              >
+                Ir a administración de usuarios
+              </Link>
+            </div>
+          )}
+
+          {!isLoadingCandidates && !loadError && selectable.length > 0 && (
+            <fieldset className="space-y-2">
+              <legend className="text-label-md text-gray-700">
+                Coordinador responsable
+                <span className="ml-0.5 text-secondary">*</span>
+              </legend>
+              <ul className="max-h-64 space-y-2 overflow-y-auto">
+                {selectable.map((candidate) => {
+                  const userId = candidate.userId ?? '';
+                  const selected = selectedUserId === userId;
+                  return (
+                    <li key={userId}>
+                      <label
+                        className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
+                          selected
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-gray-200 bg-body hover:border-primary-300'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="responsible-candidate"
+                          className="mt-1"
+                          value={userId}
+                          checked={selected}
+                          onChange={() => onSelectUser(userId)}
+                          disabled={isSubmitting}
+                        />
+                        <span>
+                          <span className="block text-body-md font-medium text-primary-900">
+                            {candidate.fullName ?? 'Sin nombre'}
+                          </span>
+                          <span className="block text-body-md text-gray-600">
+                            {candidate.email ?? '—'}
+                          </span>
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </fieldset>
+          )}
 
           {submitError && (
             <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-body-md text-danger">
@@ -94,7 +153,7 @@ export function AssignResponsibleModalUI({
           <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={onSubmit} isLoading={isSubmitting} disabled={!selectedUserId}>
+          <Button onClick={onSubmit} isLoading={isSubmitting} disabled={!selectedUserId || selectable.length === 0}>
             <UserPlus size={16} />
             Confirmar asignación
           </Button>

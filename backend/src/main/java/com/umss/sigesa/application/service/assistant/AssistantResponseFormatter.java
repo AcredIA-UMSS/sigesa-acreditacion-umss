@@ -314,6 +314,12 @@ final class AssistantResponseFormatter {
         StringBuilder sb = new StringBuilder();
         sb.append("Fragmentos normativos (").append(data.get("total")).append(") para «")
                 .append(query).append("»:\n\n");
+        Object selected = data.get("selectedTerms");
+        if (selected instanceof java.util.List<?> terms && !terms.isEmpty()) {
+            sb.append("Claves usadas: ")
+                    .append(terms.stream().map(String::valueOf).reduce((a, b) -> a + ", " + b).orElse(""))
+                    .append(".\n\n");
+        }
         int index = 1;
         for (Object item : documents) {
             if (!(item instanceof java.util.Map<?, ?> map)) {

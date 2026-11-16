@@ -10,6 +10,7 @@ import com.umss.sigesa.application.model.assistant.AssistantToolDefinition;
 import com.umss.sigesa.application.model.assistant.ToolExecutionResult;
 import com.umss.sigesa.application.model.evidence.EvidenceControlItem;
 import com.umss.sigesa.application.model.normative.NormativeDocumentHit;
+import com.umss.sigesa.application.service.normative.NormativeQueryPlanner;
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.port.in.ActivateUserUseCase;
 import com.umss.sigesa.application.port.in.CheckEvidenceCompletenessUseCase;
@@ -733,10 +734,17 @@ public class AssistantToolExecutor {
             int limit = args.hasNonNull("limit") ? Math.clamp(args.get("limit").asInt(), 1, 5) : 3;
             List<NormativeDocumentHit> hits = searchNormativeDocumentsUseCase.search(query, templateType, limit);
             List<Map<String, Object>> documents = hits.stream().map(this::toNormativeDocumentMap).toList();
+            var plan = NormativeQueryPlanner.plan(query, templateType);
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("query", query);
             data.put("documents", documents);
             data.put("total", documents.size());
+            data.put("selectedTerms", plan.selectedTerms());
+            data.put("discardedTerms", plan.discardedTerms());
+            data.put("retrievalStrategy", plan.strategy());
+            if (plan.templateTypeHint() != null && !plan.templateTypeHint().isBlank()) {
+                data.put("templateTypeHint", plan.templateTypeHint());
+            }
             if (templateType != null && !templateType.isBlank()) {
                 data.put("templateType", templateType);
             }

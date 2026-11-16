@@ -1,5 +1,6 @@
 package com.umss.sigesa.config;
 
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.in.ProcessObservationUseCase;
 import com.umss.sigesa.application.port.out.EvidenceLookupPort;
 import com.umss.sigesa.application.port.out.ProcessObservationRepositoryPort;
@@ -16,8 +17,13 @@ public class ObservationModuleConfig {
     @Bean
     ProcessObservationUseCase processObservationUseCase(ProcessQueryPort processQueryPort,
                                                         EvidenceLookupPort evidenceLookupPort,
-                                                        ProcessObservationRepositoryPort observationRepository) {
+                                                        ProcessObservationRepositoryPort observationRepository,
+                                                        EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         return new ProcessObservationService(
-                processQueryPort, evidenceLookupPort, observationRepository, Clock.systemUTC());
+                processQueryPort,
+                evidenceLookupPort,
+                observationRepository,
+                enqueueDomainNotificationUseCase,
+                Clock.systemUTC());
     }
 }

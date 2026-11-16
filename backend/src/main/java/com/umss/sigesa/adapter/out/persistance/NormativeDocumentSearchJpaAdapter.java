@@ -4,6 +4,7 @@ import com.umss.sigesa.adapter.out.persistance.entity.NormativeDocumentJpaEntity
 import com.umss.sigesa.adapter.out.persistance.repository.SpringDataNormativeDocumentRepository;
 import com.umss.sigesa.application.model.normative.NormativeDocumentHit;
 import com.umss.sigesa.application.port.out.NormativeDocumentSearchPort;
+import com.umss.sigesa.application.service.normative.NormativeQueryPlanner;
 import com.umss.sigesa.application.service.normative.NormativeSearchQueryNormalizer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -43,9 +44,13 @@ public class NormativeDocumentSearchJpaAdapter implements NormativeDocumentSearc
             return List.of();
         }
         int effectiveLimit = Math.clamp(limit, 1, 10);
-        String normalizedTemplate = normalizeTemplateType(templateType);
+        var plan = NormativeQueryPlanner.plan(query, templateType);
+        String normalizedTemplate = normalizeTemplateType(
+                templateType != null && !templateType.isBlank() ? templateType : plan.templateTypeHint());
         String sanitizedQuery = NormativeSearchQueryNormalizer.sanitize(query);
-        String condensedQuery = NormativeSearchQueryNormalizer.condensedForSearch(query);
+        String condensedQuery = plan.hasSelectedTerms()
+                ? plan.andQuery()
+                : NormativeSearchQueryNormalizer.condensedForSearch(query);
 
         List<NormativeDocumentHit> hits = searchCandidates(
                 sanitizedQuery,
@@ -54,6 +59,26 @@ public class NormativeDocumentSearchJpaAdapter implements NormativeDocumentSearc
                 effectiveLimit);
         if (!hits.isEmpty()) {
             return hits;
+        }
+
+        if (plan.hasSelectedTerms()) {
+            hits = searchCandidates(plan.orQuery(), plan.orQuery(), normalizedTemplate, effectiveLimit);
+            if (!hits.isEmpty()) {
+                return hits;
+            }
+            hits = searchWithFullTextOr(plan.expandedTerms(), normalizedTemplate, effectiveLimit);
+            if (!hits.isEmpty()) {
+                return hits;
+            }
+            for (String term : plan.selectedTerms()) {
+                hits = mergeHits(hits, searchSingleTerm(term, normalizedTemplate, effectiveLimit));
+                if (hits.size() >= effectiveLimit) {
+                    break;
+                }
+            }
+            if (!hits.isEmpty()) {
+                return hits.stream().limit(effectiveLimit).toList();
+            }
         }
 
         for (String term : NormativeSearchQueryNormalizer.significantTerms(query)) {
@@ -162,6 +187,49 @@ public class NormativeDocumentSearchJpaAdapter implements NormativeDocumentSearc
                 .getResultList();
 
         return mapFullTextRows(rows, query);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<NormativeDocumentHit> searchWithFullTextOr(List<String> terms,
+                                                            String templateType,
+                                                            int limit) {
+        String tsQuery = toOrTsQuery(terms);
+        if (tsQuery.isBlank() || !isPostgreSql() || !hasFullTextColumn()) {
+            return List.of();
+        }
+        String sql = """
+                SELECT title, template_type, phase_name, subphase_name, source_url, body_text,
+                       ts_rank(search_vector, to_tsquery('spanish', :query)) AS rank
+                FROM normative_document
+                WHERE search_vector @@ to_tsquery('spanish', :query)
+                  AND (:templateType IS NULL OR template_type = :templateType)
+                ORDER BY rank DESC
+                LIMIT :limit
+                """;
+        try {
+            List<Object[]> rows = entityManager.createNativeQuery(sql)
+                    .setParameter("query", tsQuery)
+                    .setParameter("templateType", templateType)
+                    .setParameter("limit", limit)
+                    .getResultList();
+            return mapFullTextRows(rows, String.join(" ", terms));
+        } catch (RuntimeException ex) {
+            return List.of();
+        }
+    }
+
+    private static String toOrTsQuery(List<String> terms) {
+        if (terms == null || terms.isEmpty()) {
+            return "";
+        }
+        List<String> lexemes = new ArrayList<>();
+        for (String term : terms) {
+            String lexeme = term.toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}]", "");
+            if (lexeme.length() >= 3) {
+                lexemes.add(lexeme);
+            }
+        }
+        return String.join(" | ", lexemes);
     }
 
     private List<NormativeDocumentHit> mapFullTextRows(List<Object[]> rows, String highlightQuery) {

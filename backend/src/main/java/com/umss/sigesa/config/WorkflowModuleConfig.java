@@ -1,7 +1,9 @@
 package com.umss.sigesa.config;
 
 import com.umss.sigesa.application.port.in.FreezeProcessUseCase;
+import com.umss.sigesa.application.port.in.GetPeerVisitUseCase;
 import com.umss.sigesa.application.port.in.GetPeerRoomChecklistUseCase;
+import com.umss.sigesa.application.port.in.UpsertPeerVisitUseCase;
 import com.umss.sigesa.application.port.in.GetProcessFreezeUseCase;
 import com.umss.sigesa.application.port.in.LiftProcessFreezeUseCase;
 import com.umss.sigesa.application.port.in.UpdatePeerRoomChecklistUseCase;
@@ -22,6 +24,8 @@ import com.umss.sigesa.application.port.out.EvaluationMetricsPort;
 import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ImprovementPlanItemPort;
 import com.umss.sigesa.application.port.out.IndicatorAnalysisPort;
+import com.umss.sigesa.application.port.out.CoverageMatrixQueryPort;
+import com.umss.sigesa.application.port.out.PeerVisitPort;
 import com.umss.sigesa.application.port.out.PeerRoomChecklistPort;
 import com.umss.sigesa.application.port.out.ProcessFreezePort;
 import com.umss.sigesa.application.port.out.IndicatorRepositoryPort;
@@ -35,7 +39,9 @@ import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.workflow.FreezeProcessService;
+import com.umss.sigesa.application.service.workflow.GetPeerVisitService;
 import com.umss.sigesa.application.service.workflow.GetPeerRoomChecklistService;
+import com.umss.sigesa.application.service.workflow.UpsertPeerVisitService;
 import com.umss.sigesa.application.service.workflow.GetProcessFreezeService;
 import com.umss.sigesa.application.service.workflow.LiftProcessFreezeService;
 import com.umss.sigesa.application.service.workflow.ProcessFreezeGuard;
@@ -203,6 +209,24 @@ public class WorkflowModuleConfig {
             PeerRoomChecklistPort checklistPort,
             UserProgramAssignmentRepositoryPort assignmentRepository) {
         return new UpdatePeerRoomChecklistService(processQueryPort, checklistPort, assignmentRepository);
+    }
+
+    @Bean
+    GetPeerVisitUseCase getPeerVisitUseCase(
+            ProcessQueryPort processQueryPort,
+            PeerVisitPort peerVisitPort,
+            CoverageMatrixQueryPort coverageMatrixQueryPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new GetPeerVisitService(
+                processQueryPort, peerVisitPort, coverageMatrixQueryPort, assignmentRepository);
+    }
+
+    @Bean
+    UpsertPeerVisitUseCase upsertPeerVisitUseCase(
+            ProcessQueryPort processQueryPort,
+            PeerVisitPort peerVisitPort,
+            UserProgramAssignmentRepositoryPort assignmentRepository) {
+        return new UpsertPeerVisitService(processQueryPort, peerVisitPort, assignmentRepository);
     }
 
     @Bean

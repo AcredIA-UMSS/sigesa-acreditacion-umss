@@ -58,12 +58,16 @@ async function unwrap<T>(path: string, options?: RequestInit): Promise<T> {
   return response.data;
 }
 
-export function useProcessObservations(processId: string) {
+export function useProcessObservations(processId: string, indicatorId?: string) {
   const queryClient = useQueryClient();
 
   const list = useQuery({
-    queryKey: observationsKey(processId),
-    queryFn: () => unwrap<ProcessObservation[]>(`/api/v1/processes/${processId}/observations`),
+    queryKey: [...observationsKey(processId), indicatorId ?? 'all'],
+    queryFn: () => {
+      const params = indicatorId ? `?indicatorId=${encodeURIComponent(indicatorId)}` : '';
+      return unwrap<ProcessObservation[]>(`/api/v1/processes/${processId}/observations${params}`);
+    },
+    enabled: Boolean(processId),
   });
 
   const evidences = useQuery({

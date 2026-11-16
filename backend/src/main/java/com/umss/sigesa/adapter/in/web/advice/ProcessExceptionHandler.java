@@ -26,6 +26,7 @@ import com.umss.sigesa.domain.exception.InvalidStageStateException;
 import com.umss.sigesa.domain.exception.Level1ClosureBlockedException;
 import com.umss.sigesa.domain.exception.StageGateBlockedException;
 import com.umss.sigesa.domain.exception.StageNotFoundException;
+import com.umss.sigesa.domain.exception.VisitImmutableException;
 import com.umss.sigesa.domain.model.PendingIndicator;
 import com.umss.sigesa.domain.exception.TemplateIndicatorIncompleteException;
 import com.umss.sigesa.domain.exception.TemplateInUseException;
@@ -72,6 +73,12 @@ public class ProcessExceptionHandler {
                         "error", "TEMPLATE_NOT_FOUND",
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(VisitImmutableException.class)
+    public ResponseEntity<Map<String, String>> handleVisitImmutable(VisitImmutableException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "VISIT_IMMUTABLE", "message", ex.getMessage()));
     }
 
     @ExceptionHandler(ProcessNotFoundException.class)

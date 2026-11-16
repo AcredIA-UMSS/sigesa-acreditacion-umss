@@ -49,7 +49,8 @@
 | PM-040 | PR-IMPL-051 | DD-UC-035 | FSD-UC-035 | Noticias y destacados: `/api/v1/public/news` + admin JD + home `#noticias` |
 | PM-041 | PR-IMPL-050 | DD-UC-016 | FSD-UC-016 | Certificado PDF B-lite: V29 agency/resolution, QR, A4 horizontal |
 | PM-042 | PR-IMPL-052 | DD-UC-036 | FSD-UC-036 | Historial de ingresos: sesión, logout, intentos fallidos y actividad [JD] |
-| PM-043 | N/A | — | FSD-UC-013 / FSD-UC-017 | Cierre de huecos: Gherkin semáforo `@TC-09`, 422 bitácora, `INDICATOR_APPROVED`, UI Orval |
+| PM-043 | PR-IMPL-054 | DD-UC-033 | FSD-UC-033 | RAG retrieval v2: tesauro, pesos de claves y AND/OR sobre chunks |
+| PM-044 | PR-IMPL-023 | DD-UC-023 | FSD-UC-023 | Fix: candidatos responsable = [CC] de la carrera del proceso |
 
 
 ---
@@ -2898,6 +2899,134 @@ El texto completo es el mensaje del chat del 2026-11-11 23:31. Alcance: menú HI
 - [ ] Reiniciar el backend que ya estaba en marcha para cargar V30 y los endpoints nuevos
 
 ---
+
+## PM-043
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-043 |
+| **Fecha** | 2026-11-15 |
+| **Hora** | 21:42 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Técnicas de recuperación RAG sobre chunks + Demo 4 aportes |
+| **Objetivo** | Sinónimos, peso/top-k de palabras clave y AND→OR sobre `normative_document`; documento de técnicas; `demo-4.md` / `8.4.0-aportes.md` |
+| **Contexto** | Extiende FSD-UC-033 / PR-IMPL-048. No PDF en caliente ni embeddings. k6 ya cubierto por el grupo. |
+| **PR-IMPL vinculado** | [PR-IMPL-054](../../prompts/impl/PR-IMPL-054.md) |
+| **DD-UC vinculado** | [DD-UC-033](../../design/DD-UC-033.md) |
+| **FSD-UC vinculado** | FSD-UC-033 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+aplica esa funcionalidad, crea un documento que especificque todas las tecnicas trabajadas y llena los aportes solicitados en las tareas
+
+k6 ya esta trabajado, lo de recoleccion de informacion, es aplicar a la funcion ya establecida, o sea a los chuncks de la base de datos, la idea es saber que tecnicas se aplica, como sinonimos, si doy varias palabras clave saber cual escoger, etc
+```
+
+### Entradas auxiliares
+
+- `docs/design/assistant/RAG-RETRIEVAL-TECHNIQUES.md`
+- `docs/prompts/impl/PR-IMPL-054.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/normative/NormativeDomainThesaurus.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/service/normative/NormativeQueryPlanner.java` |
+| generado | `backend/src/main/java/com/umss/sigesa/application/model/normative/NormativeSearchPlan.java` |
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/normative/NormativeQueryPlannerTest.java` |
+| generado | `docs/design/assistant/RAG-RETRIEVAL-TECHNIQUES.md` |
+| generado | `docs/prompts/impl/PR-IMPL-054.md` |
+| modificado | `NormativeDocumentSearchJpaAdapter`, `AssistantNormativeRagService`, `AssistantToolExecutor`, `AssistantResponseFormatter` |
+| modificado | `docs/product/uc/FSD-UC-033.md`, `docs/design/DD-UC-033.md`, `docs/product/FSD.md`, `docs/product/DTP.md` |
+| modificado | `docs/demos/demo-4.md`, `8.4.0-aportes.md` |
+
+### Cambios realizados
+
+- Planificador de consulta con tesauro y top-3 claves.
+- Cascada FTS AND / OR / término.
+- Reply y payload de tool con claves usadas y descartadas.
+- Aportes Demo 4 de Boris (FSD-UC-033 retrieval v2).
+
+### Validación ejecutada
+
+- [x] `backend/mvnw -Dtest=NormativeQueryPlannerTest,NormativeSearchQueryNormalizerTest,AssistantNormativeRagServiceTest test` — 9 pruebas, 0 fallos
+
+### Resultado obtenido
+
+El asistente elige claves de dominio sobre genéricos y expande sinónimos sin cambiar el corpus ni el endpoint de chat.
+
+### Próximos pasos
+
+- [ ] Reconstruir backend Docker para ver RAG v2 en el stack
+
+---
+
+## PM-044
+
+| Campo | Valor |
+|---|---|
+| **ID** | PM-044 |
+| **Fecha** | 2026-11-15 |
+| **Hora** | 22:23 |
+| **Solicitante** | Boris Anthony Angulo Urquieta |
+| **Agente/Entorno** | Cursor IDE — Agent |
+| **Modelo** | Cursor Grok 4.6 |
+| **Tarea** | Fix listado de candidatos a responsable de proceso |
+| **Objetivo** | Mostrar para asignar/cambiar responsable solo coordinadores [CC] activos de la carrera del proceso |
+| **Contexto** | El modal nativo quedaba vacío en carreras sin [CC]; el catálogo global de usuarios no debe usarse. FSD-BR-09 / FSD-BR-20. |
+| **PR-IMPL vinculado** | [PR-IMPL-023](../../prompts/impl/PR-IMPL-023.md) |
+| **DD-UC vinculado** | [DD-UC-023](../../design/DD-UC-023.md) |
+| **FSD-UC vinculado** | FSD-UC-023 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+en responsable del proceso de acreditacion no encuentro o no me muestran los usuarios, podemos hacer esa tarea mas como fix, que me muestren para asignar o cambiar responsables solo coordinadores que pertenezcan a la carrera,
+```
+
+### Entradas auxiliares
+
+- `docs/design/DD-UC-023.md`
+- `docs/product/uc/FSD-UC-023.md`
+
+### Archivos generados o modificados
+
+| Acción | Ruta |
+|---|---|
+| generado | `backend/src/test/java/com/umss/sigesa/application/service/process/ListEligibleResponsiblesServiceTest.java` |
+| generado | `frontend/src/features/processes/components/ProcessResponsibleSection.test.tsx` |
+| modificado | `backend/src/main/java/com/umss/sigesa/application/service/process/ListEligibleResponsiblesService.java` |
+| modificado | `backend/src/main/java/com/umss/sigesa/config/ProcessModuleConfig.java` |
+| modificado | `frontend/src/features/processes/components/ProcessResponsibleSection.tsx` |
+| modificado | `frontend/src/features/processes/components/ProcessResponsibleContainer.tsx` |
+| modificado | `frontend/src/features/processes/hooks/useProcessResponsible.ts` |
+| modificado | `docs/product/DTP.md` |
+
+### Cambios realizados
+
+- Candidatos = `user_program_assignment` activa de la carrera + rol CC ACTIVE; no se listan CC de otras carreras.
+- Modal con radios visibles y vacío explícito si la carrera no tiene coordinador.
+
+### Validación ejecutada
+
+- [x] `ListEligibleResponsiblesServiceTest` — 3 pruebas OK
+- [x] `ProcessResponsibleSection.test.tsx` — 2 pruebas OK
+- [ ] Browser — en curso tras rebuild compose
+
+### Resultado obtenido
+
+El [JD] ve solo coordinadores de la carrera; si no hay, el modal lo explica y enlaza a `/admin/users`.
+
+### Próximos pasos
+
+- [ ] Asignar [CC] a Arquitectura / Adm. Empresas en Usuarios si se quiere demo de esas carreras
+
 
 ## PM-043
 

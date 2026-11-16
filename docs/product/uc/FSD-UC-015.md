@@ -33,6 +33,7 @@ ultima_actualizacion: "2026-11-12"
 | Evento | Destinatario | Deep link |
 |--------|--------------|-----------|
 | `IndicatorApproved` / `IndicatorRejected` | [CC] (responsable + asignación programa) | Indicador (+ observationId) |
+| `TechnicalObservationIssued` | [CC] (responsable + asignación programa) | Indicador (`observationId`) |
 | `EvidenceUploaded` / `EvidenceSubsanated` | [TD] | Bandeja técnico |
 | `DeadlineApproaching` | [CC] | Indicador / observación |
 | `Level1Completed` | [CC] | Nivel 1 |

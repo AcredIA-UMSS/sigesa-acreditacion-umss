@@ -11,8 +11,11 @@ RUN ./mvnw -B package -DskipTests
 # Etapa 2: solo JRE + jar
 FROM eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372
 WORKDIR /app
-RUN addgroup -S sigesa && adduser -S -G sigesa -H sigesa
+# OpenPDF embebido (certificados) necesita AWT headless + fontconfig en Alpine
+RUN apk add --no-cache fontconfig freetype ttf-dejavu wget \
+    && addgroup -S sigesa && adduser -S -G sigesa -H sigesa
 RUN mkdir -p /app/data/evidences /app/data/reports /app/uploads && chown -R sigesa:sigesa /app/data /app/uploads
+ENV JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
 COPY --chown=sigesa:sigesa data/ /app/data/
 COPY --from=builder /app/target/sigesa-0.0.1-SNAPSHOT.jar app.jar
 USER sigesa

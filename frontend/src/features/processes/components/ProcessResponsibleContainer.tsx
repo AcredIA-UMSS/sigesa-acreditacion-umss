@@ -24,6 +24,7 @@ export function ProcessResponsibleContainer({
   const {
     candidates,
     isLoadingCandidates,
+    loadError,
     selectedUserId,
     setSelectedUserId,
     actionError,
@@ -81,11 +82,13 @@ export function ProcessResponsibleContainer({
 
       <AssignResponsibleModalUI
         isOpen={isModalOpen}
+        careerName={process.careerName}
         candidates={candidates}
         selectedUserId={selectedUserId}
         isLoadingCandidates={isLoadingCandidates}
         isSubmitting={isAssigning}
         submitError={actionError}
+        loadError={loadError}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedUserId('');

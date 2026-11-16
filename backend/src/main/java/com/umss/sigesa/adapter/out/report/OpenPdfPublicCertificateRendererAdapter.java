@@ -254,7 +254,8 @@ public class OpenPdfPublicCertificateRendererAdapter implements PublicCertificat
     private static BaseFont loadFont(String classpath) {
         byte[] data = readClasspath(classpath);
         try {
-            return BaseFont.createFont(classpath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, false, data, null);
+            String fontName = classpath.substring(classpath.lastIndexOf('/') + 1);
+            return BaseFont.createFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, false, data, null);
         } catch (DocumentException | IOException ex) {
             throw new IllegalStateException("No se pudo embeber la fuente " + classpath, ex);
         }

@@ -255,7 +255,8 @@ public class EnqueueDomainNotificationService implements EnqueueDomainNotificati
 
     private static UUID resolveIndicatorId(DomainNotificationCommand command) {
         return switch (command.eventType()) {
-            case IndicatorRejected, IndicatorApproved, EvidenceUploaded, EvidenceSubsanated, DeadlineApproaching -> {
+            case IndicatorRejected, IndicatorApproved, EvidenceUploaded, EvidenceSubsanated, DeadlineApproaching,
+                 TechnicalObservationIssued -> {
                 String raw = command.payloadValue("indicatorId");
                 if (hasText(raw)) {
                     try {
@@ -365,7 +366,7 @@ public class EnqueueDomainNotificationService implements EnqueueDomainNotificati
 
     private List<NotificationRecipient> resolveRecipients(DomainNotificationCommand command) {
         return switch (command.eventType()) {
-            case IndicatorRejected, IndicatorApproved, DeadlineApproaching, Level1Completed ->
+            case IndicatorRejected, IndicatorApproved, DeadlineApproaching, Level1Completed, TechnicalObservationIssued ->
                     resolveCcUnion(command.programId(), command.processId());
             case EvidenceUploaded, EvidenceSubsanated ->
                     recipientResolver.resolveForProgram(command.programId(), Role.TD);
