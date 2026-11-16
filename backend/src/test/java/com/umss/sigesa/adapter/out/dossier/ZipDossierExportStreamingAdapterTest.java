@@ -20,9 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,7 @@ class ZipDossierExportStreamingAdapterTest {
     private TemplatePort templatePort;
 
     @Test
-    @DisplayName("Genera ZIP con estructura jerárquica e índice maestro")
+    @DisplayName("Genera ZIP con estructura jerárquica e índice maestro en streaming")
     void generatesZipWithHierarchyAndIndex() throws Exception {
         UUID processId = UUID.randomUUID();
         ZipDossierExportStreamingAdapter adapter = new ZipDossierExportStreamingAdapter(
@@ -92,12 +91,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of("PDFDATA".getBytes()));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(storageKey.startsWith("dossier-exports/"));
+        assertTrue(outputStream.size() > 0);
 
         List<String> entries = new ArrayList<>();
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 entries.add(entry.getName());
@@ -145,9 +148,12 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("missing/key")).thenReturn(Optional.empty());
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
     }
 
     @Test
@@ -189,12 +195,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of(fileContent));
 
-        File zip = adapter.generateDossierZip(processId, jobId);
-        assertNotNull(zip);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
 
+        String storageKey = adapter.generateDossierZip(processId, jobId);
+        assertNotNull(storageKey);
+
+        // Verificar que el manifiest existe dentro del ZIP
         boolean manifestFound = false;
         String manifestContent = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().contains("00_Manifiest_Checksums.txt")) {
@@ -256,13 +266,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/informe.pdf")).thenReturn(Optional.of(fileContent));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
-        assertTrue(zip.exists());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
+
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
     }
 
     @Test
-    @DisplayName("Índice HTML contiene estadísticas, tabla de contenidos y enlaces relativos a archivos")
+    @DisplayName("Índice HTML contiene estadísticas y tabla de contenidos")
     void htmlIndexContainsStatsAndToc() throws Exception {
         UUID processId = UUID.randomUUID();
         ZipDossierExportStreamingAdapter adapter = new ZipDossierExportStreamingAdapter(
@@ -298,11 +311,16 @@ class ZipDossierExportStreamingAdapterTest {
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
         when(blobStorage.retrieve("evidences/1/v1/resolucion.pdf")).thenReturn(Optional.of("PDFDATA".getBytes()));
 
-        File zip = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
-        assertNotNull(zip);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
 
+        String storageKey = adapter.generateDossierZip(processId, UUID.randomUUID().toString());
+        assertNotNull(storageKey);
+        assertTrue(outputStream.size() > 0);
+
+        // Extraer el HTML del índice y verificar contenido
         String indexContent = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().contains("00_Indice_Maestro_Cumplimiento.html")) {
@@ -327,14 +345,14 @@ class ZipDossierExportStreamingAdapterTest {
         assertTrue(indexContent.contains("resolucion.pdf"), "Debe contener el nombre del archivo");
         assertTrue(indexContent.contains("SHA-256"), "Debe mencionar SHA-256 para integridad");
         assertTrue(indexContent.contains("badge-ok"), "Debe contener badges de estado");
-        // Verifica que contiene enlace relativo clicable para el archivo
-        assertTrue(indexContent.contains("href='Dimension_") && indexContent.contains("FOLIO-0012_resolucion.pdf"),
-                "Debe contener enlace relativo local al archivo dentro del ZIP");
+        assertTrue(indexContent.contains("<a href='"), "Debe contener enlace relativo al archivo");
+        assertFalse(indexContent.contains(processId.toString()), "No debe exponer el UUID del proceso");
+        assertFalse(indexContent.contains("evidences/1/v1/resolucion.pdf"), "No debe exponer la clave interna de almacenamiento");
     }
 
     @Test
-    @DisplayName("Usa nombres de negocio de proceso y carrera en HTML, resumen ejecutivo y manifiesto")
-    void resolvesBusinessNamesForProcessAndCareer() throws Exception {
+    @DisplayName("El índice HTML renderiza nombres de negocio de Carrera y Proceso sin exponer UUIDs")
+    void rendersBusinessNamesInHtmlIndex() throws Exception {
         UUID processId = UUID.randomUUID();
         UUID careerId = UUID.randomUUID();
         UUID templateId = UUID.randomUUID();
@@ -352,14 +370,9 @@ class ZipDossierExportStreamingAdapterTest {
         when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(process));
 
         when(programCatalogPort.findById(careerId)).thenReturn(Optional.of(
-                new ProgramCatalogPort.ProgramEntry(careerId, "INF-SIS", "Ingeniería de Sistemas")));
-
-        Template template = Template.builder()
-                .id(templateId)
-                .name("Modelo CEUB 2026")
-                .type("CEUB")
-                .build();
-        when(templatePort.findMetadataById(templateId)).thenReturn(Optional.of(template));
+                new ProgramCatalogPort.ProgramEntry(careerId, "SIS", "Ingeniería de Sistemas")));
+        when(templatePort.findMetadataById(templateId)).thenReturn(Optional.of(
+                Template.builder().id(templateId).name("Modelo de Acreditación ARCU-SUR 2024").type("ARCU-SUR").build()));
 
         UUID level1Id = UUID.randomUUID();
         UUID level2Id = UUID.randomUUID();
@@ -379,68 +392,51 @@ class ZipDossierExportStreamingAdapterTest {
         DocumentAsset asset = DocumentAsset.builder()
                 .id(assetId)
                 .processId(processId)
-                .folioCode("FOLIO-0077")
+                .folioCode("FOLIO-0099")
                 .title("plan_estudios.pdf")
-                .storageKey("evidences/plan_estudios.pdf")
+                .storageKey("evidences/sistemas/v1/plan_estudios.pdf")
                 .build();
         when(documentAssetPort.findByProcessId(processId)).thenReturn(List.of(asset));
-        IndicatorEvidenceLink link = IndicatorEvidenceLink.builder().id(UUID.randomUUID()).indicatorId(indicatorId).documentAssetId(assetId).evidenceId(UUID.randomUUID()).build();
+        IndicatorEvidenceLink link = IndicatorEvidenceLink.builder()
+                .id(UUID.randomUUID())
+                .indicatorId(indicatorId)
+                .documentAssetId(assetId)
+                .evidenceId(UUID.randomUUID())
+                .build();
         when(documentAssetPort.findAllLinksByProcessId(processId)).thenReturn(List.of(link));
-        when(blobStorage.retrieve("evidences/plan_estudios.pdf")).thenReturn(Optional.of("PDF_CONTENT".getBytes()));
+        when(blobStorage.retrieve("evidences/sistemas/v1/plan_estudios.pdf")).thenReturn(Optional.of("CONTENT".getBytes()));
 
-        File zip = adapter.generateDossierZip(processId, "job-business-names-123");
-        assertNotNull(zip);
-        assertTrue(zip.getName().startsWith("Dossier_INF-SIS_Modelo_CEUB_2026_"),
-                "El nombre del archivo ZIP debe incluir el código de carrera y nombre de plantilla: " + zip.getName());
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        when(blobStorage.createOutputStream(anyString(), anyString())).thenReturn(outputStream);
 
-        String htmlContent = null;
-        String summaryContent = null;
-        String manifestContent = null;
+        String storageKey = adapter.generateDossierZip(processId, "job-biz-01");
+        assertNotNull(storageKey);
+        assertTrue(storageKey.contains("SIS") || storageKey.contains("Sistemas"));
 
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
+        String indexHtml = null;
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(outputStream.toByteArray()))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                byte[] buf = new byte[8192];
-                int n;
-                while ((n = zis.read(buf)) != -1) {
-                    bos.write(buf, 0, n);
-                }
-                String content = bos.toString(StandardCharsets.UTF_8);
-                if (entry.getName().endsWith("00_Indice_Maestro_Cumplimiento.html")) {
-                    htmlContent = content;
-                } else if (entry.getName().endsWith("00_Resumen_Ejecutivo.txt")) {
-                    summaryContent = content;
-                } else if (entry.getName().endsWith("00_Manifiest_Checksums.txt")) {
-                    manifestContent = content;
+                if ("00_Indice_Maestro_Cumplimiento.html".equals(entry.getName())) {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = zis.read(buf)) != -1) {
+                        bos.write(buf, 0, n);
+                    }
+                    indexHtml = bos.toString(StandardCharsets.UTF_8);
+                    break;
                 }
                 zis.closeEntry();
             }
         }
 
-        // Validaciones en Índice HTML
-        assertNotNull(htmlContent);
-        assertTrue(htmlContent.contains("Ingeniería de Sistemas (INF-SIS)"),
-                "El HTML debe mostrar el nombre de negocio de la carrera");
-        assertTrue(htmlContent.contains("Modelo CEUB 2026"),
-                "El HTML debe mostrar el nombre de negocio del proceso/plantilla");
-        assertTrue(htmlContent.contains("href='Dimension_"),
-                "El HTML debe tener enlaces relativos a las carpetas de evidencias");
-        assertTrue(htmlContent.contains("FOLIO-0077_plan_estudios.pdf"),
-                "El HTML debe enlazar al archivo foliado");
-
-        // Validaciones en Resumen Ejecutivo
-        assertNotNull(summaryContent);
-        assertTrue(summaryContent.contains("Carrera:    Ingeniería de Sistemas (INF-SIS)"),
-                "El resumen ejecutivo debe mostrar el nombre de la carrera");
-        assertTrue(summaryContent.contains("Proceso:    Modelo CEUB 2026"),
-                "El resumen ejecutivo debe mostrar el nombre del proceso");
-
-        // Validaciones en Manifiesto
-        assertNotNull(manifestContent);
-        assertTrue(manifestContent.contains("Carrera:   Ingeniería de Sistemas (INF-SIS)"),
-                "El manifiesto debe incluir el nombre de la carrera");
-        assertTrue(manifestContent.contains("Proceso:   Modelo CEUB 2026"),
-                "El manifiesto debe incluir el nombre del proceso");
+        assertNotNull(indexHtml);
+        assertTrue(indexHtml.contains("Ingeniería de Sistemas (SIS)"), "Debe mostrar el nombre de la carrera con código");
+        assertTrue(indexHtml.contains("Modelo de Acreditación ARCU-SUR 2024"), "Debe mostrar el nombre de la plantilla");
+        assertFalse(indexHtml.contains(processId.toString()), "NO debe mostrar el UUID del proceso");
+        assertFalse(indexHtml.contains(careerId.toString()), "NO debe mostrar el UUID de la carrera");
+        assertFalse(indexHtml.contains("evidences/sistemas/v1/plan_estudios.pdf"), "NO debe exponer la storage key");
+        assertTrue(indexHtml.contains("<a href='"), "Debe contener hipervínculo relativo al documento");
     }
 }

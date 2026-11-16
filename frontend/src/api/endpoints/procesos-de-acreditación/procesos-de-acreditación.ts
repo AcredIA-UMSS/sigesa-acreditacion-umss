@@ -27,6 +27,7 @@ import type {
 import type {
   AssignResponsibleRequestDto,
   CreateProcessRequestDto,
+  DownloadDossier200,
   EligibleResponsibleDto,
   ExportJobResponse,
   JobStatusResponse,
@@ -537,10 +538,20 @@ export type exportDossierResponse404 = {
   status: 404
 }
 
+export type exportDossierResponse409 = {
+  data: void
+  status: 409
+}
+
+export type exportDossierResponse429 = {
+  data: void
+  status: 429
+}
+
 export type exportDossierResponseSuccess = (exportDossierResponse202) & {
   headers: Headers;
 };
-export type exportDossierResponseError = (exportDossierResponse401 | exportDossierResponse403 | exportDossierResponse404) & {
+export type exportDossierResponseError = (exportDossierResponse401 | exportDossierResponse403 | exportDossierResponse404 | exportDossierResponse409 | exportDossierResponse429) & {
   headers: Headers;
 };
 
@@ -738,7 +749,7 @@ export function useGetDossierExportJobStatus<TData = Awaited<ReturnType<typeof g
 
 
 export type downloadDossierResponse200 = {
-  data: Blob
+  data: DownloadDossier200
   status: 200
 }
 

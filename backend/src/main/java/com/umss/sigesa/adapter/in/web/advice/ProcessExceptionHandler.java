@@ -1,6 +1,8 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.ActiveExportAlreadyExistsException;
 import com.umss.sigesa.domain.exception.AlreadyFrozenException;
+import com.umss.sigesa.domain.exception.TooManyConcurrentExportsException;
 import com.umss.sigesa.domain.exception.CareerScopeMismatchException;
 import com.umss.sigesa.domain.exception.DelegationDeniedException;
 import com.umss.sigesa.domain.exception.DelegationNotFoundException;
@@ -328,6 +330,25 @@ public class ProcessExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of(
                         "error", "INVALID_RESPONSIBLE_USER",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(ActiveExportAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleActiveExportAlreadyExists(ActiveExportAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "ACTIVE_EXPORT_EXISTS",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(TooManyConcurrentExportsException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyConcurrentExports(TooManyConcurrentExportsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(org.springframework.http.HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(Map.of(
+                        "error", "TOO_MANY_REQUESTS",
                         "message", ex.getMessage()
                 ));
     }

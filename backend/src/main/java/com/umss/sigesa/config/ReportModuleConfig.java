@@ -24,6 +24,7 @@ import com.umss.sigesa.application.service.report.GetReportJobStatusService;
 import com.umss.sigesa.application.service.report.ProcessReportJobService;
 import com.umss.sigesa.application.service.report.ReportExportJobService;
 import com.umss.sigesa.application.service.report.ReportJobProcessor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -78,8 +79,10 @@ public class ReportModuleConfig {
             ReportExportJobRepositoryPort repositoryPort,
             TransactionRunnerPort transactions,
             DossierExportPort dossierExportPort,
-            EvidenceBlobStoragePort blobStorage) {
-        return new DossierExportService(repositoryPort, transactions, dossierExportPort, blobStorage);
+            EvidenceBlobStoragePort blobStorage,
+            @Value("${sigesa.dossier.max-concurrent-jobs:4}") int maxConcurrentJobs,
+            @Value("${sigesa.dossier.job-timeout-minutes:10}") int jobTimeoutMinutes) {
+        return new DossierExportService(repositoryPort, transactions, dossierExportPort, blobStorage, maxConcurrentJobs, jobTimeoutMinutes);
     }
 
     @Bean
