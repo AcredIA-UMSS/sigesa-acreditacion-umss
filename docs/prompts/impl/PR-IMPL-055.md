@@ -33,3 +33,4 @@ Observación del técnico DUEA por indicador: botón condicionado a evidencia, m
 
 - `ProcessObservationServiceTest` verifica enqueue al `submit`.
 - Vitest del modal: historial + envío.
+

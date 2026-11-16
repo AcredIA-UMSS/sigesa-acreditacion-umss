@@ -47,6 +47,16 @@ public interface SpringDataNormativeIndicatorRepository extends JpaRepository<No
     List<NormativeIndicatorJpaEntity> findAllByLevel1Id(@Param("level1Id") UUID level1Id);
 
     @Query("""
+            SELECT i FROM NormativeIndicatorJpaEntity i
+            JOIN FETCH i.level3Node l3
+            JOIN FETCH l3.level2Node l2
+            JOIN FETCH l2.level1Node l1
+            WHERE l1.process.id = :processId
+            ORDER BY l1.order ASC, l2.order ASC, l3.order ASC, i.order ASC
+            """)
+    List<NormativeIndicatorJpaEntity> findTreeByProcessId(@Param("processId") UUID processId);
+
+    @Query("""
             SELECT COUNT(DISTINCT i.id) FROM NormativeIndicatorJpaEntity i
             JOIN i.level3Node l3
             JOIN l3.level2Node l2

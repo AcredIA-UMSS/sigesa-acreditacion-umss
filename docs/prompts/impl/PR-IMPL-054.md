@@ -43,3 +43,4 @@ Aplicar técnicas de recuperación (sinónimos, peso de claves, AND→OR) sobre 
 | R1 | Reusar `POST /api/v1/assistant/chat` y la tool existente. |
 | R2 | Máximo 3 claves de mayor peso; genéricos no ganan a términos de tesauro. |
 | R3 | Sin hits: no fabricar artículos del manual. |
+
