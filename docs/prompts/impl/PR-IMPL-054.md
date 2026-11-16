@@ -1,18 +1,5 @@
 ---
 id: PR-IMPL-054
-<<<<<<< HEAD
-feature_asociado: DD-UC-039
-fsd_uc:
-  - FSD-UC-039
-fecha: "2026-11-15"
-version: "1.0"
-estado: En Curso
----
-
-# PR-IMPL-054 — Matriz de cobertura
-
-Implementar FSD-UC-039 / DD-UC-039: JSON + PDF síncrono, alcance via `EvaluationAccessGuard`, UI `/procesos/{id}/cobertura`, Gherkin `@TC-COVERAGE`. No ZIP. No `docs/baseline/`.
-=======
 feature_asociado: DD-UC-033
 fsd_uc:
   - FSD-UC-033
@@ -56,4 +43,4 @@ Aplicar técnicas de recuperación (sinónimos, peso de claves, AND→OR) sobre 
 | R1 | Reusar `POST /api/v1/assistant/chat` y la tool existente. |
 | R2 | Máximo 3 claves de mayor peso; genéricos no ganan a términos de tesauro. |
 | R3 | Sin hits: no fabricar artículos del manual. |
->>>>>>> c6bb1d0fb1ef23173c8316b6853bd23eecb5bb44
+
