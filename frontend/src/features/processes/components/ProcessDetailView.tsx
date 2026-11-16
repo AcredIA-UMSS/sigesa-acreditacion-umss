@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, Lock, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Download, Lock, Pencil, RefreshCw, Table2 } from 'lucide-react';
 import {
   getGetProcessQueryKey,
   getListProcessesQueryKey,

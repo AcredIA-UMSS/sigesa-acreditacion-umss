@@ -11,7 +11,13 @@ import { HomePage } from './features/home';
 import { NewsAdminPage, PublicNewsDetailPage, PublicNewsListPage } from './features/news';
 import { PublicStatusPage } from './features/public-portal';
 import { CreateProcessPage } from './features/accreditation-process';
-import { ProcessListPage, ProcessDetailPage, ProcessStructurePage } from './features/processes';
+import {
+  ProcessListPage,
+  ProcessDetailPage,
+  ProcessStructurePage,
+  CoverageMatrixPage,
+  PeerVisitAgendaPage,
+} from './features/processes';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { EvidenceUploadPage } from './features/evidence/EvidenceUploadPage';
 import { EvidenceSearchPage } from './features/evidence/EvidenceSearchPage';
@@ -171,6 +177,24 @@ function App() {
               <JdOrTdRoute>
                 <ProcessStructurePage />
               </JdOrTdRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId/cobertura"
+          element={
+            <ProtectedRoute>
+              <CoverageMatrixPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/procesos/:processId/visita-pares"
+          element={
+            <ProtectedRoute>
+              <PeerVisitAgendaPage />
             </ProtectedRoute>
           }
         />
