@@ -19,6 +19,7 @@ interface UseProcessResponsibleOptions {
 interface UseProcessResponsibleReturn {
   candidates: EligibleResponsibleDto[];
   isLoadingCandidates: boolean;
+  loadError: string | null;
   selectedUserId: string;
   setSelectedUserId: (userId: string) => void;
   actionError: string | null;
@@ -44,7 +45,10 @@ export function useProcessResponsible({
   });
 
   const candidates =
-    candidatesQuery.data?.status === 200 ? candidatesQuery.data.data : [];
+    candidatesQuery.data?.status === 200 ? (candidatesQuery.data.data ?? []) : [];
+  const loadError = candidatesQuery.isError
+    ? getApiErrorMessage(candidatesQuery.error as unknown)
+    : null;
 
   const invalidateProcessQueries = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: getGetProcessQueryKey(processId) });
@@ -96,7 +100,8 @@ export function useProcessResponsible({
 
   return {
     candidates,
-    isLoadingCandidates: candidatesQuery.isLoading,
+    isLoadingCandidates: candidatesQuery.isPending,
+    loadError,
     selectedUserId,
     setSelectedUserId,
     actionError,

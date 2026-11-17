@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import {
   AlertCircle,
   BarChart3,
-  Bell,
   CheckCircle2,
   Download,
   FileText,
@@ -11,6 +10,7 @@ import {
   Settings,
 } from 'lucide-react';
 import type { ReportJobStatusResponse } from '../../../api/model';
+import { NotificationBellPopover } from '../../notifications';
 import {
   SEMAPHORE_LABELS,
   type ReportPreviewModel,
@@ -87,14 +87,7 @@ export function ExecutiveReportUI({
           <span className="text-gray-700">Ejecutivo PDF</span>
         </nav>
         <div className="flex items-center gap-4 text-gray-600">
-          <button
-            type="button"
-            className="relative hover:text-primary-600"
-            aria-label="Notificaciones"
-          >
-            <Bell size={24} />
-            <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-secondary" />
-          </button>
+          <NotificationBellPopover />
           <button
             type="button"
             className="hover:text-primary-600"

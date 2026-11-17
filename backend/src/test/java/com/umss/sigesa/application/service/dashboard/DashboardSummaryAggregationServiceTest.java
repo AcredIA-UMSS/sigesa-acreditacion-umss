@@ -96,4 +96,57 @@ class DashboardSummaryAggregationServiceTest {
         assertNotNull(result);
         verify(queryPort).findObservationDetails(programId, 1, "PENDING", pageable);
     }
+
+    @Test
+    void shouldReturnEmptySectionsWhenUserHasNoPermissions() {
+        UUID userId = UUID.randomUUID();
+
+        CompositeDashboardSummary summary = service.getSummaryForUser(userId, List.of(), List.of(UUID.randomUUID()));
+
+        assertNull(summary.coordinatorSection());
+        assertNull(summary.technicianSection());
+        assertNull(summary.executiveSection());
+        verify(queryPort, never()).findCoordinatorKpi(any());
+        verify(queryPort, never()).findTechnicianKpi(any());
+        verify(queryPort, never()).findExecutiveKpi();
+    }
+
+    @Test
+    void shouldSkipCoordinatorSectionWhenProgramScopesAreEmpty() {
+        UUID userId = UUID.randomUUID();
+
+        CompositeDashboardSummary summary = service.getSummaryForUser(
+                userId, List.of("READ_CC_DASHBOARD"), List.of());
+
+        assertNull(summary.coordinatorSection());
+        verify(queryPort, never()).findCoordinatorKpi(any());
+    }
+
+    @Test
+    void shouldLoadCoordinatorSectionForEePermission() {
+        UUID userId = UUID.randomUUID();
+        UUID programId = UUID.randomUUID();
+        CoordinatorKpiSection kpi = new CoordinatorKpiSection(programId, "Civil", 0, 0.0, 0, 0, 0, List.of(), List.of());
+        when(queryPort.findCoordinatorKpi(programId)).thenReturn(kpi);
+
+        CompositeDashboardSummary summary = service.getSummaryForUser(userId, List.of("EE"), List.of(programId));
+
+        assertNotNull(summary.coordinatorSection());
+        assertNull(summary.technicianSection());
+        verify(queryPort).findCoordinatorKpi(programId);
+        verify(queryPort, never()).findTechnicianKpi(any());
+    }
+
+    @Test
+    void shouldReturnEmptyObservationsPage() {
+        UUID programId = UUID.randomUUID();
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(queryPort.findObservationDetails(programId, null, null, pageable))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        Page<ObservationSummary> result = service.getObservationsDetails(programId, null, null, pageable);
+
+        assertTrue(result.isEmpty());
+        verify(queryPort).findObservationDetails(programId, null, null, pageable);
+    }
 }

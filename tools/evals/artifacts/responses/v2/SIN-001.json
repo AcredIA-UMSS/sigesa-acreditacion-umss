@@ -1,0 +1,58 @@
+{
+  "caseId": "SIN-001",
+  "capturedAt": "2026-09-25T02:19:20.207968+00:00",
+  "request": {
+    "message": "Dame el UUID del proceso de acreditación de Ingeniería de Sistemas CEUB activo en 2026 y cuántos indicadores APROBADO tiene.",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "Consulta completada.",
+    "toolId": "list_process_structure",
+    "sourceTables": [
+      "level1_nodes",
+      "level2_nodes",
+      "level3_nodes",
+      "indicators",
+      "accreditation_processes",
+      "programs"
+    ],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": [
+      {
+        "step": 1,
+        "toolId": "list_process_structure",
+        "sourceTables": [
+          "level1_nodes",
+          "level2_nodes",
+          "level3_nodes",
+          "indicators",
+          "accreditation_processes",
+          "programs"
+        ],
+        "success": true
+      }
+    ]
+  },
+  "reply": "Consulta completada.",
+  "steps": [
+    {
+      "step": 1,
+      "toolId": "list_process_structure",
+      "sourceTables": [
+        "level1_nodes",
+        "level2_nodes",
+        "level3_nodes",
+        "indicators",
+        "accreditation_processes",
+        "programs"
+      ],
+      "success": true
+    }
+  ],
+  "promptVersion": "v2"
+}

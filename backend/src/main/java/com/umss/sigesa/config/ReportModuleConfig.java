@@ -1,17 +1,23 @@
 package com.umss.sigesa.config;
 
 import com.umss.sigesa.application.port.in.DownloadReportArtifactUseCase;
+import com.umss.sigesa.application.port.in.ExportProcessDossierUseCase;
 import com.umss.sigesa.application.port.in.GenerateExecutiveReportUseCase;
+import com.umss.sigesa.application.port.in.GetProcessDossierExportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.GetReportJobStatusUseCase;
 import com.umss.sigesa.application.port.in.ProcessReportJobUseCase;
 import com.umss.sigesa.application.port.out.AuditLogPort;
 import com.umss.sigesa.application.port.out.DashboardQueryPort;
+import com.umss.sigesa.application.port.out.DossierExportPort;
+import com.umss.sigesa.application.port.out.EvidenceBlobStoragePort;
 import com.umss.sigesa.application.port.out.ExecutiveDataPort;
 import com.umss.sigesa.application.port.out.PdfRendererPort;
 import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
 import com.umss.sigesa.application.port.out.ReportExportJobRepositoryPort;
 import com.umss.sigesa.application.port.out.ReportGeneratorPort;
 import com.umss.sigesa.application.port.out.ReportJobRepositoryPort;
+import com.umss.sigesa.application.port.out.TransactionRunnerPort;
+import com.umss.sigesa.application.service.dossier.DossierExportService;
 import com.umss.sigesa.application.service.report.DownloadReportArtifactService;
 import com.umss.sigesa.application.service.report.GenerateExecutiveReportService;
 import com.umss.sigesa.application.service.report.GetReportJobStatusService;
@@ -44,9 +50,10 @@ public class ReportModuleConfig {
             ReportJobRepositoryPort reportJobRepository,
             ExecutiveDataPort executiveDataPort,
             PdfRendererPort pdfRendererPort,
-            ReportArtifactStoragePort artifactStorage) {
+            ReportArtifactStoragePort artifactStorage,
+            TransactionRunnerPort transactions) {
         return new ProcessReportJobService(
-                reportJobRepository, executiveDataPort, pdfRendererPort, artifactStorage);
+                reportJobRepository, executiveDataPort, pdfRendererPort, artifactStorage, transactions);
     }
 
     @Bean
@@ -60,7 +67,28 @@ public class ReportModuleConfig {
     ReportExportJobService reportExportJobService(
             ReportExportJobRepositoryPort repositoryPort,
             DashboardQueryPort queryPort,
-            List<ReportGeneratorPort> reportGenerators) {
-        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators);
+            List<ReportGeneratorPort> reportGenerators,
+            TransactionRunnerPort transactions,
+            EvidenceBlobStoragePort blobStorage) {
+        return new ReportExportJobService(repositoryPort, queryPort, reportGenerators, transactions, blobStorage);
+    }
+
+    @Bean
+    DossierExportService dossierExportService(
+            ReportExportJobRepositoryPort repositoryPort,
+            TransactionRunnerPort transactions,
+            DossierExportPort dossierExportPort,
+            EvidenceBlobStoragePort blobStorage) {
+        return new DossierExportService(repositoryPort, transactions, dossierExportPort, blobStorage);
+    }
+
+    @Bean
+    ExportProcessDossierUseCase exportProcessDossierUseCase(DossierExportService dossierExportService) {
+        return dossierExportService;
+    }
+
+    @Bean
+    GetProcessDossierExportJobStatusUseCase getProcessDossierExportJobStatusUseCase(DossierExportService dossierExportService) {
+        return dossierExportService;
     }
 }

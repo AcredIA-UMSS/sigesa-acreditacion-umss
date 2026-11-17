@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.process;
 
 import com.umss.sigesa.application.model.process.EnrichedProcessDetail;
 import com.umss.sigesa.application.model.process.ProcessQueryContext;
+import com.umss.sigesa.application.port.out.NormativeHierarchyQueryPort;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
@@ -9,8 +10,10 @@ import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
 import com.umss.sigesa.domain.exception.ProcessNotFoundException;
 import com.umss.sigesa.domain.model.AccreditationProcess;
-import com.umss.sigesa.domain.model.Phase;
-import com.umss.sigesa.domain.model.Subphase;
+import com.umss.sigesa.domain.model.Level1Node;
+import com.umss.sigesa.domain.model.Level2Node;
+import com.umss.sigesa.domain.model.Level3Node;
+import com.umss.sigesa.domain.model.NormativeIndicator;
 import com.umss.sigesa.domain.model.Template;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,8 @@ class GetProcessDetailServiceTest {
     private ProcessResponsiblePort processResponsiblePort;
     @Mock
     private UserRepositoryPort userRepositoryPort;
+    @Mock
+    private NormativeHierarchyQueryPort normativeHierarchyQueryPort;
 
     private GetProcessDetailService service;
 
@@ -51,20 +56,68 @@ class GetProcessDetailServiceTest {
     @BeforeEach
     void setUp() {
         service = new GetProcessDetailService(
-                processQueryPort, programCatalogPort, templatePort, processResponsiblePort, userRepositoryPort);
+                processQueryPort,
+                programCatalogPort,
+                templatePort,
+                processResponsiblePort,
+                userRepositoryPort,
+                normativeHierarchyQueryPort);
     }
 
     @Test
-    void jdGetsDetailWithSortedPhases() {
-        AccreditationProcess process = buildProcessWithUnsortedPhases();
+    void jdGetsDetailWithTemplateMetadata() {
+        AccreditationProcess process = buildProcess();
         when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(process));
         stubEnrichment(careerA);
+        when(normativeHierarchyQueryPort.findProcessTree(processId)).thenReturn(Optional.empty());
 
         EnrichedProcessDetail detail = service.getDetail(processId, new ProcessQueryContext("JD", List.of()));
 
-        assertEquals("Fase 1", detail.phases().get(0).getName());
-        assertEquals("Sub 1", detail.phases().get(0).getSubphases().get(0).getName());
         assertEquals("CEUB 2026", detail.templateName());
+        assertEquals(0, detail.level1Nodes().size());
+    }
+
+    @Test
+    void jdGetsDetailWithImmutableNormativeTree() {
+        AccreditationProcess process = buildProcess();
+        when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(process));
+        stubEnrichment(careerA);
+
+        Level1Node level1B = Level1Node.builder()
+                .id(UUID.randomUUID())
+                .name("N1-B")
+                .order(2)
+                .level2Nodes(List.of())
+                .build();
+        Level1Node level1A = Level1Node.builder()
+                .id(UUID.randomUUID())
+                .name("N1-A")
+                .order(1)
+                .level2Nodes(List.of(Level2Node.builder()
+                        .id(UUID.randomUUID())
+                        .name("N2")
+                        .order(1)
+                        .level3Nodes(List.of(Level3Node.builder()
+                                .id(UUID.randomUUID())
+                                .name("N3")
+                                .order(1)
+                                .indicators(List.of(
+                                        NormativeIndicator.builder().id(UUID.randomUUID()).code("I2").order(2).build(),
+                                        NormativeIndicator.builder().id(UUID.randomUUID()).code("I1").order(1).build()
+                                ))
+                                .build()))
+                        .build()))
+                .build();
+
+        when(normativeHierarchyQueryPort.findProcessTree(processId))
+                .thenReturn(Optional.of(new NormativeHierarchyQueryPort.ProcessNormativeTree(
+                        processId, List.of(level1B, level1A))));
+
+        EnrichedProcessDetail detail = service.getDetail(processId, new ProcessQueryContext("JD", List.of()));
+
+        assertEquals("N1-A", detail.level1Nodes().get(0).getName());
+        assertEquals("I1", detail.level1Nodes().get(0).getLevel2Nodes().get(0)
+                .getLevel3Nodes().get(0).getIndicators().get(0).getCode());
     }
 
     @Test
@@ -75,7 +128,6 @@ class GetProcessDetailServiceTest {
                 .templateId(templateId)
                 .status("ACTIVE")
                 .startDate(LocalDateTime.now())
-                .phases(List.of())
                 .build();
         when(processQueryPort.findDetailById(processId)).thenReturn(Optional.of(process));
 
@@ -91,30 +143,13 @@ class GetProcessDetailServiceTest {
                 () -> service.getDetail(processId, new ProcessQueryContext("JD", List.of())));
     }
 
-    private AccreditationProcess buildProcessWithUnsortedPhases() {
-        Phase phase2 = Phase.builder()
-                .id(UUID.randomUUID())
-                .name("Fase 2")
-                .order(2)
-                .subphases(List.of(Subphase.builder().id(UUID.randomUUID()).name("Sub 2").order(2).build()))
-                .build();
-        Phase phase1 = Phase.builder()
-                .id(UUID.randomUUID())
-                .name("Fase 1")
-                .order(1)
-                .subphases(List.of(
-                        Subphase.builder().id(UUID.randomUUID()).name("Sub 2").order(2).build(),
-                        Subphase.builder().id(UUID.randomUUID()).name("Sub 1").order(1).build()
-                ))
-                .build();
-
+    private AccreditationProcess buildProcess() {
         return AccreditationProcess.builder()
                 .id(processId)
                 .careerId(careerA)
                 .templateId(templateId)
                 .status("ACTIVE")
                 .startDate(LocalDateTime.now())
-                .phases(new java.util.ArrayList<>(List.of(phase2, phase1)))
                 .build();
     }
 

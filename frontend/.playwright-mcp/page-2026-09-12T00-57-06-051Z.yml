@@ -1,0 +1,92 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - button [ref=f1e5]
+    - generic [ref=f1e8]:
+      - img "UMSS" [ref=f1e10]
+      - generic [ref=f1e11]:
+        - heading "UMSS DUEA" [level=1] [ref=f1e12]
+        - paragraph [ref=f1e13]: PANEL ADMINISTRATIVO
+    - navigation [ref=f1e14]:
+      - link "PANEL DE CONTROL ▼" [ref=f1e15] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f1e16]: PANEL DE CONTROL
+        - generic [ref=f1e24]: ▼
+      - button "GESTIÓN PROCESOS" [ref=f1e26]
+      - link "CARGAR EVIDENCIA" [ref=f1e37] [cursor=pointer]:
+        - /url: /evidencias/cargar
+      - link "BUSCAR EVIDENCIAS" [ref=f1e45] [cursor=pointer]:
+        - /url: /evidencias/buscar
+      - button "REPORTES ▼" [ref=f1e54]:
+        - generic [ref=f1e55]: REPORTES
+        - generic [ref=f1e59]: ▼
+      - button "HISTORIAL" [ref=f1e60]
+      - link "AYUDA" [ref=f1e68] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f1e75]:
+      - generic [ref=f1e76]:
+        - generic [ref=f1e77]: CC
+        - generic [ref=f1e80]:
+          - paragraph [ref=f1e81]: Coordinador de Carrera [CC]
+          - paragraph [ref=f1e82]: SIGESA
+      - button "Cerrar sesión" [ref=f1e83]
+  - generic [ref=f1e88]:
+    - banner [ref=f1e89]:
+      - navigation "Ruta de navegación" [ref=f1e90]: Inicio/Cargar evidencia
+      - generic [ref=f1e91]:
+        - button "Notificaciones" [ref=f1e92]
+        - button "Configuración" [ref=f1e97]
+    - main [ref=f1e101]:
+      - generic [ref=f1e102]:
+        - generic [ref=f1e103]:
+          - heading "Cargar Evidencia" [level=1] [ref=f1e105]
+          - paragraph [ref=f1e106]:
+            - text: El coordinador de carrera adjunta el archivo a un indicador normativo del proceso activo. Tras una carga exitosa, el indicador pasa a estado
+            - strong [ref=f1e107]: SUBIDO
+            - text: .
+        - generic [ref=f1e108]:
+          - generic [ref=f1e110]:
+            - generic [ref=f1e117]:
+              - heading "Metadatos y archivo" [level=2] [ref=f1e118]
+              - paragraph [ref=f1e119]: Proceso, indicador, descripción y documento de respaldo
+            - generic [ref=f1e120]:
+              - generic [ref=f1e121]:
+                - generic [ref=f1e122]: Proceso*
+                - combobox "Proceso*" [disabled] [ref=f1e123]:
+                  - option "Cargando procesos…" [selected]
+                - paragraph [ref=f1e124]: Solo procesos ACTIVE de su carrera
+              - generic [ref=f1e125]:
+                - generic [ref=f1e126]: Indicador normativo*
+                - combobox "Indicador normativo*" [disabled] [ref=f1e127]:
+                  - option "Primero seleccione un proceso" [selected]
+                - paragraph [ref=f1e128]: Elija el indicador donde registrará la evidencia
+              - generic [ref=f1e129]:
+                - generic [ref=f1e130]: DESCRIPCIÓN
+                - textbox "DESCRIPCIÓN" [ref=f1e131]:
+                  - /placeholder: Describa el contenido y propósito de la evidencia
+              - generic [ref=f1e132]:
+                - generic [ref=f1e133]: ARCHIVO DE EVIDENCIA
+                - generic [ref=f1e134] [cursor=pointer]:
+                  - generic [ref=f1e138]: Seleccionar archivo
+                  - generic [ref=f1e139]: PDF, Word, Excel o imagen — máx. 50 MB
+                  - button "ARCHIVO DE EVIDENCIA Seleccionar archivo PDF, Word, Excel o imagen — máx. 50 MB" [ref=f1e140]
+              - button "Subir evidencia" [ref=f1e142]
+          - complementary [ref=f1e146]:
+            - generic [ref=f1e147]:
+              - heading "Guía rápida" [level=3] [ref=f1e151]
+              - list [ref=f1e152]:
+                - listitem [ref=f1e153]:
+                  - generic [ref=f1e154]: "01"
+                  - paragraph [ref=f1e155]: Elija el proceso activo y el indicador normativo donde corresponde la evidencia.
+                - listitem [ref=f1e156]:
+                  - generic [ref=f1e157]: "02"
+                  - paragraph [ref=f1e158]: Agregue una descripción clara y adjunte el archivo de respaldo.
+                - listitem [ref=f1e159]:
+                  - generic [ref=f1e160]: "03"
+                  - paragraph [ref=f1e161]: Tras la carga, el indicador queda en SUBIDO y se notifica al técnico DUEA.
+            - generic [ref=f1e162]:
+              - heading "Formatos admitidos" [level=3] [ref=f1e163]
+              - list [ref=f1e164]:
+                - listitem [ref=f1e165]: "Documentos: PDF, DOC, DOCX"
+                - listitem [ref=f1e166]: "Hojas de cálculo: XLS, XLSX"
+                - listitem [ref=f1e167]: "Imágenes: PNG, JPEG"
+              - paragraph [ref=f1e168]: "Tamaño máximo: 50 MB por archivo"

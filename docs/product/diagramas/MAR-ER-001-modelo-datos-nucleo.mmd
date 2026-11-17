@@ -1,52 +1,107 @@
 ﻿%% diagramId: MAR-ER-001
-%% fsdTrace: team/Marlene/04_fsd/FSD.md seccion 6 modelo datos
+%% version: v2.0 (post-M5)
+%% fsdTrace: docs/product/modelo_datos.md §2
+%% adrTrace: ADR-0004, ADR-0005 (evaluación — núcleo implementado)
 erDiagram
-    CARRERA ||--o{ PROCESO_ACREDITACION : instancia
-    PROCESO_ACREDITACION ||--|{ FASE : contiene
-    FASE ||--|{ SUBFASE : contiene
-    SUBFASE ||--|{ INDICADOR : evalua
-    INDICADOR ||--o{ DOCUMENTO : versiona
-    USUARIO ||--o{ ASIGNACION_ROL : tiene
-    ASIGNACION_ROL }o--|| CARRERA : alcance
-    PLANTILLA_NORMATIVA ||--o{ PROCESO_ACREDITACION : origen
+    ACADEMIC_PROGRAM ||--o{ ACCREDITATION_PROCESS : runs
+    ACCREDITATION_TEMPLATE ||--o{ TEMPLATE_LEVEL1 : defines
+    TEMPLATE_LEVEL1 ||--o{ TEMPLATE_LEVEL2 : contains
+    TEMPLATE_LEVEL2 ||--o{ TEMPLATE_LEVEL3 : contains
+    TEMPLATE_LEVEL3 ||--o{ TEMPLATE_INDICATOR : contains
+    ACCREDITATION_PROCESS }o--|| ACCREDITATION_TEMPLATE : cloned_from
+    ACCREDITATION_PROCESS ||--o{ LEVEL1_NODE : contains
+    LEVEL1_NODE ||--o{ LEVEL2_NODE : contains
+    LEVEL2_NODE ||--o{ LEVEL3_NODE : contains
+    LEVEL3_NODE ||--o{ INDICATOR : contains
+    INDICATOR ||--o{ EVIDENCE : proves
+    INDICATOR ||--o{ INDICATOR_OBSERVATION : may_have
+    EVIDENCE ||--o{ EVIDENCE_VERSION : versions
+    INDICATOR_OBSERVATION ||--o| EVIDENCE_VERSION : triggers_subsanation
+    APP_USER ||--o{ USER_PROGRAM_ASSIGNMENT : assigned
+    ACADEMIC_PROGRAM ||--o{ USER_PROGRAM_ASSIGNMENT : scopes
+    APP_USER ||--o{ AUDIT_LOG : performs
 
-    CARRERA {
+    ACADEMIC_PROGRAM {
         uuid id PK
-        string nombre
-        string facultad
-        string tipo_grado
-        boolean publicado_portal
+        string code
+        string name
+        string status
     }
 
-    PROCESO_ACREDITACION {
+    ACCREDITATION_TEMPLATE {
         uuid id PK
-        uuid carrera_id FK
-        uuid plantilla_id FK
-        string gestion
-        string estado
-        date inicio
+        string evaluator_model "CEUB|ARCU-SUR"
+        string name
+        string status "DRAFT|PUBLISHED|ARCHIVED"
     }
 
-    INDICADOR {
+    ACCREDITATION_PROCESS {
         uuid id PK
-        uuid subfase_id FK
-        string codigo_ceub
-        string estado
-        int peso
+        uuid program_id FK
+        uuid template_id FK
+        string evaluator_model
+        int management_year
+        string status "ACTIVE|COMPLETED|CANCELLED"
     }
 
-    DOCUMENTO {
+    LEVEL1_NODE {
         uuid id PK
-        uuid indicador_id FK
-        int version
-        string hash_sha256
-        string storage_key
-        timestamptz cargado_en
+        uuid process_id FK
+        int level1_order
+        string name
+        string status "ABIERTA|COMPLETADA"
     }
 
-    USUARIO {
+    LEVEL2_NODE {
         uuid id PK
-        string email_umss
-        string rol
-        boolean activo
+        uuid level1_id FK
+        int level2_order
+        string name
+    }
+
+    LEVEL3_NODE {
+        uuid id PK
+        uuid level2_id FK
+        int level3_order
+        string name
+    }
+
+    INDICATOR {
+        uuid id PK
+        uuid level3_id FK
+        string code
+        text description
+        decimal weight
+        string status "PENDIENTE|SUBIDO|OBSERVADO|SUBSANADO|APROBADO"
+    }
+
+    EVIDENCE {
+        uuid id PK
+        uuid normative_indicator_id FK
+        uuid latest_version_id FK
+    }
+
+    EVIDENCE_VERSION {
+        uuid id PK
+        uuid evidence_id FK
+        int version_number
+        string content_hash
+        string description
+        string external_url
+        uuid indicator_observation_id FK
+    }
+
+    INDICATOR_OBSERVATION {
+        uuid id PK
+        uuid indicator_id FK
+        text body
+        string status "OPEN|RESOLVED"
+        uuid author_id FK
+    }
+
+    APP_USER {
+        uuid id PK
+        string email
+        string role "CC|TD|JD|EE"
+        boolean active
     }

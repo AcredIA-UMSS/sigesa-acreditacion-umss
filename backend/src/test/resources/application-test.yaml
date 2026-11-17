@@ -1,9 +1,25 @@
+management:
+  tracing:
+    sampling:
+      probability: 0
+
 spring:
   config:
     activate:
       on-profile: test
+  # Avoid creating a half-configured JavaMailSender in tests (empty host).
+  # DefaultNotificationSenderAdapter remains the fallback; JavaMail is @Primary only when a real sender exists.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.mail.autoconfigure.MailSenderAutoConfiguration
   datasource:
     url: jdbc:h2:mem:sigesa-test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    hikari:
+      pool-name: sigesa-hikari-test
+      maximum-pool-size: 10
+      minimum-idle: 1
+      connection-timeout: 30000
+      leak-detection-threshold: 20000
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -13,6 +29,8 @@ spring:
       mode: never
 
 sigesa:
+  public:
+    base-url: http://localhost:5173
   jwt:
     secret: "sigesa-test-jwt-secret-key-minimum-256-bits-required-for-hmac-sha256"
     expiration-seconds: 3600

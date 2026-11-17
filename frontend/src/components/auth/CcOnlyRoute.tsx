@@ -13,7 +13,7 @@ export function CcOnlyRoute({ children }: CcOnlyRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (session.role !== 'CC') {
+  if (session.role !== 'CC' && session.role !== 'CAE_MEMBER') {
     return <Navigate to={getPostLoginPath(session.role)} replace />;
   }
 

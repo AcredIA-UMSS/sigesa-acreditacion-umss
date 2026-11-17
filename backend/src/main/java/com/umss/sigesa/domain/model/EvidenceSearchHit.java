@@ -5,10 +5,9 @@ import java.util.UUID;
 
 public record EvidenceSearchHit(
         UUID evidenceId,
-        UUID subphaseId,
-        String subphaseName,
-        UUID phaseId,
-        String phaseName,
+        UUID level1Id,
+        String level1Name,
+        String level3Name,
         UUID processId,
         UUID indicatorId,
         String indicatorCode,

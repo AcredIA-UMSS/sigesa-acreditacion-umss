@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e50]:
+    - complementary [ref=e51]:
+      - button [ref=e52]
+      - generic [ref=e55]:
+        - img "UMSS" [ref=e57]
+        - generic [ref=e58]:
+          - heading "UMSS DUEA" [level=1] [ref=e59]
+          - paragraph [ref=e60]: PANEL ADMINISTRATIVO
+      - navigation [ref=e61]:
+        - link "PANEL DE CONTROL ▼" [ref=e62] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=e63]: PANEL DE CONTROL
+          - generic [ref=e71]: ▼
+        - button "GESTIÓN PROCESOS" [ref=e73]
+        - link "PLANTILLAS" [ref=e84] [cursor=pointer]:
+          - /url: /admin/plantillas
+        - link "GESTIÓN USUARIOS" [ref=e92] [cursor=pointer]:
+          - /url: /admin/users
+        - link "REPORTES" [ref=e101] [cursor=pointer]:
+          - /url: /reportes/ejecutivo
+        - button "HISTORIAL" [ref=e106]
+        - link "AYUDA" [ref=e114] [cursor=pointer]:
+          - /url: /ayuda
+      - generic [ref=e121]:
+        - generic [ref=e122]:
+          - generic [ref=e123]: JD
+          - generic [ref=e126]:
+            - paragraph [ref=e127]: Jefatura DUEA [JD]
+            - paragraph [ref=e128]: SIGESA
+        - button "Cerrar sesión" [ref=e129]
+    - generic [ref=e133]:
+      - banner [ref=e134]:
+        - generic [ref=e135]: Inicio / Administración de usuarios
+        - generic [ref=e136]:
+          - button "Notificaciones" [ref=e137]
+          - button "Configuración" [ref=e142]
+      - main [ref=e146]:
+        - generic [ref=e147]:
+          - generic [ref=e148]:
+            - heading "Gestión de usuarios" [level=1] [ref=e150]
+            - paragraph [ref=e151]: Administre cuentas internas, asigne roles y comparta credenciales al momento del alta.
+          - generic [ref=e152]:
+            - generic [ref=e153]:
+              - generic [ref=e154]:
+                - heading "Usuarios registrados" [level=2] [ref=e155]
+                - paragraph [ref=e156]: "Listado institucional con nombre completo, contacto y rol. Las contraseñas no se almacenan en texto plano: solo podrá verlas al crear un usuario nuevo."
+              - button "Agregar usuario" [ref=e157]
+            - table [ref=e162]:
+              - rowgroup [ref=e163]:
+                - row [ref=e164]:
+                  - columnheader "Nombre completo" [ref=e165]
+                  - columnheader "Correo" [ref=e166]
+                  - columnheader "Celular" [ref=e167]
+                  - columnheader "Rol" [ref=e168]
+                  - columnheader "Estado" [ref=e169]
+                  - columnheader "Acciones" [ref=e170]
+              - rowgroup [ref=e171]:
+                - row [ref=e172]:
+                  - cell "Demo CC" [ref=e173]
+                  - cell "cc2@umss.edu.bo" [ref=e174]
+                  - cell "71234567" [ref=e175]
+                  - cell "Coordinador de Carrera [CC]" [ref=e176]
+                  - cell "Activo" [ref=e177]
+                  - cell [ref=e179]:
+                    - button "Desactivar" [ref=e180]
+                - row [ref=e181]:
+                  - cell "Demo CC" [ref=e182]
+                  - cell "cc@umss.edu.bo" [ref=e183]
+                  - cell "71234567" [ref=e184]
+                  - cell "Coordinador de Carrera [CC]" [ref=e185]
+                  - cell "Activo" [ref=e186]
+                  - cell [ref=e188]:
+                    - button "Desactivar" [ref=e189]
+                - row [ref=e190]:
+                  - cell "Demo EE" [ref=e191]
+                  - cell "ee@umss.edu.bo" [ref=e192]
+                  - cell "71234567" [ref=e193]
+                  - cell "Evaluador externo [EE]" [ref=e194]
+                  - cell "Activo" [ref=e195]
+                  - cell [ref=e197]:
+                    - button "Desactivar" [ref=e198]
+                - row [ref=e199]:
+                  - cell "Demo JD" [ref=e200]
+                  - cell "jd@umss.edu.bo" [ref=e201]
+                  - cell "71234567" [ref=e202]
+                  - cell "Jefatura DUEA [JD]" [ref=e203]
+                  - cell "Activo" [ref=e204]
+                  - cell [ref=e206]:
+                    - button "Desactivar" [ref=e207]
+                - row [ref=e208]:
+                  - cell "Demo CC" [ref=e209]
+                  - cell "pendiente@umss.edu.bo" [ref=e210]
+                  - cell "71234567" [ref=e211]
+                  - cell "Coordinador de Carrera [CC]" [ref=e212]
+                  - cell "Inactivo" [ref=e213]
+                  - cell [ref=e215]:
+                    - button "Desactivar" [ref=e216]
+                - row [ref=e217]:
+                  - cell "Demo TD" [ref=e218]
+                  - cell "td@umss.edu.bo" [ref=e219]
+                  - cell "71234567" [ref=e220]
+                  - cell "Técnico DUEA [TD]" [ref=e221]
+                  - cell "Activo" [ref=e222]
+                  - cell [ref=e224]:
+                    - button "Desactivar" [ref=e225]
+  - button "Abrir copiloto de usuarios" [ref=e226]:
+    - generic [ref=e230]: Usuarios

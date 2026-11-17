@@ -4,5 +4,8 @@ public record ProgramTrafficLight(
         String programId,
         String name,
         String status,
-        Integer criticalObservations
+        Integer criticalObservations,
+        String faculty,
+        Double completionPercentage,
+        String processId
 ) {}

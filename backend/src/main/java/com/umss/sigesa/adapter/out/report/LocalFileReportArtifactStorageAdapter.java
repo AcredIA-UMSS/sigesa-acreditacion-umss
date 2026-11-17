@@ -2,6 +2,7 @@ package com.umss.sigesa.adapter.out.report;
 
 import com.umss.sigesa.application.port.out.ReportArtifactStoragePort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@ConditionalOnProperty(name = "sigesa.evidence.storage", havingValue = "local", matchIfMissing = true)
 public class LocalFileReportArtifactStorageAdapter implements ReportArtifactStoragePort {
 
     private final Path storageRoot;

@@ -5,9 +5,13 @@ import com.umss.sigesa.adapter.out.persistance.repository.SpringDataProgramRepos
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 public class ProgramCatalogJpaAdapter implements ProgramCatalogPort {
@@ -31,6 +35,17 @@ public class ProgramCatalogJpaAdapter implements ProgramCatalogPort {
         return repository.findById(id)
                 .filter(ProgramJpaEntity::isActive)
                 .map(this::toEntry);
+    }
+
+    @Override
+    public Map<UUID, ProgramEntry> findByIds(Collection<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Map.of();
+        }
+        return repository.findAllById(ids).stream()
+                .filter(ProgramJpaEntity::isActive)
+                .map(this::toEntry)
+                .collect(Collectors.toMap(ProgramEntry::id, Function.identity()));
     }
 
     private ProgramEntry toEntry(ProgramJpaEntity entity) {

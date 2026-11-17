@@ -74,6 +74,7 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 true,
                 3,
                 ragService
@@ -85,6 +86,7 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 false,
                 3,
                 ragService
@@ -95,7 +97,7 @@ class SendChatMessageServiceToolLoopTest {
     void scenario1_controlledKeyword_ccRole_doesNotCallLlm() {
         AssistantAuthContext auth = ccContext();
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 any(),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -115,7 +117,7 @@ class SendChatMessageServiceToolLoopTest {
     void scenario1_controlledKeyword_doesNotCallLlm() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 any(),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -128,8 +130,8 @@ class SendChatMessageServiceToolLoopTest {
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
         assertThat(result.llmInvoked()).isFalse();
-        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
-        assertThat(result.sourceTables()).contains("phases");
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
+        assertThat(result.sourceTables()).contains("level1_nodes");
         assertThat(result.reply()).contains("Fase 1");
         verify(chatCompletionPort, never()).complete(any());
     }
@@ -139,12 +141,12 @@ class SendChatMessageServiceToolLoopTest {
         AssistantAuthContext auth = tdContext();
         when(chatCompletionPort.complete(any()))
                 .thenReturn(new ChatCompletionResult(null, List.of(
-                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                                 "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
                 )))
                 .thenReturn(new ChatCompletionResult("", List.of()));
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 eq("{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}"),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -157,9 +159,39 @@ class SendChatMessageServiceToolLoopTest {
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.LLM);
         assertThat(result.llmInvoked()).isTrue();
-        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
         assertThat(result.reply()).contains("Fase 1");
         verify(chatCompletionPort, times(2)).complete(any());
+    }
+
+    @Test
+    void metaQuestion_returnsSelfIntroductionWithoutLlm() {
+        AssistantChatResult result = serviceWithLlm.send(
+                "Hola sobrino que modelo estas usando y mas info acerca de vos",
+                List.of(),
+                tdContext(),
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
+        assertThat(result.llmInvoked()).isFalse();
+        assertThat(result.reply()).contains("asistente virtual de SIGESA");
+        assertThat(result.reply()).contains("test-model");
+        verify(chatCompletionPort, never()).complete(any());
+    }
+
+    @Test
+    void emptyLlmSelectionWithoutTools_fallsBackToOutOfScope() {
+        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult(null, List.of()));
+
+        AssistantChatResult result = serviceWithLlm.send(
+                "Dame el estado del proceso de acreditación de Medicina",
+                List.of(),
+                tdContext(),
+                AssistantChatContext.general());
+
+        assertThat(result.path()).isEqualTo(AssistantResolutionPath.OUT_OF_SCOPE);
+        assertThat(result.reply()).contains("No puedo responder eso");
+        verify(chatCompletionPort).complete(any());
     }
 
     @Test
@@ -183,7 +215,7 @@ class SendChatMessageServiceToolLoopTest {
     void scenario4_llmDisabled_sameKeywordQuestionStillWorks() {
         AssistantAuthContext auth = tdContext();
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 any(),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -206,7 +238,7 @@ class SendChatMessageServiceToolLoopTest {
         AssistantChatContext context = AssistantChatContext.phases(
                 processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 any(),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -218,7 +250,7 @@ class SendChatMessageServiceToolLoopTest {
                 context);
 
         assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
-        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_PHASES_ID);
+        assertThat(result.toolId()).isEqualTo(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID);
         verify(chatCompletionPort, never()).complete(any());
     }
 
@@ -236,10 +268,7 @@ class SendChatMessageServiceToolLoopTest {
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
         assertThat(captor.getValue().tools()).extracting(def -> def.id()).containsExactly(
-                AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
                 AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_PHASE_ID,
-                AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
                 AssistantToolRegistry.SEARCH_NORMATIVE_DOCS_ID);
     }
 
@@ -268,7 +297,7 @@ class SendChatMessageServiceToolLoopTest {
 
         ArgumentCaptor<ChatCompletionRequest> captor = ArgumentCaptor.forClass(ChatCompletionRequest.class);
         verify(chatCompletionPort).complete(captor.capture());
-        assertThat(captor.getValue().tools()).hasSize(16);
+        assertThat(captor.getValue().tools()).hasSize(13);
     }
 
     @Test
@@ -321,16 +350,17 @@ class SendChatMessageServiceToolLoopTest {
                 keywordRouter,
                 new ObjectMapper(),
                 "system prompt",
+                "test-model",
                 true,
                 1,
                 disabledRagService());
         when(chatCompletionPort.complete(any()))
                 .thenReturn(new ChatCompletionResult(null, List.of(
-                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_PHASES_ID,
+                        new ToolCall("call_1", AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID,
                                 "{\"careerQuery\":\"Ingeniería de Sistemas\",\"templateType\":\"CEUB\"}")
                 )));
         when(toolExecutor.execute(
-                eq(AssistantToolRegistry.LIST_PROCESS_PHASES_ID),
+                eq(AssistantToolRegistry.LIST_PROCESS_STRUCTURE_ID),
                 any(),
                 eq(auth),
                 any())).thenReturn(PHASES_TOOL_JSON);
@@ -344,90 +374,6 @@ class SendChatMessageServiceToolLoopTest {
         assertThat(result.steps()).hasSize(1);
         assertThat(result.reply()).contains("Límite de 1 pasos");
         verify(chatCompletionPort, times(1)).complete(any());
-    }
-
-    private static final String SUBPHASE_PREVIEW_JSON = """
-            {"ok":true,"data":{"confirmationRequired":true,"action":"CREATE_SUBPHASE",\
-            "message":"Vista previa de subfase.","preview":{"requestedAction":"CREATE_SUBPHASE",\
-            "name":"Evidencia docente","assignedOrder":2,"phaseName":"Fase 2"}},\
-            "error":null}
-            """;
-
-    @Test
-    void writeToolPreview_stopsLoop_waitsForUserConfirmation() {
-        AssistantAuthContext auth = tdContext();
-        UUID processId = UUID.fromString("950e8400-e29b-41d4-a716-446655440020");
-        AssistantChatContext context = AssistantChatContext.phases(
-                processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
-
-        when(chatCompletionPort.complete(any())).thenReturn(new ChatCompletionResult(null, List.of(
-                new ToolCall(
-                        "call_1",
-                        AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID,
-                        "{\"action\":\"CREATE\",\"phaseOrder\":2,\"name\":\"Evidencia docente\","
-                                + "\"referenceUrl\":\"https://example.com/evidencia_docente\",\"confirmed\":false}")
-        )));
-        when(toolExecutor.execute(
-                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
-                any(),
-                eq(auth),
-                any())).thenReturn(SUBPHASE_PREVIEW_JSON);
-
-        AssistantChatResult result = serviceWithLlm.send(
-                "Agrega una subfase «Evidencia docente» con enlace HTTPS en la Fase 2",
-                List.of(),
-                auth,
-                context);
-
-        assertThat(result.steps()).hasSize(1);
-        assertThat(result.reply()).contains("confirmo");
-        assertThat(result.reply()).doesNotContain("Paso 2");
-        assertThat(result.reply()).doesNotContain("creada");
-        verify(chatCompletionPort, times(1)).complete(any());
-        verify(toolExecutor, times(1)).execute(
-                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
-                any(),
-                eq(auth),
-                any());
-    }
-
-    private static final String SUBPHASE_EXECUTED_JSON = """
-            {"ok":true,"data":{"confirmationRequired":false,"executed":true,\
-            "message":"Subfase «Evidencia docente» creada en «Fase 2» con orden 2."},\
-            "error":null}
-            """;
-
-    @Test
-    void phasesAgent_confirmo_afterPreview_executesViaKeywordWithoutLlm() {
-        AssistantAuthContext auth = tdContext();
-        UUID processId = UUID.fromString("950e8400-e29b-41d4-a716-446655440020");
-        AssistantChatContext context = AssistantChatContext.phases(
-                processId, "Ingeniería de Sistemas", "INF-SIS", "CEUB");
-
-        String previewReply = """
-                La fase «Fase 2.: verificacion de evidencias actualizada» tiene **1** subfase(s).
-                Enlace: https://example.com/evidencia_docente
-
-                Resumen: «Evidencia docente» → orden 2 en «Fase 2.: verificacion de evidencias actualizada».
-
-                Responda **confirmo** para ejecutar la acción.""";
-
-        List<ChatMessage> history = List.of(
-                new ChatMessage(ChatRole.USER, "Agrega una subfase «Evidencia docente» en Fase 2"),
-                new ChatMessage(ChatRole.ASSISTANT, previewReply));
-
-        when(toolExecutor.execute(
-                eq(AssistantToolRegistry.MANAGE_PROCESS_SUBPHASE_ID),
-                org.mockito.ArgumentMatchers.argThat(json -> json != null && json.contains("\"confirmed\":true")),
-                eq(auth),
-                any())).thenReturn(SUBPHASE_EXECUTED_JSON);
-
-        AssistantChatResult result = serviceWithLlm.send("confirmo", history, auth, context);
-
-        assertThat(result.path()).isEqualTo(AssistantResolutionPath.KEYWORD);
-        assertThat(result.llmInvoked()).isFalse();
-        assertThat(result.reply()).contains("creada");
-        verify(chatCompletionPort, never()).complete(any());
     }
 
     private static AssistantAuthContext jdContext() {

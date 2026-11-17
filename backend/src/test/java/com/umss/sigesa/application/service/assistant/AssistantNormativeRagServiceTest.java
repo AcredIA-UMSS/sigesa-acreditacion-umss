@@ -35,6 +35,7 @@ class AssistantNormativeRagServiceTest {
         assertThat(result.sourceTables()).contains("normative_document");
         assertThat(result.reply()).contains("Diagnóstico institucional");
         assertThat(result.reply()).contains("RAG");
+        assertThat(result.reply()).contains("Claves usadas");
     }
 
     @Test
@@ -46,5 +47,17 @@ class AssistantNormativeRagServiceTest {
                 3);
 
         assertThat(service.tryDirectAnswer("normativa CEUB", null)).isEmpty();
+    }
+
+    @Test
+    void isNormativeQuery_matchesArcuSurManualTerms() {
+        AssistantNormativeRagService service = new AssistantNormativeRagService(
+                (query, templateType, limit) -> List.of(),
+                true,
+                3);
+
+        assertThat(service.isNormativeQuery("¿Cómo se constituye el comité de pares ARCU-SUR?")).isTrue();
+        assertThat(service.isNormativeQuery("Explícame el proceso de autoevaluación")).isTrue();
+        assertThat(service.isNormativeQuery("horario de almuerzo")).isFalse();
     }
 }

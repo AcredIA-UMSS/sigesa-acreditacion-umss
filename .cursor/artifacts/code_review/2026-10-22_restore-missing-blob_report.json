@@ -1,0 +1,13 @@
+{
+  "id": "2026-10-22_restore-missing-blob",
+  "fsd": "FSD-UC-004",
+  "pr_impl": "PR-IMPL-041",
+  "verdict": "pass",
+  "violations": [],
+  "bugs": [],
+  "notes": [
+    "restore stays on EvidenceBlobStoragePort; domain remains persistence-free.",
+    "retrieve-then-restore is racy but acceptable for local MinIO heal of hash-reuse.",
+    "Local restore rejects '..' and path escape; S3 uses caller-provided keys same as delete."
+  ]
+}

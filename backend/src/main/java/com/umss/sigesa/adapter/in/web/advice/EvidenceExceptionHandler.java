@@ -1,6 +1,9 @@
 package com.umss.sigesa.adapter.in.web.advice;
 
+import com.umss.sigesa.domain.exception.DocumentAssetNotFoundException;
+import com.umss.sigesa.domain.exception.EvidenceBlobNotFoundException;
 import com.umss.sigesa.domain.exception.EvidenceImmutableException;
+import com.umss.sigesa.domain.exception.IndicatorAlreadyHasEvidenceException;
 import com.umss.sigesa.domain.exception.EvidenceNotFoundException;
 import com.umss.sigesa.domain.exception.EvidencePayloadTooLargeException;
 import com.umss.sigesa.domain.exception.EvidenceUnclassifiedException;
@@ -12,12 +15,12 @@ import com.umss.sigesa.domain.exception.InvalidFileFormatException;
 import com.umss.sigesa.domain.exception.MaxFileSizeExceededException;
 import com.umss.sigesa.domain.exception.ProgramScopeDeniedException;
 import com.umss.sigesa.domain.exception.EvidenceRequiredException;
-import com.umss.sigesa.domain.exception.InvalidSubphaseStateException;
 import com.umss.sigesa.domain.exception.InvalidIndicatorStateException;
 import com.umss.sigesa.domain.exception.IndicatorNotLinkedException;
 import com.umss.sigesa.domain.exception.JustificationRequiredException;
 import com.umss.sigesa.domain.exception.SubsanationNotAllowedException;
 import com.umss.sigesa.domain.exception.UploadInProgressException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -27,6 +30,29 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class EvidenceExceptionHandler {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EvidenceExceptionHandler.class);
+
+    @ExceptionHandler(DocumentAssetNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDocumentAssetNotFound(DocumentAssetNotFoundException ex) {
+        log.warn("DocumentAsset no encontrado: assetId={}", ex.getDocumentAssetId());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "DOCUMENT_ASSET_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EvidenceBlobNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleEvidenceBlobNotFound(EvidenceBlobNotFoundException ex) {
+        log.warn("Archivo de evidencia no encontrado en almacenamiento: assetId={}", ex.getDocumentAssetId());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "EVIDENCE_BLOB_NOT_FOUND", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IndicatorAlreadyHasEvidenceException.class)
+    public ResponseEntity<Map<String, String>> handleIndicatorAlreadyHasEvidence(
+            IndicatorAlreadyHasEvidenceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "INDICATOR_ALREADY_HAS_EVIDENCE", "message", ex.getMessage()));
+    }
 
     @ExceptionHandler(EvidenceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEvidenceNotFound(EvidenceNotFoundException ex) {
@@ -94,12 +120,6 @@ public class EvidenceExceptionHandler {
                 .body(Map.of("error", "EVIDENCE_REQUIRED", "message", ex.getMessage()));
     }
 
-    @ExceptionHandler(InvalidSubphaseStateException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidSubphaseState(InvalidSubphaseStateException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", "INVALID_STATE", "message", ex.getMessage()));
-    }
-
     @ExceptionHandler(InvalidIndicatorStateException.class)
     public ResponseEntity<Map<String, String>> handleInvalidIndicatorState(InvalidIndicatorStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -128,6 +148,21 @@ public class EvidenceExceptionHandler {
     public ResponseEntity<Map<String, String>> handleUploadLock(UploadInProgressException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Map.of("error", "UPLOAD_IN_PROGRESS", "message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        String detail = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : "";
+        if (detail != null && detail.contains("uk_evidence_normative_indicator")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of(
+                            "error", "INDICATOR_ALREADY_HAS_EVIDENCE",
+                            "message", "El indicador ya tiene evidencia vigente."));
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of(
+                        "error", "DATA_INTEGRITY_VIOLATION",
+                        "message", "No se pudo persistir la evidencia. Verifique el indicador y el esquema de datos."));
     }
 
     @ExceptionHandler(EvidencePayloadTooLargeException.class)

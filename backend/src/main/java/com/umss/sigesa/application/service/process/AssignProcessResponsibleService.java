@@ -2,6 +2,7 @@ package com.umss.sigesa.application.service.process;
 
 import com.umss.sigesa.application.model.process.ProcessResponsibleInfo;
 import com.umss.sigesa.application.port.in.AssignProcessResponsibleUseCase;
+import com.umss.sigesa.application.port.in.EnqueueDomainNotificationUseCase;
 import com.umss.sigesa.application.port.out.ProcessQueryPort;
 import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
@@ -16,8 +17,11 @@ import com.umss.sigesa.domain.model.ProcessResponsibleAssignment;
 import com.umss.sigesa.domain.model.Role;
 import com.umss.sigesa.domain.model.UserProgramAssignment;
 import com.umss.sigesa.domain.model.UserStatus;
+import com.umss.sigesa.domain.model.notification.DomainNotificationCommand;
+import com.umss.sigesa.domain.model.notification.NotificationEventType;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public class AssignProcessResponsibleService implements AssignProcessResponsibleUseCase {
@@ -27,17 +31,20 @@ public class AssignProcessResponsibleService implements AssignProcessResponsible
     private final UserProgramAssignmentRepositoryPort assignmentRepositoryPort;
     private final ProcessResponsiblePort processResponsiblePort;
     private final ProcessStructureGuard processStructureGuard;
+    private final EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase;
 
     public AssignProcessResponsibleService(ProcessQueryPort processQueryPort,
                                            UserRepositoryPort userRepositoryPort,
                                            UserProgramAssignmentRepositoryPort assignmentRepositoryPort,
                                            ProcessResponsiblePort processResponsiblePort,
-                                           ProcessStructureGuard processStructureGuard) {
+                                           ProcessStructureGuard processStructureGuard,
+                                           EnqueueDomainNotificationUseCase enqueueDomainNotificationUseCase) {
         this.processQueryPort = processQueryPort;
         this.userRepositoryPort = userRepositoryPort;
         this.assignmentRepositoryPort = assignmentRepositoryPort;
         this.processResponsiblePort = processResponsiblePort;
         this.processStructureGuard = processStructureGuard;
+        this.enqueueDomainNotificationUseCase = enqueueDomainNotificationUseCase;
     }
 
     @Override
@@ -52,6 +59,10 @@ public class AssignProcessResponsibleService implements AssignProcessResponsible
         ensureCareerScope(userId, process.getCareerId());
         ensureNotAssignedElsewhere(processId, userId);
 
+        UUID previousUserId = processResponsiblePort.findActiveByProcessId(processId)
+                .map(ProcessResponsibleAssignment::getUserId)
+                .orElse(null);
+
         processResponsiblePort.revokeActiveByProcessId(processId);
 
         ProcessResponsibleAssignment saved = processResponsiblePort.save(ProcessResponsibleAssignment.builder()
@@ -60,6 +71,36 @@ public class AssignProcessResponsibleService implements AssignProcessResponsible
                 .assignedBy(assignedByUserId)
                 .assignedAt(LocalDateTime.now())
                 .build());
+
+        String occurrenceId = saved.getId() != null
+                ? saved.getId().toString()
+                : UUID.randomUUID().toString();
+
+        if (previousUserId != null && !previousUserId.equals(userId)) {
+            enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                    NotificationEventType.ProcessUnassigned,
+                    processId,
+                    process.getCareerId(),
+                    processId,
+                    Map.of(
+                            "processId", processId.toString(),
+                            "programId", process.getCareerId().toString(),
+                            "removedUserId", previousUserId.toString(),
+                            "occurrenceId", occurrenceId
+                    )));
+        }
+
+        enqueueDomainNotificationUseCase.enqueue(new DomainNotificationCommand(
+                NotificationEventType.ProcessAssigned,
+                processId,
+                process.getCareerId(),
+                processId,
+                Map.of(
+                        "processId", processId.toString(),
+                        "programId", process.getCareerId().toString(),
+                        "assigneeUserId", userId.toString(),
+                        "occurrenceId", occurrenceId
+                )));
 
         return toInfo(user, saved.getAssignedAt());
     }

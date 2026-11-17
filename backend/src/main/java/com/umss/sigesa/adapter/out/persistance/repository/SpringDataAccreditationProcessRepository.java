@@ -1,7 +1,6 @@
 package com.umss.sigesa.adapter.out.persistance.repository;
 
 import com.umss.sigesa.adapter.out.persistance.entity.AccreditationProcessJpaEntity;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -30,18 +28,34 @@ public interface SpringDataAccreditationProcessRepository extends JpaRepository<
             @Param("careerId") UUID careerId,
             @Param("templateType") String templateType);
 
+    interface ProcessSummaryProjection {
+        UUID getId();
+        UUID getCareerId();
+        UUID getTemplateId();
+        String getStatus();
+        java.time.LocalDateTime getStartDate();
+    }
+
+    @Query("""
+            SELECT p.id AS id, p.careerId AS careerId, p.templateId AS templateId, p.status AS status, p.startDate AS startDate
+            FROM AccreditationProcessJpaEntity p
+            WHERE p.status <> 'ARCHIVED'
+            ORDER BY p.startDate DESC
+            """)
+    List<ProcessSummaryProjection> findAllSummaryProjections();
+
+    @Query("""
+            SELECT p.id AS id, p.careerId AS careerId, p.templateId AS templateId, p.status AS status, p.startDate AS startDate
+            FROM AccreditationProcessJpaEntity p
+            WHERE p.careerId IN :careerIds
+              AND p.status <> 'ARCHIVED'
+            ORDER BY p.startDate DESC
+            """)
+    List<ProcessSummaryProjection> findSummaryProjectionsByCareerIds(@Param("careerIds") Collection<UUID> careerIds);
+
     List<AccreditationProcessJpaEntity> findAllByOrderByStartDateDesc();
 
     List<AccreditationProcessJpaEntity> findByCareerIdInOrderByStartDateDesc(Collection<UUID> careerIds);
-
-    @EntityGraph(attributePaths = {"phases"})
-    Optional<AccreditationProcessJpaEntity> findWithPhasesById(UUID id);
-
-    @Query("SELECT COUNT(p) FROM PhaseJpaEntity p WHERE p.process.id = :processId")
-    long countPhasesByProcessId(@Param("processId") UUID processId);
-
-    @Query("SELECT COUNT(s) FROM SubphaseJpaEntity s WHERE s.phase.process.id = :processId")
-    long countSubphasesByProcessId(@Param("processId") UUID processId);
 
     boolean existsByTemplateId(UUID templateId);
 }

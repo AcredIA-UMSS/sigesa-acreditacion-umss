@@ -1,0 +1,30 @@
+package com.umss.sigesa.domain.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class IndicatorObservation {
+    private UUID id;
+    private UUID indicatorId;
+    private UUID authorId;
+    private String authorRole;
+    private String body;
+    private IndicatorObservationStatus status;
+    private LocalDateTime resolvedAt;
+    private UUID resolvedVersionId;
+    private LocalDate dueDate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}

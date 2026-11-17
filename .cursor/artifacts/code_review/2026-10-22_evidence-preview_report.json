@@ -1,0 +1,13 @@
+{
+  "id": "2026-10-22_evidence-preview",
+  "fsd": "FSD-UC-004",
+  "pr_impl": "PR-IMPL-041",
+  "verdict": "pass",
+  "violations": [],
+  "bugs": [],
+  "notes": [
+    "Viewer uses Orval-style downloadContent + customFetch blob handling; no new HTTP client.",
+    "GET content already existed; UI was the gap.",
+    "OpenAPI binary schema updated for Demo 2 drift/Spectral."
+  ]
+}

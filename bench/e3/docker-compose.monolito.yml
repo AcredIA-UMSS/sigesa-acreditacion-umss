@@ -1,0 +1,26 @@
+# Override E3 — forma in-process (solo API, sin sidecar ni Toxiproxy).
+# Uso: docker compose -f bench/e3/docker-compose.yml -f bench/e3/docker-compose.monolito.yml up -d --build --wait
+services:
+  api:
+    environment:
+      SIGESA_APP: api
+      EXTRACTION_MODE: in_process
+    depends_on:
+      modulo:
+        condition: service_started
+        required: false
+      toxiproxy:
+        condition: service_started
+        required: false
+      toxiproxy-setup:
+        condition: service_completed_successfully
+        required: false
+
+  modulo:
+    profiles: ["extracted"]
+
+  toxiproxy:
+    profiles: ["extracted"]
+
+  toxiproxy-setup:
+    profiles: ["extracted"]

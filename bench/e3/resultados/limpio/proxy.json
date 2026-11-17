@@ -1,0 +1,1 @@
+{"name":"notify","listen":"[::]:8666","upstream":"notify:8081","enabled":true,"Logger":{},"toxics":[]}

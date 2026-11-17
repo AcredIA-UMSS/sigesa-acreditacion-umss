@@ -1,0 +1,35 @@
+- generic [ref=f2e3]:
+  - complementary [ref=f2e4]:
+    - button [ref=f2e5]
+    - generic [ref=f2e8]:
+      - img "UMSS" [ref=f2e10]
+      - generic [ref=f2e11]:
+        - heading "UMSS DUEA" [level=1] [ref=f2e12]
+        - paragraph [ref=f2e13]: PANEL ADMINISTRATIVO
+    - navigation [ref=f2e14]:
+      - link "PANEL DE CONTROL ▼" [ref=f2e15] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=f2e16]: PANEL DE CONTROL
+        - generic [ref=f2e24]: ▼
+      - button "GESTIÓN PROCESOS" [ref=f2e26]
+      - link "CARGAR EVIDENCIA" [ref=f2e37] [cursor=pointer]:
+        - /url: /evidencias/cargar
+      - link "BUSCAR EVIDENCIAS" [ref=f2e45] [cursor=pointer]:
+        - /url: /evidencias/buscar
+      - button "REPORTES ▼" [ref=f2e54]:
+        - generic [ref=f2e55]: REPORTES
+        - generic [ref=f2e59]: ▼
+      - button "HISTORIAL" [ref=f2e60]
+      - link "AYUDA" [ref=f2e68] [cursor=pointer]:
+        - /url: /ayuda
+    - generic [ref=f2e75]:
+      - generic [ref=f2e76]:
+        - generic [ref=f2e77]: CC
+        - generic [ref=f2e80]:
+          - paragraph [ref=f2e81]: Coordinador de Carrera [CC]
+          - paragraph [ref=f2e82]: SIGESA
+      - button "Cerrar sesión" [ref=f2e83]
+  - main [ref=f2e87]:
+    - generic [ref=f2e89]:
+      - heading "Panel de Control Acreditación" [level=1] [ref=f2e90]
+      - paragraph [ref=f2e91]: SIGESA · Gestión Integrada de Acreditación de Calidad Académica

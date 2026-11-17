@@ -1,5 +1,5 @@
 package com.umss.sigesa.domain.model;
 
 public enum Role {
-    CC, TD, JD, EE
+    CC, TD, JD, EE, CAE_MEMBER
 }

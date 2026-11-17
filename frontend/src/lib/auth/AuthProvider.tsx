@@ -35,9 +35,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logout = useCallback(() => {
+    const token = session?.accessToken;
+    if (token) {
+      void fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => undefined);
+    }
     clearSession();
     setSession(null);
-  }, []);
+  }, [session]);
 
   useLayoutEffect(() => {
     return registerAuthBridge(

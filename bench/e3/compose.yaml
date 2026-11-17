@@ -1,0 +1,31 @@
+# Banco E3. La forma in-process levanta solo `api`.
+# La forma http añade el perfil `http` (sidecar + Toxiproxy, sin toxic).
+
+services:
+  api:
+    image: sigesa-backend:e3
+    environment:
+      SERVER_PORT: "8080"
+      EXTRACTION_MODE: ${EXTRACTION_MODE:-in_process}
+      SIGESA_NOTIFICATION_BASE_URL: ${SIGESA_NOTIFICATION_BASE_URL:-http://toxiproxy:8666}
+      SIGESA_REPORT_STORAGE_PATH: /tmp/reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/evidence
+    ports:
+      - "${API_PORT:-18080}:8080"
+
+  notify:
+    image: sigesa-backend:e3
+    profiles: ["http"]
+    environment:
+      SIGESA_APP: notification-service
+      SERVER_PORT: "8081"
+      SIGESA_REPORT_STORAGE_PATH: /tmp/reports
+      SIGESA_EVIDENCE_STORAGE_PATH: /tmp/evidence
+    ports:
+      - "${NOTIFY_PORT:-18081}:8081"
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    profiles: ["http"]
+    ports:
+      - "${TOXIPROXY_PORT:-18474}:8474"

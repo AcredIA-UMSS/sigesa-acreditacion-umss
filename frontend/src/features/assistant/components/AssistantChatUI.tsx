@@ -28,6 +28,8 @@ export type AssistantChatUIProps = {
   errorMessage: string | null;
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  /** Layout reducido para el modal del FAB global (DD-FEAT-10). */
+  compact?: boolean;
 };
 
 export function AssistantChatUI({
@@ -50,6 +52,7 @@ export function AssistantChatUI({
   errorMessage,
   messagesContainerRef,
   messagesEndRef,
+  compact = false,
 }: AssistantChatUIProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -67,7 +70,8 @@ export function AssistantChatUI({
   };
 
   return (
-    <main className="flex flex-1 flex-col overflow-hidden bg-gray-50">
+    <main className={`flex min-h-0 flex-1 flex-col overflow-hidden ${compact ? 'bg-body' : 'bg-gray-50'}`}>
+      {compact ? null : (
       <header className="border-b border-gray-200 bg-body px-8 py-6">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -95,12 +99,15 @@ export function AssistantChatUI({
           </div>
         </div>
       </header>
+      )}
 
-      <div className="flex flex-1 gap-6 overflow-hidden px-8 py-6">
+      <div className={`flex min-h-0 flex-1 gap-6 overflow-hidden ${compact ? 'p-0' : 'px-8 py-6'}`}>
+        {compact ? null : (
         <aside className="hidden w-80 shrink-0 flex-col gap-4 overflow-y-auto lg:flex">
           <DemoPanel demoScenarios={demoScenarios} onSampleSelect={onSampleSelect} />
           <CapabilitiesPanel capabilities={capabilities} />
         </aside>
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           {!isStatusLoading && isStatusError && (

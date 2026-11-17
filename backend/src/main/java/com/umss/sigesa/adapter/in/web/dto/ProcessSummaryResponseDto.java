@@ -16,9 +16,10 @@ public class ProcessSummaryResponseDto {
     private UUID templateId;
     private String templateName;
     private String templateType;
+    private String evaluatorModel;
     private String status;
     private LocalDateTime startDate;
-    private int phaseCount;
-    private int subphaseCount;
+    private int level1Count;
+    private int indicatorCount;
     private ProcessResponsibleDto responsible;
 }

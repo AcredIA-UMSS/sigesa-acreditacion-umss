@@ -23,7 +23,8 @@ Unificar la **experiencia visual** de los agentes embebidos por dominio (`phases
 | `phases` | **Fases** | `/procesos/{id}`, `/procesos/{id}/estructura` | `PhasesCopilotPanel` |
 | `evidence` | **Evidencias** | `/evidencias/cargar` | `EvidenceCopilotPanel` |
 | `users` | **Usuarios** | `/admin/users` | `UsersCopilotPanel` |
-| `general` | — | `/ayuda` | `AssistantChatUI` (**diseño legacy, no migrar**) |
+| `general` | — | `/ayuda` | `AssistantChatUI` (**diseño de página completa, no migrar**) |
+| `general` (panel) | — | Rutas `ProtectedRoute` excepto `/ayuda` | `FloatingAssistantButton` ([DD-FEAT-10](DD-FEAT-10.md) / #57) — modal; no sustituye `/ayuda` |
 
 ## 3. Comportamiento UX
 

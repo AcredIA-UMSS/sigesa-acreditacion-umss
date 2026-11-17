@@ -10,10 +10,9 @@ import java.util.UUID;
 @Setter
 public class EvidenceSearchHitResponseDto {
     private UUID evidenceId;
-    private UUID subphaseId;
-    private String subphaseName;
-    private UUID phaseId;
-    private String phaseName;
+    private UUID level1Id;
+    private String level1Name;
+    private String level3Name;
     private UUID processId;
     private UUID indicatorId;
     private String indicatorCode;

@@ -1,13 +1,13 @@
 ---
 id: FSD-UC-013
 nombre: Panel semáforo [JD]
-estado: En Curso
-release: v1.0
+estado: Implementado
+release: v2.0
 actor_principal: "[JD]"
 trazabilidad_prd: PRD-US-013
 modulo: MOD-DASH
 reglas: —
-ultima_actualizacion: "2026-08-27"
+ultima_actualizacion: "2026-11-15"
 ---
 
 # FSD-UC-013 — Panel semáforo [JD]
@@ -17,9 +17,10 @@ ultima_actualizacion: "2026-08-27"
 | Campo | Valor |
 |-------|-------|
 | **Trazabilidad** | PRD-REQ-011 · PRD-US-013 |
-| **Pantalla** | `/executive/semaphore` |
+| **Pantalla** | `/executive/semaphore` (solo [JD]) |
 | **API** | `GET /api/v1/dashboards/me/summary` (sección `executiveSection`) |
-| **Nota implementación viva (2026-08-27)** | Semáforo por programa y KPIs ejecutivos en pestaña JD de `/dashboard`. **Pendiente:** ruta dedicada `/executive/semaphore` si se exige literal del FSD baseline. |
+| **Reglas** | `ExecutiveSemaphoreRules`: Rojo si observación vencida, avance &lt; 50% o más de 10 observaciones abiertas. Sin indicadores: `SIN_DATO` (gris), agrupado por facultad. |
+| **Gherkin** | `@PRD-US-013 @FSD-UC-013 @TC-09` — `ExecutiveSemaphoreGherkinIT` + `ExecutiveSemaphoreRulesTest` |
 
 ## Flujo principal
 
@@ -57,6 +58,6 @@ Característica: Panel semáforo ejecutivo
 
   Escenario: Coherencia con reglas de completitud
     Dado reglas de completitud configuradas para el piloto
-    Cuando una carrera tiene subfases críticas vencidas
+    Cuando una carrera tiene indicadores críticos vencidos
     Entonces el semáforo de esa carrera es Rojo
 ```

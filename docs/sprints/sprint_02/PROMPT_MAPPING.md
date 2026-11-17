@@ -30,6 +30,7 @@
 | PM-021 | PR-IMPL-031 | TOOL-CATALOG §1.2.1 / DD-SYS-002 | PRD-REQ-028 | RBAC executor (subset agente) + auditoría `AUDIT_ASSISTANT_TOOL` |
 | PM-022 | PR-IMPL-032 | DD-SYS-002 | PRD-REQ-028 | RAG normativo (FTS + tool search_normative_docs) |
 | PM-023 | PR-IMPL-033 | DD-SYS-002 §11.10 | PRD-REQ-028 | Encadenamiento multi-tool Nivel 4 + traza UI en todos los copilotos |
+| PM-024 | PR-IMPL-046 | DD-UC-032 | FSD-UC-032 | Observaciones del técnico sobre evidencias y respuesta del coordinador |
 
 ## PM-001
 
@@ -1164,7 +1165,36 @@ en esta estructura del proceso, crear un espacio para que permita subir evidenci
 
 ### Resultado obtenido
 
-Cada subfase muestra enlace subrayado «Subir evidencia»; modal UC-004 (ver PM-019 / PR-IMPL-029). [CC] carga en modal; [JD/TD] enlace a formulario dedicado.
+Cada subfase muestra zona de carga; [CC] elige indicador + archivo; [JD/TD] ven el espacio con enlace a Cargar evidencia. Evolución en PM-019 / PR-IMPL-029: enlace subrayado «Subir evidencia» y modal UC-004. [CC] carga en modal; [JD/TD] enlace a formulario dedicado.
+
+---
+
+## PM-024 — Observaciones del técnico sobre evidencias
+
+| Campo | Valor |
+| --- | --- |
+| **ID** | PM-024 |
+| **Fecha** | 2026-11-04 |
+| **Solicitante** | Marlene Velasquez |
+| **Agente/Entorno** | Cursor Agent |
+| **Modelo** | Grok 4.7 |
+| **Tarea** | Diseño e implementación de observaciones de proceso |
+| **Objetivo** | [TD] registra observaciones sobre evidencias; [CC] responde y da seguimiento |
+| **Contexto** | En la rama de origen estaba numerado PM-017. Ese ID en sprint 02 ya es la seguridad del copiloto de fases (PR-IMPL-027). |
+| **PR-IMPL vinculado** | PR-IMPL-046 |
+| **DD vinculado** | DD-UC-032 |
+| **FSD / PRD vinculado** | FSD-UC-032 |
+| **Estado** | completado |
+
+### Prompt usado exacto
+
+```text
+diseño y la implementacion de DD-uc para el flujo
+```
+
+### Resultado obtenido
+
+FSD-UC-032, DD-UC-032 y API-OBS-01…10. Agregado `process_observation` aparte de `tb_observation`. Seis pruebas de dominio y servicio en verde. Panel en el detalle del proceso.
 
 ---
 

@@ -83,7 +83,7 @@ public class RegisterUserService implements RegisterUserUseCase {
     }
 
     private static boolean requiresProgramAssignment(Role role) {
-        return role == Role.CC || role == Role.EE;
+        return role == Role.CC || role == Role.EE || role == Role.CAE_MEMBER;
     }
 
     private Role parseRole(String roleName) {

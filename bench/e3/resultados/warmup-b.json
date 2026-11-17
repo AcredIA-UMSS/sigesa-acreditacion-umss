@@ -1,0 +1,149 @@
+{
+    "metrics": {
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "avg": 0,
+            "p(95)": 0,
+            "max": 0
+        },
+        "http_req_waiting": {
+            "min": 0.395625,
+            "med": 2.6463335,
+            "avg": 3.5951036968587986,
+            "p(95)": 8.765295499999999,
+            "max": 127.489375
+        },
+        "vus_max": {
+            "value": 10,
+            "min": 10,
+            "max": 10
+        },
+        "vus": {
+            "value": 10,
+            "min": 10,
+            "max": 10
+        },
+        "http_req_connecting": {
+            "avg": 0.017190259034766706,
+            "p(95)": 0,
+            "max": 12.288375,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 26232,
+            "value": 0
+        },
+        "checks": {
+            "passes": 26232,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 0.477458,
+            "med": 2.7347710000000003,
+            "avg": 3.6912926948764904,
+            "p(95)": 8.917823099999998,
+            "max": 127.72025
+        },
+        "http_req_blocked": {
+            "min": 0.000583,
+            "med": 0.001375,
+            "avg": 0.02078948578072537,
+            "p(95)": 0.004042,
+            "max": 12.40825
+        },
+        "data_received": {
+            "count": 11061728,
+            "rate": 1105897.4511090587
+        },
+        "iterations": {
+            "count": 13116,
+            "rate": 1311.2735161040314
+        },
+        "http_req_sending": {
+            "min": 0.001792,
+            "med": 0.003834,
+            "avg": 0.011308169792619402,
+            "p(95)": 0.017246349999999903,
+            "max": 5.928291
+        },
+        "http_req_duration": {
+            "min": 0.477458,
+            "med": 2.7347710000000003,
+            "avg": 3.6912926948764904,
+            "p(95)": 8.917823099999998,
+            "max": 127.72025
+        },
+        "http_req_receiving": {
+            "p(95)": 0.35926844999999996,
+            "max": 8.766083,
+            "min": 0.007459,
+            "med": 0.0225,
+            "avg": 0.08488082822506812
+        },
+        "http_reqs": {
+            "count": 26232,
+            "rate": 2622.547032208063
+        },
+        "health_duration": {
+            "min": 0.477458,
+            "med": 1.597625,
+            "avg": 2.0039055228728357,
+            "p(95)": 4.114281499999999,
+            "max": 52.436875
+        },
+        "data_sent": {
+            "count": 2846172,
+            "rate": 284546.3529945748
+        },
+        "notifications_duration": {
+            "avg": 5.378679866880119,
+            "p(95)": 11.789594,
+            "max": 127.72025,
+            "min": 1.445083,
+            "med": 4.1977705
+        },
+        "notifications_failed": {
+            "passes": 0,
+            "fails": 13116,
+            "value": 0
+        },
+        "iteration_duration": {
+            "min": 2.288166,
+            "med": 6.1454375,
+            "avg": 7.614897323574245,
+            "p(95)": 15.876051499999988,
+            "max": 149.967125
+        },
+        "health_failed": {
+            "passes": 0,
+            "fails": 13116,
+            "value": 0
+        }
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "notifications 200": {
+                    "path": "::notifications 200",
+                    "id": "cd75c130d94ca4462f25f415154c1047",
+                    "passes": 13116,
+                    "fails": 0,
+                    "name": "notifications 200"
+                },
+                "health 200": {
+                    "id": "8e4f90a842a57472549a6b2cf699032d",
+                    "passes": 13116,
+                    "fails": 0,
+                    "name": "health 200",
+                    "path": "::health 200"
+                }
+            }
+    }
+}

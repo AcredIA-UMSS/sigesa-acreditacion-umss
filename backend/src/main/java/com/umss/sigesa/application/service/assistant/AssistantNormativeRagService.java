@@ -4,7 +4,9 @@ import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolStep;
 import com.umss.sigesa.application.model.normative.NormativeDocumentHit;
+import com.umss.sigesa.application.model.normative.NormativeSearchPlan;
 import com.umss.sigesa.application.port.in.SearchNormativeDocumentsUseCase;
+import com.umss.sigesa.application.service.normative.NormativeQueryPlanner;
 
 import java.util.List;
 import java.util.Locale;
@@ -20,8 +22,11 @@ public final class AssistantNormativeRagService {
     private static final Pattern NORMATIVE_QUERY_PATTERN = Pattern.compile(
             "(?is).*(normativa|ceub|arcu[-\\s]?sur|duea|acreditaci[oó]n\\s+universitaria|"
                     + "diagn[oó]stico\\s+institucional|matriz\\s+de\\s+evidencias|"
-                    + "informe\\s+(preliminar|final)|cronograma|criterios?\\s+de\\s+evaluaci[oó]n|"
-                    + "recolecci[oó]n\\s+documental|validaci[oó]n\\s+de\\s+criterios|"
+                    + "informe\\s+(preliminar|final|de\\s+autoevaluaci[oó]n)|cronograma|"
+                    + "criterios?\\s+de\\s+evaluaci[oó]n|recolecci[oó]n\\s+documental|"
+                    + "validaci[oó]n\\s+de\\s+criterios|pares\\s+evaluadores|"
+                    + "comit[eé]\\s+de\\s+pares|visita(\\s+del\\s+comit[eé])?|"
+                    + "convocatoria|autoevaluaci[oó]n|manual\\s+de\\s+procedimientos|"
                     + "qu[eé]\\s+dice\\s+la\\s+normativa|documentaci[oó]n\\s+normativa|"
                     + "buscar\\s+en\\s+normativa|referencia\\s+normativa|enlace\\s+normativo|"
                     + "subfase\\s+normativa|est[aá]ndares?\\s+de\\s+acreditaci[oó]n).*");
@@ -94,13 +99,17 @@ public final class AssistantNormativeRagService {
             return Optional.empty();
         }
         return Optional.of(AssistantChatResult.fromSteps(
-                formatHitsAsReply(userMessage, hits),
+                formatHitsAsReply(userMessage, hits, NormativeQueryPlanner.plan(userMessage, templateType)),
                 AssistantResolutionPath.RAG,
                 false,
                 List.of(new AssistantToolStep(1, TOOL_ID, List.of("normative_document"), true))));
     }
 
     static String formatHitsAsReply(String query, List<NormativeDocumentHit> hits) {
+        return formatHitsAsReply(query, hits, NormativeQueryPlanner.plan(query, null));
+    }
+
+    static String formatHitsAsReply(String query, List<NormativeDocumentHit> hits, NormativeSearchPlan plan) {
         StringBuilder sb = new StringBuilder();
         sb.append("Encontré ").append(hits.size())
                 .append(hits.size() == 1 ? " fragmento normativo" : " fragmentos normativos")
@@ -109,6 +118,15 @@ public final class AssistantNormativeRagService {
                 .append(" para «")
                 .append(query.trim())
                 .append("»:\n\n");
+        if (plan != null && plan.hasSelectedTerms()) {
+            sb.append("Claves usadas: ").append(String.join(", ", plan.selectedTerms())).append(".\n");
+            if (!plan.discardedTerms().isEmpty()) {
+                sb.append("Descartadas (poco peso): ")
+                        .append(String.join(", ", plan.discardedTerms()))
+                        .append(".\n");
+            }
+            sb.append('\n');
+        }
 
         int index = 1;
         for (NormativeDocumentHit hit : hits) {

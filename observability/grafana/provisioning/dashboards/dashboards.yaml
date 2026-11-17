@@ -1,0 +1,11 @@
+apiVersion: 1
+providers:
+  - name: sigesa-perf
+    orgId: 1
+    folder: SIGESA Perf
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,134 @@
+# Near-real-time observability overlay for SIGESA API performance.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml --profile observability up -d --build
+#   ./scripts/perf-observe.sh up
+#
+# Grafana: http://localhost:3002  (admin/admin)
+# Prometheus: http://localhost:9090
+# Tempo: http://localhost:3200
+# OTLP: localhost:4317 (gRPC) / 4318 (HTTP)
+
+services:
+  backend:
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      smtp:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=sigesa
+      - SIGESA_ASSISTANT_ENABLED=false
+      - SIGESA_ASSISTANT_LLM_ENABLED=false
+      - MANAGEMENT_TRACING_ENABLED=true
+      - MANAGEMENT_TRACING_EXPORT_ENABLED=true
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:-1.0}
+      - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://otel-collector:4318/v1/traces
+      - MANAGEMENT_OTLP_TRACING_EXPORT_ENABLED=true
+      - MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED=false
+      - MANAGEMENT_OTLP_TRACING_TRANSPORT=http
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,prometheus,metrics
+
+  otel-collector:
+    profiles: ["observability"]
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: sigesa-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./observability/otel/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "${OTEL_GRPC_PORT:-4317}:4317"
+      - "${OTEL_HTTP_PORT:-4318}:4318"
+      - "${OTEL_PROM_PORT:-8889}:8889"
+    depends_on:
+      - tempo
+    networks:
+      - default
+
+  tempo:
+    profiles: ["observability"]
+    image: grafana/tempo:2.6.1
+    container_name: sigesa-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/otel/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+    networks:
+      - default
+
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v2.55.1
+    container_name: sigesa-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=24h
+      - --web.enable-lifecycle
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - default
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:11.3.1
+    container_name: sigesa-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_DEFAULT_THEME: light
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/sigesa-api-perf.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3002}:3000"
+    depends_on:
+      - prometheus
+      - tempo
+    networks:
+      - default
+
+  k6:
+    profiles: ["observability", "bench"]
+    image: grafana/k6:0.54.0
+    container_name: sigesa-k6
+    working_dir: /scripts
+    volumes:
+      - ./bench/perf:/scripts:ro
+    environment:
+      API_BASE_URL: http://backend:8080
+      K6_LOGIN_EMAIL: ${K6_LOGIN_EMAIL:-jd@umss.edu.bo}
+      K6_LOGIN_PASSWORD: ${K6_LOGIN_PASSWORD:-JefeDemo2026!}
+      K6_VUS: ${K6_VUS:-10}
+      K6_DURATION: ${K6_DURATION:-2m}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - default
+    # default: one-shot run via: docker compose ... run --rm k6 run /scripts/k6-api-perf.js
+
+volumes:
+  tempo_data:
+  prometheus_data:
+  grafana_data:

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLogin } from '../../../api/endpoints/auth-controller/auth-controller';
 import { getLoginErrorMessage } from '../../../lib/api/mapApiError';
@@ -19,6 +20,7 @@ interface LoginLocationState {
 export function useLoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { login } = useAuth();
   const [form, setForm] = useState<LoginFormState>({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState<Partial<LoginFormState>>({});
@@ -29,6 +31,7 @@ export function useLoginForm() {
       onSuccess: (response) => {
         const payload = response.data as LoginResponse;
         login(payload);
+        queryClient.clear();
         const redirectPath =
           (location.state as LoginLocationState | null)?.from ?? getPostLoginPath(payload.role ?? '');
         navigate(redirectPath, { replace: true });

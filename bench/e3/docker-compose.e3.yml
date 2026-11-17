@@ -1,0 +1,146 @@
+# =============================================================================
+# Entorno de Banco de Pruebas E3: Evaluación de Extracción de Notificaciones
+# Servicios: db, notification-service (sidecar), toxiproxy, backend (API), k6
+# =============================================================================
+
+services:
+  db:
+    build:
+      context: ../../db
+      dockerfile: Dockerfile
+    image: sigesa-postgres:16-alpine
+    container_name: sigesa-e3-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sigesa_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sigesa_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sigesa}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - e3_postgres_data:/var/lib/postgresql/data:Z
+      - ../../db/seed.sql:/docker-entrypoint-initdb.d/01_seed.sql:ro,Z
+      - ./seed_e3_notifications.sql:/docker-entrypoint-initdb.d/02_seed_e3.sql:ro,Z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sigesa_user -d sigesa"]
+      interval: 5s
+      timeout: 5s
+      retries: 25
+      start_period: 15s
+    networks:
+      - e3-net
+
+  # Módulo extraído de notificaciones (Sidecar con la misma imagen pero SIGESA_APP=notification-service)
+  notification-service:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: sigesa-e3-notification-service
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SIGESA_APP=notification-service
+      - SERVER_PORT=8082
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8082/api/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - e3-net
+
+  # Toxiproxy: proxy TCP con inyección controlada de latencia y cortes de red
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.11.0
+    container_name: sigesa-e3-toxiproxy
+    restart: unless-stopped
+    command: ["-host=0.0.0.0"]
+    ports:
+      - "8474:8474"   # HTTP Management API
+      - "8081:8081"   # Puerto proxy para el servicio de notificaciones
+    networks:
+      - e3-net
+
+  # API Principal (Monolito) configurada para consumir notificaciones vía HTTP a través de Toxiproxy
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: sigesa-e3-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      toxiproxy:
+        condition: service_started
+    environment:
+      - SIGESA_APP=api
+      - EXTRACTION_MODE=${EXTRACTION_MODE:-http}
+      - SIGESA_NOTIFICATION_BASE_URL=http://toxiproxy:8081
+      - SIGESA_NOTIFICATION_TIMEOUT_MS=200
+      - SIGESA_NOTIFICATION_RETRIES=2
+      - SIGESA_NOTIFICATION_RETRY_BACKOFF_MS=50
+      - SIGESA_NOTIFICATION_DEADLINE_MS=800
+      - SIGESA_ASSISTANT_ENABLED=false
+      - SIGESA_EVIDENCE_STORAGE=local
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/sigesa
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-sigesa_user}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-sigesa_password}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - e3-net
+
+  # Generador de estrés K6 integrado en la red
+  k6:
+    image: grafana/k6:latest
+    container_name: sigesa-e3-k6
+    profiles: ["bench"]
+    working_dir: /bench
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - API_BASE_URL=http://backend:8080
+      - TOXIPROXY_BASE_URL=http://toxiproxy:8474
+      - TOXIPROXY_UPSTREAM=notification-service:8082
+      - PROXY_NAME=notification_proxy
+      - PROXY_LISTEN=0.0.0.0:8081
+      - TARGET_RPS=50
+      - FAULT_START_SEC=20
+      - FAULT_END_SEC=30
+      - FAULT_LATENCY_MS=2000
+      - EXTRACTION_MODE=${EXTRACTION_MODE:-http}
+      - SUMMARY_PATH=/bench/k6_last_result.json
+    volumes:
+      - .:/bench:rw
+    entrypoint: ["k6", "run", "/bench/stress_toxiproxy.js"]
+    networks:
+      - e3-net
+
+volumes:
+  e3_postgres_data:
+
+networks:
+  e3-net:
+    driver: bridge

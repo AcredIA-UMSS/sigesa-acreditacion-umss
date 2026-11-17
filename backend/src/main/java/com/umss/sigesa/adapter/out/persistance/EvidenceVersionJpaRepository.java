@@ -13,6 +13,10 @@ public interface EvidenceVersionJpaRepository extends JpaRepository<EvidenceVers
 
     List<EvidenceVersionEntity> findByEvidenceIdOrderByVersionNumberDesc(UUID evidenceId);
 
+    void deleteByEvidenceId(UUID evidenceId);
+
+    boolean existsByStorageKey(String storageKey);
+
     @Query("SELECT COALESCE(MAX(v.versionNumber), 0) FROM EvidenceVersionEntity v WHERE v.evidenceId = :evidenceId")
     int findMaxVersionNumber(@Param("evidenceId") UUID evidenceId);
 }

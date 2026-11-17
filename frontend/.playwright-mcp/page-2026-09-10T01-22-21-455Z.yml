@@ -1,0 +1,132 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - button [ref=f1e5]
+      - generic [ref=f1e8]:
+        - img "UMSS" [ref=f1e10]
+        - generic [ref=f1e11]:
+          - heading "UMSS DUEA" [level=1] [ref=f1e12]
+          - paragraph [ref=f1e13]: PANEL ADMINISTRATIVO
+      - navigation [ref=f1e14]:
+        - link "PANEL DE CONTROL ▼" [ref=f1e15] [cursor=pointer]:
+          - /url: /dashboard
+          - generic [ref=f1e16]: PANEL DE CONTROL
+          - generic [ref=f1e24]: ▼
+        - button "GESTIÓN PROCESOS" [ref=f1e26]
+        - link "PLANTILLAS" [ref=f1e37] [cursor=pointer]:
+          - /url: /admin/plantillas
+        - link "GESTIÓN USUARIOS" [ref=f1e45] [cursor=pointer]:
+          - /url: /admin/users
+        - link "REPORTES" [ref=f1e54] [cursor=pointer]:
+          - /url: /reportes/ejecutivo
+        - button "HISTORIAL" [ref=f1e59]
+        - link "AYUDA" [ref=f1e67] [cursor=pointer]:
+          - /url: /ayuda
+      - generic [ref=f1e74]:
+        - generic [ref=f1e75]:
+          - generic [ref=f1e76]: JD
+          - generic [ref=f1e79]:
+            - paragraph [ref=f1e80]: Jefatura DUEA [JD]
+            - paragraph [ref=f1e81]: SIGESA
+        - button "Cerrar sesión" [ref=f1e82]
+    - main [ref=f1e86]:
+      - generic [ref=f1e88]:
+        - generic [ref=f1e89]:
+          - paragraph [ref=f1e90]: SIGESA · Ayuda
+          - heading "Asistente virtual" [level=1] [ref=f1e91]
+          - paragraph [ref=f1e92]: "Tool calling SIGESA: la respuesta la produce el código. El LLM solo elige la herramienta cuando la pregunta no coincide con el catálogo de palabras clave. Las entradas se validan en el servidor (SQLi, XSS y límites de longitud)."
+        - generic [ref=f1e93]:
+          - paragraph [ref=f1e94]: Modelo (fijado)
+          - paragraph [ref=f1e95]: openai/gpt-oss-20b
+          - paragraph [ref=f1e96]: IA (LLM)
+          - paragraph [ref=f1e97]: Encendida
+      - generic [ref=f1e98]:
+        - complementary [ref=f1e99]:
+          - generic [ref=f1e100]:
+            - heading "Escenarios demo" [level=2] [ref=f1e101]
+            - list [ref=f1e131]:
+              - listitem [ref=f1e132]:
+                - paragraph [ref=f1e133]: 1. Controlado (catálogo)
+                - paragraph [ref=f1e134]: Lista las fases de Ingeniería de Sistemas CEUB
+                - paragraph [ref=f1e135]: "Camino esperado: KEYWORD"
+                - button "Usar pregunta" [ref=f1e136]
+              - listitem [ref=f1e137]:
+                - paragraph [ref=f1e138]: 2. Sinónimo (LLM elige tool)
+                - paragraph [ref=f1e139]: ¿Qué etapas tiene el proceso activo de Ingeniería de Sistemas CEUB?
+                - paragraph [ref=f1e140]: "Camino esperado: LLM"
+                - button "Usar pregunta" [ref=f1e141]
+              - listitem [ref=f1e142]:
+                - paragraph [ref=f1e143]: 3. Fuera de alcance
+                - paragraph [ref=f1e144]: ¿Cuál es el presupuesto de la universidad para 2027?
+                - paragraph [ref=f1e145]: "Camino esperado: OUT_OF_SCOPE"
+                - button "Usar pregunta" [ref=f1e146]
+              - listitem [ref=f1e147]:
+                - paragraph [ref=f1e148]: 4. Modelo apagado
+                - paragraph [ref=f1e149]: Lista las fases de Ingeniería de Sistemas CEUB (SIGESA_ASSISTANT_LLM_ENABLED=false)
+                - paragraph [ref=f1e150]: "Camino esperado: KEYWORD"
+                - button "Usar pregunta" [ref=f1e151]
+              - listitem [ref=f1e152]:
+                - paragraph [ref=f1e153]: 5. Multi-tool (Nivel 4)
+                - paragraph [ref=f1e154]: Muestra la estructura de Ingeniería de Sistemas CEUB y busca la normativa de la subfase Matriz de evidencias
+                - paragraph [ref=f1e155]: "Camino esperado: LLM"
+                - button "Usar pregunta" [ref=f1e156]
+          - generic [ref=f1e102]:
+            - heading "Capacidades" [level=2] [ref=f1e103]
+            - list [ref=f1e157]:
+              - listitem [ref=f1e158]: "Listar fases del proceso activo de una carrera (palabra clave: «fases»)."
+              - listitem [ref=f1e159]: Listar carreras con proceso de acreditación activo.
+              - listitem [ref=f1e160]: Listar carreras/programas académicos.
+              - listitem [ref=f1e161]: Gestionar fases del proceso activo (con confirmación en chat).
+              - listitem [ref=f1e162]: "Listar evidencias pendientes de control (palabra clave: «evidencias pendientes»)."
+              - listitem [ref=f1e163]: "Listar usuarios registrados (palabra clave: «usuarios»)."
+              - listitem [ref=f1e164]: Activar o desactivar usuarios (con confirmación en chat).
+              - listitem [ref=f1e165]: Registrar usuarios institucionales (agente users /admin/users).
+              - listitem [ref=f1e166]: Consultar documentación normativa indexada (CEUB, ARCU-SUR, RAG).
+        - generic [ref=f1e105]:
+          - generic [ref=f1e106]:
+            - generic [ref=f1e107]:
+              - generic [ref=f1e108]: Conversación
+              - button "Historial de acciones (1)" [ref=f1e170]
+            - button "Limpiar" [ref=f1e112]
+          - generic [ref=f1e116]:
+            - paragraph [ref=f1e177]: listame las funciones que puedo hacer como usuario
+            - generic [ref=f1e183]:
+              - paragraph [ref=f1e184]: "**Funciones disponibles en SIGESA (según tu rol):** | Función | Descripción | Acceso (roles) | |---------|-------------|----------------| | `list_users` | Lista usuarios con filtros por programa, rol y estado. | JD | | `get_user_detail` | Obtiene datos completos de un usuario. | JD | | `create_user` | Registra una cuenta institucional (vista previa + confirmación). | JD | | `list_programs` | Lista carreras/programas académicos. | JD, TD | | `list_active_processes` | Lista procesos de acreditación activos por carrera o plantilla. | JD, TD | | `list_process_structure` | Muestra la estructura normativa del proceso activo. | JD, TD, CC | | `set_user_status` | Activa o desactiva usuarios (vista previa + confirmación). | JD | | `manage_user_status` | Activa, desactiva o re‑activa usuarios (vista previa + confirmación). | JD | | `manage_user_assignment` | Crea o actualiza la asignación de usuarios a carreras (vista previa + confirmación). | JD | | `list_pending_evidences` | Lista evidencias pendientes de control por carrera. | JD, TD, CC | | `get_evidence_detail` | Obtiene metadatos de una evidencia. | JD, TD, CC | | `check_evidence_completeness` | Evalúa la completitud de una evidencia. | JD, TD, CC | | `search_normative_docs` | Busca fragmentos de normativa de acreditación. | Todos | > **Nota**: Las operaciones de escritura (`create_user`, `set_user_status`, `manage_user_status`, `manage_user_assignment`) requieren una confirmación explícita antes de ejecutarse."
+              - generic [ref=f1e185]:
+                - paragraph [ref=f1e186]:
+                  - generic [ref=f1e187]: "Herramienta:"
+                  - text: —
+                - paragraph [ref=f1e188]:
+                  - generic [ref=f1e189]: "Camino:"
+                  - text: LLM · LLM invocado
+          - generic [ref=f1e125]:
+            - textbox "Escriba su consulta… (Enter para enviar, Shift+Enter para nueva línea)" [active] [ref=f1e126]
+            - button "Enviar" [disabled] [ref=f1e127]
+  - generic [ref=f1e193]:
+    - button "Cerrar trazabilidad del agente" [ref=f1e194]
+    - dialog [ref=f1e195]:
+      - banner [ref=f1e196]:
+        - generic [ref=f1e197]:
+          - heading "Historial de acciones del asistente" [level=2] [ref=f1e198]
+          - paragraph [ref=f1e199]: Trazabilidad de tools, camino, fuentes y pasos encadenados (Nivel 4).
+        - button "Cerrar" [ref=f1e200]
+      - article [ref=f1e205]:
+        - generic [ref=f1e206]:
+          - paragraph [ref=f1e207]: "**Funciones disponibles en SIGESA (según tu rol):** | Función | Descripción | Acceso (rol…"
+          - generic [ref=f1e208]: OK
+        - paragraph [ref=f1e209]: 09:22:06 p. m. · «listame las funciones que puedo hacer como usuario»
+        - list [ref=f1e210]:
+          - listitem [ref=f1e211]:
+            - generic [ref=f1e213]: Mensaje enviado al backend (/assistant/chat)
+          - listitem [ref=f1e214]:
+            - generic [ref=f1e216]: "Contexto: agent=general (validación SQLi/XSS en servidor)"
+          - listitem [ref=f1e217]:
+            - generic [ref=f1e219]: Resolviendo intención (KEYWORD / LLM / RAG / OUT_OF_SCOPE)
+          - listitem [ref=f1e220]:
+            - generic [ref=f1e222]: "Tool ejecutada: ninguna (LLM)"
+          - listitem [ref=f1e223]:
+            - generic [ref=f1e225]: LLM invocado para selección de tool
+          - listitem [ref=f1e226]:
+            - generic [ref=f1e228]: Respuesta formateada entregada al chat
+      - contentinfo [ref=f1e229]:
+        - button "Cerrar" [ref=f1e230]

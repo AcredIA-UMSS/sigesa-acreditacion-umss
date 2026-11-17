@@ -1,6 +1,7 @@
 package com.umss.sigesa.adapter.in.web;
 
 import com.umss.sigesa.adapter.in.security.JwtAuthenticationFilter;
+import com.umss.sigesa.adapter.in.security.RestAccessDeniedHandler;
 import com.umss.sigesa.adapter.in.security.RestAuthenticationEntryPoint;
 import com.umss.sigesa.adapter.in.security.SecurityConfig;
 import com.umss.sigesa.adapter.in.web.advice.AssistantExceptionHandler;
@@ -10,9 +11,11 @@ import com.umss.sigesa.application.model.assistant.AssistantChatResult;
 import com.umss.sigesa.application.model.assistant.AssistantResolutionPath;
 import com.umss.sigesa.application.model.assistant.AssistantToolStep;
 import com.umss.sigesa.application.port.in.SendChatMessageUseCase;
+import com.umss.sigesa.domain.exception.AssistantGatewayTimeoutException;
 import com.umss.sigesa.application.port.out.UserProgramAssignmentRepositoryPort;
 import com.umss.sigesa.application.service.assistant.AssistantChatContextFactory;
 import com.umss.sigesa.application.service.assistant.AssistantChatInputValidator;
+import com.umss.sigesa.application.service.assistant.AssistantReplyOutputGuard;
 import com.umss.sigesa.config.AssistantProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         SecurityConfig.class,
         JwtAuthenticationFilter.class,
         RestAuthenticationEntryPoint.class,
+        RestAccessDeniedHandler.class,
         AuthExceptionHandler.class,
         AssistantExceptionHandler.class,
         AssistantControllerWebMvcTest.TestConfig.class
@@ -85,8 +89,8 @@ class AssistantControllerWebMvcTest {
         when(sendChatMessageUseCase.send(any(), any(), any(), any())).thenReturn(
                 new AssistantChatResult(
                         "Fases del proceso **Ingeniería de Sistemas**",
-                        LIST_PROCESS_PHASES_ID,
-                        List.of("phases"),
+                        LIST_PROCESS_STRUCTURE_ID,
+                        List.of("level1_nodes"),
                         AssistantResolutionPath.KEYWORD,
                         false));
 
@@ -98,10 +102,10 @@ class AssistantControllerWebMvcTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reply").isNotEmpty())
-                .andExpect(jsonPath("$.toolId").value(LIST_PROCESS_PHASES_ID))
+                .andExpect(jsonPath("$.toolId").value(LIST_PROCESS_STRUCTURE_ID))
                 .andExpect(jsonPath("$.path").value("KEYWORD"))
                 .andExpect(jsonPath("$.llmInvoked").value(false))
-                .andExpect(jsonPath("$.sourceTables[0]").value("phases"));
+                .andExpect(jsonPath("$.sourceTables[0]").value("level1_nodes"));
     }
 
     @Test
@@ -229,6 +233,24 @@ class AssistantControllerWebMvcTest {
                 .andExpect(jsonPath("$.error").value("ASSISTANT_UNAVAILABLE"));
     }
 
+    @Test
+    void chat_whenLlmTimesOut_returns504() throws Exception {
+        stubAssistantEnabled();
+        when(assignmentRepository.findActiveByUserId(JD_USER_ID)).thenReturn(List.of());
+        when(sendChatMessageUseCase.send(any(), any(), any(), any()))
+                .thenThrow(new AssistantGatewayTimeoutException());
+
+        mockMvc.perform(post("/api/v1/assistant/chat")
+                        .with(jdAuth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"message":"Lista las fases de Ingeniería de Sistemas CEUB"}
+                                """))
+                .andExpect(status().isGatewayTimeout())
+                .andExpect(jsonPath("$.error").value("ASSISTANT_GATEWAY_TIMEOUT"))
+                .andExpect(jsonPath("$.message").value(AssistantGatewayTimeoutException.FRIENDLY_MESSAGE));
+    }
+
     private static RequestPostProcessor jdAuth() {
         return authentication(new UsernamePasswordAuthenticationToken(
                 JD_USER_ID,
@@ -255,6 +277,11 @@ class AssistantControllerWebMvcTest {
         @Bean
         AssistantChatInputValidator assistantChatInputValidator() {
             return new AssistantChatInputValidator();
+        }
+
+        @Bean
+        AssistantReplyOutputGuard assistantReplyOutputGuard() {
+            return new AssistantReplyOutputGuard(true);
         }
     }
 }

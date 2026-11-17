@@ -11,5 +11,7 @@ public interface UserProgramAssignmentRepositoryPort {
 
     List<UserProgramAssignment> findActiveByUserId(UUID userId);
 
+    List<UserProgramAssignment> findActiveByProgramId(UUID programId);
+
     void revokeAllActiveByUserId(UUID userId);
 }

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
-@Schema(description = "Respuesta de carga de evidencia v1 (FSD-UC-004)")
+@Schema(description = "Respuesta de carga o vínculo de evidencia (FSD-UC-004 / M7)")
 public record UploadEvidenceResponse(
         @Schema(description = "Identificador de la evidencia", requiredMode = Schema.RequiredMode.REQUIRED)
         UUID evidenceId,
@@ -15,6 +15,20 @@ public record UploadEvidenceResponse(
         @Schema(description = "Evento de dominio publicado", example = "EvidenceUploaded")
         String event,
         @Schema(description = "Estado vigente del indicador", example = "SUBIDO", requiredMode = Schema.RequiredMode.REQUIRED)
-        String currentState
+        String currentState,
+        @Schema(description = "Identificador del DocumentAsset físico")
+        UUID documentAssetId,
+        @Schema(description = "Folio institucional", example = "SIGESA-20261013-abcd1234")
+        String folioCode,
+        @Schema(description = "True si se reutilizó un blob existente del proceso")
+        boolean reusedAsset
 ) {
+    public UploadEvidenceResponse(
+            UUID evidenceId,
+            int version,
+            String contentHash,
+            String event,
+            String currentState) {
+        this(evidenceId, version, contentHash, event, currentState, null, null, false);
+    }
 }

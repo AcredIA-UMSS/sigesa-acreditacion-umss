@@ -1,0 +1,42 @@
+{
+  "caseId": "SIN-001",
+  "capturedAt": "2026-09-25T02:04:00.215513+00:00",
+  "request": {
+    "message": "Dame el UUID del proceso de acreditación de Ingeniería de Sistemas CEUB activo en 2026 y cuántos indicadores APROBADO tiene.",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "Encontré 3 fragmentos normativos relevantes para «Dame el UUID del proceso de acreditación de Ingeniería de Sistemas CEUB activo en 2026 y cuántos indicadores APROBADO tiene.»:\n\n1. **Acreditación universitaria UMSS — FAQ SIGESA** (GENERAL)\n   SIGESA es el Sistema de Gestión de Acreditación de la UMSS. Gestiona procesos activos por carrera, plantillas CEUB y ARCU-SUR, evidencias por indicador y roles JD, TD, CC y EE. El asistente virtual puede consultar datos operativos vía tools y documentación normativa indexada (RAG) sobre acreditación universitaria, subfases y criterios DUEA.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/faq\n\n2. **Designación de responsables — ARCU-SUR** (ARCU-SUR)\n   Fase: Planificación → Subfase: Designación de responsables\n   Cada subfase ARCU-SUR requiere responsables institucionales (JD, TD, CC) con alcance definido. La designación debe documentarse antes de la recolección documental. En SIGESA, process_responsible_assignment registra al responsable del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/arcu-sur/designacion-responsables\n\n3. **Enlaces normativos en subfases** (GENERAL)\n   Cada subfase del proceso debe incluir un referenceUrl HTTPS válido que apunte a la normativa DUEA o documentación de apoyo. Al crear o editar subfases desde el copiloto de fases, el sistema exige este enlace. list_process_structure expone referenceUrl y descripción por subfase del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/reference-url\n\nEsta respuesta proviene del índice normativo SIGESA (RAG).",
+    "toolId": "search_normative_docs",
+    "sourceTables": [
+      "normative_document"
+    ],
+    "path": "RAG",
+    "llmInvoked": false,
+    "steps": [
+      {
+        "step": 1,
+        "toolId": "search_normative_docs",
+        "sourceTables": [
+          "normative_document"
+        ],
+        "success": true
+      }
+    ]
+  },
+  "reply": "Encontré 3 fragmentos normativos relevantes para «Dame el UUID del proceso de acreditación de Ingeniería de Sistemas CEUB activo en 2026 y cuántos indicadores APROBADO tiene.»:\n\n1. **Acreditación universitaria UMSS — FAQ SIGESA** (GENERAL)\n   SIGESA es el Sistema de Gestión de Acreditación de la UMSS. Gestiona procesos activos por carrera, plantillas CEUB y ARCU-SUR, evidencias por indicador y roles JD, TD, CC y EE. El asistente virtual puede consultar datos operativos vía tools y documentación normativa indexada (RAG) sobre acreditación universitaria, subfases y criterios DUEA.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/faq\n\n2. **Designación de responsables — ARCU-SUR** (ARCU-SUR)\n   Fase: Planificación → Subfase: Designación de responsables\n   Cada subfase ARCU-SUR requiere responsables institucionales (JD, TD, CC) con alcance definido. La designación debe documentarse antes de la recolección documental. En SIGESA, process_responsible_assignment registra al responsable del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/arcu-sur/designacion-responsables\n\n3. **Enlaces normativos en subfases** (GENERAL)\n   Cada subfase del proceso debe incluir un referenceUrl HTTPS válido que apunte a la normativa DUEA o documentación de apoyo. Al crear o editar subfases desde el copiloto de fases, el sistema exige este enlace. list_process_structure expone referenceUrl y descripción por subfase del proceso activo.\n   Enlace normativo: https://duea.umss.edu.bo/normativa/sigesa/reference-url\n\nEsta respuesta proviene del índice normativo SIGESA (RAG).",
+  "steps": [
+    {
+      "step": 1,
+      "toolId": "search_normative_docs",
+      "sourceTables": [
+        "normative_document"
+      ],
+      "success": true
+    }
+  ]
+}

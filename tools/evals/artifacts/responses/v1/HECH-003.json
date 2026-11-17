@@ -1,0 +1,22 @@
+{
+  "caseId": "HECH-003",
+  "capturedAt": "2026-09-25T02:15:05.911022+00:00",
+  "request": {
+    "message": "¿Qué significa que una evidencia esté en estado SUBIDO para un coordinador?",
+    "history": [],
+    "context": {
+      "agent": "evidence"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "En el contexto de SIGESA, cuando una evidencia aparece en estado **SUBIDO** significa que ya ha sido cargada al sistema por el responsable del indicador (coordinador, técnico, etc.) y está disponible para su revisión y validación.  \nPara el coordinador esto implica:  \n\n1. **Disponibilidad** – La evidencia está accesible en el portal, y el sistema registra que se ha subido.  \n2. **Pendiente de control** – Aún no ha sido aprobada o rechazada por la Jefatura DUEA; está en espera de la revisión correspondiente.  \n3. **Seguimiento** – El coordinador puede revisar su propio indicador, verificar que la evidencia cumple con los requisitos y, si es necesario, volver a subirla o solicitar aclaraciones antes de que la jefatura la apruebe.  \n\nEn resumen, “SUBIDO” indica que la evidencia ya está en el sistema, lista para revisión, pero no ha alcanzado la aprobación final.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "En el contexto de SIGESA, cuando una evidencia aparece en estado **SUBIDO** significa que ya ha sido cargada al sistema por el responsable del indicador (coordinador, técnico, etc.) y está disponible para su revisión y validación.  \nPara el coordinador esto implica:  \n\n1. **Disponibilidad** – La evidencia está accesible en el portal, y el sistema registra que se ha subido.  \n2. **Pendiente de control** – Aún no ha sido aprobada o rechazada por la Jefatura DUEA; está en espera de la revisión correspondiente.  \n3. **Seguimiento** – El coordinador puede revisar su propio indicador, verificar que la evidencia cumple con los requisitos y, si es necesario, volver a subirla o solicitar aclaraciones antes de que la jefatura la apruebe.  \n\nEn resumen, “SUBIDO” indica que la evidencia ya está en el sistema, lista para revisión, pero no ha alcanzado la aprobación final.",
+  "steps": []
+}

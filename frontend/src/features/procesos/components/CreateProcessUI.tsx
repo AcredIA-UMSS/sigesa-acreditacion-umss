@@ -1,9 +1,10 @@
 // frontend/src/features/procesos/components/CreateProcessUI.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, Users, Calendar, Plus, X, Bell, Settings, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Info, Users, Calendar, Plus, X, Settings, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Alert';
+import { NotificationBellPopover } from '../../notifications';
 
 // Mock Data
 const MOCK_FACULTADES = [
@@ -221,11 +222,10 @@ export const CreateProcessUI = () => {
           <span>Gestión de procesos de acreditación</span>
         </div>
         <div className="flex items-center gap-4 text-gray-600">
-          <button className="hover:text-primary-600 relative">
-            <Bell size={24} />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-secondary rounded-full"></span>
+          <NotificationBellPopover />
+          <button type="button" className="hover:text-primary-600" aria-label="Configuración">
+            <Settings size={24} />
           </button>
-          <button className="hover:text-primary-600"><Settings size={24} /></button>
         </div>
       </header>
 

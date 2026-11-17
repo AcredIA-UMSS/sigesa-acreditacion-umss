@@ -156,8 +156,8 @@ En caso de fallo de negocio (filtro inválido, sin permisos):
 
 | Componente | Descripción |
 |------------|-------------|
-| **Corpus** | Tabla `normative_document` (título, template_type, body_text, source_url) |
-| **Retrieval** | PostgreSQL FTS (`tsvector` + GIN) en prod; fallback LIKE en dev/Hibernate |
+| **Corpus** | Tabla `normative_document` (título, template_type, body_text, source_url). Manual ARCU-SUR 2023: `classpath:normative-corpus/arcu-sur-2023/*.md` (#76) |
+| **Retrieval** | PostgreSQL FTS (`tsvector` + GIN) en prod; fallback LIKE en dev/Hibernate. **v2:** tesauro, top-3 claves, AND→OR ([`RAG-RETRIEVAL-TECHNIQUES.md`](RAG-RETRIEVAL-TECHNIQUES.md)) |
 | **Tool** | `search_normative_docs` — todos los agentes y roles del asistente |
 | **Enriquecimiento** | `AssistantNormativeRagService` inyecta fragmentos en system prompt del LLM |
 | **Fallback** | Si el LLM no elige tool, respuesta directa vía path `RAG` cuando hay hits |

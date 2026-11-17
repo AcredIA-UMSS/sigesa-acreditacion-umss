@@ -14,7 +14,7 @@ public final class ProcessAccessPolicy {
         if ("JD".equals(role) || "TD".equals(role)) {
             return true;
         }
-        if ("CC".equals(role)) {
+        if ("CC".equals(role) || "EE".equals(role) || "CAE_MEMBER".equals(role)) {
             return programScope != null && programScope.contains(careerId);
         }
         return false;

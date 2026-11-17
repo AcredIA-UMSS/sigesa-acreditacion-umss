@@ -63,4 +63,33 @@ class GetReportJobStatusServiceTest {
         assertThrows(ReportJobNotFoundException.class,
                 () -> service.getStatus(jobId, UUID.randomUUID()));
     }
+
+    @Test
+    void shouldReturnNullDownloadPathWhenJobIsPending() {
+        UUID jobId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        ReportJob job = ReportJob.createPending(jobId, requesterId, new ExecutiveReportFilters(null, null, 2026));
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.of(job));
+
+        var status = service.getStatus(jobId, requesterId);
+
+        assertEquals(ReportJobStatus.PENDING, status.status());
+        org.junit.jupiter.api.Assertions.assertNull(status.downloadPath());
+        org.junit.jupiter.api.Assertions.assertNull(status.errorCode());
+    }
+
+    @Test
+    void shouldReturnErrorCodeWhenJobFailed() {
+        UUID jobId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        ReportJob job = ReportJob.createPending(jobId, requesterId, new ExecutiveReportFilters(null, null, 2026));
+        job.markFailed("REPORT_TEMPLATE");
+        when(reportJobRepository.findById(jobId)).thenReturn(Optional.of(job));
+
+        var status = service.getStatus(jobId, requesterId);
+
+        assertEquals(ReportJobStatus.FAILED, status.status());
+        org.junit.jupiter.api.Assertions.assertNull(status.downloadPath());
+        assertEquals("REPORT_TEMPLATE", status.errorCode());
+    }
 }

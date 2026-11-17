@@ -1,0 +1,23 @@
+{
+  "caseId": "HECH-002",
+  "capturedAt": "2026-09-25T02:18:44.296511+00:00",
+  "request": {
+    "message": "¿Cuál es la diferencia entre un indicador y una evidencia en el flujo de acreditación SIGESA?",
+    "history": [],
+    "context": {
+      "agent": "general"
+    }
+  },
+  "httpStatus": 200,
+  "response": {
+    "reply": "En el flujo de acreditación SIGESA:\n\n| Concepto | Qué es | Función principal |\n|----------|--------|-------------------|\n| **Indicador** | Elemento que mide el cumplimiento de un criterio de evaluación. Cada indicador tiene un objetivo, una referencia documental y un estado (PENDIENTE, SUBIDO, APROBADO, OBSERVADO, etc.). | Determina **qué** debe cumplirse para que el proceso avance. |\n| **Evidencia** | Documento, archivo o registro que respalda la respuesta del indicador. Se carga en el sistema y pasa por control de calidad (hash, descripción, versión). | Proporciona la prueba concreta de que el indicador se cumple. |\n\nEn resumen, el **indicador** define lo que se debe demostrar, mientras que la **evidencia** es la prueba documental que confirma que ese indicador se cumple.",
+    "toolId": null,
+    "sourceTables": [],
+    "path": "LLM",
+    "llmInvoked": true,
+    "steps": []
+  },
+  "reply": "En el flujo de acreditación SIGESA:\n\n| Concepto | Qué es | Función principal |\n|----------|--------|-------------------|\n| **Indicador** | Elemento que mide el cumplimiento de un criterio de evaluación. Cada indicador tiene un objetivo, una referencia documental y un estado (PENDIENTE, SUBIDO, APROBADO, OBSERVADO, etc.). | Determina **qué** debe cumplirse para que el proceso avance. |\n| **Evidencia** | Documento, archivo o registro que respalda la respuesta del indicador. Se carga en el sistema y pasa por control de calidad (hash, descripción, versión). | Proporciona la prueba concreta de que el indicador se cumple. |\n\nEn resumen, el **indicador** define lo que se debe demostrar, mientras que la **evidencia** es la prueba documental que confirma que ese indicador se cumple.",
+  "steps": [],
+  "promptVersion": "v2"
+}

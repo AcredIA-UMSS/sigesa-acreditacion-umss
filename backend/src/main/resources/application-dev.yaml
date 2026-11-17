@@ -1,13 +1,23 @@
 spring:
+  threads:
+    virtual:
+      enabled: true
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/sigesa}
     username: ${SPRING_DATASOURCE_USERNAME:sigesa_user}
     password: ${SPRING_DATASOURCE_PASSWORD:sigesa_password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: sigesa-hikari
+      maximum-pool-size: ${SIGESA_HIKARI_MAX_POOL:10}
+      minimum-idle: ${SIGESA_HIKARI_MIN_IDLE:2}
+      connection-timeout: ${SIGESA_HIKARI_CONNECTION_TIMEOUT_MS:30000}
+      leak-detection-threshold: ${SIGESA_HIKARI_LEAK_DETECTION_MS:20000}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      # Dev Docker: Hibernate crea/actualiza el esquema base; Flyway solo en prod.
+      # Dev Docker: Hibernate alinea entidades JPA; migraciones V14+ requieren backfill manual
+      # o Flyway baseline si el volumen Postgres es anterior a release 2.0.0.
       ddl-auto: update
   flyway:
     enabled: false

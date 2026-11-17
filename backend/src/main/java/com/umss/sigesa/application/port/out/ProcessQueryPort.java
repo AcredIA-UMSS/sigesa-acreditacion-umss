@@ -13,9 +13,7 @@ public interface ProcessQueryPort {
             UUID careerId,
             UUID templateId,
             String status,
-            java.time.LocalDateTime startDate,
-            int phaseCount,
-            int subphaseCount
+            java.time.LocalDateTime startDate
     ) {
     }
 
