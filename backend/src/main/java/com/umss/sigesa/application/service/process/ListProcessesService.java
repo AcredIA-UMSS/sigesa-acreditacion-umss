@@ -10,6 +10,7 @@ import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.model.Template;
 
 import java.util.List;
 import java.util.Map;
@@ -51,31 +52,52 @@ public class ListProcessesService implements ListProcessesUseCase {
             items = processQueryPort.findAllSummaryItems();
         }
 
-        List<ProcessSummary> summaries = items.stream()
-                .map(item -> ProcessEnrichmentHelper.toSummary(
-                        item, programCatalogPort, templatePort, normativeHierarchyQueryPort))
-                .toList();
+        if (items.isEmpty()) {
+            return List.of();
+        }
 
-        List<UUID> processIds = summaries.stream().map(ProcessSummary::id).toList();
+        List<UUID> processIds = items.stream().map(ProcessQueryPort.ProcessListItem::id).toList();
+        List<UUID> careerIds = items.stream().map(ProcessQueryPort.ProcessListItem::careerId).distinct().toList();
+        List<UUID> templateIds = items.stream().map(ProcessQueryPort.ProcessListItem::templateId).distinct().toList();
+
+        Map<UUID, ProgramCatalogPort.ProgramEntry> programs = programCatalogPort.findByIds(careerIds);
+        Map<UUID, Template> templates = templatePort.findMetadataByIds(templateIds);
+        Map<UUID, Long> level1Counts = normativeHierarchyQueryPort.countLevel1NodesByProcessIds(processIds);
+        Map<UUID, Long> indicatorCounts = normativeHierarchyQueryPort.countIndicatorsByProcessIds(processIds);
         Map<UUID, ProcessResponsibleInfo> responsibles = ProcessResponsibleEnrichmentHelper.resolveForProcesses(
                 processIds, processResponsiblePort, userRepositoryPort);
 
-        return summaries.stream()
-                .map(summary -> new ProcessSummary(
-                        summary.id(),
-                        summary.careerId(),
-                        summary.careerCode(),
-                        summary.careerName(),
-                        summary.templateId(),
-                        summary.templateName(),
-                        summary.templateType(),
-                        summary.evaluatorModel(),
-                        summary.status(),
-                        summary.startDate(),
-                        summary.level1Count(),
-                        summary.indicatorCount(),
-                        responsibles.get(summary.id())
-                ))
+        return items.stream()
+                .map(item -> {
+                    ProgramCatalogPort.ProgramEntry program = programs.get(item.careerId());
+                    String careerCode = program != null ? program.code() : "";
+                    String careerName = program != null ? program.name() : "";
+
+                    Template template = templates.get(item.templateId());
+                    String templateName = template != null ? template.getName() : "";
+                    String templateType = template != null ? template.getType() : "";
+                    String evaluatorModel = ProcessEnrichmentHelper.resolveEvaluatorModel(templateType);
+
+                    int level1Count = level1Counts.getOrDefault(item.id(), 0L).intValue();
+                    int indicatorCount = indicatorCounts.getOrDefault(item.id(), 0L).intValue();
+                    ProcessResponsibleInfo responsible = responsibles.get(item.id());
+
+                    return new ProcessSummary(
+                            item.id(),
+                            item.careerId(),
+                            careerCode,
+                            careerName,
+                            item.templateId(),
+                            templateName,
+                            templateType,
+                            evaluatorModel,
+                            item.status(),
+                            item.startDate(),
+                            level1Count,
+                            indicatorCount,
+                            responsible
+                    );
+                })
                 .toList();
     }
 

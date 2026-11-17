@@ -28,6 +28,31 @@ public interface SpringDataAccreditationProcessRepository extends JpaRepository<
             @Param("careerId") UUID careerId,
             @Param("templateType") String templateType);
 
+    interface ProcessSummaryProjection {
+        UUID getId();
+        UUID getCareerId();
+        UUID getTemplateId();
+        String getStatus();
+        java.time.LocalDateTime getStartDate();
+    }
+
+    @Query("""
+            SELECT p.id AS id, p.careerId AS careerId, p.templateId AS templateId, p.status AS status, p.startDate AS startDate
+            FROM AccreditationProcessJpaEntity p
+            WHERE p.status <> 'ARCHIVED'
+            ORDER BY p.startDate DESC
+            """)
+    List<ProcessSummaryProjection> findAllSummaryProjections();
+
+    @Query("""
+            SELECT p.id AS id, p.careerId AS careerId, p.templateId AS templateId, p.status AS status, p.startDate AS startDate
+            FROM AccreditationProcessJpaEntity p
+            WHERE p.careerId IN :careerIds
+              AND p.status <> 'ARCHIVED'
+            ORDER BY p.startDate DESC
+            """)
+    List<ProcessSummaryProjection> findSummaryProjectionsByCareerIds(@Param("careerIds") Collection<UUID> careerIds);
+
     List<AccreditationProcessJpaEntity> findAllByOrderByStartDateDesc();
 
     List<AccreditationProcessJpaEntity> findByCareerIdInOrderByStartDateDesc(Collection<UUID> careerIds);

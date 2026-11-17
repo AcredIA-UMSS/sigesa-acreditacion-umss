@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,4 +28,12 @@ public interface SpringDataLevel1NodeRepository extends JpaRepository<Level1Node
     boolean existsByProcessId(UUID processId);
 
     long countByProcessId(UUID processId);
+
+    @Query("""
+            SELECT l1.process.id, COUNT(l1.id)
+            FROM Level1NodeJpaEntity l1
+            WHERE l1.process.id IN :processIds
+            GROUP BY l1.process.id
+            """)
+    List<Object[]> countLevel1NodesByProcessIds(@Param("processIds") Collection<UUID> processIds);
 }

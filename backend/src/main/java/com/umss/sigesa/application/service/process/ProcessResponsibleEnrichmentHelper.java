@@ -37,15 +37,27 @@ public final class ProcessResponsibleEnrichmentHelper {
             return Map.of();
         }
 
+        List<ProcessResponsibleAssignment> assignments =
+                processResponsiblePort.findActiveByProcessIds(processIds);
+        if (assignments.isEmpty()) {
+            return Map.of();
+        }
+
+        List<UUID> userIds = assignments.stream()
+                .map(ProcessResponsibleAssignment::getUserId)
+                .distinct()
+                .toList();
+
+        Map<UUID, AppUser> users = userRepositoryPort.findByIds(userIds);
+
         Map<UUID, ProcessResponsibleInfo> result = new HashMap<>();
-        for (ProcessResponsibleAssignment assignment : processResponsiblePort.findAllActive()) {
-            if (!processIds.contains(assignment.getProcessId())) {
-                continue;
+        for (ProcessResponsibleAssignment assignment : assignments) {
+            AppUser user = users.get(assignment.getUserId());
+            if (user != null) {
+                result.put(
+                        assignment.getProcessId(),
+                        toInfo(user, assignment.getAssignedAt()));
             }
-            userRepositoryPort.findById(assignment.getUserId())
-                    .ifPresent(user -> result.put(
-                            assignment.getProcessId(),
-                            toInfo(user, assignment.getAssignedAt())));
         }
         return result;
     }

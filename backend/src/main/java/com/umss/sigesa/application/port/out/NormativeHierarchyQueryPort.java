@@ -7,7 +7,10 @@ import com.umss.sigesa.domain.model.PhaseState;
 import com.umss.sigesa.domain.model.TemplateLevel1Node;
 import com.umss.sigesa.domain.model.TemplateNormativeIndicator;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,6 +67,28 @@ public interface NormativeHierarchyQueryPort {
     long countLevel1NodesByProcessId(UUID processId);
 
     long countIndicatorsByProcessId(UUID processId);
+
+    default Map<UUID, Long> countLevel1NodesByProcessIds(Collection<UUID> processIds) {
+        if (processIds == null || processIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, Long> result = new HashMap<>();
+        for (UUID id : processIds) {
+            result.put(id, countLevel1NodesByProcessId(id));
+        }
+        return result;
+    }
+
+    default Map<UUID, Long> countIndicatorsByProcessIds(Collection<UUID> processIds) {
+        if (processIds == null || processIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<UUID, Long> result = new HashMap<>();
+        for (UUID id : processIds) {
+            result.put(id, countIndicatorsByProcessId(id));
+        }
+        return result;
+    }
 
     long countLevel1NodesByTemplateId(UUID templateId);
 

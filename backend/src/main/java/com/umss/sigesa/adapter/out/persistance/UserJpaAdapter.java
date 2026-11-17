@@ -12,9 +12,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 public class UserJpaAdapter implements UserRepositoryPort {
@@ -47,6 +51,16 @@ public class UserJpaAdapter implements UserRepositoryPort {
     @Override
     public Optional<AppUser> findById(UUID id) {
         return jpaRepository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public Map<UUID, AppUser> findByIds(Collection<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Map.of();
+        }
+        return jpaRepository.findAllById(ids).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toMap(AppUser::getId, Function.identity()));
     }
 
     @Override

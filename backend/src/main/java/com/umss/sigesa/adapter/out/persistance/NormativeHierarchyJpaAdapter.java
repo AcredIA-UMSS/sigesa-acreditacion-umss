@@ -19,8 +19,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,6 +55,36 @@ public class NormativeHierarchyJpaAdapter implements NormativeHierarchyQueryPort
     @Override
     public long countIndicatorsByProcessId(UUID processId) {
         return indicatorRepository.countByProcessId(processId);
+    }
+
+    @Override
+    public Map<UUID, Long> countLevel1NodesByProcessIds(Collection<UUID> processIds) {
+        if (processIds == null || processIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Object[]> rows = level1NodeRepository.countLevel1NodesByProcessIds(processIds);
+        Map<UUID, Long> result = new HashMap<>();
+        for (Object[] row : rows) {
+            UUID processId = (UUID) row[0];
+            Long count = ((Number) row[1]).longValue();
+            result.put(processId, count);
+        }
+        return result;
+    }
+
+    @Override
+    public Map<UUID, Long> countIndicatorsByProcessIds(Collection<UUID> processIds) {
+        if (processIds == null || processIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Object[]> rows = indicatorRepository.countIndicatorsByProcessIds(processIds);
+        Map<UUID, Long> result = new HashMap<>();
+        for (Object[] row : rows) {
+            UUID processId = (UUID) row[0];
+            Long count = ((Number) row[1]).longValue();
+            result.put(processId, count);
+        }
+        return result;
     }
 
     @Override

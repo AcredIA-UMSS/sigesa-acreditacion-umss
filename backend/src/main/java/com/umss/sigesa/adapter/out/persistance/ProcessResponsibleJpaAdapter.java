@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +67,17 @@ public class ProcessResponsibleJpaAdapter implements ProcessResponsiblePort {
     @Transactional(readOnly = true)
     public List<ProcessResponsibleAssignment> findAllActive() {
         return repository.findByRevokedAtIsNull().stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProcessResponsibleAssignment> findActiveByProcessIds(Collection<UUID> processIds) {
+        if (processIds == null || processIds.isEmpty()) {
+            return List.of();
+        }
+        return repository.findByProcessIdInAndRevokedAtIsNull(processIds).stream()
                 .map(this::toDomain)
                 .toList();
     }

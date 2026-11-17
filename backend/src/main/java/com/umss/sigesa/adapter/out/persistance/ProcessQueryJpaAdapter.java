@@ -23,8 +23,7 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
 
     @Override
     public List<ProcessListItem> findAllSummaryItems() {
-        return repository.findAllByOrderByStartDateDesc().stream()
-                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
+        return repository.findAllSummaryProjections().stream()
                 .map(this::toListItem)
                 .toList();
     }
@@ -34,8 +33,7 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
         if (careerIds == null || careerIds.isEmpty()) {
             return List.of();
         }
-        return repository.findByCareerIdInOrderByStartDateDesc(careerIds).stream()
-                .filter(entity -> !ARCHIVED_STATUS.equals(entity.getStatus()))
+        return repository.findSummaryProjectionsByCareerIds(careerIds).stream()
                 .map(this::toListItem)
                 .toList();
     }
@@ -45,7 +43,7 @@ public class ProcessQueryJpaAdapter implements ProcessQueryPort {
         return repository.findById(id).map(mapper::toDomain);
     }
 
-    private ProcessListItem toListItem(AccreditationProcessJpaEntity entity) {
+    private ProcessListItem toListItem(SpringDataAccreditationProcessRepository.ProcessSummaryProjection entity) {
         return new ProcessListItem(
                 entity.getId(),
                 entity.getCareerId(),

@@ -38,6 +38,17 @@ public interface SpringDataNormativeIndicatorRepository extends JpaRepository<No
     long countByProcessId(@Param("processId") UUID processId);
 
     @Query("""
+            SELECT l1.process.id, COUNT(i.id)
+            FROM NormativeIndicatorJpaEntity i
+            JOIN i.level3Node l3
+            JOIN l3.level2Node l2
+            JOIN l2.level1Node l1
+            WHERE l1.process.id IN :processIds
+            GROUP BY l1.process.id
+            """)
+    List<Object[]> countIndicatorsByProcessIds(@Param("processIds") Collection<UUID> processIds);
+
+    @Query("""
             SELECT i FROM NormativeIndicatorJpaEntity i
             JOIN FETCH i.level3Node l3
             JOIN l3.level2Node l2

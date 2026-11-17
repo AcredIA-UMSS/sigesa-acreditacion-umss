@@ -8,6 +8,9 @@ import com.umss.sigesa.application.port.out.ProcessResponsiblePort;
 import com.umss.sigesa.application.port.out.ProgramCatalogPort;
 import com.umss.sigesa.application.port.out.TemplatePort;
 import com.umss.sigesa.application.port.out.UserRepositoryPort;
+import com.umss.sigesa.domain.model.AppUser;
+import com.umss.sigesa.domain.model.Email;
+import com.umss.sigesa.domain.model.ProcessResponsibleAssignment;
 import com.umss.sigesa.domain.model.Template;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,13 +20,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,11 +65,13 @@ class ListProcessesServiceTest {
                 processResponsiblePort,
                 userRepositoryPort,
                 normativeHierarchyQueryPort);
-        lenient().when(processResponsiblePort.findAllActive()).thenReturn(List.of());
-        lenient().when(normativeHierarchyQueryPort.countLevel1NodesByProcessId(org.mockito.ArgumentMatchers.any()))
-                .thenReturn(0L);
-        lenient().when(normativeHierarchyQueryPort.countIndicatorsByProcessId(org.mockito.ArgumentMatchers.any()))
-                .thenReturn(0L);
+        lenient().when(processResponsiblePort.findActiveByProcessIds(org.mockito.ArgumentMatchers.any())).thenReturn(List.of());
+        lenient().when(normativeHierarchyQueryPort.countLevel1NodesByProcessIds(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Map.of());
+        lenient().when(normativeHierarchyQueryPort.countIndicatorsByProcessIds(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Map.of());
+        lenient().when(templatePort.findMetadataByIds(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Map.of(templateId, Template.builder().id(templateId).name("CEUB 2026").type("CEUB").build()));
     }
 
     @Test
@@ -72,13 +80,27 @@ class ListProcessesServiceTest {
                 listItem(processA, careerA),
                 listItem(processB, careerB)
         ));
-        stubEnrichment(careerA, "INF-SIS", "Ingeniería de Sistemas");
-        stubEnrichment(careerB, "CIV", "Ingeniería Civil");
+        when(programCatalogPort.findByIds(List.of(careerA, careerB))).thenReturn(Map.of(
+                careerA, new ProgramCatalogPort.ProgramEntry(careerA, "INF-SIS", "Ingeniería de Sistemas"),
+                careerB, new ProgramCatalogPort.ProgramEntry(careerB, "CIV", "Ingeniería Civil")
+        ));
+        when(normativeHierarchyQueryPort.countLevel1NodesByProcessIds(List.of(processA, processB)))
+                .thenReturn(Map.of(processA, 5L, processB, 3L));
+        when(normativeHierarchyQueryPort.countIndicatorsByProcessIds(List.of(processA, processB)))
+                .thenReturn(Map.of(processA, 25L, processB, 15L));
 
         List<ProcessSummary> result = service.list(new ProcessQueryContext("JD", List.of()));
 
         assertEquals(2, result.size());
+        assertEquals("INF-SIS", result.get(0).careerCode());
+        assertEquals(5, result.get(0).level1Count());
+        assertEquals(25, result.get(0).indicatorCount());
+        assertEquals("CIV", result.get(1).careerCode());
+        assertEquals(3, result.get(1).level1Count());
+        assertEquals(15, result.get(1).indicatorCount());
         verify(processQueryPort).findAllSummaryItems();
+        verify(programCatalogPort).findByIds(List.of(careerA, careerB));
+        verify(templatePort).findMetadataByIds(List.of(templateId));
     }
 
     @Test
@@ -90,6 +112,7 @@ class ListProcessesServiceTest {
 
         assertEquals(1, result.size());
         verify(processQueryPort).findAllSummaryItems();
+        verify(programCatalogPort).findByIds(List.of(careerA));
     }
 
     @Test
@@ -112,6 +135,52 @@ class ListProcessesServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void returnsEmptyImmediatelyWhenNoProcessesFound() {
+        when(processQueryPort.findAllSummaryItems()).thenReturn(List.of());
+
+        List<ProcessSummary> result = service.list(new ProcessQueryContext("JD", List.of()));
+
+        assertTrue(result.isEmpty());
+        verify(processQueryPort).findAllSummaryItems();
+        verifyNoInteractions(programCatalogPort, templatePort, normativeHierarchyQueryPort, processResponsiblePort, userRepositoryPort);
+    }
+
+    @Test
+    void resolvesResponsiblesInBatch() {
+        when(processQueryPort.findAllSummaryItems()).thenReturn(List.of(listItem(processA, careerA)));
+        stubEnrichment(careerA, "INF-SIS", "Ingeniería de Sistemas");
+        UUID userId = UUID.randomUUID();
+        LocalDateTime assignedAt = LocalDateTime.now();
+        when(processResponsiblePort.findActiveByProcessIds(List.of(processA)))
+                .thenReturn(List.of(ProcessResponsibleAssignment.builder()
+                        .processId(processA)
+                        .userId(userId)
+                        .assignedAt(assignedAt)
+                        .build()));
+        when(userRepositoryPort.findByIds(List.of(userId)))
+                .thenReturn(Map.of(userId, new AppUser(
+                        userId,
+                        Email.of("perez@umss.edu.bo"),
+                        com.umss.sigesa.domain.model.Role.CC,
+                        com.umss.sigesa.domain.model.UserStatus.ACTIVE,
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        "Dr.",
+                        "Perez",
+                        null
+                )));
+
+        List<ProcessSummary> result = service.list(new ProcessQueryContext("JD", List.of()));
+
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0).responsible());
+        assertEquals("Dr. Perez", result.get(0).responsible().fullName());
+        assertEquals("perez@umss.edu.bo", result.get(0).responsible().email());
+        verify(processResponsiblePort).findActiveByProcessIds(List.of(processA));
+        verify(userRepositoryPort).findByIds(List.of(userId));
+    }
+
     private ProcessQueryPort.ProcessListItem listItem(UUID processId, UUID careerId) {
         return new ProcessQueryPort.ProcessListItem(
                 processId, careerId, templateId, "ACTIVE", LocalDateTime.now()
@@ -119,9 +188,9 @@ class ListProcessesServiceTest {
     }
 
     private void stubEnrichment(UUID careerId, String code, String name) {
-        when(programCatalogPort.findById(careerId))
-                .thenReturn(Optional.of(new ProgramCatalogPort.ProgramEntry(careerId, code, name)));
-        when(templatePort.findMetadataById(templateId))
-                .thenReturn(Optional.of(Template.builder().id(templateId).name("CEUB 2026").type("CEUB").build()));
+        when(programCatalogPort.findByIds(List.of(careerId)))
+                .thenReturn(Map.of(careerId, new ProgramCatalogPort.ProgramEntry(careerId, code, name)));
+        when(templatePort.findMetadataByIds(List.of(templateId)))
+                .thenReturn(Map.of(templateId, Template.builder().id(templateId).name("CEUB 2026").type("CEUB").build()));
     }
 }

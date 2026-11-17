@@ -1,13 +1,3 @@
-management:
-  tracing:
-    sampling:
-      probability: ${SIGESA_TRACING_SAMPLE:1.0}
-  opentelemetry:
-    tracing:
-      export:
-        otlp:
-          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}
-
 server:
   error:
     include-message: never
@@ -141,3 +131,42 @@ sigesa:
     rag-max-chunks: ${SIGESA_ASSISTANT_RAG_MAX_CHUNKS:3}
     output-guard-enabled: ${SIGESA_ASSISTANT_OUTPUT_GUARD_ENABLED:true}
     timeout-ms: ${SIGESA_ASSISTANT_TIMEOUT_MS:10000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+    prometheus:
+      access: unrestricted
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  tracing:
+    enabled: true
+    sampling:
+      probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:${SIGESA_TRACING_SAMPLE:1.0}}
+  otlp:
+    tracing:
+      endpoint: ${MANAGEMENT_OTLP_TRACING_ENDPOINT:${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://127.0.0.1:4318/v1/traces}}
+      transport: http
+      export:
+        enabled: ${MANAGEMENT_OTLP_TRACING_EXPORT_ENABLED:false}
+    metrics:
+      export:
+        enabled: ${MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED:false}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:${MANAGEMENT_OTLP_TRACING_ENDPOINT:http://127.0.0.1:4318/v1/traces}}
